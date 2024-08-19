@@ -24,13 +24,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
         // Also, with a list this small, the lookup perf hit will be largely irrelevant.
         internal static readonly IReadOnlyList<string> ValidBootstrapVersions = new List<string>()
         {
-            "3",
             "4",
             "5"
         };
 
         internal static readonly string ContentVersionDefault = "Default";
-        internal static readonly string ContentVersionBootstrap3 = "Bootstrap3";
         internal static readonly string ContentVersionBootstrap4 = "Bootstrap4";
 
         internal static readonly string DefaultContentRelativeBaseDir = "ViewGenerator";

@@ -25,13 +25,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         // Also, with a list this small, the lookup perf hit will be largely irrelevant.
         internal static readonly IReadOnlyList<string> ValidBootstrapVersions = new List<string>()
         {
-            "3",
             "4",
             "5"
         };
 
         internal static readonly string ContentVersionDefault = "Default";
-        internal static readonly string ContentVersionBootstrap3 = "Bootstrap3";
         internal static readonly string ContentVersionBootstrap4 = "Bootstrap4";
 
         internal static readonly string DefaultContentRelativeBaseDir = "RazorPageGenerator";
@@ -136,7 +134,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             }
 
             // For non-default content versions, the content is packaged under "RazorPageGenerator_Versioned\[Version_Identifier]\*"
-            if (string.Equals(contentVersion, ContentVersionBootstrap3, StringComparison.Ordinal))
+            if (string.Equals(contentVersion, ContentVersionBootstrap4, StringComparison.Ordinal))
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
@@ -305,10 +303,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
             if (string.Equals(razorGeneratorModel.BootstrapVersion, DefaultBootstrapVersion, StringComparison.Ordinal))
             {
                 return ContentVersionDefault;
-            }
-            else if (string.Equals(razorGeneratorModel.BootstrapVersion, "3", StringComparison.Ordinal))
-            {
-                return ContentVersionBootstrap3;
             }
             else if (string.Equals(razorGeneratorModel.BootstrapVersion, "4", StringComparison.Ordinal))
             {

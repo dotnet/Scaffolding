@@ -357,7 +357,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         // Maps the valid values for ContentVersion to the filename prefix for the appropriate {prefix}_identitygeneratorfilesconfig.json
         private static readonly IReadOnlyDictionary<string, string> _contentVersionToConfigPrefixMap = new Dictionary<string, string>()
         {
-            { IdentityGenerator.ContentVersionBootstrap3, "bootstrap3" },
             { IdentityGenerator.ContentVersionBootstrap4, "bootstrap4" },
             { IdentityGenerator.ContentVersionDefault, "bootstrap5" },
         };

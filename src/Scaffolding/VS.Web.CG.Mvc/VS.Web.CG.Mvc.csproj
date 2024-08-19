@@ -28,12 +28,8 @@
     <None Pack="true" Include="Templates\MvcLayout\*" PackagePath="Templates\MvcLayout\" />
     <None Pack="true" Include="Templates\Startup\*" PackagePath="Templates\Startup\" />
     <None Pack="true" Include="Templates\StaticFiles\*" PackagePath="Templates\StaticFiles\" />
-
-    <None Pack="true" Include="Templates\ViewGenerator\Bootstrap3\*" PackagePath="Templates\ViewGenerator_Versioned\Bootstrap3\" />
     <None Pack="true" Include="Templates\ViewGenerator\Bootstrap4\*" PackagePath="Templates\ViewGenerator_Versioned\Bootstrap4\" />
     <None Pack="true" Include="Templates\ViewGenerator\Bootstrap5\*" PackagePath="Templates\ViewGenerator\" />
-
-    <None Pack="true" Include="Templates\RazorPageGenerator\Bootstrap3\*" PackagePath="Templates\RazorPageGenerator_Versioned\Bootstrap3\" />
     <None Pack="true" Include="Templates\RazorPageGenerator\Bootstrap4\*" PackagePath="Templates\RazorPageGenerator_Versioned\Bootstrap4\" />
     <None Pack="true" Include="Templates\RazorPageGenerator\Bootstrap5\*" PackagePath="Templates\RazorPageGenerator\" />
 

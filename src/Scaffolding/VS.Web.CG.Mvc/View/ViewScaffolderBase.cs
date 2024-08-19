@@ -78,10 +78,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
             {
                 return ViewGenerator.ContentVersionDefault;
             }
-            else if (string.Equals(model.BootstrapVersion, "3", StringComparison.Ordinal))
-            {
-                return ViewGenerator.ContentVersionBootstrap3;
-            }
             else if (string.Equals(model.BootstrapVersion, "4", StringComparison.Ordinal))
             {
                 return ViewGenerator.ContentVersionBootstrap4;
@@ -104,12 +100,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
                 return TemplateFolders;
             }
 
-            if (string.Equals(contentVersion, ViewGenerator.ContentVersionBootstrap3, StringComparison.Ordinal))
+            if (string.Equals(contentVersion, ViewGenerator.ContentVersionBootstrap4, StringComparison.Ordinal))
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
                     containingProject: Constants.ThisAssemblyName,
                     applicationBasePath: ApplicationInfo.ApplicationBasePath,
-                    baseFolders: new[] { Path.Combine(ViewGenerator.VersionedContentRelativeBaseDir, ViewGenerator.ContentVersionBootstrap3) },
+                    baseFolders: new[] { Path.Combine(ViewGenerator.VersionedContentRelativeBaseDir, ViewGenerator.ContentVersionBootstrap4) },
                     projectContext: _projectContext);
             }
             else if (string.Equals(contentVersion, ViewGenerator.ContentVersionBootstrap4, StringComparison.Ordinal))

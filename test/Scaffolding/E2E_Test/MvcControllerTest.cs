@@ -80,7 +80,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "WebApplication1.Models.CarContext",
                     "--noViews",
                     "--bootstrapVersion",
-                    "3"
+                    "5"
                 };
 
                 Scaffold(args, TestProjectPath);
@@ -116,7 +116,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "WebApplication1.Models.CarContext",
                     "--restWithNoViews",
                     "--bootstrapVersion",
-                    "3"
+                    "5"
                 };
 
                 Scaffold(args, TestProjectPath);
@@ -152,7 +152,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "--relativeFolderPath",
                     Path.Combine("Areas", "Test", "Controllers"),
                     "--bootstrapVersion",
-                    "3"
+                    "4"
                 };
 
                 Scaffold(args, TestProjectPath);
@@ -195,7 +195,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "--dataContext",
                     "WebApplication1.Models.ProductContext",
                     "--bootstrapVersion",
-                    "3"
+                    "4"
                 };
 
                 Scaffold(args, TestProjectPath);
@@ -235,7 +235,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "ActionsController",
                     "--readWriteActions",
                     "--bootstrapVersion",
-                    "3"
+                    "4"
                 };
 
                 Scaffold(args, TestProjectPath);
@@ -273,7 +273,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "--relativeFolderPath",
                     Path.Combine("Areas", "Test", "Controllers"),
                     "--bootstrapVersion",
-                    "3"
+                    "4"
                 };
 
                 Scaffold(args, TestProjectPath);
@@ -319,7 +319,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
                     "Controllers",
                     "--restWithNoViews",
                     "--bootstrapVersion",
-                    "3"
+                    "5"
                 };
 
                 Scaffold(args, TestProjectPath);

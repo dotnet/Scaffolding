@@ -14,8 +14,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
     public class ViewGeneratorTests : E2ETestBase
     {
         private static string[] EMPTY_VIEW_ARGS = new string[] { "-c", Configuration, "view", "EmptyView", "Empty", "--bootstrapVersion", "3" };
-        private static string[] VIEW_WITH_DATACONTEXT = new string[] { "-c", Configuration, "view", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries", "--bootstrapVersion", "3" };
-        private static string[] VIEW_NO_DATACONTEXT = new string[] { "-c", Configuration, "view", "CarDetails", "Details", "--model", "Library1.Models.Car", "--partialView", "--bootstrapVersion", "3" };
+        private static string[] VIEW_WITH_DATACONTEXT = new string[] { "-c", Configuration, "view", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries", "--bootstrapVersion", "5" };
+        private static string[] VIEW_NO_DATACONTEXT = new string[] { "-c", Configuration, "view", "CarDetails", "Details", "--model", "Library1.Models.Car", "--partialView", "--bootstrapVersion", "4" };
 
         public ViewGeneratorTests(ITestOutputHelper output) : base(output)
         {

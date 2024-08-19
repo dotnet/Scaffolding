@@ -15,7 +15,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
         [Option(Name = "partialView", ShortName = "partial", Description = "Generate a partial view, other layout options (-l and -udl) are ignored if this is specified")]
         public bool PartialView { get; set; }
 
-        [Option(Name = "bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '3', '4'. Default is 4.")]
+        [Option(Name = "bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '4', '5'. Default is 5.")]
         public string BootstrapVersion { get; set; }
 
         public ViewGeneratorModel()

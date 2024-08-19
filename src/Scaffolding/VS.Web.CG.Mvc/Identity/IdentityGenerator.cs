@@ -33,13 +33,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         // Also, with a list this small, the lookup perf hit will be largely irrelevant.
         internal static readonly IReadOnlyList<string> ValidBootstrapVersions = new List<string>()
         {
-            "3",
             "4",
             "5"
         };
 
         internal static readonly string ContentVersionDefault = "Default";
-        internal static readonly string ContentVersionBootstrap3 = "Bootstrap3";
         internal static readonly string ContentVersionBootstrap4 = "Bootstrap4";
 
         internal static readonly string DefaultContentRelativeBaseDir = "Identity";
@@ -105,7 +103,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
             // For non-default bootstrap versions, the content is packaged under "Identity_Versioned\[Version_Identifier]\*"
             // Note: In the future, if content gets pivoted on things other than bootstrap, this logic will need enhancement.
-            if (string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap3, StringComparison.Ordinal) ||
+            if (string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap4, StringComparison.Ordinal) ||
                 string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap4, StringComparison.Ordinal))
             {
                 return TemplateFoldersUtilities.GetTemplateFolders(
@@ -133,7 +131,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     relativePath = DefaultContentRelativeBaseDir;
                 }
-                else if (string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap3, StringComparison.Ordinal))
+                else if (string.Equals(templateModel2.ContentVersion, ContentVersionBootstrap4, StringComparison.Ordinal))
                 {
                     // Note: In the future, if content gets pivoted on things other than bootstrap, this logic will need enhancement.
                     relativePath = Path.Combine(VersionedContentRelativeBaseDir, $"Bootstrap{templateModel2.BootstrapVersion}");
@@ -349,8 +347,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 
         private void ShowFileList(string commandBootstrapVersion)
         {
-            string contentVersion = string.Equals(commandBootstrapVersion, "3", StringComparison.Ordinal)
-                ? ContentVersionBootstrap3
+            string contentVersion = string.Equals(commandBootstrapVersion, "4", StringComparison.Ordinal)
+                ? ContentVersionBootstrap4
                 : ContentVersionDefault;
 
             _logger.LogMessage("File List:");

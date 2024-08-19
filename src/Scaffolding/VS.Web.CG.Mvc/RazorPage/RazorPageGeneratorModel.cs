@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
@@ -21,7 +21,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Razor
         [Option(Name = "namespaceName", ShortName = "namespace", Description = "Specify the name of the namespace to use for the generated PageModel")]
         public string NamespaceName { get; set; }
 
-        [Option(Name = "bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '3', '4'. Default is 4.")]
+        [Option(Name = "bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '4', '5'. Default is 5.")]
         public string BootstrapVersion { get; set; }
 
         public RazorPageGeneratorModel()

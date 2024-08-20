@@ -22,16 +22,23 @@
 
   <ItemGroup>
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\*\*.tt" PackagePath="Templates\" />
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\Files\*.*" PackagePath="Templates\Files" />
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\*.tt" PackagePath="Templates\DbContext\" />
     <None Pack="true" Include="CodeModificationConfigs\*.json" PackagePath="CodeModificationConfigs\" />
     <None Pack="true" Include="README.md" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
+    <!-- EfController templates -->
     <None Update="Templates\EfController\ApiEfController.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>ApiEfController.cs</LastGenOutput>
     </None>
+    <None Update="Templates\EfController\MvcEfController.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MvcEfController.cs</LastGenOutput>
+    </None>
+    <!-- Blazor CRUD templates -->
     <None Update="Templates\BlazorCrud\Create.tt">
       <LastGenOutput>Create.cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
@@ -52,18 +59,40 @@
       <LastGenOutput>Index.cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
+    <!-- MinimalApi templates -->
     <None Update="Templates\MinimalApi\MinimalApi.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>MinimalApi.cs</LastGenOutput>
     </None>
+    <None Update="Templates\MinimalApi\MinimalApiEf.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MinimalApiEf.cs</LastGenOutput>
+    </None>
+    <!-- Views templates -->
+    <None Update="Templates\Views\Create.tt">
+      <LastGenOutput>Create.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\Views\Delete.tt">
+      <LastGenOutput>Delete.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\Views\Details.tt">
+      <LastGenOutput>Details.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\Views\Edit.tt">
+      <LastGenOutput>Edit.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\Views\Index.tt">
+      <LastGenOutput>Index.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Templates\EfController\ApiEfController.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ApiEfController.tt</DependentUpon>
-    </Compile>
+    <!-- Blazor CRUD templates -->
     <Compile Update="Templates\BlazorCrud\Create.cs">
       <DependentUpon>Create.tt</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -89,6 +118,7 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <!-- MinimalApi templates -->
     <Compile Update="Templates\MinimalApi\MinimalApi.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -99,21 +129,50 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>MinimalApiEf.tt</DependentUpon>
     </Compile>
+    <!-- EfController templates -->
     <Compile Update="Templates\EfController\MvcEfController.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>MvcEfController.tt</DependentUpon>
     </Compile>
+    <Compile Update="Templates\EfController\ApiEfController.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ApiEfController.tt</DependentUpon>
+    </Compile>
+    <!-- Views templates -->
+    <Compile Update="Templates\Views\Create.cs">
+      <DependentUpon>Create.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Templates\Views\Delete.cs">
+      <DependentUpon>Delete.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Templates\Views\Details.cs">
+      <DependentUpon>Details.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Templates\Views\Edit.cs">
+      <DependentUpon>Edit.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Templates\Views\Index.cs">
+      <DependentUpon>Index.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Templates\MinimalApi\MinimalApiEf.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>MinimalApiEf.cs</LastGenOutput>
-    </None>
-    <None Update="Templates\EfController\MvcEfController.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>MvcEfController.cs</LastGenOutput>
-    </None>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Templates\Files\" />
   </ItemGroup>
 </Project>

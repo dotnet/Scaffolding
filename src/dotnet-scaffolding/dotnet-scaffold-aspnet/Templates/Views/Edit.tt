@@ -1,0 +1,58 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.ViewModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+#>
+@model <#= modelFullName #>
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4><#= modelName #></h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="<#= primaryKeyName#>" />
+<#
+foreach (var property in entityProperties)
+{
+    string modelPropertyName = property.Name;
+    string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
+    var inputClass = Model.GetInputClassType(propertyShortTypeName);
+    var inputTag = Model.GetInputTagType(propertyShortTypeName);
+#>
+            <div class="form-group">
+                <label asp-for="<#= modelPropertyName #>" class="control-label"></label>
+                <<#= inputTag#> asp-for="<#= modelPropertyName #>" class="<#= inputClass #>" />
+                <span asp-validation-for="<#= modelPropertyName #>" class="text-danger"></span>
+            </div>
+<#
+}
+#>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

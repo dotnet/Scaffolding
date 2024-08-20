@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.Build.Definition;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
@@ -8,7 +9,9 @@ using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Constants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
@@ -105,6 +108,83 @@ internal static class EfControllerScaffolderBuilderExtensions
                 return;
             }
         });
+
+        return builder;
+    }
+
+    public static IScaffoldBuilder WithMvcViewsStep(this IScaffoldBuilder builder)
+    {
+        builder = builder
+            .WithStep<ValidateViewsStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                var addViews = context.GetOptionResult<bool>(Constants.CliOptions.ViewsOption);
+                if (!addViews)
+                {
+                    step.SkipStep = true;
+                    return;
+                }
+
+                step.Project = context.GetOptionResult<string>(Constants.CliOptions.ProjectCliOption);
+                step.Model = context.GetOptionResult<string>(Constants.CliOptions.ModelCliOption);
+                step.Page = BlazorCrudHelper.CrudPageType;
+            })
+            .WithStep<TextTemplatingStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                var addViews = context.GetOptionResult<bool>(Constants.CliOptions.ViewsOption);
+                if (!addViews)
+                {
+                    step.SkipStep = true;
+                    return;
+                }
+
+                context.Properties.TryGetValue(nameof(ViewModel), out var viewModelObj);
+                ViewModel viewModel = viewModelObj as ViewModel ??
+                    throw new InvalidOperationException("missing 'ViewModel' in 'ScaffolderContext.Properties'");
+
+                var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["Views"]);
+                var viewTemplateProperties = ViewHelper.GetTextTemplatingProperties(allT4TemplatePaths, viewModel);
+                if (viewTemplateProperties.Any())
+                {
+                    step.TextTemplatingProperties = viewTemplateProperties;
+                    step.DisplayName = "Razor view files (.cshtml)";
+                }
+                else
+                {
+                    step.SkipStep = true;
+                    return;
+                }
+            })
+            .WithStep<AddFileStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                var addViews = context.GetOptionResult<bool>(Constants.CliOptions.ViewsOption);
+                if (!addViews)
+                {
+                    step.SkipStep = true;
+                    return;
+                }
+
+                context.Properties.TryGetValue(nameof(CrudSettings), out var viewSettingsObj);
+                var viewSettings = viewSettingsObj as CrudSettings ??
+                    throw new InvalidOperationException("missing 'ViewModel' in 'ScaffolderContext.Properties'");
+                var projectDirectory = Path.GetDirectoryName(viewSettings.Project);
+                if (Directory.Exists(projectDirectory))
+                {
+                    var sharedViewsDirectory = Path.Combine(projectDirectory, "Views", "Shared");
+                    step.BaseOutputDirectory = sharedViewsDirectory;
+                    step.FileName = "_ValidationScriptsPartial.cshtml";
+                }
+                else
+                {
+                    step.SkipStep = true;
+                    return;
+                }
+            });
 
         return builder;
     }

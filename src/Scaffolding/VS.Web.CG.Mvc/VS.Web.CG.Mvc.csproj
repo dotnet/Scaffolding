@@ -15,8 +15,6 @@
     <Content Remove="Identity\bootstrap5_identitygeneratorfilesconfig.json" />
     <EmbeddedResource Include="Identity\bootstrap4_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net6.0\" />
     <Content Remove="Identity\bootstrap4_identitygeneratorfilesconfig.json" />
-    <EmbeddedResource Include="Identity\bootstrap3_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net6.0\" />
-    <Content Remove="Identity\bootstrap3_identitygeneratorfilesconfig.json" />
     <EmbeddedResource Include="Identity\identityMinimalHostingChanges.json" Pack="true" PackagePath="lib\net6.0\" />
     <EmbeddedResource Include="Minimal Api\minimalApiChanges.json" Pack="true" PackagePath="lib\net6.0\" />
     <Content Remove="Identity\identityMinimalHostingChanges.json" />
@@ -28,12 +26,8 @@
     <None Pack="true" Include="Templates\MvcLayout\*" PackagePath="Templates\MvcLayout\" />
     <None Pack="true" Include="Templates\Startup\*" PackagePath="Templates\Startup\" />
     <None Pack="true" Include="Templates\StaticFiles\*" PackagePath="Templates\StaticFiles\" />
-
-    <None Pack="true" Include="Templates\ViewGenerator\Bootstrap3\*" PackagePath="Templates\ViewGenerator_Versioned\Bootstrap3\" />
     <None Pack="true" Include="Templates\ViewGenerator\Bootstrap4\*" PackagePath="Templates\ViewGenerator_Versioned\Bootstrap4\" />
     <None Pack="true" Include="Templates\ViewGenerator\Bootstrap5\*" PackagePath="Templates\ViewGenerator\" />
-
-    <None Pack="true" Include="Templates\RazorPageGenerator\Bootstrap3\*" PackagePath="Templates\RazorPageGenerator_Versioned\Bootstrap3\" />
     <None Pack="true" Include="Templates\RazorPageGenerator\Bootstrap4\*" PackagePath="Templates\RazorPageGenerator_Versioned\Bootstrap4\" />
     <None Pack="true" Include="Templates\RazorPageGenerator\Bootstrap5\*" PackagePath="Templates\RazorPageGenerator\" />
 

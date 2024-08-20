@@ -22,7 +22,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
         [Option(Name = "readWriteActions", ShortName = "actions", Description = "Specify this switch to generate Controller with read/write actions when a Model class is not used")]
         public bool GenerateReadWriteActions { get; set; }
 
-        [Option(Name = "bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '3', '4'. Default is 4.")]
+        [Option(Name = "bootstrapVersion", ShortName = "b", Description = "Specify the bootstrap version. Valid values: '4', '5'. Default is 5.")]
         public string BootstrapVersion { get; set; }
 
         public CommandLineGeneratorModel()

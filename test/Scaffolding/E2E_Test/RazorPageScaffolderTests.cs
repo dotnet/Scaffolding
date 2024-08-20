@@ -16,9 +16,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
     {
 
         private static string[] EMPTY_PAGE_ARGS = new string[] { "-c", Configuration, "razorpage", "EmptyPage", "Empty", "--bootstrapVersion", "3" };
-        private static string[] PAGE_WITH_DATACONTEXT = new string[] { "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries", "--bootstrapVersion", "3" };
-        private static string[] CRUD_PAGES = new string[] { "-c", Configuration, "razorpage", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries", "--partialView", "--bootstrapVersion", "3" };
-        private static string[] PAGE_WITH_DATACONTEXT_IN_DEPENDENCY = new string[] { "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "DAL.CarContext", "--referenceScriptLibraries", "--bootstrapVersion", "3" };
+        private static string[] PAGE_WITH_DATACONTEXT = new string[] { "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries", "--bootstrapVersion", "4" };
+        private static string[] CRUD_PAGES = new string[] { "-c", Configuration, "razorpage", "--model", "Library1.Models.Car", "--dataContext", "WebApplication1.Models.CarContext", "--referenceScriptLibraries", "--partialView", "--bootstrapVersion", "5" };
+        private static string[] PAGE_WITH_DATACONTEXT_IN_DEPENDENCY = new string[] { "-c", Configuration, "razorpage", "CarCreate", "Create", "--model", "Library1.Models.Car", "--dataContext", "DAL.CarContext", "--referenceScriptLibraries", "--bootstrapVersion", "4" };
 
         public RazorPageScaffolderTests(ITestOutputHelper output)
             : base(output)

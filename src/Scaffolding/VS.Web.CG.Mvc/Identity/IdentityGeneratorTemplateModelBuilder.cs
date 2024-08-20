@@ -306,10 +306,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 {
                     return IdentityGenerator.ContentVersionDefault;
                 }
-                else if (string.Equals(templateModel2.BootstrapVersion, "3", StringComparison.Ordinal))
-                {
-                    return IdentityGenerator.ContentVersionBootstrap3;
-                }
                 else if (string.Equals(templateModel2.BootstrapVersion, "4", StringComparison.Ordinal))
                 {
                     return IdentityGenerator.ContentVersionBootstrap4;

@@ -44,7 +44,7 @@ internal class ValidateViewsStep : ScaffoldStep
         var viewModel = await GetViewModelAsync(viewSettings);
         if (viewModel is null)
         {
-            _logger.LogError("An error occurred.");
+            _logger.LogError("An error occurred: 'ViewModel' instance could not be obtained");
             return false;
         }
         else

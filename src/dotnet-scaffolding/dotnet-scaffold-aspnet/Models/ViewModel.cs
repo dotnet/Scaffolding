@@ -6,12 +6,8 @@ internal class ViewModel : CrudModel
 {
     public string GetInputClassType(string inputType)
     {
-        if (string.Equals(inputType, "bool", StringComparison.OrdinalIgnoreCase))
-        {
-            return "form-check-input";
-        }
-
-        return "form-control";
+        return string.Equals(inputType, "bool", StringComparison.OrdinalIgnoreCase) ?
+            "form-check-input" : "form-control";
     }
 
     public string GetInputTagType(string inputType)

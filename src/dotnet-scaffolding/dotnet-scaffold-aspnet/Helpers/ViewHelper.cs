@@ -17,30 +17,33 @@ internal class ViewHelper
     internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, ViewModel viewModel)
     {
         var textTemplatingProperties = new List<TextTemplatingProperty>();
-        foreach (var templatePath in allT4TemplatePaths)
+        if (allT4TemplatePaths is not null && allT4TemplatePaths.Any()) 
         {
-            var templateName = Path.GetFileNameWithoutExtension(templatePath);
-            var templateType = GetTemplateType(templatePath);
-            if (!string.IsNullOrEmpty(templatePath) && templateType is not null)
+            foreach (var templatePath in allT4TemplatePaths)
             {
-                if (!IsValidTemplate(viewModel.PageType, templateName))
+                var templateName = Path.GetFileNameWithoutExtension(templatePath);
+                var templateType = GetTemplateType(templatePath);
+                if (!string.IsNullOrEmpty(templatePath) && templateType is not null)
                 {
-                    break;
-                }
+                    if (!IsValidTemplate(viewModel.PageType, templateName))
+                    {
+                        break;
+                    }
 
-                string baseOutputPath = GetBaseOutputPath(viewModel.ModelInfo.ModelTypeName, viewModel.ProjectInfo.ProjectPath);
-                string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.ViewExtension}");
-                textTemplatingProperties.Add(new()
-                {
-                    TemplateModel = viewModel,
-                    TemplateModelName = "Model",
-                    TemplatePath = templatePath,
-                    TemplateType = templateType,
-                    OutputPath = outputFileName
-                });
+                    string baseOutputPath = GetBaseOutputPath(viewModel.ModelInfo.ModelTypeName, viewModel.ProjectInfo.ProjectPath);
+                    string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.ViewExtension}");
+                    textTemplatingProperties.Add(new()
+                    {
+                        TemplateModel = viewModel,
+                        TemplateModelName = "Model",
+                        TemplatePath = templatePath,
+                        TemplateType = templateType,
+                        OutputPath = outputFileName
+                    });
+                }
             }
         }
-
+        
         return textTemplatingProperties;
     }
 
@@ -77,12 +80,12 @@ internal class ViewHelper
 
     private static bool IsValidTemplate(string templateType, string templateFileName)
     {
-        if (templateType.Equals("CRUD", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals("CRUD", templateType, StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
 
-        return templateType.Equals(templateFileName, StringComparison.OrdinalIgnoreCase);
+        return string.Equals(templateType, templateFileName, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string GetBaseOutputPath(string modelName, string? projectPath)

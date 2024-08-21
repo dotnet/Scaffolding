@@ -113,6 +113,11 @@ internal static class EfControllerScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithMvcViewsStep(this IScaffoldBuilder builder)
     {
+        string missingViewModelExceptionMssg =
+            "Missing 'ViewModel' in 'ScaffolderContext.Properties'" +
+            Environment.NewLine +
+            "'ViewModel' is required when using '--views' option";
+
         builder = builder
             .WithStep<ValidateViewsStep>(config =>
             {
@@ -142,8 +147,9 @@ internal static class EfControllerScaffolderBuilderExtensions
 
                 context.Properties.TryGetValue(nameof(ViewModel), out var viewModelObj);
                 ViewModel viewModel = viewModelObj as ViewModel ??
-                    throw new InvalidOperationException("missing 'ViewModel' in 'ScaffolderContext.Properties'");
+                    throw new InvalidOperationException(missingViewModelExceptionMssg);
 
+                //TODO add extensions if 'TemplateFoldersUtilities' is not reworked.
                 var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["Views"]);
                 var viewTemplateProperties = ViewHelper.GetTextTemplatingProperties(allT4TemplatePaths, viewModel);
                 if (viewTemplateProperties.Any())
@@ -170,7 +176,7 @@ internal static class EfControllerScaffolderBuilderExtensions
 
                 context.Properties.TryGetValue(nameof(CrudSettings), out var viewSettingsObj);
                 var viewSettings = viewSettingsObj as CrudSettings ??
-                    throw new InvalidOperationException("missing 'ViewModel' in 'ScaffolderContext.Properties'");
+                    throw new InvalidOperationException(missingViewModelExceptionMssg);
                 var projectDirectory = Path.GetDirectoryName(viewSettings.Project);
                 if (Directory.Exists(projectDirectory))
                 {

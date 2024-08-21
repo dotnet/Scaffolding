@@ -24,10 +24,14 @@ internal class AddFileStep : ScaffoldStep
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        var destinationFilePath = Path.Combine(BaseOutputDirectory, FileName);
         if (string.IsNullOrEmpty(BaseOutputDirectory) ||
-            string.IsNullOrEmpty(FileName) ||
-            File.Exists(destinationFilePath))
+            string.IsNullOrEmpty(FileName))
+        {
+            return Task.FromResult(false);
+        }
+
+        var destinationFilePath = Path.Combine(BaseOutputDirectory, FileName);
+        if (File.Exists(destinationFilePath))
         {
             return Task.FromResult(false);
         }

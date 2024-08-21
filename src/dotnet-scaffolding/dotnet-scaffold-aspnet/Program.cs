@@ -8,6 +8,7 @@ using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.Extensions.DependencyInjection;
+using Constants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet;
 public static class Program
@@ -21,7 +22,7 @@ public static class Program
             out var projectOption, out var prereleaseOption, out var fileNameOption, out var actionsOption,
             out var areaNameOption, out var modelNameOption, out var endpointsClassOption, out var databaseProviderOption,
             out var databaseProviderRequiredOption, out var dataContextClassOption, out var dataContextClassRequiredOption,
-            out var openApiOption, out var pageTypeOption, out var controllerNameOption);
+            out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption);
 
         builder.AddScaffolder("blazor-empty")
             .WithDisplayName("Razor Component - Empty")
@@ -125,7 +126,7 @@ public static class Program
             .WithDisplayName("MVC Controller with views, using Entity Framework (CRUD)")
             .WithCategory("MVC")
             .WithDescription("Create a MVC controller with read/write actions and views using Entity Framework")
-            .WithOptions([projectOption, modelNameOption, controllerNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption])
+            .WithOptions([projectOption, modelNameOption, controllerNameOption, viewsOption, dataContextClassRequiredOption, databaseProviderRequiredOption, prereleaseOption])
             .WithStep<ValidateEfControllerStep>(config =>
             {
                 var step = config.Step;
@@ -142,7 +143,8 @@ public static class Program
             .WithDbContextStep()
             .WithConnectionStringStep()
             .WithEfControllerTextTemplatingStep()
-            .WithEfControllerCodeChangeStep();
+            .WithEfControllerCodeChangeStep()
+            .WithMvcViewsStep();
 
         builder.AddScaffolder("blazor-crud")
             .WithDisplayName("Razor Components with EntityFrameworkCore (CRUD)")
@@ -165,6 +167,22 @@ public static class Program
             .WithConnectionStringStep()
             .WithBlazorCrudTextTemplatingStep()
             .WithBlazorCrudCodeChangeStep();
+
+        builder.AddScaffolder("views")
+            .WithDisplayName("Razor Views")
+            .WithCategory("MVC")
+            .WithDescription("Generates Razor views for Create, Delete, Details, Edit and List operations for the given model")
+            .WithOptions([projectOption, modelNameOption, pageTypeOption])
+            .WithStep<ValidateViewsStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.Project = context.GetOptionResult(projectOption);
+                step.Model = context.GetOptionResult(modelNameOption);
+                step.Page = context.GetOptionResult(pageTypeOption);
+            })
+            .WithViewsTextTemplatingStep()
+            .WithViewsAddFileStep();
 
         builder.AddScaffolder("minimalapi")
             .WithDisplayName("Minimal API")
@@ -224,6 +242,8 @@ public static class Program
         services.AddTransient<DotnetNewScaffolderStep>();
         services.AddTransient<EmptyControllerScaffolderStep>();
         services.AddTransient<ValidateEfControllerStep>();
+        services.AddTransient<ValidateViewsStep>();
+        services.AddTransient<AddFileStep>();
     }
 
     static void CreateOptions(
@@ -240,12 +260,13 @@ public static class Program
         out ScaffolderOption<string> dataContextClassRequiredOption,
         out ScaffolderOption<bool> openApiOption,
         out ScaffolderOption<string> pageTypeOption,
-        out ScaffolderOption<string> controllerNameOption)
+        out ScaffolderOption<string> controllerNameOption,
+        out ScaffolderOption<bool> viewsOption)
     {
         projectOption = new ScaffolderOption<string>
         {
             DisplayName = ".NET project file",
-            CliOption = "--project",
+            CliOption = Constants.CliOptions.ProjectCliOption,
             Description = ".NET project to be used for scaffolding (.csproj file)",
             Required = true,
             PickerType = InteractivePickerType.ProjectPicker
@@ -254,7 +275,7 @@ public static class Program
         prereleaseOption = new ScaffolderOption<bool>
         {
             DisplayName = "Include Prerelease packages?",
-            CliOption = "--prerelease",
+            CliOption = Constants.CliOptions.PrereleaseCliOption,
             Description = "Include prerelease package versions when installing latest Aspire components",
             Required = false,
             PickerType = InteractivePickerType.YesNo
@@ -263,7 +284,7 @@ public static class Program
         fileNameOption = new ScaffolderOption<string>
         {
             DisplayName = "File name",
-            CliOption = "--name",
+            CliOption = Constants.CliOptions.NameOption,
             Description = "File name for new file being created with 'dotnet new'",
             Required = true,
         };
@@ -271,7 +292,7 @@ public static class Program
         actionsOption = new ScaffolderOption<bool>
         {
             DisplayName = "Read/Write Actions?",
-            CliOption = "--actions",
+            CliOption = Constants.CliOptions.ActionsOption,
             Description = "Create controller with read/write actions?",
             Required = true,
             PickerType = InteractivePickerType.YesNo
@@ -280,7 +301,7 @@ public static class Program
         controllerNameOption = new ScaffolderOption<string>
         {
             DisplayName = "Controller Name",
-            CliOption = "--controller",
+            CliOption = Constants.CliOptions.ControllerNameOption,
             Description = "Name for the controller being created",
             Required = true
         };
@@ -288,7 +309,7 @@ public static class Program
         areaNameOption = new ScaffolderOption<string>
         {
             DisplayName = "Area Name",
-            CliOption = "--name",
+            CliOption = Constants.CliOptions.NameOption,
             Description = "Name for the area being created",
             Required = true
         };
@@ -296,7 +317,7 @@ public static class Program
         modelNameOption = new ScaffolderOption<string>
         {
             DisplayName = "Model Name",
-            CliOption = "--model",
+            CliOption = Constants.CliOptions.ModelCliOption,
             Description = "Name for the model class to be used for scaffolding",
             Required = true,
             PickerType = InteractivePickerType.ClassPicker
@@ -305,7 +326,7 @@ public static class Program
         endpointsClassOption = new ScaffolderOption<string>
         {
             DisplayName = "Endpoints File Name",
-            CliOption = "--endpoints",
+            CliOption = Constants.CliOptions.EndpointsOption,
             Description = "",
             Required = true
         };
@@ -313,7 +334,7 @@ public static class Program
         dataContextClassOption = new ScaffolderOption<string>
         {
             DisplayName = "Data Context Class",
-            CliOption = "--dataContext",
+            CliOption = Constants.CliOptions.DataContextOption,
             Description = "",
             Required = false
         };
@@ -321,7 +342,7 @@ public static class Program
         dataContextClassRequiredOption = new ScaffolderOption<string>
         {
             DisplayName = "Data Context Class",
-            CliOption = "--dataContext",
+            CliOption = Constants.CliOptions.DataContextOption,
             Description = "",
             Required = true
         };
@@ -329,7 +350,7 @@ public static class Program
         openApiOption = new ScaffolderOption<bool>
         {
             DisplayName = "Open API Enabled",
-            CliOption = "--open",
+            CliOption = Constants.CliOptions.OpenApiOption,
             Description = "",
             Required = false,
             PickerType = InteractivePickerType.YesNo
@@ -338,7 +359,7 @@ public static class Program
         databaseProviderOption = new ScaffolderOption<string>
         {
             DisplayName = "Database Provider",
-            CliOption = "--dbProvider",
+            CliOption = Constants.CliOptions.DbProviderOption,
             Description = "",
             Required = false,
             PickerType = InteractivePickerType.CustomPicker,
@@ -348,7 +369,7 @@ public static class Program
         databaseProviderRequiredOption = new ScaffolderOption<string>
         {
             DisplayName = "Database Provider",
-            CliOption = "--dbProvider",
+            CliOption = Constants.CliOptions.DbProviderOption,
             Description = "",
             Required = true,
             PickerType = InteractivePickerType.CustomPicker,
@@ -358,11 +379,20 @@ public static class Program
         pageTypeOption = new ScaffolderOption<string>
         {
             DisplayName = "Page Type",
-            CliOption = "--page",
+            CliOption = Constants.CliOptions.PageTypeOption,
             Description = "The CRUD page(s) to scaffold",
             Required = true,
             PickerType = InteractivePickerType.CustomPicker,
             CustomPickerValues = BlazorCrudHelper.CRUDPages
+        };
+
+        viewsOption = new ScaffolderOption<bool>
+        {
+            DisplayName = "With Views?",
+            CliOption = Constants.CliOptions.ViewsOption,
+            Description = "Add CRUD razor views (.cshtml)",
+            Required = true,
+            PickerType = InteractivePickerType.YesNo
         };
     }
 }

@@ -6,4 +6,5 @@ internal interface ITemplateFolderService
 {
     IEnumerable<string> GetTemplateFolders(string[] baseFolders);
     IEnumerable<string> GetAllT4Templates(string[] baseFolders);
+    IEnumerable<string> GetAllFiles(string[] baseFolders, string extension);
 }

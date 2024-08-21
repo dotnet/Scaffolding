@@ -34,13 +34,19 @@ internal class TemplateFoldersUtilities : ITemplateFolderService
 
     public IEnumerable<string> GetAllT4Templates(string[] baseFolders)
     {
+        return GetAllFiles(baseFolders, ".tt");
+    }
+
+    public IEnumerable<string> GetAllFiles(string[] baseFolders, string? extension = null)
+    {
         List<string> allTemplates = [];
         var allTemplateFolders = GetTemplateFolders(baseFolders);
-        if (allTemplateFolders != null && allTemplateFolders.Count() > 0)
+        var searchPattern = string.IsNullOrEmpty(extension) ? string.Empty : $"*{Path.GetExtension(extension)}";
+        if (allTemplateFolders != null && allTemplateFolders.Any())
         {
             foreach (var templateFolder in allTemplateFolders)
             {
-                allTemplates.AddRange(Directory.EnumerateFiles(templateFolder, "*.tt", SearchOption.AllDirectories));
+                allTemplates.AddRange(Directory.EnumerateFiles(templateFolder, searchPattern, SearchOption.AllDirectories));
             }
         }
 

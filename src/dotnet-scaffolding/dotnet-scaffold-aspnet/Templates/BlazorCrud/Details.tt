@@ -20,7 +20,6 @@
     string entitySetName = Model.DbContextInfo.EntitySetVariableName;
 #>
 @page "/<#= pluralModelLowerInv #>/details"
-
 @using Microsoft.EntityFrameworkCore
 <#
     if (!string.IsNullOrEmpty(modelNamespace))
@@ -60,10 +59,10 @@
 </div>
 
 @code {
-    <#= modelName #>? <#= modelNameLowerInv #>;
+    private <#= modelName #>? <#= modelNameLowerInv #>;
 
     [SupplyParameterFromQuery]
-    public <#= primaryKeyShortTypeName #> <#= primaryKeyName #> { get; set; }
+    private <#= primaryKeyShortTypeName #> <#= primaryKeyName #> { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

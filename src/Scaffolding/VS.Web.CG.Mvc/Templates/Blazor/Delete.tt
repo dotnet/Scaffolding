@@ -19,7 +19,6 @@
     var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>/delete"
-
 @using Microsoft.EntityFrameworkCore
 <#
     if (!string.IsNullOrEmpty(modelNamespace))
@@ -29,7 +28,6 @@
 #>
 @inject <#= dbContextFactory #>
 @inject NavigationManager NavigationManager
-
 
 <PageTitle>Delete</PageTitle>
 
@@ -62,10 +60,10 @@
 </div>
 
 @code {
-    <#= modelName #>? <#= modelNameLowerInv #>;
+    private <#= modelName #>? <#= modelNameLowerInv #>;
 
     [SupplyParameterFromQuery]
-    public <#= primaryKeyShortTypeName #> <#= primaryKeyName #> { get; set; }
+    private <#= primaryKeyShortTypeName #> <#= primaryKeyName #> { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,7 +76,7 @@
         }
     }
 
-    public async Task Delete<#= modelName #>()
+    private async Task Delete<#= modelName #>()
     {
         using var context = DbFactory.CreateDbContext();
         context.<#= entitySetName #>.Remove(<#= modelNameLowerInv #>!);

@@ -42,8 +42,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
     string entitySetName = Model.DbContextInfo.EntitySetVariableName;
 
             this.Write("@page \"/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
-            this.Write("/edit\"\r\n\r\n@using Microsoft.EntityFrameworkCore\r\n");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("/edit\"\r\n@using Microsoft.EntityFrameworkCore\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -107,12 +107,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write("                <button type=\"submit\" class=\"btn btn-primary\">Save</button>\r\n    " +
                     "        </EditForm>\r\n        </div>\r\n    </div>\r\n}\r\n\r\n<div>\r\n    <a href=\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\">Back to List</a>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParameterFromQuery]\r\n    public" +
-                    " ");
+            this.Write("\">Back to List</a>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParameterFromQuery]\r\n    privat" +
+                    "e ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write(" { get; set; }\r\n\r\n    [SupplyParameterFromForm]\r\n    public ");
+            this.Write(" { get; set; }\r\n\r\n    [SupplyParameterFromForm]\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
@@ -134,8 +134,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
     }
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see https://aka.ms/RazorPagesCRUD.
-    public async Task Update");
+    // For more details, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task Update");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
                     "ext.Attach(");
@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
                     "         }\r\n            else\r\n            {\r\n                throw;\r\n           " +
                     " }\r\n        }\r\n\r\n        NavigationManager.NavigateTo(\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\");\r\n    }\r\n\r\n    bool ");
+            this.Write("\");\r\n    }\r\n\r\n    private bool ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("Exists(");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
@@ -165,7 +165,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write(" == ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
-            this.Write(");\r\n    }\r\n}\r\n");
+            this.Write(");\r\n    }\r\n}\r\nF\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

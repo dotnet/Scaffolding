@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/delete\"\r\n\r\n@using Microsoft.EntityFrameworkCore\r\n");
+            this.Write("/delete\"\r\n@using Microsoft.EntityFrameworkCore\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -84,11 +84,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" is null)\">Delete</button> |\r\n            <a href=\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\">Back to List</a>\r\n        </EditForm>\r\n    }\r\n</div>\r\n\r\n@code {\r\n    ");
+            this.Write("\">Back to List</a>\r\n        </EditForm>\r\n    }\r\n</div>\r\n\r\n@code {\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(";\r\n\r\n    [SupplyParameterFromQuery]\r\n    public ");
+            this.Write(";\r\n\r\n    [SupplyParameterFromQuery]\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write(");\r\n\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" is null)\r\n        {\r\n            NavigationManager.NavigateTo(\"notfound\");\r\n    " +
-                    "    }\r\n    }\r\n\r\n    public async Task Delete");
+                    "    }\r\n    }\r\n\r\n    private async Task Delete");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
                     "ext.");

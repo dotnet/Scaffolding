@@ -52,7 +52,7 @@ namespace @Model.NamespaceName
         [BindProperty]
         public @Model.ViewDataTypeShortName @Model.ViewDataTypeShortName { get; set; } = default!;
 
-        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+        // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)

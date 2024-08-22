@@ -20,7 +20,6 @@
     string entitySetName = Model.DbContextInfo.EntitySetVariableName;
 #>
 @page "/<#= pluralModelLowerInv #>"
-
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Microsoft.EntityFrameworkCore
 <#
@@ -35,9 +34,9 @@
         #>@using <#= dbContextNamespace#>
 <#  }
 #>
+@implements IAsyncDisposable
 @inject <#=dbContextFactory #>
 @inject NavigationManager NavigationManager
-@implements IAsyncDisposable
 
 <PageTitle>Index</PageTitle>
 
@@ -64,7 +63,7 @@
 </QuickGrid>
 
 @code {
-    <#= Model.DbContextInfo.DbContextClassName #> context = default!;
+    private <#= Model.DbContextInfo.DbContextClassName #> context = default!;
 
     protected override void OnInitialized()
     {

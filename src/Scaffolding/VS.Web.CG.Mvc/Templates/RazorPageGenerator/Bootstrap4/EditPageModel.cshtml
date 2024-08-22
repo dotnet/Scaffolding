@@ -1,4 +1,4 @@
-﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @using System.Collections.Generic
 @using System.Linq
 using System;
@@ -71,7 +71,7 @@ namespace @Model.NamespaceName
         }
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see https://aka.ms/RazorPagesCRUD.
+        // For more details, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)

@@ -42,7 +42,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/delete\"\r\n\r\n@using Microsoft.EntityFrameworkCore\r\n");
+            this.Write("/delete\"\r\n@using Microsoft.EntityFrameworkCore\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -54,9 +54,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 
             this.Write("@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n\r\n<PageTitle>Delete</PageTitle>\r" +
-                    "\n\r\n<h1>Delete</h1>\r\n\r\n<h3>Are you sure you want to delete this?</h3>\r\n<div>\r\n   " +
-                    " <h4>");
+            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Delete</PageTitle>\r\n\r" +
+                    "\n<h1>Delete</h1>\r\n\r\n<h3>Are you sure you want to delete this?</h3>\r\n<div>\r\n    <" +
+                    "h4>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h4>\r\n    <hr />\r\n    @if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
@@ -83,11 +83,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" is null)\">Delete</button> |\r\n            <a href=\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\">Back to List</a>\r\n        </EditForm>\r\n    }\r\n</div>\r\n\r\n@code {\r\n    ");
+            this.Write("\">Back to List</a>\r\n        </EditForm>\r\n    }\r\n</div>\r\n\r\n@code {\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(";\r\n\r\n    [SupplyParameterFromQuery]\r\n    public ");
+            this.Write(";\r\n\r\n    [SupplyParameterFromQuery]\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
@@ -103,7 +103,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(");\r\n\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" is null)\r\n        {\r\n            NavigationManager.NavigateTo(\"notfound\");\r\n    " +
-                    "    }\r\n    }\r\n\r\n    public async Task Delete");
+                    "    }\r\n    }\r\n\r\n    private async Task Delete");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
                     "ext.");

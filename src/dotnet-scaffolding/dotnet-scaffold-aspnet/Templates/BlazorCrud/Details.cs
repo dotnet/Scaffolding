@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/details\"\r\n\r\n@using Microsoft.EntityFrameworkCore\r\n");
+            this.Write("/details\"\r\n@using Microsoft.EntityFrameworkCore\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -84,11 +84,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write("}\")\">Edit</a> |\r\n            <a href=\"@($\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\")\">Back to List</a>\r\n        </div>\r\n    }\r\n</div>\r\n\r\n@code {\r\n    ");
+            this.Write("\")\">Back to List</a>\r\n        </div>\r\n    }\r\n</div>\r\n\r\n@code {\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(";\r\n\r\n    [SupplyParameterFromQuery]\r\n    public ");
+            this.Write(";\r\n\r\n    [SupplyParameterFromQuery]\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));

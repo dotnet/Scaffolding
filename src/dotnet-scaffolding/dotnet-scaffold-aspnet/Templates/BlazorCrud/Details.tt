@@ -35,7 +35,7 @@
 <h1>Details</h1>
 
 <div>
-    <h4><#= modelName #></h4>
+    <h2><#= modelName #></h2>
     <hr />
     @if (<#= modelNameLowerInv #> is null)
     {

@@ -33,9 +33,9 @@
 
 <h1>Delete</h1>
 
-<h3>Are you sure you want to delete this?</h3>
+<p>Are you sure you want to delete this?</[]>
 <div>
-    <h4><#= modelName #></h4>
+    <h2><#= modelName #></h2>
     <hr />
     @if (<#= modelNameLowerInv #> is null)
     {

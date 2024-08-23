@@ -56,10 +56,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write("@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
             this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Delete</PageTitle>\r\n\r" +
-                    "\n<h1>Delete</h1>\r\n\r\n<h3>Are you sure you want to delete this?</h3>\r\n<div>\r\n    <" +
-                    "h4>");
+                    "\n<h1>Delete</h1>\r\n\r\n<p>Are you sure you want to delete this?</p>\r\n<div>\r\n    <h2" +
+                    ">");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("</h4>\r\n    <hr />\r\n    @if (");
+            this.Write("</h2>\r\n    <hr />\r\n    @if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" is null)\r\n    {\r\n        <p><em>Loading...</em></p>\r\n    }\r\n    else {\r\n");
 

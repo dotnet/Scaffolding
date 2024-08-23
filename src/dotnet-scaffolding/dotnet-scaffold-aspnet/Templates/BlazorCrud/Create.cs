@@ -52,9 +52,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write("@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
             this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Create</PageTitle>\r\n\r" +
-                    "\n<h1>Create</h1>\r\n\r\n<h4>");
+                    "\n<h1>Create</h1>\r\n\r\n<h2>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("</h4>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <EditForm m" +
+            this.Write("</h2>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <EditForm m" +
                     "ethod=\"post\" Model=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("\" OnValidSubmit=\"Add");

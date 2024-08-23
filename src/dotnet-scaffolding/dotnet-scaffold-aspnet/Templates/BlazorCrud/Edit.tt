@@ -92,7 +92,7 @@ else
     }
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task Update<#= modelName #>()
     {
         using var context = DbFactory.CreateDbContext();
@@ -123,4 +123,3 @@ else
         return context.<#= entitySetName #>.Any(e => e.<#= primaryKeyName #> == <#= primaryKeyNameLowerInv #>);
     }
 }
-F

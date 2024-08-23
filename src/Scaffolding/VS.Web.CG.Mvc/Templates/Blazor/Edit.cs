@@ -133,7 +133,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
     }
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task Update");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +

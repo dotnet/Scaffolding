@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
     }
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task Update");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
@@ -165,7 +165,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write(" == ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
-            this.Write(");\r\n    }\r\n}\r\nF\r\n");
+            this.Write(");\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

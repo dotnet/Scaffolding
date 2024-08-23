@@ -98,8 +98,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" { get; set; } = new();\r\n\r\n    // To protect from overposting attacks, see https:" +
-                    "//learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks\r\n  " +
-                    "  private async Task Add");
+                    "//learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.\r\n " +
+                    "   private async Task Add");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
                     "ext.");

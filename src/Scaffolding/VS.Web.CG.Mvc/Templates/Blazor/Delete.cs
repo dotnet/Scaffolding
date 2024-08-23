@@ -55,8 +55,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write("@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
             this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Delete</PageTitle>\r\n\r" +
-                    "\n<h1>Delete</h1>\r\n\r\n<p>Are you sure you want to delete this?</[]>\r\n<div>\r\n    <h" +
-                    "2>");
+                    "\n<h1>Delete</h1>\r\n\r\n<p>Are you sure you want to delete this?</p>\r\n<div>\r\n    <h2" +
+                    ">");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h2>\r\n    <hr />\r\n    @if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));

@@ -33,7 +33,7 @@
 
 <h1>Delete</h1>
 
-<p>Are you sure you want to delete this?</[]>
+<p>Are you sure you want to delete this?</p>
 <div>
     <h2><#= modelName #></h2>
     <hr />

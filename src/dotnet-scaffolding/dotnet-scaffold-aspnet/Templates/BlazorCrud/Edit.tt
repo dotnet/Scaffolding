@@ -19,8 +19,7 @@
     string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;
     string entitySetName = Model.DbContextInfo.EntitySetVariableName;
 #>
-@page "/<#= pluralModel #>/edit"
-
+@page "/<#= pluralModelLowerInv #>/edit"
 @using Microsoft.EntityFrameworkCore
 <#
     if (!string.IsNullOrEmpty(modelNamespace))
@@ -35,7 +34,7 @@
 
 <h1>Edit</h1>
 
-<h4><#= modelName #></h4>
+<h2><#= modelName #></h2>
 <hr />
 @if (<#= modelName #> is null)
 {
@@ -76,10 +75,10 @@ else
 
 @code {
     [SupplyParameterFromQuery]
-    public <#= primaryKeyShortTypeName #> <#= primaryKeyName #> { get; set; }
+    private <#= primaryKeyShortTypeName #> <#= primaryKeyName #> { get; set; }
 
     [SupplyParameterFromForm]
-    public <#= modelName #>? <#= modelName #> { get; set; }
+    private <#= modelName #>? <#= modelName #> { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,8 +92,8 @@ else
     }
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see https://aka.ms/RazorPagesCRUD.
-    public async Task Update<#= modelName #>()
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task Update<#= modelName #>()
     {
         using var context = DbFactory.CreateDbContext();
         context.Attach(<#= modelName #>!).State = EntityState.Modified;
@@ -118,7 +117,7 @@ else
         NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
     }
 
-    bool <#= modelName #>Exists(<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerInv #>)
+    private bool <#= modelName #>Exists(<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerInv #>)
     {
         using var context = DbFactory.CreateDbContext();
         return context.<#= entitySetName #>.Any(e => e.<#= primaryKeyName #> == <#= primaryKeyNameLowerInv #>);

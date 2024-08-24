@@ -10,7 +10,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
 {
     public class IdentityGeneratorCommandLineModel
     {
-        [Option(Name = "rootNamespace", ShortName = "rn", Description = "Root namesapce to use for generating identity code.")]
+        [Option(Name = "rootNamespace", ShortName = "rn", Description = "Root namespace to use for generating identity code.")]
         public string RootNamespace { get; set; }
 
         [Option(Name = "databaseProvider", ShortName = "dbProvider", Description = "Database provider to use. Options include 'sqlserver' (default), 'sqlite', 'cosmos', 'postgres'.")]

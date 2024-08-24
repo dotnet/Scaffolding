@@ -16,7 +16,6 @@
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>/create"
-
 @using Microsoft.EntityFrameworkCore
 <#
     if (!string.IsNullOrEmpty(modelNamespace))
@@ -31,7 +30,7 @@
 
 <h1>Create</h1>
 
-<h4><#= modelName #></h4>
+<h2><#= modelName #></h2>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -63,12 +62,11 @@
 </div>
 
 @code {
-
     [SupplyParameterFromForm]
-    public <#= modelName #> <#= modelName #> { get; set; } = new();
+    private <#= modelName #> <#= modelName #> { get; set; } = new();
 
-    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
-    public async Task Add<#= modelName #>()
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task Add<#= modelName #>()
     {
         using var context = DbFactory.CreateDbContext();
         context.<#= Model.DbContextInfo.EntitySetVariableName #>.Add(<#= modelName #>);

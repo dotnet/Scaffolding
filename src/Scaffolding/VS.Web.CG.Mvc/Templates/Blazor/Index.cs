@@ -41,8 +41,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\"\r\n\r\n@using Microsoft.EntityFrameworkCore\r\n@using Microsoft.AspNetCore.Components" +
-                    ".QuickGrid\r\n");
+            this.Write("\"\r\n@using Microsoft.EntityFrameworkCore\r\n@using Microsoft.AspNetCore.Components.Q" +
+                    "uickGrid\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -61,10 +61,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write("\r\n");
   }
 
-            this.Write("@inject ");
+            this.Write("@implements IAsyncDisposable\r\n@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
-            this.Write("\r\n@implements IAsyncDisposable\r\n\r\n<PageTitle>Index</PageTitle>\r\n\r\n<h1>Index</h1>\r" +
-                    "\n\r\n<p>\r\n    <a href=\"");
+            this.Write("\r\n\r\n<PageTitle>Index</PageTitle>\r\n\r\n<h1>Index</h1>\r\n\r\n<p>\r\n    <a href=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
             this.Write("/create\">Create New</a>\r\n</p>\r\n\r\n<QuickGrid Class=\"table\" Items=\"context.");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelMetadata.EntitySetName));
@@ -108,7 +107,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write("}\")\">Delete</a>\r\n    </TemplateColumn>\r\n</QuickGrid>\r\n\r\n@code {\r\n    ");
+            this.Write("}\")\">Delete</a>\r\n    </TemplateColumn>\r\n</QuickGrid>\r\n\r\n@code {\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.ContextTypeName));
             this.Write(" context = default!;\r\n\r\n    protected override void OnInitialized()\r\n    {\r\n     " +
                     "   context = DbFactory.CreateDbContext();\r\n    }\r\n\r\n    public async ValueTask D" +

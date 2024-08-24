@@ -38,7 +38,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/create\"\r\n\r\n@using Microsoft.EntityFrameworkCore\r\n");
+            this.Write("/create\"\r\n@using Microsoft.EntityFrameworkCore\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -51,9 +51,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write("@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
             this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Create</PageTitle>\r\n\r" +
-                    "\n<h1>Create</h1>\r\n\r\n<h4>");
+                    "\n<h1>Create</h1>\r\n\r\n<h2>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("</h4>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <EditForm m" +
+            this.Write("</h2>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <EditForm m" +
                     "ethod=\"post\" Model=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("\" OnValidSubmit=\"Add");
@@ -92,13 +92,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write("<button type=\"submit\" class=\"btn btn-primary\">Create</button>\r\n        </EditForm" +
                     ">\r\n    </div>\r\n</div>\r\n\r\n<div>\r\n    <a href=\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\">Back to List</a>\r\n</div>\r\n\r\n@code {\r\n\r\n    [SupplyParameterFromForm]\r\n    publi" +
-                    "c ");
+            this.Write("\">Back to List</a>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParameterFromForm]\r\n    private" +
+                    " ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" { get; set; } = new();\r\n\r\n    // To protect from overposting attacks, see https:" +
-                    "//aka.ms/RazorPagesCRUD\r\n    public async Task Add");
+                    "//learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.\r\n " +
+                    "   private async Task Add");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
                     "ext.");

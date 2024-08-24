@@ -18,7 +18,6 @@
     var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>"
-
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
 <#
@@ -33,8 +32,8 @@
         #>@using <#= dbContextNamespace#>
 <#  }
 #>
-@inject <#= dbContextFactory #>
 @implements IAsyncDisposable
+@inject <#= dbContextFactory #>
 
 <PageTitle>Index</PageTitle>
 
@@ -61,7 +60,7 @@
 </QuickGrid>
 
 @code {
-    <#= Model.ContextTypeName #> context = default!;
+    private <#= Model.ContextTypeName #> context = default!;
 
     protected override void OnInitialized()
     {

@@ -7,7 +7,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
     public class BlazorIdentityCommandLineModel
     {
 
-        [Option(Name = "rootNamespace", ShortName = "rn", Description = "Root namesapce to use for generating identity code.")]
+        [Option(Name = "rootNamespace", ShortName = "rn", Description = "Root namespace to use for generating identity code.")]
         public string RootNamespace { get; set; }
 
         [Option(Name = "relativeFolderPath", ShortName = "outDir", Description = "Specify the relative output folder path from project where the file needs to be generated, if not specified, file will be generated in the path based on the root namespace.")]

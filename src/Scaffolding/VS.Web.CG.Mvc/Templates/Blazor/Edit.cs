@@ -41,8 +41,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
     var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 
             this.Write("@page \"/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
-            this.Write("/edit\"\r\n\r\n@using Microsoft.EntityFrameworkCore\r\n");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
+            this.Write("/edit\"\r\n@using Microsoft.EntityFrameworkCore\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -55,9 +55,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write("@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
             this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Edit</PageTitle>\r\n\r\n<" +
-                    "h1>Edit</h1>\r\n\r\n<h4>");
+                    "h1>Edit</h1>\r\n\r\n<h2>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("</h4>\r\n<hr />\r\n@if (");
+            this.Write("</h2>\r\n<hr />\r\n@if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" is null)\r\n{\r\n    <p><em>Loading...</em></p>\r\n}\r\nelse\r\n{\r\n    <div class=\"row\">\r\n" +
                     "        <div class=\"col-md-4\">\r\n            <EditForm method=\"post\" Model=\"");
@@ -106,12 +106,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write("                <button type=\"submit\" class=\"btn btn-primary\">Save</button>\r\n    " +
                     "        </EditForm>\r\n        </div>\r\n    </div>\r\n}\r\n\r\n<div>\r\n    <a href=\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\">Back to List</a>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParameterFromQuery]\r\n    public" +
-                    " ");
+            this.Write("\">Back to List</a>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParameterFromQuery]\r\n    privat" +
+                    "e ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write(" { get; set; }\r\n\r\n    [SupplyParameterFromForm]\r\n    public ");
+            this.Write(" { get; set; }\r\n\r\n    [SupplyParameterFromForm]\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
@@ -133,8 +133,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
     }
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see https://aka.ms/RazorPagesCRUD.
-    public async Task Update");
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task Update");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
                     "ext.Attach(");
@@ -151,7 +151,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
                     "         }\r\n            else\r\n            {\r\n                throw;\r\n           " +
                     " }\r\n        }\r\n\r\n        NavigationManager.NavigateTo(\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\");\r\n    }\r\n\r\n    bool ");
+            this.Write("\");\r\n    }\r\n\r\n    private bool ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("Exists(");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));

@@ -11,7 +11,7 @@
     {
       "Name": "rootNamespace",
       "ShortName": "rn",
-      "Description": "Root namesapce to use for generating identity code."
+      "Description": "Root namespace to use for generating identity code."
     },
     {
       "Name": "files",

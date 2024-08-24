@@ -19,7 +19,6 @@
     var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>/details"
-
 @using Microsoft.EntityFrameworkCore
 <#
     if (!string.IsNullOrEmpty(modelNamespace))
@@ -35,7 +34,7 @@
 <h1>Details</h1>
 
 <div>
-    <h4><#= modelName #></h4>
+    <h2><#= modelName #></h2>
     <hr />
     @if (<#= modelNameLowerInv #> is null)
     {
@@ -59,10 +58,10 @@
 </div>
 
 @code {
-    <#= modelName #>? <#= modelNameLowerInv #>;
+    private <#= modelName #>? <#= modelNameLowerInv #>;
 
     [SupplyParameterFromQuery]
-    public <#= primaryKeyShortTypeName #> <#= primaryKeyName #> { get; set; }
+    private <#= primaryKeyShortTypeName #> <#= primaryKeyName #> { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

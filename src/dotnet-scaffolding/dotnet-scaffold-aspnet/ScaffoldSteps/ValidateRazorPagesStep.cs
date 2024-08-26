@@ -45,7 +45,7 @@ internal class ValidateRazorPagesStep : ScaffoldStep
             context.Properties.Add(nameof(CrudSettings), razorPagesSettings);
         }
 
-        //initialize CrudControllerModel
+        //initialize RazorPageModel
         _logger.LogInformation("Initializing scaffolding model...");
         var razorPageModel = await GetRazorPageModelAsync(razorPagesSettings);
         if (razorPageModel is null)

@@ -267,7 +267,6 @@ public static class Program
         services.AddTransient<ValidateViewsStep>();
         services.AddTransient<AddFileStep>();
         services.AddTransient<ValidateRazorPagesStep>();
-
     }
 
     static void CreateOptions(

@@ -27,7 +27,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
         {
 
     string modelName = Model.ModelInfo.ModelTypeName;
-    string modelNameUpperVariant = modelName.ToUpperInvariant();
     string modelNameLowerVariant = modelName.ToLowerInvariant();
     string pluralModel = Model.ModelInfo.ModelTypePluralName.ToUpperInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
@@ -58,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.ControllerName));
             this.Write(" : ControllerBase\r\n{\r\n    private readonly ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
-            this.Write(" _context;\r\n\r\n    public ");
+            this.Write(" _context;\r\n    public ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.ControllerName));
             this.Write("(");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));

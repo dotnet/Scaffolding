@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
         {
 
     string modelName = Model.ModelInfo.ModelTypeName;
-    string modelNameUpperVariant = modelName.ToUpperInvariant();
+    string modelNameUpperVariant = Model.ModelInfo.ModelTypeNameCapitalized;
     string pluralModel = Model.ModelInfo.ModelTypePluralName.ToUpperInvariant();
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;

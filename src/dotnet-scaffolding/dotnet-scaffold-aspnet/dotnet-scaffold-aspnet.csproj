@@ -69,18 +69,19 @@
       <LastGenOutput>MinimalApiEf.cs</LastGenOutput>
     </None>
     <!-- Razor page templates -->
-    <None Update="C:\Users\decho\scaffolding\src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\RazorPages\CreateModel.tt">
+    <None Update="Templates\RazorPages\CreateModel.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>CreateModel.cs</LastGenOutput>
     </None>
-    <None Update="C:\Users\decho\scaffolding\src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\RazorPages\DetailsModel.tt">
+    <None Update="Templates\RazorPages\DetailsModel.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>DetailsModel.cs</LastGenOutput>
     </None>
-    <None Update="C:\Users\decho\scaffolding\src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\RazorPages\EditModel.tt">
+    <None Update="Templates\RazorPages\EditModel.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>EditModel.cs</LastGenOutput>
     </None>
+    <!-- Razor page templates -->
     <None Update="Templates\RazorPages\Create.tt">
       <LastGenOutput>Create.cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
@@ -181,6 +182,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ApiEfController.tt</DependentUpon>
     </Compile>
+    <!-- RazorPages templates-->
     <Compile Update="Templates\RazorPages\Create.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

@@ -25,7 +25,6 @@ internal static class RazorPagesHelper
         }
 
         Type? templateType = null;
-
         switch (Path.GetFileName(templatePath))
         {
             case CreateTemplate:

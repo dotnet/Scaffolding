@@ -83,6 +83,11 @@ internal static class RazorPagesHelper
     internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, RazorPageModel razorPagesModel)
     {
         var textTemplatingProperties = new List<TextTemplatingProperty>();
+        if (allT4TemplatePaths is null || !allT4TemplatePaths.Any())
+        {
+            return textTemplatingProperties;
+        }
+
         foreach (var templatePath in allT4TemplatePaths)
         {
             var templateName = Path.GetFileNameWithoutExtension(templatePath);

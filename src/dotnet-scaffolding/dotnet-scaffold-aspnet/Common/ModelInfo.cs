@@ -10,7 +10,7 @@ internal class ModelInfo
     public List<IPropertySymbol>? ModelProperties { get; set; }
     public string? ModelNamespace { get; set; }
     public string ModelTypeName { get; set; } = default!;
-    public string ModelTypeNameCapitalized => char.ToUpper(ModelTypeName[0]) + ModelTypeName.Substring(1);
+    public string ModelTypeNameCapitalized => !string.IsNullOrEmpty(ModelTypeName) ? char.ToUpper(ModelTypeName[0]) + ModelTypeName.Substring(1) : ModelTypeName;
     //TODO pluralize correctly
     public string ModelTypePluralName => $"{ModelTypeName}s";
     public string ModelVariable => ModelTypeName.ToLowerInvariant();

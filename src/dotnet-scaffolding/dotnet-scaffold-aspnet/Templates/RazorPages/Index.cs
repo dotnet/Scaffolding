@@ -28,28 +28,34 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages
 
     string modelName = Model.ModelInfo.ModelTypeName;
     string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string modelNameCapitalized = Model.ModelInfo.ModelTypeNameCapitalized;
     string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string pageModelFullName = string.IsNullOrEmpty(Model.RazorPageNamespace) ? "IndexModel" : $"{Model.RazorPageNamespace}.IndexModel";
 
-            this.Write("@model IEnumerable<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelFullName));
-            this.Write(">\r\n\r\n@{\r\n    ViewData[\"Title\"] = \"Index\";\r\n}\r\n\r\n<h1>Index</h1>\r\n\r\n<p>\r\n    <a asp" +
-                    "-action=\"Create\">Create New</a>\r\n</p>\r\n<table class=\"table\">\r\n    <thead>\r\n     " +
-                    "   <tr>\r\n");
+            this.Write("@page\r\n@model ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pageModelFullName));
+            this.Write("\r\n\r\n@{\r\n    ViewData[\"Title\"] = \"Index\";\r\n}\r\n\r\n<h1>Index</h1>\r\n\r\n<p>\r\n    <a asp-" +
+                    "page=\"Create\">Create New</a>\r\n</p>\r\n<table class=\"table\">\r\n    <thead>\r\n        " +
+                    "<tr>\r\n");
 
 foreach (var property in entityProperties)
 {
 
             this.Write("            <th>\r\n                @Html.DisplayNameFor(model => model.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameCapitalized));
+            this.Write("[0].");
             this.Write(this.ToStringHelper.ToStringWithCulture(property.Name));
             this.Write(")\r\n            </th>\r\n");
 
 }
 
             this.Write("            <th></th>\r\n        </tr>\r\n    </thead>\r\n    <tbody>\r\n@foreach (var it" +
-                    "em in Model) {\r\n        <tr>\r\n");
+                    "em in Model.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameCapitalized));
+            this.Write(") {\r\n        <tr>\r\n");
 
 foreach (var property in entityProperties)
 {
@@ -60,11 +66,11 @@ foreach (var property in entityProperties)
 
 }
 
-            this.Write("            <td>\r\n                <a asp-action=\"Edit\" asp-route-id=\"@item.");
+            this.Write("            <td>\r\n                <a asp-page=\"./Edit\" asp-route-id=\"@item.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write("\">Edit</a> |\r\n                <a asp-action=\"Details\" asp-route-id=\"@item.");
+            this.Write("\">Edit</a> |\r\n                <a asp-page=\"./Details\" asp-route-id=\"@item.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write("\">Details</a> |\r\n                <a asp-action=\"Delete\" asp-route-id=\"@item.");
+            this.Write("\">Details</a> |\r\n                <a asp-page=\"./Delete\" asp-route-id=\"@item.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write("\">Delete</a>\r\n            </td>\r\n        </tr>\r\n}\r\n    </tbody>\r\n</table>\r\n");
             return this.GenerationEnvironment.ToString();

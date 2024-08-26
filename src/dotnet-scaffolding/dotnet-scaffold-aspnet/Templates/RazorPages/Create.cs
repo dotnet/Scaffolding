@@ -33,14 +33,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages
     
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    string pageModelFullName = string.IsNullOrEmpty(Model.RazorPageNamespace) ? "CreateModel" : $"{Model.RazorPageNamespace}.CreateModel";
 
-            this.Write("@model ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelFullName));
+            this.Write("@page\r\n@model ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pageModelFullName));
             this.Write("\r\n\r\n@{\r\n    ViewData[\"Title\"] = \"Create\";\r\n}\r\n\r\n<h1>Create</h1>\r\n\r\n<h4>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("</h4>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <form asp-a" +
-                    "ction=\"View\">\r\n            <div asp-validation-summary=\"ModelOnly\" class=\"text-d" +
-                    "anger\"></div>\r\n");
+            this.Write("</h4>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <form metho" +
+                    "d=\"post\">\r\n            <div asp-validation-summary=\"ModelOnly\" class=\"text-dange" +
+                    "r\"></div>\r\n");
 
 foreach (var property in entityProperties)
 {
@@ -49,23 +50,41 @@ foreach (var property in entityProperties)
     var inputClass = Model.GetInputClassType(propertyShortTypeName);
     var inputTag = Model.GetInputTagType(propertyShortTypeName);
 
-            this.Write("\r\n            <div class=\"form-group\">\r\n                <label asp-for=\"");
+            this.Write("            <div class=\"form-group\">\r\n                <label asp-for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write("\" class=\"control-label\"></label>\r\n                <");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputTag));
             this.Write(" asp-for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write("\" class=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
             this.Write("\" />\r\n                <span asp-validation-for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write("\" class=\"text-danger\"></span>\r\n            </div>\r\n");
 
 }
 
-            this.Write("            <div class=\"form-group\">\r\n                <input type=\"submit\" value=" +
-                    "\"Create\" class=\"btn btn-primary\" />\r\n            </div>\r\n        </form>\r\n    </" +
-                    "div>\r\n</div>\r\n\r\n<div>\r\n    <a asp-action=\"Index\">Back to List</a>\r\n</div>\r\n");
+            this.Write(@"            <div class=""form-group"">
+                <input type=""submit"" value=""Create"" class=""btn btn-primary"" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page=""./Index"">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync(""_ValidationScriptsPartial"");}
+}
+");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

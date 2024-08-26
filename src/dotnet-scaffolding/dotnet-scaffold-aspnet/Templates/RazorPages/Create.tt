@@ -11,8 +11,10 @@
     
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    string pageModelFullName = string.IsNullOrEmpty(Model.RazorPageNamespace) ? "CreateModel" : $"{Model.RazorPageNamespace}.CreateModel";
 #>
-@model <#= modelFullName #>
+@page
+@model <#= pageModelFullName #>
 
 @{
     ViewData["Title"] = "Create";
@@ -24,7 +26,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="View">
+        <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 <#
 foreach (var property in entityProperties)
@@ -34,11 +36,10 @@ foreach (var property in entityProperties)
     var inputClass = Model.GetInputClassType(propertyShortTypeName);
     var inputTag = Model.GetInputTagType(propertyShortTypeName);
 #>
-
             <div class="form-group">
-                <label asp-for="<#= modelPropertyName #>" class="control-label"></label>
-                <<#= inputTag#> asp-for="<#= modelPropertyName #>" class="<#= inputClass #>" />
-                <span asp-validation-for="<#= modelPropertyName #>" class="text-danger"></span>
+                <label asp-for="<#= modelName #>.<#= modelPropertyName #>" class="control-label"></label>
+                <<#= inputTag#> asp-for="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" />
+                <span asp-validation-for="<#= modelName #>.<#= modelPropertyName #>" class="text-danger"></span>
             </div>
 <#
 }
@@ -51,5 +52,9 @@ foreach (var property in entityProperties)
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-page="./Index">Back to List</a>
 </div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

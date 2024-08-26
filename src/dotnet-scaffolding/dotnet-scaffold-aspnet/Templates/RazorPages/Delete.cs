@@ -28,36 +28,44 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages
 
     string modelName = Model.ModelInfo.ModelTypeName;
     string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string modelNameCapitalized = Model.ModelInfo.ModelTypeNameCapitalized;
     string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string pageModelFullName = string.IsNullOrEmpty(Model.RazorPageNamespace) ? "DeleteModel" : $"{Model.RazorPageNamespace}.DeleteModel";
 
-            this.Write("@model ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelFullName));
+            this.Write("@page\r\n@model ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pageModelFullName));
             this.Write("\r\n\r\n@{\r\n    ViewData[\"Title\"] = \"Delete\";\r\n}\r\n\r\n<h1>Delete</h1>\r\n\r\n<h3>Are you su" +
                     "re you want to delete this?</h3>\r\n<div>\r\n    <h4>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelFullName));
-            this.Write("</h4>\r\n    <hr />\r\n");
+            this.Write("</h4>\r\n    <hr />\r\n    <dl class=\"row\">\r\n");
 
 foreach (var property in entityProperties)
 {
     string modelPropertyName = property.Name;
 
-            this.Write("    <dl class=\"row\">\r\n        <dt class = \"col-sm-2\">\r\n            @Html.DisplayN" +
-                    "ameFor(model => model.");
+            this.Write("        <dt class = \"col-sm-2\">\r\n            @Html.DisplayNameFor(model => model." +
+                    "");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write(")\r\n        </dt>\r\n        <dd class = \"col-sm-10\">\r\n            @Html.DisplayFor(" +
                     "model => model.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write(")\r\n        </dd>\r\n    </dl>\r\n");
+            this.Write(")\r\n        </dd>\r\n");
 
 }
 
-            this.Write("    <form asp-action=\"Delete\">\r\n        <input type=\"hidden\" asp-for=\"");
+            this.Write("    </dl>\r\n    <form method=\"post\">\r\n        <input type=\"hidden\" asp-for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameCapitalized));
+            this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write("\" />\r\n        <input type=\"submit\" value=\"Delete\" class=\"btn btn-danger\" /> |\r\n  " +
-                    "      <a asp-action=\"Index\">Back to List</a>\r\n    </form>\r\n</div>\r\n");
+                    "      <a asp-page=\"./Index\">Back to List</a>\r\n    </form>\r\n</div>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

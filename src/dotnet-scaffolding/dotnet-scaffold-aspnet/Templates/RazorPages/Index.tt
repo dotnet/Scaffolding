@@ -6,12 +6,15 @@
 <#
     string modelName = Model.ModelInfo.ModelTypeName;
     string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string modelNameCapitalized = Model.ModelInfo.ModelTypeNameCapitalized;
     string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string pageModelFullName = string.IsNullOrEmpty(Model.RazorPageNamespace) ? "IndexModel" : $"{Model.RazorPageNamespace}.IndexModel";
 #>
-@model IEnumerable<<#= modelFullName #>>
+@page
+@model <#= pageModelFullName #>
 
 @{
     ViewData["Title"] = "Index";
@@ -20,7 +23,7 @@
 <h1>Index</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-page="Create">Create New</a>
 </p>
 <table class="table">
     <thead>
@@ -30,7 +33,7 @@ foreach (var property in entityProperties)
 {
 #>
             <th>
-                @Html.DisplayNameFor(model => model.<#= property.Name #>)
+                @Html.DisplayNameFor(model => model.<#= modelNameCapitalized #>[0].<#= property.Name #>)
             </th>
 <#
 }
@@ -39,7 +42,7 @@ foreach (var property in entityProperties)
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.<#= modelNameCapitalized #>) {
         <tr>
 <#
 foreach (var property in entityProperties)
@@ -52,9 +55,9 @@ foreach (var property in entityProperties)
 }
 #>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.<#= primaryKeyName #>">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.<#= primaryKeyName #>">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.<#= primaryKeyName #>">Delete</a>
+                <a asp-page="./Edit" asp-route-id="@item.<#= primaryKeyName #>">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.<#= primaryKeyName #>">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.<#= primaryKeyName #>">Delete</a>
             </td>
         </tr>
 }

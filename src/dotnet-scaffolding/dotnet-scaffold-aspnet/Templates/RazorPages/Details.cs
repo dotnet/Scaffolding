@@ -32,9 +32,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string pageModelFullName = string.IsNullOrEmpty(Model.RazorPageNamespace) ? "DetailsModel" : $"{Model.RazorPageNamespace}.DetailsModel";
 
-            this.Write("@model ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelFullName));
+            this.Write("@page\r\n@model ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pageModelFullName));
             this.Write("\r\n\r\n@{\r\n    ViewData[\"Title\"] = \"Details\";\r\n}\r\n\r\n<h1>Details</h1>\r\n\r\n<div>\r\n    <" +
                     "h4>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
@@ -46,17 +47,23 @@ foreach (var property in entityProperties)
 
             this.Write("        <dt class = \"col-sm-2\">\r\n            @Html.DisplayNameFor(model => model." +
                     "");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write(")\r\n        </dt>\r\n        <dd class = \"col-sm-10\">\r\n            @Html.DisplayFor(" +
                     "model => model.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write(")\r\n        </dd>\r\n    </dl>\r\n");
+            this.Write(")\r\n        </dd>\r\n");
 
 }
 
-            this.Write("</div>\r\n<div>\r\n    <a asp-action=\"Edit\" asp-route-id=\"@Model?.");
+            this.Write("    </dl>\r\n</div>\r\n<div>\r\n    <a asp-page=\"./Edit\" asp-route-id=\"@Model.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write("\">Edit</a> |\r\n    <a asp-action=\"Index\">Back to List</a>\r\n</div>\r\n");
+            this.Write("\">Edit</a> |\r\n    <a asp-page=\"./Index\">Back to List</a>\r\n</div>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

@@ -1,0 +1,90 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string modelNameCapitalized = Model.ModelInfo.ModelTypeNameCapitalized;
+    string modelNameLowerVariant = modelName.ToLowerInvariant();
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
+    string dbContextName = Model.DbContextInfo.DbContextClassName;
+    string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string primaryKeyTypeName = Model.ModelInfo.PrimaryKeyTypeName;
+#>
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+<#
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
+        #>using <#= modelNamespace #>;
+<#  }
+#>
+<#
+    if (!string.IsNullOrEmpty(dbContextNamespace))
+    {
+        #>using <#= dbContextNamespace #>;
+<#  }
+#>
+
+<#
+    if (!string.IsNullOrEmpty(Model.RazorPageNamespace))
+    {
+        #>namespace <#= Model.RazorPageNamespace #>;
+<#  }
+#>
+
+public class DeleteModel : PageModel
+{
+    private readonly <#= dbContextName #> _context;
+
+    public DeleteModel(<#= dbContextName #> context)
+    {
+        _context = context;
+    }
+
+    [BindProperty]
+    public <#= modelName #> <#= modelNameCapitalized #> { get; set; } = default!;
+
+    public async Task<IActionResult> OnGetAsync(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>)
+    {
+        if (<#= primaryKeyNameLowerInv #> is null)
+        {
+            return NotFound();
+        }
+
+        var <#= modelNameLowerVariant #> = await _context.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyNameLowerInv #>);
+        if (<#= modelNameLowerVariant #> is null)
+        {
+            return NotFound();
+        }
+        else
+        {
+            <#= modelNameCapitalized #> = <#= modelNameLowerVariant #>;
+        }
+
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostAsync(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>)
+    {
+        if (<#= primaryKeyNameLowerInv #> is null)
+        {
+            return NotFound();
+        }
+
+        var <#= modelNameLowerVariant #> = await _context.<#= entitySetName #>.FindAsync(<#= primaryKeyNameLowerInv #>);
+        if (<#= modelNameLowerVariant #> != null)
+        {
+            <#= modelNameCapitalized #> = <#= modelNameLowerVariant #>;
+            _context.<#= entitySetName #>.Remove(<#= modelNameCapitalized #>);
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToPage("./Index");
+    }
+}

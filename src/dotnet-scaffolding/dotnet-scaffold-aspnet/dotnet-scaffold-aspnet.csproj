@@ -68,6 +68,47 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>MinimalApiEf.cs</LastGenOutput>
     </None>
+    <!-- Razor page templates -->
+    <None Update="C:\Users\decho\scaffolding\src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\RazorPages\CreateModel.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>CreateModel.cs</LastGenOutput>
+    </None>
+    <None Update="C:\Users\decho\scaffolding\src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\RazorPages\DetailsModel.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>DetailsModel.cs</LastGenOutput>
+    </None>
+    <None Update="C:\Users\decho\scaffolding\src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\RazorPages\EditModel.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>EditModel.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\RazorPages\Create.tt">
+      <LastGenOutput>Create.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\RazorPages\Delete.tt">
+      <LastGenOutput>Delete.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\RazorPages\DeleteModel.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>DeleteModel.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\RazorPages\Details.tt">
+      <LastGenOutput>Details.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\RazorPages\Edit.tt">
+      <LastGenOutput>Edit.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\RazorPages\Index.tt">
+      <LastGenOutput>Index.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="Templates\RazorPages\IndexModel.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>IndexModel.cs</LastGenOutput>
+    </None>
     <!-- Views templates -->
     <None Update="Templates\Views\Create.tt">
       <LastGenOutput>Create.cs</LastGenOutput>
@@ -140,6 +181,56 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ApiEfController.tt</DependentUpon>
     </Compile>
+    <Compile Update="Templates\RazorPages\Create.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Create.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\RazorPages\CreateModel.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CreateModel.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\RazorPages\Delete.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Delete.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\RazorPages\DeleteModel.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DeleteModel.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\RazorPages\Details.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Details.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\RazorPages\DetailsModel.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DetailsModel.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\RazorPages\Edit.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Edit.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\RazorPages\EditModel.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>EditModel.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\RazorPages\Index.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Index.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\RazorPages\IndexModel.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>IndexModel.tt</DependentUpon>
+    </Compile>
     <!-- Views templates -->
     <Compile Update="Templates\Views\Create.cs">
       <DependentUpon>Create.tt</DependentUpon>
@@ -170,5 +261,9 @@
 
   <ItemGroup>
     <Folder Include="Templates\Files\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 </Project>

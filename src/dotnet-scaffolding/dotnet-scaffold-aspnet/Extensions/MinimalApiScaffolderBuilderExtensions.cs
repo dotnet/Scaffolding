@@ -62,11 +62,7 @@ internal static class MinimalApiScaffolderBuilderExtensions
             var step = config.Step;
             var context = config.Context;
             //add Microsoft.EntityFrameworkCore.Tools package regardless of the DatabaseProvider
-            var packageList = new List<string>()
-            {
-                PackageConstants.EfConstants.EfToolsPackageName
-            };
-
+            List<string> packageList = [];
             if (context.Properties.TryGetValue(nameof(MinimalApiSettings), out var commandSettingsObj) &&
                 commandSettingsObj is MinimalApiSettings commandSettings)
             {

@@ -48,7 +48,6 @@ internal static class BlazorCrudScaffolderBuilderExtensions
             var context = config.Context;
             var packageList = new List<string>()
             {
-                PackageConstants.EfConstants.EfToolsPackageName,
                 PackageConstants.AspNetCorePackages.QuickGridEfAdapterPackageName,
                 PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackageName
             };

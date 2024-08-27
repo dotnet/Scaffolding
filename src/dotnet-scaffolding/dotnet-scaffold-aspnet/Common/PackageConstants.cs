@@ -10,7 +10,6 @@ internal class PackageConstants
         public const string SQLite = "sqlite-efcore";
         public const string CosmosDb = "cosmos-efcore";
         public const string Postgres = "npgsql-efcore";
-        public const string EfToolsPackageName = "Microsoft.EntityFrameworkCore.Tools";
         public const string EfCorePackageName = "Microsoft.EntityFrameworkCore";
         public const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         public const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";

@@ -27,7 +27,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Views
         {
 
     string modelName = Model.ModelInfo.ModelTypeName;
-    string modelNameUpperVariant = modelName.ToUpperInvariant();
     string modelNameLowerVariant = modelName.ToLowerInvariant();
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";

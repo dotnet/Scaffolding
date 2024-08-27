@@ -5,7 +5,6 @@
 <#@  import namespace="System.Linq" #>
 <#
     string modelName = Model.ModelInfo.ModelTypeName;
-    string modelNameUpperVariant = modelName.ToUpperInvariant();
     string modelNameLowerVariant = modelName.ToLowerInvariant();
     string pluralModel = Model.ModelInfo.ModelTypePluralName.ToUpperInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
@@ -33,7 +32,6 @@ using Microsoft.EntityFrameworkCore;
 public class <#= Model.ControllerName #> : ControllerBase
 {
     private readonly <#= dbContextName #> _context;
-
     public <#= Model.ControllerName #>(<#= dbContextName #> context)
     {
         _context = context;

@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages
 {
     using System.Collections.Generic;
     using System.Text;
@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class ApiEfController : ApiEfControllerBase
+    public partial class IndexModel : IndexModelBase
     {
         /// <summary>
         /// Create the template output
@@ -27,14 +27,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
         {
 
     string modelName = Model.ModelInfo.ModelTypeName;
-    string modelNameLowerVariant = modelName.ToLowerInvariant();
-    string pluralModel = Model.ModelInfo.ModelTypePluralName.ToUpperInvariant();
+    string modelNameCapitalized = Model.ModelInfo.ModelTypeNameCapitalized;
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
     string dbContextName = Model.DbContextInfo.DbContextClassName;
     string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
     string modelNamespace = Model.ModelInfo.ModelNamespace;
 
-            this.Write("using Microsoft.AspNetCore.Mvc;\r\nusing Microsoft.EntityFrameworkCore;\r\n");
+            this.Write("using Microsoft.AspNetCore.Mvc;\r\nusing Microsoft.AspNetCore.Mvc.RazorPages;\r\nusin" +
+                    "g Microsoft.EntityFrameworkCore;\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -53,101 +53,30 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
             this.Write(";\r\n");
   }
 
-            this.Write("\r\n[Route(\"api/[controller]\")]\r\n[ApiController]\r\npublic class ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ControllerName));
-            this.Write(" : ControllerBase\r\n{\r\n    private readonly ");
+            this.Write("\r\n");
+
+    if (!string.IsNullOrEmpty(Model.RazorPageNamespace))
+    {
+        
+            this.Write("namespace ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.RazorPageNamespace));
+            this.Write(";\r\n");
+  }
+
+            this.Write("\r\npublic class IndexModel : PageModel\r\n{\r\n    private readonly ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
-            this.Write(" _context;\r\n    public ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ControllerName));
-            this.Write("(");
+            this.Write(" _context;\r\n\r\n    public IndexModel(");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
-            this.Write(" context)\r\n    {\r\n        _context = context;\r\n    }\r\n\r\n    // GET: api/");
+            this.Write(" context)\r\n    {\r\n        _context = context;\r\n    }\r\n\r\n    public IList<");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("\r\n    [HttpGet]\r\n    public async Task<ActionResult<IEnumerable<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(">>> Get");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("()\r\n    {\r\n        return await _context.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write(".ToListAsync();\r\n    }\r\n\r\n    // GET: api/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("/5\r\n    [HttpGet(\"{id}\")]\r\n    public async Task<ActionResult<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(">> Get");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("(int id)\r\n    {\r\n        var ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
+            this.Write("> ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameCapitalized));
+            this.Write(" { get; set; } = default!;\r\n\r\n    public async Task OnGetAsync()\r\n    {\r\n        " +
+                    "");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameCapitalized));
             this.Write(" = await _context.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write(".FindAsync(id);\r\n\r\n        if (");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
-            this.Write(" == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n\r\n        return" +
-                    " ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
-            this.Write(";\r\n    }\r\n\r\n    // PUT: api/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("/5\r\n    // To protect from overposting attacks, see https://go.microsoft.com/fwli" +
-                    "nk/?linkid=2123754\r\n    [HttpPut(\"{id}\")]\r\n    public async Task<IActionResult> " +
-                    "Put");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("(int id, ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
-            this.Write(")\r\n    {\r\n        if (id != ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
-            this.Write(".ID)\r\n        {\r\n            return BadRequest();\r\n        }\r\n\r\n        _context." +
-                    "Entry(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
-            this.Write(").State = EntityState.Modified;\r\n\r\n        try\r\n        {\r\n            await _con" +
-                    "text.SaveChangesAsync();\r\n        }\r\n        catch (DbUpdateConcurrencyException" +
-                    ")\r\n        {\r\n            if (!");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("Exists(id))\r\n            {\r\n                return NotFound();\r\n            }\r\n  " +
-                    "          else\r\n            {\r\n                throw;\r\n            }\r\n        }\r" +
-                    "\n\r\n        return NoContent();\r\n    }\r\n\r\n    // POST: api/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("\r\n    // To protect from overposting attacks, see https://go.microsoft.com/fwlink" +
-                    "/?linkid=2123754\r\n    [HttpPost]\r\n    public async Task<ActionResult<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(">> Post");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
-            this.Write(")\r\n    {\r\n        _context.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write(".Add(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
-            this.Write(");\r\n        await _context.SaveChangesAsync();\r\n\r\n        return CreatedAtAction(" +
-                    "\"Get");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("\", new { id = ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
-            this.Write(".ID }, ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
-            this.Write(");\r\n    }\r\n\r\n    // DELETE: api/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("/5\r\n    [HttpDelete(\"{id}\")]\r\n    public async Task<IActionResult> Delete");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("(int id)\r\n    {\r\n        var ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
-            this.Write(" = await _context.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write(".FindAsync(id);\r\n        if (");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
-            this.Write(" == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n\r\n        _conte" +
-                    "xt.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write(".Remove(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerVariant));
-            this.Write(");\r\n        await _context.SaveChangesAsync();\r\n\r\n        return NoContent();\r\n  " +
-                    "  }\r\n\r\n    private bool ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("Exists(int id)\r\n    {\r\n        return _context.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write(".Any(e => e.ID == id);\r\n    }\r\n}\r\n");
+            this.Write(".ToListAsync();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -166,12 +95,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
             }
         }
 
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.EfControllerModel _ModelField;
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel _ModelField;
 
 /// <summary>
 /// Access the Model parameter of the template.
 /// </summary>
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.EfControllerModel Model
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel Model
 {
     get
     {
@@ -190,7 +119,7 @@ public virtual void Initialize()
 bool ModelValueAcquired = false;
 if (this.Session.ContainsKey("Model"))
 {
-    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.EfControllerModel)(this.Session["Model"]));
+    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel)(this.Session["Model"]));
     ModelValueAcquired = true;
 }
 if ((ModelValueAcquired == false))
@@ -198,17 +127,17 @@ if ((ModelValueAcquired == false))
     string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
     if ((string.IsNullOrEmpty(parameterValue) == false))
     {
-        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.EfControllerModel));
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel));
         if (((tc != null) 
                     && tc.CanConvertFrom(typeof(string))))
         {
-            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.EfControllerModel)(tc.ConvertFrom(parameterValue)));
+            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel)(tc.ConvertFrom(parameterValue)));
             ModelValueAcquired = true;
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.EfControllerModel\' of the" +
-                    " parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel\' of the pa" +
+                    "rameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }
@@ -217,7 +146,7 @@ if ((ModelValueAcquired == false))
     object data = global::Microsoft.DotNet.Scaffolding.TextTemplating.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
-        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.EfControllerModel)(data));
+        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel)(data));
     }
 }
 
@@ -232,7 +161,7 @@ if ((ModelValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class ApiEfControllerBase
+    public class IndexModelBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

@@ -168,6 +168,28 @@ public static class Program
             .WithBlazorCrudTextTemplatingStep()
             .WithBlazorCrudCodeChangeStep();
 
+        builder.AddScaffolder("razorpages-crud")
+            .WithDisplayName("Razor Pages with Entity Framework (CRUD)")
+            .WithCategory("Razor Pages")
+            .WithDescription("Generates Razor pages using Entity Framework for Create, Delete, Details, Edit and List operations for the given model")
+            .WithOptions([projectOption, modelNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, pageTypeOption, prereleaseOption])
+            .WithStep<ValidateRazorPagesStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.Project = context.GetOptionResult(projectOption);
+                step.Model = context.GetOptionResult(modelNameOption);
+                step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
+                step.DatabaseProvider = context.GetOptionResult(databaseProviderRequiredOption);
+                step.Prerelease = context.GetOptionResult(prereleaseOption);
+                step.Page = context.GetOptionResult(pageTypeOption);
+            })
+            .WithRazorPagesAddPackagesStep()
+            .WithDbContextStep()
+            .WithConnectionStringStep()
+            .WithRazorPagesTextTemplatingStep()
+            .WithRazorPagesCodeChangeStep();
+
         builder.AddScaffolder("views")
             .WithDisplayName("Razor Views")
             .WithCategory("MVC")
@@ -244,6 +266,7 @@ public static class Program
         services.AddTransient<ValidateEfControllerStep>();
         services.AddTransient<ValidateViewsStep>();
         services.AddTransient<AddFileStep>();
+        services.AddTransient<ValidateRazorPagesStep>();
     }
 
     static void CreateOptions(

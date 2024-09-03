@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Scaffolding tool with specific components</Description>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>$(BuildTfm)</TargetFramework>
     <OutputType>exe</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackAsTool>true</PackAsTool>

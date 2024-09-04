@@ -25,11 +25,23 @@ namespace Microsoft.DotNet.Scaffolding.TextTemplating.DbContext
         /// </summary>
         public virtual string TransformText()
         {
+
+    string baseDbContext = Model.IsIdentityDbContext ? "IdentityDbContext<ApplicationUser>" : "DbContext";
+
+
+if (Model.IsIdentityDbContext)
+{
+    
+            this.Write("using Microsoft.AspNetCore.Identity.EntityFrameworkCore;\r\n");
+}
+
             this.Write("using Microsoft.EntityFrameworkCore;\r\n\r\npublic class ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextName));
             this.Write("(DbContextOptions<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextName));
-            this.Write("> options) : DbContext(options)\r\n{\r\n");
+            this.Write("> options) : ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(baseDbContext));
+            this.Write("(options)\r\n{\r\n");
  if (!string.IsNullOrEmpty(Model.DbSetStatement))
 {
 

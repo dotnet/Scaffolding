@@ -3,9 +3,18 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
+<#
+    string baseDbContext = Model.IsIdentityDbContext ? "IdentityDbContext<ApplicationUser>" : "DbContext";
+#>
+<#
+if (Model.IsIdentityDbContext)
+{
+    #>using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+<#}
+#>
 using Microsoft.EntityFrameworkCore;
 
-public class <#= Model.DbContextName #>(DbContextOptions<<#= Model.DbContextName #>> options) : DbContext(options)
+public class <#= Model.DbContextName #>(DbContextOptions<<#= Model.DbContextName #>> options) : <#= baseDbContext #>(options)
 {
 <# if (!string.IsNullOrEmpty(Model.DbSetStatement))
 {

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Diagnostics;
 
-namespace Microsoft.DotNet.Scaffolding.Helpers.Extensions;
+namespace Microsoft.DotNet.Scaffolding.Internal.Extensions;
 
 internal static class StringExtensions
 {

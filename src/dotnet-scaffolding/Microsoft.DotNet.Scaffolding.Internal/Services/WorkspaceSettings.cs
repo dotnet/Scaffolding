@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
+using Microsoft.DotNet.Scaffolding.Internal.Extensions;
 
 namespace Microsoft.DotNet.Scaffolding.Internal.Services;
 

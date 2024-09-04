@@ -23,6 +23,12 @@ internal class PackageConstants
             { Postgres, PostgresPackageName }
         };
 
+        public static readonly IDictionary<string, string> IdentityEfPackagesDict = new Dictionary<string, string>
+        {
+            { SqlServer, SqlServerPackageName },
+            { SQLite, SqlitePackageName },
+        };
+
         internal static Dictionary<string, string> UseDatabaseMethods = new()
         {
             { SqlServer, "UseSqlServer" },
@@ -37,5 +43,6 @@ internal class PackageConstants
         public const string QuickGridEfAdapterPackageName = "Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter";
         public const string AspNetCoreDiagnosticsEfCorePackageName = "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore";
         public const string OpenApiPackageName = "Microsoft.AspNetCore.OpenApi";
+        public const string AspNetCoreIdentityEfPackageName = "Microsoft.AspNetCore.Identity.EntityFrameworkCore";
     }
 }

@@ -15,7 +15,7 @@ internal static class ClassAnalyzers
         ISymbol? existingDbContextClass,
         string dbContextClassName,
         string dbProvider,
-        string modelName)
+        string? modelName = null)
     {
         var dbContextInfo = new DbContextInfo();
         dbContextInfo.EfScenario = true;
@@ -25,18 +25,60 @@ internal static class ClassAnalyzers
             dbContextInfo.DbContextClassName = existingDbContextClass.Name;
             dbContextInfo.DbContextClassPath = existingDbContextClass.Locations.FirstOrDefault()?.SourceTree?.FilePath;
             dbContextInfo.DbContextNamespace = existingDbContextClass.ContainingNamespace.ToDisplayString();
-            dbContextInfo.EntitySetVariableName = EfDbContextHelpers.GetEntitySetVariableName(existingDbContextClass, modelName);
+            dbContextInfo.EntitySetVariableName = string.IsNullOrEmpty(modelName) ?
+                string.Empty : EfDbContextHelpers.GetEntitySetVariableName(existingDbContextClass, modelName);
         }
         //properties for creating a new DbContext
         else
         {
-            dbContextInfo.NewDbSetStatement = $"public DbSet<{modelName}> {modelName} {{ get; set; }} = default!;";
+            dbContextInfo.NewDbSetStatement = string.IsNullOrEmpty(modelName) ?
+                string.Empty : $"public DbSet<{modelName}> {modelName} {{ get; set; }} = default!;";
             dbContextInfo.DbContextClassName = dbContextClassName;
             dbContextInfo.DbContextClassPath = CommandHelpers.GetNewFilePath(projectPath, dbContextClassName);
             dbContextInfo.DatabaseProvider = dbProvider;
             dbContextInfo.EntitySetVariableName = modelName;
         }
 
+        if (!string.IsNullOrEmpty(dbContextInfo.DbContextNamespace) &&
+            dbContextInfo.DbContextNamespace.Equals(Constants.GlobalNamespace, StringComparison.OrdinalIgnoreCase))
+        {
+            dbContextInfo.DbContextNamespace = string.Empty;
+        }
+
+        return dbContextInfo;
+    }
+
+    internal static DbContextInfo GetIdentityDbContextInfo(
+        string projectPath,
+        ISymbol? existingDbContextClass,
+        string dbContextClassName,
+        string dbProvider)
+    {
+        DbContextInfo dbContextInfo = new()
+        {
+            EfScenario = true,
+            DatabaseProvider = dbProvider
+        };
+
+        if (existingDbContextClass is not null)
+        {
+            dbContextInfo.DbContextClassName = existingDbContextClass.Name;
+            dbContextInfo.DbContextClassPath = existingDbContextClass.Locations.FirstOrDefault()?.SourceTree?.FilePath;
+            dbContextInfo.DbContextNamespace = existingDbContextClass.ContainingNamespace.ToDisplayString();
+            dbContextInfo.EntitySetVariableName = string.Empty;
+        }
+        //properties for creating a new DbContext
+        else
+        {
+            dbContextInfo.NewDbSetStatement = string.Empty;
+            dbContextInfo.DbContextClassName = dbContextClassName;
+            dbContextInfo.DbContextClassPath = AspNetDbContextHelper.GetIdentityDataContextPath(projectPath, dbContextClassName);
+            dbContextInfo.DbContextNamespace = $"{Path.GetFileNameWithoutExtension(projectPath)}.Data";
+            dbContextInfo.DatabaseProvider = dbProvider;
+            dbContextInfo.EntitySetVariableName = string.Empty;
+        }
+
+        //check for '<global namespace>' and remove it (for classes that don't define a namespace)
         if (!string.IsNullOrEmpty(dbContextInfo.DbContextNamespace) &&
             dbContextInfo.DbContextNamespace.Equals(Constants.GlobalNamespace, StringComparison.OrdinalIgnoreCase))
         {

@@ -6,10 +6,4 @@
   </PropertyGroup>
 
   <Import Project="$(RepoRoot)eng\Versions.DotNetScaffold.props" />
-
-  <PropertyGroup>
-    <DotNetScaffoldTfm>net9.0</DotNetScaffoldTfm>
-    <BuildTfm>$(DotNetScaffoldTfm)</BuildTfm>
-  </PropertyGroup>
-
 </Project>

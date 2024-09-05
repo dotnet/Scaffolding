@@ -4,7 +4,7 @@
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
 <#
-    string baseDbContext = Model.IsIdentityDbContext ? "IdentityDbContext<ApplicationUser>" : "DbContext";
+    string baseDbContext = Model.IsIdentityDbContext ? $"IdentityDbContext<{Model.FullIdentityUserName}>" : "DbContext";
 #>
 <#
 if (Model.IsIdentityDbContext)

@@ -48,41 +48,48 @@ internal class ProjectModifier
         var filteredFiles = _codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, _codeChangeOptions));
         foreach (var file in filteredFiles)
         {
-            Document? originalDocument = roslynProject?.GetDocument(file.FileName);
-            var modifiedDocument = await HandleCodeFileAsync(originalDocument, file, _codeChangeOptions);
-            roslynProject = modifiedDocument?.Project;
+            if (roslynProject  is not null)
+            {
+                roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject);
+            }
         }
 
         return _codeService.TryApplyChanges(roslynProject?.Solution);
     }
 
-    private async Task<Document?> HandleCodeFileAsync(Document? document, CodeFile file, IList<string> options)
+    private async Task<Project> HandleCodeFileAsync(CodeFile file, IList<string> options, Project project)
     {
         try
         {
             switch (file.Extension)
             {
                 case "cs":
-                    //apply CodeFile.CodeSnippet changes
-                    var doc = await ModifyCsFile(file, document, options);
+                    //get CodeAnalysis.Document
+                    var document = project.GetDocument(file.FileName);
+                    document = await ModifyCsFile(file, document, options);
                     //replace simple CodeFile.Replacements
-                    return await ApplyTextReplacements(file, doc, options);
+                    document = await ApplyTextReplacements(file, document, options);
+                    return document?.Project ?? project;
                 case "cshtml":
-                    return await ModifyCshtmlFile(file, document, options);
+                    var textDoc = project.GetAdditionalDocument(file.FileName);
+                    textDoc = await ModifyCshtmlFile(file, textDoc, options);
+                    return textDoc?.Project ?? project;
                 case "razor":
                 case "html":
-                    return await ApplyTextReplacements(file, document, options);
+                    textDoc = project.GetAdditionalDocument(file.FileName);
+                    textDoc = await ApplyTextReplacements(file, textDoc, options);
+                    return textDoc?.Project ?? project;
             }
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            //_output.Append(string.Format(Resources.FailedToModifyCodeFile, file.FileName, e.Message));
+            _consoleLogger.LogError($"Failed to modify code file {file.FileName}, {e.Message}");
         }
 
-        return document;
+        return project;
     }
 
-    internal static async Task<Document?> ModifyCshtmlFile(CodeFile file, Document? fileDoc, IList<string> options)
+    internal static async Task<TextDocument?> ModifyCshtmlFile(CodeFile file, TextDocument? fileDoc, IList<string> options)
     {
         if (fileDoc is null || file.Methods is null || !file.Methods.TryGetValue("Global", out var globalMethod))
         {
@@ -103,7 +110,28 @@ internal class ProjectModifier
     /// Updates .razor and .html files via string replacement
     /// </summary>
     /// <param name="file"></param>
-    /// <param name="project"></param>
+    /// <param name="toolOptions"></param>
+    /// <returns></returns>
+    internal static async Task<TextDocument?> ApplyTextReplacements(CodeFile file, TextDocument? document, IList<string> toolOptions)
+    {
+        if (document is null)
+        {
+            return null;
+        }
+
+        var replacements = file.Replacements?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
+        if (replacements is null || !replacements.Any())
+        {
+            return document;
+        }
+
+        return await ProjectModifierHelper.ModifyDocumentTextAsync(document, replacements);
+    }
+
+    /// <summary>
+    /// Updates .razor and .html files via string replacement
+    /// </summary>
+    /// <param name="file"></param>
     /// <param name="toolOptions"></param>
     /// <returns></returns>
     internal static async Task<Document?> ApplyTextReplacements(CodeFile file, Document? document, IList<string> toolOptions)
@@ -119,7 +147,7 @@ internal class ProjectModifier
             return document;
         }
 
-        return await ProjectModifierHelper.ModifyDocumentTextAsync(document, replacements);
+        return await ProjectModifierHelper.ModifyDocumentTextAsync(document, replacements) as Document;
     }
 
     internal async Task<Document?> ModifyCsFile(CodeFile file, Document? fileDoc, IList<string> options)

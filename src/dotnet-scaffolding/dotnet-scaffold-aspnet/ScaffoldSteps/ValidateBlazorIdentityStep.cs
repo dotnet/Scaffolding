@@ -9,6 +9,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.Extensions.Logging;
+using static Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -53,6 +54,8 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
         else
         {
             context.Properties.Add(nameof(BlazorIdentityModel), blazorIdentityModel);
+            codeModifierProperties.Add(CodeModifierPropertyConstants.BlazorIdentityNamespace, blazorIdentityModel.BlazorIdentityNamespace);
+            codeModifierProperties.Add(CodeModifierPropertyConstants.UserClassNamespace, blazorIdentityModel.UserClassNamespace);
         }
 
         //Install packages and add a DbContext (if needed)
@@ -62,6 +65,7 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
             if (dbContextProperties is not null)
             {
                 dbContextProperties.IsIdentityDbContext = true;
+                dbContextProperties.FullIdentityUserName = $"{blazorIdentityModel.UserClassNamespace}.{blazorIdentityModel.UserClassName}";
                 context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
             }
 
@@ -71,7 +75,11 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
                 context.Properties.Add(Scaffolding.Internal.Constants.StepConstants.BaseProjectPath, projectBasePath);
             }
 
-            codeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(blazorIdentityModel.DbContextInfo);
+            var dbCodeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(blazorIdentityModel.DbContextInfo);
+            foreach (var kvp in dbCodeModifierProperties)
+            {
+                codeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+            }
         }
 
         context.Properties.Add(Scaffolding.Internal.Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
@@ -144,7 +152,8 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
             UserClassName = Constants.Identity.UserClassName,
             UserClassNamespace = userClassNamespace,
             DbContextName = Constants.Identity.DbContextName,
-            BaseOutputPath = projectDirectory
+            BaseOutputPath = projectDirectory,
+            Overwrite = settings.Overwrite
         };
 
         if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)

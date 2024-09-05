@@ -17,4 +17,5 @@ internal class BlazorIdentityModel
     //Database type eg. SQL Server or SQLite
     public string? DatabaseProvider { get; set; }
     public required string BaseOutputPath { get; set; }
+    public bool Overwrite { get; set; }
 }

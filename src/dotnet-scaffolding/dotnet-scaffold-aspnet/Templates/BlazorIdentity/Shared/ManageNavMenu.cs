@@ -36,7 +36,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 } 
-            this.Write("\r\n@inject SignInManager<");
+            this.Write("@inject NavigationManager NavigationManager\r\n@inject SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> SignInManager
 

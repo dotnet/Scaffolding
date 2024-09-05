@@ -461,7 +461,7 @@ internal static class ProjectModifierHelper
     /// <param name="fileDoc"></param>
     /// <param name="codeChanges"></param>
     /// <returns>updated document, or null if no changes made</returns>
-    internal static async Task<Document?> ModifyDocumentTextAsync(Document? fileDoc, IEnumerable<CodeSnippet>? codeChanges)
+    internal static async Task<TextDocument?> ModifyDocumentTextAsync(TextDocument? fileDoc, IEnumerable<CodeSnippet>? codeChanges)
     {
         if (fileDoc is null || codeChanges is null || !codeChanges.Any())
         {
@@ -500,7 +500,11 @@ internal static class ProjectModifierHelper
         }
 
         var updatedSourceText = SourceText.From(sourceFileString);
-        return fileDoc.WithText(updatedSourceText);
+        var solution = fileDoc.Project.Solution;
+        var updatedSolution = solution.WithAdditionalDocumentText(fileDoc.Id, updatedSourceText);
+        var updatedTextDocument = updatedSolution.GetAdditionalDocument(fileDoc.Id);
+
+        return updatedTextDocument;
     }
 
     internal static async Task UpdateDocument(Document document)

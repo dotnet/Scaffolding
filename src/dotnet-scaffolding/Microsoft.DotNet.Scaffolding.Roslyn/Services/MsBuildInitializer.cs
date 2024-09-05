@@ -53,7 +53,6 @@ internal class MsBuildInitializer
             {
                 // Register the latest SDK
                 MSBuildLocator.RegisterMSBuildPath(sdkPath);
-                _logger.LogInformation($"Registered .NET SDK at {sdkPath}");
             }
             else
             {

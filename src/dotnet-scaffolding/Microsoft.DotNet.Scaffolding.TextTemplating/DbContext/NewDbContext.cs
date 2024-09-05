@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Scaffolding.TextTemplating.DbContext
         public virtual string TransformText()
         {
 
-    string baseDbContext = Model.IsIdentityDbContext ? "IdentityDbContext<ApplicationUser>" : "DbContext";
+    string baseDbContext = Model.IsIdentityDbContext ? $"IdentityDbContext<{Model.FullIdentityUserName}>" : "DbContext";
 
 
 if (Model.IsIdentityDbContext)

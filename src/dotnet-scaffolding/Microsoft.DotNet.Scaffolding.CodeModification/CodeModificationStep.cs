@@ -96,13 +96,28 @@ public class CodeModificationStep : ScaffoldStep
             return;
         }
 
+        //modify CodeSnippets 'CheckBlock', 'Parent', and 'Block'
         var methods = codeModifierConfig.Files.SelectMany(x => x.Methods?.Values ?? Enumerable.Empty<Method>());
-        var codeSnippets = methods.SelectMany(x => x.CodeChanges ?? Enumerable.Empty<CodeSnippet>());
+        var replacementCodeSnippets = codeModifierConfig.Files.SelectMany(x => x.Replacements ?? Enumerable.Empty<CodeSnippet>());
+        var codeSnippets = methods.SelectMany(x => x.CodeChanges ?? Enumerable.Empty<CodeSnippet>()).ToList();
+        codeSnippets.AddRange(replacementCodeSnippets);
         foreach (var codeSnippet in codeSnippets)
         {
             codeSnippet.CheckBlock = ReplaceString(codeSnippet.CheckBlock);
             codeSnippet.Parent = ReplaceString(codeSnippet.Parent);
-            codeSnippet.Block = ReplaceString(codeSnippet.Block) ?? string.Empty;
+            codeSnippet.Block = ReplaceString(codeSnippet.Block) ?? codeSnippet.Block;
+            if (codeSnippet.ReplaceSnippet is not null)
+            {
+                for (int i = 0; i < codeSnippet.ReplaceSnippet.Length; i++)
+                {
+                    codeSnippet.ReplaceSnippet[i] = ReplaceString(codeSnippet.ReplaceSnippet[i]) ?? codeSnippet.ReplaceSnippet[i];
+                }
+            }
+        }
+
+        foreach (var file in codeModifierConfig.Files)
+        {
+            file.Usings = ReplaceStrings(file.Usings) ?? file.Usings;
         }
     }
 
@@ -113,6 +128,19 @@ public class CodeModificationStep : ScaffoldStep
             foreach (var kvp in CodeModifierProperties)
             {
                 input = input.Replace(kvp.Key, kvp.Value);
+            }
+        }
+
+        return input;
+    }
+
+    private string[]? ReplaceStrings(string[]? input)
+    {
+        if (input is not null && input.Length > 0)
+        {
+            for (int i = 0; i < input.Length; i++)
+            {
+                input[i] = ReplaceString(input[i]) ?? input[i];
             }
         }
 

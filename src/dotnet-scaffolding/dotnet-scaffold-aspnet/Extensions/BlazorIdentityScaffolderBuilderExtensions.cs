@@ -78,6 +78,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             {
                 step.TextTemplatingProperties = blazorIdentityProperties;
                 step.DisplayName = "Blazor identity files";
+                step.Overwrite = blazorIdentityModel.Overwrite;
             }
             else
             {

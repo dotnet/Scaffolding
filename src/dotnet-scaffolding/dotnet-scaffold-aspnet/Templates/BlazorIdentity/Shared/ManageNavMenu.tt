@@ -10,7 +10,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 #>@using <#= Model.DbContextNamespace #>
 <#} #>
-
+@inject NavigationManager NavigationManager
 @inject SignInManager<<#= Model.UserClassName #>> SignInManager
 
 <ul class="nav nav-pills flex-column">

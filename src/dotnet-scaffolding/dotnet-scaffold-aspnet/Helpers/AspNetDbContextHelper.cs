@@ -39,6 +39,11 @@ internal class AspNetDbContextHelper
                 dbContextProperties.Add(Constants.CodeModifierPropertyConstants.DbContextName, dbContextInfo.DbContextClassName);
                 dbContextProperties.Add(Constants.CodeModifierPropertyConstants.ConnectionStringName, dbContextInfo.DbContextClassName);
             }
+
+            if (!string.IsNullOrEmpty(dbContextInfo.DbContextNamespace))
+            {
+                dbContextProperties.Add(Constants.CodeModifierPropertyConstants.DbContextNamespace, dbContextInfo.DbContextNamespace);
+            }
         }
 
         return dbContextProperties;

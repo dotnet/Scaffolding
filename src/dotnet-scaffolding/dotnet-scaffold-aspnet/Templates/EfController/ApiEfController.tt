@@ -11,6 +11,9 @@
     string dbContextName = Model.DbContextInfo.DbContextClassName;
     string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
     string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string primaryKeyTypeName = Model.ModelInfo.PrimaryKeyTypeName;
 #>
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,10 +48,10 @@ public class <#= Model.ControllerName #> : ControllerBase
     }
 
     // GET: api/<#= modelName #>/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<<#= modelName #>>> Get<#= modelName #>(int id)
+    [HttpGet("{<#= primaryKeyNameLowerInv #>}")]
+    public async Task<ActionResult<<#= modelName #>>> Get<#= modelName #>(<#= primaryKeyTypeName #> <#= primaryKeyNameLowerInv #>)
     {
-        var <#= modelNameLowerVariant #> = await _context.<#= entitySetName #>.FindAsync(id);
+        var <#= modelNameLowerVariant #> = await _context.<#= entitySetName #>.FindAsync(<#= primaryKeyNameLowerInv #>);
 
         if (<#= modelNameLowerVariant #> == null)
         {
@@ -60,10 +63,10 @@ public class <#= Model.ControllerName #> : ControllerBase
 
     // PUT: api/<#= modelName #>/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Put<#= modelName #>(int id, <#= modelName #> <#= modelNameLowerVariant #>)
+    [HttpPut("{<#= primaryKeyNameLowerInv #>}")]
+    public async Task<IActionResult> Put<#= modelName #>(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>, <#= modelName #> <#= modelNameLowerVariant #>)
     {
-        if (id != <#= modelNameLowerVariant #>.ID)
+        if (<#= primaryKeyNameLowerInv #> != <#= modelNameLowerVariant #>.<#= primaryKeyName #>)
         {
             return BadRequest();
         }
@@ -76,7 +79,7 @@ public class <#= Model.ControllerName #> : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!<#= modelName #>Exists(id))
+            if (!<#= modelName #>Exists(<#= primaryKeyNameLowerInv #>))
             {
                 return NotFound();
             }
@@ -97,14 +100,14 @@ public class <#= Model.ControllerName #> : ControllerBase
         _context.<#= entitySetName #>.Add(<#= modelNameLowerVariant #>);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction("Get<#= modelName #>", new { id = <#= modelNameLowerVariant #>.ID }, <#= modelNameLowerVariant #>);
+        return CreatedAtAction("Get<#= modelName #>", new { <#= primaryKeyNameLowerInv #> = <#= modelNameLowerVariant #>.<#= primaryKeyName #> }, <#= modelNameLowerVariant #>);
     }
 
     // DELETE: api/<#= modelName #>/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete<#= modelName #>(int id)
+    [HttpDelete("{<#= primaryKeyNameLowerInv #>}")]
+    public async Task<IActionResult> Delete<#= modelName #>(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>)
     {
-        var <#= modelNameLowerVariant #> = await _context.<#= entitySetName #>.FindAsync(id);
+        var <#= modelNameLowerVariant #> = await _context.<#= entitySetName #>.FindAsync(<#= primaryKeyNameLowerInv #>);
         if (<#= modelNameLowerVariant #> == null)
         {
             return NotFound();
@@ -116,8 +119,8 @@ public class <#= Model.ControllerName #> : ControllerBase
         return NoContent();
     }
 
-    private bool <#= modelName #>Exists(int id)
+    private bool <#= modelName #>Exists(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>)
     {
-        return _context.<#= entitySetName #>.Any(e => e.ID == id);
+        return _context.<#= entitySetName #>.Any(e => e.<#= primaryKeyName #> == <#= primaryKeyNameLowerInv #>);
     }
 }

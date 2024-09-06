@@ -35,9 +35,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
     string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
-    string primaryKeyNameLowerCase = primaryKeyName.ToLowerInvariant();
-    string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyShortTypeName;
-    string primaryKeyType = Model.ModelInfo.PrimaryKeyTypeName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string primaryKeyTypeName = Model.ModelInfo.PrimaryKeyTypeName;
 
             this.Write("\r\nusing Microsoft.AspNetCore.Mvc;\r\nusing Microsoft.EntityFrameworkCore;\r\n");
 
@@ -73,13 +72,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
             this.Write(".ToListAsync());\r\n    }\r\n\r\n    // GET: ");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
-            this.Write("/Details/5\r\n    public async Task<IActionResult> Details(int? id)\r\n    {\r\n       " +
-                    " if (id == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n\r\n      " +
-                    "  var ");
+            this.Write("/Details/5\r\n    public async Task<IActionResult> Details(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyTypeName));
+            this.Write("? ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(")\r\n    {\r\n        if (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(" == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n\r\n        var ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" = await _context.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write("\r\n            .FirstOrDefaultAsync(m => m.ID == id);\r\n        if (");
+            this.Write("\r\n            .FirstOrDefaultAsync(m => m.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(" == ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(");\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n\r\n        return" +
                     " View(");
@@ -104,13 +111,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(");\r\n    }\r\n\r\n    // GET: ");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
-            this.Write("/Edit/5\r\n    public async Task<IActionResult> Edit(int? id)\r\n    {\r\n        if (i" +
-                    "d == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n\r\n        var " +
-                    "");
+            this.Write("/Edit/5\r\n    public async Task<IActionResult> Edit(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyTypeName));
+            this.Write("? ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(")\r\n    {\r\n        if (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(" == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n\r\n        var ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" = await _context.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write(".FindAsync(id);\r\n        if (");
+            this.Write(".FindAsync(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(");\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n        return V" +
                     "iew(");
@@ -122,20 +135,30 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind(""ID,Title,ReleaseDate,Genre,Price"")] ");
+    public async Task<IActionResult> Edit(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyTypeName));
+            this.Write("? ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(", [Bind(\"ID,Title,ReleaseDate,Genre,Price\")] ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" movie)\r\n    {\r\n        if (id != ");
+            this.Write(" movie)\r\n    {\r\n        if (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(" != ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(".ID)\r\n        {\r\n            return NotFound();\r\n        }\r\n\r\n        if (ModelSt" +
-                    "ate.IsValid)\r\n        {\r\n            try\r\n            {\r\n                _contex" +
-                    "t.Update(");
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(")\r\n        {\r\n            return NotFound();\r\n        }\r\n\r\n        if (ModelState" +
+                    ".IsValid)\r\n        {\r\n            try\r\n            {\r\n                _context.U" +
+                    "pdate(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(");\r\n                await _context.SaveChangesAsync();\r\n            }\r\n          " +
                     "  catch (DbUpdateConcurrencyException)\r\n            {\r\n                if (!");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameUpperVariant));
             this.Write("Exists(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(@".ID))
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(@"))
                 {
                     return NotFound();
                 }
@@ -150,13 +173,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(");\r\n    }\r\n\r\n    // GET: ");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
-            this.Write("/Delete/5\r\n    public async Task<IActionResult> Delete(int? id)\r\n    {\r\n        i" +
-                    "f (id == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n\r\n        " +
-                    "var ");
+            this.Write("/Delete/5\r\n    public async Task<IActionResult> Delete(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyTypeName));
+            this.Write("? ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(")\r\n    {\r\n        if (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(" == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n\r\n        var ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" = await _context.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write("\r\n            .FirstOrDefaultAsync(m => m.ID == id);\r\n        if (");
+            this.Write("\r\n            .FirstOrDefaultAsync(m => m.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(" == ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(");\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n\r\n        return" +
                     " View(");
@@ -164,12 +195,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
             this.Write(");\r\n    }\r\n\r\n    // POST: ");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
             this.Write("/Delete/5\r\n    [HttpPost, ActionName(\"Delete\")]\r\n    [ValidateAntiForgeryToken]\r\n" +
-                    "    public async Task<IActionResult> DeleteConfirmed(int id)\r\n    {\r\n        var" +
-                    " ");
+                    "    public async Task<IActionResult> DeleteConfirmed(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyTypeName));
+            this.Write("? ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(")\r\n    {\r\n        var ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" = await _context.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write(".FindAsync(id);\r\n        if (");
+            this.Write(".FindAsync(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(");\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(" != null)\r\n        {\r\n            _context.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
@@ -178,9 +214,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
             this.Write(");\r\n        }\r\n\r\n        await _context.SaveChangesAsync();\r\n        return Redir" +
                     "ectToAction(nameof(Index));\r\n    }\r\n\r\n    private bool ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameUpperVariant));
-            this.Write("Exists(int id)\r\n    {\r\n        return _context.");
+            this.Write("Exists(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyTypeName));
+            this.Write("? ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(")\r\n    {\r\n        return _context.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write(".Any(e => e.ID == id);\r\n    }\r\n}\r\n");
+            this.Write(".Any(e => e.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write(" == ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write(");\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

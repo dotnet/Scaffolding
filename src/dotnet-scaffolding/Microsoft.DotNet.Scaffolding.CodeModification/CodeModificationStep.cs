@@ -134,6 +134,7 @@ public class CodeModificationStep : ScaffoldStep
         return input;
     }
 
+    //similar to ReplaceString but for a string[]
     private string[]? ReplaceStrings(string[]? input)
     {
         if (input is not null && input.Length > 0)

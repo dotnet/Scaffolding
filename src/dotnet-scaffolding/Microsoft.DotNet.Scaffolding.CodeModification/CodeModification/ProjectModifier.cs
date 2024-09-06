@@ -147,6 +147,7 @@ internal class ProjectModifier
             return document;
         }
 
+        //should be a safe cast as we are starting with a 'Document' type
         return await ProjectModifierHelper.ModifyDocumentTextAsync(document, replacements) as Document;
     }
 

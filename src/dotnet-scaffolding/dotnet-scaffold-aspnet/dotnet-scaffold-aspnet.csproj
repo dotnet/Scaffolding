@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\**\*.tt" PackagePath="Templates\" />
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\dotnet-scaffold-aspnet\Templates\Files\*.cshtml" PackagePath="Templates\Files\" />
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\*.tt" PackagePath="Templates\DbContext\" />
     <None Pack="true" Include="CodeModificationConfigs\*.json" PackagePath="CodeModificationConfigs\" />
     <None Pack="true" Include="README.md" PackagePath="\" />
@@ -649,7 +650,4 @@
     </Compile>
   </ItemGroup>
 
-  <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
 </Project>

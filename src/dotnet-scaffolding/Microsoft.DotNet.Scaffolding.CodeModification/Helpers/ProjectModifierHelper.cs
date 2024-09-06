@@ -499,11 +499,12 @@ internal static class ProjectModifierHelper
             }
         }
 
+        //get the CodeAnalysis.Solution, add the AdditionalDocument with the updated text
+        //and return the updated TextDocument.
         var updatedSourceText = SourceText.From(sourceFileString);
         var solution = fileDoc.Project.Solution;
         var updatedSolution = solution.WithAdditionalDocumentText(fileDoc.Id, updatedSourceText);
         var updatedTextDocument = updatedSolution.GetAdditionalDocument(fileDoc.Id);
-
         return updatedTextDocument;
     }
 

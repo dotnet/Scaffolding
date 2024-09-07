@@ -1,0 +1,16 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+using Microsoft.AspNetCore.Identity;
+<# if (!string.IsNullOrEmpty(Model.UserClassNamespace))
+{#>
+namespace <#= Model.UserClassNamespace #>;<#
+}
+#>
+
+// Add profile data for application users by adding properties to the ApplicationUser class
+public class ApplicationUser : IdentityUser
+{
+}

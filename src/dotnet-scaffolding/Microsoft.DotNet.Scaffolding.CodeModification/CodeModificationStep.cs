@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
@@ -66,7 +65,7 @@ public class CodeModificationStep : ScaffoldStep
         }
 
         //replace all "variables" provided in 'CodeModifierProperties' in the 'CodeModifierConfig'
-        EditCodeModifierConfig(codeModifierConfig);
+        codeModifierConfig.EditCodeModifierConfig(CodeModifierProperties);
         var projectModifier = new ProjectModifier(
             ProjectPath,
             codeService,
@@ -87,35 +86,5 @@ public class CodeModificationStep : ScaffoldStep
         }
 
         return projectModificationResult;
-    }
-
-    private void EditCodeModifierConfig(CodeModifierConfig codeModifierConfig)
-    {
-        if (codeModifierConfig.Files is null)
-        {
-            return;
-        }
-
-        var methods = codeModifierConfig.Files.SelectMany(x => x.Methods?.Values ?? Enumerable.Empty<Method>());
-        var codeSnippets = methods.SelectMany(x => x.CodeChanges ?? Enumerable.Empty<CodeSnippet>());
-        foreach (var codeSnippet in codeSnippets)
-        {
-            codeSnippet.CheckBlock = ReplaceString(codeSnippet.CheckBlock);
-            codeSnippet.Parent = ReplaceString(codeSnippet.Parent);
-            codeSnippet.Block = ReplaceString(codeSnippet.Block) ?? string.Empty;
-        }
-    }
-
-    private string? ReplaceString(string? input)
-    {
-        if (!string.IsNullOrEmpty(input))
-        {
-            foreach (var kvp in CodeModifierProperties)
-            {
-                input = input.Replace(kvp.Key, kvp.Value);
-            }
-        }
-
-        return input;
     }
 }

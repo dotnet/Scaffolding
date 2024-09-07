@@ -1,0 +1,8 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+@using <#= Model.BlazorIdentityNamespace #>.Shared
+@using <#= Model.UserClassNamespace #>
+@layout AccountLayout

@@ -8,4 +8,6 @@ internal class DbContextProperties
     public string DbContextPath { get; set; } = default!;
     public string? DbSetStatement { get; set; }
     public string? NewDbConnectionString { get; set; }
+    public bool IsIdentityDbContext { get; set; } = false;
+    public string FullIdentityUserName { get; set; } = "IdentityUser";
 }

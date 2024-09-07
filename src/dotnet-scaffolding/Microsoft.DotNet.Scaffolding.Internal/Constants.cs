@@ -29,5 +29,9 @@ internal static class Constants
         //DbContext related constants
         public const string UseDbMethod = "$(UseDbMethod)";
         public const string DbContextName = "$(DbContextName)";
+        public const string DbContextNamespace = "$(DbContextNamespace)";
+        //Identity related constants
+        public const string UserClassNamespace = "$(UserClassNamespace)";
+        public const string BlazorIdentityNamespace = "$(BlazorIdentityNamespace)";
     }
 }

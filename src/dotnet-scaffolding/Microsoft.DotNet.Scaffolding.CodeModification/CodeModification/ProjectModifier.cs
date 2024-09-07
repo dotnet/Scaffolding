@@ -112,7 +112,7 @@ internal class ProjectModifier
     /// <param name="file"></param>
     /// <param name="toolOptions"></param>
     /// <returns></returns>
-    internal static async Task<TextDocument?> ApplyTextReplacements(CodeFile file, TextDocument? document, IList<string> toolOptions)
+    internal static async Task<T?> ApplyTextReplacements<T>(CodeFile file, T? document, IList<string> toolOptions) where T : TextDocument
     {
         if (document is null)
         {
@@ -126,29 +126,6 @@ internal class ProjectModifier
         }
 
         return await ProjectModifierHelper.ModifyDocumentTextAsync(document, replacements);
-    }
-
-    /// <summary>
-    /// Updates .razor and .html files via string replacement
-    /// </summary>
-    /// <param name="file"></param>
-    /// <param name="toolOptions"></param>
-    /// <returns></returns>
-    internal static async Task<Document?> ApplyTextReplacements(CodeFile file, Document? document, IList<string> toolOptions)
-    {
-        if (document is null)
-        {
-            return null;
-        }
-
-        var replacements = file.Replacements?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, toolOptions));
-        if (replacements is null || !replacements.Any())
-        {
-            return document;
-        }
-
-        //should be a safe cast as we are starting with a 'Document' type
-        return await ProjectModifierHelper.ModifyDocumentTextAsync(document, replacements) as Document;
     }
 
     internal async Task<Document?> ModifyCsFile(CodeFile file, Document? fileDoc, IList<string> options)

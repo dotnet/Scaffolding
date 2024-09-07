@@ -13,6 +13,7 @@ using static Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
+//TODO: pull all the duplicate logic from all these 'Validation' ScaffolderSteps into a common one.
 internal class ValidateBlazorIdentityStep : ScaffoldStep
 {
     private readonly IFileSystem _fileSystem;

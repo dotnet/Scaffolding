@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
@@ -275,20 +276,18 @@ public static class Program
 
     static void ConfigureSteps(IServiceCollection services)
     {
-        services.AddTransient<ValidateBlazorCrudStep>();
-        services.AddTransient<ValidateMinimalApiStep>();
-        services.AddTransient<ValidateBlazorIdentityStep>();
-        services.AddTransient<ValidateRazorPagesStep>();
-        services.AddTransient<ValidateViewsStep>();
-        services.AddTransient<ValidateEfControllerStep>();
+        var executingAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var scaffoldStepTypes = executingAssembly.GetTypes().Where(x => x.IsSubclassOf(typeof(ScaffoldStep)));
+        foreach (var type in scaffoldStepTypes)
+        {
+            services.AddTransient(type);
+        }
+
+        //ScaffoldSteps from other assemblies/projects
         services.AddTransient<CodeModificationStep>();
         services.AddTransient<AddPackagesStep>();
         services.AddTransient<AddConnectionStringStep>();
         services.AddTransient<TextTemplatingStep>();
-        services.AddTransient<AreaScaffolderStep>();
-        services.AddTransient<DotnetNewScaffolderStep>();
-        services.AddTransient<EmptyControllerScaffolderStep>();
-        services.AddTransient<AddFileStep>();
     }
 
     static void CreateOptions(

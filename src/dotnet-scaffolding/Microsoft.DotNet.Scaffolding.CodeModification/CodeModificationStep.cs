@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
@@ -66,7 +65,7 @@ public class CodeModificationStep : ScaffoldStep
         }
 
         //replace all "variables" provided in 'CodeModifierProperties' in the 'CodeModifierConfig'
-        EditCodeModifierConfig(codeModifierConfig);
+        codeModifierConfig.EditCodeModifierConfig(CodeModifierProperties);
         var projectModifier = new ProjectModifier(
             ProjectPath,
             codeService,
@@ -87,64 +86,5 @@ public class CodeModificationStep : ScaffoldStep
         }
 
         return projectModificationResult;
-    }
-
-    private void EditCodeModifierConfig(CodeModifierConfig codeModifierConfig)
-    {
-        if (codeModifierConfig.Files is null)
-        {
-            return;
-        }
-
-        //modify CodeSnippets 'CheckBlock', 'Parent', and 'Block'
-        var methods = codeModifierConfig.Files.SelectMany(x => x.Methods?.Values ?? Enumerable.Empty<Method>());
-        var replacementCodeSnippets = codeModifierConfig.Files.SelectMany(x => x.Replacements ?? Enumerable.Empty<CodeSnippet>());
-        var codeSnippets = methods.SelectMany(x => x.CodeChanges ?? Enumerable.Empty<CodeSnippet>()).ToList();
-        codeSnippets.AddRange(replacementCodeSnippets);
-        foreach (var codeSnippet in codeSnippets)
-        {
-            codeSnippet.CheckBlock = ReplaceString(codeSnippet.CheckBlock);
-            codeSnippet.Parent = ReplaceString(codeSnippet.Parent);
-            codeSnippet.Block = ReplaceString(codeSnippet.Block) ?? codeSnippet.Block;
-            if (codeSnippet.ReplaceSnippet is not null)
-            {
-                for (int i = 0; i < codeSnippet.ReplaceSnippet.Length; i++)
-                {
-                    codeSnippet.ReplaceSnippet[i] = ReplaceString(codeSnippet.ReplaceSnippet[i]) ?? codeSnippet.ReplaceSnippet[i];
-                }
-            }
-        }
-
-        foreach (var file in codeModifierConfig.Files)
-        {
-            file.Usings = ReplaceStrings(file.Usings) ?? file.Usings;
-        }
-    }
-
-    private string? ReplaceString(string? input)
-    {
-        if (!string.IsNullOrEmpty(input))
-        {
-            foreach (var kvp in CodeModifierProperties)
-            {
-                input = input.Replace(kvp.Key, kvp.Value);
-            }
-        }
-
-        return input;
-    }
-
-    //similar to ReplaceString but for a string[]
-    private string[]? ReplaceStrings(string[]? input)
-    {
-        if (input is not null && input.Length > 0)
-        {
-            for (int i = 0; i < input.Length; i++)
-            {
-                input[i] = ReplaceString(input[i]) ?? input[i];
-            }
-        }
-
-        return input;
     }
 }

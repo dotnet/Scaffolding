@@ -22,7 +22,7 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <Pack>true</Pack>
     </None>
-    <None Pack="true" Include="README.md"  PackagePath="\"/>
+    <None Pack="true" Include="README.md" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

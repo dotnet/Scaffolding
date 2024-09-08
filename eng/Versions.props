@@ -54,7 +54,7 @@
     <MonoTextTemplatingVersion>3.0.0-preview-0052-g5d0f76c785</MonoTextTemplatingVersion>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
-    <MicrosoftCodeAnalysisPreviewVersion>4.11.0-2.final</MicrosoftCodeAnalysisPreviewVersion>
+    <MicrosoftCodeAnalysisPreviewVersion>4.12.0-1.final</MicrosoftCodeAnalysisPreviewVersion>
     <MicrosoftCodeAnalysisVersion>4.8.0</MicrosoftCodeAnalysisVersion>
     <SystemCommandLinePackageVersion>2.0.0-beta4.22613.1</SystemCommandLinePackageVersion>
     <SystemCommandLineNamingConventionBinderPackageVersion>2.0.0-beta4.22613.1</SystemCommandLineNamingConventionBinderPackageVersion>

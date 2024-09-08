@@ -69,11 +69,11 @@ internal class ScaffoldBuilder(string name) : IScaffoldBuilder
     public IScaffolder Build(IServiceProvider serviceProvider)
     {
         List<ScaffoldStep> steps = [];
-        
         foreach (var step in _stepPreparers)
         {
-            var stepInstance = serviceProvider.GetService(step.GetStepType())
-                ?? throw new InvalidOperationException("We should log an error here and say we couldn't find the step.");
+            var stepType = step.GetStepType();
+            var stepInstance = serviceProvider.GetService(stepType)
+                ?? throw new InvalidOperationException($"Could not find '{stepType.Name}' ScaffoldStep.");
 
             steps.Add((ScaffoldStep)stepInstance);    
         }

@@ -52,23 +52,57 @@ internal static class ScaffolderBuilderExtensions
         return builder;
     }
 
-    private static void GetDbContextTemplatingStepProperties(
-        out string templatePath,
-        out Type templateType,
-        out string templateModelName)
+    /// <summary>
+    /// Adds a new IdentityDbContext class 
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
+    public static IScaffoldBuilder WithIdentityDbContextStep(
+        this IScaffoldBuilder builder)
+    {
+        builder = builder.WithStep<TextTemplatingStep>(config =>
+        {
+            var step = config.Step;
+            var context = config.Context;
+
+            DbContextProperties? dbContextProperties = null;
+            if (context.Properties.TryGetValue(nameof(DbContextProperties), out var dbContextPropertiesObj) &&
+                dbContextPropertiesObj is DbContextProperties)
+            {
+                dbContextProperties = dbContextPropertiesObj as DbContextProperties;
+            }
+
+            var dbContextTextTemplatingProperty = GetDbContextTemplatingStepProperty(dbContextProperties);
+            if (dbContextTextTemplatingProperty is null)
+            {
+                config.Step.SkipStep = true;
+                return;
+            }
+
+            step.TextTemplatingProperties = [dbContextTextTemplatingProperty];
+            step.DisplayName = $"{dbContextProperties?.DbContextName ?? Tools.Scaffold.AspNet.Common.Constants.Identity.DbContextName}{Tools.Scaffold.AspNet.Common.Constants.CSharpExtension}";
+        });
+
+        return builder;
+    }
+
+    private static TextTemplatingProperty? GetDbContextTemplatingStepProperty(DbContextProperties? dbContextProperties)
     {
         //get .tt template file path
-        var templateUtilities = new TemplateFoldersUtilities();
-        var allT4Templates = templateUtilities.GetAllT4Templates(["DbContext"]);
+        var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["DbContext"]);
         string? t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("NewDbContext.tt", StringComparison.OrdinalIgnoreCase));
-        if (string.IsNullOrEmpty(t4TemplatePath))
+        if (string.IsNullOrEmpty(t4TemplatePath) || dbContextProperties is null)
         {
-            throw new Exception();
+            return null;
         }
 
-        //get System.Type for NewDbContext
-        templateType = typeof(NewDbContext);
-        templatePath = t4TemplatePath;
-        templateModelName = "Model";
+        return new TextTemplatingProperty
+        {
+            TemplateType = typeof(NewDbContext),
+            TemplatePath = t4TemplatePath,
+            TemplateModelName = "Model",
+            OutputPath = dbContextProperties.DbContextPath,
+            TemplateModel = dbContextProperties
+        };
     }
 }

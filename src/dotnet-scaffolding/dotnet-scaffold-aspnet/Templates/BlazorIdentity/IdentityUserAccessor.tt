@@ -1,0 +1,27 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel" name="Model" #>
+<#
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+#>using <#= Model.DbContextNamespace #>;
+<#} #>
+using <#= Model.UserClassNamespace #>;
+using Microsoft.AspNetCore.Identity;
+
+namespace <#= Model.BlazorIdentityNamespace #>
+{
+    internal sealed class IdentityUserAccessor(UserManager<<#= Model.UserClassName #>> userManager, IdentityRedirectManager redirectManager)
+    {
+        public async Task<<#= Model.UserClassName #>> GetRequiredUserAsync(HttpContext context)
+        {
+            var user = await userManager.GetUserAsync(context.User);
+
+            if (user is null)
+            {
+                redirectManager.RedirectToWithStatus("Account/InvalidUser", $"Error: Unable to load user with ID '{userManager.GetUserId(context.User)}'.", context);
+            }
+
+            return user;
+        }
+    }
+}

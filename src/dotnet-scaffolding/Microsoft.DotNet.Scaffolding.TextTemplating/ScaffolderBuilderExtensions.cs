@@ -60,5 +60,4 @@ internal static class ScaffolderBuilderExtensions
             TemplateModel = dbContextProperties
         };
     }
-
 }

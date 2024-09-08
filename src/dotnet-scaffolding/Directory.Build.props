@@ -4,5 +4,6 @@
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+
   <Import Project="$(RepoRoot)eng\Versions.DotNetScaffold.props" />
 </Project>

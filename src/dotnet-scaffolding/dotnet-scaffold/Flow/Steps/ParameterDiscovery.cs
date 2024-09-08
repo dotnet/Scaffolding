@@ -3,8 +3,8 @@
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
-using Microsoft.DotNet.Scaffolding.Helpers.Extensions;
-using Microsoft.DotNet.Scaffolding.Helpers.General;
+using Microsoft.DotNet.Scaffolding.Internal;
+using Microsoft.DotNet.Scaffolding.Internal.Extensions;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Spectre.Console;

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
@@ -21,8 +22,8 @@ public static class Program
         CreateOptions(
             out var projectOption, out var prereleaseOption, out var fileNameOption, out var actionsOption,
             out var areaNameOption, out var modelNameOption, out var endpointsClassOption, out var databaseProviderOption,
-            out var databaseProviderRequiredOption, out var dataContextClassOption, out var dataContextClassRequiredOption,
-            out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption);
+            out var databaseProviderRequiredOption, out var identityDbProviderRequiredOption, out var dataContextClassOption, out var dataContextClassRequiredOption,
+            out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption, out var overwriteOption);
 
         builder.AddScaffolder("blazor-empty")
             .WithDisplayName("Razor Component - Empty")
@@ -242,6 +243,27 @@ public static class Program
                 step.Name = context.GetOptionResult(areaNameOption);
             });
 
+        builder.AddScaffolder("blazor-identity")
+            .WithDisplayName("Blazor Identity")
+            .WithCategory("Blazor")
+            .WithDescription("Add blazor identity to a project.")
+            .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, prereleaseOption])
+            .WithStep<ValidateBlazorIdentityStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.Project = context.GetOptionResult(projectOption);
+                step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
+                step.DatabaseProvider = context.GetOptionResult(identityDbProviderRequiredOption);
+                step.Prerelease = context.GetOptionResult(prereleaseOption);
+                step.Overwrite = context.GetOptionResult(overwriteOption);
+            })
+            .WithBlazorIdentityAddPackagesStep()
+            .WithIdentityDbContextStep()
+            .WithConnectionStringStep()
+            .WithBlazorIdentityTextTemplatingStep()
+            .WithBlazorIdentityCodeChangeStep();
+
         var runner = builder.Build();
         runner.RunAsync(args).Wait();
     }
@@ -254,19 +276,18 @@ public static class Program
 
     static void ConfigureSteps(IServiceCollection services)
     {
+        var executingAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var scaffoldStepTypes = executingAssembly.GetTypes().Where(x => x.IsSubclassOf(typeof(ScaffoldStep)));
+        foreach (var type in scaffoldStepTypes)
+        {
+            services.AddTransient(type);
+        }
+
+        //ScaffoldSteps from other assemblies/projects
         services.AddTransient<CodeModificationStep>();
-        services.AddTransient<ValidateBlazorCrudStep>();
-        services.AddTransient<ValidateMinimalApiStep>();
         services.AddTransient<AddPackagesStep>();
         services.AddTransient<AddConnectionStringStep>();
         services.AddTransient<TextTemplatingStep>();
-        services.AddTransient<AreaScaffolderStep>();
-        services.AddTransient<DotnetNewScaffolderStep>();
-        services.AddTransient<EmptyControllerScaffolderStep>();
-        services.AddTransient<ValidateEfControllerStep>();
-        services.AddTransient<ValidateViewsStep>();
-        services.AddTransient<AddFileStep>();
-        services.AddTransient<ValidateRazorPagesStep>();
     }
 
     static void CreateOptions(
@@ -279,12 +300,14 @@ public static class Program
         out ScaffolderOption<string> endpointsClassOption,
         out ScaffolderOption<string> databaseProviderOption,
         out ScaffolderOption<string> databaseProviderRequiredOption,
+        out ScaffolderOption<string> identityDbProviderRequiredOption,
         out ScaffolderOption<string> dataContextClassOption,
         out ScaffolderOption<string> dataContextClassRequiredOption,
         out ScaffolderOption<bool> openApiOption,
         out ScaffolderOption<string> pageTypeOption,
         out ScaffolderOption<string> controllerNameOption,
-        out ScaffolderOption<bool> viewsOption)
+        out ScaffolderOption<bool> viewsOption,
+        out ScaffolderOption<bool> overwriteOption)
     {
         projectOption = new ScaffolderOption<string>
         {
@@ -399,6 +422,16 @@ public static class Program
             CustomPickerValues = AspNetDbContextHelper.DbContextTypeDefaults.Keys.ToArray()
         };
 
+        identityDbProviderRequiredOption = new ScaffolderOption<string>
+        {
+            DisplayName = "Database Provider",
+            CliOption = Constants.CliOptions.DbProviderOption,
+            Description = "",
+            Required = true,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = AspNetDbContextHelper.IdentityDbContextTypeDefaults.Keys.ToArray()
+        };
+
         pageTypeOption = new ScaffolderOption<string>
         {
             DisplayName = "Page Type",
@@ -414,6 +447,15 @@ public static class Program
             DisplayName = "With Views?",
             CliOption = Constants.CliOptions.ViewsOption,
             Description = "Add CRUD razor views (.cshtml)",
+            Required = true,
+            PickerType = InteractivePickerType.YesNo
+        };
+
+        overwriteOption = new ScaffolderOption<bool>
+        {
+            DisplayName = "Overwrite existing files?",
+            CliOption = Constants.CliOptions.OverwriteOption,
+            Description = "Option to enable overwriting existing files",
             Required = true,
             PickerType = InteractivePickerType.YesNo
         };

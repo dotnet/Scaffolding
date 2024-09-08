@@ -12,6 +12,9 @@ public class TextTemplatingStep : ScaffoldStep
 {
     public string? DisplayName { get; set; } = "files";
     public required IEnumerable<TextTemplatingProperty> TextTemplatingProperties { get; set; }
+    //by default, Overwrite should be false, if a file already exists, don't overwrite it.
+    public bool Overwrite { get; set; }
+
     private readonly ILogger _logger;
 
     public TextTemplatingStep(ILogger<TextTemplatingStep> logger)
@@ -65,7 +68,11 @@ public class TextTemplatingStep : ScaffoldStep
                         Directory.CreateDirectory(outputFolderPath);
                     }
 
-                    File.WriteAllText(templatingProperty.OutputPath, templatedString);
+                    //if Overwrite is true, write file, or if it doesn't exist
+                    if (Overwrite || !File.Exists(templatingProperty.OutputPath))
+                    {
+                        File.WriteAllText(templatingProperty.OutputPath, templatedString);
+                    }
                 }
             }
         }

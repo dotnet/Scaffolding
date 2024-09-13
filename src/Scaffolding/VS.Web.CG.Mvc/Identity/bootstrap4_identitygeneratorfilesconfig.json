@@ -795,15 +795,15 @@
       },
       {
         "Name": "Jquery.validate.unobtrusive.js",
-        "SourcePath": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js",
-        "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js",
+        "SourcePath": "wwwroot/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.js",
+        "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.js",
         "IsTemplate": false,
         "ShowInListFiles": false
       },
       {
         "Name": "Jquery.validate.unobtrusive.min.js",
-        "SourcePath": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js",
-        "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js",
+        "SourcePath": "wwwroot/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js",
+        "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js",
         "IsTemplate": false,
         "ShowInListFiles": false
       },

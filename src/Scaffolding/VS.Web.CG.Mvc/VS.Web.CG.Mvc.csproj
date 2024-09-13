@@ -60,6 +60,7 @@
     <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery-validation\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\jquery-validation\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery-validation\dist\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\jquery-validation\dist\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery-validation-unobtrusive\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\jquery-validation-unobtrusive\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap4\wwwroot\lib\jquery-validation-unobtrusive\dist\*" PackagePath="Templates\Identity_Versioned\Bootstrap4\wwwroot\lib\jquery-validation-unobtrusive\dist\" />
 
         <!-- Identity Bootstrap5 - The current default, so it gets moved to Templates\Identity\ -->
     <None Pack="true" Include="Templates\Identity\Bootstrap5\*" PackagePath="Templates\Identity\" />
@@ -79,6 +80,7 @@
     <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\jquery-validation\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\jquery-validation\dist\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation\dist\" />
     <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\jquery-validation-unobtrusive\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation-unobtrusive\" />
+    <None Pack="true" Include="Templates\Identity\Bootstrap5\wwwroot\lib\jquery-validation-unobtrusive\dist\*" PackagePath="Templates\Identity\wwwroot\lib\jquery-validation-unobtrusive\dist\" />
   </ItemGroup>
 
   <ItemGroup>

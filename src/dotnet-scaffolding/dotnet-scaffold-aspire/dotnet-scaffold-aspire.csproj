@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Scaffolding tool for .NET Aspire scenarios</Description>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>$(BuildTfm)</TargetFrameworks>
     <OutputType>exe</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackAsTool>true</PackAsTool>

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>$(BuildTfm)</TargetFrameworks>
   </PropertyGroup>
 </Project>

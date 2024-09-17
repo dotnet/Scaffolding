@@ -15,6 +15,7 @@ internal class PackageConstants
         public const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
         public const string CosmosPakcageName = "Microsoft.EntityFrameworkCore.Cosmos";
         public const string PostgresPackageName = "Npgsql.EntityFrameworkCore.PostgreSQL";
+        public const string ConnectionStringVariableName = "connectionString";
         public static readonly IDictionary<string, string> EfPackagesDict = new Dictionary<string, string>
         {
             { SqlServer, SqlServerPackageName },
@@ -33,7 +34,7 @@ internal class PackageConstants
         {
             { SqlServer, "UseSqlServer" },
             { SQLite, "UseSqlite" },
-            { Postgres, "UsePostgres" },
+            { Postgres, "UseNpgsql" },
             { CosmosDb, "UseCosmos" }
         };
     }

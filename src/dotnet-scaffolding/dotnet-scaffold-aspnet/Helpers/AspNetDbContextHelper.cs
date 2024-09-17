@@ -31,7 +31,10 @@ internal class AspNetDbContextHelper
             if (!string.IsNullOrEmpty(dbContextInfo.DatabaseProvider) &&
                 PackageConstants.EfConstants.UseDatabaseMethods.TryGetValue(dbContextInfo.DatabaseProvider, out var useDbMethod))
             {
-                dbContextProperties.Add(Constants.CodeModifierPropertyConstants.UseDbMethod, useDbMethod);
+                string useDbMethodFull = dbContextInfo.DatabaseProvider.Equals(PackageConstants.EfConstants.CosmosDb, StringComparison.OrdinalIgnoreCase) ?
+                    $"{useDbMethod}(connectionString, \"{dbContextInfo.DbContextClassName}\")" :
+                    $"{useDbMethod}(connectionString)"; 
+                dbContextProperties.Add(Constants.CodeModifierPropertyConstants.UseDbMethod, useDbMethodFull);
             }
 
             if (!string.IsNullOrEmpty(dbContextInfo.DbContextClassName))

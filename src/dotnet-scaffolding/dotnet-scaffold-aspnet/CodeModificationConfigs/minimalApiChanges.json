@@ -36,7 +36,7 @@
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",
               "CheckBlock": "builder.Services.AddDbContext",
-              "Block": "builder.Services.AddDbContext<$(DbContextName)>(options => options.$(UseDbMethod)(connectionString))\"",
+              "Block": "builder.Services.AddDbContext<$(DbContextName)>(options => options.$(UseDbMethod))",
               "LeadingTrivia": {
                 "Newline": true
               }

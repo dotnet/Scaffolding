@@ -22,7 +22,7 @@
     <!-- Microsoft.Extensions.FileProviders.Physical -->
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>8.0.0</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <!-- Microsoft.Extensions.Identity.Stores -->
-    <MicrosoftExtensionsIdentityStoresPackageVersion>8.0.9</MicrosoftExtensionsIdentityStoresPackageVersion>
+    <MicrosoftExtensionsIdentityStoresPackageVersion>8.0.8</MicrosoftExtensionsIdentityStoresPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Abstractions -->
     <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>8.0.0</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
@@ -34,7 +34,7 @@
     <!-- Microsoft.Extensions.DependencyModel -->
     <MicrosoftExtensionsDependencyModelPackageVersion>8.0.1</MicrosoftExtensionsDependencyModelPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>8.0.9</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>8.0.8</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <!-- Microsoft.Extensions.Logging.Console -->
     <MicrosoftExtensionsLoggingConsolePackageVersion>8.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>
     <!-- Microsoft.Extensions.Logging.Debug -->
@@ -44,16 +44,16 @@
     <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
     <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>8.0.0</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
     <!-- Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>8.0.9</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>8.0.8</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>8.0.9</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>8.0.8</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.UI -->
-    <MicrosoftAspNetCoreIdentityUIPackageVersion>8.0.9</MicrosoftAspNetCoreIdentityUIPackageVersion>
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>8.0.8</MicrosoftAspNetCoreIdentityUIPackageVersion>
     <!-- Mono.TextTemplating-->
     <MonoTextTemplatingVersion>2.3.1</MonoTextTemplatingVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>8.0.4</VersionPrefix>
+    <VersionPrefix>8.0.5</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
@@ -80,7 +80,7 @@
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.3.21166.3</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.3</NewtonsoftJsonPackageVersion>
-    <NuGetPackagingVersion>6.9.1</NuGetPackagingVersion>
+    <NuGetPackagingVersion>6.11.0</NuGetPackagingVersion>
     <HumanizerPackageVersion>2.14.1</HumanizerPackageVersion>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- Everything below here are Packages only used by test projects -->
@@ -103,8 +103,6 @@
     <!-- Microsoft.AspNetCore.StaticFiles -->
     <!-- this is from aspnetcore-dev (test only) -->
     <MicrosoftAspNetCoreStaticFilesPackageVersion>6.0.0</MicrosoftAspNetCoreStaticFilesPackageVersion>
-    <!-- Microsoft.DotNet.ProjectModel -->
-    <MicrosoftDotNetProjectModelPackageVersion>1.0.0-rc3-003121</MicrosoftDotNetProjectModelPackageVersion>
     <MoqPackageVersion>4.9.0</MoqPackageVersion>
     <NETStandardLibrary20PackageVersion>2.0.3</NETStandardLibrary20PackageVersion>
     <XunitPackageVersion>2.5.0</XunitPackageVersion>
@@ -119,7 +117,7 @@
     <MicrosoftExtensionsConfigurationCommandLineVersion>3.1.20</MicrosoftExtensionsConfigurationCommandLineVersion>
     <MicrosoftGraphVersion>5.34.0</MicrosoftGraphVersion>
     <MicrosoftIdentityClientExtensionsMsalVersion>4.57.0</MicrosoftIdentityClientExtensionsMsalVersion>
-    <NuGetProjectModelVersion>6.9.1</NuGetProjectModelVersion>
+    <NuGetProjectModelVersion>6.11.0</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0-beta4.22613.1</SystemCommandLineVersion>
     <NewtonsoftJsonMsIdentityPackageVersion>13.0.3</NewtonsoftJsonMsIdentityPackageVersion>
   </PropertyGroup>

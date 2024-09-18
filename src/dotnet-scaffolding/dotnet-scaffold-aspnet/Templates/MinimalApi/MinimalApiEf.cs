@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         if (dbProvider.Equals("cosmos-efcore", StringComparison.OrdinalIgnoreCase))
         {
 
-            this.Write("        group.MapPut(\"/{id}\", async ");
+            this.Write("    group.MapPut(\"/{id}\", async ");
             this.Write(this.ToStringHelper.ToStringWithCulture(typedTaskWithNoContent));
             this.Write(" (");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));

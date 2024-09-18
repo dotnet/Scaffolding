@@ -499,13 +499,22 @@ internal static class ProjectModifierHelper
             }
         }
 
-        //get the CodeAnalysis.Solution, add the AdditionalDocument with the updated text
-        //and return the updated TextDocument.
         var updatedSourceText = SourceText.From(sourceFileString);
-        var solution = fileDoc.Project.Solution;
-        var updatedSolution = solution.WithAdditionalDocumentText(fileDoc.Id, updatedSourceText);
-        var updatedTextDocument = updatedSolution.GetAdditionalDocument(fileDoc.Id);
-        return updatedTextDocument as T;
+        //check for Document class first as its a subclass of TextDocument
+        //use Document.WithText extension to return an updated Document
+        if (fileDoc is Document document)
+        {
+            return document.WithText(updatedSourceText) as T;
+        }
+        //get the CodeAnalysis.Solution, add the AdditionalDocument with the updated text
+        //and return the updated TextDocument using Solution.GetAdditionalDocument.
+        else if (fileDoc is TextDocument)
+        {
+            var updatedSolution = fileDoc.Project.Solution.WithAdditionalDocumentText(fileDoc.Id, updatedSourceText);
+            return updatedSolution.GetAdditionalDocument(fileDoc.Id) as T;
+        }
+
+        return null;
     }
 
     internal static async Task UpdateDocument(Document document)

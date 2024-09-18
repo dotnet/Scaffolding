@@ -83,7 +83,7 @@ internal class ProjectModifier
         }
         catch (Exception e)
         {
-            _consoleLogger.LogError($"Failed to modify code file {file.FileName}, {e.Message}");
+            _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {e.Message}");
         }
 
         return project;

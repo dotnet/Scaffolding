@@ -16,7 +16,7 @@ internal class ToolManager(ILogger<ToolManager> logger, IToolManifestService too
     {
         _logger.LogInformation("Installing {packageName}...", packageName);
 
-        if (_dotnetToolService.GetDotNetTool(packageName) is not null || _dotnetToolService.InstallDotNetTool(packageName, version, prerelease, addSources, configFile))
+        if (_dotnetToolService.GetDotNetTool(packageName) is not null || _dotnetToolService.InstallDotNetTool(packageName, version, global: false, prerelease, addSources, configFile))
         {
             if (_toolManifestService.AddTool(packageName))
             {

@@ -31,22 +31,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             //need all 3 things, throw if not found
-            var componentName = context.GetComponentObj()?.Command;
+            var dotnetToolInfo = context.GetComponentObj();
             var commandObj = context.GetCommandObj();
-            if (commandObj is null || string.IsNullOrEmpty(componentName))
+            if (dotnetToolInfo is null || commandObj is null || string.IsNullOrEmpty(dotnetToolInfo.Command))
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Missing value for name of the component and/or command"));
             }
 
             var parameterValues = GetAllParameterValues(context, commandObj);
-            if (!string.IsNullOrEmpty(componentName) && parameterValues.Count != 0 && !string.IsNullOrEmpty(commandObj.Name))
+            if (!string.IsNullOrEmpty(dotnetToolInfo.Command) && parameterValues.Count != 0 && !string.IsNullOrEmpty(commandObj.Name))
             {
-                var componentExecutionString = $"{componentName} {string.Join(" ", parameterValues)}";
+                var componentExecutionString = $"{dotnetToolInfo.Command} {string.Join(" ", parameterValues)}";
                 int? exitCode = null;
                 AnsiConsole.Status()
-                    .Start($"Executing '{componentName}'", statusContext =>
+                    .Start($"Executing '{dotnetToolInfo.Command}'", statusContext =>
                     {
-                        var cliRunner = DotnetCliRunner.Create(componentName, parameterValues);
+                        var cliRunner = dotnetToolInfo.IsGlobalTool?
+                            DotnetCliRunner.Create(dotnetToolInfo.Command, parameterValues) :
+                            DotnetCliRunner.CreateDotNet(dotnetToolInfo.Command, parameterValues);
                         exitCode = cliRunner.ExecuteWithCallbacks(
                             (s) => AnsiConsole.Console.MarkupLineInterpolated($"[green]{s}[/]"),
                             (s) => AnsiConsole.Console.MarkupLineInterpolated($"[red]{s}[/]"));

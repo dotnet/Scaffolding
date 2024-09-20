@@ -9,4 +9,7 @@ internal class ToolUninstallSettings : ToolSettings
 {
     [CommandArgument(0, "<PACKAGE_NAME>")]
     public required string PackageName { get; set; }
+
+    [CommandOption("--global")]
+    public bool Global { get; set; }
 }

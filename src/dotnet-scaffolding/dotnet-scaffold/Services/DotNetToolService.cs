@@ -27,20 +27,9 @@ internal class DotNetToolService : IDotNetToolService
     public List<CommandInfo> GetCommands(DotNetToolInfo dotnetTool)
     {
         List<CommandInfo>? commands = null;
-        DotnetCliRunner? runner = null;
-        if (dotnetTool.IsGlobalTool)
-        {
-            runner = DotnetCliRunner.Create(dotnetTool.Command, ["get-commands"]);
-        }
-        else
-        {
-            runner = DotnetCliRunner.CreateDotNet(dotnetTool.Command, ["get-commands"]);
-        }
-
-        if (runner is null)
-        {
-            return [];
-        }
+        var runner = dotnetTool.IsGlobalTool ?
+            DotnetCliRunner.Create(dotnetTool.Command, ["get-commands"]) :
+            DotnetCliRunner.CreateDotNet(dotnetTool.Command, ["get-commands"]);
 
         var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
         if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))

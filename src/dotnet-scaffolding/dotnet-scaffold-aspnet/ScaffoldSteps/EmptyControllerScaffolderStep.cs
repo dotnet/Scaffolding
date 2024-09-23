@@ -32,7 +32,7 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
         var result = false;
         if (stepSettings is not null)
         {
-            return Task.FromResult(InvokeDotnetNew(stepSettings));
+            result = InvokeDotnetNew(stepSettings);
         }
 
         if (result)

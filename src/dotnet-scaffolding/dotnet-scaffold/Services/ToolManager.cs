@@ -12,11 +12,11 @@ internal class ToolManager(ILogger<ToolManager> logger, IToolManifestService too
     private readonly IToolManifestService _toolManifestService = toolManifestService;
     private readonly IDotNetToolService _dotnetToolService = dotnetToolService;
 
-    public bool AddTool(string packageName, string[] addSources, string? configFile, bool prerelease, string? version)
+    public bool AddTool(string packageName, string[] addSources, string? configFile, bool prerelease, string? version, bool global)
     {
         _logger.LogInformation("Installing {packageName}...", packageName);
 
-        if (_dotnetToolService.GetDotNetTool(packageName) is not null || _dotnetToolService.InstallDotNetTool(packageName, version, prerelease, addSources, configFile))
+        if (_dotnetToolService.GetDotNetTool(packageName) is not null || _dotnetToolService.InstallDotNetTool(packageName, version, global: global, prerelease, addSources, configFile))
         {
             if (_toolManifestService.AddTool(packageName))
             {
@@ -37,13 +37,13 @@ internal class ToolManager(ILogger<ToolManager> logger, IToolManifestService too
         return false;
     }
 
-    public bool RemoveTool(string packageName)
+    public bool RemoveTool(string packageName, bool global)
     {
         _logger.LogInformation("Uninstalling {packageName}...", packageName);
 
         if (_toolManifestService.RemoveTool(packageName))
         {
-            if (_dotnetToolService.UninstallDotNetTool(packageName))
+            if (_dotnetToolService.UninstallDotNetTool(packageName, global))
             {
                 _logger.LogInformation("Tool {packageName} removed successfully", packageName);
                 return true;

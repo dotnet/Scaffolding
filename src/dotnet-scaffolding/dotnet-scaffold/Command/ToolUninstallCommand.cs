@@ -13,8 +13,7 @@ internal class ToolUninstallCommand(IToolManager toolManager) : Command<ToolUnin
 
     public override int Execute([NotNull] CommandContext context, [NotNull] ToolUninstallSettings settings)
     {
-        _toolManager.RemoveTool(settings.PackageName);
-
+        _toolManager.RemoveTool(settings.PackageName, settings.Global);
         return 0;
     }
 }

@@ -19,6 +19,9 @@ internal class ToolInstallSettings : ToolSettings
     [CommandOption("--prerelease")]
     public bool Prerelease { get; set; }
 
+    [CommandOption("--global")]
+    public bool Global { get; set; }
+
     [CommandOption("--version <VERSION_NUMBER>")]
     public string? Version { get; set; }
 }

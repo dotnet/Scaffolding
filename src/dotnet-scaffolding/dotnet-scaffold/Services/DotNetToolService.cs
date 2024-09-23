@@ -24,25 +24,24 @@ internal class DotNetToolService : IDotNetToolService
     }
 
     private IList<DotNetToolInfo> _dotNetTools;
-    public List<CommandInfo> GetCommands(string dotnetToolName)
+    public List<CommandInfo> GetCommands(DotNetToolInfo dotnetTool)
     {
         List<CommandInfo>? commands = null;
-        var dotnetTools = GetDotNetTools();
-        if (dotnetTools.FirstOrDefault(x => x.Command.Equals(dotnetToolName, StringComparison.OrdinalIgnoreCase)) != null)
-        {
-            var runner = DotnetCliRunner.Create(dotnetToolName, ["get-commands"]);
-            var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
-            if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
-            {
-                try
-                {
-                    string escapedJsonString = stdOut.Replace("\r", "").Replace("\n", "");
-                    commands = JsonSerializer.Deserialize<List<CommandInfo>>(escapedJsonString);
-                }
-                catch (Exception)
-                {
+        var runner = dotnetTool.IsGlobalTool ?
+            DotnetCliRunner.Create(dotnetTool.Command, ["get-commands"]) :
+            DotnetCliRunner.CreateDotNet(dotnetTool.Command, ["get-commands"]);
 
-                }
+        var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
+        if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
+        {
+            try
+            {
+                string escapedJsonString = stdOut.Replace("\r", "").Replace("\n", "");
+                commands = JsonSerializer.Deserialize<List<CommandInfo>>(escapedJsonString);
+            }
+            catch (Exception)
+            {
+
             }
         }
 
@@ -74,7 +73,7 @@ internal class DotNetToolService : IDotNetToolService
     {
         if (components is null || components.Count == 0)
         {
-            components = GetDotNetTools();
+            components = GetDotNetTools(refresh: true);
         }
 
         var options = new ParallelOptions
@@ -85,7 +84,7 @@ internal class DotNetToolService : IDotNetToolService
         var commands = new ConcurrentBag<KeyValuePair<string, CommandInfo>>();
         Parallel.ForEach(components, options, dotnetTool =>
         {
-            var commandInfo = GetCommands(dotnetTool.Command);
+            var commandInfo = GetCommands(dotnetTool);
             if (commandInfo != null)
             {
                 foreach (var cmd in commandInfo)
@@ -98,14 +97,23 @@ internal class DotNetToolService : IDotNetToolService
         return commands.ToList();
     }
 
-    public bool InstallDotNetTool(string toolName, string? version = null, bool prerelease = false, string[]? addSources = null, string? configFile = null)
+    public bool InstallDotNetTool(string toolName, string? version = null, bool global = false, bool prerelease = false, string[]? addSources = null, string? configFile = null)
     {
         if (string.IsNullOrEmpty(toolName))
         {
             return false;
         }
 
-        var installParams = new List<string> { "install", "-g", toolName };
+        var installParams = new List<string> { "install", toolName };
+        if (global)
+        {
+            installParams.Add("-g");
+        }
+        else
+        {
+            installParams.Add("--create-manifest-if-needed");
+        }
+
         if (!string.IsNullOrEmpty(version))
         {
             installParams.Add("--version");
@@ -137,13 +145,20 @@ internal class DotNetToolService : IDotNetToolService
         return exitCode == 0;
     }
 
-    public bool UninstallDotNetTool(string toolName)
+    public bool UninstallDotNetTool(string toolName, bool global = false)
     {
         if (string.IsNullOrEmpty(toolName))
         {
             return false;
         }
-        var runner = DotnetCliRunner.CreateDotNet("tool", ["uninstall", "-g", toolName]);
+
+        List<string> uninstallParams = ["uninstall", toolName];
+        if (global)
+        {
+            uninstallParams.Add("-g");
+        }
+
+        var runner = DotnetCliRunner.CreateDotNet("tool", uninstallParams);
         var exitCode = runner.ExecuteAndCaptureOutput(out _, out _);
         return exitCode == 0;
     }
@@ -152,24 +167,44 @@ internal class DotNetToolService : IDotNetToolService
     {
         if (refresh || _dotNetTools.Count == 0)
         {
+            //only want unique tools, we will try to invoke local tools over global tools
             var dotnetToolList = new List<DotNetToolInfo>();
             var runner = DotnetCliRunner.CreateDotNet("tool", ["list", "-g"]);
+            var localRunner = DotnetCliRunner.CreateDotNet("tool", ["list"]);
             var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
-            if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
+            var localExitCode = localRunner.ExecuteAndCaptureOutput(out var localStdOut, out var localStdErr);
+            //parse through local dotnet tools first. 
+            if (localExitCode == 0 && !string.IsNullOrEmpty(localStdOut))
             {
-                var stdOutByLine = stdOut.Split(System.Environment.NewLine);
-                foreach (var line in stdOutByLine)
+                var localDtdOutByLine = localStdOut.Split(Environment.NewLine);
+                foreach (var line in localDtdOutByLine)
                 {
                     var parsedDotNetTool = ParseToolInfo(line);
-                    if (parsedDotNetTool != null &&
-                        !parsedDotNetTool.Command.Equals("dotnet-scaffold", StringComparison.OrdinalIgnoreCase) &&
-                        !parsedDotNetTool.PackageName.Equals("package", StringComparison.OrdinalIgnoreCase))
+                    if (parsedDotNetTool is not null &&
+                        IsValidDotNetTool(parsedDotNetTool))
                     {
                         dotnetToolList.Add(parsedDotNetTool);
                     }
                 }
 
-                _dotNetTools = dotnetToolList;
+                _dotNetTools = [.. dotnetToolList];
+            }
+
+            //parse through global tools
+            if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
+            {
+                var stdOutByLine = stdOut.Split(Environment.NewLine);
+                foreach (var line in stdOutByLine)
+                {
+                    var parsedDotNetTool = ParseToolInfo(line);
+                    if (parsedDotNetTool is not null &&
+                        IsValidDotNetTool(parsedDotNetTool) &&
+                        !_dotNetTools.Any(x => x.Command.Equals(parsedDotNetTool.Command, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        parsedDotNetTool.IsGlobalTool = true;
+                        _dotNetTools.Add(parsedDotNetTool);
+                    }
+                }
             }
         }
 
@@ -190,5 +225,12 @@ internal class DotNetToolService : IDotNetToolService
         }
 
         return null;
+    }
+
+    private static bool IsValidDotNetTool(DotNetToolInfo dotnetToolInfo)
+    {
+        return
+            !dotnetToolInfo.Command.Equals("dotnet-scaffold", StringComparison.OrdinalIgnoreCase) &&
+            !dotnetToolInfo.PackageName.Equals("package", StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             if (dotnetToolComponent != null)
             {
-                var allCommands = _dotnetToolService.GetCommands(dotnetToolComponent.Command);
+                var allCommands = _dotnetToolService.GetCommands(dotnetToolComponent);
                 commandInfo = allCommands.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
             }
             else

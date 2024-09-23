@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/dotnet/scaffolding#readme",
   "dependencies": {
-    "bootstrap": "^4.6.2",
+    "bootstrap": "^5.0.0",
     "jquery": "^3.7.1",
     "jquery-validation": "^1.21.0",
     "jquery-validation-unobtrusive": "^4.0.0"

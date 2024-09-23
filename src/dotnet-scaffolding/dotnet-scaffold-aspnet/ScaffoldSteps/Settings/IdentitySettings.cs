@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
-internal class BlazorIdentitySettings : BaseSettings
+internal class IdentitySettings : BaseSettings
 {
     public required string DatabaseProvider { get; set; }
     public required string DataContext { get; set; }

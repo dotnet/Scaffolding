@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 internal static class BlazorIdentityHelper
 {
-    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, BlazorIdentityModel blazorIdentityModel)
+    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, IdentityModel blazorIdentityModel)
     {
         var textTemplatingProperties = new List<TextTemplatingProperty>();
         foreach (var templatePath in allT4TemplatePaths)
@@ -56,7 +56,7 @@ internal static class BlazorIdentityHelper
         return string.Empty;
     }
 
-    internal static TextTemplatingProperty? GetApplicationUserTextTemplatingProperty(string? applicationUserTemplate, BlazorIdentityModel blazorIdentityModel)
+    internal static TextTemplatingProperty? GetApplicationUserTextTemplatingProperty(string? applicationUserTemplate, IdentityModel blazorIdentityModel)
     {
         var projectDirectory = Path.GetDirectoryName(blazorIdentityModel.ProjectInfo.ProjectPath);
         if (string.IsNullOrEmpty(applicationUserTemplate) || string.IsNullOrEmpty(projectDirectory))

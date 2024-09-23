@@ -4,7 +4,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 
-internal class BlazorIdentityModel
+internal class IdentityModel
 {
     public required DbContextInfo DbContextInfo { get; init; }
     public required ProjectInfo ProjectInfo { get; init; }

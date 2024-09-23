@@ -650,4 +650,8 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Templates\Identity\" />
+  </ItemGroup>
+
 </Project>

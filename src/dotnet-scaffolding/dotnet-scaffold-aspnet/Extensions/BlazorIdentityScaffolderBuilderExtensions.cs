@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using System.Diagnostics;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
@@ -22,12 +21,12 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             var step = config.Step;
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorIdentityChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
             //get needed properties and cast them as needed
-            config.Context.Properties.TryGetValue(nameof(BlazorIdentitySettings), out var blazorSettingsObj);
-            config.Context.Properties.TryGetValue(nameof(BlazorIdentityModel), out var blazorIdentityModelObj);
+            config.Context.Properties.TryGetValue(nameof(IdentitySettings), out var blazorSettingsObj);
+            config.Context.Properties.TryGetValue(nameof(IdentityModel), out var blazorIdentityModelObj);
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
-            var blazorIdentitySettings = blazorSettingsObj as BlazorIdentitySettings;
+            var blazorIdentitySettings = blazorSettingsObj as IdentitySettings;
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
-            var blazorIdentityModel = blazorIdentityModelObj as BlazorIdentityModel;
+            var blazorIdentityModel = blazorIdentityModelObj as IdentityModel;
 
             //initialize CodeModificationStep's properties
             if (!string.IsNullOrEmpty(codeModificationFilePath) &&
@@ -60,8 +59,8 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            context.Properties.TryGetValue(nameof(BlazorIdentityModel), out var blazorIdentityModelObj);
-            BlazorIdentityModel blazorIdentityModel = blazorIdentityModelObj as BlazorIdentityModel ??
+            context.Properties.TryGetValue(nameof(IdentityModel), out var blazorIdentityModelObj);
+            IdentityModel blazorIdentityModel = blazorIdentityModelObj as IdentityModel ??
                 throw new InvalidOperationException("missing 'BlazorIdentityModel' in 'ScaffolderContext.Properties'");
             var templateFolderUtilities = new TemplateFoldersUtilities();
             var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4Templates(["BlazorIdentity"]);
@@ -98,9 +97,12 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             var context = config.Context;
             List<string> packageList = [
                 PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackageName,
-                PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackageName ];
-            if (context.Properties.TryGetValue(nameof(BlazorIdentitySettings), out var commandSettingsObj) &&
-                commandSettingsObj is BlazorIdentitySettings commandSettings)
+                PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackageName,
+                PackageConstants.EfConstants.EfCoreToolsPackageName
+            ];
+
+            if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) &&
+                commandSettingsObj is IdentitySettings commandSettings)
             {
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;

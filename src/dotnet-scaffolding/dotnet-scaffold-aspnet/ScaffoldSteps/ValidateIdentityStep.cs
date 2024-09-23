@@ -14,7 +14,7 @@ using static Microsoft.DotNet.Scaffolding.Internal.Constants;
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 //TODO: pull all the duplicate logic from all these 'Validation' ScaffolderSteps into a common one.
-internal class ValidateBlazorIdentityStep : ScaffoldStep
+internal class ValidateIdentityStep : ScaffoldStep
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
@@ -23,9 +23,9 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
     public bool Prerelease { get; set; }
     public string? DatabaseProvider { get; set; }
     public string? DataContext { get; set; }
-    public ValidateBlazorIdentityStep(
+    public ValidateIdentityStep(
         IFileSystem fileSystem,
-        ILogger<ValidateBlazorIdentityStep> logger)
+        ILogger<ValidateIdentityStep> logger)
     {
         _fileSystem = fileSystem;
         _logger = logger;
@@ -33,7 +33,7 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        var blazorIdentitySettings = ValidateBlazorIdentitySettings();
+        var blazorIdentitySettings = ValidateIdentitySettings();
         var codeModifierProperties = new Dictionary<string, string>();
         if (blazorIdentitySettings is null)
         {
@@ -41,12 +41,12 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
         }
         else
         {
-            context.Properties.Add(nameof(BlazorIdentitySettings), blazorIdentitySettings);
+            context.Properties.Add(nameof(IdentitySettings), blazorIdentitySettings);
         }
 
         //initialize BlazorIdentityModel
         _logger.LogInformation("Initializing scaffolding model...");
-        var blazorIdentityModel = await GetBlazorIdentityModelAsync(blazorIdentitySettings);
+        var blazorIdentityModel = await GetIdentityModelAsync(blazorIdentitySettings);
         if (blazorIdentityModel is null)
         {
             _logger.LogError("An error occurred.");
@@ -54,7 +54,7 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
         }
         else
         {
-            context.Properties.Add(nameof(BlazorIdentityModel), blazorIdentityModel);
+            context.Properties.Add(nameof(IdentityModel), blazorIdentityModel);
             codeModifierProperties.Add(CodeModifierPropertyConstants.BlazorIdentityNamespace, blazorIdentityModel.BlazorIdentityNamespace);
             codeModifierProperties.Add(CodeModifierPropertyConstants.UserClassNamespace, blazorIdentityModel.UserClassNamespace);
         }
@@ -73,7 +73,7 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
             var projectBasePath = Path.GetDirectoryName(blazorIdentitySettings.Project);
             if (!string.IsNullOrEmpty(projectBasePath))
             {
-                context.Properties.Add(Scaffolding.Internal.Constants.StepConstants.BaseProjectPath, projectBasePath);
+                context.Properties.Add(StepConstants.BaseProjectPath, projectBasePath);
             }
 
             var dbCodeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(blazorIdentityModel.DbContextInfo);
@@ -83,11 +83,11 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
             }
         }
 
-        context.Properties.Add(Scaffolding.Internal.Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
+        context.Properties.Add(StepConstants.CodeModifierProperties, codeModifierProperties);
         return true;
     }
 
-    private BlazorIdentitySettings? ValidateBlazorIdentitySettings()
+    private IdentitySettings? ValidateIdentitySettings()
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
@@ -105,7 +105,7 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
             DatabaseProvider = PackageConstants.EfConstants.SqlServer;
         }
 
-        return new BlazorIdentitySettings
+        return new IdentitySettings
         {
             Project = Project,
             DataContext = DataContext,
@@ -115,7 +115,7 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
         };
     }
 
-    private async Task<BlazorIdentityModel?> GetBlazorIdentityModelAsync(BlazorIdentitySettings settings)
+    private async Task<IdentityModel?> GetIdentityModelAsync(IdentitySettings settings)
     {
         var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
@@ -145,7 +145,7 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
             userClassNamespace = $"{projectName}.Data";
         }
 
-        BlazorIdentityModel scaffoldingModel = new()
+        IdentityModel scaffoldingModel = new()
         {
             ProjectInfo = projectInfo,
             DbContextInfo = dbContextInfo,

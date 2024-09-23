@@ -11,6 +11,7 @@ internal class PackageConstants
         public const string CosmosDb = "cosmos-efcore";
         public const string Postgres = "npgsql-efcore";
         public const string EfCorePackageName = "Microsoft.EntityFrameworkCore";
+        public const string EfCoreToolsPackageName = "Microsoft.EntityFrameworkCore.Tools";
         public const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
         public const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
         public const string CosmosPakcageName = "Microsoft.EntityFrameworkCore.Cosmos";
@@ -45,5 +46,6 @@ internal class PackageConstants
         public const string AspNetCoreDiagnosticsEfCorePackageName = "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore";
         public const string OpenApiPackageName = "Microsoft.AspNetCore.OpenApi";
         public const string AspNetCoreIdentityEfPackageName = "Microsoft.AspNetCore.Identity.EntityFrameworkCore";
+        public const string AspNetCoreIdentityUiPackageName = "Microsoft.AspNetCore.Identity.UI";
     }
 }

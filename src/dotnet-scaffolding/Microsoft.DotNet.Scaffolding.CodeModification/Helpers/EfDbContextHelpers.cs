@@ -14,20 +14,27 @@ public static class EfDbContextHelpers
         if (modelSymbol is INamedTypeSymbol namedTypeSymbol)
         {
             var allModelProperties = namedTypeSymbol.GetMembers().OfType<IPropertySymbol>();
-            var primaryKey = namedTypeSymbol?.GetMembers().OfType<IPropertySymbol>().FirstOrDefault(IsPrimaryKey);
-            if (primaryKey != null)
+            var primaryKeys = namedTypeSymbol?.GetMembers().OfType<IPropertySymbol>().Where(IsPrimaryKey);
+            if (primaryKeys is not null && primaryKeys.Any())
             {
-                EfModelProperties efModelProperties = new()
+                List<string> primaryKeyNames = new();
+                Dictionary<string, string> primaryKeyShortTypeNames = new();
+                Dictionary<string, string> primaryKeyTypeNames = new();
+                foreach (var primaryKey in primaryKeys)
                 {
-                    PrimaryKeyName = primaryKey.Name,
-                    //using the same type name for both short and long type name.
-                    //unwanted values for base types ('Int32' instead of 'int')
-                    PrimaryKeyShortTypeName = primaryKey.Type.ToDisplayString(),
-                    PrimaryKeyTypeName = primaryKey.Type.ToDisplayString(),
-                    AllModelProperties = allModelProperties.ToList()
-                };
+                    //primaryKey.
+                }
+                //EfModelProperties efModelProperties = new()
+                //{
+                //    PrimaryKeyName = primaryKey.Name,
+                //    //using the same type name for both short and long type name.
+                //    //unwanted values for base types ('Int32' instead of 'int')
+                //    PrimaryKeyShortTypeName = primaryKey.Type.ToDisplayString(),
+                //    PrimaryKeyTypeName = primaryKey.Type.ToDisplayString(),
+                //    AllModelProperties = allModelProperties.ToList()
+                //};
 
-                return efModelProperties;
+                return null;
             }
         }
 

@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Scaffolding.CodeModification;
 public class EfModelProperties
 {
     public required List<IPropertySymbol> AllModelProperties { get; init; }
-    public required string PrimaryKeyName { get; init; }
-    public required string PrimaryKeyShortTypeName { get; init; }
-    public required string PrimaryKeyTypeName { get; init; }
+    public required List<string> PrimaryKeyName { get; init; }
+    public required Dictionary<string, string> PrimaryKeyShortTypeName { get; init; }
+    public required Dictionary<string, string> PrimaryKeyTypeName { get; init; }
 }

@@ -1,0 +1,25 @@
+{
+  "name": "identity-bootstrap5-scaffolding-dependencies",
+  "version": "0.1.0",
+  "description": "Identity Bootstrap 5 scaffolding dependencies",
+  "main": "index.js",
+  "scripts": {
+    "copy-dependency": "node ../../../js/copyDependency.mjs",
+    "copy-dependencies": "npm run copy-bootstrap && npm run copy-jquery && npm run copy-jquery-validation && npm run copy-jquery-validation-unobtrusive",
+    "copy-bootstrap": "npm run copy-dependency -- ./node_modules/bootstrap/dist/ ./wwwroot/lib/bootstrap/dist",
+    "copy-jquery": "npm run copy-dependency -- ./node_modules/jquery/dist/ ./wwwroot/lib/jquery/dist",
+    "copy-jquery-validation": "npm run copy-dependency -- ./node_modules/jquery-validation/dist/ ./wwwroot/lib/jquery-validation/dist",
+    "copy-jquery-validation-unobtrusive": "npm run copy-dependency -- ./node_modules/jquery-validation-unobtrusive/dist/ ./wwwroot/lib/jquery-validation-unobtrusive/dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotnet/scaffolding.git"
+  },
+  "homepage": "https://github.com/dotnet/scaffolding#readme",
+  "dependencies": {
+    "bootstrap": "^5.3.3",
+    "jquery": "^3.7.1",
+    "jquery-validation": "^1.21.0",
+    "jquery-validation-unobtrusive": "^4.0.0"
+  }
+}

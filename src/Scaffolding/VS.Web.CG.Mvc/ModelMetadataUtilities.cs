@@ -39,7 +39,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
            IEntityFrameworkService entityFrameworkService,
            IModelTypesLocator modelTypesLocator,
            ILogger logger,
-           string areaName, 
+           string areaName,
            bool useDbFactory = false)
         {
             ModelType model = ValidationUtil.ValidateType(modelClass, "model", modelTypesLocator);

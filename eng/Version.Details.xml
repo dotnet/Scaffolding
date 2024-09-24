@@ -21,7 +21,7 @@
     </Dependency>
     <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="8.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>b5f53494d6541a1ef9b7d0e13214d5e5e5cec594</Sha>
+      <Sha>eeb6f525300cd8312185decc2805a1651d312e23</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Physical" Version="8.0.0-rtm.23520.16">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -41,15 +41,15 @@
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Configuration.Json" Version="8.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>b5f53494d6541a1ef9b7d0e13214d5e5e5cec594</Sha>
+      <Sha>eeb6f525300cd8312185decc2805a1651d312e23</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>b5f53494d6541a1ef9b7d0e13214d5e5e5cec594</Sha>
+      <Sha>eeb6f525300cd8312185decc2805a1651d312e23</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.DependencyModel" Version="8.0.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>b5f53494d6541a1ef9b7d0e13214d5e5e5cec594</Sha>
+      <Sha>eeb6f525300cd8312185decc2805a1651d312e23</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.10">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
@@ -57,15 +57,15 @@
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Logging.Console" Version="8.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>b5f53494d6541a1ef9b7d0e13214d5e5e5cec594</Sha>
+      <Sha>eeb6f525300cd8312185decc2805a1651d312e23</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Logging.Debug" Version="8.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>b5f53494d6541a1ef9b7d0e13214d5e5e5cec594</Sha>
+      <Sha>eeb6f525300cd8312185decc2805a1651d312e23</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Logging" Version="8.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>b5f53494d6541a1ef9b7d0e13214d5e5e5cec594</Sha>
+      <Sha>eeb6f525300cd8312185decc2805a1651d312e23</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0-rtm.23520.16">
       <Uri>https://github.com/dotnet/runtime</Uri>

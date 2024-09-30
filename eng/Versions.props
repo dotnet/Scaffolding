@@ -130,4 +130,8 @@
     <SystemCommandLineVersion>2.0.0-beta4.22613.1</SystemCommandLineVersion>
     <SystemSecurityCryptographyProtectedDataVersion>8.0.0</SystemSecurityCryptographyProtectedDataVersion>
   </PropertyGroup>
+  <!-- Package versions for transitive pinning for Component Governance alerts -->
+  <PropertyGroup>
+    <SystemFormatsAsn1Version>8.0.1</SystemFormatsAsn1Version>
+  </PropertyGroup>
 </Project>

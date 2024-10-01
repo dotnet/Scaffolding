@@ -29,7 +29,7 @@
     <MicrosoftAspNetCoreIdentityUIPackageVersion>6.0.34</MicrosoftAspNetCoreIdentityUIPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>6.0.17</VersionPrefix>
+    <VersionPrefix>6.0.18</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
     <!--
@@ -61,6 +61,8 @@
     <NewtonsoftJsonPackageVersion>13.0.3</NewtonsoftJsonPackageVersion>
     <NuGetPackagingVersion>6.9.1</NuGetPackagingVersion>
     <HumanizerPackageVersion>2.14.1</HumanizerPackageVersion>
+    <!-- System.Formats.Asn1-->
+    <SystemFormatsAsn1Version>6.0.1</SystemFormatsAsn1Version>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- Everything below here are Packages only used by test projects -->
     <!-- Microsoft.AspNetCore.Server.Kestrel -->

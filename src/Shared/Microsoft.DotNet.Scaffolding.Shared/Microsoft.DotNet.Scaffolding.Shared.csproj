@@ -23,6 +23,7 @@
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="Mono.TextTemplating" Version="$(MonoTextTemplatingVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
+    <PackageReference Include="System.Formats.Asn1" Version="$(SystemFormatsAsn1Version)" />
   </ItemGroup>
 
   <ItemGroup>

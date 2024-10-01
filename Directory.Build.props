@@ -26,7 +26,4 @@
     <None Include="$(RepoRoot)NOTICE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Formats.Asn1" Version="$(SystemFormatsAsn1Version)" />
-  </ItemGroup>
 </Project>

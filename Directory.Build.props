@@ -25,5 +25,4 @@
   <ItemGroup>
     <None Include="$(RepoRoot)NOTICE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
-
 </Project>

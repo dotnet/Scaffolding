@@ -37,7 +37,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "ices;\r\nusing ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\nnamespace ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorIdentityNamespace));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
             this.Write("\r\n{\r\n    // Remove the \"else if (EmailSender is IdentityNoOpEmailSender)\" block f" +
                     "rom RegisterConfirmation.razor after updating with a real implementation.\r\n    i" +
                     "nternal sealed class IdentityNoOpEmailSender : IEmailSender<");

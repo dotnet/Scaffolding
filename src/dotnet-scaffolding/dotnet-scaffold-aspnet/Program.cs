@@ -257,6 +257,7 @@ public static class Program
                 step.DatabaseProvider = context.GetOptionResult(identityDbProviderRequiredOption);
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.Overwrite = context.GetOptionResult(overwriteOption);
+                step.BlazorScenario = true;
             })
             .WithBlazorIdentityAddPackagesStep()
             .WithIdentityDbContextStep()
@@ -281,9 +282,9 @@ public static class Program
             })
             .WithIdentityAddPackagesStep()
             .WithIdentityDbContextStep()
-            .WithConnectionStringStep();
-            //.WithIdentityTextTemplatingStep()
-            //.WithIdentityCodeChangeStep();
+            .WithConnectionStringStep()
+            .WithIdentityTextTemplatingStep()
+            .WithIdentityCodeChangeStep();
 
         var runner = builder.Build();
         runner.RunAsync(args).Wait();

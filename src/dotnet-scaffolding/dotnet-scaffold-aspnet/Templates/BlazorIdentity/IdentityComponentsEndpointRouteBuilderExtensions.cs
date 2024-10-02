@@ -30,8 +30,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity
     var sortedUsings = new SortedSet<string>()
     {
         Model.UserClassNamespace,
-        $"{Model.BlazorIdentityNamespace}.Pages",
-        $"{Model.BlazorIdentityNamespace}.Pages.Manage",
+        $"{Model.IdentityNamespace}.Pages",
+        $"{Model.IdentityNamespace}.Pages.Manage",
         "Microsoft.AspNetCore.Authentication",
         "Microsoft.AspNetCore.Components.Authorization",
         "Microsoft.AspNetCore.Http.Extensions",

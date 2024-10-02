@@ -8,4 +8,5 @@ internal class IdentitySettings : BaseSettings
     public required string DataContext { get; set; }
     public bool Prerelease { get; set; }
     public bool Overwrite { get; set; }
+    public bool BlazorScenario { get; set; }
 }

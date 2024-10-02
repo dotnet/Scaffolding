@@ -29,11 +29,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Shared
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write("\r\n@inherits LayoutComponentBase\r\n");
 
-if (!string.IsNullOrEmpty(Model.BlazorLayoutNamespace))
+if (!string.IsNullOrEmpty(Model.IdentityLayoutNamespace))
 {
 
             this.Write("@layout ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorLayoutNamespace));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityLayoutNamespace));
             this.Write("\r\n");
 } 
             this.Write(@"@inject NavigationManager NavigationManager

@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity
                     "sing ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorIdentityNamespace));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
             this.Write("\r\n{\r\n    internal sealed class IdentityRedirectManager(NavigationManager navigati" +
                     "onManager)\r\n    {\r\n        public const string StatusCookieName = \"Identity.Stat" +
                     "usMessage\";\r\n\r\n        private static readonly CookieBuilder StatusCookieBuilder" +

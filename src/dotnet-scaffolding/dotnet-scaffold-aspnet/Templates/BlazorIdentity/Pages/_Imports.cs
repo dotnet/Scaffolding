@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Pages
         public virtual string TransformText()
         {
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorIdentityNamespace));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
             this.Write(".Shared\r\n@using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write("\r\n@layout AccountLayout\r\n");

@@ -33,7 +33,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             this.Write("using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\nusing Microsoft.AspNetCore.Identity;\r\n\r\nnamespace ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorIdentityNamespace));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
             this.Write("\r\n{\r\n    internal sealed class IdentityUserAccessor(UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> userManager, IdentityRedirectManager redirectManager)\r\n    {\r\n        public as" +

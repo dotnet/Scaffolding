@@ -1,0 +1,9 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+@using <#= Model.UserClassNamespace #>
+@using <#= Model.IdentityNamespace #>.Pages
+@using <#= Model.IdentityNamespace #>.Pages.Account
+@using <#= Model.IdentityNamespace #>.Pages.Account.Manage

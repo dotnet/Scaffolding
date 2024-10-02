@@ -35,7 +35,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             this.Write(";\r\nusing Microsoft.AspNetCore.Components.Authorization;\r\nusing Microsoft.AspNetCo" +
                     "re.Components.Server;\r\nusing Microsoft.AspNetCore.Identity;\r\nusing Microsoft.Ext" +
                     "ensions.Options;\r\nusing System.Security.Claims;\r\n\r\nnamespace ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorIdentityNamespace));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
             this.Write(@"
 {
     // This is a server-side AuthenticationStateProvider that revalidates the security stamp for the connected user

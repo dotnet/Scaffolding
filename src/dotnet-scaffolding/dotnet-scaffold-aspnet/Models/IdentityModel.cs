@@ -8,8 +8,8 @@ internal class IdentityModel
 {
     public required DbContextInfo DbContextInfo { get; init; }
     public required ProjectInfo ProjectInfo { get; init; }
-    public required string BlazorIdentityNamespace { get; init; }
-    public string? BlazorLayoutNamespace { get; set; }
+    public required string IdentityNamespace { get; init; }
+    public string? IdentityLayoutNamespace { get; set; }
     public required string UserClassName { get; internal set; }
     public required string UserClassNamespace { get; internal set; }
     public string? DbContextNamespace { get; set; }

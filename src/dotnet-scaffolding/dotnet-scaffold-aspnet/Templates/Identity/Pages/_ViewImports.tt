@@ -1,0 +1,10 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+@using Microsoft.AspNetCore.Identity
+@using <#= Model.UserClassNamespace #>
+@using <#= Model.IdentityNamespace #>
+@using <#= Model.IdentityNamespace #>.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

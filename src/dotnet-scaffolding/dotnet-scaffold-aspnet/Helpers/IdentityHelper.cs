@@ -10,6 +10,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 internal static class IdentityHelper
 {
+    /// <summary>
+    /// use the template paths and IdentityModel to create valid 'TextTemplateProperty' objects.
+    /// </summary>
     internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allFilePaths, IdentityModel identityModel)
     {
         var textTemplatingProperties = new List<TextTemplatingProperty>();
@@ -25,7 +28,7 @@ internal static class IdentityHelper
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {
                 string extension = string.Empty;
-                //the 'ManageNavPagesModel.tt' only should have .cs extension.
+                //the 'ManageNavPagesModel.tt' only should have .cs extension (only exception)
                 if (templateFullName.Contains("ManageNavPagesModel", StringComparison.OrdinalIgnoreCase))
                 {
                     extension = ".cs";

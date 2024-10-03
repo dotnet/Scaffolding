@@ -266,8 +266,8 @@ public static class Program
             .WithBlazorIdentityCodeChangeStep();
 
         builder.AddScaffolder("identity")
-            .WithDisplayName("Identity")
-            .WithCategory("MVC")
+            .WithDisplayName("ASP.NET Core Identity")
+            .WithCategory("Identity")
             .WithDescription("Add ASP.NET Core identity to a project.")
             .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, prereleaseOption])
             .WithStep<ValidateIdentityStep>(config =>

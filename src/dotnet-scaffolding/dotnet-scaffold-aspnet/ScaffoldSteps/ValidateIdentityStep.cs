@@ -56,15 +56,7 @@ internal class ValidateIdentityStep : ScaffoldStep
         else
         {
             context.Properties.Add(nameof(IdentityModel), identityModel);
-            if (identitySettings.BlazorScenario)
-            {
-                codeModifierProperties.Add(CodeModifierPropertyConstants.BlazorIdentityNamespace, identityModel.IdentityNamespace);
-            }
-            else
-            {
-                codeModifierProperties.Add(CodeModifierPropertyConstants.IdentityNamespace, identityModel.IdentityNamespace);
-            }
-            
+            codeModifierProperties.Add(CodeModifierPropertyConstants.IdentityNamespace, identityModel.IdentityNamespace);
             codeModifierProperties.Add(CodeModifierPropertyConstants.UserClassNamespace, identityModel.UserClassNamespace);
         }
 

@@ -82,7 +82,7 @@
       "Usings": [
         "Microsoft.AspNetCore.Identity",
         "Microsoft.AspNetCore.Components.Authorization",
-        "$(BlazorIdentityNamespace)"
+        "$(IdentityNamespace)"
       ]
     },
     {
@@ -132,10 +132,10 @@
         {
           "ReplaceSnippet": [ "<Router AppAssembly=\"typeof(Program).Assembly\">" ],
           "MultiLineBlock": [
-            "@using $(BlazorIdentityNamespace).Shared",
+            "@using $(IdentityNamespace).Shared",
             "<Router AppAssembly= \"typeof(Program).Assembly\">"
           ],
-          "CheckBlock": "$(BlazorIdentityNamespace).Shared"
+          "CheckBlock": "$(IdentityNamespace).Shared"
         }
       ]
     },

@@ -33,9 +33,9 @@ internal static class IdentityScaffolderBuilderExtensions
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
-                    PackageConstants.EfConstants.IdentityEfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
+                    PackageConstants.EfConstants.IdentityEfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? dbProviderPackageName))
                 {
-                    packageList.Add(projectPackageName);
+                    packageList.Add(dbProviderPackageName);
                 }
 
                 step.PackageNames = packageList;
@@ -58,7 +58,9 @@ internal static class IdentityScaffolderBuilderExtensions
             IdentityModel identityModel = blazorIdentityModelObj as IdentityModel ??
                 throw new InvalidOperationException("missing 'IdentityModel' in 'ScaffolderContext.Properties'");
             var templateFolderUtilities = new TemplateFoldersUtilities();
+            //all the .cshtml and their model class (.cshtml.cs) templates
             var allIdentityPageFiles = templateFolderUtilities.GetAllT4Templates(["Identity"]);
+            //ApplicationUser.tt template
             var applicationUserFile = templateFolderUtilities.GetAllT4Templates(["Files"])
                 .FirstOrDefault(x => x.EndsWith("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
             var identityFileProperties = IdentityHelper.GetTextTemplatingProperties(allIdentityPageFiles, identityModel);

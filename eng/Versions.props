@@ -60,7 +60,7 @@
     <SystemCommandLineNamingConventionBinderPackageVersion>2.0.0-beta4.22613.1</SystemCommandLineNamingConventionBinderPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>9.0.1</VersionPrefix>
+    <VersionPrefix>9.0.0</VersionPrefix>
     <PreReleaseVersionLabel>rc</PreReleaseVersionLabel>
     <PreReleaseVersionIteration>1</PreReleaseVersionIteration>
     <IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>

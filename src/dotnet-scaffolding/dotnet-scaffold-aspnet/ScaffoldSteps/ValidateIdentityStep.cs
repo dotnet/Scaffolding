@@ -90,6 +90,8 @@ internal class ValidateIdentityStep : ScaffoldStep
             {
                 codeModifierProperties.TryAdd(kvp.Key, kvp.Value);
             }
+
+            codeModifierProperties.TryAdd(CodeModifierPropertyConstants.UserClassName, identityModel.UserClassName);
         }
 
         context.Properties.Add(StepConstants.CodeModifierProperties, codeModifierProperties);

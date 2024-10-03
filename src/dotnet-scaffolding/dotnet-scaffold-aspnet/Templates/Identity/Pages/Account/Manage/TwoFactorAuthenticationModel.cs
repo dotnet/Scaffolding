@@ -68,22 +68,22 @@ using ");
                     "bered { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP." +
                     "NET Core Identity default UI infrastructure and is not intended to be used\r\n    " +
                     "///     directly from your code. This API may change or be removed in future rel" +
-                    "eases.\r\n    /// </summary>\r\n    [TempData]\r\n    public string StatusMessage { ge" +
-                    "t; set; }\r\n\r\n    public async Task<IActionResult> OnGetAsync()\r\n    {\r\n        v" +
-                    "ar user = await _userManager.GetUserAsync(User);\r\n        if (user == null)\r\n   " +
-                    "     {\r\n            return NotFound($\"Unable to load user with ID \'{_userManager" +
-                    ".GetUserId(User)}\'.\");\r\n        }\r\n\r\n        HasAuthenticator = await _userManag" +
-                    "er.GetAuthenticatorKeyAsync(user) != null;\r\n        Is2faEnabled = await _userMa" +
-                    "nager.GetTwoFactorEnabledAsync(user);\r\n        IsMachineRemembered = await _sign" +
-                    "InManager.IsTwoFactorClientRememberedAsync(user);\r\n        RecoveryCodesLeft = a" +
-                    "wait _userManager.CountRecoveryCodesAsync(user);\r\n\r\n        return Page();\r\n    " +
-                    "}\r\n\r\n    public async Task<IActionResult> OnPostAsync()\r\n    {\r\n        var user" +
-                    " = await _userManager.GetUserAsync(User);\r\n        if (user == null)\r\n        {\r" +
-                    "\n            return NotFound($\"Unable to load user with ID \'{_userManager.GetUse" +
-                    "rId(User)}\'.\");\r\n        }\r\n\r\n        await _signInManager.ForgetTwoFactorClient" +
-                    "Async();\r\n        StatusMessage = \"The current browser has been forgotten. When " +
-                    "you login again from this browser you will be prompted for your 2fa code.\";\r\n   " +
-                    "     return RedirectToPage();\r\n    }\r\n}\r\n");
+                    "eases.\r\n    /// </summary>\r\n    [TempData]\r\n    public string? StatusMessage { g" +
+                    "et; set; }\r\n\r\n    public async Task<IActionResult> OnGetAsync()\r\n    {\r\n        " +
+                    "var user = await _userManager.GetUserAsync(User);\r\n        if (user == null)\r\n  " +
+                    "      {\r\n            return NotFound($\"Unable to load user with ID \'{_userManage" +
+                    "r.GetUserId(User)}\'.\");\r\n        }\r\n\r\n        HasAuthenticator = await _userMana" +
+                    "ger.GetAuthenticatorKeyAsync(user) != null;\r\n        Is2faEnabled = await _userM" +
+                    "anager.GetTwoFactorEnabledAsync(user);\r\n        IsMachineRemembered = await _sig" +
+                    "nInManager.IsTwoFactorClientRememberedAsync(user);\r\n        RecoveryCodesLeft = " +
+                    "await _userManager.CountRecoveryCodesAsync(user);\r\n\r\n        return Page();\r\n   " +
+                    " }\r\n\r\n    public async Task<IActionResult> OnPostAsync()\r\n    {\r\n        var use" +
+                    "r = await _userManager.GetUserAsync(User);\r\n        if (user == null)\r\n        {" +
+                    "\r\n            return NotFound($\"Unable to load user with ID \'{_userManager.GetUs" +
+                    "erId(User)}\'.\");\r\n        }\r\n\r\n        await _signInManager.ForgetTwoFactorClien" +
+                    "tAsync();\r\n        StatusMessage = \"The current browser has been forgotten. When" +
+                    " you login again from this browser you will be prompted for your 2fa code.\";\r\n  " +
+                    "      return RedirectToPage();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

@@ -56,60 +56,60 @@ using ");
                     "This API supports the ASP.NET Core Identity default UI infrastructure and is not" +
                     " intended to be used\r\n    ///     directly from your code. This API may change o" +
                     "r be removed in future releases.\r\n    /// </summary>\r\n    [BindProperty]\r\n    pu" +
-                    "blic InputModel Input { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API s" +
-                    "upports the ASP.NET Core Identity default UI infrastructure and is not intended " +
-                    "to be used\r\n    ///     directly from your code. This API may change or be remov" +
-                    "ed in future releases.\r\n    /// </summary>\r\n    public IList<AuthenticationSchem" +
-                    "e> ExternalLogins { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API suppo" +
-                    "rts the ASP.NET Core Identity default UI infrastructure and is not intended to b" +
-                    "e used\r\n    ///     directly from your code. This API may change or be removed i" +
-                    "n future releases.\r\n    /// </summary>\r\n    public string ReturnUrl { get; set; " +
-                    "}\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity " +
-                    "default UI infrastructure and is not intended to be used\r\n    ///     directly f" +
-                    "rom your code. This API may change or be removed in future releases.\r\n    /// </" +
-                    "summary>\r\n    [TempData]\r\n    public string ErrorMessage { get; set; }\r\n\r\n    //" +
-                    "/ <summary>\r\n    ///     This API supports the ASP.NET Core Identity default UI " +
-                    "infrastructure and is not intended to be used\r\n    ///     directly from your co" +
-                    "de. This API may change or be removed in future releases.\r\n    /// </summary>\r\n " +
-                    "   public class InputModel\r\n    {\r\n        /// <summary>\r\n        ///     This A" +
-                    "PI supports the ASP.NET Core Identity default UI infrastructure and is not inten" +
-                    "ded to be used\r\n        ///     directly from your code. This API may change or " +
-                    "be removed in future releases.\r\n        /// </summary>\r\n        [Required]\r\n    " +
-                    "    [EmailAddress]\r\n        public string Email { get; set; }\r\n\r\n        /// <su" +
-                    "mmary>\r\n        ///     This API supports the ASP.NET Core Identity default UI i" +
-                    "nfrastructure and is not intended to be used\r\n        ///     directly from your" +
-                    " code. This API may change or be removed in future releases.\r\n        /// </summ" +
-                    "ary>\r\n        [Required]\r\n        [DataType(DataType.Password)]\r\n        public " +
-                    "string Password { get; set; }\r\n\r\n        /// <summary>\r\n        ///     This API" +
-                    " supports the ASP.NET Core Identity default UI infrastructure and is not intende" +
-                    "d to be used\r\n        ///     directly from your code. This API may change or be" +
-                    " removed in future releases.\r\n        /// </summary>\r\n        [Display(Name = \"R" +
-                    "emember me?\")]\r\n        public bool RememberMe { get; set; }\r\n    }\r\n\r\n    publi" +
-                    "c async Task OnGetAsync(string returnUrl = null)\r\n    {\r\n        if (!string.IsN" +
-                    "ullOrEmpty(ErrorMessage))\r\n        {\r\n            ModelState.AddModelError(strin" +
-                    "g.Empty, ErrorMessage);\r\n        }\r\n\r\n        returnUrl ??= Url.Content(\"~/\");\r\n" +
-                    "\r\n        // Clear the existing external cookie to ensure a clean login process\r" +
-                    "\n        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);\r\n\r\n  " +
-                    "      ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsy" +
-                    "nc()).ToList();\r\n\r\n        ReturnUrl = returnUrl;\r\n    }\r\n\r\n    public async Tas" +
-                    "k<IActionResult> OnPostAsync(string returnUrl = null)\r\n    {\r\n        returnUrl " +
-                    "??= Url.Content(\"~/\");\r\n\r\n        ExternalLogins = (await _signInManager.GetExte" +
-                    "rnalAuthenticationSchemesAsync()).ToList();\r\n\r\n        if (ModelState.IsValid)\r\n" +
-                    "        {\r\n            // This doesn\'t count login failures towards account lock" +
-                    "out\r\n            // To enable password failures to trigger account lockout, set " +
-                    "lockoutOnFailure: true\r\n            var result = await _signInManager.PasswordSi" +
-                    "gnInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false" +
-                    ");\r\n            if (result.Succeeded)\r\n            {\r\n                _logger.Lo" +
-                    "gInformation(\"User logged in.\");\r\n                return LocalRedirect(returnUrl" +
-                    ");\r\n            }\r\n            if (result.RequiresTwoFactor)\r\n            {\r\n   " +
-                    "             return RedirectToPage(\"./LoginWith2fa\", new { ReturnUrl = returnUrl" +
-                    ", RememberMe = Input.RememberMe });\r\n            }\r\n            if (result.IsLoc" +
-                    "kedOut)\r\n            {\r\n                _logger.LogWarning(\"User account locked " +
-                    "out.\");\r\n                return RedirectToPage(\"./Lockout\");\r\n            }\r\n   " +
-                    "         else\r\n            {\r\n                ModelState.AddModelError(string.Em" +
-                    "pty, \"Invalid login attempt.\");\r\n                return Page();\r\n            }\r\n" +
-                    "        }\r\n\r\n        // If we got this far, something failed, redisplay form\r\n  " +
-                    "      return Page();\r\n    }\r\n}\r\n");
+                    "blic InputModel Input { get; set; } = default!;\r\n\r\n    /// <summary>\r\n    ///   " +
+                    "  This API supports the ASP.NET Core Identity default UI infrastructure and is n" +
+                    "ot intended to be used\r\n    ///     directly from your code. This API may change" +
+                    " or be removed in future releases.\r\n    /// </summary>\r\n    public IList<Authent" +
+                    "icationScheme>? ExternalLogins { get; set; }\r\n\r\n    /// <summary>\r\n    ///     T" +
+                    "his API supports the ASP.NET Core Identity default UI infrastructure and is not " +
+                    "intended to be used\r\n    ///     directly from your code. This API may change or" +
+                    " be removed in future releases.\r\n    /// </summary>\r\n    public string? ReturnUr" +
+                    "l { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET " +
+                    "Core Identity default UI infrastructure and is not intended to be used\r\n    /// " +
+                    "    directly from your code. This API may change or be removed in future release" +
+                    "s.\r\n    /// </summary>\r\n    [TempData]\r\n    public string? ErrorMessage { get; s" +
+                    "et; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Ident" +
+                    "ity default UI infrastructure and is not intended to be used\r\n    ///     direct" +
+                    "ly from your code. This API may change or be removed in future releases.\r\n    //" +
+                    "/ </summary>\r\n    public class InputModel\r\n    {\r\n        /// <summary>\r\n       " +
+                    " ///     This API supports the ASP.NET Core Identity default UI infrastructure a" +
+                    "nd is not intended to be used\r\n        ///     directly from your code. This API" +
+                    " may change or be removed in future releases.\r\n        /// </summary>\r\n        [" +
+                    "Required]\r\n        [EmailAddress]\r\n        public string Email { get; set; } = d" +
+                    "efault!;\r\n\r\n        /// <summary>\r\n        ///     This API supports the ASP.NET" +
+                    " Core Identity default UI infrastructure and is not intended to be used\r\n       " +
+                    " ///     directly from your code. This API may change or be removed in future re" +
+                    "leases.\r\n        /// </summary>\r\n        [Required]\r\n        [DataType(DataType." +
+                    "Password)]\r\n        public string Password { get; set; } = default!;\r\n\r\n        " +
+                    "/// <summary>\r\n        ///     This API supports the ASP.NET Core Identity defau" +
+                    "lt UI infrastructure and is not intended to be used\r\n        ///     directly fr" +
+                    "om your code. This API may change or be removed in future releases.\r\n        ///" +
+                    " </summary>\r\n        [Display(Name = \"Remember me?\")]\r\n        public bool Remem" +
+                    "berMe { get; set; }\r\n    }\r\n\r\n    public async Task OnGetAsync(string? returnUrl" +
+                    " = null)\r\n    {\r\n        if (!string.IsNullOrEmpty(ErrorMessage))\r\n        {\r\n  " +
+                    "          ModelState.AddModelError(string.Empty, ErrorMessage);\r\n        }\r\n\r\n  " +
+                    "      returnUrl ??= Url.Content(\"~/\");\r\n\r\n        // Clear the existing external" +
+                    " cookie to ensure a clean login process\r\n        await HttpContext.SignOutAsync(" +
+                    "IdentityConstants.ExternalScheme);\r\n\r\n        ExternalLogins = (await _signInMan" +
+                    "ager.GetExternalAuthenticationSchemesAsync()).ToList();\r\n\r\n        ReturnUrl = r" +
+                    "eturnUrl;\r\n    }\r\n\r\n    public async Task<IActionResult> OnPostAsync(string? ret" +
+                    "urnUrl = null)\r\n    {\r\n        returnUrl ??= Url.Content(\"~/\");\r\n\r\n        Exter" +
+                    "nalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToLis" +
+                    "t();\r\n\r\n        if (ModelState.IsValid)\r\n        {\r\n            // This doesn\'t " +
+                    "count login failures towards account lockout\r\n            // To enable password " +
+                    "failures to trigger account lockout, set lockoutOnFailure: true\r\n            var" +
+                    " result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, " +
+                    "Input.RememberMe, lockoutOnFailure: false);\r\n            if (result.Succeeded)\r\n" +
+                    "            {\r\n                _logger.LogInformation(\"User logged in.\");\r\n     " +
+                    "           return LocalRedirect(returnUrl);\r\n            }\r\n            if (resu" +
+                    "lt.RequiresTwoFactor)\r\n            {\r\n                return RedirectToPage(\"./L" +
+                    "oginWith2fa\", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });\r\n  " +
+                    "          }\r\n            if (result.IsLockedOut)\r\n            {\r\n               " +
+                    " _logger.LogWarning(\"User account locked out.\");\r\n                return Redirec" +
+                    "tToPage(\"./Lockout\");\r\n            }\r\n            else\r\n            {\r\n         " +
+                    "       ModelState.AddModelError(string.Empty, \"Invalid login attempt.\");\r\n      " +
+                    "          return Page();\r\n            }\r\n        }\r\n\r\n        // If we got this " +
+                    "far, something failed, redisplay form\r\n        return Page();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

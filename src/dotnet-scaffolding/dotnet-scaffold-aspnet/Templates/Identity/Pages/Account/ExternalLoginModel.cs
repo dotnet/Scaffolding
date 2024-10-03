@@ -71,89 +71,90 @@ using ");
                     "\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity d" +
                     "efault UI infrastructure and is not intended to be used\r\n    ///     directly fr" +
                     "om your code. This API may change or be removed in future releases.\r\n    /// </s" +
-                    "ummary>\r\n    [BindProperty]\r\n    public InputModel Input { get; set; }\r\n\r\n    //" +
-                    "/ <summary>\r\n    ///     This API supports the ASP.NET Core Identity default UI " +
-                    "infrastructure and is not intended to be used\r\n    ///     directly from your co" +
-                    "de. This API may change or be removed in future releases.\r\n    /// </summary>\r\n " +
-                    "   public string ProviderDisplayName { get; set; }\r\n\r\n    /// <summary>\r\n    ///" +
-                    "     This API supports the ASP.NET Core Identity default UI infrastructure and i" +
-                    "s not intended to be used\r\n    ///     directly from your code. This API may cha" +
-                    "nge or be removed in future releases.\r\n    /// </summary>\r\n    public string Ret" +
-                    "urnUrl { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP" +
-                    ".NET Core Identity default UI infrastructure and is not intended to be used\r\n   " +
-                    " ///     directly from your code. This API may change or be removed in future re" +
-                    "leases.\r\n    /// </summary>\r\n    [TempData]\r\n    public string ErrorMessage { ge" +
-                    "t; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core I" +
-                    "dentity default UI infrastructure and is not intended to be used\r\n    ///     di" +
-                    "rectly from your code. This API may change or be removed in future releases.\r\n  " +
-                    "  /// </summary>\r\n    public class InputModel\r\n    {\r\n        /// <summary>\r\n   " +
-                    "     ///     This API supports the ASP.NET Core Identity default UI infrastructu" +
-                    "re and is not intended to be used\r\n        ///     directly from your code. This" +
-                    " API may change or be removed in future releases.\r\n        /// </summary>\r\n     " +
-                    "   [Required]\r\n        [EmailAddress]\r\n        public string Email { get; set; }" +
-                    "\r\n    }\r\n        \r\n    public IActionResult OnGet() => RedirectToPage(\"./Login\")" +
-                    ";\r\n\r\n    public IActionResult OnPost(string provider, string returnUrl = null)\r\n" +
-                    "    {\r\n        // Request a redirect to the external login provider.\r\n        va" +
-                    "r redirectUrl = Url.Page(\"./ExternalLogin\", pageHandler: \"Callback\", values: new" +
-                    " { returnUrl });\r\n        var properties = _signInManager.ConfigureExternalAuthe" +
-                    "nticationProperties(provider, redirectUrl);\r\n        return new ChallengeResult(" +
-                    "provider, properties);\r\n    }\r\n\r\n    public async Task<IActionResult> OnGetCallb" +
-                    "ackAsync(string returnUrl = null, string remoteError = null)\r\n    {\r\n        ret" +
-                    "urnUrl = returnUrl ?? Url.Content(\"~/\");\r\n        if (remoteError != null)\r\n    " +
-                    "    {\r\n            ErrorMessage = $\"Error from external provider: {remoteError}\"" +
-                    ";\r\n            return RedirectToPage(\"./Login\", new { ReturnUrl = returnUrl });\r" +
-                    "\n        }\r\n        var info = await _signInManager.GetExternalLoginInfoAsync();" +
-                    "\r\n        if (info == null)\r\n        {\r\n            ErrorMessage = \"Error loadin" +
-                    "g external login information.\";\r\n            return RedirectToPage(\"./Login\", ne" +
-                    "w { ReturnUrl = returnUrl });\r\n        }\r\n\r\n        // Sign in the user with thi" +
-                    "s external login provider if the user already has a login.\r\n        var result =" +
-                    " await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.Provider" +
-                    "Key, isPersistent: false, bypassTwoFactor: true);\r\n        if (result.Succeeded)" +
-                    "\r\n        {\r\n            _logger.LogInformation(\"{Name} logged in with {LoginPro" +
-                    "vider} provider.\", info.Principal.Identity.Name, info.LoginProvider);\r\n         " +
-                    "   return LocalRedirect(returnUrl);\r\n        }\r\n        if (result.IsLockedOut)\r" +
-                    "\n        {\r\n            return RedirectToPage(\"./Lockout\");\r\n        }\r\n        " +
-                    "else\r\n        {\r\n            // If the user does not have an account, then ask t" +
-                    "he user to create an account.\r\n            ReturnUrl = returnUrl;\r\n            P" +
-                    "roviderDisplayName = info.ProviderDisplayName;\r\n            if (info.Principal.H" +
-                    "asClaim(c => c.Type == ClaimTypes.Email))\r\n            {\r\n                Input " +
-                    "= new InputModel\r\n                {\r\n                    Email = info.Principal." +
-                    "FindFirstValue(ClaimTypes.Email)\r\n                };\r\n            }\r\n           " +
-                    " return Page();\r\n        }\r\n    }\r\n\r\n    public async Task<IActionResult> OnPost" +
-                    "ConfirmationAsync(string returnUrl = null)\r\n    {\r\n        returnUrl = returnUrl" +
-                    " ?? Url.Content(\"~/\");\r\n        // Get the information about the user from the e" +
-                    "xternal login provider\r\n        var info = await _signInManager.GetExternalLogin" +
-                    "InfoAsync();\r\n        if (info == null)\r\n        {\r\n            ErrorMessage = \"" +
-                    "Error loading external login information during confirmation.\";\r\n            ret" +
-                    "urn RedirectToPage(\"./Login\", new { ReturnUrl = returnUrl });\r\n        }\r\n\r\n    " +
-                    "    if (ModelState.IsValid)\r\n        {\r\n            var user = CreateUser();\r\n\r\n" +
-                    "            await _userStore.SetUserNameAsync(user, Input.Email, CancellationTok" +
-                    "en.None);\r\n            await _emailStore.SetEmailAsync(user, Input.Email, Cancel" +
-                    "lationToken.None);\r\n\r\n            var result = await _userManager.CreateAsync(us" +
-                    "er);\r\n            if (result.Succeeded)\r\n            {\r\n                result =" +
-                    " await _userManager.AddLoginAsync(user, info);\r\n                if (result.Succe" +
-                    "eded)\r\n                {\r\n                    _logger.LogInformation(\"User creat" +
-                    "ed an account using {Name} provider.\", info.LoginProvider);\r\n\r\n                 " +
-                    "   var userId = await _userManager.GetUserIdAsync(user);\r\n                    va" +
-                    "r code = await _userManager.GenerateEmailConfirmationTokenAsync(user);\r\n        " +
-                    "            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n " +
-                    "                   var callbackUrl = Url.Page(\r\n                        \"/Accoun" +
-                    "t/ConfirmEmail\",\r\n                        pageHandler: null,\r\n                  " +
-                    "      values: new { area = \"Identity\", userId = userId, code = code },\r\n        " +
-                    "                protocol: Request.Scheme);\r\n\r\n                    await _emailSe" +
-                    "nder.SendEmailAsync(Input.Email, \"Confirm your email\",\r\n                        " +
-                    "$\"Please confirm your account by <a href=\'{HtmlEncoder.Default.Encode(callbackUr" +
-                    "l)}\'>clicking here</a>.\");\r\n\r\n                    // If account confirmation is " +
-                    "required, we need to show the link if we don\'t have a real email sender\r\n       " +
-                    "             if (_userManager.Options.SignIn.RequireConfirmedAccount)\r\n         " +
-                    "           {\r\n                        return RedirectToPage(\"./RegisterConfirmat" +
-                    "ion\", new { Email = Input.Email });\r\n                    }\r\n\r\n                  " +
-                    "  await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider" +
-                    ");\r\n                    return LocalRedirect(returnUrl);\r\n                }\r\n   " +
-                    "         }\r\n            foreach (var error in result.Errors)\r\n            {\r\n   " +
-                    "             ModelState.AddModelError(string.Empty, error.Description);\r\n       " +
-                    "     }\r\n        }\r\n\r\n        ProviderDisplayName = info.ProviderDisplayName;\r\n  " +
-                    "      ReturnUrl = returnUrl;\r\n        return Page();\r\n    }\r\n\r\n    private ");
+                    "ummary>\r\n    [BindProperty]\r\n    public InputModel Input { get; set; } = default" +
+                    "!;\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity" +
+                    " default UI infrastructure and is not intended to be used\r\n    ///     directly " +
+                    "from your code. This API may change or be removed in future releases.\r\n    /// <" +
+                    "/summary>\r\n    public string? ProviderDisplayName { get; set; }\r\n\r\n    /// <summ" +
+                    "ary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infrast" +
+                    "ructure and is not intended to be used\r\n    ///     directly from your code. Thi" +
+                    "s API may change or be removed in future releases.\r\n    /// </summary>\r\n    publ" +
+                    "ic string? ReturnUrl { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API su" +
+                    "pports the ASP.NET Core Identity default UI infrastructure and is not intended t" +
+                    "o be used\r\n    ///     directly from your code. This API may change or be remove" +
+                    "d in future releases.\r\n    /// </summary>\r\n    [TempData]\r\n    public string? Er" +
+                    "rorMessage { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the" +
+                    " ASP.NET Core Identity default UI infrastructure and is not intended to be used\r" +
+                    "\n    ///     directly from your code. This API may change or be removed in futur" +
+                    "e releases.\r\n    /// </summary>\r\n    public class InputModel\r\n    {\r\n        ///" +
+                    " <summary>\r\n        ///     This API supports the ASP.NET Core Identity default " +
+                    "UI infrastructure and is not intended to be used\r\n        ///     directly from " +
+                    "your code. This API may change or be removed in future releases.\r\n        /// </" +
+                    "summary>\r\n        [Required]\r\n        [EmailAddress]\r\n        public string Emai" +
+                    "l { get; set; } = default!;\r\n    }\r\n        \r\n    public IActionResult OnGet() =" +
+                    "> RedirectToPage(\"./Login\");\r\n\r\n    public IActionResult OnPost(string provider," +
+                    " string? returnUrl = null)\r\n    {\r\n        // Request a redirect to the external" +
+                    " login provider.\r\n        var redirectUrl = Url.Page(\"./ExternalLogin\", pageHand" +
+                    "ler: \"Callback\", values: new { returnUrl });\r\n        var properties = _signInMa" +
+                    "nager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);\r\n       " +
+                    " return new ChallengeResult(provider, properties);\r\n    }\r\n\r\n    public async Ta" +
+                    "sk<IActionResult> OnGetCallbackAsync(string? returnUrl = null, string? remoteErr" +
+                    "or = null)\r\n    {\r\n        returnUrl = returnUrl ?? Url.Content(\"~/\");\r\n        " +
+                    "if (remoteError != null)\r\n        {\r\n            ErrorMessage = $\"Error from ext" +
+                    "ernal provider: {remoteError}\";\r\n            return RedirectToPage(\"./Login\", ne" +
+                    "w { ReturnUrl = returnUrl });\r\n        }\r\n        var info = await _signInManage" +
+                    "r.GetExternalLoginInfoAsync();\r\n        if (info == null)\r\n        {\r\n          " +
+                    "  ErrorMessage = \"Error loading external login information.\";\r\n            retur" +
+                    "n RedirectToPage(\"./Login\", new { ReturnUrl = returnUrl });\r\n        }\r\n\r\n      " +
+                    "  // Sign in the user with this external login provider if the user already has " +
+                    "a login.\r\n        var result = await _signInManager.ExternalLoginSignInAsync(inf" +
+                    "o.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);\r" +
+                    "\n        if (result.Succeeded)\r\n        {\r\n            _logger.LogInformation(\"{" +
+                    "Name} logged in with {LoginProvider} provider.\", info.Principal.Identity?.Name, " +
+                    "info.LoginProvider);\r\n            return LocalRedirect(returnUrl);\r\n        }\r\n " +
+                    "       if (result.IsLockedOut)\r\n        {\r\n            return RedirectToPage(\"./" +
+                    "Lockout\");\r\n        }\r\n        else\r\n        {\r\n            // If the user does " +
+                    "not have an account, then ask the user to create an account.\r\n            Return" +
+                    "Url = returnUrl;\r\n            ProviderDisplayName = info.ProviderDisplayName;\r\n " +
+                    "           if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))\r\n      " +
+                    "      {\r\n                Input = new InputModel\r\n                {\r\n            " +
+                    "        Email = info.Principal.FindFirstValue(ClaimTypes.Email)!\r\n              " +
+                    "  };\r\n            }\r\n            return Page();\r\n        }\r\n    }\r\n\r\n    public " +
+                    "async Task<IActionResult> OnPostConfirmationAsync(string? returnUrl = null)\r\n   " +
+                    " {\r\n        returnUrl = returnUrl ?? Url.Content(\"~/\");\r\n        // Get the info" +
+                    "rmation about the user from the external login provider\r\n        var info = awai" +
+                    "t _signInManager.GetExternalLoginInfoAsync();\r\n        if (info == null)\r\n      " +
+                    "  {\r\n            ErrorMessage = \"Error loading external login information during" +
+                    " confirmation.\";\r\n            return RedirectToPage(\"./Login\", new { ReturnUrl =" +
+                    " returnUrl });\r\n        }\r\n\r\n        if (ModelState.IsValid)\r\n        {\r\n       " +
+                    "     var user = CreateUser();\r\n\r\n            await _userStore.SetUserNameAsync(u" +
+                    "ser, Input.Email, CancellationToken.None);\r\n            await _emailStore.SetEma" +
+                    "ilAsync(user, Input.Email, CancellationToken.None);\r\n\r\n            var result = " +
+                    "await _userManager.CreateAsync(user);\r\n            if (result.Succeeded)\r\n      " +
+                    "      {\r\n                result = await _userManager.AddLoginAsync(user, info);\r" +
+                    "\n                if (result.Succeeded)\r\n                {\r\n                    _" +
+                    "logger.LogInformation(\"User created an account using {Name} provider.\", info.Log" +
+                    "inProvider);\r\n\r\n                    var userId = await _userManager.GetUserIdAsy" +
+                    "nc(user);\r\n                    var code = await _userManager.GenerateEmailConfir" +
+                    "mationTokenAsync(user);\r\n                    code = WebEncoders.Base64UrlEncode(" +
+                    "Encoding.UTF8.GetBytes(code));\r\n                    var callbackUrl = Url.Page(\r" +
+                    "\n                        \"/Account/ConfirmEmail\",\r\n                        pageH" +
+                    "andler: null,\r\n                        values: new { area = \"Identity\", userId =" +
+                    " userId, code = code },\r\n                        protocol: Request.Scheme)!;\r\n\r\n" +
+                    "                    await _emailSender.SendEmailAsync(Input.Email, \"Confirm your" +
+                    " email\",\r\n                        $\"Please confirm your account by <a href=\'{Htm" +
+                    "lEncoder.Default.Encode(callbackUrl)}\'>clicking here</a>.\");\r\n\r\n                " +
+                    "    // If account confirmation is required, we need to show the link if we don\'t" +
+                    " have a real email sender\r\n                    if (_userManager.Options.SignIn.R" +
+                    "equireConfirmedAccount)\r\n                    {\r\n                        return R" +
+                    "edirectToPage(\"./RegisterConfirmation\", new { Email = Input.Email });\r\n         " +
+                    "           }\r\n\r\n                    await _signInManager.SignInAsync(user, isPer" +
+                    "sistent: false, info.LoginProvider);\r\n                    return LocalRedirect(r" +
+                    "eturnUrl);\r\n                }\r\n            }\r\n            foreach (var error in " +
+                    "result.Errors)\r\n            {\r\n                ModelState.AddModelError(string.E" +
+                    "mpty, error.Description);\r\n            }\r\n        }\r\n\r\n        ProviderDisplayNa" +
+                    "me = info.ProviderDisplayName;\r\n        ReturnUrl = returnUrl;\r\n        return P" +
+                    "age();\r\n    }\r\n\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" CreateUser()\r\n    {\r\n        try\r\n        {\r\n            return Activator.Create" +
                     "Instance<");

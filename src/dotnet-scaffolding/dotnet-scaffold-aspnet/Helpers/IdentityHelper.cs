@@ -24,7 +24,17 @@ internal static class IdentityHelper
             var projectName = Path.GetFileNameWithoutExtension(identityModel.ProjectInfo.ProjectPath);
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {
-                string extension = templateFullName.EndsWith("Model", StringComparison.OrdinalIgnoreCase) ? ".cshtml.cs" : ".cshtml";
+                string extension = string.Empty;
+                //the 'ManageNavPagesModel.tt' only should have .cs extension.
+                if (templateFullName.Equals("ManageNavPagesModel", StringComparison.OrdinalIgnoreCase))
+                {
+                    extension = ".cs";
+                }
+                else
+                {
+                    extension = templateFullName.EndsWith("Model", StringComparison.OrdinalIgnoreCase) ? ".cshtml.cs" : ".cshtml";
+                }
+                
                 string formattedTemplateName = templateFullName.Replace("Model", string.Empty, StringComparison.OrdinalIgnoreCase);
                 string templateNameWithNamespace = $"{identityModel.IdentityNamespace}.{formattedTemplateName}";
                 string outputFileName = $"{StringUtil.ToPath(templateNameWithNamespace, identityModel.BaseOutputPath, projectName)}{extension}";

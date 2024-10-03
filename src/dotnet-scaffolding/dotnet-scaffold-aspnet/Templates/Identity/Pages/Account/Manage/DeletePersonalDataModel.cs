@@ -55,36 +55,37 @@ using ");
                     " ASP.NET Core Identity default UI infrastructure and is not intended to be used\r" +
                     "\n    ///     directly from your code. This API may change or be removed in futur" +
                     "e releases.\r\n    /// </summary>\r\n    [BindProperty]\r\n    public InputModel Input" +
-                    " { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET C" +
-                    "ore Identity default UI infrastructure and is not intended to be used\r\n    ///  " +
-                    "   directly from your code. This API may change or be removed in future releases" +
-                    ".\r\n    /// </summary>\r\n    public class InputModel\r\n    {\r\n        /// <summary>" +
-                    "\r\n        ///     This API supports the ASP.NET Core Identity default UI infrast" +
-                    "ructure and is not intended to be used\r\n        ///     directly from your code." +
-                    " This API may change or be removed in future releases.\r\n        /// </summary>\r\n" +
-                    "        [Required]\r\n        [DataType(DataType.Password)]\r\n        public string" +
-                    " Password { get; set; }\r\n    }\r\n\r\n    /// <summary>\r\n    ///     This API suppor" +
-                    "ts the ASP.NET Core Identity default UI infrastructure and is not intended to be" +
-                    " used\r\n    ///     directly from your code. This API may change or be removed in" +
-                    " future releases.\r\n    /// </summary>\r\n    public bool RequirePassword { get; se" +
-                    "t; }\r\n\r\n    public async Task<IActionResult> OnGet()\r\n    {\r\n        var user = " +
-                    "await _userManager.GetUserAsync(User);\r\n        if (user == null)\r\n        {\r\n  " +
-                    "          return NotFound($\"Unable to load user with ID \'{_userManager.GetUserId" +
-                    "(User)}\'.\");\r\n        }\r\n\r\n        RequirePassword = await _userManager.HasPassw" +
-                    "ordAsync(user);\r\n        return Page();\r\n    }\r\n\r\n    public async Task<IActionR" +
-                    "esult> OnPostAsync()\r\n    {\r\n        var user = await _userManager.GetUserAsync(" +
-                    "User);\r\n        if (user == null)\r\n        {\r\n            return NotFound($\"Unab" +
-                    "le to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n     " +
-                    "   RequirePassword = await _userManager.HasPasswordAsync(user);\r\n        if (Req" +
-                    "uirePassword)\r\n        {\r\n            if (!await _userManager.CheckPasswordAsync" +
-                    "(user, Input.Password))\r\n            {\r\n                ModelState.AddModelError" +
-                    "(string.Empty, \"Incorrect password.\");\r\n                return Page();\r\n        " +
-                    "    }\r\n        }\r\n\r\n        var result = await _userManager.DeleteAsync(user);\r\n" +
-                    "        var userId = await _userManager.GetUserIdAsync(user);\r\n        if (!resu" +
-                    "lt.Succeeded)\r\n        {\r\n            throw new InvalidOperationException($\"Unex" +
-                    "pected error occurred deleting user.\");\r\n        }\r\n\r\n        await _signInManag" +
-                    "er.SignOutAsync();\r\n\r\n        _logger.LogInformation(\"User with ID \'{UserId}\' de" +
-                    "leted themselves.\", userId);\r\n\r\n        return Redirect(\"~/\");\r\n    }\r\n}\r\n");
+                    " { get; set; } = default!;\r\n\r\n    /// <summary>\r\n    ///     This API supports t" +
+                    "he ASP.NET Core Identity default UI infrastructure and is not intended to be use" +
+                    "d\r\n    ///     directly from your code. This API may change or be removed in fut" +
+                    "ure releases.\r\n    /// </summary>\r\n    public class InputModel\r\n    {\r\n        /" +
+                    "// <summary>\r\n        ///     This API supports the ASP.NET Core Identity defaul" +
+                    "t UI infrastructure and is not intended to be used\r\n        ///     directly fro" +
+                    "m your code. This API may change or be removed in future releases.\r\n        /// " +
+                    "</summary>\r\n        [Required]\r\n        [DataType(DataType.Password)]\r\n        p" +
+                    "ublic string Password { get; set; } = default!;\r\n    }\r\n\r\n    /// <summary>\r\n   " +
+                    " ///     This API supports the ASP.NET Core Identity default UI infrastructure a" +
+                    "nd is not intended to be used\r\n    ///     directly from your code. This API may" +
+                    " change or be removed in future releases.\r\n    /// </summary>\r\n    public bool R" +
+                    "equirePassword { get; set; }\r\n\r\n    public async Task<IActionResult> OnGet()\r\n  " +
+                    "  {\r\n        var user = await _userManager.GetUserAsync(User);\r\n        if (user" +
+                    " == null)\r\n        {\r\n            return NotFound($\"Unable to load user with ID " +
+                    "\'{_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n        RequirePassword = awa" +
+                    "it _userManager.HasPasswordAsync(user);\r\n        return Page();\r\n    }\r\n\r\n    pu" +
+                    "blic async Task<IActionResult> OnPostAsync()\r\n    {\r\n        var user = await _u" +
+                    "serManager.GetUserAsync(User);\r\n        if (user == null)\r\n        {\r\n          " +
+                    "  return NotFound($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'" +
+                    ".\");\r\n        }\r\n\r\n        RequirePassword = await _userManager.HasPasswordAsync" +
+                    "(user);\r\n        if (RequirePassword)\r\n        {\r\n            if (!await _userMa" +
+                    "nager.CheckPasswordAsync(user, Input.Password))\r\n            {\r\n                " +
+                    "ModelState.AddModelError(string.Empty, \"Incorrect password.\");\r\n                " +
+                    "return Page();\r\n            }\r\n        }\r\n\r\n        var result = await _userMana" +
+                    "ger.DeleteAsync(user);\r\n        var userId = await _userManager.GetUserIdAsync(u" +
+                    "ser);\r\n        if (!result.Succeeded)\r\n        {\r\n            throw new InvalidO" +
+                    "perationException($\"Unexpected error occurred deleting user.\");\r\n        }\r\n\r\n  " +
+                    "      await _signInManager.SignOutAsync();\r\n\r\n        _logger.LogInformation(\"Us" +
+                    "er with ID \'{UserId}\' deleted themselves.\", userId);\r\n\r\n        return Redirect(" +
+                    "\"~/\");\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

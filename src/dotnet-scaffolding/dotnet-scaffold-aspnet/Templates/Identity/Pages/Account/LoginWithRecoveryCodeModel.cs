@@ -56,41 +56,42 @@ using ");
                     "e ASP.NET Core Identity default UI infrastructure and is not intended to be used" +
                     "\r\n    ///     directly from your code. This API may change or be removed in futu" +
                     "re releases.\r\n    /// </summary>\r\n    [BindProperty]\r\n    public InputModel Inpu" +
-                    "t { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET " +
-                    "Core Identity default UI infrastructure and is not intended to be used\r\n    /// " +
-                    "    directly from your code. This API may change or be removed in future release" +
-                    "s.\r\n    /// </summary>\r\n    public string ReturnUrl { get; set; }\r\n\r\n    /// <su" +
-                    "mmary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infra" +
-                    "structure and is not intended to be used\r\n    ///     directly from your code. T" +
-                    "his API may change or be removed in future releases.\r\n    /// </summary>\r\n    pu" +
-                    "blic class InputModel\r\n    {\r\n        /// <summary>\r\n        ///     This API su" +
-                    "pports the ASP.NET Core Identity default UI infrastructure and is not intended t" +
-                    "o be used\r\n        ///     directly from your code. This API may change or be re" +
-                    "moved in future releases.\r\n        /// </summary>\r\n        [BindProperty]\r\n     " +
-                    "   [Required]\r\n        [DataType(DataType.Text)]\r\n        [Display(Name = \"Recov" +
-                    "ery Code\")]\r\n        public string RecoveryCode { get; set; }\r\n    }\r\n\r\n    publ" +
-                    "ic async Task<IActionResult> OnGetAsync(string returnUrl = null)\r\n    {\r\n       " +
-                    " // Ensure the user has gone through the username & password screen first\r\n     " +
-                    "   var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();\r\n     " +
-                    "   if (user == null)\r\n        {\r\n            throw new InvalidOperationException" +
-                    "($\"Unable to load two-factor authentication user.\");\r\n        }\r\n\r\n        Retur" +
-                    "nUrl = returnUrl;\r\n\r\n        return Page();\r\n    }\r\n\r\n    public async Task<IAct" +
-                    "ionResult> OnPostAsync(string returnUrl = null)\r\n    {\r\n        if (!ModelState." +
-                    "IsValid)\r\n        {\r\n            return Page();\r\n        }\r\n\r\n        var user =" +
-                    " await _signInManager.GetTwoFactorAuthenticationUserAsync();\r\n        if (user =" +
-                    "= null)\r\n        {\r\n            throw new InvalidOperationException($\"Unable to " +
-                    "load two-factor authentication user.\");\r\n        }\r\n\r\n        var recoveryCode =" +
-                    " Input.RecoveryCode.Replace(\" \", string.Empty);\r\n\r\n        var result = await _s" +
-                    "ignInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode);\r\n\r\n        var user" +
-                    "Id = await _userManager.GetUserIdAsync(user);\r\n\r\n        if (result.Succeeded)\r\n" +
-                    "        {\r\n            _logger.LogInformation(\"User with ID \'{UserId}\' logged in" +
-                    " with a recovery code.\", user.Id);\r\n            return LocalRedirect(returnUrl ?" +
-                    "? Url.Content(\"~/\"));\r\n        }\r\n        if (result.IsLockedOut)\r\n        {\r\n  " +
-                    "          _logger.LogWarning(\"User account locked out.\");\r\n            return Re" +
-                    "directToPage(\"./Lockout\");\r\n        }\r\n        else\r\n        {\r\n            _log" +
-                    "ger.LogWarning(\"Invalid recovery code entered for user with ID \'{UserId}\' \", use" +
-                    "r.Id);\r\n            ModelState.AddModelError(string.Empty, \"Invalid recovery cod" +
-                    "e entered.\");\r\n            return Page();\r\n        }\r\n    }\r\n}\r\n");
+                    "t { get; set; } = default!;\r\n\r\n    /// <summary>\r\n    ///     This API supports " +
+                    "the ASP.NET Core Identity default UI infrastructure and is not intended to be us" +
+                    "ed\r\n    ///     directly from your code. This API may change or be removed in fu" +
+                    "ture releases.\r\n    /// </summary>\r\n    public string? ReturnUrl { get; set; }\r\n" +
+                    "\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity def" +
+                    "ault UI infrastructure and is not intended to be used\r\n    ///     directly from" +
+                    " your code. This API may change or be removed in future releases.\r\n    /// </sum" +
+                    "mary>\r\n    public class InputModel\r\n    {\r\n        /// <summary>\r\n        ///   " +
+                    "  This API supports the ASP.NET Core Identity default UI infrastructure and is n" +
+                    "ot intended to be used\r\n        ///     directly from your code. This API may ch" +
+                    "ange or be removed in future releases.\r\n        /// </summary>\r\n        [BindPro" +
+                    "perty]\r\n        [Required]\r\n        [DataType(DataType.Text)]\r\n        [Display(" +
+                    "Name = \"Recovery Code\")]\r\n        public string RecoveryCode { get; set; } = def" +
+                    "ault!;\r\n    }\r\n\r\n    public async Task<IActionResult> OnGetAsync(string? returnU" +
+                    "rl = null)\r\n    {\r\n        // Ensure the user has gone through the username & pa" +
+                    "ssword screen first\r\n        var user = await _signInManager.GetTwoFactorAuthent" +
+                    "icationUserAsync();\r\n        if (user == null)\r\n        {\r\n            throw new" +
+                    " InvalidOperationException($\"Unable to load two-factor authentication user.\");\r\n" +
+                    "        }\r\n\r\n        ReturnUrl = returnUrl;\r\n\r\n        return Page();\r\n    }\r\n\r\n" +
+                    "    public async Task<IActionResult> OnPostAsync(string? returnUrl = null)\r\n    " +
+                    "{\r\n        if (!ModelState.IsValid)\r\n        {\r\n            return Page();\r\n    " +
+                    "    }\r\n\r\n        var user = await _signInManager.GetTwoFactorAuthenticationUserA" +
+                    "sync();\r\n        if (user == null)\r\n        {\r\n            throw new InvalidOper" +
+                    "ationException($\"Unable to load two-factor authentication user.\");\r\n        }\r\n\r" +
+                    "\n        var recoveryCode = Input.RecoveryCode.Replace(\" \", string.Empty);\r\n\r\n  " +
+                    "      var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(recover" +
+                    "yCode);\r\n\r\n        var userId = await _userManager.GetUserIdAsync(user);\r\n\r\n    " +
+                    "    if (result.Succeeded)\r\n        {\r\n            _logger.LogInformation(\"User w" +
+                    "ith ID \'{UserId}\' logged in with a recovery code.\", user.Id);\r\n            retur" +
+                    "n LocalRedirect(returnUrl ?? Url.Content(\"~/\"));\r\n        }\r\n        if (result." +
+                    "IsLockedOut)\r\n        {\r\n            _logger.LogWarning(\"User account locked out" +
+                    ".\");\r\n            return RedirectToPage(\"./Lockout\");\r\n        }\r\n        else\r\n" +
+                    "        {\r\n            _logger.LogWarning(\"Invalid recovery code entered for use" +
+                    "r with ID \'{UserId}\' \", user.Id);\r\n            ModelState.AddModelError(string.E" +
+                    "mpty, \"Invalid recovery code entered.\");\r\n            return Page();\r\n        }\r" +
+                    "\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

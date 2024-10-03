@@ -57,53 +57,54 @@ using ");
                     " Core Identity default UI infrastructure and is not intended to be used\r\n    ///" +
                     "     directly from your code. This API may change or be removed in future releas" +
                     "es.\r\n    /// </summary>\r\n    [BindProperty]\r\n    public InputModel Input { get; " +
-                    "set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Iden" +
-                    "tity default UI infrastructure and is not intended to be used\r\n    ///     direc" +
-                    "tly from your code. This API may change or be removed in future releases.\r\n    /" +
-                    "// </summary>\r\n    public bool RememberMe { get; set; }\r\n\r\n    /// <summary>\r\n  " +
-                    "  ///     This API supports the ASP.NET Core Identity default UI infrastructure " +
-                    "and is not intended to be used\r\n    ///     directly from your code. This API ma" +
-                    "y change or be removed in future releases.\r\n    /// </summary>\r\n    public strin" +
-                    "g ReturnUrl { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports th" +
-                    "e ASP.NET Core Identity default UI infrastructure and is not intended to be used" +
-                    "\r\n    ///     directly from your code. This API may change or be removed in futu" +
-                    "re releases.\r\n    /// </summary>\r\n    public class InputModel\r\n    {\r\n        //" +
-                    "/ <summary>\r\n        ///     This API supports the ASP.NET Core Identity default" +
-                    " UI infrastructure and is not intended to be used\r\n        ///     directly from" +
-                    " your code. This API may change or be removed in future releases.\r\n        /// <" +
-                    "/summary>\r\n        [Required]\r\n        [StringLength(7, ErrorMessage = \"The {0} " +
-                    "must be at least {2} and at max {1} characters long.\", MinimumLength = 6)]\r\n    " +
-                    "    [DataType(DataType.Text)]\r\n        [Display(Name = \"Authenticator code\")]\r\n " +
-                    "       public string TwoFactorCode { get; set; }\r\n\r\n        /// <summary>\r\n     " +
-                    "   ///     This API supports the ASP.NET Core Identity default UI infrastructure" +
-                    " and is not intended to be used\r\n        ///     directly from your code. This A" +
-                    "PI may change or be removed in future releases.\r\n        /// </summary>\r\n       " +
-                    " [Display(Name = \"Remember this machine\")]\r\n        public bool RememberMachine " +
-                    "{ get; set; }\r\n    }\r\n\r\n    public async Task<IActionResult> OnGetAsync(bool rem" +
-                    "emberMe, string returnUrl = null)\r\n    {\r\n        // Ensure the user has gone th" +
-                    "rough the username & password screen first\r\n        var user = await _signInMana" +
-                    "ger.GetTwoFactorAuthenticationUserAsync();\r\n\r\n        if (user == null)\r\n       " +
-                    " {\r\n            throw new InvalidOperationException($\"Unable to load two-factor " +
-                    "authentication user.\");\r\n        }\r\n\r\n        ReturnUrl = returnUrl;\r\n        Re" +
-                    "memberMe = rememberMe;\r\n\r\n        return Page();\r\n    }\r\n\r\n    public async Task" +
-                    "<IActionResult> OnPostAsync(bool rememberMe, string returnUrl = null)\r\n    {\r\n  " +
-                    "      if (!ModelState.IsValid)\r\n        {\r\n            return Page();\r\n        }" +
-                    "\r\n\r\n        returnUrl = returnUrl ?? Url.Content(\"~/\");\r\n\r\n        var user = aw" +
-                    "ait _signInManager.GetTwoFactorAuthenticationUserAsync();\r\n        if (user == n" +
-                    "ull)\r\n        {\r\n            throw new InvalidOperationException($\"Unable to loa" +
-                    "d two-factor authentication user.\");\r\n        }\r\n\r\n        var authenticatorCode" +
-                    " = Input.TwoFactorCode.Replace(\" \", string.Empty).Replace(\"-\", string.Empty);\r\n\r" +
-                    "\n        var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(aut" +
-                    "henticatorCode, rememberMe, Input.RememberMachine);\r\n\r\n        var userId = awai" +
-                    "t _userManager.GetUserIdAsync(user);\r\n\r\n        if (result.Succeeded)\r\n        {" +
-                    "\r\n            _logger.LogInformation(\"User with ID \'{UserId}\' logged in with 2fa" +
-                    ".\", user.Id);\r\n            return LocalRedirect(returnUrl);\r\n        }\r\n        " +
-                    "else if (result.IsLockedOut)\r\n        {\r\n            _logger.LogWarning(\"User wi" +
-                    "th ID \'{UserId}\' account locked out.\", user.Id);\r\n            return RedirectToP" +
-                    "age(\"./Lockout\");\r\n        }\r\n        else\r\n        {\r\n            _logger.LogWa" +
-                    "rning(\"Invalid authenticator code entered for user with ID \'{UserId}\'.\", user.Id" +
-                    ");\r\n            ModelState.AddModelError(string.Empty, \"Invalid authenticator co" +
-                    "de.\");\r\n            return Page();\r\n        }\r\n    }\r\n}\r\n");
+                    "set; } = default!;\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.N" +
+                    "ET Core Identity default UI infrastructure and is not intended to be used\r\n    /" +
+                    "//     directly from your code. This API may change or be removed in future rele" +
+                    "ases.\r\n    /// </summary>\r\n    public bool RememberMe { get; set; }\r\n\r\n    /// <" +
+                    "summary>\r\n    ///     This API supports the ASP.NET Core Identity default UI inf" +
+                    "rastructure and is not intended to be used\r\n    ///     directly from your code." +
+                    " This API may change or be removed in future releases.\r\n    /// </summary>\r\n    " +
+                    "public string? ReturnUrl { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This AP" +
+                    "I supports the ASP.NET Core Identity default UI infrastructure and is not intend" +
+                    "ed to be used\r\n    ///     directly from your code. This API may change or be re" +
+                    "moved in future releases.\r\n    /// </summary>\r\n    public class InputModel\r\n    " +
+                    "{\r\n        /// <summary>\r\n        ///     This API supports the ASP.NET Core Ide" +
+                    "ntity default UI infrastructure and is not intended to be used\r\n        ///     " +
+                    "directly from your code. This API may change or be removed in future releases.\r\n" +
+                    "        /// </summary>\r\n        [Required]\r\n        [StringLength(7, ErrorMessag" +
+                    "e = \"The {0} must be at least {2} and at max {1} characters long.\", MinimumLengt" +
+                    "h = 6)]\r\n        [DataType(DataType.Text)]\r\n        [Display(Name = \"Authenticat" +
+                    "or code\")]\r\n        public string TwoFactorCode { get; set; } = default!;\r\n\r\n   " +
+                    "     /// <summary>\r\n        ///     This API supports the ASP.NET Core Identity " +
+                    "default UI infrastructure and is not intended to be used\r\n        ///     direct" +
+                    "ly from your code. This API may change or be removed in future releases.\r\n      " +
+                    "  /// </summary>\r\n        [Display(Name = \"Remember this machine\")]\r\n        pub" +
+                    "lic bool RememberMachine { get; set; }\r\n    }\r\n\r\n    public async Task<IActionRe" +
+                    "sult> OnGetAsync(bool rememberMe, string? returnUrl = null)\r\n    {\r\n        // E" +
+                    "nsure the user has gone through the username & password screen first\r\n        va" +
+                    "r user = await _signInManager.GetTwoFactorAuthenticationUserAsync();\r\n\r\n        " +
+                    "if (user == null)\r\n        {\r\n            throw new InvalidOperationException($\"" +
+                    "Unable to load two-factor authentication user.\");\r\n        }\r\n\r\n        ReturnUr" +
+                    "l = returnUrl;\r\n        RememberMe = rememberMe;\r\n\r\n        return Page();\r\n    " +
+                    "}\r\n\r\n    public async Task<IActionResult> OnPostAsync(bool rememberMe, string? r" +
+                    "eturnUrl = null)\r\n    {\r\n        if (!ModelState.IsValid)\r\n        {\r\n          " +
+                    "  return Page();\r\n        }\r\n\r\n        returnUrl = returnUrl ?? Url.Content(\"~/\"" +
+                    ");\r\n\r\n        var user = await _signInManager.GetTwoFactorAuthenticationUserAsyn" +
+                    "c();\r\n        if (user == null)\r\n        {\r\n            throw new InvalidOperati" +
+                    "onException($\"Unable to load two-factor authentication user.\");\r\n        }\r\n\r\n  " +
+                    "      var authenticatorCode = Input.TwoFactorCode.Replace(\" \", string.Empty).Rep" +
+                    "lace(\"-\", string.Empty);\r\n\r\n        var result = await _signInManager.TwoFactorA" +
+                    "uthenticatorSignInAsync(authenticatorCode, rememberMe, Input.RememberMachine);\r\n" +
+                    "\r\n        var userId = await _userManager.GetUserIdAsync(user);\r\n\r\n        if (r" +
+                    "esult.Succeeded)\r\n        {\r\n            _logger.LogInformation(\"User with ID \'{" +
+                    "UserId}\' logged in with 2fa.\", user.Id);\r\n            return LocalRedirect(retur" +
+                    "nUrl);\r\n        }\r\n        else if (result.IsLockedOut)\r\n        {\r\n            " +
+                    "_logger.LogWarning(\"User with ID \'{UserId}\' account locked out.\", user.Id);\r\n   " +
+                    "         return RedirectToPage(\"./Lockout\");\r\n        }\r\n        else\r\n        {" +
+                    "\r\n            _logger.LogWarning(\"Invalid authenticator code entered for user wi" +
+                    "th ID \'{UserId}\'.\", user.Id);\r\n            ModelState.AddModelError(string.Empty" +
+                    ", \"Invalid authenticator code.\");\r\n            return Page();\r\n        }\r\n    }\r" +
+                    "\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

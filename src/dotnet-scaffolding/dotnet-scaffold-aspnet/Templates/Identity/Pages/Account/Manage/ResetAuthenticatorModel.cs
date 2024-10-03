@@ -53,22 +53,22 @@ using ");
                     "_logger = logger;\r\n    }\r\n\r\n    /// <summary>\r\n    ///     This API supports the" +
                     " ASP.NET Core Identity default UI infrastructure and is not intended to be used\r" +
                     "\n    ///     directly from your code. This API may change or be removed in futur" +
-                    "e releases.\r\n    /// </summary>\r\n    [TempData]\r\n    public string StatusMessage" +
-                    " { get; set; }\r\n\r\n    public async Task<IActionResult> OnGet()\r\n    {\r\n        v" +
-                    "ar user = await _userManager.GetUserAsync(User);\r\n        if (user == null)\r\n   " +
-                    "     {\r\n            return NotFound($\"Unable to load user with ID \'{_userManager" +
-                    ".GetUserId(User)}\'.\");\r\n        }\r\n\r\n        return Page();\r\n    }\r\n\r\n    public" +
-                    " async Task<IActionResult> OnPostAsync()\r\n    {\r\n        var user = await _userM" +
-                    "anager.GetUserAsync(User);\r\n        if (user == null)\r\n        {\r\n            re" +
-                    "turn NotFound($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\");" +
-                    "\r\n        }\r\n\r\n        await _userManager.SetTwoFactorEnabledAsync(user, false);" +
-                    "\r\n        await _userManager.ResetAuthenticatorKeyAsync(user);\r\n        var user" +
-                    "Id = await _userManager.GetUserIdAsync(user);\r\n        _logger.LogInformation(\"U" +
-                    "ser with ID \'{UserId}\' has reset their authentication app key.\", user.Id);\r\n\r\n  " +
-                    "      await _signInManager.RefreshSignInAsync(user);\r\n        StatusMessage = \"Y" +
-                    "our authenticator app key has been reset, you will need to configure your authen" +
-                    "ticator app using the new key.\";\r\n\r\n        return RedirectToPage(\"./EnableAuthe" +
-                    "nticator\");\r\n    }\r\n}\r\n");
+                    "e releases.\r\n    /// </summary>\r\n    [TempData]\r\n    public string? StatusMessag" +
+                    "e { get; set; }\r\n\r\n    public async Task<IActionResult> OnGet()\r\n    {\r\n        " +
+                    "var user = await _userManager.GetUserAsync(User);\r\n        if (user == null)\r\n  " +
+                    "      {\r\n            return NotFound($\"Unable to load user with ID \'{_userManage" +
+                    "r.GetUserId(User)}\'.\");\r\n        }\r\n\r\n        return Page();\r\n    }\r\n\r\n    publi" +
+                    "c async Task<IActionResult> OnPostAsync()\r\n    {\r\n        var user = await _user" +
+                    "Manager.GetUserAsync(User);\r\n        if (user == null)\r\n        {\r\n            r" +
+                    "eturn NotFound($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\")" +
+                    ";\r\n        }\r\n\r\n        await _userManager.SetTwoFactorEnabledAsync(user, false)" +
+                    ";\r\n        await _userManager.ResetAuthenticatorKeyAsync(user);\r\n        var use" +
+                    "rId = await _userManager.GetUserIdAsync(user);\r\n        _logger.LogInformation(\"" +
+                    "User with ID \'{UserId}\' has reset their authentication app key.\", user.Id);\r\n\r\n " +
+                    "       await _signInManager.RefreshSignInAsync(user);\r\n        StatusMessage = \"" +
+                    "Your authenticator app key has been reset, you will need to configure your authe" +
+                    "nticator app using the new key.\";\r\n\r\n        return RedirectToPage(\"./EnableAuth" +
+                    "enticator\");\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

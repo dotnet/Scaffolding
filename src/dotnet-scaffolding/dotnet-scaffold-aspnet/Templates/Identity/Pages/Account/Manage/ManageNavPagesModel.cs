@@ -66,48 +66,48 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Identity.Pages.Accoun
                     "ntication => \"TwoFactorAuthentication\";\r\n\r\n    /// <summary>\r\n    ///     This A" +
                     "PI supports the ASP.NET Core Identity default UI infrastructure and is not inten" +
                     "ded to be used\r\n    ///     directly from your code. This API may change or be r" +
-                    "emoved in future releases.\r\n    /// </summary>\r\n    public static string IndexNa" +
-                    "vClass(ViewContext viewContext) => PageNavClass(viewContext, Index);\r\n\r\n    /// " +
-                    "<summary>\r\n    ///     This API supports the ASP.NET Core Identity default UI in" +
-                    "frastructure and is not intended to be used\r\n    ///     directly from your code" +
-                    ". This API may change or be removed in future releases.\r\n    /// </summary>\r\n   " +
-                    " public static string EmailNavClass(ViewContext viewContext) => PageNavClass(vie" +
-                    "wContext, Email);\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NE" +
-                    "T Core Identity default UI infrastructure and is not intended to be used\r\n    //" +
-                    "/     directly from your code. This API may change or be removed in future relea" +
-                    "ses.\r\n    /// </summary>\r\n    public static string ChangePasswordNavClass(ViewCo" +
-                    "ntext viewContext) => PageNavClass(viewContext, ChangePassword);\r\n\r\n    /// <sum" +
-                    "mary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infras" +
-                    "tructure and is not intended to be used\r\n    ///     directly from your code. Th" +
-                    "is API may change or be removed in future releases.\r\n    /// </summary>\r\n    pub" +
-                    "lic static string DownloadPersonalDataNavClass(ViewContext viewContext) => PageN" +
-                    "avClass(viewContext, DownloadPersonalData);\r\n\r\n    /// <summary>\r\n    ///     Th" +
-                    "is API supports the ASP.NET Core Identity default UI infrastructure and is not i" +
-                    "ntended to be used\r\n    ///     directly from your code. This API may change or " +
-                    "be removed in future releases.\r\n    /// </summary>\r\n    public static string Del" +
-                    "etePersonalDataNavClass(ViewContext viewContext) => PageNavClass(viewContext, De" +
-                    "letePersonalData);\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.N" +
-                    "ET Core Identity default UI infrastructure and is not intended to be used\r\n    /" +
-                    "//     directly from your code. This API may change or be removed in future rele" +
-                    "ases.\r\n    /// </summary>\r\n    public static string ExternalLoginsNavClass(ViewC" +
-                    "ontext viewContext) => PageNavClass(viewContext, ExternalLogins);\r\n\r\n    /// <su" +
-                    "mmary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infra" +
-                    "structure and is not intended to be used\r\n    ///     directly from your code. T" +
-                    "his API may change or be removed in future releases.\r\n    /// </summary>\r\n    pu" +
-                    "blic static string PersonalDataNavClass(ViewContext viewContext) => PageNavClass" +
-                    "(viewContext, PersonalData);\r\n\r\n    /// <summary>\r\n    ///     This API supports" +
-                    " the ASP.NET Core Identity default UI infrastructure and is not intended to be u" +
-                    "sed\r\n    ///     directly from your code. This API may change or be removed in f" +
-                    "uture releases.\r\n    /// </summary>\r\n    public static string TwoFactorAuthentic" +
-                    "ationNavClass(ViewContext viewContext) => PageNavClass(viewContext, TwoFactorAut" +
-                    "hentication);\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Co" +
-                    "re Identity default UI infrastructure and is not intended to be used\r\n    ///   " +
-                    "  directly from your code. This API may change or be removed in future releases." +
-                    "\r\n    /// </summary>\r\n    public static string PageNavClass(ViewContext viewCont" +
-                    "ext, string page)\r\n    {\r\n        var activePage = viewContext.ViewData[\"ActiveP" +
-                    "age\"] as string\r\n            ?? System.IO.Path.GetFileNameWithoutExtension(viewC" +
-                    "ontext.ActionDescriptor.DisplayName);\r\n        return string.Equals(activePage, " +
-                    "page, StringComparison.OrdinalIgnoreCase) ? \"active\" : null;\r\n    }\r\n}\r\n");
+                    "emoved in future releases.\r\n    /// </summary>\r\n    public static string? IndexN" +
+                    "avClass(ViewContext viewContext) => PageNavClass(viewContext, Index);\r\n\r\n    ///" +
+                    " <summary>\r\n    ///     This API supports the ASP.NET Core Identity default UI i" +
+                    "nfrastructure and is not intended to be used\r\n    ///     directly from your cod" +
+                    "e. This API may change or be removed in future releases.\r\n    /// </summary>\r\n  " +
+                    "  public static string? EmailNavClass(ViewContext viewContext) => PageNavClass(v" +
+                    "iewContext, Email);\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP." +
+                    "NET Core Identity default UI infrastructure and is not intended to be used\r\n    " +
+                    "///     directly from your code. This API may change or be removed in future rel" +
+                    "eases.\r\n    /// </summary>\r\n    public static string? ChangePasswordNavClass(Vie" +
+                    "wContext viewContext) => PageNavClass(viewContext, ChangePassword);\r\n\r\n    /// <" +
+                    "summary>\r\n    ///     This API supports the ASP.NET Core Identity default UI inf" +
+                    "rastructure and is not intended to be used\r\n    ///     directly from your code." +
+                    " This API may change or be removed in future releases.\r\n    /// </summary>\r\n    " +
+                    "public static string? DownloadPersonalDataNavClass(ViewContext viewContext) => P" +
+                    "ageNavClass(viewContext, DownloadPersonalData);\r\n\r\n    /// <summary>\r\n    ///   " +
+                    "  This API supports the ASP.NET Core Identity default UI infrastructure and is n" +
+                    "ot intended to be used\r\n    ///     directly from your code. This API may change" +
+                    " or be removed in future releases.\r\n    /// </summary>\r\n    public static string" +
+                    "? DeletePersonalDataNavClass(ViewContext viewContext) => PageNavClass(viewContex" +
+                    "t, DeletePersonalData);\r\n\r\n    /// <summary>\r\n    ///     This API supports the " +
+                    "ASP.NET Core Identity default UI infrastructure and is not intended to be used\r\n" +
+                    "    ///     directly from your code. This API may change or be removed in future" +
+                    " releases.\r\n    /// </summary>\r\n    public static string? ExternalLoginsNavClass" +
+                    "(ViewContext viewContext) => PageNavClass(viewContext, ExternalLogins);\r\n\r\n    /" +
+                    "// <summary>\r\n    ///     This API supports the ASP.NET Core Identity default UI" +
+                    " infrastructure and is not intended to be used\r\n    ///     directly from your c" +
+                    "ode. This API may change or be removed in future releases.\r\n    /// </summary>\r\n" +
+                    "    public static string? PersonalDataNavClass(ViewContext viewContext) => PageN" +
+                    "avClass(viewContext, PersonalData);\r\n\r\n    /// <summary>\r\n    ///     This API s" +
+                    "upports the ASP.NET Core Identity default UI infrastructure and is not intended " +
+                    "to be used\r\n    ///     directly from your code. This API may change or be remov" +
+                    "ed in future releases.\r\n    /// </summary>\r\n    public static string? TwoFactorA" +
+                    "uthenticationNavClass(ViewContext viewContext) => PageNavClass(viewContext, TwoF" +
+                    "actorAuthentication);\r\n\r\n    /// <summary>\r\n    ///     This API supports the AS" +
+                    "P.NET Core Identity default UI infrastructure and is not intended to be used\r\n  " +
+                    "  ///     directly from your code. This API may change or be removed in future r" +
+                    "eleases.\r\n    /// </summary>\r\n    public static string? PageNavClass(ViewContext" +
+                    " viewContext, string page)\r\n    {\r\n        var activePage = viewContext.ViewData" +
+                    "[\"ActivePage\"] as string\r\n            ?? Path.GetFileNameWithoutExtension(viewCo" +
+                    "ntext.ActionDescriptor.DisplayName);\r\n        return string.Equals(activePage, p" +
+                    "age, StringComparison.OrdinalIgnoreCase) ? \"active\" : null;\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

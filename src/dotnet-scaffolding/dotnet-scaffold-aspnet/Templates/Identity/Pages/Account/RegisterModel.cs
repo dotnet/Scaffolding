@@ -72,66 +72,67 @@ using ");
                     "\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity de" +
                     "fault UI infrastructure and is not intended to be used\r\n    ///     directly fro" +
                     "m your code. This API may change or be removed in future releases.\r\n    /// </su" +
-                    "mmary>\r\n    [BindProperty]\r\n    public InputModel Input { get; set; }\r\n\r\n    ///" +
-                    " <summary>\r\n    ///     This API supports the ASP.NET Core Identity default UI i" +
-                    "nfrastructure and is not intended to be used\r\n    ///     directly from your cod" +
-                    "e. This API may change or be removed in future releases.\r\n    /// </summary>\r\n  " +
-                    "  public string ReturnUrl { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This A" +
-                    "PI supports the ASP.NET Core Identity default UI infrastructure and is not inten" +
-                    "ded to be used\r\n    ///     directly from your code. This API may change or be r" +
-                    "emoved in future releases.\r\n    /// </summary>\r\n    public IList<AuthenticationS" +
-                    "cheme> ExternalLogins { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API s" +
-                    "upports the ASP.NET Core Identity default UI infrastructure and is not intended " +
-                    "to be used\r\n    ///     directly from your code. This API may change or be remov" +
-                    "ed in future releases.\r\n    /// </summary>\r\n    public class InputModel\r\n    {\r\n" +
-                    "        /// <summary>\r\n        ///     This API supports the ASP.NET Core Identi" +
-                    "ty default UI infrastructure and is not intended to be used\r\n        ///     dir" +
-                    "ectly from your code. This API may change or be removed in future releases.\r\n   " +
-                    "     /// </summary>\r\n        [Required]\r\n        [EmailAddress]\r\n        [Displa" +
-                    "y(Name = \"Email\")]\r\n        public string Email { get; set; }\r\n\r\n        /// <su" +
-                    "mmary>\r\n        ///     This API supports the ASP.NET Core Identity default UI i" +
-                    "nfrastructure and is not intended to be used\r\n        ///     directly from your" +
-                    " code. This API may change or be removed in future releases.\r\n        /// </summ" +
-                    "ary>\r\n        [Required]\r\n        [StringLength(100, ErrorMessage = \"The {0} mus" +
-                    "t be at least {2} and at max {1} characters long.\", MinimumLength = 6)]\r\n       " +
-                    " [DataType(DataType.Password)]\r\n        [Display(Name = \"Password\")]\r\n        pu" +
-                    "blic string Password { get; set; }\r\n\r\n        /// <summary>\r\n        ///     Thi" +
-                    "s API supports the ASP.NET Core Identity default UI infrastructure and is not in" +
-                    "tended to be used\r\n        ///     directly from your code. This API may change " +
-                    "or be removed in future releases.\r\n        /// </summary>\r\n        [DataType(Dat" +
-                    "aType.Password)]\r\n        [Display(Name = \"Confirm password\")]\r\n        [Compare" +
-                    "(\"Password\", ErrorMessage = \"The password and confirmation password do not match" +
-                    ".\")]\r\n        public string ConfirmPassword { get; set; }\r\n    }\r\n\r\n\r\n    public" +
-                    " async Task OnGetAsync(string returnUrl = null)\r\n    {\r\n        ReturnUrl = retu" +
-                    "rnUrl;\r\n        ExternalLogins = (await _signInManager.GetExternalAuthentication" +
-                    "SchemesAsync()).ToList();\r\n    }\r\n\r\n    public async Task<IActionResult> OnPostA" +
-                    "sync(string returnUrl = null)\r\n    {\r\n        returnUrl ??= Url.Content(\"~/\");\r\n" +
-                    "        ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesA" +
-                    "sync()).ToList();\r\n        if (ModelState.IsValid)\r\n        {\r\n            var u" +
-                    "ser = CreateUser();\r\n\r\n            await _userStore.SetUserNameAsync(user, Input" +
-                    ".Email, CancellationToken.None);\r\n            await _emailStore.SetEmailAsync(us" +
-                    "er, Input.Email, CancellationToken.None);\r\n            var result = await _userM" +
-                    "anager.CreateAsync(user, Input.Password);\r\n\r\n            if (result.Succeeded)\r\n" +
-                    "            {\r\n                _logger.LogInformation(\"User created a new accoun" +
-                    "t with password.\");\r\n\r\n                var userId = await _userManager.GetUserId" +
-                    "Async(user);\r\n                var code = await _userManager.GenerateEmailConfirm" +
-                    "ationTokenAsync(user);\r\n                code = WebEncoders.Base64UrlEncode(Encod" +
-                    "ing.UTF8.GetBytes(code));\r\n                var callbackUrl = Url.Page(\r\n        " +
-                    "            \"/Account/ConfirmEmail\",\r\n                    pageHandler: null,\r\n  " +
-                    "                  values: new { area = \"Identity\", userId = userId, code = code," +
-                    " returnUrl = returnUrl },\r\n                    protocol: Request.Scheme);\r\n\r\n   " +
-                    "             await _emailSender.SendEmailAsync(Input.Email, \"Confirm your email\"" +
-                    ",\r\n                    $\"Please confirm your account by <a href=\'{HtmlEncoder.De" +
-                    "fault.Encode(callbackUrl)}\'>clicking here</a>.\");\r\n\r\n                if (_userMa" +
-                    "nager.Options.SignIn.RequireConfirmedAccount)\r\n                {\r\n              " +
-                    "      return RedirectToPage(\"RegisterConfirmation\", new { email = Input.Email, r" +
-                    "eturnUrl = returnUrl });\r\n                }\r\n                else\r\n             " +
-                    "   {\r\n                    await _signInManager.SignInAsync(user, isPersistent: f" +
-                    "alse);\r\n                    return LocalRedirect(returnUrl);\r\n                }\r" +
-                    "\n            }\r\n            foreach (var error in result.Errors)\r\n            {\r" +
-                    "\n                ModelState.AddModelError(string.Empty, error.Description);\r\n   " +
-                    "         }\r\n        }\r\n\r\n        // If we got this far, something failed, redisp" +
-                    "lay form\r\n        return Page();\r\n    }\r\n\r\n    private ");
+                    "mmary>\r\n    [BindProperty]\r\n    public InputModel Input { get; set; } = default!" +
+                    ";\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity " +
+                    "default UI infrastructure and is not intended to be used\r\n    ///     directly f" +
+                    "rom your code. This API may change or be removed in future releases.\r\n    /// </" +
+                    "summary>\r\n    public string? ReturnUrl { get; set; }\r\n\r\n    /// <summary>\r\n    /" +
+                    "//     This API supports the ASP.NET Core Identity default UI infrastructure and" +
+                    " is not intended to be used\r\n    ///     directly from your code. This API may c" +
+                    "hange or be removed in future releases.\r\n    /// </summary>\r\n    public IList<Au" +
+                    "thenticationScheme>? ExternalLogins { get; set; }\r\n\r\n    /// <summary>\r\n    /// " +
+                    "    This API supports the ASP.NET Core Identity default UI infrastructure and is" +
+                    " not intended to be used\r\n    ///     directly from your code. This API may chan" +
+                    "ge or be removed in future releases.\r\n    /// </summary>\r\n    public class Input" +
+                    "Model\r\n    {\r\n        /// <summary>\r\n        ///     This API supports the ASP.N" +
+                    "ET Core Identity default UI infrastructure and is not intended to be used\r\n     " +
+                    "   ///     directly from your code. This API may change or be removed in future " +
+                    "releases.\r\n        /// </summary>\r\n        [Required]\r\n        [EmailAddress]\r\n " +
+                    "       [Display(Name = \"Email\")]\r\n        public string Email { get; set; } = de" +
+                    "fault!;\r\n\r\n        /// <summary>\r\n        ///     This API supports the ASP.NET " +
+                    "Core Identity default UI infrastructure and is not intended to be used\r\n        " +
+                    "///     directly from your code. This API may change or be removed in future rel" +
+                    "eases.\r\n        /// </summary>\r\n        [Required]\r\n        [StringLength(100, E" +
+                    "rrorMessage = \"The {0} must be at least {2} and at max {1} characters long.\", Mi" +
+                    "nimumLength = 6)]\r\n        [DataType(DataType.Password)]\r\n        [Display(Name " +
+                    "= \"Password\")]\r\n        public string Password { get; set; } = default!;\r\n\r\n    " +
+                    "    /// <summary>\r\n        ///     This API supports the ASP.NET Core Identity d" +
+                    "efault UI infrastructure and is not intended to be used\r\n        ///     directl" +
+                    "y from your code. This API may change or be removed in future releases.\r\n       " +
+                    " /// </summary>\r\n        [DataType(DataType.Password)]\r\n        [Display(Name = " +
+                    "\"Confirm password\")]\r\n        [Compare(\"Password\", ErrorMessage = \"The password " +
+                    "and confirmation password do not match.\")]\r\n        public string? ConfirmPasswo" +
+                    "rd { get; set; }\r\n    }\r\n\r\n\r\n    public async Task OnGetAsync(string? returnUrl " +
+                    "= null)\r\n    {\r\n        ReturnUrl = returnUrl;\r\n        ExternalLogins = (await " +
+                    "_signInManager.GetExternalAuthenticationSchemesAsync()).ToList();\r\n    }\r\n\r\n    " +
+                    "public async Task<IActionResult> OnPostAsync(string? returnUrl = null)\r\n    {\r\n " +
+                    "       returnUrl ??= Url.Content(\"~/\");\r\n        ExternalLogins = (await _signIn" +
+                    "Manager.GetExternalAuthenticationSchemesAsync()).ToList();\r\n        if (ModelSta" +
+                    "te.IsValid)\r\n        {\r\n            var user = CreateUser();\r\n\r\n            awai" +
+                    "t _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);\r\n     " +
+                    "       await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None" +
+                    ");\r\n            var result = await _userManager.CreateAsync(user, Input.Password" +
+                    ");\r\n\r\n            if (result.Succeeded)\r\n            {\r\n                _logger." +
+                    "LogInformation(\"User created a new account with password.\");\r\n\r\n                " +
+                    "var userId = await _userManager.GetUserIdAsync(user);\r\n                var code " +
+                    "= await _userManager.GenerateEmailConfirmationTokenAsync(user);\r\n               " +
+                    " code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n            " +
+                    "    var callbackUrl = Url.Page(\r\n                    \"/Account/ConfirmEmail\",\r\n " +
+                    "                   pageHandler: null,\r\n                    values: new { area = " +
+                    "\"Identity\", userId = userId, code = code, returnUrl = returnUrl },\r\n            " +
+                    "        protocol: Request.Scheme)!;\r\n\r\n                await _emailSender.SendEm" +
+                    "ailAsync(Input.Email, \"Confirm your email\",\r\n                    $\"Please confir" +
+                    "m your account by <a href=\'{HtmlEncoder.Default.Encode(callbackUrl)}\'>clicking h" +
+                    "ere</a>.\");\r\n\r\n                if (_userManager.Options.SignIn.RequireConfirmedA" +
+                    "ccount)\r\n                {\r\n                    return RedirectToPage(\"RegisterC" +
+                    "onfirmation\", new { email = Input.Email, returnUrl = returnUrl });\r\n            " +
+                    "    }\r\n                else\r\n                {\r\n                    await _signI" +
+                    "nManager.SignInAsync(user, isPersistent: false);\r\n                    return Loc" +
+                    "alRedirect(returnUrl);\r\n                }\r\n            }\r\n            foreach (v" +
+                    "ar error in result.Errors)\r\n            {\r\n                ModelState.AddModelEr" +
+                    "ror(string.Empty, error.Description);\r\n            }\r\n        }\r\n\r\n        // If" +
+                    " we got this far, something failed, redisplay form\r\n        return Page();\r\n    " +
+                    "}\r\n\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" CreateUser()\r\n    {\r\n        try\r\n        {\r\n            return Activator.Create" +
                     "Instance<");

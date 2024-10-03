@@ -54,32 +54,32 @@ using ");
                     "  This API supports the ASP.NET Core Identity default UI infrastructure and is n" +
                     "ot intended to be used\r\n    ///     directly from your code. This API may change" +
                     " or be removed in future releases.\r\n    /// </summary>\r\n    [BindProperty]\r\n    " +
-                    "public InputModel Input { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API" +
-                    " supports the ASP.NET Core Identity default UI infrastructure and is not intende" +
-                    "d to be used\r\n    ///     directly from your code. This API may change or be rem" +
-                    "oved in future releases.\r\n    /// </summary>\r\n    public class InputModel\r\n    {" +
-                    "\r\n        /// <summary>\r\n        ///     This API supports the ASP.NET Core Iden" +
-                    "tity default UI infrastructure and is not intended to be used\r\n        ///     d" +
-                    "irectly from your code. This API may change or be removed in future releases.\r\n " +
-                    "       /// </summary>\r\n        [Required]\r\n        [EmailAddress]\r\n        publi" +
-                    "c string Email { get; set; }\r\n    }\r\n\r\n    public async Task<IActionResult> OnPo" +
-                    "stAsync()\r\n    {\r\n        if (ModelState.IsValid)\r\n        {\r\n            var us" +
-                    "er = await _userManager.FindByEmailAsync(Input.Email);\r\n            if (user == " +
-                    "null || !(await _userManager.IsEmailConfirmedAsync(user)))\r\n            {\r\n     " +
-                    "           // Don\'t reveal that the user does not exist or is not confirmed\r\n   " +
-                    "             return RedirectToPage(\"./ForgotPasswordConfirmation\");\r\n           " +
-                    " }\r\n\r\n            // For more information on how to enable account confirmation " +
-                    "and password reset please\r\n            // visit https://go.microsoft.com/fwlink/" +
-                    "?LinkID=532713\r\n            var code = await _userManager.GeneratePasswordResetT" +
-                    "okenAsync(user);\r\n            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.G" +
-                    "etBytes(code));\r\n            var callbackUrl = Url.Page(\r\n                \"/Acco" +
-                    "unt/ResetPassword\",\r\n                pageHandler: null,\r\n                values:" +
-                    " new { area = \"Identity\", code },\r\n                protocol: Request.Scheme);\r\n\r" +
-                    "\n            await _emailSender.SendEmailAsync(\r\n                Input.Email,\r\n " +
-                    "               \"Reset Password\",\r\n                $\"Please reset your password b" +
-                    "y <a href=\'{HtmlEncoder.Default.Encode(callbackUrl)}\'>clicking here</a>.\");\r\n\r\n " +
-                    "           return RedirectToPage(\"./ForgotPasswordConfirmation\");\r\n        }\r\n\r\n" +
-                    "        return Page();\r\n    }\r\n}\r\n");
+                    "public InputModel Input { get; set; } = default!;\r\n\r\n    /// <summary>\r\n    /// " +
+                    "    This API supports the ASP.NET Core Identity default UI infrastructure and is" +
+                    " not intended to be used\r\n    ///     directly from your code. This API may chan" +
+                    "ge or be removed in future releases.\r\n    /// </summary>\r\n    public class Input" +
+                    "Model\r\n    {\r\n        /// <summary>\r\n        ///     This API supports the ASP.N" +
+                    "ET Core Identity default UI infrastructure and is not intended to be used\r\n     " +
+                    "   ///     directly from your code. This API may change or be removed in future " +
+                    "releases.\r\n        /// </summary>\r\n        [Required]\r\n        [EmailAddress]\r\n " +
+                    "       public string Email { get; set; } = default!;\r\n    }\r\n\r\n    public async " +
+                    "Task<IActionResult> OnPostAsync()\r\n    {\r\n        if (ModelState.IsValid)\r\n     " +
+                    "   {\r\n            var user = await _userManager.FindByEmailAsync(Input.Email);\r\n" +
+                    "            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)" +
+                    "))\r\n            {\r\n                // Don\'t reveal that the user does not exist " +
+                    "or is not confirmed\r\n                return RedirectToPage(\"./ForgotPasswordConf" +
+                    "irmation\");\r\n            }\r\n\r\n            // For more information on how to enab" +
+                    "le account confirmation and password reset please\r\n            // visit https://" +
+                    "go.microsoft.com/fwlink/?LinkID=532713\r\n            var code = await _userManage" +
+                    "r.GeneratePasswordResetTokenAsync(user);\r\n            code = WebEncoders.Base64U" +
+                    "rlEncode(Encoding.UTF8.GetBytes(code));\r\n            var callbackUrl = Url.Page(" +
+                    "\r\n                \"/Account/ResetPassword\",\r\n                pageHandler: null,\r" +
+                    "\n                values: new { area = \"Identity\", code },\r\n                proto" +
+                    "col: Request.Scheme)!;\r\n\r\n            await _emailSender.SendEmailAsync(\r\n      " +
+                    "          Input.Email,\r\n                \"Reset Password\",\r\n                $\"Ple" +
+                    "ase reset your password by <a href=\'{HtmlEncoder.Default.Encode(callbackUrl)}\'>c" +
+                    "licking here</a>.\");\r\n\r\n            return RedirectToPage(\"./ForgotPasswordConfi" +
+                    "rmation\");\r\n        }\r\n\r\n        return Page();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

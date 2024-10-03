@@ -71,7 +71,7 @@ using ");
         _logger.LogInformation(""User with ID '{UserId}' asked for their personal data."", _userManager.GetUserId(User));
 
         // Only include personal data for download
-        var personalData = new Dictionary<string, string>();
+        var personalData = new Dictionary<string, string?>();
         var personalDataProps = typeof(");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@").GetProperties().Where(

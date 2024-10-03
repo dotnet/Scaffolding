@@ -57,72 +57,72 @@ using ");
                     "emailSender;\r\n    }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP." +
                     "NET Core Identity default UI infrastructure and is not intended to be used\r\n    " +
                     "///     directly from your code. This API may change or be removed in future rel" +
-                    "eases.\r\n    /// </summary>\r\n    public string Email { get; set; }\r\n\r\n    /// <su" +
-                    "mmary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infra" +
-                    "structure and is not intended to be used\r\n    ///     directly from your code. T" +
-                    "his API may change or be removed in future releases.\r\n    /// </summary>\r\n    pu" +
-                    "blic bool IsEmailConfirmed { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This " +
-                    "API supports the ASP.NET Core Identity default UI infrastructure and is not inte" +
-                    "nded to be used\r\n    ///     directly from your code. This API may change or be " +
-                    "removed in future releases.\r\n    /// </summary>\r\n    [TempData]\r\n    public stri" +
-                    "ng StatusMessage { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API suppor" +
-                    "ts the ASP.NET Core Identity default UI infrastructure and is not intended to be" +
-                    " used\r\n    ///     directly from your code. This API may change or be removed in" +
-                    " future releases.\r\n    /// </summary>\r\n    [BindProperty]\r\n    public InputModel" +
-                    " Input { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP" +
-                    ".NET Core Identity default UI infrastructure and is not intended to be used\r\n   " +
-                    " ///     directly from your code. This API may change or be removed in future re" +
-                    "leases.\r\n    /// </summary>\r\n    public class InputModel\r\n    {\r\n        /// <su" +
-                    "mmary>\r\n        ///     This API supports the ASP.NET Core Identity default UI i" +
-                    "nfrastructure and is not intended to be used\r\n        ///     directly from your" +
-                    " code. This API may change or be removed in future releases.\r\n        /// </summ" +
-                    "ary>\r\n        [Required]\r\n        [EmailAddress]\r\n        [Display(Name = \"New e" +
-                    "mail\")]\r\n        public string NewEmail { get; set; }\r\n    }\r\n\r\n    private asyn" +
-                    "c Task LoadAsync(");
+                    "eases.\r\n    /// </summary>\r\n    public string? Email { get; set; }\r\n\r\n    /// <s" +
+                    "ummary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infr" +
+                    "astructure and is not intended to be used\r\n    ///     directly from your code. " +
+                    "This API may change or be removed in future releases.\r\n    /// </summary>\r\n    p" +
+                    "ublic bool IsEmailConfirmed { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This" +
+                    " API supports the ASP.NET Core Identity default UI infrastructure and is not int" +
+                    "ended to be used\r\n    ///     directly from your code. This API may change or be" +
+                    " removed in future releases.\r\n    /// </summary>\r\n    [TempData]\r\n    public str" +
+                    "ing? StatusMessage { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supp" +
+                    "orts the ASP.NET Core Identity default UI infrastructure and is not intended to " +
+                    "be used\r\n    ///     directly from your code. This API may change or be removed " +
+                    "in future releases.\r\n    /// </summary>\r\n    [BindProperty]\r\n    public InputMod" +
+                    "el Input { get; set; } = default!;\r\n\r\n    /// <summary>\r\n    ///     This API su" +
+                    "pports the ASP.NET Core Identity default UI infrastructure and is not intended t" +
+                    "o be used\r\n    ///     directly from your code. This API may change or be remove" +
+                    "d in future releases.\r\n    /// </summary>\r\n    public class InputModel\r\n    {\r\n " +
+                    "       /// <summary>\r\n        ///     This API supports the ASP.NET Core Identit" +
+                    "y default UI infrastructure and is not intended to be used\r\n        ///     dire" +
+                    "ctly from your code. This API may change or be removed in future releases.\r\n    " +
+                    "    /// </summary>\r\n        [Required]\r\n        [EmailAddress]\r\n        [Display" +
+                    "(Name = \"New email\")]\r\n        public string NewEmail { get; set; } = default!;\r" +
+                    "\n    }\r\n\r\n    private async Task LoadAsync(");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user)\r\n    {\r\n        var email = await _userManager.GetEmailAsync(user);\r\n     " +
                     "   Email = email;\r\n\r\n        Input = new InputModel\r\n        {\r\n            NewE" +
-                    "mail = email,\r\n        };\r\n\r\n        IsEmailConfirmed = await _userManager.IsEma" +
-                    "ilConfirmedAsync(user);\r\n    }\r\n\r\n    public async Task<IActionResult> OnGetAsyn" +
-                    "c()\r\n    {\r\n        var user = await _userManager.GetUserAsync(User);\r\n        i" +
-                    "f (user == null)\r\n        {\r\n            return NotFound($\"Unable to load user w" +
-                    "ith ID \'{_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n        await LoadAsyn" +
-                    "c(user);\r\n        return Page();\r\n    }\r\n\r\n    public async Task<IActionResult> " +
-                    "OnPostChangeEmailAsync()\r\n    {\r\n        var user = await _userManager.GetUserAs" +
-                    "ync(User);\r\n        if (user == null)\r\n        {\r\n            return NotFound($\"" +
-                    "Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n " +
-                    "       if (!ModelState.IsValid)\r\n        {\r\n            await LoadAsync(user);\r\n" +
-                    "            return Page();\r\n        }\r\n\r\n        var email = await _userManager." +
-                    "GetEmailAsync(user);\r\n        if (Input.NewEmail != email)\r\n        {\r\n         " +
-                    "   var userId = await _userManager.GetUserIdAsync(user);\r\n            var code =" +
-                    " await _userManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);\r\n      " +
-                    "      code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n       " +
-                    "     var callbackUrl = Url.Page(\r\n                \"/Account/ConfirmEmailChange\"," +
-                    "\r\n                pageHandler: null,\r\n                values: new { area = \"Iden" +
-                    "tity\", userId = userId, email = Input.NewEmail, code = code },\r\n                " +
-                    "protocol: Request.Scheme);\r\n            await _emailSender.SendEmailAsync(\r\n    " +
-                    "            Input.NewEmail,\r\n                \"Confirm your email\",\r\n            " +
-                    "    $\"Please confirm your account by <a href=\'{HtmlEncoder.Default.Encode(callba" +
-                    "ckUrl)}\'>clicking here</a>.\");\r\n\r\n            StatusMessage = \"Confirmation link" +
-                    " to change email sent. Please check your email.\";\r\n            return RedirectTo" +
-                    "Page();\r\n        }\r\n\r\n        StatusMessage = \"Your email is unchanged.\";\r\n     " +
-                    "   return RedirectToPage();\r\n    }\r\n\r\n    public async Task<IActionResult> OnPos" +
-                    "tSendVerificationEmailAsync()\r\n    {\r\n        var user = await _userManager.GetU" +
-                    "serAsync(User);\r\n        if (user == null)\r\n        {\r\n            return NotFou" +
-                    "nd($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n        }" +
-                    "\r\n\r\n        if (!ModelState.IsValid)\r\n        {\r\n            await LoadAsync(use" +
-                    "r);\r\n            return Page();\r\n        }\r\n\r\n        var userId = await _userMa" +
-                    "nager.GetUserIdAsync(user);\r\n        var email = await _userManager.GetEmailAsyn" +
-                    "c(user);\r\n        var code = await _userManager.GenerateEmailConfirmationTokenAs" +
-                    "ync(user);\r\n        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(co" +
-                    "de));\r\n        var callbackUrl = Url.Page(\r\n            \"/Account/ConfirmEmail\"," +
-                    "\r\n            pageHandler: null,\r\n            values: new { area = \"Identity\", u" +
-                    "serId = userId, code = code },\r\n            protocol: Request.Scheme);\r\n        " +
-                    "await _emailSender.SendEmailAsync(\r\n            email,\r\n            \"Confirm you" +
-                    "r email\",\r\n            $\"Please confirm your account by <a href=\'{HtmlEncoder.De" +
-                    "fault.Encode(callbackUrl)}\'>clicking here</a>.\");\r\n\r\n        StatusMessage = \"Ve" +
-                    "rification email sent. Please check your email.\";\r\n        return RedirectToPage" +
-                    "();\r\n    }\r\n}\r\n");
+                    "mail = email!,\r\n        };\r\n\r\n        IsEmailConfirmed = await _userManager.IsEm" +
+                    "ailConfirmedAsync(user);\r\n    }\r\n\r\n    public async Task<IActionResult> OnGetAsy" +
+                    "nc()\r\n    {\r\n        var user = await _userManager.GetUserAsync(User);\r\n        " +
+                    "if (user == null)\r\n        {\r\n            return NotFound($\"Unable to load user " +
+                    "with ID \'{_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n        await LoadAsy" +
+                    "nc(user);\r\n        return Page();\r\n    }\r\n\r\n    public async Task<IActionResult>" +
+                    " OnPostChangeEmailAsync()\r\n    {\r\n        var user = await _userManager.GetUserA" +
+                    "sync(User);\r\n        if (user == null)\r\n        {\r\n            return NotFound($" +
+                    "\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n" +
+                    "        if (!ModelState.IsValid)\r\n        {\r\n            await LoadAsync(user);\r" +
+                    "\n            return Page();\r\n        }\r\n\r\n        var email = await _userManager" +
+                    ".GetEmailAsync(user);\r\n        if (Input.NewEmail != email)\r\n        {\r\n        " +
+                    "    var userId = await _userManager.GetUserIdAsync(user);\r\n            var code " +
+                    "= await _userManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);\r\n     " +
+                    "       code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n      " +
+                    "      var callbackUrl = Url.Page(\r\n                \"/Account/ConfirmEmailChange\"" +
+                    ",\r\n                pageHandler: null,\r\n                values: new { area = \"Ide" +
+                    "ntity\", userId = userId, email = Input.NewEmail, code = code },\r\n               " +
+                    " protocol: Request.Scheme)!;\r\n            await _emailSender.SendEmailAsync(\r\n  " +
+                    "              Input.NewEmail,\r\n                \"Confirm your email\",\r\n          " +
+                    "      $\"Please confirm your account by <a href=\'{HtmlEncoder.Default.Encode(call" +
+                    "backUrl)}\'>clicking here</a>.\");\r\n\r\n            StatusMessage = \"Confirmation li" +
+                    "nk to change email sent. Please check your email.\";\r\n            return Redirect" +
+                    "ToPage();\r\n        }\r\n\r\n        StatusMessage = \"Your email is unchanged.\";\r\n   " +
+                    "     return RedirectToPage();\r\n    }\r\n\r\n    public async Task<IActionResult> OnP" +
+                    "ostSendVerificationEmailAsync()\r\n    {\r\n        var user = await _userManager.Ge" +
+                    "tUserAsync(User);\r\n        if (user == null)\r\n        {\r\n            return NotF" +
+                    "ound($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n       " +
+                    " }\r\n\r\n        if (!ModelState.IsValid)\r\n        {\r\n            await LoadAsync(u" +
+                    "ser);\r\n            return Page();\r\n        }\r\n\r\n        var userId = await _user" +
+                    "Manager.GetUserIdAsync(user);\r\n        var email = await _userManager.GetEmailAs" +
+                    "ync(user);\r\n        var code = await _userManager.GenerateEmailConfirmationToken" +
+                    "Async(user);\r\n        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(" +
+                    "code));\r\n        var callbackUrl = Url.Page(\r\n            \"/Account/ConfirmEmail" +
+                    "\",\r\n            pageHandler: null,\r\n            values: new { area = \"Identity\"," +
+                    " userId = userId, code = code },\r\n            protocol: Request.Scheme)!;\r\n     " +
+                    "   await _emailSender.SendEmailAsync(\r\n            email!,\r\n            \"Confirm" +
+                    " your email\",\r\n            $\"Please confirm your account by <a href=\'{HtmlEncode" +
+                    "r.Default.Encode(callbackUrl)}\'>clicking here</a>.\");\r\n\r\n        StatusMessage =" +
+                    " \"Verification email sent. Please check your email.\";\r\n        return RedirectTo" +
+                    "Page();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

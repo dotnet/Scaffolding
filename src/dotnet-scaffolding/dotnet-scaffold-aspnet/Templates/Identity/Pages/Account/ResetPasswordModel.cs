@@ -50,47 +50,47 @@ using ");
                     "mary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infras" +
                     "tructure and is not intended to be used\r\n    ///     directly from your code. Th" +
                     "is API may change or be removed in future releases.\r\n    /// </summary>\r\n    [Bi" +
-                    "ndProperty]\r\n    public InputModel Input { get; set; }\r\n\r\n    /// <summary>\r\n   " +
-                    " ///     This API supports the ASP.NET Core Identity default UI infrastructure a" +
-                    "nd is not intended to be used\r\n    ///     directly from your code. This API may" +
-                    " change or be removed in future releases.\r\n    /// </summary>\r\n    public class " +
-                    "InputModel\r\n    {\r\n        /// <summary>\r\n        ///     This API supports the " +
-                    "ASP.NET Core Identity default UI infrastructure and is not intended to be used\r\n" +
-                    "        ///     directly from your code. This API may change or be removed in fu" +
-                    "ture releases.\r\n        /// </summary>\r\n        [Required]\r\n        [EmailAddres" +
-                    "s]\r\n        public string Email { get; set; }\r\n\r\n        /// <summary>\r\n        " +
-                    "///     This API supports the ASP.NET Core Identity default UI infrastructure an" +
-                    "d is not intended to be used\r\n        ///     directly from your code. This API " +
-                    "may change or be removed in future releases.\r\n        /// </summary>\r\n        [R" +
-                    "equired]\r\n        [StringLength(100, ErrorMessage = \"The {0} must be at least {2" +
-                    "} and at max {1} characters long.\", MinimumLength = 6)]\r\n        [DataType(DataT" +
-                    "ype.Password)]\r\n        public string Password { get; set; }\r\n\r\n        /// <sum" +
-                    "mary>\r\n        ///     This API supports the ASP.NET Core Identity default UI in" +
-                    "frastructure and is not intended to be used\r\n        ///     directly from your " +
-                    "code. This API may change or be removed in future releases.\r\n        /// </summa" +
-                    "ry>\r\n        [DataType(DataType.Password)]\r\n        [Display(Name = \"Confirm pas" +
-                    "sword\")]\r\n        [Compare(\"Password\", ErrorMessage = \"The password and confirma" +
-                    "tion password do not match.\")]\r\n        public string ConfirmPassword { get; set" +
-                    "; }\r\n\r\n        /// <summary>\r\n        ///     This API supports the ASP.NET Core" +
-                    " Identity default UI infrastructure and is not intended to be used\r\n        /// " +
-                    "    directly from your code. This API may change or be removed in future release" +
-                    "s.\r\n        /// </summary>\r\n        [Required]\r\n        public string Code { get" +
-                    "; set; }\r\n\r\n    }\r\n\r\n    public IActionResult OnGet(string code = null)\r\n    {\r\n" +
-                    "        if (code == null)\r\n        {\r\n            return BadRequest(\"A code must" +
-                    " be supplied for password reset.\");\r\n        }\r\n        else\r\n        {\r\n       " +
-                    "     Input = new InputModel\r\n            {\r\n                Code = Encoding.UTF8" +
-                    ".GetString(WebEncoders.Base64UrlDecode(code))\r\n            };\r\n            retur" +
-                    "n Page();\r\n        }\r\n    }\r\n\r\n    public async Task<IActionResult> OnPostAsync(" +
-                    ")\r\n    {\r\n        if (!ModelState.IsValid)\r\n        {\r\n            return Page()" +
-                    ";\r\n        }\r\n\r\n        var user = await _userManager.FindByEmailAsync(Input.Ema" +
-                    "il);\r\n        if (user == null)\r\n        {\r\n            // Don\'t reveal that the" +
-                    " user does not exist\r\n            return RedirectToPage(\"./ResetPasswordConfirma" +
-                    "tion\");\r\n        }\r\n\r\n        var result = await _userManager.ResetPasswordAsync" +
-                    "(user, Input.Code, Input.Password);\r\n        if (result.Succeeded)\r\n        {\r\n " +
-                    "           return RedirectToPage(\"./ResetPasswordConfirmation\");\r\n        }\r\n\r\n " +
-                    "       foreach (var error in result.Errors)\r\n        {\r\n            ModelState.A" +
-                    "ddModelError(string.Empty, error.Description);\r\n        }\r\n        return Page()" +
-                    ";\r\n    }\r\n}\r\n");
+                    "ndProperty]\r\n    public InputModel Input { get; set; } = default!;\r\n\r\n    /// <s" +
+                    "ummary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infr" +
+                    "astructure and is not intended to be used\r\n    ///     directly from your code. " +
+                    "This API may change or be removed in future releases.\r\n    /// </summary>\r\n    p" +
+                    "ublic class InputModel\r\n    {\r\n        /// <summary>\r\n        ///     This API s" +
+                    "upports the ASP.NET Core Identity default UI infrastructure and is not intended " +
+                    "to be used\r\n        ///     directly from your code. This API may change or be r" +
+                    "emoved in future releases.\r\n        /// </summary>\r\n        [Required]\r\n        " +
+                    "[EmailAddress]\r\n        public string Email { get; set; } = default!;\r\n\r\n       " +
+                    " /// <summary>\r\n        ///     This API supports the ASP.NET Core Identity defa" +
+                    "ult UI infrastructure and is not intended to be used\r\n        ///     directly f" +
+                    "rom your code. This API may change or be removed in future releases.\r\n        //" +
+                    "/ </summary>\r\n        [Required]\r\n        [StringLength(100, ErrorMessage = \"The" +
+                    " {0} must be at least {2} and at max {1} characters long.\", MinimumLength = 6)]\r" +
+                    "\n        [DataType(DataType.Password)]\r\n        public string Password { get; se" +
+                    "t; } = default!;\r\n\r\n        /// <summary>\r\n        ///     This API supports the" +
+                    " ASP.NET Core Identity default UI infrastructure and is not intended to be used\r" +
+                    "\n        ///     directly from your code. This API may change or be removed in f" +
+                    "uture releases.\r\n        /// </summary>\r\n        [DataType(DataType.Password)]\r\n" +
+                    "        [Display(Name = \"Confirm password\")]\r\n        [Compare(\"Password\", Error" +
+                    "Message = \"The password and confirmation password do not match.\")]\r\n        publ" +
+                    "ic string? ConfirmPassword { get; set; }\r\n\r\n        /// <summary>\r\n        ///  " +
+                    "   This API supports the ASP.NET Core Identity default UI infrastructure and is " +
+                    "not intended to be used\r\n        ///     directly from your code. This API may c" +
+                    "hange or be removed in future releases.\r\n        /// </summary>\r\n        [Requir" +
+                    "ed]\r\n        public string Code { get; set; } = default!;\r\n\r\n    }\r\n\r\n    public" +
+                    " IActionResult OnGet(string? code = null)\r\n    {\r\n        if (code == null)\r\n   " +
+                    "     {\r\n            return BadRequest(\"A code must be supplied for password rese" +
+                    "t.\");\r\n        }\r\n        else\r\n        {\r\n            Input = new InputModel\r\n " +
+                    "           {\r\n                Code = Encoding.UTF8.GetString(WebEncoders.Base64U" +
+                    "rlDecode(code))\r\n            };\r\n            return Page();\r\n        }\r\n    }\r\n\r" +
+                    "\n    public async Task<IActionResult> OnPostAsync()\r\n    {\r\n        if (!ModelSt" +
+                    "ate.IsValid)\r\n        {\r\n            return Page();\r\n        }\r\n\r\n        var us" +
+                    "er = await _userManager.FindByEmailAsync(Input.Email);\r\n        if (user == null" +
+                    ")\r\n        {\r\n            // Don\'t reveal that the user does not exist\r\n        " +
+                    "    return RedirectToPage(\"./ResetPasswordConfirmation\");\r\n        }\r\n\r\n        " +
+                    "var result = await _userManager.ResetPasswordAsync(user, Input.Code, Input.Passw" +
+                    "ord);\r\n        if (result.Succeeded)\r\n        {\r\n            return RedirectToPa" +
+                    "ge(\"./ResetPasswordConfirmation\");\r\n        }\r\n\r\n        foreach (var error in r" +
+                    "esult.Errors)\r\n        {\r\n            ModelState.AddModelError(string.Empty, err" +
+                    "or.Description);\r\n        }\r\n        return Page();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

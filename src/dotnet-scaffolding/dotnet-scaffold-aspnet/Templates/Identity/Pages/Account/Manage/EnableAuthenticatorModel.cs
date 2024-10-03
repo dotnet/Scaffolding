@@ -60,59 +60,60 @@ using ");
                     "logger;\r\n        _urlEncoder = urlEncoder;\r\n    }\r\n\r\n    /// <summary>\r\n    /// " +
                     "    This API supports the ASP.NET Core Identity default UI infrastructure and is" +
                     " not intended to be used\r\n    ///     directly from your code. This API may chan" +
-                    "ge or be removed in future releases.\r\n    /// </summary>\r\n    public string Shar" +
-                    "edKey { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP." +
-                    "NET Core Identity default UI infrastructure and is not intended to be used\r\n    " +
-                    "///     directly from your code. This API may change or be removed in future rel" +
-                    "eases.\r\n    /// </summary>\r\n    public string AuthenticatorUri { get; set; }\r\n\r\n" +
-                    "    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity defau" +
-                    "lt UI infrastructure and is not intended to be used\r\n    ///     directly from y" +
-                    "our code. This API may change or be removed in future releases.\r\n    /// </summa" +
-                    "ry>\r\n    [TempData]\r\n    public string[] RecoveryCodes { get; set; }\r\n\r\n    /// " +
-                    "<summary>\r\n    ///     This API supports the ASP.NET Core Identity default UI in" +
-                    "frastructure and is not intended to be used\r\n    ///     directly from your code" +
-                    ". This API may change or be removed in future releases.\r\n    /// </summary>\r\n   " +
-                    " [TempData]\r\n    public string StatusMessage { get; set; }\r\n\r\n    /// <summary>\r" +
-                    "\n    ///     This API supports the ASP.NET Core Identity default UI infrastructu" +
-                    "re and is not intended to be used\r\n    ///     directly from your code. This API" +
-                    " may change or be removed in future releases.\r\n    /// </summary>\r\n    [BindProp" +
-                    "erty]\r\n    public InputModel Input { get; set; }\r\n\r\n    /// <summary>\r\n    ///  " +
-                    "   This API supports the ASP.NET Core Identity default UI infrastructure and is " +
-                    "not intended to be used\r\n    ///     directly from your code. This API may chang" +
-                    "e or be removed in future releases.\r\n    /// </summary>\r\n    public class InputM" +
-                    "odel\r\n    {\r\n        /// <summary>\r\n        ///     This API supports the ASP.NE" +
-                    "T Core Identity default UI infrastructure and is not intended to be used\r\n      " +
-                    "  ///     directly from your code. This API may change or be removed in future r" +
-                    "eleases.\r\n        /// </summary>\r\n        [Required]\r\n        [StringLength(7, E" +
-                    "rrorMessage = \"The {0} must be at least {2} and at max {1} characters long.\", Mi" +
-                    "nimumLength = 6)]\r\n        [DataType(DataType.Text)]\r\n        [Display(Name = \"V" +
-                    "erification Code\")]\r\n        public string Code { get; set; }\r\n    }\r\n\r\n    publ" +
-                    "ic async Task<IActionResult> OnGetAsync()\r\n    {\r\n        var user = await _user" +
-                    "Manager.GetUserAsync(User);\r\n        if (user == null)\r\n        {\r\n            r" +
-                    "eturn NotFound($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\")" +
-                    ";\r\n        }\r\n\r\n        await LoadSharedKeyAndQrCodeUriAsync(user);\r\n\r\n        r" +
-                    "eturn Page();\r\n    }\r\n\r\n    public async Task<IActionResult> OnPostAsync()\r\n    " +
-                    "{\r\n        var user = await _userManager.GetUserAsync(User);\r\n        if (user =" +
-                    "= null)\r\n        {\r\n            return NotFound($\"Unable to load user with ID \'{" +
-                    "_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n        if (!ModelState.IsValid" +
-                    ")\r\n        {\r\n            await LoadSharedKeyAndQrCodeUriAsync(user);\r\n         " +
-                    "   return Page();\r\n        }\r\n\r\n        // Strip spaces and hyphens\r\n        var" +
-                    " verificationCode = Input.Code.Replace(\" \", string.Empty).Replace(\"-\", string.Em" +
-                    "pty);\r\n\r\n        var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAs" +
-                    "ync(\r\n            user, _userManager.Options.Tokens.AuthenticatorTokenProvider, " +
-                    "verificationCode);\r\n\r\n        if (!is2faTokenValid)\r\n        {\r\n            Mode" +
-                    "lState.AddModelError(\"Input.Code\", \"Verification code is invalid.\");\r\n          " +
-                    "  await LoadSharedKeyAndQrCodeUriAsync(user);\r\n            return Page();\r\n     " +
-                    "   }\r\n\r\n        await _userManager.SetTwoFactorEnabledAsync(user, true);\r\n      " +
-                    "  var userId = await _userManager.GetUserIdAsync(user);\r\n        _logger.LogInfo" +
-                    "rmation(\"User with ID \'{UserId}\' has enabled 2FA with an authenticator app.\", us" +
-                    "erId);\r\n\r\n        StatusMessage = \"Your authenticator app has been verified.\";\r\n" +
-                    "\r\n        if (await _userManager.CountRecoveryCodesAsync(user) == 0)\r\n        {\r" +
-                    "\n            var recoveryCodes = await _userManager.GenerateNewTwoFactorRecovery" +
-                    "CodesAsync(user, 10);\r\n            RecoveryCodes = recoveryCodes.ToArray();\r\n   " +
-                    "         return RedirectToPage(\"./ShowRecoveryCodes\");\r\n        }\r\n        else\r" +
-                    "\n        {\r\n            return RedirectToPage(\"./TwoFactorAuthentication\");\r\n   " +
-                    "     }\r\n    }\r\n\r\n    private async Task LoadSharedKeyAndQrCodeUriAsync(");
+                    "ge or be removed in future releases.\r\n    /// </summary>\r\n    public string? Sha" +
+                    "redKey { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP" +
+                    ".NET Core Identity default UI infrastructure and is not intended to be used\r\n   " +
+                    " ///     directly from your code. This API may change or be removed in future re" +
+                    "leases.\r\n    /// </summary>\r\n    public string? AuthenticatorUri { get; set; }\r\n" +
+                    "\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity def" +
+                    "ault UI infrastructure and is not intended to be used\r\n    ///     directly from" +
+                    " your code. This API may change or be removed in future releases.\r\n    /// </sum" +
+                    "mary>\r\n    [TempData]\r\n    public string[]? RecoveryCodes { get; set; }\r\n\r\n    /" +
+                    "// <summary>\r\n    ///     This API supports the ASP.NET Core Identity default UI" +
+                    " infrastructure and is not intended to be used\r\n    ///     directly from your c" +
+                    "ode. This API may change or be removed in future releases.\r\n    /// </summary>\r\n" +
+                    "    [TempData]\r\n    public string? StatusMessage { get; set; }\r\n\r\n    /// <summa" +
+                    "ry>\r\n    ///     This API supports the ASP.NET Core Identity default UI infrastr" +
+                    "ucture and is not intended to be used\r\n    ///     directly from your code. This" +
+                    " API may change or be removed in future releases.\r\n    /// </summary>\r\n    [Bind" +
+                    "Property]\r\n    public InputModel Input { get; set; } = default!;\r\n\r\n    /// <sum" +
+                    "mary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infras" +
+                    "tructure and is not intended to be used\r\n    ///     directly from your code. Th" +
+                    "is API may change or be removed in future releases.\r\n    /// </summary>\r\n    pub" +
+                    "lic class InputModel\r\n    {\r\n        /// <summary>\r\n        ///     This API sup" +
+                    "ports the ASP.NET Core Identity default UI infrastructure and is not intended to" +
+                    " be used\r\n        ///     directly from your code. This API may change or be rem" +
+                    "oved in future releases.\r\n        /// </summary>\r\n        [Required]\r\n        [S" +
+                    "tringLength(7, ErrorMessage = \"The {0} must be at least {2} and at max {1} chara" +
+                    "cters long.\", MinimumLength = 6)]\r\n        [DataType(DataType.Text)]\r\n        [D" +
+                    "isplay(Name = \"Verification Code\")]\r\n        public string Code { get; set; } = " +
+                    "default!;\r\n    }\r\n\r\n    public async Task<IActionResult> OnGetAsync()\r\n    {\r\n  " +
+                    "      var user = await _userManager.GetUserAsync(User);\r\n        if (user == nul" +
+                    "l)\r\n        {\r\n            return NotFound($\"Unable to load user with ID \'{_user" +
+                    "Manager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n        await LoadSharedKeyAndQrCode" +
+                    "UriAsync(user);\r\n\r\n        return Page();\r\n    }\r\n\r\n    public async Task<IActio" +
+                    "nResult> OnPostAsync()\r\n    {\r\n        var user = await _userManager.GetUserAsyn" +
+                    "c(User);\r\n        if (user == null)\r\n        {\r\n            return NotFound($\"Un" +
+                    "able to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n   " +
+                    "     if (!ModelState.IsValid)\r\n        {\r\n            await LoadSharedKeyAndQrCo" +
+                    "deUriAsync(user);\r\n            return Page();\r\n        }\r\n\r\n        // Strip spa" +
+                    "ces and hyphens\r\n        var verificationCode = Input.Code.Replace(\" \", string.E" +
+                    "mpty).Replace(\"-\", string.Empty);\r\n\r\n        var is2faTokenValid = await _userMa" +
+                    "nager.VerifyTwoFactorTokenAsync(\r\n            user, _userManager.Options.Tokens." +
+                    "AuthenticatorTokenProvider, verificationCode);\r\n\r\n        if (!is2faTokenValid)\r" +
+                    "\n        {\r\n            ModelState.AddModelError(\"Input.Code\", \"Verification cod" +
+                    "e is invalid.\");\r\n            await LoadSharedKeyAndQrCodeUriAsync(user);\r\n     " +
+                    "       return Page();\r\n        }\r\n\r\n        await _userManager.SetTwoFactorEnabl" +
+                    "edAsync(user, true);\r\n        var userId = await _userManager.GetUserIdAsync(use" +
+                    "r);\r\n        _logger.LogInformation(\"User with ID \'{UserId}\' has enabled 2FA wit" +
+                    "h an authenticator app.\", userId);\r\n\r\n        StatusMessage = \"Your authenticato" +
+                    "r app has been verified.\";\r\n\r\n        if (await _userManager.CountRecoveryCodesA" +
+                    "sync(user) == 0)\r\n        {\r\n            var recoveryCodes = await _userManager." +
+                    "GenerateNewTwoFactorRecoveryCodesAsync(user, 10);\r\n            RecoveryCodes = r" +
+                    "ecoveryCodes!.ToArray();\r\n            return RedirectToPage(\"./ShowRecoveryCodes" +
+                    "\");\r\n        }\r\n        else\r\n        {\r\n            return RedirectToPage(\"./Tw" +
+                    "oFactorAuthentication\");\r\n        }\r\n    }\r\n\r\n    private async Task LoadSharedK" +
+                    "eyAndQrCodeUriAsync(");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@" user)
     {
@@ -124,10 +125,10 @@ using ");
             unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
         }
 
-        SharedKey = FormatKey(unformattedKey);
+        SharedKey = FormatKey(unformattedKey!);
 
         var email = await _userManager.GetEmailAsync(user);
-        AuthenticatorUri = GenerateQrCodeUri(email, unformattedKey);
+        AuthenticatorUri = GenerateQrCodeUri(email!, unformattedKey!);
     }
 
     private string FormatKey(string unformattedKey)

@@ -54,30 +54,31 @@ using ");
                     "  This API supports the ASP.NET Core Identity default UI infrastructure and is n" +
                     "ot intended to be used\r\n    ///     directly from your code. This API may change" +
                     " or be removed in future releases.\r\n    /// </summary>\r\n    [BindProperty]\r\n    " +
-                    "public InputModel Input { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API" +
-                    " supports the ASP.NET Core Identity default UI infrastructure and is not intende" +
-                    "d to be used\r\n    ///     directly from your code. This API may change or be rem" +
-                    "oved in future releases.\r\n    /// </summary>\r\n    public class InputModel\r\n    {" +
-                    "\r\n        /// <summary>\r\n        ///     This API supports the ASP.NET Core Iden" +
-                    "tity default UI infrastructure and is not intended to be used\r\n        ///     d" +
-                    "irectly from your code. This API may change or be removed in future releases.\r\n " +
-                    "       /// </summary>\r\n        [Required]\r\n        [EmailAddress]\r\n        publi" +
-                    "c string Email { get; set; }\r\n    }\r\n\r\n    public void OnGet()\r\n    {\r\n    }\r\n\r\n" +
-                    "    public async Task<IActionResult> OnPostAsync()\r\n    {\r\n        if (!ModelSta" +
-                    "te.IsValid)\r\n        {\r\n            return Page();\r\n        }\r\n\r\n        var use" +
-                    "r = await _userManager.FindByEmailAsync(Input.Email);\r\n        if (user == null)" +
-                    "\r\n        {\r\n            ModelState.AddModelError(string.Empty, \"Verification em" +
-                    "ail sent. Please check your email.\");\r\n            return Page();\r\n        }\r\n\r\n" +
-                    "        var userId = await _userManager.GetUserIdAsync(user);\r\n        var code " +
-                    "= await _userManager.GenerateEmailConfirmationTokenAsync(user);\r\n        code = " +
-                    "WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        var callback" +
-                    "Url = Url.Page(\r\n            \"/Account/ConfirmEmail\",\r\n            pageHandler: " +
-                    "null,\r\n            values: new { userId = userId, code = code },\r\n            pr" +
-                    "otocol: Request.Scheme);\r\n        await _emailSender.SendEmailAsync(\r\n          " +
-                    "  Input.Email,\r\n            \"Confirm your email\",\r\n            $\"Please confirm " +
-                    "your account by <a href=\'{HtmlEncoder.Default.Encode(callbackUrl)}\'>clicking her" +
-                    "e</a>.\");\r\n\r\n        ModelState.AddModelError(string.Empty, \"Verification email " +
-                    "sent. Please check your email.\");\r\n        return Page();\r\n    }\r\n}\r\n");
+                    "public InputModel Input { get; set; } = default!;\r\n\r\n    /// <summary>\r\n    /// " +
+                    "    This API supports the ASP.NET Core Identity default UI infrastructure and is" +
+                    " not intended to be used\r\n    ///     directly from your code. This API may chan" +
+                    "ge or be removed in future releases.\r\n    /// </summary>\r\n    public class Input" +
+                    "Model\r\n    {\r\n        /// <summary>\r\n        ///     This API supports the ASP.N" +
+                    "ET Core Identity default UI infrastructure and is not intended to be used\r\n     " +
+                    "   ///     directly from your code. This API may change or be removed in future " +
+                    "releases.\r\n        /// </summary>\r\n        [Required]\r\n        [EmailAddress]\r\n " +
+                    "       public string Email { get; set; } = default!;\r\n    }\r\n\r\n    public void O" +
+                    "nGet()\r\n    {\r\n    }\r\n\r\n    public async Task<IActionResult> OnPostAsync()\r\n    " +
+                    "{\r\n        if (!ModelState.IsValid)\r\n        {\r\n            return Page();\r\n    " +
+                    "    }\r\n\r\n        var user = await _userManager.FindByEmailAsync(Input.Email);\r\n " +
+                    "       if (user == null)\r\n        {\r\n            ModelState.AddModelError(string" +
+                    ".Empty, \"Verification email sent. Please check your email.\");\r\n            retur" +
+                    "n Page();\r\n        }\r\n\r\n        var userId = await _userManager.GetUserIdAsync(u" +
+                    "ser);\r\n        var code = await _userManager.GenerateEmailConfirmationTokenAsync" +
+                    "(user);\r\n        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code)" +
+                    ");\r\n        var callbackUrl = Url.Page(\r\n            \"/Account/ConfirmEmail\",\r\n " +
+                    "           pageHandler: null,\r\n            values: new { userId = userId, code =" +
+                    " code },\r\n            protocol: Request.Scheme)!;\r\n        await _emailSender.Se" +
+                    "ndEmailAsync(\r\n            Input.Email,\r\n            \"Confirm your email\",\r\n    " +
+                    "        $\"Please confirm your account by <a href=\'{HtmlEncoder.Default.Encode(ca" +
+                    "llbackUrl)}\'>clicking here</a>.\");\r\n\r\n        ModelState.AddModelError(string.Em" +
+                    "pty, \"Verification email sent. Please check your email.\");\r\n        return Page(" +
+                    ");\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

@@ -52,7 +52,6 @@ internal static class IdentityScaffolderBuilderExtensions
     {
         builder = builder.WithStep<TextTemplatingStep>(config =>
         {
-            Debugger.Launch();
             var step = config.Step;
             var context = config.Context;
             context.Properties.TryGetValue(nameof(IdentityModel), out var blazorIdentityModelObj);

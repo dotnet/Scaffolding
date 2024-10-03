@@ -53,24 +53,24 @@ using ");
                     "ger = signInManager;\r\n    }\r\n\r\n    /// <summary>\r\n    ///     This API supports " +
                     "the ASP.NET Core Identity default UI infrastructure and is not intended to be us" +
                     "ed\r\n    ///     directly from your code. This API may change or be removed in fu" +
-                    "ture releases.\r\n    /// </summary>\r\n    public string Username { get; set; }\r\n\r\n" +
-                    "    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity defau" +
-                    "lt UI infrastructure and is not intended to be used\r\n    ///     directly from y" +
-                    "our code. This API may change or be removed in future releases.\r\n    /// </summa" +
-                    "ry>\r\n    [TempData]\r\n    public string StatusMessage { get; set; }\r\n\r\n    /// <s" +
-                    "ummary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infr" +
-                    "astructure and is not intended to be used\r\n    ///     directly from your code. " +
-                    "This API may change or be removed in future releases.\r\n    /// </summary>\r\n    [" +
-                    "BindProperty]\r\n    public InputModel Input { get; set; }\r\n\r\n    /// <summary>\r\n " +
-                    "   ///     This API supports the ASP.NET Core Identity default UI infrastructure" +
-                    " and is not intended to be used\r\n    ///     directly from your code. This API m" +
-                    "ay change or be removed in future releases.\r\n    /// </summary>\r\n    public clas" +
-                    "s InputModel\r\n    {\r\n        /// <summary>\r\n        ///     This API supports th" +
-                    "e ASP.NET Core Identity default UI infrastructure and is not intended to be used" +
-                    "\r\n        ///     directly from your code. This API may change or be removed in " +
-                    "future releases.\r\n        /// </summary>\r\n        [Phone]\r\n        [Display(Name" +
-                    " = \"Phone number\")]\r\n        public string PhoneNumber { get; set; }\r\n    }\r\n\r\n " +
-                    "   private async Task LoadAsync(");
+                    "ture releases.\r\n    /// </summary>\r\n    public string? Username { get; set; }\r\n\r" +
+                    "\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity defa" +
+                    "ult UI infrastructure and is not intended to be used\r\n    ///     directly from " +
+                    "your code. This API may change or be removed in future releases.\r\n    /// </summ" +
+                    "ary>\r\n    [TempData]\r\n    public string? StatusMessage { get; set; }\r\n\r\n    /// " +
+                    "<summary>\r\n    ///     This API supports the ASP.NET Core Identity default UI in" +
+                    "frastructure and is not intended to be used\r\n    ///     directly from your code" +
+                    ". This API may change or be removed in future releases.\r\n    /// </summary>\r\n   " +
+                    " [BindProperty]\r\n    public InputModel Input { get; set; } = default!;\r\n\r\n    //" +
+                    "/ <summary>\r\n    ///     This API supports the ASP.NET Core Identity default UI " +
+                    "infrastructure and is not intended to be used\r\n    ///     directly from your co" +
+                    "de. This API may change or be removed in future releases.\r\n    /// </summary>\r\n " +
+                    "   public class InputModel\r\n    {\r\n        /// <summary>\r\n        ///     This A" +
+                    "PI supports the ASP.NET Core Identity default UI infrastructure and is not inten" +
+                    "ded to be used\r\n        ///     directly from your code. This API may change or " +
+                    "be removed in future releases.\r\n        /// </summary>\r\n        [Phone]\r\n       " +
+                    " [Display(Name = \"Phone number\")]\r\n        public string? PhoneNumber { get; set" +
+                    "; }\r\n    }\r\n\r\n    private async Task LoadAsync(");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user)\r\n    {\r\n        var userName = await _userManager.GetUserNameAsync(user);\r" +
                     "\n        var phoneNumber = await _userManager.GetPhoneNumberAsync(user);\r\n\r\n    " +

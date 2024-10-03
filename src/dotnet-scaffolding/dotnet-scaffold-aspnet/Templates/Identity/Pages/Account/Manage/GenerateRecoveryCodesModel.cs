@@ -50,31 +50,31 @@ using ");
                     "mary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infras" +
                     "tructure and is not intended to be used\r\n    ///     directly from your code. Th" +
                     "is API may change or be removed in future releases.\r\n    /// </summary>\r\n    [Te" +
-                    "mpData]\r\n    public string[] RecoveryCodes { get; set; }\r\n\r\n    /// <summary>\r\n " +
-                    "   ///     This API supports the ASP.NET Core Identity default UI infrastructure" +
-                    " and is not intended to be used\r\n    ///     directly from your code. This API m" +
-                    "ay change or be removed in future releases.\r\n    /// </summary>\r\n    [TempData]\r" +
-                    "\n    public string StatusMessage { get; set; }\r\n\r\n    public async Task<IActionR" +
-                    "esult> OnGetAsync()\r\n    {\r\n        var user = await _userManager.GetUserAsync(U" +
-                    "ser);\r\n        if (user == null)\r\n        {\r\n            return NotFound($\"Unabl" +
-                    "e to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n      " +
-                    "  var isTwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user);\r\n " +
-                    "       if (!isTwoFactorEnabled)\r\n        {\r\n            throw new InvalidOperati" +
-                    "onException($\"Cannot generate recovery codes for user because they do not have 2" +
-                    "FA enabled.\");\r\n        }\r\n\r\n        return Page();\r\n    }\r\n\r\n    public async T" +
-                    "ask<IActionResult> OnPostAsync()\r\n    {\r\n        var user = await _userManager.G" +
-                    "etUserAsync(User);\r\n        if (user == null)\r\n        {\r\n            return Not" +
-                    "Found($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n      " +
-                    "  }\r\n\r\n        var isTwoFactorEnabled = await _userManager.GetTwoFactorEnabledAs" +
-                    "ync(user);\r\n        var userId = await _userManager.GetUserIdAsync(user);\r\n     " +
-                    "   if (!isTwoFactorEnabled)\r\n        {\r\n            throw new InvalidOperationEx" +
-                    "ception($\"Cannot generate recovery codes for user as they do not have 2FA enable" +
-                    "d.\");\r\n        }\r\n\r\n        var recoveryCodes = await _userManager.GenerateNewTw" +
-                    "oFactorRecoveryCodesAsync(user, 10);\r\n        RecoveryCodes = recoveryCodes.ToAr" +
-                    "ray();\r\n\r\n        _logger.LogInformation(\"User with ID \'{UserId}\' has generated " +
-                    "new 2FA recovery codes.\", userId);\r\n        StatusMessage = \"You have generated " +
-                    "new recovery codes.\";\r\n        return RedirectToPage(\"./ShowRecoveryCodes\");\r\n  " +
-                    "  }\r\n}\r\n");
+                    "mpData]\r\n    public string[]? RecoveryCodes { get; set; }\r\n\r\n    /// <summary>\r\n" +
+                    "    ///     This API supports the ASP.NET Core Identity default UI infrastructur" +
+                    "e and is not intended to be used\r\n    ///     directly from your code. This API " +
+                    "may change or be removed in future releases.\r\n    /// </summary>\r\n    [TempData]" +
+                    "\r\n    public string? StatusMessage { get; set; }\r\n\r\n    public async Task<IActio" +
+                    "nResult> OnGetAsync()\r\n    {\r\n        var user = await _userManager.GetUserAsync" +
+                    "(User);\r\n        if (user == null)\r\n        {\r\n            return NotFound($\"Una" +
+                    "ble to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n    " +
+                    "    var isTwoFactorEnabled = await _userManager.GetTwoFactorEnabledAsync(user);\r" +
+                    "\n        if (!isTwoFactorEnabled)\r\n        {\r\n            throw new InvalidOpera" +
+                    "tionException($\"Cannot generate recovery codes for user because they do not have" +
+                    " 2FA enabled.\");\r\n        }\r\n\r\n        return Page();\r\n    }\r\n\r\n    public async" +
+                    " Task<IActionResult> OnPostAsync()\r\n    {\r\n        var user = await _userManager" +
+                    ".GetUserAsync(User);\r\n        if (user == null)\r\n        {\r\n            return N" +
+                    "otFound($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n    " +
+                    "    }\r\n\r\n        var isTwoFactorEnabled = await _userManager.GetTwoFactorEnabled" +
+                    "Async(user);\r\n        var userId = await _userManager.GetUserIdAsync(user);\r\n   " +
+                    "     if (!isTwoFactorEnabled)\r\n        {\r\n            throw new InvalidOperation" +
+                    "Exception($\"Cannot generate recovery codes for user as they do not have 2FA enab" +
+                    "led.\");\r\n        }\r\n\r\n        var recoveryCodes = await _userManager.GenerateNew" +
+                    "TwoFactorRecoveryCodesAsync(user, 10);\r\n        RecoveryCodes = recoveryCodes!.T" +
+                    "oArray();\r\n\r\n        _logger.LogInformation(\"User with ID \'{UserId}\' has generat" +
+                    "ed new 2FA recovery codes.\", userId);\r\n        StatusMessage = \"You have generat" +
+                    "ed new recovery codes.\";\r\n        return RedirectToPage(\"./ShowRecoveryCodes\");\r" +
+                    "\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

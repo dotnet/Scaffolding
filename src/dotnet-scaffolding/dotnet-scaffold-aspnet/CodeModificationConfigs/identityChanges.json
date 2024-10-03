@@ -4,7 +4,8 @@
       "FileName": "Program.cs",
       "Usings": [
         "Microsoft.AspNetCore.Identity",
-        "Microsoft.EntityFrameworkCore"
+        "Microsoft.EntityFrameworkCore",
+        "$(UserClassNamespace)"
       ],
       "Options": [
         "EfScenario"

@@ -53,23 +53,23 @@ using ");
                     "ger = signInManager;\r\n    }\r\n\r\n    /// <summary>\r\n    ///     This API supports " +
                     "the ASP.NET Core Identity default UI infrastructure and is not intended to be us" +
                     "ed\r\n    ///     directly from your code. This API may change or be removed in fu" +
-                    "ture releases.\r\n    /// </summary>\r\n    [TempData]\r\n    public string StatusMess" +
-                    "age { get; set; }\r\n\r\n    public async Task<IActionResult> OnGetAsync(string user" +
-                    "Id, string email, string code)\r\n    {\r\n        if (userId == null || email == nu" +
-                    "ll || code == null)\r\n        {\r\n            return RedirectToPage(\"/Index\");\r\n  " +
-                    "      }\r\n\r\n        var user = await _userManager.FindByIdAsync(userId);\r\n       " +
-                    " if (user == null)\r\n        {\r\n            return NotFound($\"Unable to load user" +
-                    " with ID \'{userId}\'.\");\r\n        }\r\n\r\n        code = Encoding.UTF8.GetString(Web" +
-                    "Encoders.Base64UrlDecode(code));\r\n        var result = await _userManager.Change" +
-                    "EmailAsync(user, email, code);\r\n        if (!result.Succeeded)\r\n        {\r\n     " +
-                    "       StatusMessage = \"Error changing email.\";\r\n            return Page();\r\n   " +
-                    "     }\r\n\r\n        // In our UI email and user name are one and the same, so when" +
-                    " we update the email\r\n        // we need to update the user name.\r\n        var s" +
-                    "etUserNameResult = await _userManager.SetUserNameAsync(user, email);\r\n        if" +
-                    " (!setUserNameResult.Succeeded)\r\n        {\r\n            StatusMessage = \"Error c" +
-                    "hanging user name.\";\r\n            return Page();\r\n        }\r\n\r\n        await _si" +
-                    "gnInManager.RefreshSignInAsync(user);\r\n        StatusMessage = \"Thank you for co" +
-                    "nfirming your email change.\";\r\n        return Page();\r\n    }\r\n}\r\n");
+                    "ture releases.\r\n    /// </summary>\r\n    [TempData]\r\n    public string? StatusMes" +
+                    "sage { get; set; }\r\n\r\n    public async Task<IActionResult> OnGetAsync(string use" +
+                    "rId, string email, string code)\r\n    {\r\n        if (userId == null || email == n" +
+                    "ull || code == null)\r\n        {\r\n            return RedirectToPage(\"/Index\");\r\n " +
+                    "       }\r\n\r\n        var user = await _userManager.FindByIdAsync(userId);\r\n      " +
+                    "  if (user == null)\r\n        {\r\n            return NotFound($\"Unable to load use" +
+                    "r with ID \'{userId}\'.\");\r\n        }\r\n\r\n        code = Encoding.UTF8.GetString(We" +
+                    "bEncoders.Base64UrlDecode(code));\r\n        var result = await _userManager.Chang" +
+                    "eEmailAsync(user, email, code);\r\n        if (!result.Succeeded)\r\n        {\r\n    " +
+                    "        StatusMessage = \"Error changing email.\";\r\n            return Page();\r\n  " +
+                    "      }\r\n\r\n        // In our UI email and user name are one and the same, so whe" +
+                    "n we update the email\r\n        // we need to update the user name.\r\n        var " +
+                    "setUserNameResult = await _userManager.SetUserNameAsync(user, email);\r\n        i" +
+                    "f (!setUserNameResult.Succeeded)\r\n        {\r\n            StatusMessage = \"Error " +
+                    "changing user name.\";\r\n            return Page();\r\n        }\r\n\r\n        await _s" +
+                    "ignInManager.RefreshSignInAsync(user);\r\n        StatusMessage = \"Thank you for c" +
+                    "onfirming your email change.\";\r\n        return Page();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

@@ -52,44 +52,45 @@ using ");
                     "the ASP.NET Core Identity default UI infrastructure and is not intended to be us" +
                     "ed\r\n    ///     directly from your code. This API may change or be removed in fu" +
                     "ture releases.\r\n    /// </summary>\r\n    [BindProperty]\r\n    public InputModel In" +
-                    "put { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NE" +
-                    "T Core Identity default UI infrastructure and is not intended to be used\r\n    //" +
-                    "/     directly from your code. This API may change or be removed in future relea" +
-                    "ses.\r\n    /// </summary>\r\n    [TempData]\r\n    public string StatusMessage { get;" +
-                    " set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Ide" +
-                    "ntity default UI infrastructure and is not intended to be used\r\n    ///     dire" +
-                    "ctly from your code. This API may change or be removed in future releases.\r\n    " +
-                    "/// </summary>\r\n    public class InputModel\r\n    {\r\n        /// <summary>\r\n     " +
-                    "   ///     This API supports the ASP.NET Core Identity default UI infrastructure" +
-                    " and is not intended to be used\r\n        ///     directly from your code. This A" +
-                    "PI may change or be removed in future releases.\r\n        /// </summary>\r\n       " +
-                    " [Required]\r\n        [StringLength(100, ErrorMessage = \"The {0} must be at least" +
-                    " {2} and at max {1} characters long.\", MinimumLength = 6)]\r\n        [DataType(Da" +
-                    "taType.Password)]\r\n        [Display(Name = \"New password\")]\r\n        public stri" +
-                    "ng NewPassword { get; set; }\r\n\r\n        /// <summary>\r\n        ///     This API " +
-                    "supports the ASP.NET Core Identity default UI infrastructure and is not intended" +
-                    " to be used\r\n        ///     directly from your code. This API may change or be " +
-                    "removed in future releases.\r\n        /// </summary>\r\n        [DataType(DataType." +
-                    "Password)]\r\n        [Display(Name = \"Confirm new password\")]\r\n        [Compare(\"" +
-                    "NewPassword\", ErrorMessage = \"The new password and confirmation password do not " +
-                    "match.\")]\r\n        public string ConfirmPassword { get; set; }\r\n    }\r\n\r\n    pub" +
-                    "lic async Task<IActionResult> OnGetAsync()\r\n    {\r\n        var user = await _use" +
-                    "rManager.GetUserAsync(User);\r\n        if (user == null)\r\n        {\r\n            " +
-                    "return NotFound($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\"" +
-                    ");\r\n        }\r\n\r\n        var hasPassword = await _userManager.HasPasswordAsync(u" +
-                    "ser);\r\n\r\n        if (hasPassword)\r\n        {\r\n            return RedirectToPage(" +
-                    "\"./ChangePassword\");\r\n        }\r\n\r\n        return Page();\r\n    }\r\n\r\n    public a" +
-                    "sync Task<IActionResult> OnPostAsync()\r\n    {\r\n        if (!ModelState.IsValid)\r" +
-                    "\n        {\r\n            return Page();\r\n        }\r\n\r\n        var user = await _u" +
-                    "serManager.GetUserAsync(User);\r\n        if (user == null)\r\n        {\r\n          " +
-                    "  return NotFound($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'" +
-                    ".\");\r\n        }\r\n\r\n        var addPasswordResult = await _userManager.AddPasswor" +
-                    "dAsync(user, Input.NewPassword);\r\n        if (!addPasswordResult.Succeeded)\r\n   " +
-                    "     {\r\n            foreach (var error in addPasswordResult.Errors)\r\n           " +
-                    " {\r\n                ModelState.AddModelError(string.Empty, error.Description);\r\n" +
-                    "            }\r\n            return Page();\r\n        }\r\n\r\n        await _signInMan" +
-                    "ager.RefreshSignInAsync(user);\r\n        StatusMessage = \"Your password has been " +
-                    "set.\";\r\n\r\n        return RedirectToPage();\r\n    }\r\n}\r\n");
+                    "put { get; set; } = default!;\r\n\r\n    /// <summary>\r\n    ///     This API support" +
+                    "s the ASP.NET Core Identity default UI infrastructure and is not intended to be " +
+                    "used\r\n    ///     directly from your code. This API may change or be removed in " +
+                    "future releases.\r\n    /// </summary>\r\n    [TempData]\r\n    public string? StatusM" +
+                    "essage { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP" +
+                    ".NET Core Identity default UI infrastructure and is not intended to be used\r\n   " +
+                    " ///     directly from your code. This API may change or be removed in future re" +
+                    "leases.\r\n    /// </summary>\r\n    public class InputModel\r\n    {\r\n        /// <su" +
+                    "mmary>\r\n        ///     This API supports the ASP.NET Core Identity default UI i" +
+                    "nfrastructure and is not intended to be used\r\n        ///     directly from your" +
+                    " code. This API may change or be removed in future releases.\r\n        /// </summ" +
+                    "ary>\r\n        [Required]\r\n        [StringLength(100, ErrorMessage = \"The {0} mus" +
+                    "t be at least {2} and at max {1} characters long.\", MinimumLength = 6)]\r\n       " +
+                    " [DataType(DataType.Password)]\r\n        [Display(Name = \"New password\")]\r\n      " +
+                    "  public string NewPassword { get; set; } = default!;\r\n\r\n        /// <summary>\r\n" +
+                    "        ///     This API supports the ASP.NET Core Identity default UI infrastru" +
+                    "cture and is not intended to be used\r\n        ///     directly from your code. T" +
+                    "his API may change or be removed in future releases.\r\n        /// </summary>\r\n  " +
+                    "      [DataType(DataType.Password)]\r\n        [Display(Name = \"Confirm new passwo" +
+                    "rd\")]\r\n        [Compare(\"NewPassword\", ErrorMessage = \"The new password and conf" +
+                    "irmation password do not match.\")]\r\n        public string? ConfirmPassword { get" +
+                    "; set; }\r\n    }\r\n\r\n    public async Task<IActionResult> OnGetAsync()\r\n    {\r\n   " +
+                    "     var user = await _userManager.GetUserAsync(User);\r\n        if (user == null" +
+                    ")\r\n        {\r\n            return NotFound($\"Unable to load user with ID \'{_userM" +
+                    "anager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n        var hasPassword = await _user" +
+                    "Manager.HasPasswordAsync(user);\r\n\r\n        if (hasPassword)\r\n        {\r\n        " +
+                    "    return RedirectToPage(\"./ChangePassword\");\r\n        }\r\n\r\n        return Page" +
+                    "();\r\n    }\r\n\r\n    public async Task<IActionResult> OnPostAsync()\r\n    {\r\n       " +
+                    " if (!ModelState.IsValid)\r\n        {\r\n            return Page();\r\n        }\r\n\r\n " +
+                    "       var user = await _userManager.GetUserAsync(User);\r\n        if (user == nu" +
+                    "ll)\r\n        {\r\n            return NotFound($\"Unable to load user with ID \'{_use" +
+                    "rManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n        var addPasswordResult = awa" +
+                    "it _userManager.AddPasswordAsync(user, Input.NewPassword);\r\n        if (!addPass" +
+                    "wordResult.Succeeded)\r\n        {\r\n            foreach (var error in addPasswordR" +
+                    "esult.Errors)\r\n            {\r\n                ModelState.AddModelError(string.Em" +
+                    "pty, error.Description);\r\n            }\r\n            return Page();\r\n        }\r\n" +
+                    "\r\n        await _signInManager.RefreshSignInAsync(user);\r\n        StatusMessage " +
+                    "= \"Your password has been set.\";\r\n\r\n        return RedirectToPage();\r\n    }\r\n}\r\n" +
+                    "");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

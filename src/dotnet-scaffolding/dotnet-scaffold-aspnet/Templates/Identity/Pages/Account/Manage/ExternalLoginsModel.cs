@@ -58,26 +58,26 @@ using ");
                     "   ///     This API supports the ASP.NET Core Identity default UI infrastructure" +
                     " and is not intended to be used\r\n    ///     directly from your code. This API m" +
                     "ay change or be removed in future releases.\r\n    /// </summary>\r\n    public ILis" +
-                    "t<UserLoginInfo> CurrentLogins { get; set; }\r\n\r\n    /// <summary>\r\n    ///     T" +
-                    "his API supports the ASP.NET Core Identity default UI infrastructure and is not " +
-                    "intended to be used\r\n    ///     directly from your code. This API may change or" +
-                    " be removed in future releases.\r\n    /// </summary>\r\n    public IList<Authentica" +
-                    "tionScheme> OtherLogins { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API" +
-                    " supports the ASP.NET Core Identity default UI infrastructure and is not intende" +
-                    "d to be used\r\n    ///     directly from your code. This API may change or be rem" +
-                    "oved in future releases.\r\n    /// </summary>\r\n    public bool ShowRemoveButton {" +
-                    " get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Cor" +
-                    "e Identity default UI infrastructure and is not intended to be used\r\n    ///    " +
-                    " directly from your code. This API may change or be removed in future releases.\r" +
-                    "\n    /// </summary>\r\n    [TempData]\r\n    public string StatusMessage { get; set;" +
-                    " }\r\n\r\n    public async Task<IActionResult> OnGetAsync()\r\n    {\r\n        var user" +
-                    " = await _userManager.GetUserAsync(User);\r\n        if (user == null)\r\n        {\r" +
-                    "\n            return NotFound($\"Unable to load user with ID \'{_userManager.GetUse" +
-                    "rId(User)}\'.\");\r\n        }\r\n\r\n        CurrentLogins = await _userManager.GetLogi" +
-                    "nsAsync(user);\r\n        OtherLogins = (await _signInManager.GetExternalAuthentic" +
-                    "ationSchemesAsync())\r\n            .Where(auth => CurrentLogins.All(ul => auth.Na" +
-                    "me != ul.LoginProvider))\r\n            .ToList();\r\n\r\n        string passwordHash " +
-                    "= null;\r\n        if (_userStore is IUserPasswordStore<");
+                    "t<UserLoginInfo>? CurrentLogins { get; set; }\r\n\r\n    /// <summary>\r\n    ///     " +
+                    "This API supports the ASP.NET Core Identity default UI infrastructure and is not" +
+                    " intended to be used\r\n    ///     directly from your code. This API may change o" +
+                    "r be removed in future releases.\r\n    /// </summary>\r\n    public IList<Authentic" +
+                    "ationScheme>? OtherLogins { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This A" +
+                    "PI supports the ASP.NET Core Identity default UI infrastructure and is not inten" +
+                    "ded to be used\r\n    ///     directly from your code. This API may change or be r" +
+                    "emoved in future releases.\r\n    /// </summary>\r\n    public bool ShowRemoveButton" +
+                    " { get; set; }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET C" +
+                    "ore Identity default UI infrastructure and is not intended to be used\r\n    ///  " +
+                    "   directly from your code. This API may change or be removed in future releases" +
+                    ".\r\n    /// </summary>\r\n    [TempData]\r\n    public string? StatusMessage { get; s" +
+                    "et; }\r\n\r\n    public async Task<IActionResult> OnGetAsync()\r\n    {\r\n        var u" +
+                    "ser = await _userManager.GetUserAsync(User);\r\n        if (user == null)\r\n       " +
+                    " {\r\n            return NotFound($\"Unable to load user with ID \'{_userManager.Get" +
+                    "UserId(User)}\'.\");\r\n        }\r\n\r\n        CurrentLogins = await _userManager.GetL" +
+                    "oginsAsync(user);\r\n        OtherLogins = (await _signInManager.GetExternalAuthen" +
+                    "ticationSchemesAsync())\r\n            .Where(auth => CurrentLogins.All(ul => auth" +
+                    ".Name != ul.LoginProvider))\r\n            .ToList();\r\n\r\n        string? passwordH" +
+                    "ash = null;\r\n        if (_userStore is IUserPasswordStore<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> userPasswordStore)\r\n        {\r\n            passwordHash = await userPasswordSto" +
                     "re.GetPasswordHashAsync(user, HttpContext.RequestAborted);\r\n        }\r\n\r\n       " +

@@ -49,23 +49,23 @@ using ");
                     "///     This API supports the ASP.NET Core Identity default UI infrastructure an" +
                     "d is not intended to be used\r\n    ///     directly from your code. This API may " +
                     "change or be removed in future releases.\r\n    /// </summary>\r\n    [TempData]\r\n  " +
-                    "  public string StatusMessage { get; set; }\r\n\r\n    public async Task<IActionResu" +
-                    "lt> OnGet()\r\n    {\r\n        var user = await _userManager.GetUserAsync(User);\r\n " +
-                    "       if (user == null)\r\n        {\r\n            return NotFound($\"Unable to loa" +
-                    "d user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n        if (!a" +
-                    "wait _userManager.GetTwoFactorEnabledAsync(user))\r\n        {\r\n            throw " +
-                    "new InvalidOperationException($\"Cannot disable 2FA for user as it\'s not currentl" +
-                    "y enabled.\");\r\n        }\r\n\r\n        return Page();\r\n    }\r\n\r\n    public async Ta" +
-                    "sk<IActionResult> OnPostAsync()\r\n    {\r\n        var user = await _userManager.Ge" +
-                    "tUserAsync(User);\r\n        if (user == null)\r\n        {\r\n            return NotF" +
-                    "ound($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n       " +
-                    " }\r\n\r\n        var disable2faResult = await _userManager.SetTwoFactorEnabledAsync" +
-                    "(user, false);\r\n        if (!disable2faResult.Succeeded)\r\n        {\r\n           " +
-                    " throw new InvalidOperationException($\"Unexpected error occurred disabling 2FA.\"" +
-                    ");\r\n        }\r\n\r\n        _logger.LogInformation(\"User with ID \'{UserId}\' has dis" +
-                    "abled 2fa.\", _userManager.GetUserId(User));\r\n        StatusMessage = \"2fa has be" +
-                    "en disabled. You can reenable 2fa when you setup an authenticator app\";\r\n       " +
-                    " return RedirectToPage(\"./TwoFactorAuthentication\");\r\n    }\r\n}\r\n");
+                    "  public string? StatusMessage { get; set; }\r\n\r\n    public async Task<IActionRes" +
+                    "ult> OnGet()\r\n    {\r\n        var user = await _userManager.GetUserAsync(User);\r\n" +
+                    "        if (user == null)\r\n        {\r\n            return NotFound($\"Unable to lo" +
+                    "ad user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n        if (!" +
+                    "await _userManager.GetTwoFactorEnabledAsync(user))\r\n        {\r\n            throw" +
+                    " new InvalidOperationException($\"Cannot disable 2FA for user as it\'s not current" +
+                    "ly enabled.\");\r\n        }\r\n\r\n        return Page();\r\n    }\r\n\r\n    public async T" +
+                    "ask<IActionResult> OnPostAsync()\r\n    {\r\n        var user = await _userManager.G" +
+                    "etUserAsync(User);\r\n        if (user == null)\r\n        {\r\n            return Not" +
+                    "Found($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n      " +
+                    "  }\r\n\r\n        var disable2faResult = await _userManager.SetTwoFactorEnabledAsyn" +
+                    "c(user, false);\r\n        if (!disable2faResult.Succeeded)\r\n        {\r\n          " +
+                    "  throw new InvalidOperationException($\"Unexpected error occurred disabling 2FA." +
+                    "\");\r\n        }\r\n\r\n        _logger.LogInformation(\"User with ID \'{UserId}\' has di" +
+                    "sabled 2fa.\", _userManager.GetUserId(User));\r\n        StatusMessage = \"2fa has b" +
+                    "een disabled. You can reenable 2fa when you setup an authenticator app\";\r\n      " +
+                    "  return RedirectToPage(\"./TwoFactorAuthentication\");\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

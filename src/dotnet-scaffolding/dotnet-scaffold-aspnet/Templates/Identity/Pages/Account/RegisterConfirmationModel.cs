@@ -51,30 +51,30 @@ using ");
                     "        _sender = sender;\r\n    }\r\n\r\n    /// <summary>\r\n    ///     This API supp" +
                     "orts the ASP.NET Core Identity default UI infrastructure and is not intended to " +
                     "be used\r\n    ///     directly from your code. This API may change or be removed " +
-                    "in future releases.\r\n    /// </summary>\r\n    public string Email { get; set; }\r\n" +
-                    "\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity def" +
-                    "ault UI infrastructure and is not intended to be used\r\n    ///     directly from" +
-                    " your code. This API may change or be removed in future releases.\r\n    /// </sum" +
-                    "mary>\r\n    public bool DisplayConfirmAccountLink { get; set; }\r\n\r\n    /// <summa" +
-                    "ry>\r\n    ///     This API supports the ASP.NET Core Identity default UI infrastr" +
-                    "ucture and is not intended to be used\r\n    ///     directly from your code. This" +
-                    " API may change or be removed in future releases.\r\n    /// </summary>\r\n    publi" +
-                    "c string EmailConfirmationUrl { get; set; }\r\n\r\n    public async Task<IActionResu" +
-                    "lt> OnGetAsync(string email, string returnUrl = null)\r\n    {\r\n        if (email " +
-                    "== null)\r\n        {\r\n            return RedirectToPage(\"/Index\");\r\n        }\r\n  " +
-                    "      returnUrl = returnUrl ?? Url.Content(\"~/\");\r\n\r\n        var user = await _u" +
-                    "serManager.FindByEmailAsync(email);\r\n        if (user == null)\r\n        {\r\n     " +
-                    "       return NotFound($\"Unable to load user with email \'{email}\'.\");\r\n        }" +
-                    "\r\n\r\n        Email = email;\r\n        // Once you add a real email sender, you sho" +
-                    "uld remove this code that lets you confirm the account\r\n        DisplayConfirmAc" +
-                    "countLink = true;\r\n        if (DisplayConfirmAccountLink)\r\n        {\r\n          " +
-                    "  var userId = await _userManager.GetUserIdAsync(user);\r\n            var code = " +
-                    "await _userManager.GenerateEmailConfirmationTokenAsync(user);\r\n            code " +
-                    "= WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n            EmailC" +
-                    "onfirmationUrl = Url.Page(\r\n                \"/Account/ConfirmEmail\",\r\n          " +
-                    "      pageHandler: null,\r\n                values: new { area = \"Identity\", userI" +
-                    "d = userId, code = code, returnUrl = returnUrl },\r\n                protocol: Req" +
-                    "uest.Scheme);\r\n        }\r\n\r\n        return Page();\r\n    }\r\n}\r\n");
+                    "in future releases.\r\n    /// </summary>\r\n    public string? Email { get; set; }\r" +
+                    "\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity de" +
+                    "fault UI infrastructure and is not intended to be used\r\n    ///     directly fro" +
+                    "m your code. This API may change or be removed in future releases.\r\n    /// </su" +
+                    "mmary>\r\n    public bool DisplayConfirmAccountLink { get; set; }\r\n\r\n    /// <summ" +
+                    "ary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infrast" +
+                    "ructure and is not intended to be used\r\n    ///     directly from your code. Thi" +
+                    "s API may change or be removed in future releases.\r\n    /// </summary>\r\n    publ" +
+                    "ic string? EmailConfirmationUrl { get; set; }\r\n\r\n    public async Task<IActionRe" +
+                    "sult> OnGetAsync(string email, string? returnUrl = null)\r\n    {\r\n        if (ema" +
+                    "il == null)\r\n        {\r\n            return RedirectToPage(\"/Index\");\r\n        }\r" +
+                    "\n        returnUrl = returnUrl ?? Url.Content(\"~/\");\r\n\r\n        var user = await" +
+                    " _userManager.FindByEmailAsync(email);\r\n        if (user == null)\r\n        {\r\n  " +
+                    "          return NotFound($\"Unable to load user with email \'{email}\'.\");\r\n      " +
+                    "  }\r\n\r\n        Email = email;\r\n        // Once you add a real email sender, you " +
+                    "should remove this code that lets you confirm the account\r\n        DisplayConfir" +
+                    "mAccountLink = true;\r\n        if (DisplayConfirmAccountLink)\r\n        {\r\n       " +
+                    "     var userId = await _userManager.GetUserIdAsync(user);\r\n            var code" +
+                    " = await _userManager.GenerateEmailConfirmationTokenAsync(user);\r\n            co" +
+                    "de = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n            Ema" +
+                    "ilConfirmationUrl = Url.Page(\r\n                \"/Account/ConfirmEmail\",\r\n       " +
+                    "         pageHandler: null,\r\n                values: new { area = \"Identity\", us" +
+                    "erId = userId, code = code, returnUrl = returnUrl },\r\n                protocol: " +
+                    "Request.Scheme);\r\n        }\r\n\r\n        return Page();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

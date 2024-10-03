@@ -26,7 +26,7 @@ internal static class IdentityHelper
             {
                 string extension = string.Empty;
                 //the 'ManageNavPagesModel.tt' only should have .cs extension.
-                if (templateFullName.Equals("ManageNavPagesModel", StringComparison.OrdinalIgnoreCase))
+                if (templateFullName.Contains("ManageNavPagesModel", StringComparison.OrdinalIgnoreCase))
                 {
                     extension = ".cs";
                 }

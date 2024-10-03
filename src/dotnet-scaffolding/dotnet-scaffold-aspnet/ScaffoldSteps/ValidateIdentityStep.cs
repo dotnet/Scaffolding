@@ -122,7 +122,8 @@ internal class ValidateIdentityStep : ScaffoldStep
             DataContext = DataContext,
             DatabaseProvider = DatabaseProvider,
             Prerelease = Prerelease,
-            Overwrite = Overwrite
+            Overwrite = Overwrite,
+            BlazorScenario = BlazorScenario
         };
     }
 

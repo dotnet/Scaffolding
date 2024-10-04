@@ -69,6 +69,7 @@ static void ConfigureServices(IServiceCollection services)
 {
     services.AddSingleton<IFileSystem, FileSystem>();
     services.AddSingleton<IEnvironmentService, EnvironmentService>();
+    services.AddTelemetry("dotnetScaffoldAspire");
 }
 
 static void ConfigureSteps(IServiceCollection services)

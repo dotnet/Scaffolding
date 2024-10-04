@@ -4,6 +4,7 @@ using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AppBuilder;
 using Microsoft.DotNet.Tools.Scaffold.Command;
 using Microsoft.DotNet.Tools.Scaffold.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold;
@@ -34,7 +35,7 @@ internal class ScaffoldCommandAppBuilder(string[] args)
         return new ScaffoldCommandApp(commandApp, _args);
     }
 
-    private ITypeRegistrar? GetDefaultServices()
+    private static TypeRegistrar? GetDefaultServices()
     {
         var registrar = new TypeRegistrar();
         registrar.Register(typeof(IFileSystem), typeof(FileSystem));
@@ -43,6 +44,14 @@ internal class ScaffoldCommandAppBuilder(string[] args)
         registrar.Register(typeof(IDotNetToolService), typeof(DotNetToolService));
         registrar.Register(typeof(IToolManager), typeof(ToolManager));
         registrar.Register(typeof(IToolManifestService), typeof(ToolManifestService));
+        registrar.Register(typeof(IFirstTimeUseNoticeSentinel), typeof(FirstTimeUseNoticeSentinel));
+        registrar.RegisterLazy(typeof(IFirstTimeUseNoticeSentinel), (serviceProvider) =>
+        {
+            return new FirstTimeUseNoticeSentinel(serviceProvider.GetRequiredService<IFileSystem>(),
+                                                  serviceProvider.GetRequiredService<IEnvironmentService>(),
+                                                  "dotnetScaffold");
+        });
+        registrar.Register(typeof(ITelemetryService), typeof(TelemetryService));
         return registrar;
     }
 

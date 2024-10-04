@@ -1,4 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
+using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.Flow;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console.Cli;
@@ -6,15 +7,18 @@ using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Command;
 
-public abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
+internal abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
     where TSettings : CommandSettings
 {
-    protected BaseCommand(IFlowProvider flowProvider)
+    protected BaseCommand(IFlowProvider flowProvider, ITelemetryService telemetryService)
     {
         FlowProvider = flowProvider;
+        TelemetryService = telemetryService;
     }
 
     protected IFlowProvider FlowProvider { get; }
+
+    protected ITelemetryService TelemetryService { get; }
 
     protected async ValueTask<int> RunFlowAsync(IEnumerable<IFlowStep> flowSteps, TSettings settings, IRemainingArguments remainingArgs, bool nonInteractive = false, bool showSelectedOptions = true)
     {

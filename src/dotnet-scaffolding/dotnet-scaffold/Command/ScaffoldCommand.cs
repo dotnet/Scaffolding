@@ -13,13 +13,15 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     private readonly IEnvironmentService _environmentService;
+    
     public ScaffoldCommand(
         IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
         IFlowProvider flowProvider,
-        ILogger<ScaffoldCommand> logger)
-        : base(flowProvider)
+        ILogger<ScaffoldCommand> logger,
+        ITelemetryService telemetry)
+        : base(flowProvider, telemetry)
     {
         _dotnetToolService = dotnetToolService;
         _environmentService = environmentService;
@@ -41,6 +43,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
+        
         IEnumerable<IFlowStep> flowSteps =
         [
             new StartupFlowStep(_dotnetToolService, _environmentService, _fileSystem, _logger),

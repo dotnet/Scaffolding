@@ -294,6 +294,7 @@ public static class Program
     {
         services.AddSingleton<IEnvironmentService, EnvironmentService>();
         services.AddSingleton<IFileSystem, FileSystem>();
+        services.AddTelemetry("dotnetScaffoldAspnet");
     }
 
     static void ConfigureSteps(IServiceCollection services)

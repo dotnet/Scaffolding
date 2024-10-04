@@ -13,6 +13,7 @@ public interface IEnvironmentService
     OperatingSystem OS { get; }
     string GetMachineName();
     string? GetEnvironmentVariable(string name);
+    bool GetEnvironmentVariableAsBool(string name, bool defaultValue = false);
     void SetEnvironmentVariable(string name, string value, EnvironmentVariableTarget envTarget = EnvironmentVariableTarget.Process);
     string GetFolderPath(System.Environment.SpecialFolder specifalFolder);
     string ExpandEnvironmentVariables(string name);

@@ -38,12 +38,16 @@ internal sealed class TypeRegistrar : ITypeRegistrar
 
     public void RegisterLazy(Type service, Func<object> func)
     {
-        if (func is null)
-        {
-            throw new ArgumentNullException(nameof(func));
-        }
+        ArgumentNullException.ThrowIfNull(func);
 
         _services.AddSingleton(service, (provider) => func());
+    }
+
+    public void RegisterLazy(Type service, Func<IServiceProvider, object> func)
+    {
+        ArgumentNullException.ThrowIfNull(func);
+
+        _services.AddSingleton(service, func);
     }
 
     private sealed class LoggingBuilder(IServiceCollection services) : ILoggingBuilder

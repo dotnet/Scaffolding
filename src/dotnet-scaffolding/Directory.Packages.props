@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageVersion Include="Humanizer" Version="$(HumanizerPackageVersion)" />
+    <PackageVersion Include="Microsoft.ApplicationInsights.WorkerService" Version="$(MicrosoftApplicationInsightsWorkerServicePackageVersion)" />
     <PackageVersion Include="Microsoft.Build.Locator" Version="$(MicrosoftBuildLocatorPackageVersion)" />
     <PackageVersion Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisPreviewVersion)" />
@@ -16,6 +17,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.Features" Version="$(MicrosoftCodeAnalysisPreviewVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(MicrosoftCodeAnalysisPreviewVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisPreviewVersion)" />
+    <PackageVersion Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsDependencyInjectionPackageVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsHostingPackageVersion)" />

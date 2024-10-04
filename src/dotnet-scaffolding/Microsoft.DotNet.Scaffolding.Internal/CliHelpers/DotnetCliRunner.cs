@@ -1,6 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Diagnostics;
+#if DOTNET_SCAFFOLD_INTERNAL
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+#endif
 
 namespace Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 
@@ -117,5 +120,12 @@ internal class DotnetCliRunner
         _psi.Environment.Remove("MSBuildSDKsPath");
         _psi.Environment.Remove("MSBuildExtensionsPath");
         _psi.Environment.Remove("MSBUILD_EXE_PATH");
+#if DOTNET_SCAFFOLD_INTERNAL
+        // Specify that this is being launched by dotnet-scaffold, so that we avoid
+        // the first run banner, etc.
+        // TODO: Allow extra Env Vars to be passed into the runner, so this can be done
+        //       by the caller instead of this way
+        _psi.Environment[TelemetryConstants.LAUNCHED_BY_DOTNET_SCAFFOLD] = "true";
+#endif
     }
 }

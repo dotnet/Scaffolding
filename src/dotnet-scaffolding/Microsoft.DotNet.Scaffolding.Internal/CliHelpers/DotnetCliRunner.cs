@@ -43,7 +43,15 @@ internal class DotnetCliRunner
             }
         };
 
-        process.Start();
+        try
+        {
+            process.Start();
+        }
+        catch (Exception e)
+        {
+            return -1;
+        }
+
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
         process.WaitForExit();
@@ -66,7 +74,16 @@ internal class DotnetCliRunner
 
         process.EnableRaisingEvents = true;
 
-        process.Start();
+        try
+        {
+            process.Start();
+        }
+        catch (Exception e)
+        {
+            stdOut = null;
+            stdErr = e.Message;
+            return -1;
+        }
 
         var taskOut = outStream.BeginRead(process.StandardOutput);
         var taskErr = errStream.BeginRead(process.StandardError);

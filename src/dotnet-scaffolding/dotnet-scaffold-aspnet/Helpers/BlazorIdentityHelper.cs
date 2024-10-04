@@ -8,9 +8,10 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Files;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
+//TODO : combine with 'IdentityHelper', should be quite easy.
 internal static class BlazorIdentityHelper
 {
-    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, BlazorIdentityModel blazorIdentityModel)
+    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, IdentityModel blazorIdentityModel)
     {
         var textTemplatingProperties = new List<TextTemplatingProperty>();
         foreach (var templatePath in allT4TemplatePaths)
@@ -26,7 +27,7 @@ internal static class BlazorIdentityHelper
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {
                 string extension = templateFullName.StartsWith("identity", StringComparison.OrdinalIgnoreCase) ? ".cs" : ".razor";
-                string templateNameWithNamespace = $"{blazorIdentityModel.BlazorIdentityNamespace}.{templateFullName}";
+                string templateNameWithNamespace = $"{blazorIdentityModel.IdentityNamespace}.{templateFullName}";
                 string outputFileName = $"{StringUtil.ToPath(templateNameWithNamespace, blazorIdentityModel.BaseOutputPath, projectName)}{extension}";
                 textTemplatingProperties.Add(new()
                 {
@@ -56,7 +57,7 @@ internal static class BlazorIdentityHelper
         return string.Empty;
     }
 
-    internal static TextTemplatingProperty? GetApplicationUserTextTemplatingProperty(string? applicationUserTemplate, BlazorIdentityModel blazorIdentityModel)
+    internal static TextTemplatingProperty? GetApplicationUserTextTemplatingProperty(string? applicationUserTemplate, IdentityModel blazorIdentityModel)
     {
         var projectDirectory = Path.GetDirectoryName(blazorIdentityModel.ProjectInfo.ProjectPath);
         if (string.IsNullOrEmpty(applicationUserTemplate) || string.IsNullOrEmpty(projectDirectory))

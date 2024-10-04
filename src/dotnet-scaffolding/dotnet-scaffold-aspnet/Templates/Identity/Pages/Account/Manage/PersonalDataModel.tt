@@ -1,0 +1,41 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
+using <#= Model.UserClassNamespace #>;
+
+namespace <#= Model.IdentityNamespace #>.Pages.Account.Manage;
+
+public class PersonalDataModel : PageModel
+{
+    private readonly UserManager<<#= Model.UserClassName #>> _userManager;
+    private readonly ILogger<PersonalDataModel> _logger;
+
+    public PersonalDataModel(
+        UserManager<<#= Model.UserClassName #>> userManager,
+        ILogger<PersonalDataModel> logger)
+    {
+        _userManager = userManager;
+        _logger = logger;
+    }
+
+    public async Task<IActionResult> OnGet()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+        }
+
+        return Page();
+    }
+}

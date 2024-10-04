@@ -1,0 +1,42 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Usings": [
+        "Microsoft.AspNetCore.Identity",
+        "Microsoft.EntityFrameworkCore",
+        "$(UserClassNamespace)"
+      ],
+      "Options": [
+        "EfScenario"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CheckBlock": "builder.Configuration.GetConnectionString",
+              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '$(ConnectionStringName)' not found.\")"
+            },
+            {
+              "InsertAfter": "builder.Configuration.GetConnectionString",
+              "CheckBlock": "builder.Services.AddDbContext",
+              "Block": "builder.Services.AddDbContext<$(DbContextName)>(options => options.$(UseDbMethod))",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "builder.Services.AddDbContext",
+              "CheckBlock": "builder.Services.AddDefaultIdentity",
+              "Block": "builder.Services.AddDefaultIdentity<$(UserClassName)>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<$(DbContextName)>()\"",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

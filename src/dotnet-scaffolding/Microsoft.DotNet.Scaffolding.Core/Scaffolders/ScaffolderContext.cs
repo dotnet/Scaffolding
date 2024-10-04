@@ -13,6 +13,7 @@ public class ScaffolderContext
     }
 
     public IScaffolder Scaffolder { get; }
+    //TODO : add a 'T GetProperty<T>(string)' to easily fetch values from the 'Properties' bucket.
     public Dictionary<string, object?> Properties { get; } = [];
     public Dictionary<ScaffolderOption, object?> OptionResults { get; } = [];
 

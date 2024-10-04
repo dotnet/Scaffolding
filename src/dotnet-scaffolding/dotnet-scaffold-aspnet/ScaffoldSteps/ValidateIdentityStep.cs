@@ -14,18 +14,19 @@ using static Microsoft.DotNet.Scaffolding.Internal.Constants;
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 //TODO: pull all the duplicate logic from all these 'Validation' ScaffolderSteps into a common one.
-internal class ValidateBlazorIdentityStep : ScaffoldStep
+internal class ValidateIdentityStep : ScaffoldStep
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     public bool Overwrite { get; set; }
+    public bool BlazorScenario { get; set; }
     public string? Project { get; set; }
     public bool Prerelease { get; set; }
     public string? DatabaseProvider { get; set; }
     public string? DataContext { get; set; }
-    public ValidateBlazorIdentityStep(
+    public ValidateIdentityStep(
         IFileSystem fileSystem,
-        ILogger<ValidateBlazorIdentityStep> logger)
+        ILogger<ValidateIdentityStep> logger)
     {
         _fileSystem = fileSystem;
         _logger = logger;
@@ -33,61 +34,63 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        var blazorIdentitySettings = ValidateBlazorIdentitySettings();
+        var identitySettings = ValidateIdentitySettings();
         var codeModifierProperties = new Dictionary<string, string>();
-        if (blazorIdentitySettings is null)
+        if (identitySettings is null)
         {
             return false;
         }
         else
         {
-            context.Properties.Add(nameof(BlazorIdentitySettings), blazorIdentitySettings);
+            context.Properties.Add(nameof(IdentitySettings), identitySettings);
         }
 
-        //initialize BlazorIdentityModel
+        //initialize IdentityModel
         _logger.LogInformation("Initializing scaffolding model...");
-        var blazorIdentityModel = await GetBlazorIdentityModelAsync(blazorIdentitySettings);
-        if (blazorIdentityModel is null)
+        var identityModel = await GetIdentityModelAsync(identitySettings);
+        if (identityModel is null)
         {
             _logger.LogError("An error occurred.");
             return false;
         }
         else
         {
-            context.Properties.Add(nameof(BlazorIdentityModel), blazorIdentityModel);
-            codeModifierProperties.Add(CodeModifierPropertyConstants.BlazorIdentityNamespace, blazorIdentityModel.BlazorIdentityNamespace);
-            codeModifierProperties.Add(CodeModifierPropertyConstants.UserClassNamespace, blazorIdentityModel.UserClassNamespace);
+            context.Properties.Add(nameof(IdentityModel), identityModel);
+            codeModifierProperties.Add(CodeModifierPropertyConstants.IdentityNamespace, identityModel.IdentityNamespace);
+            codeModifierProperties.Add(CodeModifierPropertyConstants.UserClassNamespace, identityModel.UserClassNamespace);
         }
 
         //Install packages and add a DbContext (if needed)
-        if (blazorIdentityModel.DbContextInfo.EfScenario)
+        if (identityModel.DbContextInfo.EfScenario)
         {
-            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(blazorIdentitySettings.Project, blazorIdentityModel.DbContextInfo);
+            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(identitySettings.Project, identityModel.DbContextInfo);
             if (dbContextProperties is not null)
             {
                 dbContextProperties.IsIdentityDbContext = true;
-                dbContextProperties.FullIdentityUserName = $"{blazorIdentityModel.UserClassNamespace}.{blazorIdentityModel.UserClassName}";
+                dbContextProperties.FullIdentityUserName = $"{identityModel.UserClassNamespace}.{identityModel.UserClassName}";
                 context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
             }
 
-            var projectBasePath = Path.GetDirectoryName(blazorIdentitySettings.Project);
+            var projectBasePath = Path.GetDirectoryName(identitySettings.Project);
             if (!string.IsNullOrEmpty(projectBasePath))
             {
-                context.Properties.Add(Scaffolding.Internal.Constants.StepConstants.BaseProjectPath, projectBasePath);
+                context.Properties.Add(StepConstants.BaseProjectPath, projectBasePath);
             }
 
-            var dbCodeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(blazorIdentityModel.DbContextInfo);
+            var dbCodeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(identityModel.DbContextInfo);
             foreach (var kvp in dbCodeModifierProperties)
             {
                 codeModifierProperties.TryAdd(kvp.Key, kvp.Value);
             }
+
+            codeModifierProperties.TryAdd(CodeModifierPropertyConstants.UserClassName, identityModel.UserClassName);
         }
 
-        context.Properties.Add(Scaffolding.Internal.Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
+        context.Properties.Add(StepConstants.CodeModifierProperties, codeModifierProperties);
         return true;
     }
 
-    private BlazorIdentitySettings? ValidateBlazorIdentitySettings()
+    private IdentitySettings? ValidateIdentitySettings()
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
@@ -105,17 +108,18 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
             DatabaseProvider = PackageConstants.EfConstants.SqlServer;
         }
 
-        return new BlazorIdentitySettings
+        return new IdentitySettings
         {
             Project = Project,
             DataContext = DataContext,
             DatabaseProvider = DatabaseProvider,
             Prerelease = Prerelease,
-            Overwrite = Overwrite
+            Overwrite = Overwrite,
+            BlazorScenario = BlazorScenario
         };
     }
 
-    private async Task<BlazorIdentityModel?> GetBlazorIdentityModelAsync(BlazorIdentitySettings settings)
+    private async Task<IdentityModel?> GetIdentityModelAsync(IdentitySettings settings)
     {
         var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
@@ -136,20 +140,20 @@ internal class ValidateBlazorIdentityStep : ScaffoldStep
             dbContextInfo.EfScenario = true;
         }
 
-        string blazorIdentityNamespace = string.Empty;
+        string identityNamespace = string.Empty;
         string userClassNamespace = string.Empty;
         var projectName = Path.GetFileNameWithoutExtension(settings.Project);
         if (!string.IsNullOrEmpty(projectName))
         {
-            blazorIdentityNamespace = $"{projectName}.Components.Account";
+            identityNamespace = settings.BlazorScenario ? $"{projectName}.Components.Account" : $"{projectName}.Areas.Identity";
             userClassNamespace = $"{projectName}.Data";
         }
 
-        BlazorIdentityModel scaffoldingModel = new()
+        IdentityModel scaffoldingModel = new()
         {
             ProjectInfo = projectInfo,
             DbContextInfo = dbContextInfo,
-            BlazorIdentityNamespace = blazorIdentityNamespace,
+            IdentityNamespace = identityNamespace,
             UserClassName = Constants.Identity.UserClassName,
             UserClassNamespace = userClassNamespace,
             DbContextName = Constants.Identity.DbContextName,

@@ -248,7 +248,29 @@ public static class Program
             .WithCategory("Blazor")
             .WithDescription("Add blazor identity to a project.")
             .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, prereleaseOption])
-            .WithStep<ValidateBlazorIdentityStep>(config =>
+            .WithStep<ValidateIdentityStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.Project = context.GetOptionResult(projectOption);
+                step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
+                step.DatabaseProvider = context.GetOptionResult(identityDbProviderRequiredOption);
+                step.Prerelease = context.GetOptionResult(prereleaseOption);
+                step.Overwrite = context.GetOptionResult(overwriteOption);
+                step.BlazorScenario = true;
+            })
+            .WithBlazorIdentityAddPackagesStep()
+            .WithIdentityDbContextStep()
+            .WithConnectionStringStep()
+            .WithBlazorIdentityTextTemplatingStep()
+            .WithBlazorIdentityCodeChangeStep();
+
+        builder.AddScaffolder("identity")
+            .WithDisplayName("ASP.NET Core Identity")
+            .WithCategory("Identity")
+            .WithDescription("Add ASP.NET Core identity to a project.")
+            .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, prereleaseOption])
+            .WithStep<ValidateIdentityStep>(config =>
             {
                 var step = config.Step;
                 var context = config.Context;
@@ -258,11 +280,11 @@ public static class Program
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.Overwrite = context.GetOptionResult(overwriteOption);
             })
-            .WithBlazorIdentityAddPackagesStep()
+            .WithIdentityAddPackagesStep()
             .WithIdentityDbContextStep()
             .WithConnectionStringStep()
-            .WithBlazorIdentityTextTemplatingStep()
-            .WithBlazorIdentityCodeChangeStep();
+            .WithIdentityTextTemplatingStep()
+            .WithIdentityCodeChangeStep();
 
         var runner = builder.Build();
         runner.RunAsync(args).Wait();

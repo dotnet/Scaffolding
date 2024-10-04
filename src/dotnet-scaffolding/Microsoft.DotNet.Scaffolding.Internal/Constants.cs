@@ -31,7 +31,8 @@ internal static class Constants
         public const string DbContextName = "$(DbContextName)";
         public const string DbContextNamespace = "$(DbContextNamespace)";
         //Identity related constants
+        public const string UserClassName = "$(UserClassName)";
         public const string UserClassNamespace = "$(UserClassNamespace)";
-        public const string BlazorIdentityNamespace = "$(BlazorIdentityNamespace)";
+        public const string IdentityNamespace = "$(IdentityNamespace)";
     }
 }

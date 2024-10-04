@@ -8,6 +8,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Files;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
+//TODO : combine with 'IdentityHelper', should be quite easy.
 internal static class BlazorIdentityHelper
 {
     internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, IdentityModel blazorIdentityModel)

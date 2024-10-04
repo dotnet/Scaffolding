@@ -49,6 +49,8 @@ internal class DotnetCliRunner
         }
         catch (Exception e)
         {
+            stdOutCallback(e.Message);
+            stdErrCallback(e.Message);
             return -1;
         }
 
@@ -80,7 +82,7 @@ internal class DotnetCliRunner
         }
         catch (Exception e)
         {
-            stdOut = null;
+            stdOut = e.Message;
             stdErr = e.Message;
             return -1;
         }

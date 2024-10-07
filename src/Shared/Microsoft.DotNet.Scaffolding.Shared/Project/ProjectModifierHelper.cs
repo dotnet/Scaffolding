@@ -553,7 +553,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 if (change.ReplaceSnippet != null)
                 {
                     var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                    if (sourceFileString.Contains(replaceSnippet))
+                    if (!sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase) && 
+                        sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase))
                     {
                         sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
                     }

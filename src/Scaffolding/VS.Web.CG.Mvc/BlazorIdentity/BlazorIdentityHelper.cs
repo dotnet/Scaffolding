@@ -104,11 +104,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
 
         internal static string BlazorIdentityReadmeFileName = "Scaffolding-README.md";
         internal static string BlazorIdentityReadmeString =
-@"Support for Blazor Identity was added to your project.
+@"Blazor Identity scaffolding has completed successfully.
 
 For setup and configuration information, see https://learn.microsoft.com/en-us/aspnet/core/blazor/security.
 
-If adding Blazor Identity to a project with existing Identity, ensure the following changes in your Program.cs file:
+If the project had identity support prior to scaffolding, ensure that the following changes are present in Program.cs:
 1. Correct DbContextClass is used in the following statements :
     - var connectionString = builder.Configuration.GetConnectionString(DBCONTEXT_CONNECTIONSTRING) ...
     - builder.Services.AddDbContext<DBCONTEXT>(options => ...

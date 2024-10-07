@@ -153,6 +153,7 @@
       "FileName" : "NavMenu.razor",
       "Replacements": [
         {
+          "CheckBlock": "@implements IDisposable",
           "ReplaceSnippet": [
             "<div class=\"top-row ps-3 navbar navbar-dark\">"
           ],
@@ -163,6 +164,7 @@
           ]
         },
         {
+          "CheckBlock": "<AuthorizeView>",
           "ReplaceSnippet": [
             "<span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather",
             "            </NavLink>",
@@ -205,6 +207,7 @@
           ]
         },
         {
+          "CheckBlock": "OnInitialized()",
           "MultiLineBlock": [
             "@code {",
             "    private string? currentUrl;",

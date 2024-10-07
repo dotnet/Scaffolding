@@ -357,10 +357,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 if (file.FileName.Equals("Routes.razor", StringComparison.OrdinalIgnoreCase) &&
                     FileSystem.FileExists(fileDoc.Name))
                 {
+                    var usingStatement = $"@using {blazorIdentityModel.BlazorIdentityNamespace}.Shared";
                     var fileText = FileSystem.ReadAllText(fileDoc.Name);
-                    fileText = $"@using {blazorIdentityModel.BlazorIdentityNamespace}.Shared" + Environment.NewLine + fileText;
-                    FileSystem.WriteAllText(fileDoc.Name, fileText.ToString());
-                    Logger.LogMessage($"Modified {fileDoc.Name}.\n");
+                    if (!fileText.Contains(usingStatement, StringComparison.OrdinalIgnoreCase))
+                    {
+                        fileText = usingStatement + Environment.NewLine + fileText;
+                        FileSystem.WriteAllText(fileDoc.Name, fileText.ToString());
+                        Logger.LogMessage($"Modified {fileDoc.Name}.\n");
+                    }
                 }
             }
         }

@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             if (string.IsNullOrEmpty(displayCategory))
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Unable to find any component categories!"));
+                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Unable to find any component categories."));
             }
             else
             {
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
             else
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("No component (dotnet tool) provided!"));
+                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("No component (dotnet tool) provided."));
             }
 
             if (commandInfo is null)

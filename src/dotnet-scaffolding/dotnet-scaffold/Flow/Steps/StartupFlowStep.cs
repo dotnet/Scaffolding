@@ -59,7 +59,7 @@ internal class StartupFlowStep : IFlowStep
                 new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize();
                 statusContext.Status = "Done\n";
                 //parse args passed
-                statusContext.Status = "Parsing args!";
+                statusContext.Status = "Parsing args.";
                 var remainingArgs = context.GetRemainingArgs();
                 if (remainingArgs != null)
                 {

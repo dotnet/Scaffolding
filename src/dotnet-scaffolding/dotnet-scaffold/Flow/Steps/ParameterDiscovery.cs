@@ -167,7 +167,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             if (!string.IsNullOrEmpty(promptVal) && !ParameterHelpers.CheckType(_parameter.Type, promptVal))
             {
-                return ValidationResult.Error("Invalid input, please try again!");
+                return ValidationResult.Error("Invalid input, please try again.");
             }
 
             return ValidationResult.Success();

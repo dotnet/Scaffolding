@@ -7,7 +7,7 @@ For example :
 var builder = Host.CreateScaffoldBuilder();
 var newScaffolder = builder.AddScaffolder("scaffolder");
 newScaffolder.WithCategory("Custom")
-    .WithDescription("Project for scaffolding!")
+    .WithDescription("Project for scaffolding.")
     .WithOption(projectOption)
     .WithStep<CodeModificationStep>(config =>
     {

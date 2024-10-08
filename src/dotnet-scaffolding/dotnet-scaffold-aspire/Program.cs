@@ -19,7 +19,7 @@ CreateOptions(out var cachingTypeOption, out var databaseTypeOption, out var sto
 
 var caching = builder.AddScaffolder("caching");
 caching.WithCategory("Aspire")
-       .WithDescription("Modified Aspire project to make it caching ready!")
+       .WithDescription("Modified Aspire project to make it caching ready.")
        .WithOption(cachingTypeOption)
        .WithOption(appHostProjectOption)
        .WithOption(projectOption)
@@ -33,7 +33,7 @@ caching.WithCategory("Aspire")
 
 var database = builder.AddScaffolder("database");
 database.WithCategory("Aspire")
-        .WithDescription("Modifies Aspire project to make it database ready!")
+        .WithDescription("Modifies Aspire project to make it database ready.")
         .WithOption(databaseTypeOption)
         .WithOption(appHostProjectOption)
         .WithOption(projectOption)
@@ -49,7 +49,7 @@ database.WithCategory("Aspire")
 
 var storage = builder.AddScaffolder("storage");
 storage.WithCategory("Aspire")
-       .WithDescription("Modifies Aspire project to make it storage ready!")
+       .WithDescription("Modifies Aspire project to make it storage ready.")
        .WithOption(storageTypeOption)
        .WithOption(appHostProjectOption)
        .WithOption(projectOption)

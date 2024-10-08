@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             if (commandInfoKvp is null || !commandInfoKvp.HasValue || commandInfoKvp.Value.Value is null || string.IsNullOrEmpty(commandInfoKvp.Value.Key))
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Unable to find any commands!"));
+                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Unable to find any commands."));
             }
             else
             {
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
             else
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("No component (dotnet tool) provided!"));
+                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("No component (dotnet tool) provided."));
             }
 
             if (commandInfo is null)

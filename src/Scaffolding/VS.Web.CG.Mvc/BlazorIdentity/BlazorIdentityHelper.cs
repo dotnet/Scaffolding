@@ -101,5 +101,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
 
             return filteredChanges;
         }
+
+        internal static string BlazorIdentityReadmeFileName = "Scaffolding-README.md";
+        internal static string BlazorIdentityReadmeString =
+@"Blazor Identity scaffolding has completed successfully.
+
+For setup and configuration information, see https://go.microsoft.com/fwlink/?linkid=2290075.
+
+If the project had identity support prior to scaffolding, ensure that the following changes are present in Program.cs:
+1. Correct DbContextClass is used in the following statements :
+    - var connectionString = builder.Configuration.GetConnectionString(DBCONTEXT_CONNECTIONSTRING) ...
+    - builder.Services.AddDbContext<DBCONTEXT>(options => ...
+    - builder.Services.AddIdentityCore<IDENTITY_USER_CLASS>...
+        .AddEntityFrameworkStores<DBCONTEXT>() ...
+2. Correct Identity User class is being used, (if using the default 'IdentityUser' or a custom IdentityUser class).
+    - builder.Services.AddIdentityCore<IDENTITY_USER_CLASS>...
+    - builder.Services.AddSingleton<IEmailSender<IDENTITY_USER_CLASS>...
+";
+
     }
 }

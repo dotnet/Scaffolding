@@ -141,7 +141,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             var blazorTemplateModel = await ValidateAndBuild(model);
             ExecuteTemplates(blazorTemplateModel);
+            AddReadmeFile(blazorTemplateModel.BaseOutputPath);
             await ModifyFilesAsync(blazorTemplateModel);
+        }
+
+        internal void AddReadmeFile(string outputPath)
+        {
+            string fileName = BlazorIdentityHelper.BlazorIdentityReadmeFileName;
+            string readmeFilePath = Path.Combine(outputPath, fileName);
+            FileSystem.WriteAllText(readmeFilePath, BlazorIdentityHelper.BlazorIdentityReadmeString);
+            Logger.LogMessage($"Added Blazor identity file : {fileName}");
         }
 
         internal async Task<BlazorIdentityModel> ValidateAndBuild(BlazorIdentityCommandLineModel commandlineModel)

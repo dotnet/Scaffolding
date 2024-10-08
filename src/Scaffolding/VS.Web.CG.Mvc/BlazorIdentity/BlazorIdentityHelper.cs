@@ -106,7 +106,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
         internal static string BlazorIdentityReadmeString =
 @"Blazor Identity scaffolding has completed successfully.
 
-For setup and configuration information, see https://learn.microsoft.com/en-us/aspnet/core/blazor/security.
+For setup and configuration information, see https://go.microsoft.com/fwlink/?linkid=2290075.
 
 If the project had identity support prior to scaffolding, ensure that the following changes are present in Program.cs:
 1. Correct DbContextClass is used in the following statements :

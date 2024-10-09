@@ -45,7 +45,7 @@ internal static class DotnetCommands
                     logger.LogInformation($"\n{stdErr}");
                 }
 
-                logger.LogInformation("Failed!");
+                logger.LogInformation("Failed.");
             }
             else
             {

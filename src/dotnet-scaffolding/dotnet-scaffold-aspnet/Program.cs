@@ -26,7 +26,7 @@ public static class Program
             out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption, out var overwriteOption);
 
         builder.AddScaffolder("blazor-empty")
-            .WithDisplayName("Razor Component - Empty")
+            .WithDisplayName("Razor Component")
             .WithCategory("Blazor")
             .WithDescription("Add an empty razor component to a given project")
             .WithOption(projectOption)
@@ -70,8 +70,8 @@ public static class Program
                 step.CommandName = "page";
             });
 
-        builder.AddScaffolder("apicontroller-empty")
-            .WithDisplayName("API Controller - Empty")
+        builder.AddScaffolder("apicontroller")
+            .WithDisplayName("API Controller")
             .WithCategory("API")
             .WithDescription("Add an empty API Controller to a given project")
             .WithOptions([projectOption, fileNameOption, actionsOption])
@@ -85,8 +85,8 @@ public static class Program
                 step.CommandName = "apicontroller";
             });
 
-        builder.AddScaffolder("mvccontroller-empty")
-            .WithDisplayName("MVC Controller - Empty")
+        builder.AddScaffolder("mvccontroller")
+            .WithDisplayName("MVC Controller")
             .WithCategory("MVC")
             .WithDescription("Add an empty MVC Controller to a given project")
             .WithOptions([projectOption, fileNameOption, actionsOption])

@@ -29,11 +29,11 @@ internal class FirstPartyComponentInitializer
 
         foreach (var tool in toolsToInstall)
         {
-            _logger.LogInformation("Installing {tool}!", tool);
+            _logger.LogInformation("Installing {tool}.", tool);
             var successfullyInstalled = _dotnetToolService.InstallDotNetTool(tool, prerelease: true);
             if (!successfullyInstalled)
             {
-                _logger.LogInformation("Failed to install {tool}!", tool);
+                _logger.LogInformation("Failed to install {tool}.", tool);
             }
         }
     }

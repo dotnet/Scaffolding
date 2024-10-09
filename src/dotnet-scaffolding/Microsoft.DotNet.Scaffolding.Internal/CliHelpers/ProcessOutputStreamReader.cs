@@ -81,7 +81,7 @@ internal sealed class ProcessOutputStreamReader : IDisposable
     {
         if (_capture != null)
         {
-            throw new InvalidOperationException("Already capturing stream!"); // TODO: Localize this?
+            throw new InvalidOperationException("Already capturing stream."); // TODO: Localize this?
         }
     }
 

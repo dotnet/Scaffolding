@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Locator;
 using Microsoft.Extensions.Logging;
@@ -38,9 +39,10 @@ internal class MsBuildInitializer
 
             //register newest MSBuild from the newest dotnet sdk installed.
             var sdkPath = Directory.GetDirectories(sdkBasePath)
-                .Select(d => new DirectoryInfo(d).Name)
-                .Where(name => Version.TryParse(name.Split('-')[0], out _))
-                .OrderByDescending(name => name)
+                .Select(d => new { Path = d, new DirectoryInfo(d).Name })
+                .Where(d => Version.TryParse(d.Name.Split('-')[0], out _))
+                .OrderByDescending(d => Version.Parse(d.Name.Split('-')[0]))
+                .Select(d => d.Path)
                 .FirstOrDefault();
 
             if (string.IsNullOrEmpty(sdkPath))

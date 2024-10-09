@@ -52,6 +52,11 @@ using Microsoft.EntityFrameworkCore;
 using <#= Model.DbContextInfo.DbContextNamespace #>;
 <#
 }#>
+<# if (!string.IsNullOrEmpty(Model.ModelInfo.ModelNamespace))
+{#>
+using <#= Model.ModelInfo.ModelNamespace #>;
+<#
+}#>
 
 public static class <#= Model.EndpointsClassName #>
 {

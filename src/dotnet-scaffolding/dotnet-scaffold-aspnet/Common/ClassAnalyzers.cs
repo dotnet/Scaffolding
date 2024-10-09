@@ -15,7 +15,7 @@ internal static class ClassAnalyzers
         ISymbol? existingDbContextClass,
         string dbContextClassName,
         string dbProvider,
-        string? modelName = null)
+        ModelInfo? modelInfo = null)
     {
         var dbContextInfo = new DbContextInfo();
         dbContextInfo.EfScenario = true;
@@ -25,18 +25,18 @@ internal static class ClassAnalyzers
             dbContextInfo.DbContextClassName = existingDbContextClass.Name;
             dbContextInfo.DbContextClassPath = existingDbContextClass.Locations.FirstOrDefault()?.SourceTree?.FilePath;
             dbContextInfo.DbContextNamespace = existingDbContextClass.ContainingNamespace.ToDisplayString();
-            dbContextInfo.EntitySetVariableName = string.IsNullOrEmpty(modelName) ?
-                string.Empty : EfDbContextHelpers.GetEntitySetVariableName(existingDbContextClass, modelName);
+            dbContextInfo.EntitySetVariableName = modelInfo is null ?
+                string.Empty : EfDbContextHelpers.GetEntitySetVariableName(existingDbContextClass, modelInfo.ModelTypeName);
         }
         //properties for creating a new DbContext
         else
         {
-            dbContextInfo.NewDbSetStatement = string.IsNullOrEmpty(modelName) ?
-                string.Empty : $"public DbSet<{modelName}> {modelName} {{ get; set; }} = default!;";
+            dbContextInfo.NewDbSetStatement = modelInfo is null ?
+                string.Empty : $"public DbSet<{modelInfo.ModelFullName}> {modelInfo.ModelTypeName} {{ get; set; }} = default!;";
             dbContextInfo.DbContextClassName = dbContextClassName;
             dbContextInfo.DbContextClassPath = CommandHelpers.GetNewFilePath(projectPath, dbContextClassName);
             dbContextInfo.DatabaseProvider = dbProvider;
-            dbContextInfo.EntitySetVariableName = modelName;
+            dbContextInfo.EntitySetVariableName = modelInfo?.ModelTypeName;
         }
 
         if (!string.IsNullOrEmpty(dbContextInfo.DbContextNamespace) &&
@@ -93,10 +93,21 @@ internal static class ClassAnalyzers
         var modelInfo = new ModelInfo();
         modelInfo.ModelTypeName = modelClassSymbol.Name;
         modelInfo.ModelNamespace = modelClassSymbol.ContainingNamespace.ToDisplayString();
-        if (!string.IsNullOrEmpty(modelInfo.ModelNamespace) &&
-            modelInfo.ModelNamespace.Equals(Constants.GlobalNamespace, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrEmpty(modelInfo.ModelNamespace))
         {
-            modelInfo.ModelNamespace = string.Empty;
+            if (modelInfo.ModelNamespace.Equals(Constants.GlobalNamespace, StringComparison.OrdinalIgnoreCase))
+            {
+                modelInfo.ModelNamespace = string.Empty;
+                modelInfo.ModelFullName = modelInfo.ModelTypeName;
+            }
+            else
+            {
+                modelInfo.ModelFullName = $"{modelInfo.ModelNamespace}.{modelInfo.ModelTypeName}";
+            }
+        }
+        else
+        {
+            modelInfo.ModelFullName = modelInfo.ModelTypeName;
         }
 
         var efModelProperties = EfDbContextHelpers.GetModelProperties(modelClassSymbol);

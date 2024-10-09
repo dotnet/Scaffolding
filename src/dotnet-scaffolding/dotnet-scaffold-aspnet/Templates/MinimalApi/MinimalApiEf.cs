@@ -76,6 +76,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(";\r\n");
 
 }
+ if (!string.IsNullOrEmpty(Model.ModelInfo.ModelNamespace))
+{
+            this.Write("using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelInfo.ModelNamespace));
+            this.Write(";\r\n");
+
+}
             this.Write("\r\npublic static class ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.EndpointsClassName));
             this.Write("\r\n{\r\n    public static void ");

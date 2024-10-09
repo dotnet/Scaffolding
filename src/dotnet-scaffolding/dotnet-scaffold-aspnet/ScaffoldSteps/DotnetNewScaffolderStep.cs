@@ -49,7 +49,13 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
     private bool InvokeDotnetNew(DotnetNewStepSettings stepSettings)
     {
         var projectBasePath = Path.GetDirectoryName(stepSettings.Project);
-        if (Directory.Exists(projectBasePath))
+        //using the project name from the csproj path as namespace currently.
+        //to evaluate the correct namespace is a lot of overhead for a simple 'dotnet new' operation
+        //TODO maybe change this?
+        var projectName = Path.GetFileNameWithoutExtension(stepSettings.Project);
+        if (Directory.Exists(projectBasePath) &&
+            !string.IsNullOrEmpty(projectBasePath) &&
+            !string.IsNullOrEmpty(projectName))
         {
             //arguments for 'dotnet new {settings.CommandName}'
             var args = new List<string>()
@@ -57,6 +63,8 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
                 stepSettings.CommandName,
                 "--name",
                 stepSettings.Name,
+                "--namespace",
+                projectName,
                 "--output",
                 projectBasePath
             };

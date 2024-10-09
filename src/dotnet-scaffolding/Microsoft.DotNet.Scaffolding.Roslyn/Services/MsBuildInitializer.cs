@@ -38,9 +38,10 @@ internal class MsBuildInitializer
 
             //register newest MSBuild from the newest dotnet sdk installed.
             var sdkPath = Directory.GetDirectories(sdkBasePath)
-                .Select(d => new DirectoryInfo(d).Name)
-                .Where(name => Version.TryParse(name.Split('-')[0], out _))
-                .OrderByDescending(name => name)
+                .Select(d => new { Path = d, new DirectoryInfo(d).Name })
+                .Where(d => Version.TryParse(d.Name.Split('-')[0], out _))
+                .OrderByDescending(d => Version.Parse(d.Name.Split('-')[0]))
+                .Select(d => d.Path)
                 .FirstOrDefault();
 
             if (string.IsNullOrEmpty(sdkPath))

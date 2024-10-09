@@ -47,9 +47,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="6.0.13">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="6.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha />
+      <Sha>061c8b7177fbe56584994325a24bb262628ebd5a</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.36">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>

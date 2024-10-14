@@ -13,7 +13,8 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     private readonly IEnvironmentService _environmentService;
-    
+
+
     public ScaffoldCommand(
         IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
@@ -43,13 +44,16 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        
+        // only tracking telemetry at 'StartupFlowStep' and 'CommandExecuteFlowStep'.
+        // users can change selections so only want to track as we execute the interactive commands.
+        // StartupFlowStep will initialize the environment and gather some telemetry
+
         IEnumerable<IFlowStep> flowSteps =
         [
-            new StartupFlowStep(_dotnetToolService, _environmentService, _fileSystem, _logger),
+            new StartupFlowStep(_dotnetToolService, _environmentService, _fileSystem, _logger, TelemetryService),
             new CategoryPickerFlowStep(_logger, _dotnetToolService),
             new CommandPickerFlowStep(_logger, _dotnetToolService, _environmentService, _fileSystem),
-            new CommandExecuteFlowStep()
+            new CommandExecuteFlowStep(TelemetryService)
         ];
 
         return await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive, showSelectedOptions: false);

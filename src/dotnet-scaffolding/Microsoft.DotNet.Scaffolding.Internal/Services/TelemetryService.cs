@@ -6,6 +6,7 @@ using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Internal.Services;
 
@@ -13,34 +14,61 @@ internal class TelemetryService : ITelemetryService, IDisposable
 {
     private readonly IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
     private readonly IEnvironmentService _environmentService;
-    private readonly string _currentSessionId;
+    private readonly ILogger _logger;
+    private readonly string? _currentSessionId;
     private TelemetryClient? _client;
     private TelemetryConfiguration? _telemetryConfig;
     private Dictionary<string, string> _commonProperties = [];
     private Dictionary<string, double> _commonMeasurements = [];
     private bool _enabled;
-    private Task _trackEventTask;
+    private Task? _trackEventTask;
 
-    public TelemetryService(IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel, IEnvironmentService environmentService)
+    public TelemetryService(IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel, IEnvironmentService environmentService, ILogger<TelemetryService> logger)
     {
         _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
         _environmentService = environmentService;
+        _logger= logger;
+        InitializeFirstTimeUse();
+        if (_enabled)
+        {
+            // Store the session ID in a static field so that it can be reused
+            _currentSessionId = Guid.NewGuid().ToString();
+            _trackEventTask = Task.Factory.StartNew(() => InitializeClient(), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+        }
+    }
 
-        _enabled = !_environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.TELEMETRY_OPTOUT) &&
-                   (_firstTimeUseNoticeSentinel.Exists() || _environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.LAUNCHED_BY_DOTNET_SCAFFOLD));
+    //TODO : should this live here in the Program.cs for the given scaffolding projects.
+    private void InitializeFirstTimeUse()
+    {
+        if (_environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.TELEMETRY_OPTOUT))
+        {
+            _enabled = false;
+        }
+        else if (_firstTimeUseNoticeSentinel.Exists() || _environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.LAUNCHED_BY_DOTNET_SCAFFOLD))
+        {
+            _enabled = true;
+        }
+        else 
+        {
+            _enabled = false;
+            if (!_firstTimeUseNoticeSentinel.SkipFirstTimeExperience)
+            {
+                _logger.Log(LogLevel.Information, _firstTimeUseNoticeSentinel.DisclosureText);
+            }
 
-        // Store the session ID in a static field so that it can be reused
-        _currentSessionId = Guid.NewGuid().ToString();
-
-        _trackEventTask = Task.Factory.StartNew(() => InitializeClient(), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+            _firstTimeUseNoticeSentinel.CreateIfNotExists();
+        }
     }
 
     public void TrackEvent(string eventName, IReadOnlyDictionary<string, string> properties, IReadOnlyDictionary<string, double> measurements)
     {
-        _trackEventTask = _trackEventTask.ContinueWith(
-            x => TrackEventTask(eventName, properties, measurements),
-            TaskScheduler.Default
-        );
+        if (_trackEventTask is not null)
+        {
+            _trackEventTask = _trackEventTask.ContinueWith(
+                x => TrackEventTask(eventName, properties, measurements),
+                TaskScheduler.Default
+            );
+        }
     }
 
     private void InitializeClient()
@@ -51,6 +79,8 @@ internal class TelemetryService : ITelemetryService, IDisposable
         _client = new TelemetryClient(_telemetryConfig);
         _client.Context.Session.Id = _currentSessionId;
         _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;
+        //add common properties
+        _commonProperties = new TelemetryCommonProperties(_environmentService, _firstTimeUseNoticeSentinel.ProductFullVersion).GetTelemetryCommonProperties();
     }
 
     private void TrackEventTask(

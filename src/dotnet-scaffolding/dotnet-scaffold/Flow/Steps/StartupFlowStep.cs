@@ -18,18 +18,21 @@ internal class StartupFlowStep : IFlowStep
     private readonly IDotNetToolService _dotnetToolService;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
+    private readonly ITelemetryService _telemetry;
     private readonly bool _initializeMsbuild;
     public StartupFlowStep(
         IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
         ILogger logger,
+        ITelemetryService telemetry,
         bool initializeMsbuild = true)
     {
         _dotnetToolService = dotnetToolService;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
         _logger = logger;
+        _telemetry = telemetry;
         _initializeMsbuild = initializeMsbuild;
     }
 

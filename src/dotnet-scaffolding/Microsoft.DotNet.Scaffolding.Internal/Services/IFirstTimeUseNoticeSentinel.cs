@@ -8,6 +8,7 @@ internal interface IFirstTimeUseNoticeSentinel
     string Title { get; }
     string DisclosureText { get; }
     bool SkipFirstTimeExperience { get; }
+    string ProductFullVersion { get; }
     bool Exists();
     void CreateIfNotExists();
 }

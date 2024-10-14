@@ -1,8 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.Core;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
+using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Spectre.Console;
 using Spectre.Console.Flow;
 
@@ -14,6 +14,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
     /// </summary>
     internal class CommandExecuteFlowStep : IFlowStep
     {
+        private readonly ITelemetryService _telemetryService;
+        public CommandExecuteFlowStep(ITelemetryService telemetryService)
+        {
+            _telemetryService = telemetryService;
+        }
+
         public string Id => nameof(CommandExecuteFlowStep);
 
         public string DisplayName => "Command Execute";
@@ -46,6 +52,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 AnsiConsole.Status()
                     .Start($"Executing '{dotnetToolInfo.Command}'", statusContext =>
                     {
+                        //TODO track which component is being executed, and exit code
                         var cliRunner = dotnetToolInfo.IsGlobalTool?
                             DotnetCliRunner.Create(dotnetToolInfo.Command, parameterValues) :
                             DotnetCliRunner.CreateDotNet(dotnetToolInfo.Command, parameterValues);

@@ -23,6 +23,6 @@
   <ItemGroup>
     <None Pack="true" Include="CodeModificationConfigs\*\*.json" PackagePath="CodeModificationConfigs\" />
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\*.tt" PackagePath="Templates\DbContext\" />
-    <None Pack="true" Include="README.md"  PackagePath="\"/>
+    <None Pack="true" Include="README.md" PackagePath="\" />
   </ItemGroup>
 </Project>

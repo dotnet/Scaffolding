@@ -46,7 +46,7 @@ internal class FirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
 
     public bool Exists() => _fileSystem.FileExists(SentinelPath);
 
-    private static string ProductFullVersion
+    public string ProductFullVersion
         => Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ??
            typeof(FirstTimeUseNoticeSentinel).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
 }

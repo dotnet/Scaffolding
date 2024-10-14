@@ -3,6 +3,8 @@
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.DotNet.Tools.Scaffold.Telemetry;
 using Spectre.Console;
 using Spectre.Console.Flow;
 
@@ -52,7 +54,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 AnsiConsole.Status()
                     .Start($"Executing '{dotnetToolInfo.Command}'", statusContext =>
                     {
-                        //TODO track which component is being executed, and exit code
                         var cliRunner = dotnetToolInfo.IsGlobalTool?
                             DotnetCliRunner.Create(dotnetToolInfo.Command, parameterValues) :
                             DotnetCliRunner.CreateDotNet(dotnetToolInfo.Command, parameterValues);
@@ -61,6 +62,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                             (s) => AnsiConsole.Console.MarkupLineInterpolated($"[red]{s}[/]"));
                     });
 
+                _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, exitCode));
                 if (exitCode != null)
                 {
                     if (exitCode != 0)

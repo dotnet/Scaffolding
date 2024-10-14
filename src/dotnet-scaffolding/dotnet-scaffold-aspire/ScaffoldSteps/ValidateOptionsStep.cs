@@ -22,11 +22,8 @@ internal class ValidateOptionsStep : ScaffoldStep
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        //_telemetryService.TrackEvent()
-        //TODO track telemetry
-        // - the IScaffolder properties
-        // - the result of the validation
-        if (!ValidateMethod(context, _logger))
+        var validationResult = ValidateMethod(context, _logger);
+        if (!validationResult)
         {
             _logger.LogError("Validation failed.");
             return Task.FromResult(false);

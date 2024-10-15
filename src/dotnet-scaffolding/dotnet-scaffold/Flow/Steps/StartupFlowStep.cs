@@ -91,7 +91,6 @@ internal class StartupFlowStep : IFlowStep
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine("Press any key to continue...");
             Console.ReadKey();
-
             _firstTimeUseNoticeSentinel.CreateIfNotExists();
         }
     }

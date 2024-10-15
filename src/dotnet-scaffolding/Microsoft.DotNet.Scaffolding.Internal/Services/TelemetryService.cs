@@ -33,14 +33,9 @@ internal class TelemetryService : ITelemetryService, IDisposable
 
         if (_enabled)
         {
-            _logger.LogInformation("==========TELEMETRY ENABLED ===========");
             // Store the session ID in a static field so that it can be reused
             _currentSessionId = Guid.NewGuid().ToString();
             _trackEventTask = Task.Factory.StartNew(() => InitializeClient(), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
-        }
-        else
-        {
-            _logger.LogInformation("==========TELEMETRY NOT ENABLED ===========");
         }
     }
 

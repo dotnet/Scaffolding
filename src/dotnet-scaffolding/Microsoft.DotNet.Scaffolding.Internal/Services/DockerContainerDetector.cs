@@ -4,7 +4,9 @@ using System.Security;
 using Microsoft.Win32;
 
 namespace Microsoft.DotNet.Scaffolding.Internal.Services;
-
+/// <summary>
+/// Copied from dotnet/HttpRepl/blob/main/src/Microsoft.HttpRepl.Telemetry/DockerContainerDetectorForTelemetry.cs
+/// </summary>
 internal static class DockerContainerDetector
 {
     public static IsDockerContainer IsDockerContainer()

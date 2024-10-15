@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                             (s) => AnsiConsole.Console.MarkupLineInterpolated($"[red]{s}[/]"));
                     });
 
-                _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, exitCode));
+                _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandObj, exitCode));
                 if (exitCode != null)
                 {
                     if (exitCode != 0)

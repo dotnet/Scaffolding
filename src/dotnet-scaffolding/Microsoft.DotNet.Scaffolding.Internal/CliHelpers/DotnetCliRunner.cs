@@ -125,7 +125,7 @@ internal class DotnetCliRunner
         // the first run banner, etc.
         // TODO: Allow extra Env Vars to be passed into the runner, so this can be done
         //       by the caller instead of this way
-        _psi.Environment[TelemetryConstants.LAUNCHED_BY_DOTNET_SCAFFOLD] = "true";
+        _psi.Environment.Add(TelemetryConstants.LAUNCHED_BY_DOTNET_SCAFFOLD, "true");
 #endif
     }
 }

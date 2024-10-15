@@ -151,12 +151,9 @@ internal static class StringExtensions
     /// <returns></returns>
     public static string Hash(this string text)
     {
-        using var sha256 = SHA256.Create();
-
         var bytes = Encoding.UTF8.GetBytes(text);
-        var hash = sha256.ComputeHash(bytes);
+        var hash = SHA256.HashData(bytes);
         StringBuilder hashString = new();
-
         try
         {
             foreach (var x in hash)

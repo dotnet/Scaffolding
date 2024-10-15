@@ -31,6 +31,7 @@ public static class Program
             .WithDescription("Add an empty razor component to a given project")
             .WithOption(projectOption)
             .WithOption(fileNameOption)
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<DotnetNewScaffolderStep>(config =>
             {
                 var step = config.Step;
@@ -46,6 +47,7 @@ public static class Program
             .WithDescription("Add an empty razor view to a given project")
             .WithOption(projectOption)
             .WithOption(fileNameOption)
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<DotnetNewScaffolderStep>(config =>
             {
                 var step = config.Step;
@@ -61,6 +63,7 @@ public static class Program
             .WithDescription("Add an empty razor page to a given project")
             .WithOption(projectOption)
             .WithOption(fileNameOption)
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<DotnetNewScaffolderStep>(config =>
             {
                 var step = config.Step;
@@ -75,6 +78,7 @@ public static class Program
             .WithCategory("API")
             .WithDescription("Add an empty API Controller to a given project")
             .WithOptions([projectOption, fileNameOption, actionsOption])
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<EmptyControllerScaffolderStep>(config =>
             {
                 var step = config.Step;
@@ -90,6 +94,7 @@ public static class Program
             .WithCategory("MVC")
             .WithDescription("Add an empty MVC Controller to a given project")
             .WithOptions([projectOption, fileNameOption, actionsOption])
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<EmptyControllerScaffolderStep>(config =>
             {
                 var step = config.Step;
@@ -105,6 +110,7 @@ public static class Program
             .WithCategory("API")
             .WithDescription("Create an API controller with REST actions to create, read, update, delete, and list entities")
             .WithOptions([projectOption, modelNameOption, controllerNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, prereleaseOption])
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<ValidateEfControllerStep>(config =>
             {
                 var step = config.Step;
@@ -128,6 +134,7 @@ public static class Program
             .WithCategory("MVC")
             .WithDescription("Create a MVC controller with read/write actions and views using Entity Framework")
             .WithOptions([projectOption, modelNameOption, controllerNameOption, viewsOption, dataContextClassRequiredOption, databaseProviderRequiredOption, prereleaseOption])
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<ValidateEfControllerStep>(config =>
             {
                 var step = config.Step;
@@ -152,6 +159,7 @@ public static class Program
             .WithCategory("Blazor")
             .WithDescription("Generates Razor Components using Entity Framework for Create, Delete, Details, Edit and List operations for the given model")
             .WithOptions([projectOption, modelNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, pageTypeOption, prereleaseOption])
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<ValidateBlazorCrudStep>(config =>
             {
                 var step = config.Step;
@@ -174,6 +182,7 @@ public static class Program
             .WithCategory("Razor Pages")
             .WithDescription("Generates Razor pages using Entity Framework for Create, Delete, Details, Edit and List operations for the given model")
             .WithOptions([projectOption, modelNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, pageTypeOption, prereleaseOption])
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<ValidateRazorPagesStep>(config =>
             {
                 var step = config.Step;
@@ -196,6 +205,7 @@ public static class Program
             .WithCategory("MVC")
             .WithDescription("Generates Razor views for Create, Delete, Details, Edit and List operations for the given model")
             .WithOptions([projectOption, modelNameOption, pageTypeOption])
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<ValidateViewsStep>(config =>
             {
                 var step = config.Step;
@@ -212,6 +222,7 @@ public static class Program
             .WithCategory("API")
             .WithDescription("Generates an endpoints file (with CRUD API endpoints) given a model and optional DbContext.")
             .WithOptions([projectOption, modelNameOption, endpointsClassOption, openApiOption, dataContextClassOption, databaseProviderOption, prereleaseOption])
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<ValidateMinimalApiStep>(config =>
             {
                 var step = config.Step;
@@ -235,6 +246,7 @@ public static class Program
             .WithCategory("MVC")
             .WithDescription("Creates a MVC Area folder structure.")
             .WithOptions([projectOption, areaNameOption])
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<AreaScaffolderStep>(config =>
             {
                 var step = config.Step;
@@ -248,6 +260,7 @@ public static class Program
             .WithCategory("Blazor")
             .WithDescription("Add blazor identity to a project.")
             .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, prereleaseOption])
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<ValidateIdentityStep>(config =>
             {
                 var step = config.Step;
@@ -270,6 +283,7 @@ public static class Program
             .WithCategory("Identity")
             .WithDescription("Add ASP.NET Core identity to a project.")
             .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, prereleaseOption])
+            .WithStep<FirstTimeTelemetrySetupStep>()
             .WithStep<ValidateIdentityStep>(config =>
             {
                 var step = config.Step;

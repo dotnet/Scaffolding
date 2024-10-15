@@ -18,21 +18,21 @@ internal class StartupFlowStep : IFlowStep
     private readonly IDotNetToolService _dotnetToolService;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
-    private readonly ITelemetryService _telemetry;
+    private readonly IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
     private readonly bool _initializeMsbuild;
     public StartupFlowStep(
         IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
         ILogger logger,
-        ITelemetryService telemetry,
+        IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
         bool initializeMsbuild = true)
     {
         _dotnetToolService = dotnetToolService;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
         _logger = logger;
-        _telemetry = telemetry;
+        _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
         _initializeMsbuild = initializeMsbuild;
     }
 
@@ -57,6 +57,7 @@ internal class StartupFlowStep : IFlowStep
             .Start("Initializing dotnet-scaffold", statusContext =>
             {
                 statusContext.Refresh();
+                InitializeFirstTimeTelemetry();
                 //initialize 1st party components (dotnet tools)
                 statusContext.Status = "Getting ready";
                 new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize();
@@ -77,6 +78,22 @@ internal class StartupFlowStep : IFlowStep
             });
 
         return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+    }
+
+    private void InitializeFirstTimeTelemetry()
+    {
+        if (!(_firstTimeUseNoticeSentinel.SkipFirstTimeExperience || _firstTimeUseNoticeSentinel.Exists()))
+        {
+            AnsiConsole.Write(new Markup(_firstTimeUseNoticeSentinel.Title.ToHeader()));
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine(_firstTimeUseNoticeSentinel.DisclosureText);
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+
+            _firstTimeUseNoticeSentinel.CreateIfNotExists();
+        }
     }
 
     private void SelectCommandArgs(IFlowContext context, IDictionary<string, List<string>> args)

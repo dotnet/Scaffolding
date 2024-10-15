@@ -24,6 +24,7 @@ caching.WithCategory("Aspire")
        .WithOption(appHostProjectOption)
        .WithOption(projectOption)
        .WithOption(prereleaseOption)
+       .WithStep<FirstTimeTelemetrySetupStep>()
        .WithStep<ValidateOptionsStep>(config =>
        {
            config.Step.ValidateMethod = ValidationHelper.ValidateCachingSettings;
@@ -38,6 +39,7 @@ database.WithCategory("Aspire")
         .WithOption(appHostProjectOption)
         .WithOption(projectOption)
         .WithOption(prereleaseOption)
+        .WithStep<FirstTimeTelemetrySetupStep>()
         .WithStep<ValidateOptionsStep>(config =>
         {
             config.Step.ValidateMethod = ValidationHelper.ValidateDatabaseSettings;
@@ -54,6 +56,7 @@ storage.WithCategory("Aspire")
        .WithOption(appHostProjectOption)
        .WithOption(projectOption)
        .WithOption(prereleaseOption)
+       .WithStep<FirstTimeTelemetrySetupStep>()
        .WithStep<ValidateOptionsStep>(config =>
        {
            config.Step.ValidateMethod = ValidationHelper.ValidateStorageSettings;
@@ -80,6 +83,7 @@ static void ConfigureSteps(IServiceCollection services)
     services.AddTransient<AddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();
     services.AddTransient<AddConnectionStringStep>();
+    services.AddTransient<FirstTimeTelemetrySetupStep>();
 }
 
 static void CreateOptions(out ScaffolderOption<string> cachingTypeOption, out ScaffolderOption<string> databaseTypeOption, out ScaffolderOption<string> storageTypeOption,

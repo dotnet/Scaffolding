@@ -27,36 +27,20 @@ internal class TelemetryService : ITelemetryService, IDisposable
     {
         _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
         _environmentService = environmentService;
-        _logger= logger;
-        InitializeFirstTimeUse();
+        _logger = logger;
+        _enabled = !_environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.TELEMETRY_OPTOUT) &&
+           (_firstTimeUseNoticeSentinel.Exists() || _environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.LAUNCHED_BY_DOTNET_SCAFFOLD));
+
         if (_enabled)
         {
+            _logger.LogInformation("==========TELEMETRY ENABLED ===========");
             // Store the session ID in a static field so that it can be reused
             _currentSessionId = Guid.NewGuid().ToString();
             _trackEventTask = Task.Factory.StartNew(() => InitializeClient(), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
         }
-    }
-
-    //TODO : should this live here in the Program.cs for the given scaffolding projects.
-    private void InitializeFirstTimeUse()
-    {
-        if (_environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.TELEMETRY_OPTOUT))
+        else
         {
-            _enabled = false;
-        }
-        else if (_firstTimeUseNoticeSentinel.Exists() || _environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.LAUNCHED_BY_DOTNET_SCAFFOLD))
-        {
-            _enabled = true;
-        }
-        else 
-        {
-            _enabled = false;
-            if (!_firstTimeUseNoticeSentinel.SkipFirstTimeExperience)
-            {
-                _logger.Log(LogLevel.Information, _firstTimeUseNoticeSentinel.DisclosureText);
-            }
-
-            _firstTimeUseNoticeSentinel.CreateIfNotExists();
+            _logger.LogInformation("==========TELEMETRY NOT ENABLED ===========");
         }
     }
 

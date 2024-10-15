@@ -12,12 +12,10 @@ internal class ValidateOptionsStep : ScaffoldStep
 {
     public required Func<ScaffolderContext, ILogger, bool> ValidateMethod { get; set; }
     private readonly ILogger _logger;
-    private readonly ITelemetryService _telemetryService;
 
-    public ValidateOptionsStep(ILogger<ValidateOptionsStep> logger, ITelemetryService telemetryService)
+    public ValidateOptionsStep(ILogger<ValidateOptionsStep> logger)
     {
         _logger = logger;
-        _telemetryService = telemetryService;
     }
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)

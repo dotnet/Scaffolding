@@ -21,7 +21,6 @@ internal class FirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
         _environmentService = environmentService;
         _sentinel = $"{ProductFullVersion}.{productName}{TelemetryConstants.SENTINEL_SUFFIX}";
         _dotnetUserProfileFolderPath = _environmentService.DotnetUserProfilePath;
-
         SkipFirstTimeExperience = _environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.SKIP_FIRST_TIME_EXPERIENCE);
     }
 

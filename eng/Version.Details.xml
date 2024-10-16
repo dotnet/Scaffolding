@@ -19,57 +19,57 @@
       <Uri>https://github.com/dotnet/efcore</Uri>
       <Sha>7d1a46cfd99f5573b78b7be879452b5df9052489</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="6.0.2">
+    <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="6.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>4b4a745fc0152b887eec20da906b98a229973313</Sha>
+      <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.FileProviders.Physical" Version="6.0.1">
+    <Dependency Name="Microsoft.Extensions.FileProviders.Physical" Version="6.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>4b4a745fc0152b887eec20da906b98a229973313</Sha>
+      <Sha />
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Identity.Stores" Version="6.0.36">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>25ef79e96f407cb1e2ab5acecd568aed0845e955</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.1">
+    <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>4b4a745fc0152b887eec20da906b98a229973313</Sha>
+      <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.2">
+    <Dependency Name="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>4b4a745fc0152b887eec20da906b98a229973313</Sha>
+      <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.Json" Version="6.0.1">
+    <Dependency Name="Microsoft.Extensions.Configuration.Json" Version="6.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>4b4a745fc0152b887eec20da906b98a229973313</Sha>
+      <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.2">
+    <Dependency Name="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>4b4a745fc0152b887eec20da906b98a229973313</Sha>
+      <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="6.0.2">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="6.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>4b4a745fc0152b887eec20da906b98a229973313</Sha>
+      <Sha>061c8b7177fbe56584994325a24bb262628ebd5a</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.36">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>25ef79e96f407cb1e2ab5acecd568aed0845e955</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging.Console" Version="6.0.1">
+    <Dependency Name="Microsoft.Extensions.Logging.Console" Version="6.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>4b4a745fc0152b887eec20da906b98a229973313</Sha>
+      <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging.Debug" Version="6.0.1">
+    <Dependency Name="Microsoft.Extensions.Logging.Debug" Version="6.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>4b4a745fc0152b887eec20da906b98a229973313</Sha>
+      <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging" Version="6.0.1">
+    <Dependency Name="Microsoft.Extensions.Logging" Version="6.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>4b4a745fc0152b887eec20da906b98a229973313</Sha>
+      <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.1">
+    <Dependency Name="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>4b4a745fc0152b887eec20da906b98a229973313</Sha>
+      <Sha />
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.36">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>

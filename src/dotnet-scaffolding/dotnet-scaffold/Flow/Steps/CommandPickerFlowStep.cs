@@ -89,6 +89,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var settings = context.GetCommandSettings();
+            var envVars = context.GetTelemetryEnvironmentVariables();
             var componentName = settings?.ComponentName;
             var commandName = settings?.CommandName;
             CommandInfo? commandInfo = null;
@@ -99,7 +100,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             if (dotnetToolComponent != null)
             {
-                var allCommands = _dotnetToolService.GetCommands(dotnetToolComponent);
+                var allCommands = _dotnetToolService.GetCommands(dotnetToolComponent, envVars);
                 commandInfo = allCommands.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
             }
             else

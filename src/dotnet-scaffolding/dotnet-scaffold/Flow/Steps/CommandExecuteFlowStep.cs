@@ -47,6 +47,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
 
             var parameterValues = GetAllParameterValues(context, commandObj);
+            var envVars = context.GetTelemetryEnvironmentVariables();
             if (!string.IsNullOrEmpty(dotnetToolInfo.Command) && parameterValues.Count != 0 && !string.IsNullOrEmpty(commandObj.Name))
             {
                 var componentExecutionString = $"{dotnetToolInfo.Command} {string.Join(" ", parameterValues)}";
@@ -55,8 +56,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     .Start($"Executing '{dotnetToolInfo.Command}'", statusContext =>
                     {
                         var cliRunner = dotnetToolInfo.IsGlobalTool?
-                            DotnetCliRunner.Create(dotnetToolInfo.Command, parameterValues) :
-                            DotnetCliRunner.CreateDotNet(dotnetToolInfo.Command, parameterValues);
+                            DotnetCliRunner.Create(dotnetToolInfo.Command, parameterValues, envVars) :
+                            DotnetCliRunner.CreateDotNet(dotnetToolInfo.Command, parameterValues, envVars);
                         exitCode = cliRunner.ExecuteWithCallbacks(
                             (s) => AnsiConsole.Console.MarkupLineInterpolated($"[green]{s}[/]"),
                             (s) => AnsiConsole.Console.MarkupLineInterpolated($"[red]{s}[/]"));

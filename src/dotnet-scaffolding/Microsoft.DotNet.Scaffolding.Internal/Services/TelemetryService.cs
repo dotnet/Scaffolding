@@ -28,9 +28,11 @@ internal class TelemetryService : ITelemetryService, IDisposable
         _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
         _environmentService = environmentService;
         _logger = logger;
-        _enabled = !_environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.TELEMETRY_OPTOUT) &&
-           (_firstTimeUseNoticeSentinel.Exists() || _environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.LAUNCHED_BY_DOTNET_SCAFFOLD));
+        var dotnetScaffoldTelemetryState = _environmentService.GetEnvironmentVariable(TelemetryConstants.DOTNET_SCAFFOLD_TELEMETRY_STATE);
+        var dotnetScaffoldTelemetryEnabled = !string.IsNullOrEmpty(dotnetScaffoldTelemetryState) && dotnetScaffoldTelemetryState.Equals(TelemetryConstants.TELEMETRY_STATE_ENABLED, StringComparison.OrdinalIgnoreCase);
 
+        _enabled = !_environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.TELEMETRY_OPTOUT) &&
+           (_firstTimeUseNoticeSentinel.Exists() || dotnetScaffoldTelemetryEnabled);
         if (_enabled)
         {
             // Store the session ID in a static field so that it can be reused

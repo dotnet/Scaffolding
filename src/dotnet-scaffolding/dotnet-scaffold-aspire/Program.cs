@@ -4,13 +4,13 @@ using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = Host.CreateScaffoldBuilder();
-
 ConfigureServices(builder.Services);
 ConfigureSteps(builder.Services);
 
@@ -24,7 +24,6 @@ caching.WithCategory("Aspire")
        .WithOption(appHostProjectOption)
        .WithOption(projectOption)
        .WithOption(prereleaseOption)
-       .WithStep<FirstTimeTelemetrySetupStep>()
        .WithStep<ValidateOptionsStep>(config =>
        {
            config.Step.ValidateMethod = ValidationHelper.ValidateCachingSettings;
@@ -39,7 +38,6 @@ database.WithCategory("Aspire")
         .WithOption(appHostProjectOption)
         .WithOption(projectOption)
         .WithOption(prereleaseOption)
-        .WithStep<FirstTimeTelemetrySetupStep>()
         .WithStep<ValidateOptionsStep>(config =>
         {
             config.Step.ValidateMethod = ValidationHelper.ValidateDatabaseSettings;
@@ -56,7 +54,6 @@ storage.WithCategory("Aspire")
        .WithOption(appHostProjectOption)
        .WithOption(projectOption)
        .WithOption(prereleaseOption)
-       .WithStep<FirstTimeTelemetrySetupStep>()
        .WithStep<ValidateOptionsStep>(config =>
        {
            config.Step.ValidateMethod = ValidationHelper.ValidateStorageSettings;
@@ -65,7 +62,7 @@ storage.WithCategory("Aspire")
        .WithStorageCodeModificationSteps();
 
 var runner = builder.Build();
-
+FirstTimeTelemetryInitializer.ConfigureTelemetry(builder.ServiceProvider);
 runner.RunAsync(args).Wait();
 
 static void ConfigureServices(IServiceCollection services)
@@ -83,7 +80,6 @@ static void ConfigureSteps(IServiceCollection services)
     services.AddTransient<AddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();
     services.AddTransient<AddConnectionStringStep>();
-    services.AddTransient<FirstTimeTelemetrySetupStep>();
 }
 
 static void CreateOptions(out ScaffolderOption<string> cachingTypeOption, out ScaffolderOption<string> databaseTypeOption, out ScaffolderOption<string> storageTypeOption,

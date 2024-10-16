@@ -27,6 +27,18 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     public ILoggingBuilder Logging => _logging;
     public IServiceCollection Services => _serviceCollection;
     public IEnumerable<IScaffoldBuilder> Scaffolders => _scaffoldBuilders;
+    public IServiceProvider? ServiceProvider
+    {
+        get
+        {
+            if (!_built)
+            {
+                return null;
+            }
+
+            return _appServices!;
+        }
+    }
 
     public IScaffoldRunner Build()
     {
@@ -45,7 +57,6 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
         scaffoldRunner.Scaffolders = Scaffolders.Select(s => s.Build(_appServices));
 
         scaffoldRunner.BuildRootCommand();
-
         return scaffoldRunner;
     }
 

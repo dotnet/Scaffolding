@@ -1,9 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Diagnostics;
-#if DOTNET_SCAFFOLD_INTERNAL
-using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
-#endif
 
 namespace Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 
@@ -12,14 +9,14 @@ namespace Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 /// </summary>
 internal class DotnetCliRunner
 {
-    public static DotnetCliRunner CreateDotNet(string commandName, IEnumerable<string> args)
+    public static DotnetCliRunner CreateDotNet(string commandName, IEnumerable<string> args, IDictionary<string, string>? environmentVariables = null)
     {
         return Create("dotnet", new[] { commandName }.Concat(args));
     }
 
-    public static DotnetCliRunner Create(string commandName, IEnumerable<string> args)
+    public static DotnetCliRunner Create(string commandName, IEnumerable<string> args, IDictionary<string, string>? environmentVariables = null)
     {
-        return new DotnetCliRunner(commandName, args);
+        return new DotnetCliRunner(commandName, args, environmentVariables);
     }
 
     public int ExecuteWithCallbacks(Action<string> stdOutCallback, Action<string> stdErrCallback)
@@ -104,7 +101,7 @@ internal class DotnetCliRunner
     }
 
     internal ProcessStartInfo _psi;
-    private DotnetCliRunner(string commandName, IEnumerable<string> args)
+    private DotnetCliRunner(string commandName, IEnumerable<string> args, IDictionary<string, string>? environmentVariables = null)
     {
         _psi = new ProcessStartInfo
         {
@@ -117,15 +114,16 @@ internal class DotnetCliRunner
 
         // Clear MSBuild related environment variables so it doesn't interfere with dotnet calls
         // automatic lookups via global.json, etc.
+        //TODO add the environment variables below using the 'environmentVariables' parameter.
         _psi.Environment.Remove("MSBuildSDKsPath");
         _psi.Environment.Remove("MSBuildExtensionsPath");
         _psi.Environment.Remove("MSBUILD_EXE_PATH");
-#if DOTNET_SCAFFOLD_INTERNAL
-        // Specify that this is being launched by dotnet-scaffold, so that we avoid
-        // the first run banner, etc.
-        // TODO: Allow extra Env Vars to be passed into the runner, so this can be done
-        //       by the caller instead of this way
-        _psi.Environment.Add(TelemetryConstants.LAUNCHED_BY_DOTNET_SCAFFOLD, "true");
-#endif
+        if (environmentVariables is not null && environmentVariables.Any())
+        {
+            foreach (var envVar in environmentVariables)
+            {
+                _psi.Environment.Add(envVar.Key, envVar.Value);
+            }
+        }
     }
 }

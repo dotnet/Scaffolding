@@ -24,12 +24,12 @@ internal class DotNetToolService : IDotNetToolService
     }
 
     private IList<DotNetToolInfo> _dotNetTools;
-    public List<CommandInfo> GetCommands(DotNetToolInfo dotnetTool)
+    public List<CommandInfo> GetCommands(DotNetToolInfo dotnetTool, IDictionary<string, string>? envVars = null)
     {
         List<CommandInfo>? commands = null;
         var runner = dotnetTool.IsGlobalTool ?
-            DotnetCliRunner.Create(dotnetTool.Command, ["get-commands"]) :
-            DotnetCliRunner.CreateDotNet(dotnetTool.Command, ["get-commands"]);
+            DotnetCliRunner.Create(dotnetTool.Command, ["get-commands"], envVars) :
+            DotnetCliRunner.CreateDotNet(dotnetTool.Command, ["get-commands"], envVars);
 
         var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
         if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
@@ -69,7 +69,7 @@ internal class DotNetToolService : IDotNetToolService
         }
     }
 
-    public IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null)
+    public IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null)
     {
         if (components is null || components.Count == 0)
         {
@@ -84,7 +84,7 @@ internal class DotNetToolService : IDotNetToolService
         var commands = new ConcurrentBag<KeyValuePair<string, CommandInfo>>();
         Parallel.ForEach(components, options, dotnetTool =>
         {
-            var commandInfo = GetCommands(dotnetTool);
+            var commandInfo = GetCommands(dotnetTool, envVars);
             if (commandInfo != null)
             {
                 foreach (var cmd in commandInfo)

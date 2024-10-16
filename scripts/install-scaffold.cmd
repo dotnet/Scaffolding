@@ -1,5 +1,5 @@
 set VERSION=9.0.0-dev
-set DEFAULT_NUPKG_PATH=C:\Nuget
+set DEFAULT_NUPKG_PATH=%userprofile%/.nuget/packages
 set SRC_DIR=%cd%
 set NUPKG=artifacts/packages/Debug/Shipping/
 call taskkill /f /im dotnet.exe

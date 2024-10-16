@@ -17,11 +17,13 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
     public string? FileName { get; set; }
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
+    private readonly ITelemetryService _telemetryService;
 
-    public DotnetNewScaffolderStep(ILogger<DotnetNewScaffolderStep> logger, IFileSystem fileSystem)
+    public DotnetNewScaffolderStep(ILogger<DotnetNewScaffolderStep> logger, IFileSystem fileSystem, ITelemetryService telemetryService)
     {
         _logger = logger;
         _fileSystem = fileSystem;
+        _telemetryService = telemetryService;
     }
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)

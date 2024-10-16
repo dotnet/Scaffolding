@@ -1,6 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Diagnostics;
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Microsoft.DotNet.Scaffolding.Internal.Extensions;
 
@@ -139,6 +142,31 @@ internal static class StringExtensions
         }
 
         return text.Replace(IncorrectPathSeparator, Path.DirectorySeparatorChar);
+    }
+
+    /// <summary>
+    /// Hashes given string with SHA256. If we ever need different hash type, we should create abstract contract.
+    /// </summary>
+    /// <param name="text"></param>
+    /// <returns></returns>
+    public static string Hash(this string text)
+    {
+        var bytes = Encoding.UTF8.GetBytes(text);
+        var hash = SHA256.HashData(bytes);
+        StringBuilder hashString = new();
+        try
+        {
+            foreach (var x in hash)
+            {
+                hashString.AppendFormat(CultureInfo.InvariantCulture, "{0:x2}", x);
+            }
+
+            return hashString.ToString();
+        }
+        finally
+        {
+            hashString.Clear();
+        }
     }
 
     private static readonly char IncorrectPathSeparator = Path.DirectorySeparatorChar == '\\' ? '/' : '\\';

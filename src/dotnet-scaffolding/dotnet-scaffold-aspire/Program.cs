@@ -4,13 +4,13 @@ using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = Host.CreateScaffoldBuilder();
-
 ConfigureServices(builder.Services);
 ConfigureSteps(builder.Services);
 
@@ -62,13 +62,17 @@ storage.WithCategory("Aspire")
        .WithStorageCodeModificationSteps();
 
 var runner = builder.Build();
-
+var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
+telemetryWrapper?.ConfigureFirstTimeTelemetry();
 runner.RunAsync(args).Wait();
+telemetryWrapper?.Flush();
 
 static void ConfigureServices(IServiceCollection services)
 {
     services.AddSingleton<IFileSystem, FileSystem>();
     services.AddSingleton<IEnvironmentService, EnvironmentService>();
+    services.AddTelemetry("dotnetScaffoldAspire");
+    services.AddSingleton<IFirstPartyToolTelemetryWrapper, FirstPartyToolTelemetryWrapper>();
 }
 
 static void ConfigureSteps(IServiceCollection services)

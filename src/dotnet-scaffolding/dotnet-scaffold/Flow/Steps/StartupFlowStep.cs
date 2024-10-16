@@ -1,4 +1,5 @@
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
@@ -18,18 +19,21 @@ internal class StartupFlowStep : IFlowStep
     private readonly IDotNetToolService _dotnetToolService;
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
+    private readonly IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
     private readonly bool _initializeMsbuild;
     public StartupFlowStep(
         IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
         ILogger logger,
+        IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
         bool initializeMsbuild = true)
     {
         _dotnetToolService = dotnetToolService;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
         _logger = logger;
+        _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
         _initializeMsbuild = initializeMsbuild;
     }
 
@@ -54,6 +58,7 @@ internal class StartupFlowStep : IFlowStep
             .Start("Initializing dotnet-scaffold", statusContext =>
             {
                 statusContext.Refresh();
+                SelectTelemetryEnvironmentVariables(context, InitializeFirstTimeTelemetry());
                 //initialize 1st party components (dotnet tools)
                 statusContext.Status = "Getting ready";
                 new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize();
@@ -76,13 +81,51 @@ internal class StartupFlowStep : IFlowStep
         return new ValueTask<FlowStepResult>(FlowStepResult.Success);
     }
 
+    private IDictionary<string, string> InitializeFirstTimeTelemetry()
+    {
+        var telemetryEnvironmentVariables = new Dictionary<string, string>();
+        if (_environmentService.GetEnvironmentVariableAsBool(TelemetryConstants.TELEMETRY_OPTOUT))
+        {
+            telemetryEnvironmentVariables.Add(TelemetryConstants.DOTNET_SCAFFOLD_TELEMETRY_STATE, TelemetryConstants.TELEMETRY_STATE_DISABLED);
+        }
+        else if (_firstTimeUseNoticeSentinel.SkipFirstTimeExperience || _firstTimeUseNoticeSentinel.Exists())
+        {
+            telemetryEnvironmentVariables.Add(TelemetryConstants.DOTNET_SCAFFOLD_TELEMETRY_STATE, TelemetryConstants.TELEMETRY_STATE_ENABLED);
+        }
+        else
+        {
+            AnsiConsole.Write(new Markup(_firstTimeUseNoticeSentinel.Title.ToHeader()));
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine(_firstTimeUseNoticeSentinel.DisclosureText);
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+            _firstTimeUseNoticeSentinel.CreateIfNotExists();
+            telemetryEnvironmentVariables.Add(TelemetryConstants.DOTNET_SCAFFOLD_TELEMETRY_STATE, TelemetryConstants.TELEMETRY_STATE_DISABLED);
+        }
+
+        return telemetryEnvironmentVariables;
+    }
+
     private void SelectCommandArgs(IFlowContext context, IDictionary<string, List<string>> args)
     {
-        if (args != null)
+        if (args is not null)
         {
             context.Set(new FlowProperty(
                 FlowContextProperties.CommandArgs,
                 args,
+                isVisible: false));
+        }
+    }
+
+    private void SelectTelemetryEnvironmentVariables(IFlowContext context, IDictionary<string, string> envVars)
+    {
+        if (envVars is not null)
+        {
+            context.Set(new FlowProperty(
+                FlowContextProperties.TelemetryEnvironmentVariables,
+                envVars,
                 isVisible: false));
         }
     }

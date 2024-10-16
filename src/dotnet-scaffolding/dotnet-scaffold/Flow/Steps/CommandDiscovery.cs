@@ -22,6 +22,7 @@ internal class CommandDiscovery
     public KeyValuePair<string, CommandInfo>? Discover(IFlowContext context)
     {
         var allCommands = context.GetCommandInfos();
+        var envVars = context.GetTelemetryEnvironmentVariables();
         if (allCommands is null || allCommands.Count == 0)
         {
             allCommands = AnsiConsole
@@ -29,7 +30,7 @@ internal class CommandDiscovery
             .WithSpinner()
             .Start("Discovering scaffolders", statusContext =>
             {
-                return _dotnetToolService.GetAllCommandsParallel();
+                return _dotnetToolService.GetAllCommandsParallel(envVars: envVars);
             });
 
             if (allCommands is not null)

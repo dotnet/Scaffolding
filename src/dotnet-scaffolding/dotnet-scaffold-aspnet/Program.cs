@@ -1,10 +1,10 @@
-using System.Diagnostics;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
@@ -287,13 +287,18 @@ public static class Program
             .WithIdentityCodeChangeStep();
 
         var runner = builder.Build();
+        var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
+        telemetryWrapper?.ConfigureFirstTimeTelemetry();
         runner.RunAsync(args).Wait();
+        telemetryWrapper?.Flush();
     }
 
     static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<IEnvironmentService, EnvironmentService>();
         services.AddSingleton<IFileSystem, FileSystem>();
+        services.AddTelemetry("dotnetScaffoldAspnet");
+        services.AddSingleton<IFirstPartyToolTelemetryWrapper, FirstPartyToolTelemetryWrapper>();
     }
 
     static void ConfigureSteps(IServiceCollection services)

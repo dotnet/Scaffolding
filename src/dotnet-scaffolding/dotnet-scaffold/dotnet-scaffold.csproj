@@ -38,6 +38,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Pack="true" Include="README.md"  PackagePath="\"/>
+    <None Pack="true" Include="README.md" PackagePath="\" />
   </ItemGroup>
 </Project>

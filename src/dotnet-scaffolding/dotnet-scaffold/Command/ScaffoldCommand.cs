@@ -13,18 +13,23 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     private readonly IEnvironmentService _environmentService;
+    private readonly IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
+
     public ScaffoldCommand(
         IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
         IFlowProvider flowProvider,
-        ILogger<ScaffoldCommand> logger)
-        : base(flowProvider)
+        ILogger<ScaffoldCommand> logger,
+        ITelemetryService telemetry,
+        IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel)
+        : base(flowProvider, telemetry)
     {
         _dotnetToolService = dotnetToolService;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
         _logger = logger;
+        _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
     }
 
     public class Settings : CommandSettings
@@ -43,13 +48,16 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     {
         IEnumerable<IFlowStep> flowSteps =
         [
-            new StartupFlowStep(_dotnetToolService, _environmentService, _fileSystem, _logger),
+            new StartupFlowStep(_dotnetToolService, _environmentService, _fileSystem, _logger, _firstTimeUseNoticeSentinel),
             new CategoryPickerFlowStep(_logger, _dotnetToolService),
             new CommandPickerFlowStep(_logger, _dotnetToolService, _environmentService, _fileSystem),
-            new CommandExecuteFlowStep()
+            new CommandExecuteFlowStep(TelemetryService)
         ];
 
-        return await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive, showSelectedOptions: false);
+        var flowResult = await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive, showSelectedOptions: false);
+        //wait on the telemetry task to finish
+        TelemetryService.Flush();
+        return flowResult;
     }
 }
 

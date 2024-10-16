@@ -11,6 +11,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow
 {
     internal static class FlowContextExtensions
     {
+        public static IDictionary<string, string>? GetTelemetryEnvironmentVariables(this IFlowContext context, bool throwIfEmpty = false)
+        {
+            return context.GetValueOrThrow<IDictionary<string, string>>(FlowContextProperties.TelemetryEnvironmentVariables, throwIfEmpty);
+        }
         public static ICodeService? GetCodeService(this IFlowContext context, bool throwIfEmpty = false)
         {
             return context.GetValueOrThrow<ICodeService>(FlowContextProperties.CodeService, throwIfEmpty);

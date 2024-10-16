@@ -5,7 +5,7 @@ namespace Microsoft.DotNet.Scaffolding.Internal.Services;
 /// <summary>
 /// Wrapper over System.Environment abstraction for unit testing.
 /// </summary>
-public class EnvironmentService : IEnvironmentService
+internal class EnvironmentService : IEnvironmentService
 {
     private readonly IFileSystem _fileSystem;
     public EnvironmentService(IFileSystem fileSystem)
@@ -111,31 +111,76 @@ public class EnvironmentService : IEnvironmentService
     /// <inheritdoc />
     public string GetMachineName()
     {
-        return System.Environment.MachineName;
+        return Environment.MachineName;
     }
 
     /// <inheritdoc />
     public string? GetEnvironmentVariable(string name)
     {
-        return System.Environment.GetEnvironmentVariable(name);
+        return Environment.GetEnvironmentVariable(name);
+    }
+
+    /// <inheritdoc />
+    public bool GetEnvironmentVariableAsBool(string name, bool defaultValue = false)
+    {
+        var str = Environment.GetEnvironmentVariable(name);
+        if (string.IsNullOrEmpty(str))
+        {
+            return defaultValue;
+        }
+
+        switch (str.ToLowerInvariant())
+        {
+            case "true":
+            case "1":
+            case "yes":
+                return true;
+            case "false":
+            case "0":
+            case "no":
+                return false;
+            default:
+                return defaultValue;
+        }
     }
 
     /// <inheritdoc />
     public void SetEnvironmentVariable(string name, string value, EnvironmentVariableTarget envTarget)
     {
-        System.Environment.SetEnvironmentVariable(name, value, envTarget);
+        Environment.SetEnvironmentVariable(name, value, envTarget);
     }
 
     /// <inheritdoc />
-    public string GetFolderPath(System.Environment.SpecialFolder specifalFolder)
+    public string GetFolderPath(Environment.SpecialFolder specifalFolder)
     {
-        return System.Environment.GetFolderPath(specifalFolder);
+        return Environment.GetFolderPath(specifalFolder);
     }
 
     /// <inheritdoc />
     public string ExpandEnvironmentVariables(string name)
     {
-        return System.Environment.ExpandEnvironmentVariables(name);
+        return Environment.ExpandEnvironmentVariables(name);
+    }
+
+    public string? GetMacAddress()
+    {
+        return MacAddressGetter.GetMacAddress();
+    }
+
+    private bool _didCheckForContainer;
+    private IsDockerContainer _isDockerContainer;
+    public IsDockerContainer IsDockerContainer
+    {
+        get
+        {
+            if (!_didCheckForContainer)
+            {
+                _didCheckForContainer = true;
+                _isDockerContainer = DockerContainerDetector.IsDockerContainer();
+            }
+
+            return _isDockerContainer;
+        }
     }
 }
 

@@ -18,6 +18,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
+    private readonly ITelemetryService _telemetryService;
 
     public string? Project { get; set; }
     public bool Prerelease { get; set; }
@@ -29,10 +30,12 @@ internal class ValidateMinimalApiStep : ScaffoldStep
 
     public ValidateMinimalApiStep(
         IFileSystem fileSystem,
-        ILogger<ValidateMinimalApiStep> logger)
+        ILogger<ValidateMinimalApiStep> logger,
+        ITelemetryService telemetryService)
     {
         _fileSystem = fileSystem;
         _logger = logger;
+        _telemetryService = telemetryService;
     }
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)

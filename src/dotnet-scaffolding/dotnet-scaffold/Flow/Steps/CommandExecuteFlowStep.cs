@@ -1,8 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.Core;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
+using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.DotNet.Tools.Scaffold.Telemetry;
 using Spectre.Console;
 using Spectre.Console.Flow;
 
@@ -14,6 +16,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
     /// </summary>
     internal class CommandExecuteFlowStep : IFlowStep
     {
+        private readonly ITelemetryService _telemetryService;
+        public CommandExecuteFlowStep(ITelemetryService telemetryService)
+        {
+            _telemetryService = telemetryService;
+        }
+
         public string Id => nameof(CommandExecuteFlowStep);
 
         public string DisplayName => "Command Execute";
@@ -39,6 +47,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
 
             var parameterValues = GetAllParameterValues(context, commandObj);
+            var envVars = context.GetTelemetryEnvironmentVariables();
             if (!string.IsNullOrEmpty(dotnetToolInfo.Command) && parameterValues.Count != 0 && !string.IsNullOrEmpty(commandObj.Name))
             {
                 var componentExecutionString = $"{dotnetToolInfo.Command} {string.Join(" ", parameterValues)}";
@@ -47,13 +56,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     .Start($"Executing '{dotnetToolInfo.Command}'", statusContext =>
                     {
                         var cliRunner = dotnetToolInfo.IsGlobalTool?
-                            DotnetCliRunner.Create(dotnetToolInfo.Command, parameterValues) :
-                            DotnetCliRunner.CreateDotNet(dotnetToolInfo.Command, parameterValues);
+                            DotnetCliRunner.Create(dotnetToolInfo.Command, parameterValues, envVars) :
+                            DotnetCliRunner.CreateDotNet(dotnetToolInfo.Command, parameterValues, envVars);
                         exitCode = cliRunner.ExecuteWithCallbacks(
                             (s) => AnsiConsole.Console.MarkupLineInterpolated($"[green]{s}[/]"),
                             (s) => AnsiConsole.Console.MarkupLineInterpolated($"[red]{s}[/]"));
                     });
 
+                _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandObj, exitCode));
                 if (exitCode != null)
                 {
                     if (exitCode != 0)

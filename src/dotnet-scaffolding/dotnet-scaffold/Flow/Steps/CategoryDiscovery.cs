@@ -21,6 +21,7 @@ internal class CategoryDiscovery
     public string? Discover(IFlowContext context)
     {
         var allCommands = context.GetCommandInfos();
+        var envVars = context.GetTelemetryEnvironmentVariables();
         if (allCommands is null || allCommands.Count == 0)
         {
             allCommands = AnsiConsole
@@ -28,7 +29,7 @@ internal class CategoryDiscovery
             .WithSpinner()
             .Start("Discovering scaffolders", statusContext =>
             {
-                return _dotnetToolService.GetAllCommandsParallel();
+                return _dotnetToolService.GetAllCommandsParallel(envVars: envVars);
             });
 
             if (allCommands is not null)

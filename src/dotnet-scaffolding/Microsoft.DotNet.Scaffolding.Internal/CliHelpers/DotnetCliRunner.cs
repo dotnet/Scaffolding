@@ -9,14 +9,14 @@ namespace Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 /// </summary>
 internal class DotnetCliRunner
 {
-    public static DotnetCliRunner CreateDotNet(string commandName, IEnumerable<string> args)
+    public static DotnetCliRunner CreateDotNet(string commandName, IEnumerable<string> args, IDictionary<string, string>? environmentVariables = null)
     {
         return Create("dotnet", new[] { commandName }.Concat(args));
     }
 
-    public static DotnetCliRunner Create(string commandName, IEnumerable<string> args)
+    public static DotnetCliRunner Create(string commandName, IEnumerable<string> args, IDictionary<string, string>? environmentVariables = null)
     {
-        return new DotnetCliRunner(commandName, args);
+        return new DotnetCliRunner(commandName, args, environmentVariables);
     }
 
     public int ExecuteWithCallbacks(Action<string> stdOutCallback, Action<string> stdErrCallback)
@@ -101,7 +101,7 @@ internal class DotnetCliRunner
     }
 
     internal ProcessStartInfo _psi;
-    private DotnetCliRunner(string commandName, IEnumerable<string> args)
+    private DotnetCliRunner(string commandName, IEnumerable<string> args, IDictionary<string, string>? environmentVariables = null)
     {
         _psi = new ProcessStartInfo
         {
@@ -114,8 +114,16 @@ internal class DotnetCliRunner
 
         // Clear MSBuild related environment variables so it doesn't interfere with dotnet calls
         // automatic lookups via global.json, etc.
+        //TODO add the environment variables below using the 'environmentVariables' parameter.
         _psi.Environment.Remove("MSBuildSDKsPath");
         _psi.Environment.Remove("MSBuildExtensionsPath");
         _psi.Environment.Remove("MSBUILD_EXE_PATH");
+        if (environmentVariables is not null && environmentVariables.Any())
+        {
+            foreach (var envVar in environmentVariables)
+            {
+                _psi.Environment.Add(envVar.Key, envVar.Value);
+            }
+        }
     }
 }

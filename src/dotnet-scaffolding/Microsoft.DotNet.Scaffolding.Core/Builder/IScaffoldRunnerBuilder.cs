@@ -9,6 +9,11 @@ namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 public interface IScaffoldRunnerBuilder
 {
     /// <summary>
+    /// Gets the service provider created by the ScaffoldRunnerBuilder. This is useful for accessing services off the IScaffoldRunnerBuilder.
+    /// returns null IF accessed before Build()
+    /// </summary>
+    IServiceProvider? ServiceProvider { get; }
+    /// <summary>
     /// Gets a collection of logging providers for the application to compose. This is useful for adding new logging providers.
     /// </summary>
     ILoggingBuilder Logging { get; }

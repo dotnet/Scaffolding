@@ -1,6 +1,6 @@
 namespace Microsoft.DotNet.Scaffolding.Internal.Services;
 
-public interface IEnvironmentService
+internal interface IEnvironmentService
 {
     string UserProfilePath { get; }
     string NugetCachePath { get; }
@@ -13,7 +13,10 @@ public interface IEnvironmentService
     OperatingSystem OS { get; }
     string GetMachineName();
     string? GetEnvironmentVariable(string name);
+    bool GetEnvironmentVariableAsBool(string name, bool defaultValue = false);
     void SetEnvironmentVariable(string name, string value, EnvironmentVariableTarget envTarget = EnvironmentVariableTarget.Process);
     string GetFolderPath(System.Environment.SpecialFolder specifalFolder);
     string ExpandEnvironmentVariables(string name);
+    string? GetMacAddress();
+    IsDockerContainer IsDockerContainer { get; }
 }

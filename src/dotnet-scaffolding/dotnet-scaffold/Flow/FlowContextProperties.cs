@@ -29,4 +29,5 @@ internal static class FlowContextProperties
     public const string RemainingArgs = nameof(RemainingArgs);
     public const string DotnetToolComponents = nameof(DotnetToolComponents);
     public const string ScaffoldingCategory = nameof(ScaffoldingCategory);
+    public const string TelemetryEnvironmentVariables = nameof(TelemetryEnvironmentVariables);
 }

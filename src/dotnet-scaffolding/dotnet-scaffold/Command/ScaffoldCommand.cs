@@ -54,7 +54,10 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
             new CommandExecuteFlowStep(TelemetryService)
         ];
 
-        return await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive, showSelectedOptions: false);
+        var flowResult = await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive, showSelectedOptions: false);
+        //wait on the telemetry task to finish
+        TelemetryService.Flush();
+        return flowResult;
     }
 }
 

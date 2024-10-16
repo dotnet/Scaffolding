@@ -62,14 +62,17 @@ storage.WithCategory("Aspire")
        .WithStorageCodeModificationSteps();
 
 var runner = builder.Build();
-FirstTimeTelemetryInitializer.ConfigureTelemetry(builder.ServiceProvider);
+var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
+telemetryWrapper?.ConfigureFirstTimeTelemetry();
 runner.RunAsync(args).Wait();
+telemetryWrapper?.Flush();
 
 static void ConfigureServices(IServiceCollection services)
 {
     services.AddSingleton<IFileSystem, FileSystem>();
     services.AddSingleton<IEnvironmentService, EnvironmentService>();
     services.AddTelemetry("dotnetScaffoldAspire");
+    services.AddSingleton<IFirstPartyToolTelemetryWrapper, FirstPartyToolTelemetryWrapper>();
 }
 
 static void ConfigureSteps(IServiceCollection services)

@@ -6,4 +6,5 @@ namespace Microsoft.DotNet.Scaffolding.Internal.Services;
 internal interface ITelemetryService
 {
     void TrackEvent(string eventName, IReadOnlyDictionary<string, string> properties, IReadOnlyDictionary<string, double> measurements);
+    void Flush();
 }

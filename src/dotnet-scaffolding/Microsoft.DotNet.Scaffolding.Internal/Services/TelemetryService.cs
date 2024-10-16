@@ -50,13 +50,10 @@ internal class TelemetryService : ITelemetryService, IDisposable
                 x => TrackEventTask(eventName, properties, measurements),
                 TaskScheduler.Default
             );
-
-            //wait on the task to finish
-            Flush();
         }
     }
 
-    private void Flush()
+    public void Flush()
     {
         if (!_enabled || _trackEventTask == null)
         {

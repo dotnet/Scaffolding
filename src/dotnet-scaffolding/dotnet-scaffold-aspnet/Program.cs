@@ -287,8 +287,10 @@ public static class Program
             .WithIdentityCodeChangeStep();
 
         var runner = builder.Build();
-        FirstTimeTelemetryInitializer.ConfigureTelemetry(builder.ServiceProvider);
+        var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
+        telemetryWrapper?.ConfigureFirstTimeTelemetry();
         runner.RunAsync(args).Wait();
+        telemetryWrapper?.Flush();
     }
 
     static void ConfigureServices(IServiceCollection services)
@@ -296,6 +298,7 @@ public static class Program
         services.AddSingleton<IEnvironmentService, EnvironmentService>();
         services.AddSingleton<IFileSystem, FileSystem>();
         services.AddTelemetry("dotnetScaffoldAspnet");
+        services.AddSingleton<IFirstPartyToolTelemetryWrapper, FirstPartyToolTelemetryWrapper>();
     }
 
     static void ConfigureSteps(IServiceCollection services)

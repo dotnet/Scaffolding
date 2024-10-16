@@ -6,4 +6,5 @@ internal class DotnetNewStepSettings : BaseSettings
 {
     public required string CommandName { get; set; }
     public required string Name { get; set; }
+    public string? NamespaceName { get; set; }
 }

@@ -14,6 +14,7 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
 {
     public string? ProjectPath { get; set; }
     public required string CommandName { get; set; }
+    public string? NamespaceName { get; set; }
     public string? FileName { get; set; }
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
@@ -56,8 +57,7 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
         //TODO maybe change this?
         var projectName = Path.GetFileNameWithoutExtension(stepSettings.Project);
         if (Directory.Exists(projectBasePath) &&
-            !string.IsNullOrEmpty(projectBasePath) &&
-            !string.IsNullOrEmpty(projectName))
+            !string.IsNullOrEmpty(projectBasePath))
         {
             //arguments for 'dotnet new {settings.CommandName}'
             var args = new List<string>()
@@ -65,11 +65,15 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
                 stepSettings.CommandName,
                 "--name",
                 stepSettings.Name,
-                "--namespace",
-                projectName,
                 "--output",
                 projectBasePath
             };
+
+            if (!string.IsNullOrEmpty(stepSettings.NamespaceName))
+            {
+                args.Add("--namespace");
+                args.Add(stepSettings.NamespaceName);
+            }
 
             var runner = DotnetCliRunner.CreateDotNet("new", args);
             var exitCode = runner.ExecuteAndCaptureOutput(out _, out _);
@@ -102,6 +106,7 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
         {
             Project = ProjectPath,
             Name = FileName,
+            NamespaceName = NamespaceName,
             CommandName = CommandName
         };
     }

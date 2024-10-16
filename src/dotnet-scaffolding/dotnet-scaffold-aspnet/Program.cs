@@ -66,6 +66,7 @@ public static class Program
                 var step = config.Step;
                 var context = config.Context;
                 step.ProjectPath = context.GetOptionResult(projectOption);
+                step.NamespaceName = Path.GetFileNameWithoutExtension(step.ProjectPath);
                 step.FileName = context.GetOptionResult(fileNameOption);
                 step.CommandName = "page";
             });

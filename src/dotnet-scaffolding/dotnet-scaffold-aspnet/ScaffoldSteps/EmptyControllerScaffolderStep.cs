@@ -46,11 +46,13 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
 
         return Task.FromResult(result);
     }
+
     private bool InvokeDotnetNew(EmptyControllerStepSettings settings)
     {
         var projectBasePath = Path.GetDirectoryName(settings.Project);
+        var projectName = Path.GetFileNameWithoutExtension(settings.Project);
         var actionsParameter = settings.Actions ? "--actions" : string.Empty;
-        if (Directory.Exists(projectBasePath))
+        if (Directory.Exists(projectBasePath) && !string.IsNullOrEmpty(projectName))
         {
             //arguments for 'dotnet new {settings.CommandName}'
             var args = new List<string>()
@@ -58,11 +60,16 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
                 settings.CommandName,
                 "--name",
                 settings.Name,
-                "--actions",
                 "--output",
                 projectBasePath,
-                actionsParameter
+                "--namespace",
+                projectName,
             };
+
+            if (!string.IsNullOrEmpty(actionsParameter))
+            {
+                args.Add(actionsParameter);
+            }
 
             var runner = DotnetCliRunner.CreateDotNet("new", args);
             var exitCode = runner.ExecuteAndCaptureOutput(out _, out _);

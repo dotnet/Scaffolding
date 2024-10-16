@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
@@ -49,14 +50,32 @@ internal class TelemetryService : ITelemetryService, IDisposable
                 x => TrackEventTask(eventName, properties, measurements),
                 TaskScheduler.Default
             );
+
+            //wait on the task to finish
+            Flush();
         }
+    }
+
+    private void Flush()
+    {
+        if (!_enabled || _trackEventTask == null)
+        {
+            return;
+        }
+
+        _trackEventTask.Wait();
     }
 
     private void InitializeClient()
     {
         _telemetryConfig = TelemetryConfiguration.CreateDefault();
         _telemetryConfig.ConnectionString = TelemetryConstants.CONNECTION_STRING;
+        var inMemoryChanel = new InMemoryChannel()
+        {
+            SendingInterval = TimeSpan.FromMilliseconds(1)
+        };
 
+        _telemetryConfig.TelemetryChannel = inMemoryChanel;
         _client = new TelemetryClient(_telemetryConfig);
         _client.Context.Session.Id = _currentSessionId;
         _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;
@@ -78,7 +97,6 @@ internal class TelemetryService : ITelemetryService, IDisposable
         {
             Dictionary<string, string> eventProperties = GetEventProperties(properties);
             Dictionary<string, double> eventMeasurements = GetEventMeasures(measurements);
-
             _client.TrackEvent(PrependProducerNamespace(eventName), eventProperties, eventMeasurements);
             _client.Flush();
         }

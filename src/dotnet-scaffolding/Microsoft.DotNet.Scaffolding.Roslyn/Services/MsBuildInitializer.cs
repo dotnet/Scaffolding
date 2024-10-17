@@ -9,6 +9,7 @@ namespace Microsoft.DotNet.Scaffolding.Roslyn.Services;
 internal class MsBuildInitializer
 {
     private readonly ILogger _logger;
+    private readonly string[] LinuxDotnetSdkPaths = [@"/usr/share/dotnet/sdk/", @"/usr/share/dotnet/", @"/usr/share/dotnet/dotnet"];
     public MsBuildInitializer(ILogger logger)
     {
         _logger = logger;
@@ -74,14 +75,22 @@ internal class MsBuildInitializer
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            sdkBasePath = @"/usr/local/share/dotnet/x64/sdk";
+            //check for the ARM sdk first
+            sdkBasePath = @"/usr/local/share/dotnet/sdk";
+            if (!Directory.Exists(sdkBasePath))
+            {
+                sdkBasePath = @"/usr/local/share/dotnet/x64/sdk";
+            }
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            sdkBasePath = @"/usr/share/dotnet/sdk";
-            if (!Directory.Exists(sdkBasePath))
+            foreach(var sdkPath in LinuxDotnetSdkPaths)
             {
-                sdkBasePath = @"/usr/local/share/dotnet/sdk";
+                if (Directory.Exists(sdkBasePath))
+                {
+                    sdkBasePath = sdkPath;
+                    break;
+                }
             }
         }
 

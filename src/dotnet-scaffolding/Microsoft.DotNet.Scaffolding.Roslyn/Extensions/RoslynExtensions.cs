@@ -53,8 +53,7 @@ public static class RoslynExtensions
 
     public static Document? GetDocument(this Project project, string? documentName)
     {
-        var fileName = Path.GetFileName(documentName);
-        if (string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrEmpty(documentName))
         {
             return null;
         }
@@ -62,16 +61,13 @@ public static class RoslynExtensions
         //often Document.Name is the file path of the document and not the name.
         //check for all possible cases. 
         return project.Documents.FirstOrDefault(x =>
-            x.Name.EndsWith(fileName, StringComparison.OrdinalIgnoreCase) ||
-            x.Name.Equals(documentName, StringComparison.OrdinalIgnoreCase) ||
-            (!string.IsNullOrEmpty(x.FilePath) &&
-            x.FilePath.Equals(documentName, StringComparison.OrdinalIgnoreCase)));
+            x.Name.EndsWith(documentName.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase) ||
+            (!string.IsNullOrEmpty(x.FilePath) && x.FilePath.EndsWith(documentName.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase)));
     }
 
     public static TextDocument? GetAdditionalDocument(this Project project, string? documentName)
     {
-        var fileName = Path.GetFileName(documentName);
-        if (string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrEmpty(documentName))
         {
             return null;
         }
@@ -79,9 +75,7 @@ public static class RoslynExtensions
         //often TextDocument.Name is the file path of the document and not the name.
         //check for all possible cases. 
         return project.AdditionalDocuments.FirstOrDefault(x =>
-            x.Name.EndsWith(fileName, StringComparison.OrdinalIgnoreCase) ||
-            x.Name.Equals(documentName, StringComparison.OrdinalIgnoreCase) ||
-            (!string.IsNullOrEmpty(x.FilePath) &&
-            x.FilePath.Equals(documentName, StringComparison.OrdinalIgnoreCase)));
+            !string.IsNullOrEmpty(x.FilePath) &&
+            x.FilePath.EndsWith(documentName.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase));
     }
 }

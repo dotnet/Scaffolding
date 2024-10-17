@@ -26,8 +26,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Pages
         public virtual string TransformText()
         {
             this.Write("@page \"/Account/Lockout\"\r\n\r\n<PageTitle>Locked out</PageTitle>\r\n\r\n<header>\r\n    <h" +
-                    "1 class=\"text-danger\">Locked out</h1>\r\n    <p class=\"text-danger\">This account h" +
-                    "as been locked out, please try again later.</p>\r\n</header>\r\n");
+                    "1 class=\"text-danger\">Locked out</h1>\r\n    <p class=\"text-danger\" role=\"alert\">T" +
+                    "his account has been locked out, please try again later.</p>\r\n</header>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -87,8 +87,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

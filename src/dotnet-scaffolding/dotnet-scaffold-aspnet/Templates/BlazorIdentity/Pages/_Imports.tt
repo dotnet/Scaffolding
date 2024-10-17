@@ -3,6 +3,6 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@using <#= Model.BlazorIdentityNamespace #>.Shared
+@using <#= Model.IdentityNamespace #>.Shared
 @using <#= Model.UserClassNamespace #>
-@layout AccountLayout
+@attribute [ExcludeFromInteractiveRouting]

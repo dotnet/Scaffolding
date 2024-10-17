@@ -172,7 +172,7 @@
       ]
     },
     {
-      "FileName" : "NavMenu.razor",
+      "FileName" : "Components\\Layout\\NavMenu.razor",
       "Replacements": [
         {
           "ReplaceSnippet": [

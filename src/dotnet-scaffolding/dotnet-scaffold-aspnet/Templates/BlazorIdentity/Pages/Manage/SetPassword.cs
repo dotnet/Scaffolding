@@ -44,22 +44,23 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "r password</h3>\r\n<StatusMessage Message=\"@message\" />\r\n<p class=\"text-info\">\r\n  " +
                     "  You do not have a local username/password for this site. Add a local\r\n    acco" +
                     "unt so you can log in without an external login.\r\n</p>\r\n<div class=\"row\">\r\n    <" +
-                    "div class=\"col-md-6\">\r\n        <EditForm Model=\"Input\" FormName=\"set-password\" O" +
+                    "div class=\"col-xl-6\">\r\n        <EditForm Model=\"Input\" FormName=\"set-password\" O" +
                     "nValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n            <DataAnnotationsVa" +
                     "lidator />\r\n            <ValidationSummary class=\"text-danger\" role=\"alert\" />\r\n" +
                     "            <div class=\"form-floating mb-3\">\r\n                <InputText type=\"p" +
-                    "assword\" @bind-Value=\"Input.NewPassword\" class=\"form-control\" autocomplete=\"new-" +
-                    "password\" placeholder=\"Please enter your new password.\" />\r\n                <lab" +
-                    "el for=\"new-password\" class=\"form-label\">New password</label>\r\n                <" +
-                    "ValidationMessage For=\"() => Input.NewPassword\" class=\"text-danger\" />\r\n        " +
-                    "    </div>\r\n            <div class=\"form-floating mb-3\">\r\n                <Input" +
-                    "Text type=\"password\" @bind-Value=\"Input.ConfirmPassword\" class=\"form-control\" au" +
-                    "tocomplete=\"new-password\" placeholder=\"Please confirm your new password.\" />\r\n  " +
-                    "              <label for=\"confirm-password\" class=\"form-label\">Confirm password<" +
-                    "/label>\r\n                <ValidationMessage For=\"() => Input.ConfirmPassword\" cl" +
-                    "ass=\"text-danger\" />\r\n            </div>\r\n            <button type=\"submit\" clas" +
-                    "s=\"w-100 btn btn-lg btn-primary\">Set password</button>\r\n        </EditForm>\r\n   " +
-                    "  </div>\r\n</div>\r\n\r\n@code {\r\n    private string? message;\r\n    private ");
+                    "assword\" @bind-Value=\"Input.NewPassword\" id=\"Input.NewPassword\" class=\"form-cont" +
+                    "rol\" autocomplete=\"new-password\" placeholder=\"Enter the new password\" />\r\n      " +
+                    "          <label for=\"Input.NewPassword\" class=\"form-label\">New password</label>" +
+                    "\r\n                <ValidationMessage For=\"() => Input.NewPassword\" class=\"text-d" +
+                    "anger\" />\r\n            </div>\r\n            <div class=\"form-floating mb-3\">\r\n   " +
+                    "             <InputText type=\"password\" @bind-Value=\"Input.ConfirmPassword\" id=\"" +
+                    "Input.ConfirmPassword\" class=\"form-control\" autocomplete=\"new-password\" placehol" +
+                    "der=\"Enter the new password\" />\r\n                <label for=\"Input.ConfirmPasswo" +
+                    "rd\" class=\"form-label\">Confirm password</label>\r\n                <ValidationMess" +
+                    "age For=\"() => Input.ConfirmPassword\" class=\"text-danger\" />\r\n            </div>" +
+                    "\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Set pas" +
+                    "sword</button>\r\n        </EditForm>\r\n     </div>\r\n</div>\r\n\r\n@code {\r\n    private" +
+                    " string? message;\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user = default!;\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpContex" +
                     "t { get; set; } = default!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputM" +
@@ -141,8 +142,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

@@ -43,31 +43,31 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             this.Write("> EmailSender\r\n@inject IdentityUserAccessor UserAccessor\r\n@inject NavigationManag" +
                     "er NavigationManager\r\n\r\n<PageTitle>Manage email</PageTitle>\r\n\r\n<h3>Manage email<" +
                     "/h3>\r\n\r\n<StatusMessage Message=\"@message\"/>\r\n<div class=\"row\">\r\n    <div class=\"" +
-                    "col-md-6\">\r\n        <form @onsubmit=\"OnSendEmailVerificationAsync\" @formname=\"se" +
+                    "col-xl-6\">\r\n        <form @onsubmit=\"OnSendEmailVerificationAsync\" @formname=\"se" +
                     "nd-verification\" id=\"send-verification-form\" method=\"post\">\r\n            <Antifo" +
                     "rgeryToken />\r\n        </form>\r\n        <EditForm Model=\"Input\" FormName=\"change" +
                     "-email\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n            <DataAnno" +
                     "tationsValidator />\r\n            <ValidationSummary class=\"text-danger\" role=\"al" +
                     "ert\" />\r\n            @if (isEmailConfirmed)\r\n            {\r\n                <div" +
                     " class=\"form-floating mb-3 input-group\">\r\n                    <input type=\"text\"" +
-                    " value=\"@email\" class=\"form-control\" placeholder=\"Please enter your email.\" disa" +
-                    "bled />\r\n                    <div class=\"input-group-append\">\r\n                 " +
-                    "       <span class=\"h-100 input-group-text text-success font-weight-bold\">?</spa" +
-                    "n>\r\n                    </div>\r\n                    <label for=\"email\" class=\"fo" +
-                    "rm-label\">Email</label>\r\n                </div>\r\n            }\r\n            else" +
-                    "\r\n            {\r\n                <div class=\"form-floating mb-3\">\r\n             " +
-                    "       <input type=\"text\" value=\"@email\" class=\"form-control\" placeholder=\"Pleas" +
-                    "e enter your email.\" disabled />\r\n                    <label for=\"email\" class=\"" +
-                    "form-label\">Email</label>\r\n                    <button type=\"submit\" class=\"btn " +
-                    "btn-link\" form=\"send-verification-form\">Send verification email</button>\r\n      " +
-                    "          </div>\r\n            }\r\n            <div class=\"form-floating mb-3\">\r\n " +
-                    "               <InputText @bind-Value=\"Input.NewEmail\" class=\"form-control\" auto" +
-                    "complete=\"email\" aria-required=\"true\" placeholder=\"Please enter new email.\" />\r\n" +
-                    "                <label for=\"new-email\" class=\"form-label\">New email</label>\r\n   " +
-                    "             <ValidationMessage For=\"() => Input.NewEmail\" class=\"text-danger\" /" +
-                    ">\r\n            </div>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg" +
-                    " btn-primary\">Change email</button>\r\n        </EditForm>\r\n    </div>\r\n</div>\r\n\r\n" +
-                    "@code {\r\n    private string? message;\r\n    private ");
+                    " value=\"@email\" id=\"email\" class=\"form-control\" placeholder=\"Enter your email\" d" +
+                    "isabled />\r\n                    <div class=\"input-group-append\">\r\n              " +
+                    "          <span class=\"h-100 input-group-text text-success font-weight-bold\">?</" +
+                    "span>\r\n                    </div>\r\n                    <label for=\"email\" class=" +
+                    "\"form-label\">Email</label>\r\n                </div>\r\n            }\r\n            e" +
+                    "lse\r\n            {\r\n                <div class=\"form-floating mb-3\">\r\n          " +
+                    "          <input type=\"text\" value=\"@email\" id=\"email\" class=\"form-control\" plac" +
+                    "eholder=\"Enter your email\" disabled />\r\n                    <label for=\"email\" c" +
+                    "lass=\"form-label\">Email</label>\r\n                    <button type=\"submit\" class" +
+                    "=\"btn btn-link\" form=\"send-verification-form\">Send verification email</button>\r\n" +
+                    "                </div>\r\n            }\r\n            <div class=\"form-floating mb-" +
+                    "3\">\r\n                <InputText @bind-Value=\"Input.NewEmail\" id=\"Input.NewEmail\"" +
+                    " class=\"form-control\" autocomplete=\"email\" aria-required=\"true\" placeholder=\"Ent" +
+                    "er a new email\" />\r\n                <label for=\"Input.NewEmail\" class=\"form-labe" +
+                    "l\">New email</label>\r\n                <ValidationMessage For=\"() => Input.NewEma" +
+                    "il\" class=\"text-danger\" />\r\n            </div>\r\n            <button type=\"submit" +
+                    "\" class=\"w-100 btn btn-lg btn-primary\">Change email</button>\r\n        </EditForm" +
+                    ">\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private string? message;\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user = default!;\r\n    private string? email;\r\n    private bool isEmailConfirmed;" +
                     "\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpContext { get; set; } " +
@@ -160,8 +160,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

@@ -42,29 +42,30 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             this.Write("> SignInManager\r\n@inject IdentityUserAccessor UserAccessor\r\n@inject IdentityRedir" +
                     "ectManager RedirectManager\r\n@inject ILogger<ChangePassword> Logger\r\n\r\n<PageTitle" +
                     ">Change password</PageTitle>\r\n\r\n<h3>Change password</h3>\r\n<StatusMessage Message" +
-                    "=\"@message\" />\r\n<div class=\"row\">\r\n    <div class=\"col-md-6\">\r\n        <EditForm" +
+                    "=\"@message\" />\r\n<div class=\"row\">\r\n    <div class=\"col-xl-6\">\r\n        <EditForm" +
                     " Model=\"Input\" FormName=\"change-password\" OnValidSubmit=\"OnValidSubmitAsync\" met" +
                     "hod=\"post\">\r\n            <DataAnnotationsValidator />\r\n            <ValidationSu" +
                     "mmary class=\"text-danger\" role=\"alert\" />\r\n            <div class=\"form-floating" +
                     " mb-3\">\r\n                <InputText type=\"password\" @bind-Value=\"Input.OldPasswo" +
-                    "rd\" class=\"form-control\" autocomplete=\"current-password\" aria-required=\"true\" pl" +
-                    "aceholder=\"Please enter your old password.\" />\r\n                <label for=\"old-" +
-                    "password\" class=\"form-label\">Old password</label>\r\n                <ValidationMe" +
-                    "ssage For=\"() => Input.OldPassword\" class=\"text-danger\" />\r\n            </div>\r\n" +
-                    "            <div class=\"form-floating mb-3\">\r\n                <InputText type=\"p" +
-                    "assword\" @bind-Value=\"Input.NewPassword\" class=\"form-control\" autocomplete=\"new-" +
-                    "password\" aria-required=\"true\" placeholder=\"Please enter your new password.\" />\r" +
-                    "\n                <label for=\"new-password\" class=\"form-label\">New password</labe" +
-                    "l>\r\n                <ValidationMessage For=\"() => Input.NewPassword\" class=\"text" +
-                    "-danger\" />\r\n            </div>\r\n            <div class=\"form-floating mb-3\">\r\n " +
-                    "               <InputText type=\"password\" @bind-Value=\"Input.ConfirmPassword\" cl" +
-                    "ass=\"form-control\" autocomplete=\"new-password\" aria-required=\"true\" placeholder=" +
-                    "\"Please confirm your new password.\" />\r\n                <label for=\"confirm-pass" +
-                    "word\" class=\"form-label\">Confirm password</label>\r\n                <ValidationMe" +
-                    "ssage For=\"() => Input.ConfirmPassword\" class=\"text-danger\" />\r\n            </di" +
-                    "v>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Updat" +
-                    "e password</button>\r\n        </EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    pri" +
-                    "vate string? message;\r\n    private ");
+                    "rd\" id=\"Input.OldPassword\" class=\"form-control\" autocomplete=\"current-password\" " +
+                    "aria-required=\"true\" placeholder=\"Enter the old password\" />\r\n                <l" +
+                    "abel for=\"Input.OldPassword\" class=\"form-label\">Old password</label>\r\n          " +
+                    "      <ValidationMessage For=\"() => Input.OldPassword\" class=\"text-danger\" />\r\n " +
+                    "           </div>\r\n            <div class=\"form-floating mb-3\">\r\n               " +
+                    " <InputText type=\"password\" @bind-Value=\"Input.NewPassword\" id=\"Input.NewPasswor" +
+                    "d\" class=\"form-control\" autocomplete=\"new-password\" aria-required=\"true\" placeho" +
+                    "lder=\"Enter the new password\" />\r\n                <label for=\"Input.NewPassword\"" +
+                    " class=\"form-label\">New password</label>\r\n                <ValidationMessage For" +
+                    "=\"() => Input.NewPassword\" class=\"text-danger\" />\r\n            </div>\r\n         " +
+                    "   <div class=\"form-floating mb-3\">\r\n                <InputText type=\"password\" " +
+                    "@bind-Value=\"Input.ConfirmPassword\" id=\"Input.ConfirmPassword\" class=\"form-contr" +
+                    "ol\" autocomplete=\"new-password\" aria-required=\"true\" placeholder=\"Enter the new " +
+                    "password\" />\r\n                <label for=\"Input.ConfirmPassword\" class=\"form-lab" +
+                    "el\">Confirm password</label>\r\n                <ValidationMessage For=\"() => Inpu" +
+                    "t.ConfirmPassword\" class=\"text-danger\" />\r\n            </div>\r\n            <butt" +
+                    "on type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Update password</button>\r\n" +
+                    "        </EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private string? message;" +
+                    "\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user = default!;\r\n    private bool hasPassword;\r\n\r\n    [CascadingParameter]\r\n   " +
                     " private HttpContext HttpContext { get; set; } = default!;\r\n\r\n    [SupplyParamet" +
@@ -150,8 +151,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

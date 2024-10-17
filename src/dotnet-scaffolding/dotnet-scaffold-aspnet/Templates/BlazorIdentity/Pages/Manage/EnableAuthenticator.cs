@@ -63,21 +63,21 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "nput the key above, your two factor authentication app will provide you\r\n       " +
                     "             with a unique code. Enter the code in the confirmation box below.\r\n" +
                     "                </p>\r\n                <div class=\"row\">\r\n                    <di" +
-                    "v class=\"col-md-6\">\r\n                        <EditForm Model=\"Input\" FormName=\"s" +
+                    "v class=\"col-xl-6\">\r\n                        <EditForm Model=\"Input\" FormName=\"s" +
                     "end-code\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n                   " +
                     "         <DataAnnotationsValidator />\r\n                            <div class=\"f" +
                     "orm-floating mb-3\">\r\n                                <InputText @bind-Value=\"Inp" +
-                    "ut.Code\" class=\"form-control\" autocomplete=\"off\" placeholder=\"Please enter the c" +
-                    "ode.\" />\r\n                                <label for=\"code\" class=\"control-label" +
-                    " form-label\">Verification Code</label>\r\n                                <Validat" +
-                    "ionMessage For=\"() => Input.Code\" class=\"text-danger\" />\r\n                      " +
-                    "      </div>\r\n                            <button type=\"submit\" class=\"w-100 btn" +
-                    " btn-lg btn-primary\">Verify</button>\r\n                            <ValidationSum" +
-                    "mary class=\"text-danger\" role=\"alert\" />\r\n                        </EditForm>\r\n " +
-                    "                   </div>\r\n                </div>\r\n            </li>\r\n        </" +
-                    "ol>\r\n    </div>\r\n}\r\n\r\n@code {\r\n    private const string AuthenticatorUriFormat =" +
-                    " \"otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6\";\r\n\r\n    private string?" +
-                    " message;\r\n    private ");
+                    "ut.Code\" id=\"Input.Code\" class=\"form-control\" autocomplete=\"off\" placeholder=\"En" +
+                    "ter the code\" />\r\n                                <label for=\"Input.Code\" class=" +
+                    "\"control-label form-label\">Verification Code</label>\r\n                          " +
+                    "      <ValidationMessage For=\"() => Input.Code\" class=\"text-danger\" />\r\n        " +
+                    "                    </div>\r\n                            <button type=\"submit\" cl" +
+                    "ass=\"w-100 btn btn-lg btn-primary\">Verify</button>\r\n                            " +
+                    "<ValidationSummary class=\"text-danger\" role=\"alert\" />\r\n                        " +
+                    "</EditForm>\r\n                    </div>\r\n                </div>\r\n            </l" +
+                    "i>\r\n        </ol>\r\n    </div>\r\n}\r\n\r\n@code {\r\n    private const string Authentica" +
+                    "torUriFormat = \"otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6\";\r\n\r\n    p" +
+                    "rivate string? message;\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user = default!;\r\n    private string? sharedKey;\r\n    private string? authentica" +
                     "torUri;\r\n    private IEnumerable<string>? recoveryCodes;\r\n\r\n    [CascadingParame" +
@@ -184,8 +184,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

@@ -74,6 +74,7 @@ internal class ProjectModifier
                     var textDoc = project.GetAdditionalDocument(file.FileName);
                     textDoc = await ModifyCshtmlFile(file, textDoc, options);
                     return textDoc?.Project ?? project;
+                case "css":
                 case "razor":
                 case "html":
                     textDoc = project.GetAdditionalDocument(file.FileName);

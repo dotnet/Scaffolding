@@ -76,6 +76,15 @@ internal class DotNetToolService : IDotNetToolService
             components = GetDotNetTools(refresh: true);
         }
 
+        //if any local tools are present, we need to restore them first
+        //when sdks/runtimes are switched/rolled forward, local tools need to be restored before they are called
+        var anyLocalTools = components.FirstOrDefault(x => !x.IsGlobalTool) is not null;
+        if (anyLocalTools)
+        {
+            var runner = DotnetCliRunner.CreateDotNet("tool", ["restore"]);
+            runner.ExecuteAndCaptureOutput(out _, out _);
+        }
+
         var options = new ParallelOptions
         {
             MaxDegreeOfParallelism = System.Environment.ProcessorCount

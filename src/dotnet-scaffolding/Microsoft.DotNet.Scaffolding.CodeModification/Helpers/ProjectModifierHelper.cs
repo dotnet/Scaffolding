@@ -454,6 +454,55 @@ internal static class ProjectModifierHelper
         return true;
     }
 
+    internal static void ApplyReplacementsOnFileOnDisk(string filePath, IEnumerable<CodeSnippet>? codeChanges)
+    {
+        if (codeChanges is null)
+        {
+            return;    
+        }
+
+        bool sourceChanged = false;
+        var sourceFileString = File.ReadAllText(filePath);
+        if (string.IsNullOrEmpty(sourceFileString))
+        {
+            return;
+        }
+
+        var trimmedSourceFile = TrimStatement(sourceFileString);
+        var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(TrimStatement(c.Block)));
+        if (!applicableCodeChanges.Any())
+        {
+            return;
+        }
+
+        foreach (var change in applicableCodeChanges)
+        {
+            // If doing a code replacement, replace ReplaceSnippet in source with Block
+            if (change.ReplaceSnippet != null)
+            {
+                var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
+                if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
+                    (string.IsNullOrEmpty(change.CheckBlock) ||
+                     !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)))
+                {
+                    sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
+                    sourceChanged = true;
+                }
+
+            }
+            else
+            {
+                sourceFileString += change.Block; // Otherwise appending block to end of file
+                sourceChanged = true;
+            }
+        }
+
+        if (sourceChanged)
+        {
+            File.WriteAllText(filePath, sourceFileString);
+        }
+    }
+
     /// <summary>
     /// Replaces text within document or appends text to the end of the document
     /// depending on whether change.ReplaceSnippet is set 
@@ -488,10 +537,13 @@ internal static class ProjectModifierHelper
             if (change.ReplaceSnippet != null)
             {
                 var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                if (sourceFileString.Contains(replaceSnippet))
+                if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
+                    (string.IsNullOrEmpty(change.CheckBlock) ||
+                     !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)))
                 {
                     sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
                 }
+
             }
             else
             {

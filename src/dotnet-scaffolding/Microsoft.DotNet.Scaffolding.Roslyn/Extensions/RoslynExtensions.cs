@@ -51,6 +51,33 @@ public static class RoslynExtensions
         return null;
     }
 
+    public static string? GetFilePath(this Project project, string? fileNameWithExtension)
+    {
+        if (string.IsNullOrEmpty(fileNameWithExtension))
+        {
+            return null;
+        }
+
+        var allFiles = project.GetFilesOfExtension(fileNameWithExtension);
+        return allFiles?.FirstOrDefault(x => x.EndsWith(fileNameWithExtension.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase));
+    }
+
+    public static List<string>? GetFilesOfExtension(this Project project, string extension)
+    {
+        var fileExtension = Path.GetExtension(extension);
+        if (string.IsNullOrEmpty(fileExtension))
+        {
+            return null;
+        }
+
+        var projectDirectory = Path.GetDirectoryName(project.FilePath);
+        if (string.IsNullOrEmpty(projectDirectory))
+        {
+            return null;
+        }
+
+        return Directory.EnumerateFiles(projectDirectory, $"*{fileExtension}", SearchOption.AllDirectories).ToList();
+    }
     public static Document? GetDocument(this Project project, string? documentName)
     {
         if (string.IsNullOrEmpty(documentName))

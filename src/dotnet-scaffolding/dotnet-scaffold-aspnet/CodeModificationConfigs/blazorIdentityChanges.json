@@ -86,35 +86,6 @@
       ]
     },
     {
-      "FileName": "Program.cs",
-      "Usings": [
-        "Microsoft.EntityFrameworkCore",
-        "$(UserClassNamespace)"
-      ],
-      "Options": [
-        "EfScenario"
-      ],
-      "Methods": {
-        "Global": {
-          "CodeChanges": [
-            {
-              "InsertAfter": "WebApplication.CreateBuilder",
-              "CheckBlock": "builder.Configuration.GetConnectionString",
-              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '$(ConnectionStringName)' not found.\")"
-            },
-            {
-              "InsertAfter": "builder.Configuration.GetConnectionString",
-              "CheckBlock": "builder.Services.AddDbContext",
-              "Block": "builder.Services.AddDbContext<$(DbContextName)>(options => options.$(UseDbMethod))",
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
       "FileName": "Routes.razor",
       "Replacements": [
         {
@@ -127,13 +98,6 @@
             "                <RedirectToLogin />",
             "            </NotAuthorized>",
             "        </AuthorizeRouteView>"
-          ]
-        },
-        {
-          "ReplaceSnippet": [ "<Router AppAssembly=\"typeof(Program).Assembly\">" ],
-          "MultiLineBlock": [
-            "@using $(IdentityNamespace).Shared",
-            "<Router AppAssembly= \"typeof(Program).Assembly\">"
           ],
           "CheckBlock": "$(IdentityNamespace).Shared"
         }
@@ -148,6 +112,7 @@
             "    background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-list-nested' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M4.5 11.5A.5.5 0 0 1 5 11h10a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 1 3h10a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5z'/%3E%3C/svg%3E\");",
             "}"
           ],
+          "CheckBlock": "bi-lock-nav-menu",
           "MultiLineBlock": [
             ".bi-list-nested-nav-menu {",
             "    background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-list-nested' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M4.5 11.5A.5.5 0 0 1 5 11h10a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 1 3h10a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5z'/%3E%3C/svg%3E\");",
@@ -175,6 +140,7 @@
       "FileName" : "Components\\Layout\\NavMenu.razor",
       "Replacements": [
         {
+          "CheckBlock": "@implements IDisposable",
           "ReplaceSnippet": [
             "<div class=\"top-row ps-3 navbar navbar-dark\">"
           ],
@@ -185,6 +151,7 @@
           ]
         },
         {
+          "CheckBlock": "<AuthorizeView>",
           "ReplaceSnippet": [
             "<span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather",
             "            </NavLink>",
@@ -227,6 +194,7 @@
           ]
         },
         {
+          "CheckBlock": "OnInitialized()",
           "MultiLineBlock": [
             "@code {",
             "    private string? currentUrl;",
@@ -253,8 +221,8 @@
       ]
     },
     {
-      "FileName":  "Components\\_Imports.razor",
-      "Replacements":  [
+      "FileName":"Components\\_Imports.razor",
+      "Replacements":[
         {
           "ReplaceSnippet": [
             "@using Microsoft.AspNetCore.Components.Forms"
@@ -262,7 +230,8 @@
           "MultiLineBlock": [
             "@using Microsoft.AspNetCore.Components.Forms",
             "@using Microsoft.AspNetCore.Components.Authorization"
-          ]
+          ],
+          "CheckBlock": "Microsoft.AspNetCore.Components.Authorization"
         }
       ]
     }

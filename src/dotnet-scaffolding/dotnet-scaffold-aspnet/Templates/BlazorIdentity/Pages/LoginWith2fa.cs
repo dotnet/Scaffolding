@@ -49,19 +49,19 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "\r\n            <input type=\"hidden\" name=\"RememberMe\" value=\"@RememberMe\" />\r\n   " +
                     "         <DataAnnotationsValidator />\r\n            <ValidationSummary class=\"tex" +
                     "t-danger\" role=\"alert\" />\r\n            <div class=\"form-floating mb-3\">\r\n       " +
-                    "         <InputText @bind-Value=\"Input.TwoFactorCode\" class=\"form-control\" autoc" +
-                    "omplete=\"off\" />\r\n                <label for=\"two-factor-code\" class=\"form-label" +
-                    "\">Authenticator code</label>\r\n                <ValidationMessage For=\"() => Inpu" +
-                    "t.TwoFactorCode\" class=\"text-danger\" />\r\n            </div>\r\n            <div cl" +
-                    "ass=\"checkbox mb-3\">\r\n                <label for=\"remember-machine\" class=\"form-" +
-                    "label\">\r\n                    <InputCheckbox @bind-Value=\"Input.RememberMachine\" " +
-                    "/>\r\n                    Remember this machine\r\n                </label>\r\n       " +
-                    "     </div>\r\n            <div>\r\n                <button type=\"submit\" class=\"w-1" +
-                    "00 btn btn-lg btn-primary\">Log in</button>\r\n            </div>\r\n        </EditFo" +
-                    "rm>\r\n    </div>\r\n</div>\r\n<p>\r\n    Don\'t have access to your authenticator device" +
-                    "? You can\r\n    <a href=\"Account/LoginWithRecoveryCode?ReturnUrl=@ReturnUrl\">log " +
-                    "in with a recovery code</a>.\r\n</p>\r\n\r\n@code {\r\n    private string? message;\r\n   " +
-                    " private ");
+                    "         <InputText @bind-Value=\"Input.TwoFactorCode\" id=\"Input.TwoFactorCode\" c" +
+                    "lass=\"form-control\" autocomplete=\"off\" />\r\n                <label for=\"Input.Two" +
+                    "FactorCode\" class=\"form-label\">Authenticator code</label>\r\n                <Vali" +
+                    "dationMessage For=\"() => Input.TwoFactorCode\" class=\"text-danger\" />\r\n          " +
+                    "  </div>\r\n            <div class=\"checkbox mb-3\">\r\n                <label for=\"r" +
+                    "emember-machine\" class=\"form-label\">\r\n                    <InputCheckbox @bind-V" +
+                    "alue=\"Input.RememberMachine\" />\r\n                    Remember this machine\r\n    " +
+                    "            </label>\r\n            </div>\r\n            <div>\r\n                <bu" +
+                    "tton type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Log in</button>\r\n       " +
+                    "     </div>\r\n        </EditForm>\r\n    </div>\r\n</div>\r\n<p>\r\n    Don\'t have access" +
+                    " to your authenticator device? You can\r\n    <a href=\"Account/LoginWithRecoveryCo" +
+                    "de?ReturnUrl=@ReturnUrl\">log in with a recovery code</a>.\r\n</p>\r\n\r\n@code {\r\n    " +
+                    "private string? message;\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user = default!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Input " +
                     "{ get; set; } = new();\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? Re" +
@@ -148,8 +148,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

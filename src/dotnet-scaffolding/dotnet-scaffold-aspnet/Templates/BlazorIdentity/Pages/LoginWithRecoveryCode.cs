@@ -58,8 +58,8 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             <DataAnnotationsValidator />
             <ValidationSummary class=""text-danger"" role=""alert"" />
             <div class=""form-floating mb-3"">
-                <InputText @bind-Value=""Input.RecoveryCode"" class=""form-control"" autocomplete=""off"" placeholder=""RecoveryCode"" />
-                <label for=""recovery-code"" class=""form-label"">Recovery Code</label>
+                <InputText @bind-Value=""Input.RecoveryCode"" id=""Input.RecoveryCode"" class=""form-control"" autocomplete=""off"" placeholder=""RecoveryCode"" />
+                <label for=""Input.RecoveryCode"" class=""form-label"">Recovery Code</label>
                 <ValidationMessage For=""() => Input.RecoveryCode"" class=""text-danger"" />
             </div>
             <button type=""submit"" class=""w-100 btn btn-lg btn-primary"">Log in</button>
@@ -151,8 +151,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

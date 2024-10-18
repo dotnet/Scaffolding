@@ -26,8 +26,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Pages
         public virtual string TransformText()
         {
             this.Write("@page \"/Account/InvalidPasswordReset\"\r\n\r\n<PageTitle>Invalid password reset</PageT" +
-                    "itle>\r\n\r\n<h1>Invalid password reset</h1>\r\n<p>\r\n    The password reset link is in" +
-                    "valid.\r\n</p>\r\n");
+                    "itle>\r\n\r\n<h1>Invalid password reset</h1>\r\n<p role=\"alert\">\r\n    The password res" +
+                    "et link is invalid.\r\n</p>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -87,8 +87,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

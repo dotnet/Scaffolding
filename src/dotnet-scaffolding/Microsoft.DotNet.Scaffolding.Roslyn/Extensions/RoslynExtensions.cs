@@ -51,10 +51,47 @@ public static class RoslynExtensions
         return null;
     }
 
+    /// <summary>
+    /// given a file name with extension,
+    /// return the first file path in the project that matches the file name with extension.
+    /// </summary>
+    public static string? GetFilePath(this Project project, string? fileNameWithExtension)
+    {
+        if (string.IsNullOrEmpty(fileNameWithExtension))
+        {
+            return null;
+        }
+
+        var allFiles = project.GetFilesOfExtension(fileNameWithExtension);
+        return allFiles?.FirstOrDefault(x => x.EndsWith(fileNameWithExtension.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// given an extension,
+    /// return a list of all file paths in the project that have the given extension.
+    /// </summary>
+    /// <param name="extension">should include the '.' character</param>
+    /// <returns></returns>
+    public static List<string>? GetFilesOfExtension(this Project project, string extension)
+    {
+        var fileExtension = Path.GetExtension(extension);
+        if (string.IsNullOrEmpty(fileExtension))
+        {
+            return null;
+        }
+
+        var projectDirectory = Path.GetDirectoryName(project.FilePath);
+        if (string.IsNullOrEmpty(projectDirectory))
+        {
+            return null;
+        }
+
+        return Directory.EnumerateFiles(projectDirectory, $"*{fileExtension}", SearchOption.AllDirectories).ToList();
+    }
+
     public static Document? GetDocument(this Project project, string? documentName)
     {
-        var fileName = Path.GetFileName(documentName);
-        if (string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrEmpty(documentName))
         {
             return null;
         }
@@ -62,16 +99,13 @@ public static class RoslynExtensions
         //often Document.Name is the file path of the document and not the name.
         //check for all possible cases. 
         return project.Documents.FirstOrDefault(x =>
-            x.Name.EndsWith(fileName, StringComparison.OrdinalIgnoreCase) ||
-            x.Name.Equals(documentName, StringComparison.OrdinalIgnoreCase) ||
-            (!string.IsNullOrEmpty(x.FilePath) &&
-            x.FilePath.Equals(documentName, StringComparison.OrdinalIgnoreCase)));
+            x.Name.EndsWith(documentName.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase) ||
+            (!string.IsNullOrEmpty(x.FilePath) && x.FilePath.EndsWith(documentName.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase)));
     }
 
     public static TextDocument? GetAdditionalDocument(this Project project, string? documentName)
     {
-        var fileName = Path.GetFileName(documentName);
-        if (string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrEmpty(documentName))
         {
             return null;
         }
@@ -79,9 +113,7 @@ public static class RoslynExtensions
         //often TextDocument.Name is the file path of the document and not the name.
         //check for all possible cases. 
         return project.AdditionalDocuments.FirstOrDefault(x =>
-            x.Name.EndsWith(fileName, StringComparison.OrdinalIgnoreCase) ||
-            x.Name.Equals(documentName, StringComparison.OrdinalIgnoreCase) ||
-            (!string.IsNullOrEmpty(x.FilePath) &&
-            x.FilePath.Equals(documentName, StringComparison.OrdinalIgnoreCase)));
+            !string.IsNullOrEmpty(x.FilePath) &&
+            x.FilePath.EndsWith(documentName.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase));
     }
 }

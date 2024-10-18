@@ -79,6 +79,14 @@ internal class ProjectModifier
                     textDoc = project.GetAdditionalDocument(file.FileName);
                     textDoc = await ApplyTextReplacements(file, textDoc, options);
                     return textDoc?.Project ?? project;
+                case "css":
+                    var filePathOnDisk = project.GetFilePath(file.FileName);
+                    if (!string.IsNullOrEmpty(filePathOnDisk))
+                    {
+                        ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(filePathOnDisk, file.Replacements);
+                    }
+
+                    break;
             }
         }
         catch (Exception e)

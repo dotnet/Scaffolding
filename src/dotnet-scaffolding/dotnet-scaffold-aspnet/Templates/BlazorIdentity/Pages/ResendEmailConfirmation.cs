@@ -48,26 +48,27 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "t=\"OnValidSubmitAsync\" method=\"post\">\r\n            <DataAnnotationsValidator />\r" +
                     "\n            <ValidationSummary class=\"text-danger\" role=\"alert\" />\r\n           " +
                     " <div class=\"form-floating mb-3\">\r\n                <InputText @bind-Value=\"Input" +
-                    ".Email\" class=\"form-control\" aria-required=\"true\" placeholder=\"name@example.com\"" +
-                    " />\r\n                <label for=\"email\" class=\"form-label\">Email</label>\r\n      " +
-                    "          <ValidationMessage For=\"() => Input.Email\" class=\"text-danger\" />\r\n   " +
-                    "         </div>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg btn-p" +
-                    "rimary\">Resend</button>\r\n        </EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n   " +
-                    " private string? message;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputMod" +
-                    "el Input { get; set; } = new();\r\n\r\n    private async Task OnValidSubmitAsync()\r\n" +
-                    "    {\r\n        var user = await UserManager.FindByEmailAsync(Input.Email!);\r\n   " +
-                    "     if (user is null)\r\n        {\r\n            message = \"Verification email sen" +
-                    "t. Please check your email.\";\r\n            return;\r\n        }\r\n\r\n        var use" +
-                    "rId = await UserManager.GetUserIdAsync(user);\r\n        var code = await UserMana" +
-                    "ger.GenerateEmailConfirmationTokenAsync(user);\r\n        code = WebEncoders.Base6" +
-                    "4UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        var callbackUrl = NavigationM" +
-                    "anager.GetUriWithQueryParameters(\r\n            NavigationManager.ToAbsoluteUri(\"" +
-                    "Account/ConfirmEmail\").AbsoluteUri,\r\n            new Dictionary<string, object?>" +
-                    " { [\"userId\"] = userId, [\"code\"] = code });\r\n        await EmailSender.SendConfi" +
-                    "rmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r" +
-                    "\n        message = \"Verification email sent. Please check your email.\";\r\n    }\r\n" +
-                    "\r\n    private sealed class InputModel\r\n    {\r\n        [Required]\r\n        [Email" +
-                    "Address]\r\n        public string Email { get; set; } = \"\";\r\n    }\r\n}\r\n");
+                    ".Email\" id=\"Input.Email\" class=\"form-control\" aria-required=\"true\" placeholder=\"" +
+                    "name@example.com\" />\r\n                <label for=\"Input.Email\" class=\"form-label" +
+                    "\">Email</label>\r\n                <ValidationMessage For=\"() => Input.Email\" clas" +
+                    "s=\"text-danger\" />\r\n            </div>\r\n            <button type=\"submit\" class=" +
+                    "\"w-100 btn btn-lg btn-primary\">Resend</button>\r\n        </EditForm>\r\n    </div>\r" +
+                    "\n</div>\r\n\r\n@code {\r\n    private string? message;\r\n\r\n    [SupplyParameterFromForm" +
+                    "]\r\n    private InputModel Input { get; set; } = new();\r\n\r\n    private async Task" +
+                    " OnValidSubmitAsync()\r\n    {\r\n        var user = await UserManager.FindByEmailAs" +
+                    "ync(Input.Email!);\r\n        if (user is null)\r\n        {\r\n            message = " +
+                    "\"Verification email sent. Please check your email.\";\r\n            return;\r\n     " +
+                    "   }\r\n\r\n        var userId = await UserManager.GetUserIdAsync(user);\r\n        va" +
+                    "r code = await UserManager.GenerateEmailConfirmationTokenAsync(user);\r\n        c" +
+                    "ode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        var ca" +
+                    "llbackUrl = NavigationManager.GetUriWithQueryParameters(\r\n            Navigation" +
+                    "Manager.ToAbsoluteUri(\"Account/ConfirmEmail\").AbsoluteUri,\r\n            new Dict" +
+                    "ionary<string, object?> { [\"userId\"] = userId, [\"code\"] = code });\r\n        awai" +
+                    "t EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.E" +
+                    "ncode(callbackUrl));\r\n\r\n        message = \"Verification email sent. Please check" +
+                    " your email.\";\r\n    }\r\n\r\n    private sealed class InputModel\r\n    {\r\n        [Re" +
+                    "quired]\r\n        [EmailAddress]\r\n        public string Email { get; set; } = \"\";" +
+                    "\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -127,8 +128,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

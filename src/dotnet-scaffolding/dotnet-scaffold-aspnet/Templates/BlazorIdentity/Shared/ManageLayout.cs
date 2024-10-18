@@ -37,10 +37,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Shared
     <h2>Change your account settings</h2>
     <hr />
     <div class=""row"">
-        <div class=""col-md-3"">
+        <div class=""col-lg-3"">
             <ManageNavMenu />
         </div>
-        <div class=""col-md-9"">
+        <div class=""col-lg-9"">
             @Body
         </div>
     </div>
@@ -105,8 +105,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

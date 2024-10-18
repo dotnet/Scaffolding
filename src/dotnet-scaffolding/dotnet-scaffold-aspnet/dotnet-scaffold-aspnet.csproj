@@ -50,6 +50,10 @@
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
+    <None Update="Templates\BlazorIdentity\Pages\AccessDenied.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>AccessDenied.cs</LastGenOutput>
+    </None>
     <None Update="Templates\BlazorIdentity\Pages\ConfirmEmail.tt">
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
@@ -965,6 +969,11 @@
       <AutoGen>True</AutoGen>
     </Compile>
     <!-- Blazor identity templates-->
+    <Compile Update="Templates\BlazorIdentity\Pages\AccessDenied.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AccessDenied.tt</DependentUpon>
+    </Compile>
     <Compile Update="Templates\BlazorIdentity\IdentityComponentsEndpointRouteBuilderExtensions.cs">
       <DependentUpon>IdentityComponentsEndpointRouteBuilderExtensions.tt</DependentUpon>
       <DesignTime>True</DesignTime>

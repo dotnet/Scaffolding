@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Pages.Manage
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Pages
 {
     using System.Collections.Generic;
     using System.Text;
@@ -18,100 +18,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Pages.
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class Index : IndexBase
+    public partial class AccessDenied : AccessDeniedBase
     {
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@page \"/Account/Manage\"\r\n\r\n@using System.ComponentModel.DataAnnotations\r\n@using M" +
-                    "icrosoft.AspNetCore.Identity\r\n");
-
-if (!string.IsNullOrEmpty(Model.DbContextNamespace))
-{
-
-            this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
-            this.Write("\r\n");
-} 
-            this.Write("\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> UserManager\r\n@inject SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@"> SignInManager
-@inject IdentityUserAccessor UserAccessor
-@inject IdentityRedirectManager RedirectManager
-
-<PageTitle>Profile</PageTitle>
-
-<h3>Profile</h3>
-<StatusMessage />
-
-<div class=""row"">
-    <div class=""col-xl-6"">
-        <EditForm Model=""Input"" FormName=""profile"" OnValidSubmit=""OnValidSubmitAsync"" method=""post"">
-            <DataAnnotationsValidator />
-            <ValidationSummary class=""text-danger"" role=""alert"" />
-            <div class=""form-floating mb-3"">
-                <input type=""text"" value=""@username"" id=""username"" class=""form-control"" placeholder=""Choose your username."" disabled />
-                <label for=""username"" class=""form-label"">Username</label>
-            </div>
-            <div class=""form-floating mb-3"">
-                <InputText @bind-Value=""Input.PhoneNumber"" id=""Input.PhoneNumber"" class=""form-control"" placeholder=""Enter your phone number"" />
-                <label for=""Input.PhoneNumber"" class=""form-label"">Phone number</label>
-                <ValidationMessage For=""() => Input.PhoneNumber"" class=""text-danger"" />
-            </div>
-            <button type=""submit"" class=""w-100 btn btn-lg btn-primary"">Save</button>
-        </EditForm>
-    </div>
-</div>
-
-@code {
-    private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@" user = default!;
-    private string? username;
-    private string? phoneNumber;
-
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
-
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        username = await UserManager.GetUserNameAsync(user);
-        phoneNumber = await UserManager.GetPhoneNumberAsync(user);
-
-        Input.PhoneNumber ??= phoneNumber;
-    }
-
-    private async Task OnValidSubmitAsync()
-    {
-        if (Input.PhoneNumber != phoneNumber)
-        {
-            var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-            if (!setPhoneResult.Succeeded)
-            {
-                RedirectManager.RedirectToCurrentPageWithStatus(""Error: Failed to set phone number."", HttpContext);
-            }
-        }
-
-        await SignInManager.RefreshSignInAsync(user);
-        RedirectManager.RedirectToCurrentPageWithStatus(""Your profile has been updated"", HttpContext);
-    }
-
-    private sealed class InputModel
-    {
-        [Phone]
-        [Display(Name = ""Phone number"")]
-        public string? PhoneNumber { get; set; }
-    }
-}
-");
+            this.Write("@page \"/Account/AccessDenied\"\r\n\r\n<PageTitle>Access denied</PageTitle>\r\n\r\n<header>" +
+                    "\r\n    <h1 class=\"text-danger\">Access denied</h1>\r\n    <p class=\"text-danger\">You" +
+                    " do not have access to this resource.</p>\r\n</header>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -196,7 +112,7 @@ if ((ModelValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class IndexBase
+    public class AccessDeniedBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

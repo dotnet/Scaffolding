@@ -47,29 +47,29 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "t-password\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n            <Data" +
                     "AnnotationsValidator />\r\n            <ValidationSummary class=\"text-danger\" role" +
                     "=\"alert\" />\r\n\r\n            <div class=\"form-floating mb-3\">\r\n                <In" +
-                    "putText @bind-Value=\"Input.Email\" class=\"form-control\" autocomplete=\"username\" a" +
-                    "ria-required=\"true\" placeholder=\"name@example.com\" />\r\n                <label fo" +
-                    "r=\"email\" class=\"form-label\">Email</label>\r\n                <ValidationMessage F" +
-                    "or=\"() => Input.Email\" class=\"text-danger\" />\r\n            </div>\r\n            <" +
-                    "button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Reset password</button" +
-                    ">\r\n        </EditForm>\r\n     </div>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParameterFrom" +
-                    "Form]\r\n    private InputModel Input { get; set; } = new();\r\n\r\n    private async " +
-                    "Task OnValidSubmitAsync()\r\n    {\r\n        var user = await UserManager.FindByEma" +
-                    "ilAsync(Input.Email);\r\n        if (user is null || !(await UserManager.IsEmailCo" +
-                    "nfirmedAsync(user)))\r\n        {\r\n            // Don\'t reveal that the user does " +
-                    "not exist or is not confirmed\r\n            RedirectManager.RedirectTo(\"Account/F" +
-                    "orgotPasswordConfirmation\");\r\n        }\r\n\r\n        // For more information on ho" +
-                    "w to enable account confirmation and password reset please\r\n        // visit htt" +
-                    "ps://go.microsoft.com/fwlink/?LinkID=532713\r\n        var code = await UserManage" +
-                    "r.GeneratePasswordResetTokenAsync(user);\r\n        code = WebEncoders.Base64UrlEn" +
-                    "code(Encoding.UTF8.GetBytes(code));\r\n        var callbackUrl = NavigationManager" +
-                    ".GetUriWithQueryParameters(\r\n            NavigationManager.ToAbsoluteUri(\"Accoun" +
-                    "t/ResetPassword\").AbsoluteUri,\r\n            new Dictionary<string, object?> { [\"" +
-                    "code\"] = code });\r\n\r\n        await EmailSender.SendPasswordResetLinkAsync(user, " +
-                    "Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n        RedirectManage" +
-                    "r.RedirectTo(\"Account/ForgotPasswordConfirmation\");\r\n    }\r\n\r\n    private sealed" +
-                    " class InputModel\r\n    {\r\n        [Required]\r\n        [EmailAddress]\r\n        pu" +
-                    "blic string Email { get; set; } = \"\";\r\n    }\r\n}\r\n");
+                    "putText @bind-Value=\"Input.Email\" id=\"Input.Email\" class=\"form-control\" autocomp" +
+                    "lete=\"username\" aria-required=\"true\" placeholder=\"name@example.com\" />\r\n        " +
+                    "        <label for=\"Input.Email\" class=\"form-label\">Email</label>\r\n             " +
+                    "   <ValidationMessage For=\"() => Input.Email\" class=\"text-danger\" />\r\n          " +
+                    "  </div>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\"" +
+                    ">Reset password</button>\r\n        </EditForm>\r\n     </div>\r\n</div>\r\n\r\n@code {\r\n " +
+                    "   [SupplyParameterFromForm]\r\n    private InputModel Input { get; set; } = new()" +
+                    ";\r\n\r\n    private async Task OnValidSubmitAsync()\r\n    {\r\n        var user = awai" +
+                    "t UserManager.FindByEmailAsync(Input.Email);\r\n        if (user is null || !(awai" +
+                    "t UserManager.IsEmailConfirmedAsync(user)))\r\n        {\r\n            // Don\'t rev" +
+                    "eal that the user does not exist or is not confirmed\r\n            RedirectManage" +
+                    "r.RedirectTo(\"Account/ForgotPasswordConfirmation\");\r\n        }\r\n\r\n        // For" +
+                    " more information on how to enable account confirmation and password reset pleas" +
+                    "e\r\n        // visit https://go.microsoft.com/fwlink/?LinkID=532713\r\n        var " +
+                    "code = await UserManager.GeneratePasswordResetTokenAsync(user);\r\n        code = " +
+                    "WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        var callback" +
+                    "Url = NavigationManager.GetUriWithQueryParameters(\r\n            NavigationManage" +
+                    "r.ToAbsoluteUri(\"Account/ResetPassword\").AbsoluteUri,\r\n            new Dictionar" +
+                    "y<string, object?> { [\"code\"] = code });\r\n\r\n        await EmailSender.SendPasswo" +
+                    "rdResetLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r" +
+                    "\n        RedirectManager.RedirectTo(\"Account/ForgotPasswordConfirmation\");\r\n    " +
+                    "}\r\n\r\n    private sealed class InputModel\r\n    {\r\n        [Required]\r\n        [Em" +
+                    "ailAddress]\r\n        public string Email { get; set; } = \"\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -129,8 +129,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

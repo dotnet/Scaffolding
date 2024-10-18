@@ -218,8 +218,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             {
                 if (string.IsNullOrEmpty(commandlineModel.UserClass))
                 {
-                    blazorIdentityModel.UserClassName = "IdentityUser";
-                    blazorIdentityModel.UserClassNamespace = "Microsoft.AspNetCore.Identity";
+                    //check for ApplicationUser (defaulkt IdentityUser for apps with existing blazor identity)
+                    var existingApplicationUser = await RoslynWorkspaceHelper.FindExistingType(
+                        Workspace,
+                        AssemblyLoadContextLoader,
+                        ProjectContext.AssemblyName,
+                        "ApplicationUser");
+                    if (existingApplicationUser is null)
+                    {
+                        //default IdentityUser shipped with "Microsoft.AspNetCore.Identity
+                        blazorIdentityModel.UserClassName = "IdentityUser";
+                        blazorIdentityModel.UserClassNamespace = "Microsoft.AspNetCore.Identity";
+                    }
+                    else
+                    {
+                        blazorIdentityModel.UserClassName = existingApplicationUser.Name;
+                        blazorIdentityModel.UserClassNamespace = existingApplicationUser.Namespace;
+                    }
                 }
                 else
                 {
@@ -267,7 +282,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
                 ExecuteDbContextTemplate(dbContextModel);
                 var connectionStringsWriter = new ConnectionStringsWriter(AppInfo, FileSystem);
-                connectionStringsWriter.AddConnectionString("DefaultConnection", dbContextModel.DbContextName, commandlineModel.DatabaseProvider);
+                connectionStringsWriter.AddConnectionString(dbContextModel.DbContextName, dbContextModel.DbContextName, commandlineModel.DatabaseProvider);
             }
 
             //gather blazor identity files to generate

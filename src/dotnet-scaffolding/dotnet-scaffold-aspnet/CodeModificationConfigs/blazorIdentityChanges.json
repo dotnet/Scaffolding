@@ -56,7 +56,7 @@
             },
             {
               "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
-              "CheckBlock" : "builder.Services.AddIdentityCore",
+              "CheckBlock": "builder.Services.AddIdentityCore",
               "MultiLineBlock": [
                 "builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)",
                 "    .AddEntityFrameworkStores<$(DbContextName)>()",
@@ -69,7 +69,7 @@
             },
             {
               "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
-              "CheckBlock" : "builder.Services.AddSingleton<IEmailSender",
+              "CheckBlock": "builder.Services.AddSingleton<IEmailSender",
               "Block": "builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>()",
               "LeadingTrivia": {
                 "Newline": true
@@ -86,6 +86,35 @@
       ]
     },
     {
+      "FileName": "Program.cs",
+      "Usings": [
+        "Microsoft.EntityFrameworkCore",
+        "$(UserClassNamespace)"
+      ],
+      "Options": [
+        "EfScenario"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CheckBlock": "builder.Configuration.GetConnectionString",
+              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '$(ConnectionStringName)' not found.\")"
+            },
+            {
+              "InsertAfter": "builder.Configuration.GetConnectionString",
+              "CheckBlock": "builder.Services.AddDbContext",
+              "Block": "builder.Services.AddDbContext<$(DbContextName)>(options => options.$(UseDbMethod))",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
       "FileName": "Routes.razor",
       "Replacements": [
         {
@@ -99,13 +128,21 @@
             "            </NotAuthorized>",
             "        </AuthorizeRouteView>"
           ],
+          "CheckBlock": "<NotAuthorized>"
+        },
+        {
+          "ReplaceSnippet": [ "<Router AppAssembly=\"typeof(Program).Assembly\">" ],
+          "MultiLineBlock": [
+            "@using $(IdentityNamespace).Shared",
+            "<Router AppAssembly= \"typeof(Program).Assembly\">"
+          ],
           "CheckBlock": "$(IdentityNamespace).Shared"
         }
       ]
     },
     {
       "FileName": "NavMenu.razor.css",
-      "Replacements":  [
+      "Replacements": [
         {
           "ReplaceSnippet": [
             ".bi-list-nested-nav-menu {",
@@ -137,7 +174,7 @@
       ]
     },
     {
-      "FileName" : "Components\\Layout\\NavMenu.razor",
+      "FileName": "Components\\Layout\\NavMenu.razor",
       "Replacements": [
         {
           "CheckBlock": "@implements IDisposable",
@@ -221,8 +258,8 @@
       ]
     },
     {
-      "FileName":"Components\\_Imports.razor",
-      "Replacements":[
+      "FileName": "Components\\_Imports.razor",
+      "Replacements": [
         {
           "ReplaceSnippet": [
             "@using Microsoft.AspNetCore.Components.Forms"

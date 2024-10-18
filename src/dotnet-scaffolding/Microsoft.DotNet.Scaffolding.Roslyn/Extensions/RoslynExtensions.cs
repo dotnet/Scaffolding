@@ -51,6 +51,10 @@ public static class RoslynExtensions
         return null;
     }
 
+    /// <summary>
+    /// given a file name with extension,
+    /// return the first file path in the project that matches the file name with extension.
+    /// </summary>
     public static string? GetFilePath(this Project project, string? fileNameWithExtension)
     {
         if (string.IsNullOrEmpty(fileNameWithExtension))
@@ -62,6 +66,12 @@ public static class RoslynExtensions
         return allFiles?.FirstOrDefault(x => x.EndsWith(fileNameWithExtension.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    /// given an extension,
+    /// return a list of all file paths in the project that have the given extension.
+    /// </summary>
+    /// <param name="extension">should include the '.' character</param>
+    /// <returns></returns>
     public static List<string>? GetFilesOfExtension(this Project project, string extension)
     {
         var fileExtension = Path.GetExtension(extension);
@@ -78,6 +88,7 @@ public static class RoslynExtensions
 
         return Directory.EnumerateFiles(projectDirectory, $"*{fileExtension}", SearchOption.AllDirectories).ToList();
     }
+
     public static Document? GetDocument(this Project project, string? documentName)
     {
         if (string.IsNullOrEmpty(documentName))

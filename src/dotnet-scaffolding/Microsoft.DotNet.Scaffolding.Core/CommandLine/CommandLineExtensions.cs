@@ -67,7 +67,7 @@ internal static class CommandLineExtensions
         {
             Name = scaffolder.Name,
             DisplayName = scaffolder.DisplayName,
-            DisplayCategory = scaffolder.Category,
+            DisplayCategories = scaffolder.Categories,
             Description = scaffolder.Description,
             Parameters = scaffolder.Options.Select(o => o.ToParameter()).ToArray()
         };

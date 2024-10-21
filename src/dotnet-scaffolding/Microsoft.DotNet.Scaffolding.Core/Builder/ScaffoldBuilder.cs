@@ -8,18 +8,18 @@ namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
 internal class ScaffoldBuilder(string name) : IScaffoldBuilder
 {
-    private const string DEFAULT_CATEGORY = "General";
+    private const string DEFAULT_CATEGORY = "All";
 
     private readonly List<ScaffolderOption> _options = [];
     private readonly List<ScaffoldStepPreparer> _stepPreparers = [];
     private readonly string _name = FixName(name);
     private string? _displayName;
-    private string? _category;
+    private HashSet<string> _categories = [DEFAULT_CATEGORY];
     private string? _description;
 
     internal string Name => _name;
     internal string DisplayName => _displayName ?? System.Globalization.CultureInfo.CurrentUICulture.TextInfo.ToTitleCase(name);
-    internal string Category => _category ?? DEFAULT_CATEGORY;
+    internal HashSet<string> Categories => _categories;
     internal string? Description => _description;
     internal IEnumerable<ScaffolderOption> Options => _options;
     internal IEnumerable<ScaffoldStepPreparer> StepPreparers => _stepPreparers;
@@ -32,7 +32,7 @@ internal class ScaffoldBuilder(string name) : IScaffoldBuilder
 
     public IScaffoldBuilder WithCategory(string category)
     {
-        _category = category;
+        _categories.Add(category);
         return this;
     }
 
@@ -78,7 +78,7 @@ internal class ScaffoldBuilder(string name) : IScaffoldBuilder
             steps.Add((ScaffoldStep)stepInstance);    
         }
 
-        return new Scaffolder(Name, DisplayName, Category, Description, _options, steps, _stepPreparers);
+        return new Scaffolder(Name, DisplayName, Categories.ToList(), Description, _options, steps, _stepPreparers);
     }
 
     private static string FixName(string name)

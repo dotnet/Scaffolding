@@ -18,9 +18,9 @@ public interface IScaffolder
     string DisplayName { get; }
 
     /// <summary>
-    /// The category in which the scaffolder will be organized in the dotnet-scaffold interactive UI
+    /// The categories in which the scaffolder will be organized in the dotnet-scaffold interactive UI (atleast one default 'All')
     /// </summary>
-    string Category { get; }
+    List<string> Categories { get; }
 
     /// <summary>
     /// The description of the scaffolder as it will be displayed in the dotnet-scaffold interactive UI

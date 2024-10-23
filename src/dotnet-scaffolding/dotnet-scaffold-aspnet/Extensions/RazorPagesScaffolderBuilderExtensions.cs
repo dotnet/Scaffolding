@@ -84,7 +84,7 @@ internal static class RazorPagesScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<string> packageList = [];
+            List<string> packageList = [PackageConstants.EfConstants.EfCoreToolsPackageName];
             if (context.Properties.TryGetValue(nameof(CrudSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CrudSettings commandSettings)
             {

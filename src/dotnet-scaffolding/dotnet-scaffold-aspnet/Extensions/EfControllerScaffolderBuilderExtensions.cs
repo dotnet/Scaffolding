@@ -46,7 +46,7 @@ internal static class EfControllerScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<string> packageList = [];
+            List<string> packageList = [PackageConstants.EfConstants.EfCoreToolsPackageName];
             if (context.Properties.TryGetValue(nameof(EfControllerSettings), out var commandSettingsObj) &&
                 commandSettingsObj is EfControllerSettings commandSettings)
             {

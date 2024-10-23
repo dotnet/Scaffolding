@@ -10,6 +10,7 @@ internal class Constants
     public const string ViewModelExtension = ".cshtml.cs";
     public const string T4TemplateExtension = ".tt";
     public const string GlobalNamespace = "<global namespace>";
+    public const string NewDbContext = nameof(NewDbContext);
 
     public class CliOptions
     {

@@ -10,6 +10,7 @@ internal interface IFirstPartyToolTelemetryWrapper
 {
     //Handles first time notice and sentinel file creation
     void ConfigureFirstTimeTelemetry();
+
     //Calls ITelemetryService.Flush()
     void Flush();
 }

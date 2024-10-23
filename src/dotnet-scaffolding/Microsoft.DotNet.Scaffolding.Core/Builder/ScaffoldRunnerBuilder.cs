@@ -46,16 +46,13 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
         {
             throw new InvalidOperationException("Build already called.");
         }
+
         _built = true;
-
         _appServices = Services.BuildServiceProvider();
-
         _serviceCollection.MakeReadOnly();
 
         var scaffoldRunner = _appServices.GetRequiredService<IScaffoldRunner>();
-
         scaffoldRunner.Scaffolders = Scaffolders.Select(s => s.Build(_appServices));
-
         scaffoldRunner.BuildRootCommand();
         return scaffoldRunner;
     }

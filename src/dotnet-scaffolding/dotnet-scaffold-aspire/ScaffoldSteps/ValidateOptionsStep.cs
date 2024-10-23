@@ -3,6 +3,8 @@
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
@@ -12,10 +14,12 @@ internal class ValidateOptionsStep : ScaffoldStep
 {
     public required Func<ScaffolderContext, ILogger, bool> ValidateMethod { get; set; }
     private readonly ILogger _logger;
+    private readonly ITelemetryService _telemetryService;
 
-    public ValidateOptionsStep(ILogger<ValidateOptionsStep> logger)
+    public ValidateOptionsStep(ILogger<ValidateOptionsStep> logger, ITelemetryService telemetryService)
     {
         _logger = logger;
+        _telemetryService = telemetryService;
     }
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
@@ -28,6 +32,7 @@ internal class ValidateOptionsStep : ScaffoldStep
         }
 
         _logger.LogInformation("Validation succeeded.");
+        _telemetryService.TrackEvent(new ValidateOptionsStepTelemetryEvent(ValidateMethod.Method.Name, validationResult));
         return Task.FromResult(true);
     }
 }

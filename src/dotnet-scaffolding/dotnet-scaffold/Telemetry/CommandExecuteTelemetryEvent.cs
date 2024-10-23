@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using System.Diagnostics;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Internal.Extensions;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Telemetry;
@@ -16,10 +16,10 @@ internal class CommandExecuteTelemetryEvent : TelemetryEventBase
         SetProperty("ToolName", dotnetToolInfo.Command);
         SetProperty("ToolLevel", dotnetToolInfo.IsGlobalTool ? TelemetryConstants.GlobalTool : TelemetryConstants.LocalTool);
         SetProperty("CommandName", commandInfo.Name);
-        SetProperty("AllCommandCategories", string.Join(",", commandInfo.DisplayCategories));
+        SetProperty("AllCommandCategories", string.Join(",", commandInfo.DisplayCategories).Hash());
         if (!string.IsNullOrEmpty(chosenCategory))
         {
-            SetProperty("ChosenCategory", chosenCategory);
+            SetProperty("ChosenCategory", chosenCategory.Hash());
         }
 
         SetProperty("Result", exitCode is null ? TelemetryConstants.Unknown : exitCode == 0 ? TelemetryConstants.Success : TelemetryConstants.Failure);

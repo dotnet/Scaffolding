@@ -13,9 +13,6 @@ internal class IdentityModel
     public required string UserClassName { get; internal set; }
     public required string UserClassNamespace { get; internal set; }
     public string? DbContextNamespace { get; set; }
-    public required string DbContextName { get; set; }
-    //Database type eg. SQL Server or SQLite
-    public string? DatabaseProvider { get; set; }
     public required string BaseOutputPath { get; set; }
     public bool Overwrite { get; set; }
 }

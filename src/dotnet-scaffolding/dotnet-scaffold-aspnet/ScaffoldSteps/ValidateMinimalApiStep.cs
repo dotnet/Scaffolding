@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
@@ -11,6 +12,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.Extensions.Logging;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
+using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -98,20 +100,29 @@ internal class ValidateMinimalApiStep : ScaffoldStep
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
-            _logger.LogError("Missing/Invalid --project option.");
+            _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.ProjectCliOption} option.");
             return null;
         }
 
         if (string.IsNullOrEmpty(Model))
         {
-            _logger.LogError("Missing/Invalid --model option.");
+            _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.ModelCliOption} option.");
             return null;
         }
 
-        if (!string.IsNullOrEmpty(DataContext) &&
-            (string.IsNullOrEmpty(DatabaseProvider) || !PackageConstants.EfConstants.EfPackagesDict.ContainsKey(DatabaseProvider)))
+        if (!string.IsNullOrEmpty(DataContext))
         {
-            DatabaseProvider = PackageConstants.EfConstants.SqlServer;
+            if (!SyntaxFacts.IsValidIdentifier(DataContext) || DataContext.Equals("DbContext", StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogInformation($"Invalid {AspNetConstants.CliOptions.DataContextOption} option");
+                _logger.LogInformation($"Using default '{AspNetConstants.NewDbContext}'");
+               DataContext = AspNetConstants.NewDbContext;
+            }
+
+            if(string.IsNullOrEmpty(DatabaseProvider) || !PackageConstants.EfConstants.EfPackagesDict.ContainsKey(DatabaseProvider))
+            {
+                DatabaseProvider = PackageConstants.EfConstants.SqlServer;
+            }
         }
 
         var commandSettings = new MinimalApiSettings
@@ -142,7 +153,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
         var modelClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(settings.Model, StringComparison.OrdinalIgnoreCase));
         if (string.IsNullOrEmpty(settings.Model) || modelClassSymbol is null)
         {
-            _logger.LogError($"Invalid --model '{settings.Model}' provided");
+            _logger.LogError($"Invalid {AspNetConstants.CliOptions.ModelCliOption} '{settings.Model}' provided");
             return null;
         }
         else
@@ -153,7 +164,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
         var validateModelInfoResult = ClassAnalyzers.ValidateModelForCrudScaffolders(modelInfo, _logger);
         if (!validateModelInfoResult)
         {
-            _logger.LogError($"Invalid --model '{settings.Model}'");
+            _logger.LogError($"Invalid {AspNetConstants.CliOptions.ModelCliOption} '{settings.Model}'");
             return null;
         }
 

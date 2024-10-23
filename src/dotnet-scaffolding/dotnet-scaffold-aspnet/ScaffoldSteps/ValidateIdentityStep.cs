@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -9,7 +10,8 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.Extensions.Logging;
-using static Microsoft.DotNet.Scaffolding.Internal.Constants;
+using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
+using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -56,8 +58,8 @@ internal class ValidateIdentityStep : ScaffoldStep
         else
         {
             context.Properties.Add(nameof(IdentityModel), identityModel);
-            codeModifierProperties.Add(CodeModifierPropertyConstants.IdentityNamespace, identityModel.IdentityNamespace);
-            codeModifierProperties.Add(CodeModifierPropertyConstants.UserClassNamespace, identityModel.UserClassNamespace);
+            codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.IdentityNamespace, identityModel.IdentityNamespace);
+            codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.UserClassNamespace, identityModel.UserClassNamespace);
         }
 
         //Install packages and add a DbContext (if needed)
@@ -74,7 +76,7 @@ internal class ValidateIdentityStep : ScaffoldStep
             var projectBasePath = Path.GetDirectoryName(identitySettings.Project);
             if (!string.IsNullOrEmpty(projectBasePath))
             {
-                context.Properties.Add(StepConstants.BaseProjectPath, projectBasePath);
+                context.Properties.Add(Constants.StepConstants.BaseProjectPath, projectBasePath);
             }
 
             var dbCodeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(identityModel.DbContextInfo);
@@ -83,10 +85,10 @@ internal class ValidateIdentityStep : ScaffoldStep
                 codeModifierProperties.TryAdd(kvp.Key, kvp.Value);
             }
 
-            codeModifierProperties.TryAdd(CodeModifierPropertyConstants.UserClassName, identityModel.UserClassName);
+            codeModifierProperties.TryAdd(Constants.CodeModifierPropertyConstants.UserClassName, identityModel.UserClassName);
         }
 
-        context.Properties.Add(StepConstants.CodeModifierProperties, codeModifierProperties);
+        context.Properties.Add(Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
         return true;
     }
 
@@ -94,18 +96,28 @@ internal class ValidateIdentityStep : ScaffoldStep
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
-            _logger.LogError("Missing/Invalid --project option.");
+            _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.ProjectCliOption} option.");
             return null;
         }
 
         if (string.IsNullOrEmpty(DataContext))
         {
-            _logger.LogError("Missing/Invalid --dataContext option.");
+            _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.DataContextOption} option.");
             return null;
         }
-        else if (string.IsNullOrEmpty(DatabaseProvider) || !PackageConstants.EfConstants.IdentityEfPackagesDict.ContainsKey(DatabaseProvider))
+        else
         {
-            DatabaseProvider = PackageConstants.EfConstants.SqlServer;
+            if (!SyntaxFacts.IsValidIdentifier(DataContext) || DataContext.Equals("DbContext", StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogInformation($"Invalid {AspNetConstants.CliOptions.DataContextOption} option");
+                _logger.LogInformation($"Using default '{AspNetConstants.NewDbContext}'");
+                DataContext = AspNetConstants.NewDbContext;
+            }
+
+            if (string.IsNullOrEmpty(DatabaseProvider) || !PackageConstants.EfConstants.IdentityEfPackagesDict.ContainsKey(DatabaseProvider))
+            {
+                DatabaseProvider = PackageConstants.EfConstants.SqlServer;
+            }
         }
 
         return new IdentitySettings
@@ -154,9 +166,8 @@ internal class ValidateIdentityStep : ScaffoldStep
             ProjectInfo = projectInfo,
             DbContextInfo = dbContextInfo,
             IdentityNamespace = identityNamespace,
-            UserClassName = Constants.Identity.UserClassName,
+            UserClassName = AspNetConstants.Identity.UserClassName,
             UserClassNamespace = userClassNamespace,
-            DbContextName = Constants.Identity.DbContextName,
             BaseOutputPath = projectDirectory,
             Overwrite = settings.Overwrite
         };

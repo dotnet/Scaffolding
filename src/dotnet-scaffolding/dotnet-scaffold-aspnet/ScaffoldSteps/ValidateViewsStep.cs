@@ -8,6 +8,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.Extensions.Logging;
+using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -59,19 +60,19 @@ internal class ValidateViewsStep : ScaffoldStep
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
-            _logger.LogError("Missing/Invalid --project option.");
+            _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.ProjectCliOption} option.");
             return null;
         }
 
         if (string.IsNullOrEmpty(Model))
         {
-            _logger.LogError("Missing/Invalid --model option.");
+            _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.ModelCliOption} option.");
             return null;
         }
 
         if (string.IsNullOrEmpty(Page))
         {
-            _logger.LogError("Missing/Invalid --page option.");
+            _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.PageTypeOption} option.");
             return null;
         }
         else if (!string.IsNullOrEmpty(Page) && !BlazorCrudHelper.CRUDPages.Contains(Page, StringComparer.OrdinalIgnoreCase))
@@ -102,7 +103,7 @@ internal class ValidateViewsStep : ScaffoldStep
         var modelClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(settings.Model, StringComparison.OrdinalIgnoreCase));
         if (string.IsNullOrEmpty(settings.Model) || modelClassSymbol is null)
         {
-            _logger.LogError($"Invalid --model '{settings.Model}'");
+            _logger.LogError($"Invalid {AspNetConstants.CliOptions.ModelCliOption} '{settings.Model}'");
             return null;
         }
         else
@@ -113,7 +114,7 @@ internal class ValidateViewsStep : ScaffoldStep
         var validateModelInfoResult = ClassAnalyzers.ValidateModelForCrudScaffolders(modelInfo, _logger);
         if (!validateModelInfoResult)
         {
-            _logger.LogError($"Invalid --model '{settings.Model}'");
+            _logger.LogError($"Invalid {AspNetConstants.CliOptions.ModelCliOption} '{settings.Model}'");
             return null;
         }
 

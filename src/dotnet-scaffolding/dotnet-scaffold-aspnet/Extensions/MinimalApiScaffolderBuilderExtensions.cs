@@ -61,16 +61,18 @@ internal static class MinimalApiScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            //add Microsoft.EntityFrameworkCore.Tools package regardless of the DatabaseProvider
-            List<string> packageList = [PackageConstants.EfConstants.EfCoreToolsPackageName];
+            //this scaffolder has a non-EF scenario, only add EF packages if DataContext is provided.
+            List<string> packageList = [];
             if (context.Properties.TryGetValue(nameof(MinimalApiSettings), out var commandSettingsObj) &&
                 commandSettingsObj is MinimalApiSettings commandSettings)
             {
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
-                if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
+                if (!string.IsNullOrEmpty(commandSettings.DataContext) &&
+                    !string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
                     PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
                 {
+                    packageList.Add(PackageConstants.EfConstants.EfCoreToolsPackageName);
                     packageList.Add(projectPackageName);
                 }
 

@@ -20,7 +20,7 @@ public interface IScaffolder
     /// <summary>
     /// The categories in which the scaffolder will be organized in the dotnet-scaffold interactive UI (atleast one default 'All')
     /// </summary>
-    List<string> Categories { get; }
+    IEnumerable<string> Categories { get; }
 
     /// <summary>
     /// The description of the scaffolder as it will be displayed in the dotnet-scaffold interactive UI

@@ -16,7 +16,7 @@ public class Scaffolder : IScaffolder
     private readonly List<ScaffoldStepPreparer> _preparers;
     public string Name => _name;
     public string DisplayName => _displayName;
-    public List<string> Categories => _categories;
+    public IEnumerable<string> Categories => _categories;
     public string? Description => _description;
     public IEnumerable<ScaffolderOption> Options => _options;
 

@@ -9,22 +9,22 @@ public class Scaffolder : IScaffolder
 {
     private readonly string _name;
     private readonly string _displayName;
-    private readonly string _category;
+    private readonly List<string> _categories;
     private readonly string? _description;
     private readonly List<ScaffolderOption> _options;
     private readonly List<ScaffoldStep> _steps;
     private readonly List<ScaffoldStepPreparer> _preparers;
     public string Name => _name;
     public string DisplayName => _displayName;
-    public string Category => _category;
+    public IEnumerable<string> Categories => _categories;
     public string? Description => _description;
     public IEnumerable<ScaffolderOption> Options => _options;
 
-    internal Scaffolder(string name, string displayName, string category, string? description, List<ScaffolderOption> options, List<ScaffoldStep> steps, List<ScaffoldStepPreparer> preparers)
+    internal Scaffolder(string name, string displayName, List<string> categories, string? description, List<ScaffolderOption> options, List<ScaffoldStep> steps, List<ScaffoldStepPreparer> preparers)
     {
         _name = name;
         _displayName = displayName;
-        _category = category;
+        _categories = categories;
         _description = description;
         _options = options;
         _steps = steps;

@@ -27,7 +27,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            context.Unset(FlowContextProperties.ScaffoldingCategory);
+            context.Unset(FlowContextProperties.ScaffoldingCategories);
+            context.Unset(FlowContextProperties.ChosenCategory);
             context.Unset(FlowContextProperties.ComponentName);
             context.Unset(FlowContextProperties.ComponentObj);
             context.Unset(FlowContextProperties.CommandName);
@@ -57,7 +58,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
             else
             {
-                SelectCategory(context, displayCategory);
+                SelectChosenCategory(context, displayCategory);
             }
 
             return new ValueTask<FlowStepResult>(FlowStepResult.Success);
@@ -92,15 +93,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             SelectComponent(context, dotnetToolComponent);
             SelectCommand(context, commandInfo);
-            SelectCategory(context, commandInfo.DisplayCategory);
+            SelectCategories(context, commandInfo.DisplayCategories);
             return new ValueTask<FlowStepResult>(FlowStepResult.Success);
         }
 
-        private void SelectCategory(IFlowContext context, string categoryName)
+        private void SelectCategories(IFlowContext context, List<string> categories)
         {
             context.Set(new FlowProperty(
-                FlowContextProperties.ScaffoldingCategory,
-                categoryName,
+                FlowContextProperties.ScaffoldingCategories,
+                categories,
+                "Scaffolding Categories",
+                isVisible: false));
+        }
+
+        private void SelectChosenCategory(IFlowContext context, string category)
+        {
+            context.Set(new FlowProperty(
+                FlowContextProperties.ChosenCategory,
+                category,
                 "Scaffolding Category",
                 isVisible: true));
         }

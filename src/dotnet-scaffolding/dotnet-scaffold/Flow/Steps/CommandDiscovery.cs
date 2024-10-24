@@ -50,9 +50,28 @@ internal class CommandDiscovery
             allCommands = allCommands?.Where(x => x.Key.Equals(_componentPicked.Command)).ToList();
         }
 
-        var scaffoldingCategory = context.GetScaffoldingCategory();
+        List<string> scaffoldingCategories = [];
+        var scaffoldingCategory = context.GetChosenCategory();
+        if (string.IsNullOrEmpty(scaffoldingCategory))
+        {
+            //get all categories for non-interactive scenario (since no chosen one was found)
+            var possibleScaffoldingCategories = context.GetScaffoldingCategories();
+            if (possibleScaffoldingCategories is null || possibleScaffoldingCategories.Count == 0)
+            {
+                return null;
+            }
+            else
+            {
+                scaffoldingCategories.AddRange(possibleScaffoldingCategories);
+            }
+        }
+        else
+        {
+            scaffoldingCategories.Add(scaffoldingCategory);
+        }
+
         var allCommandsByCategory = allCommands?
-            .Where(x => x.Value.DisplayCategory.Equals(scaffoldingCategory))
+            .Where(x => x.Value.DisplayCategories.Intersect(scaffoldingCategories).Any())
             .OrderBy(kvp => kvp.Value.DisplayName)
             .ToList();
 

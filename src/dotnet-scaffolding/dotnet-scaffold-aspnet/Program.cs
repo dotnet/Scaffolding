@@ -249,6 +249,7 @@ public static class Program
         builder.AddScaffolder("blazor-identity")
             .WithDisplayName("Blazor Identity")
             .WithCategory("Blazor")
+            .WithCategory("Identity")
             .WithDescription("Add blazor identity to a project.")
             .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, prereleaseOption])
             .WithStep<ValidateIdentityStep>(config =>

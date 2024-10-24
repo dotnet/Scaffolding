@@ -9,7 +9,7 @@ internal class CommandInfo
 {
     public required string Name { get; init; }
     public required string DisplayName { get; init; }
-    public required string DisplayCategory { get; init; }
+    public required List<string> DisplayCategories { get; init; }
     public string? Description { get; set; }
     public required Parameter[] Parameters { get; init; }
 }

@@ -48,6 +48,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             var parameterValues = GetAllParameterValues(context, commandObj);
             var envVars = context.GetTelemetryEnvironmentVariables();
+            var chosenCategory = context.GetChosenCategory();
             if (!string.IsNullOrEmpty(dotnetToolInfo.Command) && parameterValues.Count != 0 && !string.IsNullOrEmpty(commandObj.Name))
             {
                 var componentExecutionString = $"{dotnetToolInfo.Command} {string.Join(" ", parameterValues)}";
@@ -63,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                             (s) => AnsiConsole.Console.MarkupLineInterpolated($"[red]{s}[/]"));
                     });
 
-                _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandObj, exitCode));
+                _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandObj, exitCode, chosenCategory));
                 if (exitCode != null)
                 {
                     if (exitCode != 0)

@@ -47,7 +47,7 @@ internal class CategoryDiscovery
         var displayCategories = new List<string>();
         //only get categories from the picked DotNetToolInfo
         displayCategories = (_componentPicked != null ? allCommands?.Where(x => x.Key.Equals(_componentPicked.Command)) : allCommands)
-            ?.Select(y => y.Value.DisplayCategory)
+            ?.SelectMany(y => y.Value.DisplayCategories)
             ?.Distinct()
             ?.Order()
             ?.ToList();

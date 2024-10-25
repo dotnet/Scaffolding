@@ -4,9 +4,9 @@ using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 
-internal class ValidateScaffolderStepTelemetryEvent : TelemetryEventBase
+internal class ValidateScaffolderTelemetryEvent : TelemetryEventBase
 {
-    public ValidateScaffolderStepTelemetryEvent(string validateStepName, string scaffolderName, bool result) : base($"validateStepName{validateStepName}")
+    public ValidateScaffolderTelemetryEvent(string validateStepName, string scaffolderName, bool result) : base($"{validateStepName}Event")
     {
         SetProperty("ScaffolderName", scaffolderName);
         SetProperty("Result", result ? TelemetryConstants.Success : TelemetryConstants.Failure);

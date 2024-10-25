@@ -4,22 +4,28 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
-
+using TelemetryConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry.TelemetryConstants;
 namespace Microsoft.DotNet.Scaffolding.Core.Steps;
 
-public class AddConnectionStringStep : ScaffoldStep
+internal class AddConnectionStringStep : ScaffoldStep
 {
     public required string BaseProjectPath { get; set; }
     public required string ConnectionStringName { get; set; }
     public required string ConnectionString { get; set; }
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
-
-    public AddConnectionStringStep(ILogger<AddConnectionStringStep> logger, IFileSystem fileSystem)
+    private readonly ITelemetryService _telemetryService;
+    public AddConnectionStringStep(
+        ILogger<AddConnectionStringStep> logger,
+        IFileSystem fileSystem,
+        ITelemetryService telemetryService)
     {
         _logger = logger;
         _fileSystem = fileSystem;
+        _telemetryService = telemetryService;
     }
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
@@ -28,7 +34,7 @@ public class AddConnectionStringStep : ScaffoldStep
         var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
         JsonNode? content;
         bool writeContent = false;
-
+        AddConnectionStringTelemetryEvent? telemetryEvent = null;
         if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
         {
             content = new JsonObject();
@@ -43,7 +49,8 @@ public class AddConnectionStringStep : ScaffoldStep
         if (content is null)
         {
             _logger.LogError($"Failed to parse appsettings.json file at {appSettingsFile}");
-            return Task.FromResult(false);            
+            telemetryEvent = new AddConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json");
+            return Task.FromResult(false);
         }
 
         string connectionStringNodeName = "ConnectionStrings";
@@ -65,11 +72,19 @@ public class AddConnectionStringStep : ScaffoldStep
             content[connectionStringNodeName] = connectionStringObject;
         }
 
+        bool result = false;
         if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
             _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
+            result = true;
+        }
+
+        telemetryEvent = new AddConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, result ? TelemetryConstants.Added : TelemetryConstants.NoChange);
+        if (telemetryEvent is not null)
+        {
+            _telemetryService.TrackEvent(telemetryEvent);
         }
 
         return Task.FromResult(true);

@@ -13,7 +13,7 @@ internal static class ViewScaffoldeBuilderExtensions
 {
     public static IScaffoldBuilder WithViewsTextTemplatingStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<TextTemplatingStep>(config =>
+        return builder.WithStep<WrappedTextTemplatingStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;

@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
-using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -18,7 +16,7 @@ internal static class EfControllerScaffolderBuilderExtensions
 {
     public static IScaffoldBuilder WithEfControllerTextTemplatingStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<TextTemplatingStep>(config =>
+        return builder.WithStep<WrappedTextTemplatingStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;
@@ -42,7 +40,7 @@ internal static class EfControllerScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithEfControllerAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<AddPackagesStep>(config =>
+        return builder.WithStep<WrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;
@@ -70,7 +68,7 @@ internal static class EfControllerScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithEfControllerCodeChangeStep(this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<CodeModificationStep>(config =>
+        builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("efControllerChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
@@ -130,7 +128,7 @@ internal static class EfControllerScaffolderBuilderExtensions
                 step.Model = context.GetOptionResult<string>(Constants.CliOptions.ModelCliOption);
                 step.Page = BlazorCrudHelper.CrudPageType;
             })
-            .WithStep<TextTemplatingStep>(config =>
+            .WithStep<WrappedTextTemplatingStep>(config =>
             {
                 var step = config.Step;
                 var context = config.Context;

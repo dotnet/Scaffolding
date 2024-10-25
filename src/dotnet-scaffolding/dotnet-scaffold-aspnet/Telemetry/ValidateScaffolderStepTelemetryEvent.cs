@@ -4,14 +4,11 @@ using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 
-internal class ValidateOptionsStepTelemetryEvent : TelemetryEventBase
+internal class ValidateScaffolderStepTelemetryEvent : TelemetryEventBase
 {
-
-    private const string TelemetryEventName = "ValidationOptionsStep";
-    public ValidateOptionsStepTelemetryEvent(string scaffolderName, string methodName, bool result) : base(TelemetryEventName)
+    public ValidateScaffolderStepTelemetryEvent(string validateStepName, string scaffolderName, bool result) : base($"validateStepName{validateStepName}")
     {
         SetProperty("ScaffolderName", scaffolderName);
-        SetProperty("MethodName", methodName);
         SetProperty("Result", result ? TelemetryConstants.Success : TelemetryConstants.Failure);
     }
 }

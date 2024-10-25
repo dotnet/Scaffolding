@@ -9,4 +9,6 @@ internal static class TelemetryConstants
     public static readonly string Success = "Success";
     public static readonly string Failure = "Failure";
     public static readonly string Unknown = "Unknown";
+    public static readonly string Yes = "Yes";
+    public static readonly string No = "No";
 }

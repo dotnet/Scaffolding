@@ -1,13 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
-using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
@@ -17,7 +16,7 @@ internal static class BlazorCrudScaffolderBuilderExtensions
 {
     public static IScaffoldBuilder WithBlazorCrudTextTemplatingStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<TextTemplatingStep>(config =>
+        return builder.WithStep<WrappedTextTemplatingStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;
@@ -42,7 +41,7 @@ internal static class BlazorCrudScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithBlazorCrudAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<AddPackagesStep>(config =>
+        return builder.WithStep<WrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;
@@ -76,7 +75,7 @@ internal static class BlazorCrudScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithBlazorCrudCodeChangeStep(this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<CodeModificationStep>(config =>
+        builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorWebCrudChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
@@ -112,7 +111,7 @@ internal static class BlazorCrudScaffolderBuilderExtensions
 
         //blazor-crud scenario has some custom Program.cs additions that get decided after some analysis.
         //adding these changes with a programmatically created config
-        builder = builder.WithStep<CodeModificationStep>(config =>
+        builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
             config.Context.Properties.TryGetValue(nameof(CrudSettings), out var blazorCrudSettingsObj);

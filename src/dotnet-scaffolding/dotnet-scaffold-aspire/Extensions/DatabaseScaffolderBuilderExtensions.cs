@@ -3,9 +3,9 @@
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
-using Microsoft.DotNet.Tools.Scaffold.Aspire;
-using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
-using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
+using Microsoft.DotNet.Tools.Scaffold.AspNet;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 

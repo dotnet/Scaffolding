@@ -5,7 +5,9 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
@@ -18,11 +20,15 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
     public bool Actions { get; set; }
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
-
-    public EmptyControllerScaffolderStep(ILogger<EmptyControllerScaffolderStep> logger, IFileSystem fileSystem)
+    private readonly ITelemetryService _telemetryService;
+    public EmptyControllerScaffolderStep(
+        ILogger<EmptyControllerScaffolderStep> logger,
+        IFileSystem fileSystem,
+        ITelemetryService telemetryService)
     {
         _logger = logger;
         _fileSystem = fileSystem;
+        _telemetryService = telemetryService;
     }
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
@@ -44,6 +50,7 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
             _logger.LogError("Failed");
         }
 
+        _telemetryService.TrackEvent(new EmptyControllerScaffolderTelemetryEvent(context.Scaffolder.DisplayName, Actions, stepSettings is not null, result));
         return Task.FromResult(result);
     }
 

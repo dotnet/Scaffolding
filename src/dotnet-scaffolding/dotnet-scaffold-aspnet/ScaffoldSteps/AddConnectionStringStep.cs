@@ -34,7 +34,6 @@ internal class AddConnectionStringStep : ScaffoldStep
         var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
         JsonNode? content;
         bool writeContent = false;
-        AddConnectionStringTelemetryEvent? telemetryEvent = null;
         if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
         {
             content = new JsonObject();
@@ -49,7 +48,7 @@ internal class AddConnectionStringStep : ScaffoldStep
         if (content is null)
         {
             _logger.LogError($"Failed to parse appsettings.json file at {appSettingsFile}");
-            telemetryEvent = new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Failure, "Failed to parse appsettings.json");
+            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json"));
             return Task.FromResult(false);
         }
 
@@ -77,16 +76,11 @@ internal class AddConnectionStringStep : ScaffoldStep
             var options = new JsonSerializerOptions { WriteIndented = true };
             _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
-            telemetryEvent = new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added);
+            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));
         }
         else
         {
-            telemetryEvent = new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.NoChange);
-        }
-
-        if (telemetryEvent is not null)
-        {
-            _telemetryService.TrackEvent(telemetryEvent);
+            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.NoChange));
         }
 
         return Task.FromResult(true);

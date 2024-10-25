@@ -28,11 +28,13 @@ internal class ValidateOptionsStep : ScaffoldStep
         if (!validationResult)
         {
             _logger.LogError("Validation failed.");
-            return Task.FromResult(false);
+        }
+        else
+        {
+            _logger.LogInformation("Validation succeeded.");
         }
 
-        _logger.LogInformation("Validation succeeded.");
         _telemetryService.TrackEvent(new ValidateOptionsStepTelemetryEvent(context.Scaffolder.DisplayName, ValidateMethod.Method.Name, validationResult));
-        return Task.FromResult(true);
+        return Task.FromResult(validationResult);
     }
 }

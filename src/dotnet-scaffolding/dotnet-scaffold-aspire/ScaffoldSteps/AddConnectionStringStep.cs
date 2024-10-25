@@ -34,7 +34,6 @@ internal class AddConnectionStringStep : ScaffoldStep
         var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
         JsonNode? content;
         bool writeContent = false;
-        AddConnectionStringTelemetryEvent? telemetryEvent = null;
         if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
         {
             content = new JsonObject();
@@ -49,7 +48,7 @@ internal class AddConnectionStringStep : ScaffoldStep
         if (content is null)
         {
             _logger.LogError($"Failed to parse appsettings.json file at {appSettingsFile}");
-            telemetryEvent = new AddConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json");
+            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json"));
             return Task.FromResult(false);
         }
 
@@ -72,19 +71,16 @@ internal class AddConnectionStringStep : ScaffoldStep
             content[connectionStringNodeName] = connectionStringObject;
         }
 
-        bool result = false;
         if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
             _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
-            result = true;
+            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));
         }
-
-        telemetryEvent = new AddConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, result ? TelemetryConstants.Added : TelemetryConstants.NoChange);
-        if (telemetryEvent is not null)
+        else
         {
-            _telemetryService.TrackEvent(telemetryEvent);
+            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.NoChange));
         }
 
         return Task.FromResult(true);

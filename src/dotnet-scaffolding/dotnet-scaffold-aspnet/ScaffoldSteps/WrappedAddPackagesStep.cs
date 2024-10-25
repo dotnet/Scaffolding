@@ -24,7 +24,6 @@ internal class WrappedAddPackagesStep : AddPackagesStep
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        Debugger.Launch();
         var result = await base.ExecuteAsync(context, cancellationToken);
         _telemetryService.TrackEvent(new WrappedStepTelemetryEvent(nameof(AddPackagesStep), context.Scaffolder.DisplayName, result));
         return result;

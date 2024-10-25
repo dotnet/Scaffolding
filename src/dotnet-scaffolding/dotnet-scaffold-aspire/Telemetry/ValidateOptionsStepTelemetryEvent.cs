@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
+namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
 
 internal class ValidateOptionsStepTelemetryEvent : TelemetryEventBase
 {

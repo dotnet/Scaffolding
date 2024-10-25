@@ -5,7 +5,7 @@ using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 
 internal static class ValidationHelper
 {

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 
 internal static class AspireCommandHelpers
 {

@@ -5,9 +5,9 @@ using System.Text.Json.Nodes;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
 using Microsoft.Extensions.Logging;
-using TelemetryConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry.TelemetryConstants;
+using TelemetryConstants = Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry.TelemetryConstants;
 namespace Microsoft.DotNet.Scaffolding.Core.Steps;
 
 internal class AddConnectionStringStep : ScaffoldStep

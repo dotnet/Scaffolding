@@ -7,7 +7,7 @@ using Microsoft.DotNet.Scaffolding.Roslyn.Extensions;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 
 internal static class AspireHelpers
 {

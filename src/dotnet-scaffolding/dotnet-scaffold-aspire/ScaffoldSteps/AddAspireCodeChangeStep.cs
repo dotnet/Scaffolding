@@ -5,11 +5,11 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
+namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 
 internal class AddAspireCodeChangeStep : CodeModificationStep
 {

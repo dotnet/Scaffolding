@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
-using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.Aspire;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
@@ -14,7 +12,7 @@ internal static class CachingScaffolderBuilderExtensions
 {
     public static IScaffoldBuilder WithCachingAddPackageSteps(this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<AddPackagesStep>(config =>
+        builder = builder.WithStep<WrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var properties = config.Context.Properties;
@@ -32,7 +30,7 @@ internal static class CachingScaffolderBuilderExtensions
             }
         });
 
-        builder = builder.WithStep<AddPackagesStep>(config =>
+        builder = builder.WithStep<WrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var properties = config.Context.Properties;
@@ -82,7 +80,7 @@ internal static class CachingScaffolderBuilderExtensions
             }
         });
 
-        builder = builder.WithStep<CodeModificationStep>(config =>
+        builder = builder.WithStep<AddAspireCodeChangeStep>(config =>
         {
             var step = config.Step;
             if (config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&

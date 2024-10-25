@@ -4,14 +4,16 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
-using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
+using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -19,6 +21,7 @@ internal class ValidateRazorPagesStep : ScaffoldStep
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
+    private readonly ITelemetryService _telemetryService;
     public string? Project { get; set; }
     public bool Prerelease { get; set; }
     public string? DatabaseProvider { get; set; }
@@ -28,10 +31,12 @@ internal class ValidateRazorPagesStep : ScaffoldStep
 
     public ValidateRazorPagesStep(
         IFileSystem fileSystem,
-        ILogger<ValidateRazorPagesStep> logger)
+        ILogger<ValidateRazorPagesStep> logger,
+        ITelemetryService telemetryService)
     {
         _fileSystem = fileSystem;
         _logger = logger;
+        _telemetryService = telemetryService;
     }
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
@@ -40,6 +45,7 @@ internal class ValidateRazorPagesStep : ScaffoldStep
         var codeModifierProperties = new Dictionary<string, string>();
         if (razorPagesSettings is null)
         {
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: false));
             return false;
         }
         else
@@ -53,6 +59,7 @@ internal class ValidateRazorPagesStep : ScaffoldStep
         if (razorPageModel is null)
         {
             _logger.LogError("An error occurred.");
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: false));
             return false;
         }
         else
@@ -79,6 +86,7 @@ internal class ValidateRazorPagesStep : ScaffoldStep
         }
 
         context.Properties.Add(Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
+        _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: true));
         return true;
     }
 

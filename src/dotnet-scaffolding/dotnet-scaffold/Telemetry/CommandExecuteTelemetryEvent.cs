@@ -15,7 +15,7 @@ internal class CommandExecuteTelemetryEvent : TelemetryEventBase
         SetProperty("Version", dotnetToolInfo.Version);
         SetProperty("ToolName", dotnetToolInfo.Command);
         SetProperty("ToolLevel", dotnetToolInfo.IsGlobalTool ? TelemetryConstants.GlobalTool : TelemetryConstants.LocalTool);
-        SetProperty("CommandName", commandInfo.Name);
+        SetProperty("CommandName", commandInfo.Name.Hash());
         SetProperty("AllCommandCategories", string.Join(",", commandInfo.DisplayCategories).Hash());
         if (!string.IsNullOrEmpty(chosenCategory))
         {

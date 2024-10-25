@@ -80,6 +80,7 @@ static void ConfigureSteps(IServiceCollection services)
     services.AddTransient<AddAspireCodeChangeStep>();
     services.AddTransient<ValidateOptionsStep>();
     services.AddTransient<AddPackagesStep>();
+    services.AddTransient<WrappedAddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();
     services.AddTransient<AddConnectionStringStep>();
 }

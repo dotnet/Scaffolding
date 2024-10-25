@@ -4,10 +4,10 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
-using Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 //TODO: move to Microsoft.DotNet.Scaffolding.Core and register it there.
 internal class ValidateOptionsStep : ScaffoldStep
@@ -32,7 +32,7 @@ internal class ValidateOptionsStep : ScaffoldStep
         }
 
         _logger.LogInformation("Validation succeeded.");
-        _telemetryService.TrackEvent(new ValidateOptionsStepTelemetryEvent(ValidateMethod.Method.Name, validationResult));
+        _telemetryService.TrackEvent(new ValidateOptionsStepTelemetryEvent(context.Scaffolder.DisplayName, ValidateMethod.Method.Name, validationResult));
         return Task.FromResult(true);
     }
 }

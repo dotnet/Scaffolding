@@ -12,6 +12,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages
     using System.Collections.Generic;
     using System.Text;
     using System.Linq;
+    using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
     using System;
     
     /// <summary>
@@ -49,8 +50,12 @@ foreach (var property in entityProperties)
     string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
     var inputClass = Model.GetInputClassType(propertyShortTypeName);
     var inputTag = Model.GetInputTagType(propertyShortTypeName);
+    string divWhitespace = new string(' ', 16);
+    var propertyRequiredText = property.HasRequiredAttribute() ? $"\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
 
-            this.Write("            <div class=\"form-group\">\r\n                <label asp-for=\"");
+            this.Write("            <div class=\"form-group\">");
+            this.Write(this.ToStringHelper.ToStringWithCulture(propertyRequiredText));
+            this.Write("\r\n                <label asp-for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));

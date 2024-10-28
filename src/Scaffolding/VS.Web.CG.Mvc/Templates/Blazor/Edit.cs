@@ -65,7 +65,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write("\" OnValidSubmit=\"Update");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("\" FormName=\"edit\" Enhance>\r\n                <DataAnnotationsValidator />\r\n       " +
-                    "         <ValidationSummary />\r\n                <input type=\"hidden\" name=\"");
+                    "         <ValidationSummary role=\"alert\"/>\r\n                <input type=\"hidden\"" +
+                    " name=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
@@ -82,6 +83,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
                     string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
+                    var requiredHtml = property.IsRequired ? "aria-required=\"true\"" : string.Empty;
 
             this.Write("                <div class=\"mb-3\">\r\n                    <label for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
@@ -97,7 +99,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write("\" class=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
-            this.Write("\" />\r\n                    <ValidationMessage For=\"() => ");
+            this.Write("\" ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(requiredHtml));
+            this.Write("/>\r\n                    <ValidationMessage For=\"() => ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));

@@ -73,5 +73,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         public bool IsMultilineText { get; set; }
 
         public PropertyInfo PropertyInfo { get; set; }
+        public bool IsRequired { get; set; }
     }
 }

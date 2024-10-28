@@ -35,7 +35,7 @@
     <div class="col-md-4">
         <EditForm method="post" Model="<#= modelName #>" OnValidSubmit="Add<#= modelName #>" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" />
+            <ValidationSummary class="text-danger" role="alert"/>
             <#
                 foreach (var property in entityProperties)
                 {
@@ -44,10 +44,11 @@
                     string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
+                    var requiredHtml = property.IsRequired ? "aria-required=\"true\"" : string.Empty;
             #>
 <div class="mb-3">
                 <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label> 
-                <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" /> 
+                <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" <#= requiredHtml #>/> 
                 <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" /> 
             </div>        
             <#  } #>

@@ -3,6 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
+<#@  import namespace="Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions" #>
 <#
     string modelName = Model.ModelInfo.ModelTypeName;
     string modelNameLowerVariant = modelName.ToLowerInvariant();
@@ -35,8 +36,10 @@ foreach (var property in entityProperties)
     string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
     var inputClass = Model.GetInputClassType(propertyShortTypeName);
     var inputTag = Model.GetInputTagType(propertyShortTypeName);
+    string divWhitespace = new string(' ', 16);
+    var propertyRequiredText = property.HasRequiredAttribute() ? $"\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
 #>
-            <div class="form-group">
+            <div class="form-group"><#= propertyRequiredText #>
                 <label asp-for="<#= modelName #>.<#= modelPropertyName #>" class="control-label"></label>
                 <<#= inputTag#> asp-for="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" />
                 <span asp-validation-for="<#= modelName #>.<#= modelPropertyName #>" class="text-danger"></span>

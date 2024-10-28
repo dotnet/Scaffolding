@@ -10,8 +10,8 @@ internal static class PropertySymbolExtensions
 {
     public static bool HasRequiredAttribute(this IPropertySymbol propertySymbol)
     {
-        return propertySymbol.GetAttributes().FirstOrDefault(
+        return propertySymbol.GetAttributes().Any(
             x => x.AttributeClass is not null &&
-            x.AttributeClass.Name.Equals(nameof(RequiredAttribute), StringComparison.OrdinalIgnoreCase)) is not null;
+            x.AttributeClass.Name.Equals(nameof(RequiredAttribute), StringComparison.OrdinalIgnoreCase));
     }
 }

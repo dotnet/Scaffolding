@@ -51,10 +51,10 @@ foreach (var property in entityProperties)
     var inputClass = Model.GetInputClassType(propertyShortTypeName);
     var inputTag = Model.GetInputTagType(propertyShortTypeName);
     string divWhitespace = new string(' ', 16);
-    var propertyRequiredText = property.HasRequiredAttribute() ? $"\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
+    var requiredAttributeHtml = property.HasRequiredAttribute() ? $"\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
 
             this.Write("            <div class=\"form-group\">");
-            this.Write(this.ToStringHelper.ToStringWithCulture(propertyRequiredText));
+            this.Write(this.ToStringHelper.ToStringWithCulture(requiredAttributeHtml));
             this.Write("\r\n                <label asp-for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");

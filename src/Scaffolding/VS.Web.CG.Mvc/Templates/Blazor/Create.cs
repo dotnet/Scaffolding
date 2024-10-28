@@ -68,7 +68,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
                     string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
-                    var requiredHtml = property.IsRequired ? "aria-required=\"true\"" : string.Empty;
+                    var requiredAttributeHtml = property.IsRequired ? "aria-required=\"true\"" : string.Empty;
             
             this.Write("<div class=\"mb-3\">\r\n                <label for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
@@ -85,7 +85,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write("\" class=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
             this.Write("\" ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(requiredHtml));
+            this.Write(this.ToStringHelper.ToStringWithCulture(requiredAttributeHtml));
             this.Write("/> \r\n                <ValidationMessage For=\"() => ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");

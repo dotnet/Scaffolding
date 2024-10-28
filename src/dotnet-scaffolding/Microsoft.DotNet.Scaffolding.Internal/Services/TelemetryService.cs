@@ -6,6 +6,7 @@ using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.DotNet.PlatformAbstractions;
+using Microsoft.DotNet.Scaffolding.Internal.Extensions;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.Extensions.Logging;
 
@@ -128,8 +129,16 @@ internal class TelemetryService : ITelemetryService, IDisposable
             var eventProperties = new Dictionary<string, string>(_commonProperties);
             foreach (KeyValuePair<string, string> property in properties)
             {
-                eventProperties[property.Key] = property.Value;
+                string eventName = property.Key;
+                bool pii = eventName.StartsWith(TelemetryConstants.PII);
+                if (pii)
+                {
+                    eventName = eventName.Substring(TelemetryConstants.PII.Length);
+                }
+
+                eventProperties[eventName] = pii ? property.Value.ToString()!.Hash() : property.Value.ToString()!;
             }
+
             return eventProperties;
         }
         else

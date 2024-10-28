@@ -45,7 +45,7 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
         var codeModifierProperties = new Dictionary<string, string>();
         if (blazorCrudSettings is null)
         {
-            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: false));
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateBlazorCrudStep), context.Scaffolder.DisplayName, result: false));
             return false;
         }
         else

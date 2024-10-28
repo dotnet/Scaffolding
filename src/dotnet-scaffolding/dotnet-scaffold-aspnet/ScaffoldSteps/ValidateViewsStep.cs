@@ -39,7 +39,7 @@ internal class ValidateViewsStep : ScaffoldStep
         var codeModifierProperties = new Dictionary<string, string>();
         if (viewSettings is null)
         {
-            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: false));
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateViewsStep), context.Scaffolder.DisplayName, result: false));
             return false;
         }
         else

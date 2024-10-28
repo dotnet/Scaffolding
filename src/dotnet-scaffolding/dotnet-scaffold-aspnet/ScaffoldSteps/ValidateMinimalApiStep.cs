@@ -48,7 +48,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
         var codeModifierProperties = new Dictionary<string, string>();
         if (minimalApiSettings is null)
         {
-            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: false));
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateMinimalApiStep), context.Scaffolder.DisplayName, result: false));
             return false;
         }
         else

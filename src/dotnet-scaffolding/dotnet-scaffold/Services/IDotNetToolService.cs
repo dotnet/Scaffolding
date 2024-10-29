@@ -8,7 +8,7 @@ internal interface IDotNetToolService
 {
     IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null);
     DotNetToolInfo? GetDotNetTool(string? componentName, string? version = null);
-    IList<DotNetToolInfo> GetDotNetTools(bool refresh = false);
+    IList<DotNetToolInfo> GetDotNetTools(bool refresh = false, IDictionary<string, string>? envVars = null);
     bool InstallDotNetTool(string toolName, string? version = null, bool global = false, bool prerelease = false, string[]? addSources = null, string? configFile = null);
     bool UninstallDotNetTool(string toolName, bool global = false);
     List<CommandInfo> GetCommands(DotNetToolInfo dotnetTool, IDictionary<string, string>? envVars = null);

@@ -3,6 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
+<#@  import namespace="Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions" #>
 <#
     string modelName = Model.ModelInfo.ModelTypeName;
     string pluralModel = Model.ModelInfo.ModelTypePluralName;
@@ -46,7 +47,7 @@ else
         <div class="col-md-4">
             <EditForm method="post" Model="<#= modelName #>" OnValidSubmit="Update<#= modelName #>" FormName="edit" Enhance>
                 <DataAnnotationsValidator />
-                <ValidationSummary />
+                <ValidationSummary role="alert"/>
                 <input type="hidden" name="<#= modelName #>.<#= primaryKeyName #>" value="@<#= modelName #>.<#= primaryKeyName #>" />
 <#
                 foreach (var property in entityProperties)
@@ -56,10 +57,11 @@ else
                     string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
+                    var requiredHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
 #>
                 <div class="mb-3">
                     <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label>
-                    <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" />
+                    <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" <#= requiredHtml #>/>
                     <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" />
                 </div>
 <#  } #>

@@ -1,13 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
-using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
-using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
@@ -18,7 +16,7 @@ internal static class MinimalApiScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithMinimalApiCodeChangeStep(this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<CodeModificationStep>(config =>
+        builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("minimalApiChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
@@ -57,7 +55,7 @@ internal static class MinimalApiScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithMinimalApiAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<AddPackagesStep>(config =>
+        return builder.WithStep<WrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;
@@ -93,7 +91,7 @@ internal static class MinimalApiScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithMinimalApiTextTemplatingStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<TextTemplatingStep>(config =>
+        return builder.WithStep<WrappedTextTemplatingStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;

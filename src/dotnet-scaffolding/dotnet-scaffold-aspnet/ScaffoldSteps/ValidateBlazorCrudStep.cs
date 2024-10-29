@@ -4,14 +4,16 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
-using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
+using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -19,7 +21,7 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
-
+    private readonly ITelemetryService _telemetryService;
     public string? Project { get; set; }
     public bool Prerelease { get; set; }
     public string? DatabaseProvider { get; set; }
@@ -29,10 +31,12 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
 
     public ValidateBlazorCrudStep(
         IFileSystem fileSystem,
-        ILogger<ValidateBlazorCrudStep> logger)
+        ILogger<ValidateBlazorCrudStep> logger,
+        ITelemetryService telemetryService)
     {
         _fileSystem = fileSystem;
         _logger = logger;
+        _telemetryService = telemetryService;
     }
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
@@ -41,6 +45,7 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
         var codeModifierProperties = new Dictionary<string, string>();
         if (blazorCrudSettings is null)
         {
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateBlazorCrudStep), context.Scaffolder.DisplayName, result: false));
             return false;
         }
         else
@@ -54,6 +59,7 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
         if (blazorCrudModel is null)
         {
             _logger.LogError("An error occurred.");
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: false));
             return false;
         }
         else
@@ -88,6 +94,7 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
             context.Properties.Add(Constants.StepConstants.AdditionalCodeModifier, codeModificationConfigString);
         }
 
+        _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: true));
         return true;
     }
 

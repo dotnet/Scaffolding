@@ -3,7 +3,10 @@
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal;
+using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
@@ -11,9 +14,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 internal class AddAspireCodeChangeStep : CodeModificationStep
 {
     private readonly ILogger _logger;
-    public AddAspireCodeChangeStep(ILogger<CodeModificationStep> logger) : base(logger)
+    private readonly ITelemetryService _telemetryService;
+    public AddAspireCodeChangeStep(ILogger<CodeModificationStep> logger, ITelemetryService telemetryService) : base(logger)
     {
         _logger = logger;
+        _telemetryService = telemetryService;
     }
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
@@ -24,7 +29,9 @@ internal class AddAspireCodeChangeStep : CodeModificationStep
             await AddAutoGenProjectPropertiesAsync(commandSettings);
         }
 
-        return await base.ExecuteAsync(context, cancellationToken);
+        var result = await base.ExecuteAsync(context, cancellationToken);
+        _telemetryService.TrackEvent(new AddAspireCodeChangeTelemetryEvent(context.Scaffolder.DisplayName, result));
+        return result;
     }
 
     internal async Task AddAutoGenProjectPropertiesAsync(CommandSettings commandSettings)

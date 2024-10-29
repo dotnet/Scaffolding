@@ -4,6 +4,7 @@ using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
@@ -60,7 +61,7 @@ internal static class ScaffolderBuilderExtensions
     public static IScaffoldBuilder WithIdentityDbContextStep(
         this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<TextTemplatingStep>(config =>
+        builder = builder.WithStep<WrappedTextTemplatingStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;

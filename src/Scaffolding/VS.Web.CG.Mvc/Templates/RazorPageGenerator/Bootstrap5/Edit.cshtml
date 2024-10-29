@@ -47,6 +47,8 @@
             @:<div asp-validation-summary="ModelOnly" class="text-danger"></div>
         foreach (PropertyMetadata property in Model.ModelMetadata.Properties)
         {
+            var sixteenWhitespace = new string(' ', 16);
+            var propertyRequiredText = property.IsRequired ? $"\n{sixteenWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
             if (property.IsPrimaryKey)
             {
             @:<input type="hidden" asp-for="@(Model.ModelTypeName).@property.PropertyName" />
@@ -62,7 +64,7 @@
 
                 if (property.IsForeignKey)
                 {
-            @:<div class="form-group">
+            @:<div class="form-group">@propertyRequiredText
                 @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="control-label"></label>
                 @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control" asp-items="ViewBag.@property.PropertyName"></select>
                 @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>
@@ -73,7 +75,7 @@
                 bool isCheckbox = property.TypeName.Equals("System.Boolean");
                 if (isCheckbox)
                 {
-            @:<div class="form-group form-check">
+            @:<div class="form-group form-check">@propertyRequiredText
                 @:<label class="form-check-label">
                     @:<input class="form-check-input" asp-for="@(Model.ModelTypeName).@property.PropertyName" /> @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName).@GetValueExpression(property))
                 @:</label>
@@ -81,7 +83,7 @@
                 }
                 else if (property.IsEnum && !property.IsEnumFlags)
                 {
-            @:<div class="form-group">
+            @:<div class="form-group">@propertyRequiredText
                 @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="control-label"></label>
                 @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control"></select>
                 @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>
@@ -89,7 +91,7 @@
                 }
                 else if (property.IsMultilineText)
                 {
-            @:<div class="form-group">
+            @:<div class="form-group">@propertyRequiredText
                 @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="control-label"></label>
                 @:<textarea asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control"></textarea>
                 @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>
@@ -97,7 +99,7 @@
                 }
                 else
                 {
-            @:<div class="form-group">
+            @:<div class="form-group">@propertyRequiredText
                 @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="control-label"></label>
                 @:<input asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control" />
                 @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>

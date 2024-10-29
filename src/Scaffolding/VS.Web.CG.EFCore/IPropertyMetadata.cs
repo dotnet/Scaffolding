@@ -18,6 +18,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
         string ShortTypeName { get; set; }
         string TypeName { get; set; }
         bool IsMultilineText { get; set; }
+        bool IsRequired { get; set; }
 
         PropertyInfo PropertyInfo { get; set; }
     }

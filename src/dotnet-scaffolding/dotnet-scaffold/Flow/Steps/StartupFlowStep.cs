@@ -58,10 +58,11 @@ internal class StartupFlowStep : IFlowStep
             .Start("Initializing dotnet-scaffold", statusContext =>
             {
                 statusContext.Refresh();
-                SelectTelemetryEnvironmentVariables(context, InitializeFirstTimeTelemetry());
+                var envVars = InitializeFirstTimeTelemetry();
+                SelectTelemetryEnvironmentVariables(context, envVars);
                 //initialize 1st party components (dotnet tools)
                 statusContext.Status = "Getting ready";
-                new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize();
+                new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize(envVars);
                 statusContext.Status = "Done\n";
                 //parse args passed
                 statusContext.Status = "Parsing args.";

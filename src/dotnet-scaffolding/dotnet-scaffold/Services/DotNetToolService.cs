@@ -73,7 +73,7 @@ internal class DotNetToolService : IDotNetToolService
     {
         if (components is null || components.Count == 0)
         {
-            components = GetDotNetTools(refresh: true);
+            components = GetDotNetTools(refresh: true, envVars);
         }
 
         //if any local tools are present, we need to restore them first
@@ -81,7 +81,7 @@ internal class DotNetToolService : IDotNetToolService
         var anyLocalTools = components.FirstOrDefault(x => !x.IsGlobalTool) is not null;
         if (anyLocalTools)
         {
-            var runner = DotnetCliRunner.CreateDotNet("tool", ["restore"]);
+            var runner = DotnetCliRunner.CreateDotNet("tool", ["restore"], envVars);
             runner.ExecuteAndCaptureOutput(out _, out _);
         }
 
@@ -172,14 +172,14 @@ internal class DotNetToolService : IDotNetToolService
         return exitCode == 0;
     }
 
-    public IList<DotNetToolInfo> GetDotNetTools(bool refresh = false)
+    public IList<DotNetToolInfo> GetDotNetTools(bool refresh = false, IDictionary<string, string> ? envVars = null)
     {
         if (refresh || _dotNetTools.Count == 0)
         {
             //only want unique tools, we will try to invoke local tools over global tools
             var dotnetToolList = new List<DotNetToolInfo>();
-            var runner = DotnetCliRunner.CreateDotNet("tool", ["list", "-g"]);
-            var localRunner = DotnetCliRunner.CreateDotNet("tool", ["list"]);
+            var runner = DotnetCliRunner.CreateDotNet("tool", ["list", "-g"], envVars);
+            var localRunner = DotnetCliRunner.CreateDotNet("tool", ["list"], envVars);
             var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
             var localExitCode = localRunner.ExecuteAndCaptureOutput(out var localStdOut, out var localStdErr);
             //parse through local dotnet tools first. 

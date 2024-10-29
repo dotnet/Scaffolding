@@ -12,6 +12,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
     using System.Collections.Generic;
     using System.Text;
     using System.Linq;
+    using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
     using System;
     
     /// <summary>
@@ -60,7 +61,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write("\" OnValidSubmit=\"Add");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("\" FormName=\"create\" Enhance>\r\n            <DataAnnotationsValidator />\r\n         " +
-                    "   <ValidationSummary class=\"text-danger\" />\r\n            ");
+                    "   <ValidationSummary class=\"text-danger\" role=\"alert\"/>\r\n            ");
 
                 foreach (var property in entityProperties)
                 {
@@ -69,6 +70,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
                     string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
+                    var requiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
             
             this.Write("<div class=\"mb-3\">\r\n                <label for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
@@ -84,7 +86,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write("\" class=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
-            this.Write("\" /> \r\n                <ValidationMessage For=\"() => ");
+            this.Write("\" ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(requiredAttributeHtml));
+            this.Write("/> \r\n                <ValidationMessage For=\"() => ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));

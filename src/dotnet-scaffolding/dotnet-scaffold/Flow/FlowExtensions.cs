@@ -40,9 +40,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow
             return context.GetValueOrThrow<IList<KeyValuePair<string, CommandInfo>>>(FlowContextProperties.CommandInfos, throwIfEmpty);
         }
 
-        public static string? GetScaffoldingCategory(this IFlowContext context, bool throwIfEmpty = false)
+        public static List<string>? GetScaffoldingCategories(this IFlowContext context, bool throwIfEmpty = false)
         {
-            return context.GetValueOrThrow<string>(FlowContextProperties.ScaffoldingCategory, throwIfEmpty);
+            return context.GetValueOrThrow<List<string>?>(FlowContextProperties.ScaffoldingCategories, throwIfEmpty);
+        }
+
+        public static string? GetChosenCategory(this IFlowContext context, bool throwIfEmpty = false)
+        {
+            return context.GetValueOrThrow<string>(FlowContextProperties.ChosenCategory, throwIfEmpty);
         }
 
         public static string? GetSourceProjectPath(this IFlowContext context, bool throwIfEmpty = false)

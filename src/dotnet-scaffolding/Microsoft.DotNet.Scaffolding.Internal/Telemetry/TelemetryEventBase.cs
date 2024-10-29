@@ -9,7 +9,7 @@ internal abstract class TelemetryEventBase(string name)
 {
     private readonly Dictionary<string, string> _properties = [];
     private readonly Dictionary<string, double> _measurements = [];
-    
+
     public string Name => name;
     public IReadOnlyDictionary<string, string> Properties => _properties;
     public IReadOnlyDictionary<string, double> Measurements => _measurements;

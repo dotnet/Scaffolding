@@ -136,7 +136,7 @@ internal class TelemetryService : ITelemetryService, IDisposable
                     eventName = eventName.Substring(TelemetryConstants.PII.Length);
                 }
 
-                eventProperties[eventName] = pii ? property.Value.ToString()!.Hash() : property.Value.ToString()!;
+                eventProperties[eventName] = pii ? property.Value.Hash() : property.Value.ToString()!;
             }
 
             return eventProperties;

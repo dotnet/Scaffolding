@@ -11,37 +11,37 @@
     }
     else if (Model.IsLayoutPageSelected)
     {
-        @:@@{
-        @:ViewData["Title"] = "@Model.RazorPageName";
-        if (!string.IsNullOrEmpty(Model.LayoutPageFile))
-        {
-            @:Layout = "@Model.LayoutPageFile";
-        }
-        @:}
-        @:
-        @:<h1>@Model.RazorPageName</h1>
-        @:
-    }
-    else
+    @:@@{
+    @:ViewData["Title"] = "@Model.RazorPageName";
+    if (!string.IsNullOrEmpty(Model.LayoutPageFile))
     {
-        @:@@{
-        @:Layout = null;
-        @:}
-        @:
-        @:<!DOCTYPE html>
-        @:
-        @:<html>
-        @:<head>
-        @:<meta name="viewport" content="width=device-width" />
-        @:<title>@Model.RazorPageName</title>
-        @:</head>
-        @:<body>
-        @:
-        //    PushIndent("    ");
+        @:Layout = "@Model.LayoutPageFile";
     }
-    @:<h4>@Model.ViewDataTypeShortName</h4>
-    @:<hr />
-    @:<div class="row">
+    @:}
+    @:
+    @:<h1>@Model.RazorPageName</h1>
+    @:
+}
+else
+{
+    @:@@{
+    @:Layout = null;
+    @:}
+    @:
+    @:<!DOCTYPE html>
+    @:
+    @:<html>
+    @:<head>
+    @:<meta name="viewport" content="width=device-width" />
+    @:<title>@Model.RazorPageName</title>
+    @:</head>
+    @:<body>
+    @:
+    //    PushIndent("    ");
+}
+@:<h4>@Model.ViewDataTypeShortName</h4>
+@:<hr />
+@:<div class="row">
     @:<div class="col-md-4">
     @:<form method="post">
     @:<div asp-validation-summary="ModelOnly" class="text-danger"></div>

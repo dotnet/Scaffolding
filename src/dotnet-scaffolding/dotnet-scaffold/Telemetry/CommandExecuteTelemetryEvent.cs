@@ -11,15 +11,15 @@ internal class CommandExecuteTelemetryEvent : TelemetryEventBase
     private const string TelemetryEventName = "CommandExecute";
     public CommandExecuteTelemetryEvent(DotNetToolInfo dotnetToolInfo, CommandInfo commandInfo, int? exitCode, string? chosenCategory = null) : base(TelemetryEventName)
     {
-        SetProperty("PackageName", dotnetToolInfo.PackageName);
+        SetProperty("PackageName", dotnetToolInfo.PackageName, isPII: true);
         SetProperty("Version", dotnetToolInfo.Version);
-        SetProperty("ToolName", dotnetToolInfo.Command);
+        SetProperty("ToolName", dotnetToolInfo.Command, isPII: true);
         SetProperty("ToolLevel", dotnetToolInfo.IsGlobalTool ? TelemetryConstants.GlobalTool : TelemetryConstants.LocalTool);
-        SetProperty("CommandName", commandInfo.Name);
-        SetProperty("AllCommandCategories", string.Join(",", commandInfo.DisplayCategories).Hash());
+        SetProperty("CommandName", commandInfo.Name, isPII: true);
+        SetProperty("AllCommandCategories", commandInfo.DisplayCategories, isPII: true);
         if (!string.IsNullOrEmpty(chosenCategory))
         {
-            SetProperty("ChosenCategory", chosenCategory.Hash());
+            SetProperty("ChosenCategory", chosenCategory, isPII: true);
         }
 
         SetProperty("Result", exitCode is null ? TelemetryConstants.Unknown : exitCode == 0 ? TelemetryConstants.Success : TelemetryConstants.Failure);

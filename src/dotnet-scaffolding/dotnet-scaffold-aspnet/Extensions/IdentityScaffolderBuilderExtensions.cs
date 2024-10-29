@@ -1,14 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using System.Diagnostics;
-using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
-using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
@@ -17,7 +15,7 @@ internal static class IdentityScaffolderBuilderExtensions
 {
     public static IScaffoldBuilder WithIdentityAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<AddPackagesStep>(config =>
+        return builder.WithStep<WrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;
@@ -50,7 +48,7 @@ internal static class IdentityScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithIdentityTextTemplatingStep(this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<TextTemplatingStep>(config =>
+        builder = builder.WithStep<WrappedTextTemplatingStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;
@@ -88,7 +86,7 @@ internal static class IdentityScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithIdentityCodeChangeStep(this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<CodeModificationStep>(config =>
+        builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("identityChanges.json", System.Reflection.Assembly.GetExecutingAssembly());

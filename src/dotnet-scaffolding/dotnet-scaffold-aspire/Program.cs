@@ -4,7 +4,6 @@ using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
-using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
@@ -81,6 +80,7 @@ static void ConfigureSteps(IServiceCollection services)
     services.AddTransient<AddAspireCodeChangeStep>();
     services.AddTransient<ValidateOptionsStep>();
     services.AddTransient<AddPackagesStep>();
+    services.AddTransient<WrappedAddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();
     services.AddTransient<AddConnectionStringStep>();
 }

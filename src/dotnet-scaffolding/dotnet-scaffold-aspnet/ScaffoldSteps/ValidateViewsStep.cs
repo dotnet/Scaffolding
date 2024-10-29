@@ -3,10 +3,12 @@
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
 using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 
@@ -16,17 +18,19 @@ internal class ValidateViewsStep : ScaffoldStep
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
-
+    private readonly ITelemetryService _telemetryService;
     public string? Project { get; set; }
     public string? Model { get; set; }
     public string? Page { get; set; }
 
     public ValidateViewsStep(
         IFileSystem fileSystem,
-        ILogger<ValidateViewsStep> logger)
+        ILogger<ValidateViewsStep> logger,
+        ITelemetryService telemetryService)
     {
         _fileSystem = fileSystem;
         _logger = logger;
+        _telemetryService = telemetryService;
     }
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
@@ -35,6 +39,7 @@ internal class ValidateViewsStep : ScaffoldStep
         var codeModifierProperties = new Dictionary<string, string>();
         if (viewSettings is null)
         {
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateViewsStep), context.Scaffolder.DisplayName, result: false));
             return false;
         }
         else
@@ -46,6 +51,7 @@ internal class ValidateViewsStep : ScaffoldStep
         if (viewModel is null)
         {
             _logger.LogError("An error occurred: 'ViewModel' instance could not be obtained");
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: false));
             return false;
         }
         else
@@ -53,6 +59,7 @@ internal class ValidateViewsStep : ScaffoldStep
             context.Properties.Add(nameof(ViewModel), viewModel);
         }
 
+        _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: true));
         return true;
     }
 

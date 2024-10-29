@@ -8,6 +8,7 @@ using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
@@ -16,7 +17,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
 {
     public static IScaffoldBuilder WithBlazorIdentityCodeChangeStep(this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<CodeModificationStep>(config =>
+        builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorIdentityChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
@@ -55,7 +56,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithBlazorIdentityTextTemplatingStep(this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<TextTemplatingStep>(config =>
+        builder = builder.WithStep<WrappedTextTemplatingStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;
@@ -91,7 +92,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithBlazorIdentityAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<AddPackagesStep>(config =>
+        return builder.WithStep<WrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;

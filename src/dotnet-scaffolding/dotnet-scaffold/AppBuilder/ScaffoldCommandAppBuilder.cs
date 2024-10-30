@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-using System.Reflection;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AppBuilder;
 using Microsoft.DotNet.Tools.Scaffold.Command;
+using Microsoft.DotNet.Tools.Scaffold.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
@@ -13,7 +13,7 @@ internal class ScaffoldCommandAppBuilder(string[] args)
 {
     private readonly string[] _args = args;
     //try to update this every release
-    private readonly string _backupDotNetScaffoldVersion = "9.0.0-dev";
+    private readonly string _backupDotNetScaffoldVersion = "9.0.0";
 
     public ScaffoldCommandApp Build()
     {
@@ -23,7 +23,7 @@ internal class ScaffoldCommandAppBuilder(string[] args)
         {
             config
                 .SetApplicationName("dotnet-scaffold")
-                .SetApplicationVersion(GetToolVersion())
+                .SetApplicationVersion(ToolHelper.GetToolVersion() ?? _backupDotNetScaffoldVersion)
                 .AddBranch<ToolSettings>("tool", tool =>
                 {
                     tool.AddCommand<ToolInstallCommand>("install");
@@ -53,12 +53,5 @@ internal class ScaffoldCommandAppBuilder(string[] args)
         });
         registrar.Register(typeof(ITelemetryService), typeof(TelemetryService));
         return registrar;
-    }
-
-    private string GetToolVersion()
-    {
-        var assembly = Assembly.GetExecutingAssembly();
-        var assemblyAttr = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-        return assemblyAttr?.InformationalVersion ?? _backupDotNetScaffoldVersion;
     }
 }

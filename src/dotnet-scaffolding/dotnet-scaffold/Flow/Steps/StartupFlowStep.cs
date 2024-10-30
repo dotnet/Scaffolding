@@ -1,5 +1,6 @@
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.DotNet.Tools.Scaffold.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;

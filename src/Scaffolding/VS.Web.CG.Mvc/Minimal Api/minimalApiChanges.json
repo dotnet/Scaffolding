@@ -19,24 +19,16 @@
           "CodeChanges": [
             {
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddControllers();",
-              "InsertBefore": [ "WebApplication.CreateBuilder.Services.AddSwaggerGen();", "var app = builder.Build();" ],
-              "Options": [ "OpenApi" ],
-              "Block": "WebApplication.CreateBuilder.Services.AddEndpointsApiExplorer()",
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
-              "InsertAfter": "WebApplication.CreateBuilder.Services.AddEndpointsApiExplorer();",
               "InsertBefore": [ "var app = builder.Build();" ],
               "Options": [ "OpenApi" ],
-              "Block": "WebApplication.CreateBuilder.Services.AddSwaggerGen()",
+              "Block": "WebApplication.CreateBuilder.Services.AddOpenApi()",
               "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
-              "Block": "if (app.Environment.IsDevelopment())\r\n{\r\n    app.UseSwagger();\r\n    app.UseSwaggerUI();\r\n}",
+              "CheckBlock": "if (!app.Environment.IsDevelopment())",
+              "Block": "if (app.Environment.IsDevelopment())\r\n{\r\n   app.MapOpenApi();\r\n}",
               "Options": [ "OpenApi" ],
               "InsertAfter": "var app = WebApplication.CreateBuilder.Build();",
               "InsertBefore": [ "app.UseHttpsRedirection();" ],

@@ -401,7 +401,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi
         {
             var openApiDependencies = new HashSet<string>()
             {
-                "Swashbuckle.AspNetCore",
                 "Microsoft.AspNetCore.OpenApi"
             };
 

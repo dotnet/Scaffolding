@@ -219,7 +219,8 @@ internal class ValidateMinimalApiStep : ScaffoldStep
         {
             scaffoldingModel.ProjectInfo.CodeChangeOptions =
             [
-                scaffoldingModel.DbContextInfo.EfScenario ? "EfScenario" : string.Empty
+                scaffoldingModel.DbContextInfo.EfScenario ? "EfScenario" : string.Empty,
+                settings.OpenApi ? "OpenApi" : string.Empty
             ];
         }
 

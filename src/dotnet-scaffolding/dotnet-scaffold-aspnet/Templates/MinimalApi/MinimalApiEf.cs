@@ -96,14 +96,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(";\r\n        })");
 
         string builderExtensions = $".WithName(\"{getAllModels}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
-        }
-        if(!Model.UseTypedResults)
-        {
-            builderExtensions += $"\r\n    .Produces<{modelList}>(StatusCodes.Status200OK)";
-        }
         
             this.Write("\r\n        ");
             this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
@@ -130,15 +122,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(";\r\n        })");
 
         builderExtensions = $".WithName(\"{getModelById}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
-        }
-        if(!Model.UseTypedResults)
-        {
-            builderExtensions += $"\r\n    .Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
-            builderExtensions += $"\r\n    .Produces(StatusCodes.Status404NotFound)";
-        }
         
             this.Write("\r\n        ");
             this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
@@ -214,15 +197,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         }
 
         builderExtensions = $".WithName(\"{updateModel}\")";
-        if (Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
-        }
-        if (!Model.UseTypedResults)
-        {
-            builderExtensions += $"\r\n{builderExtensionSpaces}.Produces(StatusCodes.Status404NotFound)";
-            builderExtensions += $"\r\n{builderExtensionSpaces}.Produces(StatusCodes.Status204NoContent)";
-        }
 
     
             this.Write("    ");
@@ -240,14 +214,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(";\r\n        })\r\n        ");
 
         builderExtensions = $".WithName(\"{createModel}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions+= $"\r\n{builderExtensionSpaces}.WithOpenApi()";
-        }
-        if (!Model.UseTypedResults)
-        {
-            builderExtensions += $"\r\n    .Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status201Created)";
-        }
     
             this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
             this.Write(";\r\n\r\n        ");
@@ -304,15 +270,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         }
 
         builderExtensions = $".WithName(\"{deleteModel}\")";
-        if (Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
-        }
-        if (!Model.UseTypedResults)
-        {
-            builderExtensions += $"\r\n{builderExtensionSpaces}.Produces<{modelName}>(StatusCodes.Status200OK)";
-            builderExtensions += $"\r\n{builderExtensionSpaces}.Produces(StatusCodes.Status404NotFound)";
-        }
     
             this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
             this.Write(";\r\n    }\r\n}\r\n");

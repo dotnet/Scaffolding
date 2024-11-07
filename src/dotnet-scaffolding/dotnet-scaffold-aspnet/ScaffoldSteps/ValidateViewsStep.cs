@@ -51,7 +51,7 @@ internal class ValidateViewsStep : ScaffoldStep
         if (viewModel is null)
         {
             _logger.LogError("An error occurred: 'ViewModel' instance could not be obtained");
-            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: false));
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateViewsStep), context.Scaffolder.DisplayName, result: false));
             return false;
         }
         else
@@ -59,7 +59,7 @@ internal class ValidateViewsStep : ScaffoldStep
             context.Properties.Add(nameof(ViewModel), viewModel);
         }
 
-        _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: true));
+        _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateViewsStep), context.Scaffolder.DisplayName, result: true));
         return true;
     }
 

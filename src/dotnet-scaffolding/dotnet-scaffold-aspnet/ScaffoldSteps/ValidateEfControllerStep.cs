@@ -60,7 +60,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
         if (efControllerModel is null)
         {
             _logger.LogError("An error occurred.");
-            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: false));
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateEfControllerStep), context.Scaffolder.DisplayName, result: false));
             return false;
         }
         else
@@ -87,7 +87,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
         }
 
         context.Properties.Add(Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
-        _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: true));
+        _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateEfControllerStep), context.Scaffolder.DisplayName, result: true));
         return true;
     }
 

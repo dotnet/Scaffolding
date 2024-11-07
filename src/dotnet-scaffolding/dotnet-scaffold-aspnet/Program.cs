@@ -39,7 +39,7 @@ public static class Program
                 var context = config.Context;
                 step.ProjectPath = context.GetOptionResult(projectOption);
                 step.FileName = context.GetOptionResult(fileNameOption);
-                step.CommandName = "razorcomponent";
+                step.CommandName = Constants.DotnetCommands.RazorComponentCommandName;
             });
 
         builder.AddScaffolder("razorview-empty")
@@ -54,7 +54,7 @@ public static class Program
                 var context = config.Context;
                 step.ProjectPath = context.GetOptionResult(projectOption);
                 step.FileName = context.GetOptionResult(fileNameOption);
-                step.CommandName = "view";
+                step.CommandName = Constants.DotnetCommands.ViewCommandName;
             });
 
         builder.AddScaffolder("razorpage-empty")
@@ -70,7 +70,7 @@ public static class Program
                 step.ProjectPath = context.GetOptionResult(projectOption);
                 step.NamespaceName = Path.GetFileNameWithoutExtension(step.ProjectPath);
                 step.FileName = context.GetOptionResult(fileNameOption);
-                step.CommandName = "page";
+                step.CommandName = Constants.DotnetCommands.RazorPageCommandName;
             });
 
         builder.AddScaffolder("apicontroller")

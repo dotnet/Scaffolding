@@ -38,4 +38,15 @@ internal class Constants
         public const string UserClassName = "ApplicationUser";
         public const string DbContextName = "NewIdentityDbContext";
     }
+
+    public class DotnetCommands
+    {
+        public const string RazorPageCommandName = "page";
+        public const string RazorPageCommandOutput = "Pages";
+        public const string RazorComponentCommandName = "razorcomponent";
+        public const string RazorComponentCommandOutput = "Components";
+        public const string ViewCommandName = "view";
+        public const string ViewCommandOutput = "Views";
+        public const string ControllerCommandOutput = "Controllers";
+    }
 }

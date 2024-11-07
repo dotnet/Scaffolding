@@ -6,6 +6,10 @@ internal class PackageConstants
 {
     public static class EfConstants
     {
+        public const string SqlServerDisplayName = "SQL Server (EntityFramework Core)";
+        public const string SqliteDisplayName = "SQL Server (EntityFramework Core)";
+        public const string CosmosDbDisplayName = "Cosmos DB (EntityFramework Core)";
+        public const string PostgresDisplayName = "Postgres (EntityFramework Core)";
         public const string SqlServer = "sqlserver-efcore";
         public const string SQLite = "sqlite-efcore";
         public const string CosmosDb = "cosmos-efcore";

@@ -52,12 +52,28 @@ internal class CategoryDiscovery
             ?.Order()
             ?.ToList();
 
+        //removes 'All' and adds it back at the end
+        displayCategories?.Remove(ScaffolderConstants.DEFAULT_CATEGORY);
+        displayCategories?.Add(ScaffolderConstants.DEFAULT_CATEGORY);
+
         var prompt = new FlowSelectionPrompt<string>()
             .Title("[lightseagreen]Pick a scaffolding category: [/]")
+            .Converter(GetCategoryDisplayName)
             .AddChoices(displayCategories, navigation: context.Navigation);
 
         var result = prompt.Show();
         State = result.State;
         return result.Value;
+    }
+
+    //change 'All' to '(Show All)' only for display, value recorded from the prompt is still 'All'
+    private string GetCategoryDisplayName(string categoryName)
+    {
+        if (categoryName.Equals(ScaffolderConstants.DEFAULT_CATEGORY, StringComparison.OrdinalIgnoreCase))
+        {
+            return "(Show All)";
+        }
+
+        return categoryName;
     }
 }

@@ -68,8 +68,8 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
         }
 
         var projectName = Path.GetFileNameWithoutExtension(stepSettings.Project);
-        if (_fileSystem.DirectoryExists(outputDirectory) &&
-            !string.IsNullOrEmpty(outputDirectory))
+        if (!string.IsNullOrEmpty(outputDirectory) &&
+            _fileSystem.DirectoryExists(outputDirectory))
         {
             //arguments for 'dotnet new {settings.CommandName}'
             var args = new List<string>()

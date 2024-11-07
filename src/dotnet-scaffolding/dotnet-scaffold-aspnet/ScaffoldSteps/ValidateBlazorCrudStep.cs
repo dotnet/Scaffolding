@@ -59,7 +59,7 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
         if (blazorCrudModel is null)
         {
             _logger.LogError("An error occurred.");
-            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: false));
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateBlazorCrudStep), context.Scaffolder.DisplayName, result: false));
             return false;
         }
         else
@@ -94,7 +94,7 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
             context.Properties.Add(Constants.StepConstants.AdditionalCodeModifier, codeModificationConfigString);
         }
 
-        _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, result: true));
+        _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateBlazorCrudStep), context.Scaffolder.DisplayName, result: true));
         return true;
     }
 

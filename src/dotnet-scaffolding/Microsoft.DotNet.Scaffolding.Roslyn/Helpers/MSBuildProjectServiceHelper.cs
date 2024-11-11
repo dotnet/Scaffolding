@@ -1,13 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.Build.Evaluation;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.Scaffolding.Roslyn.Helpers;
 
 internal static class MSBuildProjectServiceHelper
 {
-    // Method to parse version from a TFM string
+    /// <summary>
+    /// Method to parse version from a TFM string.
+    /// Given a short tfm like "net5.0" or "netstandard2.0", it will return a Version object with just major and minor.
+    /// eg, 5.0 or 2.0
+    /// </summary>
     internal static Version ParseFrameworkVersion(string tfm)
     {
         // Remove "net" or "netstandard" prefix to parse the version
@@ -19,6 +22,9 @@ internal static class MSBuildProjectServiceHelper
         return Version.TryParse(versionPart, out var version) ? version : new Version(0, 0);
     }
 
+    /// <summary>
+    /// Get the lowest target framework version from the project.
+    /// </summary>
     internal static string? GetLowestTargetFramework(Build.Evaluation.Project project)
     {
         if (project is null)

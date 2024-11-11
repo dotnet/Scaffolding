@@ -10,4 +10,7 @@ internal class ProjectInfo
     public string? ProjectPath { get; set; }
     public CodeService? CodeService { get; set; }
     public IList<string>? CodeChangeOptions { get; set; }
+    //if multiple are found, use the lowest one
+    public string? LowestTargetFramework { get; set; }
+    public IList<string>? Capabilities { get; set; }
 }

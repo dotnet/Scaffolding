@@ -150,10 +150,20 @@ internal static class ClassAnalyzers
 
     internal static ProjectInfo GetProjectInfo(string projectPath, ILogger logger)
     {
+        /* to use MSBuildProjectService, we need to initialize the MsBuildInitializer
+         * that is because MSBuildLocator.Register fails if Microsoft.Build assemblies are already pulled in
+         * using MSBuildProjectService does that unfortunately so this initialization cannot happen in that helper service
+         * unlike ICodeService, also no chance for a wasted op because at this point in the scaffolder,
+         * we will definitely to have MSBuild initialized.*/
+        new MsBuildInitializer(logger).Initialize();
+        var codeService = new CodeService(logger, projectPath);
+        var msBuildProject = new MSBuildProjectService(projectPath);
         var projectInfo = new ProjectInfo()
         {
-            CodeService = new CodeService(logger, projectPath),
-            ProjectPath = projectPath
+            CodeService = codeService,
+            ProjectPath = projectPath,
+            LowestTargetFramework = msBuildProject.GetLowestTargetFramework(),
+            Capabilities = msBuildProject.GetProjectCapabilities().ToList()
         };
 
         return projectInfo;

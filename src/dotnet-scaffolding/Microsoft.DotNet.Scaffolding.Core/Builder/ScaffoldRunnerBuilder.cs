@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics;
 using Microsoft.DotNet.Scaffolding.Core.CommandLine;
 using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.Extensions.DependencyInjection;
@@ -72,8 +73,14 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
 
     private void AddCoreServices()
     {
-        Services.AddLogging();
-        Logging.AddCleanConsoleFormatter();
+        Debugger.Launch();
+        Services.AddLogging(builder =>
+        {
+            builder.ClearProviders();
+            builder.AddProvider(new AnsiConsoleLoggerProvider(LogLevel.Information));
+        });
+
+        //Logging.AddCleanConsoleFormatter();
         Logging.AddDebug();
     }
 

@@ -18,7 +18,7 @@ internal sealed class TypeRegistrar : ITypeRegistrar
         _services = new ServiceCollection();
         _logging = new LoggingBuilder(_services);
         _services.AddLogging();
-        _logging.AddCleanConsoleFormatter();
+        //_logging.AddCleanConsoleFormatter();
     }
 
     public ITypeResolver Build()

@@ -73,7 +73,6 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
 
     private void AddCoreServices()
     {
-        Debugger.Launch();
         Services.AddLogging(builder =>
         {
             builder.ClearProviders();

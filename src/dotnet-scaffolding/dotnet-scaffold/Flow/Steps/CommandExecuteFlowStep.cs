@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.Diagnostics;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -38,6 +39,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
+            Debugger.Launch();
             //need all 3 things, throw if not found
             var dotnetToolInfo = context.GetComponentObj();
             var commandObj = context.GetCommandObj();
@@ -60,7 +62,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                             DotnetCliRunner.Create(dotnetToolInfo.Command, parameterValues, envVars) :
                             DotnetCliRunner.CreateDotNet(dotnetToolInfo.Command, parameterValues, envVars);
                         exitCode = cliRunner.ExecuteWithCallbacks(
-                            (s) => AnsiConsole.Console.MarkupLineInterpolated($"[green]{s}[/]"),
+                            (s) => AnsiConsole.Console.MarkupLine(s),
                             (s) => AnsiConsole.Console.MarkupLineInterpolated($"[red]{s}[/]"));
                     });
 

@@ -32,7 +32,6 @@ public class AnsiConsoleLogger : ILogger
         Exception? exception,
         Func<TState, Exception?, string> formatter)
     {
-        Debugger.Launch();
         if (!IsEnabled(logLevel))
         {
             return;

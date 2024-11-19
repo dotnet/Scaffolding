@@ -1,22 +1,24 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel" name="Model" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
+<#@  import namespace="Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions" #>
 <#
-    string modelName = Model.ModelType.Name;
-    string pluralModel = Model.ModelType.PluralName;
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName;
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : Model.DbContextNamespace;
-    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.ContextTypeName : $"{dbContextNamespace}.{Model.ContextTypeName}";
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
+    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.DbContextInfo.DbContextClassName : $"{dbContextNamespace}.{Model.DbContextInfo.DbContextClassName}";
     string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
-    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
-    string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
-    string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
-    string entitySetName = Model.ModelMetadata.EntitySetName;
-    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
+    string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;
+    string entitySetName = Model.DbContextInfo.EntitySetVariableName;
 #>
 @page "/<#= pluralModelLowerInv #>/edit"
 @using Microsoft.EntityFrameworkCore
@@ -26,7 +28,7 @@
         #>@using <#= modelNamespace#>
 <#  }
 #>
-@inject <#= dbContextFactory #>
+@inject <#=dbContextFactory #>
 @inject NavigationManager NavigationManager
 
 <PageTitle>Edit</PageTitle>
@@ -50,14 +52,14 @@ else
 <#
                 foreach (var property in entityProperties)
                 {
-                    string modelPropertyName = property.PropertyName;
+                    string modelPropertyName = property.Name;
                     string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
-                    string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
+                    string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
-                    var ariaRequiredAttributeHtml = property.IsRequired ? "aria-required=\"true\"" : string.Empty;
+                    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
                     var divWhitespace = new string(' ', 16);
-                    var requiredSpanAttributeHtml = property.IsRequired ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
+                    var requiredSpanAttributeHtml = property.HasRequiredAttribute() ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
 #>
                 <div class="mb-3"><#= requiredSpanAttributeHtml #>
                     <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label>

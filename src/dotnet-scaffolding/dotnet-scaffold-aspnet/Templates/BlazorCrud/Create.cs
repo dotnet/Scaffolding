@@ -7,11 +7,12 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
 {
     using System.Collections.Generic;
     using System.Text;
     using System.Linq;
+    using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
     using System;
     
     /// <summary>
@@ -26,15 +27,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
         public virtual string TransformText()
         {
 
-    string modelName = Model.ModelType.Name;
-    string pluralModel = Model.ModelType.PluralName;
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName;
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : Model.DbContextNamespace;
-    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.ContextTypeName : $"{dbContextNamespace}.{Model.ContextTypeName}";
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
+    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.DbContextInfo.DbContextClassName : $"{dbContextNamespace}.{Model.DbContextInfo.DbContextClassName}";
     string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
-    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
-    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
@@ -63,14 +65,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 
                 foreach (var property in entityProperties)
                 {
-                    string modelPropertyName = property.PropertyName;
+                    string modelPropertyName = property.Name;
                     string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
-                    string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
+                    string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
-                    var ariaRequiredAttributeHtml = property.IsRequired ? "aria-required=\"true\"" : string.Empty;
+                    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
                     var divWhitespace = new string(' ', 16);
-                    var requiredSpanAttributeHtml = property.IsRequired ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
+                    var requiredSpanAttributeHtml = property.HasRequiredAttribute() ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
             
             this.Write("<div class=\"mb-3\">");
             this.Write(this.ToStringHelper.ToStringWithCulture(requiredSpanAttributeHtml));
@@ -110,7 +112,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
                     "ext.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelMetadata.EntitySetName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.EntitySetVariableName));
             this.Write(".Add(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(");\r\n        await context.SaveChangesAsync();\r\n        NavigationManager.Navigate" +
@@ -135,12 +137,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             }
         }
 
-private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel _ModelField;
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel _ModelField;
 
 /// <summary>
 /// Access the Model parameter of the template.
 /// </summary>
-private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel Model
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel Model
 {
     get
     {
@@ -159,7 +161,7 @@ public virtual void Initialize()
 bool ModelValueAcquired = false;
 if (this.Session.ContainsKey("Model"))
 {
-    this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(this.Session["Model"]));
+    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel)(this.Session["Model"]));
     ModelValueAcquired = true;
 }
 if ((ModelValueAcquired == false))
@@ -167,26 +169,26 @@ if ((ModelValueAcquired == false))
     string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
     if ((string.IsNullOrEmpty(parameterValue) == false))
     {
-        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel));
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel));
         if (((tc != null) 
                     && tc.CanConvertFrom(typeof(string))))
         {
-            this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(tc.ConvertFrom(parameterValue)));
+            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel)(tc.ConvertFrom(parameterValue)));
             ModelValueAcquired = true;
         }
         else
         {
-            this.Error("The type \'Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel\' of th" +
-                    "e parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel\' of the p" +
+                    "arameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }
 if ((ModelValueAcquired == false))
 {
-    object data = global::Microsoft.DotNet.Scaffolding.Shared.T4Templating.CallContext.LogicalGetData("Model");
+    object data = global::Microsoft.DotNet.Scaffolding.TextTemplating.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
-        this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(data));
+        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel)(data));
     }
 }
 

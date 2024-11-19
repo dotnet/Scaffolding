@@ -7,18 +7,19 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages
 {
     using System.Collections.Generic;
     using System.Text;
     using System.Linq;
+    using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class Create : CreateBase
+    public partial class Edit : EditBase
     {
         /// <summary>
         /// Create the template output
@@ -26,97 +27,76 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
         public virtual string TransformText()
         {
 
-    string modelName = Model.ModelType.Name;
-    string pluralModel = Model.ModelType.PluralName;
-    string modelNameLowerInv = modelName.ToLowerInvariant();
-    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : Model.DbContextNamespace;
-    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.ContextTypeName : $"{dbContextNamespace}.{Model.ContextTypeName}";
-    string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
-    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
-    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string modelNameCapitalized = Model.ModelInfo.ModelTypeNameCapitalized;
+    string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string pageModelFullName = string.IsNullOrEmpty(Model.RazorPageNamespace) ? "EditModel" : $"{Model.RazorPageNamespace}.EditModel";
 
-            this.Write("@page \"/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/create\"\r\n@using Microsoft.EntityFrameworkCore\r\n");
-
-    if (!string.IsNullOrEmpty(modelNamespace))
-    {
-        
-            this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNamespace));
-            this.Write("\r\n");
-  }
-
-            this.Write("@inject ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Create</PageTitle>\r\n\r" +
-                    "\n<h1>Create</h1>\r\n\r\n<h2>");
+            this.Write("@page\r\n@model ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(pageModelFullName));
+            this.Write("\r\n\r\n@{\r\n    ViewData[\"Title\"] = \"Edit\";\r\n}\r\n\r\n<h1>Edit</h1>\r\n\r\n<h4>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("</h2>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <EditForm m" +
-                    "ethod=\"post\" Model=\"");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("\" OnValidSubmit=\"Add");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("\" FormName=\"create\" Enhance>\r\n            <DataAnnotationsValidator />\r\n         " +
-                    "   <ValidationSummary class=\"text-danger\" role=\"alert\"/>\r\n            ");
+            this.Write("</h4>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <form metho" +
+                    "d=\"post\">\r\n            <div asp-validation-summary=\"ModelOnly\" class=\"text-dange" +
+                    "r\"></div>\r\n            <input type=\"hidden\" asp-for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameCapitalized));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write("\" />\r\n");
 
-                foreach (var property in entityProperties)
-                {
-                    string modelPropertyName = property.PropertyName;
-                    string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
-                    string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
-                    var inputTypeName = Model.GetInputType(propertyShortTypeName);
-                    var inputClass = Model.GetInputClassType(propertyShortTypeName);
-                    var ariaRequiredAttributeHtml = property.IsRequired ? "aria-required=\"true\"" : string.Empty;
-                    var divWhitespace = new string(' ', 16);
-                    var requiredSpanAttributeHtml = property.IsRequired ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
-            
-            this.Write("<div class=\"mb-3\">");
-            this.Write(this.ToStringHelper.ToStringWithCulture(requiredSpanAttributeHtml));
-            this.Write("\r\n                <label for=\"");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
-            this.Write("\" class=\"form-label\">");
+foreach (var property in entityProperties)
+{
+    string modelPropertyName = property.Name;
+    string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
+    var inputClass = Model.GetInputClassType(propertyShortTypeName);
+    var inputTag = Model.GetInputTagType(propertyShortTypeName);
+    string divWhitespace = new string(' ', 16);
+    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
+    var requiredAttributeHtml = property.HasRequiredAttribute() ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
+
+            this.Write("            <div class=\"form-group\">");
+            this.Write(this.ToStringHelper.ToStringWithCulture(requiredAttributeHtml));
+            this.Write("\r\n                <label asp-for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameCapitalized));
+            this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write(":</label> \r\n                <");
-            this.Write(this.ToStringHelper.ToStringWithCulture(inputTypeName));
-            this.Write(" id=\"");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
-            this.Write("\" @bind-Value=\"");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("\" class=\"control-label\"></label>\r\n                <");
+            this.Write(this.ToStringHelper.ToStringWithCulture(inputTag));
+            this.Write(" asp-for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameCapitalized));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write("\" class=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
             this.Write("\" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(ariaRequiredAttributeHtml));
-            this.Write("/> \r\n                <ValidationMessage For=\"() => ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("/>\r\n                <span asp-validation-for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameCapitalized));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write("\" class=\"text-danger\" /> \r\n            </div>        \r\n            ");
-  } 
-            this.Write("<button type=\"submit\" class=\"btn btn-primary\">Create</button>\r\n        </EditForm" +
-                    ">\r\n    </div>\r\n</div>\r\n\r\n<div>\r\n    <a href=\"/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\">Back to List</a>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParameterFromForm]\r\n    private" +
-                    " ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" { get; set; } = new();\r\n\r\n    // To protect from overposting attacks, see https:" +
-                    "//learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.\r\n " +
-                    "   private async Task Add");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
-                    "ext.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.ModelMetadata.EntitySetName));
-            this.Write(".Add(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(");\r\n        await context.SaveChangesAsync();\r\n        NavigationManager.Navigate" +
-                    "To(\"/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\");\r\n    }\r\n}\r\n");
+            this.Write("\" class=\"text-danger\"></span>\r\n            </div>\r\n");
+
+}
+
+            this.Write(@"            <div class=""form-group"">
+                <input type=""submit"" value=""Save"" class=""btn btn-primary"" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page=""./Index"">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync(""_ValidationScriptsPartial"");}
+}
+");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -135,12 +115,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             }
         }
 
-private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel _ModelField;
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel _ModelField;
 
 /// <summary>
 /// Access the Model parameter of the template.
 /// </summary>
-private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel Model
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel Model
 {
     get
     {
@@ -159,7 +139,7 @@ public virtual void Initialize()
 bool ModelValueAcquired = false;
 if (this.Session.ContainsKey("Model"))
 {
-    this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(this.Session["Model"]));
+    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel)(this.Session["Model"]));
     ModelValueAcquired = true;
 }
 if ((ModelValueAcquired == false))
@@ -167,26 +147,26 @@ if ((ModelValueAcquired == false))
     string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
     if ((string.IsNullOrEmpty(parameterValue) == false))
     {
-        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel));
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel));
         if (((tc != null) 
                     && tc.CanConvertFrom(typeof(string))))
         {
-            this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(tc.ConvertFrom(parameterValue)));
+            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel)(tc.ConvertFrom(parameterValue)));
             ModelValueAcquired = true;
         }
         else
         {
-            this.Error("The type \'Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel\' of th" +
-                    "e parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel\' of the pa" +
+                    "rameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }
 if ((ModelValueAcquired == false))
 {
-    object data = global::Microsoft.DotNet.Scaffolding.Shared.T4Templating.CallContext.LogicalGetData("Model");
+    object data = global::Microsoft.DotNet.Scaffolding.TextTemplating.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
-        this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(data));
+        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel)(data));
     }
 }
 
@@ -201,7 +181,7 @@ if ((ModelValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class CreateBase
+    public class EditBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

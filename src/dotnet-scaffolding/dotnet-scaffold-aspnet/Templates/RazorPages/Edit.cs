@@ -55,7 +55,7 @@ foreach (var property in entityProperties)
     var inputClass = Model.GetInputClassType(propertyShortTypeName);
     var inputTag = Model.GetInputTagType(propertyShortTypeName);
     string divWhitespace = new string(' ', 16);
-    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "required aria-required=\"true\"" : string.Empty;
+    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
     var requiredAttributeHtml = property.HasRequiredAttribute() ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
 
             this.Write("            <div class=\"form-group\">");

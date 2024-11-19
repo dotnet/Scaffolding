@@ -48,7 +48,7 @@
         foreach (PropertyMetadata property in Model.ModelMetadata.Properties)
         {
             var propertyRequiredText = property.IsRequired ? "\r\n<span class=\"text-danger\">*</span>" : string.Empty;
-            var ariaRequiredAttributeHtml = property.IsRequired ? "required aria-required=\"true\"" : string.Empty;
+            var ariaRequiredAttributeHtml = property.IsRequired ? "aria-required=\"true\"" : string.Empty;
             if (property.IsPrimaryKey)
             {
             @:<input type="hidden" asp-for="@(Model.ModelTypeName).@property.PropertyName" />

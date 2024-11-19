@@ -51,7 +51,8 @@ foreach (var property in entityProperties)
     var inputClass = Model.GetInputClassType(propertyShortTypeName);
     var inputTag = Model.GetInputTagType(propertyShortTypeName);
     string divWhitespace = new string(' ', 16);
-    var requiredAttributeHtml = property.HasRequiredAttribute() ? $"\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
+    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
+    var requiredAttributeHtml = property.HasRequiredAttribute() ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
 
             this.Write("            <div class=\"form-group\">");
             this.Write(this.ToStringHelper.ToStringWithCulture(requiredAttributeHtml));
@@ -67,7 +68,9 @@ foreach (var property in entityProperties)
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write("\" class=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
-            this.Write("\" />\r\n                <span asp-validation-for=\"");
+            this.Write("\" ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(ariaRequiredAttributeHtml));
+            this.Write("/>\r\n                <span asp-validation-for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));

@@ -55,11 +55,13 @@ else
                     string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
-                    var requiredHtml = property.IsRequired ? "aria-required=\"true\"" : string.Empty;
+                    var ariaRequiredAttributeHtml = property.IsRequired ? "aria-required=\"true\"" : string.Empty;
+                    var divWhitespace = new string(' ', 16);
+                    var requiredSpanAttributeHtml = property.IsRequired ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
 #>
-                <div class="mb-3">
+                <div class="mb-3"><#= requiredSpanAttributeHtml #>
                     <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label>
-                    <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" <#= requiredHtml #>/>
+                    <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" <#= ariaRequiredAttributeHtml #>/>
                     <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" />
                 </div>
 <#  } #>

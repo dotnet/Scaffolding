@@ -70,9 +70,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
                     string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
-                    var requiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
+                    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
+                    var divWhitespace = new string(' ', 16);
+                    var requiredSpanAttributeHtml = property.HasRequiredAttribute() ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
             
-            this.Write("<div class=\"mb-3\">\r\n                <label for=\"");
+            this.Write("<div class=\"mb-3\">");
+            this.Write(this.ToStringHelper.ToStringWithCulture(requiredSpanAttributeHtml));
+            this.Write("\r\n                <label for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
             this.Write("\" class=\"form-label\">");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
@@ -87,7 +91,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write("\" class=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
             this.Write("\" ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(requiredAttributeHtml));
+            this.Write(this.ToStringHelper.ToStringWithCulture(ariaRequiredAttributeHtml));
             this.Write("/> \r\n                <ValidationMessage For=\"() => ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");

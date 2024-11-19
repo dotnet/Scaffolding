@@ -47,7 +47,8 @@
             @:<div asp-validation-summary="ModelOnly" class="text-danger"></div>
         foreach (PropertyMetadata property in Model.ModelMetadata.Properties)
         {
-            var propertyRequiredText = property.IsRequired ? "<span class=\"text-danger\">*</span>" : string.Empty;
+            var propertyRequiredText = property.IsRequired ? "\r\n<span class=\"text-danger\">*</span>" : string.Empty;
+            var ariaRequiredAttributeHtml = property.IsRequired ? "required aria-required=\"true\"" : string.Empty;
             if (property.IsPrimaryKey)
             {
             @:<input type="hidden" asp-for="@(Model.ModelTypeName).@property.PropertyName" />
@@ -63,10 +64,9 @@
 
                 if (property.IsForeignKey)
                 {
-            @:<div class="form-group">
-                @:@propertyRequiredText
+            @:<div class="form-group">@propertyRequiredText
                 @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="control-label"></label>
-                @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control" asp-items="ViewBag.@property.PropertyName"></select>
+                @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control" asp-items="ViewBag.@property.PropertyName" @ariaRequiredAttributeHtml></select>
                 @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>
             @:</div>
                     continue;
@@ -75,37 +75,33 @@
                 bool isCheckbox = property.TypeName.Equals("System.Boolean");
                 if (isCheckbox)
                 {
-            @:<div class="form-group form-check">
-                @:@propertyRequiredText
+            @:<div class="form-group form-check">@propertyRequiredText
                 @:<label class="form-check-label">
-                    @:<input class="form-check-input" asp-for="@(Model.ModelTypeName).@property.PropertyName" /> @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName).@GetValueExpression(property))
+                    @:<input class="form-check-input" asp-for="@(Model.ModelTypeName).@property.PropertyName" @ariaRequiredAttributeHtml/> @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName).@GetValueExpression(property))
                 @:</label>
             @:</div>
                 }
                 else if (property.IsEnum && !property.IsEnumFlags)
                 {
-            @:<div class="form-group">
-                @:@propertyRequiredText
+            @:<div class="form-group">@propertyRequiredText
                 @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="control-label"></label>
-                @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control"></select>
+                @:<select asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control" @ariaRequiredAttributeHtml></select>
                 @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>
             @:</div>
                 }
                 else if (property.IsMultilineText)
                 {
-            @:<div class="form-group">
-                @:@propertyRequiredText
+            @:<div class="form-group">@propertyRequiredText
                 @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="control-label"></label>
-                @:<textarea asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control"></textarea>
+                @:<textarea asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control" @ariaRequiredAttributeHtml></textarea>
                 @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>
             @:</div>
                 }
                 else
                 {
-            @:<div class="form-group">
-                @:@propertyRequiredText
+            @:<div class="form-group">@propertyRequiredText
                 @:<label asp-for="@(Model.ModelTypeName).@property.PropertyName" class="control-label"></label>
-                @:<input asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control" />
+                @:<input asp-for="@(Model.ModelTypeName).@property.PropertyName" class="form-control" @ariaRequiredAttributeHtml/>
                 @:<span asp-validation-for="@(Model.ModelTypeName).@property.PropertyName" class="text-danger"></span>
             @:</div>
                 }

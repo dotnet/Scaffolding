@@ -126,7 +126,7 @@
     <MicrosoftExtensionsConfigurationVersion>9.0.0</MicrosoftExtensionsConfigurationVersion>
     <MicrosoftExtensionsConfigurationBinderVersion>9.0.0</MicrosoftExtensionsConfigurationBinderVersion>
     <MicrosoftExtensionsConfigurationCommandLineVersion>9.0.0</MicrosoftExtensionsConfigurationCommandLineVersion>
-    <MicrosoftGraphVersion>5.62.0</MicrosoftGraphVersion>
+    <MicrosoftGraphVersion>5.63.0</MicrosoftGraphVersion>
     <MicrosoftIdentityClientExtensionsMsalVersion>4.66.1</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>6.11.0</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0-beta4.22613.1</SystemCommandLineVersion>

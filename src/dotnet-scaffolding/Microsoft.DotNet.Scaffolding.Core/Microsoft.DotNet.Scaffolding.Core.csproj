@@ -4,6 +4,7 @@
     <TargetFrameworks>$(BuildTfm)</TargetFrameworks>
     <PackageTags>dotnet;scaffold;</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

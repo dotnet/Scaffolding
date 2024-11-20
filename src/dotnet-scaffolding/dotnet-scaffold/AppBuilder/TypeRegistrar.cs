@@ -10,14 +10,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AppBuilder;
 internal sealed class TypeRegistrar : ITypeRegistrar
 {
     private readonly IServiceCollection _services;
-    private readonly ILoggingBuilder _logging;
 
     public TypeRegistrar()
     {
         _services = new ServiceCollection();
-        _logging = new LoggingBuilder(_services);
         _services.AddLogging();
-        //_logging.AddCleanConsoleFormatter();
     }
 
     public ITypeResolver Build()

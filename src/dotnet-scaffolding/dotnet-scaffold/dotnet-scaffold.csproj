@@ -16,9 +16,6 @@
       TODO: Find a better place for these files to live that is shared between .Core and dotnet-scaffold. Linking them like this is temporary
       to get around the fact that dotnet-scaffold doesn't (and likely won't) have a dependency on .Core.
     -->
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Logging\CleanConsoleFormatter.cs" Link="Logging\CleanConsoleFormatter.cs" />
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Logging\CleanConsoleFormatterOptions.cs" Link="Logging\CleanConsoleFormatterOptions.cs" />
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Logging\ConsoleLoggerExtensions.cs" Link="Logging\ConsoleLoggerExtensions.cs" />
     <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\ComponentModel\*.cs">
       <Link>ComponentModel\%(Filename)%(Extension)</Link>
     </Compile>

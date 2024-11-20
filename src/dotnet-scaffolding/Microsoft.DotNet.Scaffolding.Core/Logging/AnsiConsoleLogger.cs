@@ -32,6 +32,8 @@ public class AnsiConsoleLogger : ILogger
         Exception? exception,
         Func<TState, Exception?, string> formatter)
     {
+        //should be "enabled", "disabled", "", or null. Empty or null will indicate that a tool is not launched by dotnet-scaffold.
+        bool isRedirectedToDotnetScaffold = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_SCAFFOLD_TELEMETRY_STATE"));
         if (!IsEnabled(logLevel))
         {
             return;
@@ -39,7 +41,17 @@ public class AnsiConsoleLogger : ILogger
 
         var message = formatter(state, exception);
         var formattedMessage = FormatMessage(logLevel, message);
-        AnsiConsole.MarkupLine(formattedMessage);
+        //adding another sanity check to check if console output is being redirected to dotnet-scaffold.
+        if (isRedirectedToDotnetScaffold && (Console.IsOutputRedirected || Console.IsErrorRedirected))
+        {
+            // Output plain markup for main app to handle
+            AnsiConsole.WriteLine(formattedMessage);
+        }
+        else
+        {
+            // Render colored output directly
+            AnsiConsole.MarkupLine(formattedMessage);
+        }
     }
 
     private string FormatMessage(LogLevel logLevel, string message)

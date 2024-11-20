@@ -79,7 +79,6 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
             builder.AddProvider(new AnsiConsoleLoggerProvider(LogLevel.Information));
         });
 
-        //Logging.AddCleanConsoleFormatter();
         Logging.AddDebug();
     }
 

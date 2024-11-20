@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 
-using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.AppBuilder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

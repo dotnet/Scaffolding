@@ -87,7 +87,7 @@
     <!-- Microsoft.DotNet.ProjectModel -->
     <MicrosoftDotNetProjectModelPackageVersion>1.0.0-rc3-003121</MicrosoftDotNetProjectModelPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Abstractions -->
-    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>6.0.0</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
+    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>6.0.1</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
     <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>6.0.0</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Json -->

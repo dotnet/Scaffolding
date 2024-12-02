@@ -1,0 +1,1487 @@
+<Playlist Version="2.0">
+  <Rule Name="Includes" Match="Any">
+    <Rule Match="All">
+      <Property Name="Solution" />
+      <Rule Match="Any">
+        <Rule Match="All">
+          <Property Name="Project" Value="Microsoft.DotNet.Scaffolding.Shared.Tests" />
+          <Rule Match="Any">
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.DotNet.Scaffolding.Shared.Tests" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="CodeAnalysisHelperTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.CodeAnalysisHelperTests.LoadCodeAnalysisProjectTest" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.CodeAnalysisHelperTests.LoadCodeAnalysisProjectTest" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="DocumentBuilderTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddAttributesTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddAttributesTests(attributes: [&quot;Authorize&quot;, &quot;Theory&quot;, &quot;Empty&quot;, &quot;Controller&quot;, &quot;&quot;, ...])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddGlobalStatementsTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddGlobalStatementsTests(statementsToAdd: [&quot;static readonly string[] scopeRequiredByApi = new &quot;..., &quot;app.DoMethod1()&quot;, &quot;app.Method2()&quot;], duplicateStatements: [&quot;var app = builder.Build()&quot;, &quot;app.UseHttpsRedirection()&quot;, &quot;app.UseStaticFiles()&quot;, &quot;app.UseRouting()&quot;, &quot;app.DoMethod1()&quot;, ...])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddingUsingsEmptyClassTest" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddingUsingsEmptyClassTest(usings: [&quot;System&quot;, &quot;System.Test&quot;, &quot;System.Data&quot;, &quot;&quot;, null])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddLeadingTriviaSpacesTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddLeadingTriviaSpacesTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddPropertiesTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddPropertiesTests(properties: [&quot;static readonly string[] scopeRequiredByApi = new &quot;..., &quot;public string Name { get; set; }&quot;, &quot;bool IsProperty { get; set; } = false&quot;, &quot;&quot;, null])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddUsingsTest" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddUsingsTest(usings: [&quot;System&quot;, &quot;System.Test&quot;, &quot;System.Data&quot;, &quot;&quot;, null])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddUsingsTestDuplicate" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.AddUsingsTestDuplicate(usings: [&quot;System&quot;, &quot;System.Duplicate&quot;])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.CreateAttributeListTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.CreateAttributeListTests(attributeStrings: [&quot;Authorize&quot;, &quot;Theory&quot;, &quot;Empty&quot;, &quot;Controller&quot;, &quot;&quot;, ...])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.CreateClassPropertiesTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.CreateClassPropertiesTests(properties: [&quot;static readonly string[] scopeRequiredByApi = new &quot;..., &quot;public string Name { get; set; }&quot;, &quot;bool IsProperty { get; set; } = false&quot;, &quot;&quot;, null], nonDuplicateProperties: [&quot;public string Name { get; set; }&quot;, &quot;bool IsProperty { get; set; } = false&quot;])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.CreateUsingsTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.CreateUsingsTests(usingsStrings: [&quot;System&quot;, &quot;System.Test&quot;, &quot;System.Data&quot;, &quot;&quot;, null])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.GetMethodFromSyntaxRootTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.GetMethodFromSyntaxRootTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.PropertyExistsTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.PropertyExistsTests(existingProperties: [&quot;static readonly string[] scopeRequiredByApi = new &quot;..., &quot;public int Id { get; set; } &quot;], nonExistingProperties: [&quot;public string Name { get; set; }&quot;, &quot;bool IsProperty { get; set; } = false&quot;, &quot;&quot;, null])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.VerfiyParametersTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.DocumentBuilderTests.VerfiyParametersTests(types: [&quot;IServiceCollection&quot;, &quot;IApplcationBuilder&quot;, &quot;IWebHostEnvironment&quot;, &quot;string&quot;, &quot;bool&quot;], vals: [&quot;services&quot;, &quot;app&quot;, &quot;env&quot;, &quot;testString&quot;, &quot;testBool&quot;])" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="ModelTypesLocatorTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ModelTypesLocatorTests.GetAllTypes_Gets_All_Types_Including_ReferencedProjects" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ModelTypesLocatorTests.GetAllTypes_Gets_All_Types_Including_ReferencedProjects" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ModelTypesLocatorTests.GetAllTypesAsyncTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ModelTypesLocatorTests.GetAllTypesAsyncTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ModelTypesLocatorTests.GetType_Does_Not_Find_Type_From_A_Binary_Reference" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ModelTypesLocatorTests.GetType_Does_Not_Find_Type_From_A_Binary_Reference" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ModelTypesLocatorTests.GetType_Fallsback_To_Short_TypeName_Match" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ModelTypesLocatorTests.GetType_Fallsback_To_Short_TypeName_Match" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ModelTypesLocatorTests.GetType_Finds_Exact_Type_In_App" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ModelTypesLocatorTests.GetType_Finds_Exact_Type_In_App" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ModelTypesLocatorTests.GetType_Finds_Exact_Type_In_Referenced_ClassLib" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ModelTypesLocatorTests.GetType_Finds_Exact_Type_In_Referenced_ClassLib" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="ProjectModelHelperTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModelHelperTests.GetShortTfmTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModelHelperTests.GetShortTfmTests(tfmMonikers: [&quot;.NETCoreApp,Version=v3.1&quot;, &quot;.NETCoreApp,Version=v5.0&quot;, &quot;.NETCoreApp,Version=v6.0&quot;, &quot;.NETCoreApp, Version = v2.1&quot;, &quot;.NETCoreApp,Version=v7.0&quot;], shortTfms: [&quot;netcoreapp3.1&quot;, &quot;net5.0&quot;, &quot;net6.0&quot;, &quot;netcoreapp2.1&quot;, &quot;net7.0&quot;])" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="ProjectModifierHelperTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.AttributeExistsTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.AttributeExistsTests(existingAttributes: [&quot;Authorize&quot;, &quot;Empty&quot;], nonExistingAttributes: [&quot;Theory&quot;, &quot;Controller&quot;], invalidAttributes: [&quot;&quot;, null])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.BlockStatementExistsTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.BlockStatementExistsTests(contents: &quot;&quot;, contains: True)" />
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.BlockStatementExistsTests(contents: &quot;app.UseDeveloperExceptionPage();&quot;, contains: False)" />
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.BlockStatementExistsTests(contents: &quot;app.UseRouting();&quot;, contains: True)" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.DenseBlockStatementExistsTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.DenseBlockStatementExistsTests(contents: &quot;&quot;, contains: True)" />
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.DenseBlockStatementExistsTests(contents: &quot;app.UseDeveloperExceptionPage();&quot;, contains: True)" />
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.DenseBlockStatementExistsTests(contents: &quot;app.UseRouting();&quot;, contains: False)" />
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.DenseBlockStatementExistsTests(contents: &quot;endpoints.MapRazorPages();&quot;, contains: True)" />
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.DenseBlockStatementExistsTests(contents: &quot;env.IsDevelopment()&quot;, contains: True)" />
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.DenseBlockStatementExistsTests(contents: &quot;services.AddRazorPages().AddMvcOptions(options =&gt; &quot;..., contains: True)" />
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.DenseBlockStatementExistsTests(contents: &quot;services.AddRazorPages()&quot;, contains: True)" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.EmptyBlockStatementExistsTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.EmptyBlockStatementExistsTests(contents: &quot;&quot;, contains: True)" />
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.EmptyBlockStatementExistsTests(contents: &quot;app.UseRouting();&quot;, contains: False)" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.FilterCodeBlocksTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.FilterCodeBlocksTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.FilterCodeSnippetsTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.FilterCodeSnippetsTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.FilterOptionsTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.FilterOptionsTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.FormatCodeBlockTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.FormatCodeBlockTests(parameterKeys: [&quot;string.ToString()&quot;, &quot;bool.ToString()&quot;, &quot;IServices.AddRazorPages()&quot;, &quot;IWebSomething.DoWebStuff()&quot;, &quot;&quot;, ...], formattedValues: [&quot;password.ToString()&quot;, &quot;IsTrue.ToString()&quot;, &quot;services.AddRazorPages()&quot;, &quot;app.DoWebStuff()&quot;, &quot;&quot;, ...])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.FormatCodeSnippetTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.FormatCodeSnippetTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.FormatGlobalStatementTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.FormatGlobalStatementTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.GetClassNameTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.GetClassNameTests(classNames: [&quot;Startup.cs&quot;, &quot;File.cs&quot;, &quot;Test&quot;, &quot;&quot;, null], formattedClassNames: [&quot;Startup&quot;, &quot;File&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.GetStartupClassNameTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.GetStartupClassNameTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.GetStartupClassTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.GetStartupClassTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.GetVariablesTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.GetVariablesTests(statements: [&quot;var builder = WebApplication.CreateBuilder(args);&quot;, &quot;var      builderThing = WebApplication.CreateBuild&quot;..., &quot;var builderVar=WebApplication.CreateBuilder(args);&quot;, &quot;var realBuilder =             WebApplication.Creat&quot;..., &quot;WebApplicationBuilder fakeBuilder = WebApplication&quot;..., ...], builderVariableIdentifierValues: [&quot;builder&quot;, &quot;builderThing&quot;, &quot;builderVar&quot;, &quot;realBuilder&quot;, &quot;fakeBuilder&quot;, ...])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.GlobalStatementExistsTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.GlobalStatementExistsTests(existingStatements: [&quot;var app = builder.Build()&quot;, &quot;app.UseHttpsRedirection()&quot;, &quot;app.UseStaticFiles()&quot;, &quot;app.UseRouting()&quot;], nonExistingStatements: [&quot;var app2 = builder.Build()&quot;, &quot;app2.UseHttpsRedirection()&quot;, &quot;app2.UseStaticFiles()&quot;, &quot;app2.UseRouting()&quot;])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.IsMinimalAppTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.IsMinimalAppTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.IsUsingTopLevelStatements" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.IsUsingTopLevelStatements" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.ProcessCsprojTfmsTest" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.ProcessCsprojTfmsTest" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.TrimStatementTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.ProjectModifierHelperTests.TrimStatementTests(statements: [&quot;\nWebApplication.CreateBuilder.Services.AddAuthent&quot;..., &quot;\nWebApplication.CreateBuilder.Services.AddAuthori&quot;..., &quot;absdf \n \r asdfsadfasdf sdfasdf \n {} &quot;, &quot;&quot;, null], trimmedStatements: [&quot;WebApplication.CreateBuilder.Services.AddAuthentic&quot;..., &quot;WebApplication.CreateBuilder.Services.AddAuthoriza&quot;..., &quot;absdfasdfsadfasdfsdfasdf{}&quot;, &quot;&quot;, &quot;&quot;])" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="RoslynUtilitiesTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.RoslynUtilitiesTests.CheckDocumentForMethodInvocationAsyncTest" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.RoslynUtilitiesTests.CheckDocumentForMethodInvocationAsyncTest" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.RoslynUtilitiesTests.CheckDocumentForTextAsyncTest" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.RoslynUtilitiesTests.CheckDocumentForTextAsyncTest" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.RoslynUtilitiesTests.IsKeyWordTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.RoslynUtilitiesTests.IsKeyWordTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.RoslynUtilitiesTests.TestCreateEscapedIdentifier" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.RoslynUtilitiesTests.TestCreateEscapedIdentifier" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.RoslynUtilitiesTests.TestCreateValidNameSpace" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.RoslynUtilitiesTests.TestCreateValidNameSpace" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="StringUtilTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.StringUtilTests.ContainsIgnoreCase_ShouldReturnCorrectResults" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.StringUtilTests.ContainsIgnoreCase_ShouldReturnCorrectResults" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.StringUtilTests.GetFilePathWithoutExtensionTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.StringUtilTests.GetFilePathWithoutExtensionTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.StringUtilTests.ToNamespaceTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.StringUtilTests.ToNamespaceTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.StringUtilTests.ToPathTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.StringUtilTests.ToPathTests" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.T4TemplatingTests" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="TemplateInvokerTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.T4TemplatingTests.TemplateInvokerTests.TestInvokeTemplate" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.DotNet.Scaffolding.Shared.Tests.T4TemplatingTests.TemplateInvokerTests.TestInvokeTemplate" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+          </Rule>
+        </Rule>
+        <Rule Match="All">
+          <Property Name="Project" Value="VS.Web.CG.Core.FunctionalTests.Tests (net9.0)" />
+          <Rule Match="Any">
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="NupkgTest" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest.NupkgTest.CheckFolderStructure" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.FunctionalTest.NupkgTest.CheckFolderStructure" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+          </Rule>
+        </Rule>
+        <Rule Match="All">
+          <Property Name="Project" Value="VS.Web.CG.Core.Tests (net9.0)" />
+          <Rule Match="Any">
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGeneration" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="MemberInfoExtensionsTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MemberInfoExtensionsTests.GetAliasAttribute_Returns_Correct_Value" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MemberInfoExtensionsTests.GetAliasAttribute_Returns_Correct_Value" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MemberInfoExtensionsTests.GetArgumentAttribute_Returns_Correct_Value" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MemberInfoExtensionsTests.GetArgumentAttribute_Returns_Correct_Value" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MemberInfoExtensionsTests.GetOptionAttribute_Returns_Correct_Value" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MemberInfoExtensionsTests.GetOptionAttribute_Returns_Correct_Value" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="ParameterDescriptorTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.ParameterDescriptorTests.Arguments_HaveCorrectDescription_Returns_CorrectValue" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.ParameterDescriptorTests.Arguments_HaveCorrectDescription_Returns_CorrectValue(propertyName: &quot;StringWithExplicitArgument&quot;, expectedDescription: &quot;My string description&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.ParameterDescriptorTests.Arguments_HaveCorrectDescription_Returns_CorrectValue(propertyName: &quot;StringWithoutExplicitArgument&quot;, expectedDescription: &quot;&quot;)" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.ParameterDescriptorTests.Options_UseCorrectName_Returns_CorrectValue" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.ParameterDescriptorTests.Options_UseCorrectName_Returns_CorrectValue(propertyName: &quot;BooleanWithDefaultValue&quot;, expectedOptionTemplate: &quot;--BooleanWithDefaultValue&quot;, expectedOptionDescription: &quot;&quot;, commandLineStringWithTheOption: &quot;--BooleanWithDefaultValue&quot;, expectedValueWhenOptionIsPresent: True, expectedValueWhenOptionIsNotPresent: True)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.ParameterDescriptorTests.Options_UseCorrectName_Returns_CorrectValue(propertyName: &quot;BooleanWithExplicitOption&quot;, expectedOptionTemplate: &quot;--NameOverride|-bwo&quot;, expectedOptionDescription: &quot;Bool with explicit option&quot;, commandLineStringWithTheOption: &quot;--NameOverride&quot;, expectedValueWhenOptionIsPresent: True, expectedValueWhenOptionIsNotPresent: False)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.ParameterDescriptorTests.Options_UseCorrectName_Returns_CorrectValue(propertyName: &quot;BooleanWithoutExplicitOption&quot;, expectedOptionTemplate: &quot;--BooleanWithoutExplicitOption&quot;, expectedOptionDescription: &quot;&quot;, commandLineStringWithTheOption: &quot;--BooleanWithoutExplicitOption&quot;, expectedValueWhenOptionIsPresent: True, expectedValueWhenOptionIsNotPresent: False)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.ParameterDescriptorTests.Options_UseCorrectName_Returns_CorrectValue(propertyName: &quot;StringOption&quot;, expectedOptionTemplate: &quot;--StringOption|-so&quot;, expectedOptionDescription: &quot;String with explicit option&quot;, commandLineStringWithTheOption: &quot;--StringOption GivenValue&quot;, expectedValueWhenOptionIsPresent: &quot;GivenValue&quot;, expectedValueWhenOptionIsNotPresent: &quot;&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.ParameterDescriptorTests.Options_UseCorrectName_Returns_CorrectValue(propertyName: &quot;StringOptionWithDefaultValue&quot;, expectedOptionTemplate: &quot;--StringOptionWithDefaultValue&quot;, expectedOptionDescription: &quot;&quot;, commandLineStringWithTheOption: &quot;--StringOptionWithDefaultValue GivenValue&quot;, expectedValueWhenOptionIsPresent: &quot;GivenValue&quot;, expectedValueWhenOptionIsNotPresent: &quot;Default Value&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.ParameterDescriptorTests.Options_UseCorrectName_Returns_CorrectValue(propertyName: &quot;StringOptionWithNameOverride&quot;, expectedOptionTemplate: &quot;--OverridenName&quot;, expectedOptionDescription: &quot;&quot;, commandLineStringWithTheOption: &quot;--OverridenName GivenValue&quot;, expectedValueWhenOptionIsPresent: &quot;GivenValue&quot;, expectedValueWhenOptionIsNotPresent: &quot;&quot;)" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="ActionDescriptorTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.ActionDescriptorTests.ActionDescriptor_ActionModel_Returns_Correct_Type" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.ActionDescriptorTests.ActionDescriptor_ActionModel_Returns_Correct_Type" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.ActionDescriptorTests.ActionDescriptor_Parameters_Returns_Parameters_Writeable_And_Of_Supported_Type" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.ActionDescriptorTests.ActionDescriptor_Parameters_Returns_Parameters_Writeable_And_Of_Supported_Type" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="ActionInvokerTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.ActionInvokerTests.ActionInvoker_Invokes_GenerateCode_Method_With_Right_ActionModel" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.ActionInvokerTests.ActionInvoker_Invokes_GenerateCode_Method_With_Right_ActionModel" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.ActionInvokerTests.ActionInvoker_Throws_With_Inner_Exception" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.ActionInvokerTests.ActionInvoker_Throws_With_Inner_Exception" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="CodeGeneratorActionsServiceTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorActionsServiceTests.AddFileFromTemplateAsync_Throws_If_Template_Is_Not_Found" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorActionsServiceTests.AddFileFromTemplateAsync_Throws_If_Template_Is_Not_Found" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorActionsServiceTests.AddFileFromTemplateAsync_Throws_If_Template_Processing_Has_Exceptions" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorActionsServiceTests.AddFileFromTemplateAsync_Throws_If_Template_Processing_Has_Exceptions" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorActionsServiceTests.AddFileFromTemplateAsync_Writes_If_Template_Processing_Is_Successful" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorActionsServiceTests.AddFileFromTemplateAsync_Writes_If_Template_Processing_Is_Successful" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorActionsServiceTests.ExecuteTemplateTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorActionsServiceTests.ExecuteTemplateTests" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="CodeGeneratorDescriptorTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_CodeGeneratorAction_Returns_Valid_GenerateCode_Method" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_CodeGeneratorAction_Returns_Valid_GenerateCode_Method" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_CodeGeneratorAction_Throws_When_Multiple_GenerateCode_Methods" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_CodeGeneratorAction_Throws_When_Multiple_GenerateCode_Methods" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_CodeGeneratorAction_Throws_When_No_GenerateCode_Method" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_CodeGeneratorAction_Throws_When_No_GenerateCode_Method" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_CodeGeneratorInstance_Injects_Dependencies" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_CodeGeneratorInstance_Injects_Dependencies" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_CodeGeneratorInstance_Throws_When_Not_Able_To_Create_Instance" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_CodeGeneratorInstance_Throws_When_Not_Able_To_Create_Instance" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_Name_Uses_Alias_When_Present" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_Name_Uses_Alias_When_Present" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_Name_Uses_TypeName_When_Alias_Not_Present" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorDescriptorTests.CodeGeneratorDescriptor_Name_Uses_TypeName_When_Alias_Not_Present" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="CodeGeneratorsLocatorTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorsLocatorTests.CodeGeneratorsLocator_Returns_Correct_CodeGenerator_For_A_Name" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorsLocatorTests.CodeGeneratorsLocator_Returns_Correct_CodeGenerator_For_A_Name" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorsLocatorTests.CodeGeneratorsLocator_Returns_Correct_Number_Of_Generators" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorsLocatorTests.CodeGeneratorsLocator_Returns_Correct_Number_Of_Generators" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorsLocatorTests.CodeGeneratorsLocator_Throws_When_No_CodeGenerator_Found_For_A_Name" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.CodeGeneratorsLocatorTests.CodeGeneratorsLocator_Throws_When_No_CodeGenerator_Found_For_A_Name" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="FilesLocatorTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FilesLocatorTests.FilesLocator_Returns_Entry_From_FirstSearchPath" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FilesLocatorTests.FilesLocator_Returns_Entry_From_FirstSearchPath" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FilesLocatorTests.FilesLocator_Throws_When_Multiple_Matches_In_OneSearchPath" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FilesLocatorTests.FilesLocator_Throws_When_Multiple_Matches_In_OneSearchPath" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FilesLocatorTests.FilesLocator_Throws_When_No_Matches_In_SearchPaths" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FilesLocatorTests.FilesLocator_Throws_When_No_Matches_In_SearchPaths" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FilesLocatorTests.FilesLocator_Throws_When_No_SearchPaths_Does_Not_Exist" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FilesLocatorTests.FilesLocator_Throws_When_No_SearchPaths_Does_Not_Exist" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="FileSystemChangeTrackerTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FileSystemChangeTrackerTests.FileSystemChangeTracker_ClearChanges" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FileSystemChangeTrackerTests.FileSystemChangeTracker_ClearChanges" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FileSystemChangeTrackerTests.FileSystemChangeTracker_Returns_changes" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FileSystemChangeTrackerTests.FileSystemChangeTracker_Returns_changes" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FileSystemChangeTrackerTests.FileSystemChangeTracker_Returns_Last_change" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.FileSystemChangeTrackerTests.FileSystemChangeTracker_Returns_Last_change" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="PackageInstallerTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.PackageInstallerTests.AddPackages_Adds_Depedenency_Section_If_Needed" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.PackageInstallerTests.AddPackages_Adds_Depedenency_Section_If_Needed" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.PackageInstallerTests.AddPackages_Adds_New_Depedenency" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.PackageInstallerTests.AddPackages_Adds_New_Depedenency" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="SimulationModeFileSystemTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.SimulationModeFileSystemTests.SimulationModeFileSystem_AddFile" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.SimulationModeFileSystemTests.SimulationModeFileSystem_AddFile" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.SimulationModeFileSystemTests.SimulationModeFileSystem_CreateDirectory" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.SimulationModeFileSystemTests.SimulationModeFileSystem_CreateDirectory" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.SimulationModeFileSystemTests.SimulationModeFileSystem_EditFile" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.SimulationModeFileSystemTests.SimulationModeFileSystem_EditFile" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.SimulationModeFileSystemTests.SimulationModeFileSystem_EnumerateFiles_AddedFiles" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.SimulationModeFileSystemTests.SimulationModeFileSystem_EnumerateFiles_AddedFiles" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.SimulationModeFileSystemTests.SimulationModeFileSystem_EnumerateFiles_RemovedFiles" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.SimulationModeFileSystemTests.SimulationModeFileSystem_EnumerateFiles_RemovedFiles" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.SimulationModeFileSystemTests.SimulationModeFileSystem_MakeFileWritable" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Core.Test.SimulationModeFileSystemTests.SimulationModeFileSystem_MakeFileWritable" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+          </Rule>
+        </Rule>
+        <Rule Match="All">
+          <Property Name="Project" Value="VS.Web.CG.EFCore.Tests (net9.0)" />
+          <Rule Match="Any">
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGeneration" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="ConnectionStringsWriterTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.ConnectionStringsWriterTests.AddConnectionString_Creates_App_Settings_File" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.ConnectionStringsWriterTests.AddConnectionString_Creates_App_Settings_File" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.ConnectionStringsWriterTests.AddConnectionString_Modifies_App_Settings_File_As_Required" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.ConnectionStringsWriterTests.AddConnectionString_Modifies_App_Settings_File_As_Required(dbProvider: null, previousContent: null, newContent: null)" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="DbContextEditorServicesTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.DbContextEditorServicesTests.AddDbContextStringTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.DbContextEditorServicesTests.AddDbContextStringTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.DbContextEditorServicesTests.AddModelToContext_Adds_Model_From_Same_Project_To_Context_With_Nullable_Enabled" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.DbContextEditorServicesTests.AddModelToContext_Adds_Model_From_Same_Project_To_Context_With_Nullable_Enabled(beforeContextResource: &quot;DbContext_Before.txt&quot;, modelResource: &quot;MyModel.txt&quot;, afterContextResource: &quot;DbContextNullable_After.txt&quot;)" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.DbContextEditorServicesTests.AddModelToContext_Adds_Model_From_Same_Project_To_Context" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.DbContextEditorServicesTests.AddModelToContext_Adds_Model_From_Same_Project_To_Context(beforeContextResource: &quot;DbContext_Before.txt&quot;, modelResource: &quot;MyModel.txt&quot;, afterContextResource: &quot;DbContext_After.txt&quot;)" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.DbContextEditorServicesTests.GetAddDbContextStatementTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.DbContextEditorServicesTests.GetAddDbContextStatementTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.DbContextEditorServicesTests.TryEditStartupForNewContext_Adds_Context_Registration_To_ConfigureServices" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.DbContextEditorServicesTests.TryEditStartupForNewContext_Adds_Context_Registration_To_ConfigureServices(beforeStartupResource: &quot;Startup_Empty_Method_RegisterContext_Before.txt&quot;, afterStartupResource: &quot;Startup_Empty_Method_RegisterContext_After.txt&quot;, dbContextResource: &quot;DbContext_Before.txt&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.DbContextEditorServicesTests.TryEditStartupForNewContext_Adds_Context_Registration_To_ConfigureServices(beforeStartupResource: &quot;Startup_RegisterContext_Before.txt&quot;, afterStartupResource: &quot;Startup_RegisterContext_After.txt&quot;, dbContextResource: &quot;DbContext_Before.txt&quot;)" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="CodeModelMetadataTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.CodeModelMetadataTests.Number_Of_Properties_And_Navigations_Is_Correct" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.CodeModelMetadataTests.Number_Of_Properties_And_Navigations_Is_Correct" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="CodeModelServicesTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.CodeModelServicesTests.TestGetModelMetadata_WithoutDbContext" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.CodeModelServicesTests.TestGetModelMetadata_WithoutDbContext" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="EntityFrameworkServicesTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.EntityFrameworkServicesTests.TestGetModelMetadata_WithDbContext" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.EntityFrameworkServicesTests.TestGetModelMetadata_WithDbContext" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="ModelMetadataTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ModelMetadataTests.EntitySetName_Fallsback_To_GenericSetMethod" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ModelMetadataTests.EntitySetName_Fallsback_To_GenericSetMethod" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ModelMetadataTests.EntitySetName_Uses_DbContext_PropertyName" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ModelMetadataTests.EntitySetName_Uses_DbContext_PropertyName" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ModelMetadataTests.Number_Of_Properties_And_Navigations_Is_Correct" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ModelMetadataTests.Number_Of_Properties_And_Navigations_Is_Correct" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ModelMetadataTests.PrimaryKeys_Are_Returned_Correct" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ModelMetadataTests.PrimaryKeys_Are_Returned_Correct" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ModelMetadataTests.Properties_Are_Sorted_According_To_Reflection_order" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ModelMetadataTests.Properties_Are_Sorted_According_To_Reflection_order" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="NavigationMetadataTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.NavigationMetadataTests.ForeignKeyRelation_Metadata_Is_Correct" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.NavigationMetadataTests.ForeignKeyRelation_Metadata_Is_Correct" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.NavigationMetadataTests.Independent_Association_Excluded_From_Metadata" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.NavigationMetadataTests.Independent_Association_Excluded_From_Metadata" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.NavigationMetadataTests.ManyToOneRelation_Metadata_Is_Correct" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.NavigationMetadataTests.ManyToOneRelation_Metadata_Is_Correct" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.NavigationMetadataTests.OneToManyNavigation_Excluded_From_Metadata" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.NavigationMetadataTests.OneToManyNavigation_Excluded_From_Metadata" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="PropertyMetadataTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.DataType_Attribute_Is_Reflected_In_Metadata" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.DataType_Attribute_Is_Reflected_In_Metadata" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.Enum_Flags_Property_Metadata_Is_Correct" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.Enum_Flags_Property_Metadata_Is_Correct" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.Enum_Property_Metadata_Is_Correct" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.Enum_Property_Metadata_Is_Correct" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.Foreign_Key_Metadata_Is_Correct" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.Foreign_Key_Metadata_Is_Correct" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.Primary_Key_Metadata_Is_Correct" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.Primary_Key_Metadata_Is_Correct" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.PropertyMetadata_From_PropertyInfo" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.PropertyMetadata_From_PropertyInfo" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.ReadOnly_Attribute_Is_Reflected_In_Metadata" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.ReadOnly_Attribute_Is_Reflected_In_Metadata" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.Scaffold_Attribute_Is_Reflected_In_Metadata" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.Scaffold_Attribute_Is_Reflected_In_Metadata" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.String_Property_Metadata_Is_Correct" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.PropertyMetadataTests.String_Property_Metadata_Is_Correct" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="ReflectedTypesProviderTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ReflectedTypesProviderTests.TestGetReflectedType" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ReflectedTypesProviderTests.TestGetReflectedType" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ReflectedTypesProviderTests.TestGetReflectedType_FailedCompilation" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.ReflectedTypesProviderTests.TestGetReflectedType_FailedCompilation" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="TypeUtilTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TypeUtilTests.GetShortTypeName_Returns_Friendly_Short_Name" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TypeUtilTests.GetShortTypeName_Returns_Friendly_Short_Name(type: int, expected: &quot;int&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TypeUtilTests.GetShortTypeName_Returns_Friendly_Short_Name(type: int?, expected: &quot;int?&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TypeUtilTests.GetShortTypeName_Returns_Friendly_Short_Name(type: Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.TypeUtil, expected: &quot;TypeUtil&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TypeUtilTests.GetShortTypeName_Returns_Friendly_Short_Name(type: short, expected: &quot;short&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TypeUtilTests.GetShortTypeName_Returns_Friendly_Short_Name(type: System.Collections.Generic.Dictionary&lt;int, short?&gt;, expected: &quot;Dictionary&lt;int, short?&gt;&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TypeUtilTests.GetShortTypeName_Returns_Friendly_Short_Name(type: System.Collections.Generic.Dictionary&lt;int?, short?&gt;, expected: &quot;Dictionary&lt;int?, short?&gt;&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TypeUtilTests.GetShortTypeName_Returns_Friendly_Short_Name(type: System.Collections.Generic.List&lt;int?&gt;, expected: &quot;List&lt;int?&gt;&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TypeUtilTests.GetShortTypeName_Returns_Friendly_Short_Name(type: System.Collections.Generic.List&lt;int&gt;, expected: &quot;List&lt;int&gt;&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.Test.TypeUtilTests.GetShortTypeName_Returns_Friendly_Short_Name(type: System.Collections.Generic.List&lt;System.Collections.Generic.List&lt;int?&gt;&gt;, expected: &quot;List&lt;List&lt;int?&gt;&gt;&quot;)" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+          </Rule>
+        </Rule>
+        <Rule Match="All">
+          <Property Name="Project" Value="VS.Web.CG.MSBuild.Tests (net9.0)" />
+          <Rule Match="Any">
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="ProjectContextWriterTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestOSX" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestOSX(nugetPath: &quot;C://Users//User//.nuget//&quot;, packageName: &quot;X.Y.Z&quot;, version: &quot;1.2.3&quot;, expectedPath: &quot;C://Users//User//.nuget//x.y.z//1.2.3&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestOSX(nugetPath: &quot;C://Users//User//.nuget//packages//&quot;, packageName: &quot;X.Y.Z&quot;, version: &quot;1.2.3&quot;, expectedPath: &quot;C://Users//User//.nuget//packages//x.y.z//1.2.3&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestOSX(nugetPath: &quot;C://Users//User//.nuget//packages//&quot;, packageName: &quot;X.Y.Z&quot;, version: null, expectedPath: &quot;&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestOSX(nugetPath: &quot;C://Users//User//.nuget//packages//&quot;, packageName: null, version: &quot;1.2.3&quot;, expectedPath: &quot;&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestOSX(nugetPath: &quot;C://Users//User//.nuget//packages//&quot;, packageName: null, version: null, expectedPath: &quot;&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestOSX(nugetPath: null, packageName: &quot;X.Y.Z&quot;, version: &quot;1.2.3&quot;, expectedPath: &quot;&quot;)" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestWindows" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestWindows(nugetPath: &quot;C:\\Users\\User\\.nuget\\&quot;, packageName: &quot;X.Y.Z&quot;, version: &quot;1.2.3&quot;, expectedPath: &quot;C:\\Users\\User\\.nuget\\x.y.z\\1.2.3&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestWindows(nugetPath: &quot;C:\\Users\\User\\.nuget\\packages\\&quot;, packageName: &quot;X.Y.Z&quot;, version: &quot;1.2.3&quot;, expectedPath: &quot;C:\\Users\\User\\.nuget\\packages\\x.y.z\\1.2.3&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestWindows(nugetPath: &quot;C:\\Users\\User\\.nuget\\packages\\&quot;, packageName: &quot;X.Y.Z&quot;, version: null, expectedPath: &quot;&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestWindows(nugetPath: &quot;C:\\Users\\User\\.nuget\\packages\\&quot;, packageName: null, version: &quot;1.2.3&quot;, expectedPath: &quot;&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestWindows(nugetPath: &quot;C:\\Users\\User\\.nuget\\packages\\&quot;, packageName: null, version: null, expectedPath: &quot;&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetPathTestWindows(nugetPath: null, packageName: &quot;X.Y.Z&quot;, version: &quot;1.2.3&quot;, expectedPath: &quot;&quot;)" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetXmlKeyValueTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.GetXmlKeyValueTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.TestProjectContextFromMsBuild" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.TestProjectContextFromMsBuild" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.TestProjectContextNullableDisabled" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.TestProjectContextNullableDisabled" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.TestProjectContextNullableEnabled" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.TestProjectContextNullableEnabled" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.TestProjectContextNullableMissing" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.TestProjectContextNullableMissing" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.TestProjectContextWithReferencedModel" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.ProjectContextWriterTests.TestProjectContextWithReferencedModel" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="ProjectReferenceInformationTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test.ProjectReferenceInformationTests.TestGetProjectReferenceInformation" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test.ProjectReferenceInformationTests.TestGetProjectReferenceInformation(rootProjectPath: &quot;Root/Root.csproj&quot;, libraryDirectoryPath: &quot;.&quot;, relativePathToLibrary: &quot;../Library1/Library1.csproj&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.MSBuild.Test.ProjectReferenceInformationTests.TestGetProjectReferenceInformation(rootProjectPath: &quot;src/Root/Root.csproj&quot;, libraryDirectoryPath: &quot;.&quot;, relativePathToLibrary: &quot;../../Library1/Library1.csproj&quot;)" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+          </Rule>
+        </Rule>
+        <Rule Match="All">
+          <Property Name="Project" Value="VS.Web.CG.Mvc.Tests (net9.0)" />
+          <Rule Match="Any">
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="BlazorIdentityHelperTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentityHelperTests.GetFormattedRelativeIdentityFileTest" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentityHelperTests.GetFormattedRelativeIdentityFileTest" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="BlazorWebCRUDGeneratorCommandLineModelTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorWebCRUDGeneratorCommandLineModelTests.ValidateModelTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorWebCRUDGeneratorCommandLineModelTests.ValidateModelTests" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="BlazorWebCRUDGeneratorTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorWebCRUDGeneratorTests.ValidateAndGetOutputPathTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorWebCRUDGeneratorTests.ValidateAndGetOutputPathTests" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="CdnScriptTagTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CdnScriptTagTests.ScriptTags_SubresourceIntegrityCheck" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.CdnScriptTagTests.ScriptTags_SubresourceIntegrityCheck" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="IdentityGeneratorFilesConfigTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorFilesConfigTests.TestExistingWwwRootDataIsNotOverwrittenWhenScaffoldAllFilesSelected" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorFilesConfigTests.TestExistingWwwRootDataIsNotOverwrittenWhenScaffoldAllFilesSelected" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorFilesConfigTests.TestGetTemplates" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorFilesConfigTests.TestGetTemplates" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="IdentityGeneratorTemplateModelBuilderTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest(leadTilde: False, leadSeparator: False, existingLayoutFileParts: [&quot;Custom&quot;, &quot;Location&quot;, &quot;Layout.cshtml&quot;], expectedSupportFileLocationParts: [&quot;Custom&quot;, &quot;Location&quot;], expectedLayoutFileParts: [&quot;Custom&quot;, &quot;Location&quot;, &quot;Layout.cshtml&quot;])" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest(leadTilde: False, leadSeparator: False, existingLayoutFileParts: [&quot;Views&quot;, &quot;Shared&quot;, &quot;Layout.cshtml&quot;], expectedSupportFileLocationParts: [&quot;Views&quot;, &quot;Shared&quot;], expectedLayoutFileParts: [&quot;Views&quot;, &quot;Shared&quot;, &quot;Layout.cshtml&quot;])" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest(leadTilde: False, leadSeparator: False, existingLayoutFileParts: [], expectedSupportFileLocationParts: [], expectedLayoutFileParts: [])" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest(leadTilde: False, leadSeparator: True, existingLayoutFileParts: [&quot;My&quot;, &quot;Files&quot;, &quot;Layout.cshtml&quot;], expectedSupportFileLocationParts: [&quot;My&quot;, &quot;Files&quot;], expectedLayoutFileParts: [&quot;My&quot;, &quot;Files&quot;, &quot;Layout.cshtml&quot;])" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest(leadTilde: False, leadSeparator: True, existingLayoutFileParts: [&quot;Views&quot;, &quot;Shared&quot;, &quot;Layout.cshtml&quot;], expectedSupportFileLocationParts: [&quot;Views&quot;, &quot;Shared&quot;], expectedLayoutFileParts: [&quot;Views&quot;, &quot;Shared&quot;, &quot;Layout.cshtml&quot;])" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest(leadTilde: False, leadSeparator: True, existingLayoutFileParts: [], expectedSupportFileLocationParts: [], expectedLayoutFileParts: [])" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest(leadTilde: True, leadSeparator: False, existingLayoutFileParts: [&quot;Views&quot;, &quot;Shared&quot;, &quot;Layout.cshtml&quot;], expectedSupportFileLocationParts: [&quot;Views&quot;, &quot;Shared&quot;], expectedLayoutFileParts: [&quot;Views&quot;, &quot;Shared&quot;, &quot;Layout.cshtml&quot;])" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest(leadTilde: True, leadSeparator: False, existingLayoutFileParts: [], expectedSupportFileLocationParts: [], expectedLayoutFileParts: [])" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest(leadTilde: True, leadSeparator: True, existingLayoutFileParts: [&quot;My&quot;, &quot;Files&quot;, &quot;Layout.cshtml&quot;], expectedSupportFileLocationParts: [&quot;My&quot;, &quot;Files&quot;], expectedLayoutFileParts: [&quot;My&quot;, &quot;Files&quot;, &quot;Layout.cshtml&quot;])" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest(leadTilde: True, leadSeparator: True, existingLayoutFileParts: [&quot;Some&quot;, &quot;Location&quot;, &quot;Layout.cshtml&quot;], expectedSupportFileLocationParts: [&quot;Some&quot;, &quot;Location&quot;], expectedLayoutFileParts: [&quot;Some&quot;, &quot;Location&quot;, &quot;Layout.cshtml&quot;])" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest(leadTilde: True, leadSeparator: True, existingLayoutFileParts: [&quot;Views&quot;, &quot;Shared&quot;, &quot;Layout.cshtml&quot;], expectedSupportFileLocationParts: [&quot;Views&quot;, &quot;Shared&quot;], expectedLayoutFileParts: [&quot;Views&quot;, &quot;Shared&quot;, &quot;Layout.cshtml&quot;])" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.SupportFileLocationForExistingLayoutFileTest(leadTilde: True, leadSeparator: True, existingLayoutFileParts: [], expectedSupportFileLocationParts: [], expectedLayoutFileParts: [])" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.TestValidateAndBuild" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTemplateModelBuilderTests.TestValidateAndBuild" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="IdentityGeneratorTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTests.ReplaceIdentityStringsTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityGeneratorTests.ReplaceIdentityStringsTests" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="IdentityHelperTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityHelperTests.GetClassNameFromTypeNameTest" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.IdentityHelperTests.GetClassNameFromTypeNameTest" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="MinimalApiGeneratorTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApiGeneratorTests.AddEndpointsMethodTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApiGeneratorTests.AddEndpointsMethodTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApiGeneratorTests.GetTemplateNameTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApiGeneratorTests.GetTemplateNameTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApiGeneratorTests.ModifyProgramCsTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApiGeneratorTests.ModifyProgramCsTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApiGeneratorTests.ValidateAndGetOutputPathTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApiGeneratorTests.ValidateAndGetOutputPathTests" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApiGeneratorTests.ValidateModelTests" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApiGeneratorTests.ValidateModelTests" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="ControllerGeneratorBaseTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ControllerGeneratorBaseTests.Test_ValidateNameSpace" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ControllerGeneratorBaseTests.Test_ValidateNameSpace" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ControllerGeneratorBaseTests.Test_ValidateNameSpace_ThrowsException" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ControllerGeneratorBaseTests.Test_ValidateNameSpace_ThrowsException" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="ModelMetadataUtilitiesTest" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ModelMetadataUtilitiesTest.TestGetModelEFMetadataMinimalAsync" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ModelMetadataUtilitiesTest.TestGetModelEFMetadataMinimalAsync" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ModelMetadataUtilitiesTest.TestValidateModelAndGetCodeModelMetadata" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ModelMetadataUtilitiesTest.TestValidateModelAndGetCodeModelMetadata" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ModelMetadataUtilitiesTest.TestValidateModelAndGetModelMetadata" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ModelMetadataUtilitiesTest.TestValidateModelAndGetModelMetadata" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="NamespaceUtilitiesTest" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.NamespaceUtilitiesTest.TestGetSafeNameSpaceName" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.NamespaceUtilitiesTest.TestGetSafeNameSpaceName" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.NamespaceUtilitiesTest.TestGetSafeNameSpaceNameFromPath" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.NamespaceUtilitiesTest.TestGetSafeNameSpaceNameFromPath" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="ValidationUtilTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ValidationUtilTests.ValidateType_Throws_When_TypeName_Is_Null_Or_Empty" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ValidationUtilTests.ValidateType_Throws_When_TypeName_Is_Null_Or_Empty(typeName: &quot;&quot;)" />
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test.ValidationUtilTests.ValidateType_Throws_When_TypeName_Is_Null_Or_Empty(typeName: null)" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+          </Rule>
+        </Rule>
+        <Rule Match="All">
+          <Property Name="Project" Value="VS.Web.CG.Sources.Tests (net9.0)" />
+          <Rule Match="Any">
+            <Rule Match="All">
+              <Property Name="Namespace" Value="ConsoleApplication" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="ApplicationInfoTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="ConsoleApplication.ApplicationInfoTests.ApplicationEnvironment_Test" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="ConsoleApplication.ApplicationInfoTests.ApplicationEnvironment_Test" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGeneration" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="CommonUtilitiesTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.CommonUtilitiesTests.CommonUtilities_TestGetAssemblyFromCompilation" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.CommonUtilitiesTests.CommonUtilities_TestGetAssemblyFromCompilation" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.CommonUtilitiesTests.CommonUtilities_TestGetAssemblyFromCompilation_Failure" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.CommonUtilitiesTests.CommonUtilities_TestGetAssemblyFromCompilation_Failure" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.CommonUtilitiesTests.CommonUtilities_TestGetAssemblyFromCompilation_MsBuild" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.CommonUtilitiesTests.CommonUtilities_TestGetAssemblyFromCompilation_MsBuild" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="CompilationResultTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.CompilationResultTests.CompilationResult_TestFromAssembly" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.CompilationResultTests.CompilationResult_TestFromAssembly" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.CompilationResultTests.CompilationResult_TestFromErrorMessage" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.CompilationResultTests.CompilationResult_TestFromErrorMessage" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="DefaultAssemblyLoadContextTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.DefaultAssemblyLoadContextTests.DefaultAssemblyLoadContext_Test" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.DefaultAssemblyLoadContextTests.DefaultAssemblyLoadContext_Test" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="FileSystemChangeMessageHandlerTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.FileSystemChangeMessageHandlerTests.TestFileSystemChangeMessageHandler_MessageTypes" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.FileSystemChangeMessageHandlerTests.TestFileSystemChangeMessageHandler_MessageTypes" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="MessageHandlerTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.MessageHandlerTests.TestMessageHandlerBase_HandleMessage_LogsWarning" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.MessageHandlerTests.TestMessageHandlerBase_HandleMessage_LogsWarning" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.MessageHandlerTests.TestMessageHandlerBase_HandleMessage_ReturnsFalse" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.MessageHandlerTests.TestMessageHandlerBase_HandleMessage_ReturnsFalse" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.MessageHandlerTests.TestMessageHandlerBase_HandleMessage_ThrowsException" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.MessageHandlerTests.TestMessageHandlerBase_HandleMessage_ThrowsException" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="ProjectInformationMessageHandlerTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.ProjectInformationMessageHandlerTests.TestProjectInformationMessageHandler_MessageTypes" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.ProjectInformationMessageHandlerTests.TestProjectInformationMessageHandler_MessageTypes" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.ProjectInformationMessageHandlerTests.TestProjectInformationMessageHandler_RequestMessage" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Sources.Test.ProjectInformationMessageHandlerTests.TestProjectInformationMessageHandler_RequestMessage" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+          </Rule>
+        </Rule>
+        <Rule Match="All">
+          <Property Name="Project" Value="VS.Web.CG.Templating.Tests (net9.0)" />
+          <Rule Match="Any">
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="RazorTemplateBaseTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.RazorTemplateBaseTests.ExecuteTemplate_Sets_Output_And_Calls_ExecuteAsync" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.RazorTemplateBaseTests.ExecuteTemplate_Sets_Output_And_Calls_ExecuteAsync" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.RazorTemplateBaseTests.WriteLiteralTo_Does_Not_Fail_For_Null_Object" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.RazorTemplateBaseTests.WriteLiteralTo_Does_Not_Fail_For_Null_Object" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.RazorTemplateBaseTests.WriteTo_Does_Not_Fail_For_Null_Object" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.RazorTemplateBaseTests.WriteTo_Does_Not_Fail_For_Null_Object" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+                <Rule Match="All">
+                  <Property Name="Class" Value="TypeUtilitiesTest" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.TypeUtilitiesTest.TestIsNullable" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.TypeUtilitiesTest.TestIsNullable" />
+                      </Rule>
+                    </Rule>
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.TypeUtilitiesTest.TestIsTypePrimitive" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Templating.Test.TypeUtilitiesTest.TestIsTypePrimitive" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+          </Rule>
+        </Rule>
+        <Rule Match="All">
+          <Property Name="Project" Value="VS.Web.CG.Tools.Tests" />
+          <Rule Match="Any">
+            <Rule Match="All">
+              <Property Name="Namespace" Value="Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test" />
+              <Rule Match="Any">
+                <Rule Match="All">
+                  <Property Name="Class" Value="TargetInstallerTests" />
+                  <Rule Match="Any">
+                    <Rule Match="All">
+                      <Property Name="TestWithNormalizedFullyQualifiedName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test.TargetInstallerTests.TestTargetInstallation" />
+                      <Rule Match="Any">
+                        <Property Name="DisplayName" Value="Microsoft.VisualStudio.Web.CodeGeneration.Tools.Test.TargetInstallerTests.TestTargetInstallation" />
+                      </Rule>
+                    </Rule>
+                  </Rule>
+                </Rule>
+              </Rule>
+            </Rule>
+          </Rule>
+        </Rule>
+      </Rule>
+    </Rule>
+  </Rule>
+</Playlist>

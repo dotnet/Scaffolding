@@ -42,6 +42,12 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 
         [CommandOption("--non-interactive")]
         public bool NonInteractive { get; init; }
+
+        [CommandOption("--verbose")]
+        public bool Verbose { get; init; }
+
+        [CommandOption("--log-to-file")]
+        public bool LogToFile { get; init; }
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
@@ -51,7 +57,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
             new StartupFlowStep(_dotnetToolService, _environmentService, _fileSystem, _logger, _firstTimeUseNoticeSentinel),
             new CategoryPickerFlowStep(_logger, _dotnetToolService),
             new CommandPickerFlowStep(_logger, _dotnetToolService, _environmentService, _fileSystem),
-            new CommandExecuteFlowStep(TelemetryService)
+            new CommandExecuteFlowStep(TelemetryService, logToFile: settings.LogToFile, verboseOutput: settings.Verbose)
         ];
 
         var flowResult = await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive, showSelectedOptions: false);

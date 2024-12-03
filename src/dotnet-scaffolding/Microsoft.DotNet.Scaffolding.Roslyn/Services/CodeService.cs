@@ -75,7 +75,6 @@ public class CodeService : ICodeService, IDisposable
     private async Task<MSBuildWorkspace?> GetMsBuildWorkspaceAsync(bool refresh = false)
     {
         EnsureInitialized();
-
         if (_workspace is not null && !refresh)
         {
             return _workspace;
@@ -140,10 +139,9 @@ public class CodeService : ICodeService, IDisposable
         await GetMsBuildWorkspaceAsync(refresh: true);
     }
 
-    //TODO add a debug option to logging.
     private void OnWorkspaceFailed(object? sender, WorkspaceDiagnosticEventArgs e)
     {
-        var diagnostic = e.Diagnostic!;
+        _logger.LogDebug(e.Diagnostic.Message);
     }
 
     public void Dispose()

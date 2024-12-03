@@ -56,10 +56,26 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
 
     private bool InvokeDotnetNew(EmptyControllerStepSettings settings)
     {
-        var projectBasePath = Path.GetDirectoryName(settings.Project);
+        var outputDirectory = Path.GetDirectoryName(settings.Project);
+        if (!string.IsNullOrEmpty(outputDirectory))
+        {
+            outputDirectory = Path.Combine(outputDirectory, "Controllers");
+            if (!_fileSystem.DirectoryExists(outputDirectory))
+            {
+                _fileSystem.CreateDirectory(outputDirectory);
+            }
+        }
+        else
+        {
+            _logger.LogError("Failed to determine output path.");
+            return false;
+        }    
+
         var projectName = Path.GetFileNameWithoutExtension(settings.Project);
         var actionsParameter = settings.Actions ? "--actions" : string.Empty;
-        if (Directory.Exists(projectBasePath) && !string.IsNullOrEmpty(projectName))
+        if (!string.IsNullOrEmpty(outputDirectory) &&
+            _fileSystem.DirectoryExists(outputDirectory) &&
+            !string.IsNullOrEmpty(projectName))
         {
             //arguments for 'dotnet new {settings.CommandName}'
             var args = new List<string>()
@@ -68,7 +84,7 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
                 "--name",
                 settings.Name,
                 "--output",
-                projectBasePath,
+                outputDirectory,
                 "--namespace",
                 projectName,
             };

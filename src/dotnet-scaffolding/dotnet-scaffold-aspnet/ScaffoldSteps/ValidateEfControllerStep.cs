@@ -209,7 +209,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
             ProjectInfo = projectInfo,
             ModelInfo = modelInfo,
             DbContextInfo = dbContextInfo,
-            ControllerOutputPath = projectDirectory
+            ControllerOutputPath = Path.Combine(projectDirectory, AspNetConstants.DotnetCommands.ControllerCommandOutput)
         };
 
         if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)

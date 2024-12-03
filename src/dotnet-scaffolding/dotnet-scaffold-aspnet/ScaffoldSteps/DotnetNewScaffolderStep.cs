@@ -6,6 +6,7 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
@@ -54,13 +55,21 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
 
     private bool InvokeDotnetNew(DotnetNewStepSettings stepSettings)
     {
-        var projectBasePath = Path.GetDirectoryName(stepSettings.Project);
-        //using the project name from the csproj path as namespace currently.
-        //to evaluate the correct namespace is a lot of overhead for a simple 'dotnet new' operation
-        //TODO maybe change this?
+        var outputDirectory = Path.GetDirectoryName(stepSettings.Project);
+        //invoking a command with a specific output folder, if not, use the default output folder (project root)
+        if (!string.IsNullOrEmpty(outputDirectory) &&
+            OutputFolders.TryGetValue(stepSettings.CommandName, out var folderName))
+        {
+            outputDirectory = Path.Combine(outputDirectory, folderName);
+            if (!_fileSystem.DirectoryExists(outputDirectory))
+            {
+                _fileSystem.CreateDirectory(outputDirectory);
+            }
+        }
+
         var projectName = Path.GetFileNameWithoutExtension(stepSettings.Project);
-        if (Directory.Exists(projectBasePath) &&
-            !string.IsNullOrEmpty(projectBasePath))
+        if (!string.IsNullOrEmpty(outputDirectory) &&
+            _fileSystem.DirectoryExists(outputDirectory))
         {
             //arguments for 'dotnet new {settings.CommandName}'
             var args = new List<string>()
@@ -69,7 +78,7 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
                 "--name",
                 stepSettings.Name,
                 "--output",
-                projectBasePath
+                outputDirectory
             };
 
             if (!string.IsNullOrEmpty(stepSettings.NamespaceName))
@@ -113,4 +122,11 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
             CommandName = CommandName
         };
     }
+
+    private readonly static Dictionary<string, string> OutputFolders = new()
+    {
+        { Constants.DotnetCommands.RazorPageCommandName, Constants.DotnetCommands.RazorPageCommandOutput },
+        { Constants.DotnetCommands.RazorComponentCommandName, Constants.DotnetCommands.RazorComponentCommandOutput },
+        { Constants.DotnetCommands.ViewCommandName, Constants.DotnetCommands.ViewCommandOutput }
+    };
 }

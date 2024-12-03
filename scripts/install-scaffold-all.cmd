@@ -4,9 +4,7 @@ set SRC_DIR=%cd%
 set NUPKG=artifacts/packages/Debug/Shipping/
 call taskkill /f /im dotnet.exe
 call rd /Q /S artifacts
-call dotnet pack src\dotnet-scaffolding\dotnet-scaffold\dotnet-scaffold.csproj -c Debug
-call dotnet pack src\dotnet-scaffolding\dotnet-scaffold-aspire\dotnet-scaffold-aspire.csproj -c Debug
-call dotnet pack src\dotnet-scaffolding\dotnet-scaffold-aspnet\dotnet-scaffold-aspnet.csproj -c Debug
+call build.cmd
 call dotnet tool uninstall -g Microsoft.dotnet-scaffold
 call dotnet tool uninstall -g Microsoft.dotnet-scaffold-aspire
 call dotnet tool uninstall -g Microsoft.dotnet-scaffold-aspnet

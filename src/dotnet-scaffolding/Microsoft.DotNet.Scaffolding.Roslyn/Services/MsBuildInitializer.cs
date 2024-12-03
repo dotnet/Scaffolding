@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Roslyn.Services;
 
-internal class MsBuildInitializer
+public class MsBuildInitializer
 {
     private readonly ILogger _logger;
     public MsBuildInitializer(ILogger logger)
@@ -37,30 +37,28 @@ internal class MsBuildInitializer
             }
 
             //register newest MSBuild from the newest dotnet sdk installed.
-            var sdkPath = Directory.GetDirectories(sdkBasePath)
+            var sdkPaths = Directory.GetDirectories(sdkBasePath)
                 .Select(d => new { Path = d, new DirectoryInfo(d).Name })
                 .Where(d => Version.TryParse(d.Name.Split('-')[0], out _))
                 .OrderByDescending(d => Version.Parse(d.Name.Split('-')[0]))
-                .Select(d => d.Path)
-                .FirstOrDefault();
+                .Select(d => d.Path);
 
-            if (string.IsNullOrEmpty(sdkPath))
+            if (!sdkPaths.Any())
             {
                 _logger.LogInformation($"Could not find a .NET SDK at the default locations.");
                 MSBuildLocator.RegisterDefaults();
                 return;
             }
 
-            var msbuildPath = Path.Combine(sdkPath, "MSBuild.dll");
-            if (File.Exists(msbuildPath))
+            foreach (var sdkPath in sdkPaths)
             {
-                // Register the latest SDK
-                MSBuildLocator.RegisterMSBuildPath(sdkPath);
-            }
-            else
-            {
-                _logger.LogInformation($"MSBuild.dll not found in the SDK path '{sdkPath}'.");
-                MSBuildLocator.RegisterDefaults();
+                var msbuildPath = Path.Combine(sdkPath, "MSBuild.dll");
+                if (File.Exists(msbuildPath))
+                {
+                    // Register the latest SDK
+                    MSBuildLocator.RegisterMSBuildPath(sdkPath);
+                    break;
+                }
             }
         }
     }

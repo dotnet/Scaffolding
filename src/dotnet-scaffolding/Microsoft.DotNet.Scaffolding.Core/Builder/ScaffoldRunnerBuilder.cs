@@ -1,11 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Diagnostics;
 using Microsoft.DotNet.Scaffolding.Core.CommandLine;
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -73,10 +74,32 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
 
     private void AddCoreServices()
     {
+        //get some logging properties from environment variables
+        var isVerboseEnabled = Environment.GetEnvironmentVariable(ScaffolderConstants.ENABLE_VERBOSE_LOGGING)?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
+        var isLogToFileEnabled = Environment.GetEnvironmentVariable(ScaffolderConstants.LOG_TO_FILE)?.Equals("true", StringComparison.OrdinalIgnoreCase) == true; ;
+        // Configure Serilog Logger
+        var loggerConfig = new LoggerConfiguration().WriteTo.Sink(new AnsiConsoleSink());
+        loggerConfig.MinimumLevel.Information();
+        if(isVerboseEnabled)
+        {
+            loggerConfig.MinimumLevel.Verbose();
+        }
+
+        if (isLogToFileEnabled)
+        {
+            var currentDirectory = Directory.GetCurrentDirectory();
+            if (!string.IsNullOrEmpty(currentDirectory))
+            {
+                var logPath = Path.Combine(currentDirectory, _defaultLogFolder, "dotnet-scaffold.txt");
+                loggerConfig.WriteTo.File(logPath, rollingInterval: RollingInterval.Minute);
+            }
+        }
+
+        Log.Logger = loggerConfig.CreateLogger();
         Services.AddLogging(builder =>
         {
             builder.ClearProviders();
-            builder.AddProvider(new AnsiConsoleLoggerProvider(LogLevel.Information));
+            builder.AddSerilog(dispose: true);
         });
 
         Logging.AddDebug();
@@ -86,4 +109,6 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     {
         public IServiceCollection Services { get; } = services;
     }
+
+    private readonly string _defaultLogFolder = ".logs";
 }

@@ -17,9 +17,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
     internal class CommandExecuteFlowStep : IFlowStep
     {
         private readonly ITelemetryService _telemetryService;
-        public CommandExecuteFlowStep(ITelemetryService telemetryService)
+        private readonly bool _logToFile;
+        private readonly bool _verboseOutput;
+        public CommandExecuteFlowStep(
+            ITelemetryService telemetryService,
+            bool logToFile,
+            bool verboseOutput)
         {
             _telemetryService = telemetryService;
+            _logToFile = logToFile;
+            _verboseOutput = verboseOutput;
         }
 
         public string Id => nameof(CommandExecuteFlowStep);
@@ -47,7 +54,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
 
             var parameterValues = GetAllParameterValues(context, commandObj);
-            var envVars = context.GetTelemetryEnvironmentVariables();
+            var envVars = context.GetTelemetryEnvironmentVariables() ?? new Dictionary<string, string>();
+            if (_verboseOutput)
+            {
+                envVars.Add(ScaffolderConstants.ENABLE_VERBOSE_LOGGING, "true");
+            }
+
+            if (_logToFile)
+            {
+                envVars.Add(ScaffolderConstants.LOG_TO_FILE, "true");
+            }
+
             var chosenCategory = context.GetChosenCategory();
             if (!string.IsNullOrEmpty(dotnetToolInfo.Command) && parameterValues.Count != 0 && !string.IsNullOrEmpty(commandObj.Name))
             {
@@ -60,8 +77,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                             DotnetCliRunner.Create(dotnetToolInfo.Command, parameterValues, envVars) :
                             DotnetCliRunner.CreateDotNet(dotnetToolInfo.Command, parameterValues, envVars);
                         exitCode = cliRunner.ExecuteWithCallbacks(
-                            (s) => AnsiConsole.Console.MarkupLine(s),
-                            (s) => AnsiConsole.Console.MarkupLineInterpolated($"[red]{s}[/]"));
+                            (s) => AnsiConsole.Console.MarkupLine($"{s}"),
+                            (s) => AnsiConsole.Console.MarkupLine($"{s}"));
                     });
 
                 _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandObj, exitCode, chosenCategory));

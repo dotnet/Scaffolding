@@ -54,6 +54,8 @@
     <MonoTextTemplatingVersion>3.0.0</MonoTextTemplatingVersion>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
+    <SerilogPackageVersion>4.1.0</SerilogPackageVersion>
+    <SerilogExtensionsPackageVersion>8.0.0</SerilogExtensionsPackageVersion>
     <MicrosoftCodeAnalysisPreviewVersion>4.12.0-1.final</MicrosoftCodeAnalysisPreviewVersion>
     <MicrosoftCodeAnalysisVersion>4.8.0</MicrosoftCodeAnalysisVersion>
     <SystemCommandLinePackageVersion>2.0.0-beta4.22613.1</SystemCommandLinePackageVersion>

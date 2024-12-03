@@ -43,11 +43,7 @@ internal class AddFileStep : ScaffoldStep
         {
             _logger.LogInformation($"Adding file '{FileName}'...");
 
-            if (!_fileSystem.DirectoryExists(destinationDirectory))
-            {
-                _fileSystem.CreateDirectory(destinationDirectory);
-            }
-
+            _fileSystem.CreateDirectoryIfNotExists(destinationDirectory);
             _fileSystem.CopyFile(fileToCopy, destinationFilePath, overwrite: false);
             _logger.LogInformation("Done");
             return Task.FromResult(true);

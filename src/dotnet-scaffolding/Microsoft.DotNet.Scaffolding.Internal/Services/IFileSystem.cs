@@ -11,6 +11,8 @@ public interface IFileSystem
 {
     bool FileExists(string path);
 
+    void CreateDirectoryIfNotExists(string dirPath);
+
     bool DirectoryExists(string dirPath);
 
     void CreateDirectory(string dirPath);

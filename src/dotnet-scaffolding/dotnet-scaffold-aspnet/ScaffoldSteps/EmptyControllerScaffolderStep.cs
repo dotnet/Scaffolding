@@ -60,10 +60,7 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
         if (!string.IsNullOrEmpty(outputDirectory))
         {
             outputDirectory = Path.Combine(outputDirectory, "Controllers");
-            if (!_fileSystem.DirectoryExists(outputDirectory))
-            {
-                _fileSystem.CreateDirectory(outputDirectory);
-            }
+            _fileSystem.CreateDirectoryIfNotExists(outputDirectory);
         }
         else
         {

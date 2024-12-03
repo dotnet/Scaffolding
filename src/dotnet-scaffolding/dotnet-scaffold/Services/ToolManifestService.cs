@@ -27,10 +27,7 @@ internal class ToolManifestService(IFileSystem fileSystem) : IToolManifestServic
 
     private void EnsureManifestDirectory()
     {
-        if (!_fileSystem.DirectoryExists(GetToolManifestDirectory()))
-        {
-            _fileSystem.CreateDirectory(GetToolManifestDirectory());
-        }
+        _fileSystem.CreateDirectoryIfNotExists(GetToolManifestDirectory());
     }
 
     public ScaffoldManifest GetManifest()

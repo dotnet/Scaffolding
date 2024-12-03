@@ -61,10 +61,7 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
             OutputFolders.TryGetValue(stepSettings.CommandName, out var folderName))
         {
             outputDirectory = Path.Combine(outputDirectory, folderName);
-            if (!_fileSystem.DirectoryExists(outputDirectory))
-            {
-                _fileSystem.CreateDirectory(outputDirectory);
-            }
+            _fileSystem.CreateDirectoryIfNotExists(outputDirectory);
         }
 
         var projectName = Path.GetFileNameWithoutExtension(stepSettings.Project);

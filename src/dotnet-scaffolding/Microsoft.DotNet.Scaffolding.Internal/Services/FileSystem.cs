@@ -128,4 +128,12 @@ public class FileSystem : IFileSystem
             await sourceStream.CopyToAsync(writeStream);
         }
     }
+
+    public void CreateDirectoryIfNotExists(string dirPath)
+    {
+        if (!DirectoryExists(dirPath))
+        {
+            CreateDirectory(dirPath);
+        }
+    }
 }

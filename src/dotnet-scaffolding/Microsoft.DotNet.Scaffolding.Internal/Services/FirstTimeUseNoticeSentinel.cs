@@ -34,11 +34,7 @@ internal class FirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
     {
         if (!Exists())
         {
-            if (!_fileSystem.DirectoryExists(_dotnetUserProfileFolderPath))
-            {
-                _fileSystem.CreateDirectory(_dotnetUserProfileFolderPath);
-            }
-
+            _fileSystem.CreateDirectoryIfNotExists(_dotnetUserProfileFolderPath);
             _fileSystem.WriteAllText(SentinelPath, string.Empty);
         }
     }

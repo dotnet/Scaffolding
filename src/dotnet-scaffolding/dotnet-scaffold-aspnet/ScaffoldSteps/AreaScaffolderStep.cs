@@ -54,24 +54,15 @@ internal class AreaScaffolderStep : ScaffoldStep
         }
 
         var areaBasePath = Path.Combine(basePath, "Areas");
-        if (!_fileSystem.DirectoryExists(areaBasePath))
-        {
-            _fileSystem.CreateDirectory(areaBasePath);
-        }
+        _fileSystem.CreateDirectoryIfNotExists(areaBasePath);
 
         var areaPath = Path.Combine(areaBasePath, stepSettings.Name);
-        if (!_fileSystem.DirectoryExists(areaPath))
-        {
-            _fileSystem.CreateDirectory(areaPath);
-        }
+        _fileSystem.CreateDirectoryIfNotExists(areaPath);
 
         foreach (var areaFolder in AreaFolders)
         {
             var path = Path.Combine(areaPath, areaFolder);
-            if (!_fileSystem.DirectoryExists(path))
-            {
-                _fileSystem.CreateDirectory(path);
-            }
+            _fileSystem.CreateDirectoryIfNotExists(path);
         }
 
         _logger.LogInformation("Done");

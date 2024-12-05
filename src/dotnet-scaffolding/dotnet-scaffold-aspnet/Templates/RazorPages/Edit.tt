@@ -38,11 +38,12 @@ foreach (var property in entityProperties)
     var inputClass = Model.GetInputClassType(propertyShortTypeName);
     var inputTag = Model.GetInputTagType(propertyShortTypeName);
     string divWhitespace = new string(' ', 16);
-    var propertyRequiredText = property.HasRequiredAttribute() ? $"\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
+    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
+    var requiredAttributeHtml = property.HasRequiredAttribute() ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
 #>
-            <div class="form-group"><#= propertyRequiredText #>
+            <div class="form-group"><#= requiredAttributeHtml #>
                 <label asp-for="<#= modelNameCapitalized #>.<#= modelPropertyName #>" class="control-label"></label>
-                <<#= inputTag#> asp-for="<#= modelNameCapitalized #>.<#= modelPropertyName #>" class="<#= inputClass #>" />
+                <<#= inputTag#> asp-for="<#= modelNameCapitalized #>.<#= modelPropertyName #>" class="<#= inputClass #>" <#= ariaRequiredAttributeHtml #>/>
                 <span asp-validation-for="<#= modelNameCapitalized #>.<#= modelPropertyName #>" class="text-danger"></span>
             </div>
 <#

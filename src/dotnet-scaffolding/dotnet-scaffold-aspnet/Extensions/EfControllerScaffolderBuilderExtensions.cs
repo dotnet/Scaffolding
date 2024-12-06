@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Internal;
+using Microsoft.DotNet.Scaffolding.Internal.Helpers;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -40,13 +41,15 @@ internal static class EfControllerScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithEfControllerAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<WrappedAddPackagesStep>(config =>
+        return builder.WithStep<WrappedAddPackagesStep>(async config =>
         {
             var step = config.Step;
             var context = config.Context;
             List<string> packageList = [PackageConstants.EfConstants.EfCoreToolsPackageName];
             if (context.Properties.TryGetValue(nameof(EfControllerSettings), out var commandSettingsObj) &&
-                commandSettingsObj is EfControllerSettings commandSettings)
+               context.Properties.TryGetValue(nameof(EfControllerModel), out var efControllerModelObj) &&
+               efControllerModelObj is EfControllerModel efControllerModel &&
+               commandSettingsObj is CrudSettings commandSettings)
             {
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
@@ -56,7 +59,15 @@ internal static class EfControllerScaffolderBuilderExtensions
                     packageList.Add(projectPackageName);
                 }
 
-                step.PackageNames = packageList;
+                var shortTfm = efControllerModel.ProjectInfo.LowestTargetFramework ?? string.Empty;
+                var packageDict = new Dictionary<string, string?>();
+                foreach (var package in packageList)
+                {
+                    var packageVersion = await PackageVersionHelper.GetPackageVersionFromTfmAsync(package, shortTfm);
+                    packageDict.Add(package, packageVersion);
+                }
+
+                step.Packages = packageDict;
             }
             else
             {

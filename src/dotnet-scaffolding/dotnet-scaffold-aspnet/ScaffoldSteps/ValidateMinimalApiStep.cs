@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
@@ -44,6 +45,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
+        Debugger.Launch();
         var minimalApiSettings = ValidateMinimalApiSettings(context);
         var codeModifierProperties = new Dictionary<string, string>();
         if (minimalApiSettings is null)

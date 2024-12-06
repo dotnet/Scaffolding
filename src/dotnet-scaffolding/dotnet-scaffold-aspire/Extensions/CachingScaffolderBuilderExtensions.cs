@@ -19,7 +19,7 @@ internal static class CachingScaffolderBuilderExtensions
             if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
-                step.PackageNames = [PackageConstants.CachingPackages.AppHostRedisPackageName];
+                step.Packages = new Dictionary<string, string?>() { { PackageConstants.CachingPackages.AppHostRedisPackageName, string.Empty } };
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.Prerelease = commandSettings.Prerelease;
             }
@@ -42,10 +42,9 @@ internal static class CachingScaffolderBuilderExtensions
                 {
                     step.SkipStep = true;
                     return;
-
                 }
 
-                step.PackageNames = [projectPackageName];
+                step.Packages = new Dictionary<string, string?>() { { projectPackageName, string.Empty } };
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
             }

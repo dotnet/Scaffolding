@@ -36,7 +36,7 @@ internal static class IdentityScaffolderBuilderExtensions
                     packageList.Add(dbProviderPackageName);
                 }
 
-                step.PackageNames = packageList;
+                step.Packages = packageList.ToDictionary(x => x, y => (string?)null);
             }
             else
             {

@@ -25,7 +25,7 @@ internal static class DatabaseScaffolderBuilderExtensions
                     return;
                 }
 
-                step.PackageNames = [appHostPackageName];
+                step.Packages = new Dictionary<string, string?>() { { appHostPackageName, string.Empty } };
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.Prerelease = commandSettings.Prerelease;
             }
@@ -51,7 +51,7 @@ internal static class DatabaseScaffolderBuilderExtensions
 
                 }
 
-                step.PackageNames = [projectPackageName];
+                step.Packages = new Dictionary<string, string?>() { { projectPackageName, string.Empty } };
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
             }

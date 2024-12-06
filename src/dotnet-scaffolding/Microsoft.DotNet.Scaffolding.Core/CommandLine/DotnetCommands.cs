@@ -18,16 +18,15 @@ internal static class DotnetCommands
             }
 
             arguments.AddRange(["package", packageName]);
-            if (!string.IsNullOrEmpty(packageVersion))
-            {
-                arguments.AddRange(["-v", packageVersion]);
-            }
-
             if (includePrerelease)
             {
                 arguments.Add("--prerelease");
             }
-
+            else if (!string.IsNullOrEmpty(packageVersion))
+            {
+                arguments.AddRange(["-v", packageVersion]);
+            }
+           
             logger.LogInformation(string.Format("\nAdding package '{0}'...", packageName));
             var runner = DotnetCliRunner.CreateDotNet("add", arguments);
 

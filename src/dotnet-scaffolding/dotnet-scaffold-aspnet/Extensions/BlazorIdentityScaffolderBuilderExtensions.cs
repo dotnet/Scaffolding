@@ -4,6 +4,7 @@ using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
+using Microsoft.DotNet.Scaffolding.Internal.Helpers;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -92,7 +93,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithBlazorIdentityAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<WrappedAddPackagesStep>(config =>
+        return builder.WithStep<WrappedAddPackagesStep>(async config =>
         {
             var step = config.Step;
             var context = config.Context;
@@ -103,17 +104,27 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             ];
 
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) &&
-                commandSettingsObj is IdentitySettings commandSettings)
+                context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) &&
+                identityModelObj is IdentityModel identityModel &&
+                commandSettingsObj is CrudSettings commandSettings)
             {
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
-                    PackageConstants.EfConstants.IdentityEfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
+                    PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
                 {
                     packageList.Add(projectPackageName);
                 }
 
-                step.PackageNames = packageList;
+                var shortTfm = identityModel.ProjectInfo.LowestTargetFramework ?? string.Empty;
+                var packageDict = new Dictionary<string, string?>();
+                foreach (var package in packageList)
+                {
+                    var packageVersion = await PackageVersionHelper.GetPackageVersionFromTfmAsync(package, shortTfm);
+                    packageDict.Add(package, packageVersion);
+                }
+
+                step.Packages = packageDict;
             }
             else
             {

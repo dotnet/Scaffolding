@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Internal;
+using Microsoft.DotNet.Scaffolding.Internal.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
@@ -55,14 +56,16 @@ internal static class MinimalApiScaffolderBuilderExtensions
 
     public static IScaffoldBuilder WithMinimalApiAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<WrappedAddPackagesStep>(config =>
+        return builder.WithStep<WrappedAddPackagesStep>(async config =>
         {
             var step = config.Step;
             var context = config.Context;
             //this scaffolder has a non-EF scenario, only add EF packages if DataContext is provided.
             List<string> packageList = [];
             if (context.Properties.TryGetValue(nameof(MinimalApiSettings), out var commandSettingsObj) &&
-                commandSettingsObj is MinimalApiSettings commandSettings)
+                context.Properties.TryGetValue(nameof(MinimalApiModel), out var minimalApiModelObj) &&
+                commandSettingsObj is MinimalApiSettings commandSettings &&
+                minimalApiModelObj is MinimalApiModel minimalApiModel)
             {
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
@@ -79,7 +82,15 @@ internal static class MinimalApiScaffolderBuilderExtensions
                     packageList.Add(PackageConstants.AspNetCorePackages.OpenApiPackageName);
                 }
 
-                step.PackageNames = packageList;
+                var shortTfm = minimalApiModel.ProjectInfo.LowestTargetFramework ?? string.Empty;
+                var packageDict = new Dictionary<string, string?>();
+                foreach (var package in packageList)
+                {
+                    var packageVersion = await PackageVersionHelper.GetPackageVersionFromTfmAsync(package, shortTfm);
+                    packageDict.Add(package, packageVersion);
+                }
+
+                step.Packages = packageDict;
             }
             else
             {

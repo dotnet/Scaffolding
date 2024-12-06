@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Internal;
+using Microsoft.DotNet.Scaffolding.Internal.Helpers;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -53,6 +54,8 @@ internal static class BlazorCrudScaffolderBuilderExtensions
             };
 
             if (context.Properties.TryGetValue(nameof(CrudSettings), out var commandSettingsObj) &&
+                context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj) &&
+                blazorCrudModelObj is BlazorCrudModel blazorCrudModel &&
                 commandSettingsObj is CrudSettings commandSettings)
             {
                 step.ProjectPath = commandSettings.Project;
@@ -63,7 +66,15 @@ internal static class BlazorCrudScaffolderBuilderExtensions
                     packageList.Add(projectPackageName);
                 }
 
-                step.PackageNames = packageList;
+                var shortTfm = blazorCrudModel.ProjectInfo.LowestTargetFramework ?? string.Empty;
+                var packageDict = new Dictionary<string, string?>();
+                foreach (var package in packageList)
+                {
+                    var packageVersion = PackageVersionHelper.GetPackageVersionFromTfmAsync(package, shortTfm).Result;
+                    packageDict.Add(package, packageVersion);
+                }
+
+                step.Packages = packageDict;
             }
             else
             {

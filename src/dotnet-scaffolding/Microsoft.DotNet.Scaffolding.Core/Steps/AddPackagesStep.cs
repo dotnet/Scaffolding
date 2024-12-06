@@ -7,7 +7,8 @@ namespace Microsoft.DotNet.Scaffolding.Core.Steps;
 
 public class AddPackagesStep : ScaffoldStep
 {
-    public required IList<string> PackageNames { get; set; }
+    //key is the name of the packages, value is the version. version is not required.
+    public required IDictionary<string, string?> Packages { get; set; }
     public required string ProjectPath { get; set; }
     public bool Prerelease { get; set; } = false;
     private readonly ILogger _logger;
@@ -20,12 +21,13 @@ public class AddPackagesStep : ScaffoldStep
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        foreach (var packageName in PackageNames)
+        foreach (var package in Packages)
         {
             DotnetCommands.AddPackage(
-                packageName: packageName,
+                packageName: package.Key,
                 logger: _logger,
                 projectFile: ProjectPath,
+                packageVersion: package.Value,
                 includePrerelease: Prerelease);
         }
 

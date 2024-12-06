@@ -95,7 +95,7 @@ internal static class RazorPagesScaffolderBuilderExtensions
                     packageList.Add(projectPackageName);
                 }
 
-                step.PackageNames = packageList;
+                step.Packages = packageList.ToDictionary(x => x, y => (string?)null);
             }
             else
             {

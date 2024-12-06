@@ -19,7 +19,7 @@ internal static class StorageScaffolderBuilderExtensions
             if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
-                step.PackageNames = [PackageConstants.StoragePackages.AppHostStoragePackageName];
+                step.Packages = new Dictionary<string, string?>() { { PackageConstants.StoragePackages.AppHostStoragePackageName, string.Empty } };
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.Prerelease = commandSettings.Prerelease;
             }
@@ -45,7 +45,7 @@ internal static class StorageScaffolderBuilderExtensions
 
                 }
 
-                step.PackageNames = [projectPackageName];
+                step.Packages = new Dictionary<string, string?>() { { projectPackageName, string.Empty } };
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
             }

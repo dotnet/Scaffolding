@@ -4,6 +4,7 @@
 using Microsoft.DotNet.Scaffolding.Core.CommandLine;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Logging;
+using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -90,8 +91,9 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
             var currentDirectory = Directory.GetCurrentDirectory();
             if (!string.IsNullOrEmpty(currentDirectory))
             {
-                var logPath = Path.Combine(currentDirectory, _defaultLogFolder, "dotnet-scaffold.txt");
-                loggerConfig.WriteTo.File(logPath, rollingInterval: RollingInterval.Minute);
+                var filePath = $"dotnet-scaffold-{DateTime.UtcNow:yyyy-MM-dd_HH-mm}.log";
+                var logPath = StringUtil.GetUniqueFilePath(Path.Combine(currentDirectory, _defaultLogFolder, filePath));                
+                loggerConfig.WriteTo.File(logPath, rollingInterval: RollingInterval.Infinite);
             }
         }
 

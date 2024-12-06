@@ -55,6 +55,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             var parameterValues = GetAllParameterValues(context, commandObj);
             var envVars = context.GetTelemetryEnvironmentVariables() ?? new Dictionary<string, string>();
+            envVars.Add(ScaffolderConstants.LAUNCHED_BY_DOTNET_SCAFFOLD, "true");
             if (_verboseOutput)
             {
                 envVars.Add(ScaffolderConstants.ENABLE_VERBOSE_LOGGING, "true");

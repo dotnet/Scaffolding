@@ -18,7 +18,7 @@ public class MsBuildInitializer
     {
         _logger.LogTrace($"Initializing MSBuild in '{nameof(MsBuildInitializer)}.Initialize()...'");
         RegisterMsbuild();
-        _logger.LogTrace("Done.\n");
+        _logger.LogTrace("Done");
     }
 
     /// <summary>

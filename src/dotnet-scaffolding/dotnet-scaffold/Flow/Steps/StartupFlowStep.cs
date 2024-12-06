@@ -64,7 +64,7 @@ internal class StartupFlowStep : IFlowStep
                 //initialize 1st party components (dotnet tools)
                 statusContext.Status = "Getting ready";
                 new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize(envVars);
-                statusContext.Status = "Done\n";
+                statusContext.Status = "Done";
                 //parse args passed
                 statusContext.Status = "Parsing args.";
                 var remainingArgs = context.GetRemainingArgs();
@@ -77,7 +77,7 @@ internal class StartupFlowStep : IFlowStep
                     }
                 }
 
-                statusContext.Status = "Done\n";
+                statusContext.Status = "Done";
             });
 
         return new ValueTask<FlowStepResult>(FlowStepResult.Success);

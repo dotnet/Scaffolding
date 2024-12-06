@@ -65,6 +65,7 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
         else
         {
             context.Properties.Add(nameof(BlazorCrudModel), blazorCrudModel);
+            _logger.LogInformation("Done");
         }
 
         //Install packages and add a DbContext (if needed)

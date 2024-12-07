@@ -77,7 +77,7 @@ public class TextTemplatingStep : ScaffoldStep
             }
         }
 
-        _logger.LogInformation("Done\n");
+        _logger.LogInformation("Done");
         return Task.FromResult(true);
     }
 }

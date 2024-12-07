@@ -28,7 +28,7 @@ internal static class DotnetCommands
                 arguments.Add("--prerelease");
             }
 
-            logger.LogInformation(string.Format("\nAdding package '{0}'...", packageName));
+            logger.LogInformation(string.Format("Adding package '{0}'...", packageName));
             var runner = DotnetCliRunner.CreateDotNet("add", arguments);
 
             // Buffer the output here because we'll only display it in the failure scenario

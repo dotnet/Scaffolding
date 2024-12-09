@@ -173,7 +173,7 @@ internal static class StringUtil
         string newFilePath;
         do
         {
-            newFilePath = Path.Combine(directory, $"{fileNameWithoutExtension}{count}{fileExtension}");
+            newFilePath = Path.Combine(directory, $"{fileNameWithoutExtension}-{count}{fileExtension}");
             count++;
         } while (File.Exists(newFilePath));
 

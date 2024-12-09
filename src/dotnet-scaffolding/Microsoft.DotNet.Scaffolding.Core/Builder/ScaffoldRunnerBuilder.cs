@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Scaffolding.Core.CommandLine;
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Logging;
+using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -72,8 +75,35 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
 
     private void AddCoreServices()
     {
-        Services.AddLogging();
-        Logging.AddCleanConsoleFormatter();
+        //get some logging properties from environment variables
+        var isVerboseEnabled = Environment.GetEnvironmentVariable(ScaffolderConstants.ENABLE_VERBOSE_LOGGING)?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
+        var isLogToFileEnabled = Environment.GetEnvironmentVariable(ScaffolderConstants.LOG_TO_FILE)?.Equals("true", StringComparison.OrdinalIgnoreCase) == true; ;
+        // Configure Serilog Logger
+        var loggerConfig = new LoggerConfiguration().WriteTo.Sink(new AnsiConsoleSink());
+        loggerConfig.MinimumLevel.Information();
+        if(isVerboseEnabled)
+        {
+            loggerConfig.MinimumLevel.Verbose();
+        }
+
+        if (isLogToFileEnabled)
+        {
+            var currentDirectory = Directory.GetCurrentDirectory();
+            if (!string.IsNullOrEmpty(currentDirectory))
+            {
+                var filePath = $"dotnet-scaffold-{DateTime.UtcNow:yyyy-MM-dd_HH-mm}.log";
+                var logPath = StringUtil.GetUniqueFilePath(Path.Combine(currentDirectory, _defaultLogFolder, filePath));                
+                loggerConfig.WriteTo.File(logPath, rollingInterval: RollingInterval.Infinite);
+            }
+        }
+
+        Log.Logger = loggerConfig.CreateLogger();
+        Services.AddLogging(builder =>
+        {
+            builder.ClearProviders();
+            builder.AddSerilog(dispose: true);
+        });
+
         Logging.AddDebug();
     }
 
@@ -81,4 +111,6 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     {
         public IServiceCollection Services { get; } = services;
     }
+
+    private readonly string _defaultLogFolder = ".logs";
 }

@@ -3,16 +3,6 @@ namespace Microsoft.DotNet.Scaffolding.Internal;
 
 internal static class Constants
 {
-    public static class EnvironmentVariables
-    {
-        public const string MSBuildExtensionsPath32 = nameof(MSBuildExtensionsPath32);
-        public const string MSBuildExtensionsPath = nameof(MSBuildExtensionsPath);
-        public const string MSBUILD_EXE_PATH = nameof(MSBUILD_EXE_PATH);
-        public const string MSBuildSDKsPath = nameof(MSBuildSDKsPath);
-        public const string USERPROFILE = nameof(USERPROFILE);
-        public const string VSINSTALLDIR = nameof(VSINSTALLDIR);
-    }
-
     public static class StepConstants
     {
         public const string BaseProjectPath = nameof(BaseProjectPath);

@@ -24,6 +24,9 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsolePackageVersion)" />
     <PackageVersion Include="Mono.TextTemplating" Version="$(MonoTextTemplatingVersion)" />
     <PackageVersion Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="$(SerilogExtensionsPackageVersion)" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="$(SerilogPackageVersion)" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="$(SerilogPackageVersion)" />
     <PackageVersion Include="Spectre.Console.Flow" Version="$(SpectreConsoleFlowVersion)" />
     <PackageVersion Include="Spectre.Console" Version="$(SpectreConsoleVersion)" />
     <PackageVersion Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />

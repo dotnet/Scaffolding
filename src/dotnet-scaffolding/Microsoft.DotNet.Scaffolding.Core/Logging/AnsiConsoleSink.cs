@@ -12,7 +12,7 @@ public class AnsiConsoleSink : ILogEventSink
     public void Emit(LogEvent logEvent)
     {
         //LAUNCHED_BY_DOTNET_SCAFFOLD should be "true", or some other value. "true" indicates being launched by dotnet-scaffold.
-        bool isLaunchedByDotnetScaffold = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(ScaffolderConstants.LAUNCHED_BY_DOTNET_SCAFFOLD));
+        bool isLaunchedByDotnetScaffold = Environment.GetEnvironmentVariable(ScaffolderConstants.LAUNCHED_BY_DOTNET_SCAFFOLD)?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
         var formattedMessage = FormatMessage(logEvent.Level, logEvent.RenderMessage());
         if (isLaunchedByDotnetScaffold && (Console.IsOutputRedirected || Console.IsErrorRedirected))
         {

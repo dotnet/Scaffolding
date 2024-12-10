@@ -4,6 +4,7 @@
   <PropertyGroup>
     <DeveloperBuildTestTfms>net9.0</DeveloperBuildTestTfms>
     <StandardTestTfms>$(DeveloperBuildTestTfms)</StandardTestTfms>
+    <RollForward>Major</RollForward>
   </PropertyGroup>
 
   <ItemGroup>

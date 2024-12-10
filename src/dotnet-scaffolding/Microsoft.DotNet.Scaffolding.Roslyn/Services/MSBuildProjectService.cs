@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Scaffolding.Roslyn.Services;
 public class MSBuildProjectService : IMSBuildProjectService
 {
     private readonly string _projectPath;
-    private Build.Evaluation.Project? _project;
+    private Project? _project;
     private bool _initialized;
     private readonly object _initLock = new();
     public MSBuildProjectService(string projectPath)
@@ -53,13 +53,12 @@ public class MSBuildProjectService : IMSBuildProjectService
                 return;
             }
 
-            //try loading MSBuild project the faster way.
-            _project = new Project(_projectPath, null, null, new Build.Evaluation.ProjectCollection(), ProjectLoadSettings.IgnoreMissingImports);
-            //if fails, use the longer way using GLobalProjectCollection.
-            if (_project is null)
+            try
             {
-                _project = ProjectCollection.GlobalProjectCollection.LoadProject(_projectPath);
+                //try loading MSBuild project the faster way.
+                _project = new Project(_projectPath, null, null, new ProjectCollection(), ProjectLoadSettings.IgnoreMissingImports);
             }
+            catch (Exception) { }
         }
     }
 

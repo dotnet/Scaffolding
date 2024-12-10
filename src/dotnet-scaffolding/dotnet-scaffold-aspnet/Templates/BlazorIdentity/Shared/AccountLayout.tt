@@ -6,9 +6,9 @@
 @using <#= Model.UserClassNamespace #>
 @inherits LayoutComponentBase
 <#
-if (!string.IsNullOrEmpty(Model.BlazorLayoutNamespace))
+if (!string.IsNullOrEmpty(Model.IdentityLayoutNamespace))
 {
-#>@layout <#= Model.BlazorLayoutNamespace #>
+#>@layout <#= Model.IdentityLayoutNamespace #>
 <#} #>
 @inject NavigationManager NavigationManager
 

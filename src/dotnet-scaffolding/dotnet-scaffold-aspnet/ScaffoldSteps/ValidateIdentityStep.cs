@@ -162,10 +162,12 @@ internal class ValidateIdentityStep : ScaffoldStep
 
         string identityNamespace = string.Empty;
         string userClassNamespace = string.Empty;
+        string identityLayoutNamespace = string.Empty;
         var projectName = Path.GetFileNameWithoutExtension(settings.Project);
         if (!string.IsNullOrEmpty(projectName))
         {
             identityNamespace = settings.BlazorScenario ? $"{projectName}.Components.Account" : $"{projectName}.Areas.Identity";
+            identityLayoutNamespace = settings.BlazorScenario ? $"{projectName}.Components.Layout.MainLayout" : string.Empty;
             userClassNamespace = $"{projectName}.Data";
         }
 
@@ -176,6 +178,7 @@ internal class ValidateIdentityStep : ScaffoldStep
             IdentityNamespace = identityNamespace,
             UserClassName = AspNetConstants.Identity.UserClassName,
             UserClassNamespace = userClassNamespace,
+            IdentityLayoutNamespace = identityLayoutNamespace,
             BaseOutputPath = projectDirectory,
             Overwrite = settings.Overwrite
         };

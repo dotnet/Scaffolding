@@ -15,11 +15,12 @@ internal static class ProjectModelHelper
         { ".NETCoreApp,Version=v7.0", "net7.0" },
         { ".NETCoreApp,Version=v8.0", "net8.0" },
         { ".NETCoreApp,Version=v9.0", "net9.0" },
+        { ".NETCoreApp,Version=v10.0", "net10.0" },
     };
 
     internal static bool IsTfmPreRelease(string tfm)
     {
-        return tfm.Equals("net9.0", StringComparison.OrdinalIgnoreCase);
+        return tfm.Equals("net10.0", StringComparison.OrdinalIgnoreCase);
     }
 
     internal static string GetManifestResource(Assembly assembly, string shortResourceName)

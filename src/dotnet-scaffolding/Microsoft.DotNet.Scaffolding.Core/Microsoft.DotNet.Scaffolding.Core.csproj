@@ -18,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Internal\CliHelpers\*.cs">
-      <Link>CliHelpers\%(Filename)%(Extension)</Link>
+    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Internal\Shared\*.cs">
+      <Link>Shared\%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
 

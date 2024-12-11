@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Internal.Shared;
 using Serilog.Core;
 using Serilog.Events;
 using Spectre.Console;
@@ -12,7 +13,7 @@ public class AnsiConsoleSink : ILogEventSink
     public void Emit(LogEvent logEvent)
     {
         //LAUNCHED_BY_DOTNET_SCAFFOLD should be "true", or some other value. "true" indicates being launched by dotnet-scaffold.
-        bool isLaunchedByDotnetScaffold = Environment.GetEnvironmentVariable(ScaffolderConstants.LAUNCHED_BY_DOTNET_SCAFFOLD)?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
+        bool isLaunchedByDotnetScaffold = EnvironmentHelpers.GetEnvironmentVariableAsBool(ScaffolderConstants.LAUNCHED_BY_DOTNET_SCAFFOLD);
         var formattedMessage = FormatMessage(logEvent.Level, logEvent.RenderMessage());
         if (isLaunchedByDotnetScaffold && (Console.IsOutputRedirected || Console.IsErrorRedirected))
         {
@@ -32,7 +33,7 @@ public class AnsiConsoleSink : ILogEventSink
         {
             LogEventLevel.Verbose => $"[gray]{message}[/]",
             LogEventLevel.Debug => $"[gray]{message}[/]",
-            LogEventLevel.Information => $"[green]{message}[/]",
+            LogEventLevel.Information => $"[default]{message}[/]",
             LogEventLevel.Warning => $"[yellow]{message}[/]",
             LogEventLevel.Error => $"[red]{message}[/]",
             LogEventLevel.Fatal => $"[bold red]{message}[/]",

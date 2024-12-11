@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 using System.Text;
 
-namespace Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
+namespace Microsoft.DotNet.Scaffolding.Internal.Shared;
 
 internal sealed class ProcessOutputStreamReader : IDisposable
 {

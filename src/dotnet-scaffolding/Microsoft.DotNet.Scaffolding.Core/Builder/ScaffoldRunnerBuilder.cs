@@ -4,7 +4,7 @@
 using Microsoft.DotNet.Scaffolding.Core.CommandLine;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Logging;
-using Microsoft.DotNet.Scaffolding.Internal;
+using Microsoft.DotNet.Scaffolding.Internal.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -23,7 +23,6 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     public ScaffoldRunnerBuilder()
     {
         _logging = new LoggingBuilder(Services);
-
         AddDefaultServices();
     }
 
@@ -75,36 +74,43 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
 
     private void AddCoreServices()
     {
+        var loggerConfig = GetLoggingConfiguration();
+        Services.AddLogging(builder =>
+        {
+            builder.ClearProviders();
+            builder.AddSerilog(loggerConfig.CreateLogger(), dispose: true);
+        });
+
+        Logging.AddDebug();
+    }
+
+    private LoggerConfiguration GetLoggingConfiguration()
+    {
         //get some logging properties from environment variables
-        var isVerboseEnabled = Environment.GetEnvironmentVariable(ScaffolderConstants.ENABLE_VERBOSE_LOGGING)?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
-        var isLogToFileEnabled = Environment.GetEnvironmentVariable(ScaffolderConstants.LOG_TO_FILE)?.Equals("true", StringComparison.OrdinalIgnoreCase) == true; ;
+        var isVerboseEnabled = EnvironmentHelpers.GetEnvironmentVariableAsBool(ScaffolderConstants.ENABLE_VERBOSE_LOGGING);
+        var isLogToFileEnabled = EnvironmentHelpers.GetEnvironmentVariableAsBool(ScaffolderConstants.LOG_TO_FILE);
         // Configure Serilog Logger
         var loggerConfig = new LoggerConfiguration().WriteTo.Sink(new AnsiConsoleSink());
         loggerConfig.MinimumLevel.Information();
-        if(isVerboseEnabled)
+        if (isVerboseEnabled)
         {
             loggerConfig.MinimumLevel.Verbose();
         }
 
         if (isLogToFileEnabled)
         {
-            var currentDirectory = Directory.GetCurrentDirectory();
-            if (!string.IsNullOrEmpty(currentDirectory))
+            var loggingDirectory = Path.Combine(EnvironmentHelpers.GetUserProfilePath(), _defaultLogFolder);
+            if (!Directory.Exists(loggingDirectory))
             {
-                var filePath = $"dotnet-scaffold-{DateTime.UtcNow:yyyy-MM-dd_HH-mm}.log";
-                var logPath = StringUtil.GetUniqueFilePath(Path.Combine(currentDirectory, _defaultLogFolder, filePath));                
-                loggerConfig.WriteTo.File(logPath, rollingInterval: RollingInterval.Infinite);
+                Directory.CreateDirectory(loggingDirectory);
             }
+
+            var filePath = $"dotnet-scaffold-{DateTime.Now:yyyy-MM-dd_HH-mm}.log";
+            var logPath = StringUtil.GetUniqueFilePath(Path.Combine(loggingDirectory, filePath));
+            loggerConfig.WriteTo.File(logPath, rollingInterval: RollingInterval.Infinite);
         }
 
-        Log.Logger = loggerConfig.CreateLogger();
-        Services.AddLogging(builder =>
-        {
-            builder.ClearProviders();
-            builder.AddSerilog(dispose: true);
-        });
-
-        Logging.AddDebug();
+        return loggerConfig;
     }
 
     private sealed class LoggingBuilder(IServiceCollection services) : ILoggingBuilder
@@ -112,5 +118,5 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
         public IServiceCollection Services { get; } = services;
     }
 
-    private readonly string _defaultLogFolder = ".logs";
+    private readonly string _defaultLogFolder = Path.Combine(".dotnet-scaffold", ".logs");
 }

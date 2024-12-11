@@ -55,7 +55,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             using (var stream = toolAssembly.GetManifestResourceStream(toolImportTargetsResourceName))
             {
                 var targetBytes = new byte[stream.Length];
-                stream.Read(targetBytes, 0, targetBytes.Length);
+                stream.ReadExactly(targetBytes);
                 File.WriteAllBytes(importingTargetFilePath, targetBytes);
             }
             return true;

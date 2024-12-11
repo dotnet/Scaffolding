@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
-using System.Runtime.InteropServices;
+using Microsoft.DotNet.Scaffolding.Internal.Shared;
 
 namespace Microsoft.DotNet.Scaffolding.Internal.Services;
 /// <summary>
@@ -33,16 +33,7 @@ internal class EnvironmentService : IEnvironmentService
         }
     }
 
-    public static string LocalUserProfilePath
-    {
-        get
-        {
-            return System.Environment.GetEnvironmentVariable(
-                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                        ? "USERPROFILE"
-                        : "HOME") ?? "USERPROFILE";
-        }
-    }
+    public static string LocalUserProfilePath => EnvironmentHelpers.GetUserProfilePath();
 
     public const string DotnetProfileDirectoryName = ".dotnet";
 
@@ -123,25 +114,7 @@ internal class EnvironmentService : IEnvironmentService
     /// <inheritdoc />
     public bool GetEnvironmentVariableAsBool(string name, bool defaultValue = false)
     {
-        var str = Environment.GetEnvironmentVariable(name);
-        if (string.IsNullOrEmpty(str))
-        {
-            return defaultValue;
-        }
-
-        switch (str.ToLowerInvariant())
-        {
-            case "true":
-            case "1":
-            case "yes":
-                return true;
-            case "false":
-            case "0":
-            case "no":
-                return false;
-            default:
-                return defaultValue;
-        }
+        return EnvironmentHelpers.GetEnvironmentVariableAsBool(name, defaultValue);
     }
 
     /// <inheritdoc />

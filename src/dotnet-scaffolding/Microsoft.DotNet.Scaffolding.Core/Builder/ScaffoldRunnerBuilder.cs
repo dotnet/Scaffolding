@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Scaffolding.Core.CommandLine;
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Logging;
+using Microsoft.DotNet.Scaffolding.Internal.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -20,7 +23,6 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     public ScaffoldRunnerBuilder()
     {
         _logging = new LoggingBuilder(Services);
-
         AddDefaultServices();
     }
 
@@ -72,13 +74,49 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
 
     private void AddCoreServices()
     {
-        Services.AddLogging();
-        Logging.AddCleanConsoleFormatter();
+        var loggerConfig = GetLoggingConfiguration();
+        Services.AddLogging(builder =>
+        {
+            builder.ClearProviders();
+            builder.AddSerilog(loggerConfig.CreateLogger(), dispose: true);
+        });
+
         Logging.AddDebug();
+    }
+
+    private LoggerConfiguration GetLoggingConfiguration()
+    {
+        //get some logging properties from environment variables
+        var isVerboseEnabled = EnvironmentHelpers.GetEnvironmentVariableAsBool(ScaffolderConstants.ENABLE_VERBOSE_LOGGING);
+        var isLogToFileEnabled = EnvironmentHelpers.GetEnvironmentVariableAsBool(ScaffolderConstants.LOG_TO_FILE);
+        // Configure Serilog Logger
+        var loggerConfig = new LoggerConfiguration().WriteTo.Sink(new AnsiConsoleSink());
+        loggerConfig.MinimumLevel.Information();
+        if (isVerboseEnabled)
+        {
+            loggerConfig.MinimumLevel.Verbose();
+        }
+
+        if (isLogToFileEnabled)
+        {
+            var loggingDirectory = Path.Combine(EnvironmentHelpers.GetUserProfilePath(), _defaultLogFolder);
+            if (!Directory.Exists(loggingDirectory))
+            {
+                Directory.CreateDirectory(loggingDirectory);
+            }
+
+            var filePath = $"dotnet-scaffold-{DateTime.Now:yyyy-MM-dd_HH-mm}.log";
+            var logPath = StringUtil.GetUniqueFilePath(Path.Combine(loggingDirectory, filePath));
+            loggerConfig.WriteTo.File(logPath, rollingInterval: RollingInterval.Infinite);
+        }
+
+        return loggerConfig;
     }
 
     private sealed class LoggingBuilder(IServiceCollection services) : ILoggingBuilder
     {
         public IServiceCollection Services { get; } = services;
     }
+
+    private readonly string _defaultLogFolder = Path.Combine(".dotnet-scaffold", ".logs");
 }

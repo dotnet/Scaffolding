@@ -5,6 +5,7 @@ namespace Microsoft.DotNet.Scaffolding.Internal;
 internal static class StringUtil
 {
     //converts Project.Namespace.SubNamespace to Project//Namespace//SubNamespace or Project\\Namespace\\SubNamespace (based on OS)
+    //TODO : add string helpers for all the different little checks below.
     public static string? ToPath(string namespaceName, string? basePath, string projectRootNamespace)
     {
         if (string.IsNullOrEmpty(namespaceName) || string.IsNullOrEmpty(basePath) || string.IsNullOrEmpty(projectRootNamespace))

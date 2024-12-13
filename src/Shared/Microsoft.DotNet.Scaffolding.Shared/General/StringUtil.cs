@@ -40,23 +40,49 @@ namespace Microsoft.DotNet.Scaffolding.Shared
         //converts Project.Namespace.SubNamespace to Project//Namespace//SubNamespace or Project\\Namespace\\SubNamespace (based on OS)
         public static string ToPath(string namespaceName, string basePath, string projectRootNamespace)
         {
-            string path = string.Empty;
-            if (!string.IsNullOrEmpty(basePath) && !string.IsNullOrEmpty(namespaceName))
+            if (string.IsNullOrEmpty(namespaceName) || string.IsNullOrEmpty(basePath) || string.IsNullOrEmpty(projectRootNamespace))
             {
-                namespaceName = RemovePrefix(namespaceName, basePath, projectRootNamespace);
-                namespaceName = namespaceName.Replace(".", Path.DirectorySeparatorChar.ToString());
-                try
-                {
-                    basePath = Path.HasExtension(basePath) ? Path.GetDirectoryName(basePath) : basePath;
-                    var combinedPath = Path.Combine(basePath, namespaceName);
-                    path = Path.GetFullPath(combinedPath);
-                }
-                //invalid path
-                catch (Exception ex) when (ex is ArgumentException || ex is PathTooLongException || ex is NotSupportedException)
-                {}
+                return string.Empty;
             }
 
-            return path;
+            try
+            {
+                // Normalize the base path if it is a file
+                if (Path.HasExtension(basePath))
+                {
+                    basePath = Path.GetDirectoryName(basePath);
+                }
+
+                // Ensure basePath ends with a directory separator
+                if (!basePath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+                {
+                    basePath += Path.DirectorySeparatorChar;
+                }
+
+                // Remove redundant project root namespace folder from basePath if present
+                if (basePath.EndsWith(Path.Combine(projectRootNamespace, string.Empty) + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+                {
+                    basePath = basePath.Substring(0, basePath.Length - projectRootNamespace.Length - 1);
+                }
+
+                // Remove the project root namespace prefix from the namespaceName
+                if (namespaceName.StartsWith(projectRootNamespace + ".", StringComparison.Ordinal))
+                {
+                    namespaceName = namespaceName.Substring(projectRootNamespace.Length + 1);
+                }
+
+                // Convert namespaceName into a directory path
+                string relativePath = namespaceName.Replace('.', Path.DirectorySeparatorChar);
+                // Combine the base path with the relative path
+                string combinedPath = Path.Combine(basePath, projectRootNamespace, relativePath);
+                // Get the full path
+                return Path.GetFullPath(combinedPath);
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is PathTooLongException || ex is NotSupportedException)
+            {
+                // Handle invalid path scenarios
+                return string.Empty;
+            }
         }
 
         //remove prefix from namespace, used to remove the project name from namespace when creating the path

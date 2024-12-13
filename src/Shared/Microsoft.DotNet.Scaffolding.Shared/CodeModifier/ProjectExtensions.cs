@@ -59,10 +59,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
                 var allFiles = Directory.EnumerateFiles(projectDirectory, extension, SearchOption.AllDirectories);
                 string filePath = allFiles.FirstOrDefault(x => x.EndsWith(fileName, StringComparison.OrdinalIgnoreCase));
-                string fileText = fileSystem.ReadAllText(filePath);
-                if (!string.IsNullOrEmpty(fileText))
+                if (!string.IsNullOrEmpty(filePath))
                 {
-                    return project.AddDocument(filePath, fileText);
+                    string fileText = fileSystem.ReadAllText(filePath);
+                    if (!string.IsNullOrEmpty(fileText))
+                    {
+                        return project.AddDocument(filePath, fileText);
+                    }
                 }
             }
 

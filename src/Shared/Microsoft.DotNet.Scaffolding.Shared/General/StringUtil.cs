@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
                 }
 
                 // Remove redundant project root namespace folder from basePath if present
-                if (basePath.EndsWith(Path.Combine(projectRootNamespace, "") + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+                if (basePath.EndsWith(Path.Combine(projectRootNamespace, string.Empty) + Path.DirectorySeparatorChar, StringComparison.Ordinal))
                 {
                     basePath = basePath.Substring(0, basePath.Length - projectRootNamespace.Length - 1);
                 }

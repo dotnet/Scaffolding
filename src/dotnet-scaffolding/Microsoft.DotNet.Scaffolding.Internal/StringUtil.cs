@@ -27,7 +27,7 @@ internal static class StringUtil
             }
 
             // Remove redundant project root namespace folder from basePath if present
-            if (!string.IsNullOrEmpty(basePath) && basePath.EndsWith(Path.Combine(projectRootNamespace, "") + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            if (!string.IsNullOrEmpty(basePath) && basePath.EndsWith(Path.Combine(projectRootNamespace, string.Empty) + Path.DirectorySeparatorChar, StringComparison.Ordinal))
             {
                 basePath = basePath.Substring(0, basePath.Length - projectRootNamespace.Length - 1);
             }

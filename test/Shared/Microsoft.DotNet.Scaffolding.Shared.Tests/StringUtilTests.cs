@@ -76,8 +76,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         {
             get
             {
-                return
-                [
+                return new[]
+                {
                     new object[] { "Project.Namespace.SubNamespace", "C:\\Some\\Path\\Project.csproj", "Project", "C:\\Some\\Path\\Project\\Namespace\\SubNamespace" },
                     new object[] { "Project.Web.Namespace.SubNamespace", "C:\\Some\\Path\\Project.Web.csproj", "Project.Web", "C:\\Some\\Path\\Project.Web\\Namespace\\SubNamespace" },
                     new object[] { "Project.Namespace.SubNamespace", "C:\\Some\\Path\\", "Project", "C:\\Some\\Path\\Project\\Namespace\\SubNamespace" },
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                     new object[] { "Project", "C:\\Some\\Path\\Project.csproj", "Project", "C:\\Some\\Path\\Project\\Project" },
                     new object[] { "Project", "", "Project", "" },
                     new object[] { "", "C:\\Some\\Path\\Project.csproj", "Project", "" },
-                ];
+                };
             }
         }
 

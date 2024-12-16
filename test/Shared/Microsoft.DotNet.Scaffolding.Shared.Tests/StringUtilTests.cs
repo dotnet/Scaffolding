@@ -79,13 +79,14 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
                 return new[]
                 {
                     new object[] { "Project.Namespace.SubNamespace", "C:\\Some\\Path\\Project.csproj", "Project", "C:\\Some\\Path\\Project\\Namespace\\SubNamespace" },
+                    new object[] { "Project.Web.Namespace.SubNamespace", "C:\\Some\\Path\\Project.Web.csproj", "Project.Web", "C:\\Some\\Path\\Project.Web\\Namespace\\SubNamespace" },
                     new object[] { "Project.Namespace.SubNamespace", "C:\\Some\\Path\\", "Project", "C:\\Some\\Path\\Project\\Namespace\\SubNamespace" },
                     //special case : default namespace of a project in VS solution folder
                     new object[] { "Project.Components.Account", "C:\\SomePath\\Project\\Project\\", "Project", "C:\\SomePath\\Project\\Project\\Components\\Account" },
                     //special case : default namespace of a project in just a project folder
                     new object[] { "Project.Components.Account", "C:\\SomePath\\Project\\", "Project", "C:\\SomePath\\Project\\Components\\Account" },
                     new object[] { "Project.Namespace.SubNamespace", "", "Project", "" },
-                    new object[] { "Project", "C:\\Some\\Path\\Project.csproj", "Project", "C:\\Some\\Path\\Project" },
+                    new object[] { "Project", "C:\\Some\\Path\\Project.csproj", "Project", "C:\\Some\\Path\\Project\\Project" },
                     new object[] { "Project", "", "Project", "" },
                     new object[] { "", "C:\\Some\\Path\\Project.csproj", "Project", "" },
                 };

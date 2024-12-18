@@ -60,7 +60,7 @@
         @:@builderExtensions;
 }
 
-        group.MapGet("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
+        group.MapGet("/{@primaryKeyNameLowerCase}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         {
             return await db.@entitySetNoTracking
                 .FirstOrDefaultAsync(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
@@ -75,7 +75,7 @@
 
 @if (dbProvider == "CosmosDb")
 {
-        @:group.MapPut("/{id}", async @typedTaskWithNoContent (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
+        @:group.MapPut("/{@primaryKeyNameLowerCase}", async @typedTaskWithNoContent (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
         @:{
             @:var foundModel = await db.@findModel;
 
@@ -92,7 +92,7 @@
 }
 @if (dbProvider != "CosmosDb")
 {
-        @:group.MapPut("/{id}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
+        @:group.MapPut("/{@primaryKeyNameLowerCase}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @modelName @Model.ModelVariable, @dbContextName db) =>
         @:{
             @:var affected = await db.@entitySetName
                 @:.Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
@@ -127,7 +127,7 @@
 
 @if (dbProvider == "CosmosDb")
 {
-        @:group.MapDelete("/{id}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
+        @:group.MapDelete("/{@primaryKeyNameLowerCase}", async @typedTaskWithNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         @:{
         @:    if (await db.@findModel is @modelName @Model.ModelVariable)
         @:    {
@@ -141,7 +141,7 @@
 }
 @if (dbProvider != "CosmosDb")
 {
-        @:group.MapDelete("/{id}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
+        @:group.MapDelete("/{@primaryKeyNameLowerCase}", async @typedTaskOkNotFound (@primaryKeyShortTypeName @primaryKeyNameLowerCase, @dbContextName db) =>
         @:{
         @:    var affected = await db.@entitySetName
         @:        .Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)

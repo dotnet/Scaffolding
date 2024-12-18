@@ -1,6 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-namespace Microsoft.DotNet.Scaffolding.Internal;
+namespace Microsoft.DotNet.Scaffolding.Internal.Shared;
 
 internal static class StringUtil
 {
@@ -203,7 +203,7 @@ internal static class StringUtil
         string newFilePath;
         do
         {
-            newFilePath = Path.Combine(directory, $"{fileNameWithoutExtension}{count}{fileExtension}");
+            newFilePath = Path.Combine(directory, $"{fileNameWithoutExtension}-{count}{fileExtension}");
             count++;
         } while (File.Exists(newFilePath));
 

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Text;
 
-namespace Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
+namespace Microsoft.DotNet.Scaffolding.Internal.Shared;
 
 internal static class ArgumentEscaper
 {

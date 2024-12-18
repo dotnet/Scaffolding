@@ -27,11 +27,12 @@ public class MsBuildInitializer
     {
         if (!MSBuildLocator.IsRegistered)
         {
+            _logger.LogTrace($"Initializing MSBuild in '{nameof(MsBuildInitializer)}.Initialize()...'");
             // Path to the directory containing the SDKs
             string sdkBasePath = GetDefaultSdkPath();
             if (!Directory.Exists(sdkBasePath))
             {
-                _logger.LogInformation($"Could not find a .NET SDK at the default locations.");
+                _logger.LogDebug($"Could not find a .NET SDK at the default locations.");
                 MSBuildLocator.RegisterDefaults();
                 return;
             }
@@ -45,7 +46,7 @@ public class MsBuildInitializer
 
             if (!sdkPaths.Any())
             {
-                _logger.LogInformation($"Could not find a .NET SDK at the default locations.");
+                _logger.LogDebug($"No sdk locations found, using MSBuildLocator.RegisterDefaults()");
                 MSBuildLocator.RegisterDefaults();
                 return;
             }
@@ -56,10 +57,19 @@ public class MsBuildInitializer
                 if (File.Exists(msbuildPath))
                 {
                     // Register the latest SDK
+                    _logger.LogTrace($"Registering MSBuild at path '{sdkPath}'");
                     MSBuildLocator.RegisterMSBuildPath(sdkPath);
                     break;
                 }
             }
+
+            if (!MSBuildLocator.IsRegistered)
+            {
+                _logger.LogDebug($"MSBuild.dll not found at default locations.");
+                MSBuildLocator.RegisterDefaults();
+            }
+
+            _logger.LogTrace("Done");
         }
     }
 

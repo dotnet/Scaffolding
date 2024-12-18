@@ -13,8 +13,19 @@ public static class EfDbContextHelpers
     {
         if (modelSymbol is INamedTypeSymbol namedTypeSymbol)
         {
-            var allModelProperties = namedTypeSymbol.GetMembers().OfType<IPropertySymbol>();
-            var primaryKey = namedTypeSymbol?.GetMembers().OfType<IPropertySymbol>().FirstOrDefault(IsPrimaryKey);
+            List<IPropertySymbol> propertySymbols = new List<IPropertySymbol>();
+            var currentType = namedTypeSymbol;
+            while (currentType is not null && currentType.SpecialType is not SpecialType.System_Object)
+            {
+                foreach (var propertySymbol in currentType.GetMembers().OfType<IPropertySymbol>())
+                {
+                    propertySymbols.Add(propertySymbol);
+                }
+
+                currentType = currentType.BaseType; // Traverse to the base type
+            }
+
+            var primaryKey = propertySymbols.FirstOrDefault(IsPrimaryKey);
             if (primaryKey != null)
             {
                 EfModelProperties efModelProperties = new()
@@ -24,7 +35,7 @@ public static class EfDbContextHelpers
                     //unwanted values for base types ('Int32' instead of 'int')
                     PrimaryKeyShortTypeName = primaryKey.Type.ToDisplayString(),
                     PrimaryKeyTypeName = primaryKey.Type.ToDisplayString(),
-                    AllModelProperties = allModelProperties.ToList()
+                    AllModelProperties = propertySymbols
                 };
 
                 return efModelProperties;
@@ -61,15 +72,18 @@ public static class EfDbContextHelpers
     /// check for the specific DbSet variable in a given DbContext's ISymbol.
     /// return the DbSet property's name.
     /// </summary>
-    public static string? GetEntitySetVariableName(ISymbol dbContextSymbol, string modelTypeName)
+    public static string? GetEntitySetVariableName(ISymbol dbContextSymbol, string modelTypeName, string? modelTypeFullName)
     {
         if (dbContextSymbol is INamedTypeSymbol dbContextTypeSymbol)
         {
             string dbSetType = $"Microsoft.EntityFrameworkCore.DbSet<{modelTypeName}>";
+            string dbSetWithFullType = string.IsNullOrEmpty(modelTypeFullName) ?
+                string.Empty : $"Microsoft.EntityFrameworkCore.DbSet<{modelTypeFullName}>";
             //get the DbSet pertaining our given modelSymbol
             var dbSetProperty = dbContextTypeSymbol.GetMembers().OfType<IPropertySymbol>().FirstOrDefault(p =>
                 p.Type is INamedTypeSymbol &&
-                p.Type.ToDisplayString().Equals(dbSetType));
+                (p.Type.ToDisplayString().Equals(dbSetType) ||
+                p.Type.ToDisplayString().Equals(dbSetWithFullType)));
 
             if (dbSetProperty != null)
             {

@@ -72,12 +72,13 @@ public static class EfDbContextHelpers
     /// check for the specific DbSet variable in a given DbContext's ISymbol.
     /// return the DbSet property's name.
     /// </summary>
-    public static string? GetEntitySetVariableName(ISymbol dbContextSymbol, string modelTypeName, string modelTypeFullName)
+    public static string? GetEntitySetVariableName(ISymbol dbContextSymbol, string modelTypeName, string? modelTypeFullName)
     {
         if (dbContextSymbol is INamedTypeSymbol dbContextTypeSymbol)
         {
             string dbSetType = $"Microsoft.EntityFrameworkCore.DbSet<{modelTypeName}>";
-            string dbSetWithFullType = $"Microsoft.EntityFrameworkCore.DbSet<{modelTypeFullName}>";
+            string dbSetWithFullType = string.IsNullOrEmpty(modelTypeFullName) ?
+                string.Empty : $"Microsoft.EntityFrameworkCore.DbSet<{modelTypeFullName}>";
             //get the DbSet pertaining our given modelSymbol
             var dbSetProperty = dbContextTypeSymbol.GetMembers().OfType<IPropertySymbol>().FirstOrDefault(p =>
                 p.Type is INamedTypeSymbol &&

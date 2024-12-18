@@ -26,7 +26,7 @@ internal static class ClassAnalyzers
             dbContextInfo.DbContextClassPath = existingDbContextClass.Locations.FirstOrDefault()?.SourceTree?.FilePath;
             dbContextInfo.DbContextNamespace = existingDbContextClass.ContainingNamespace.ToDisplayString();
             dbContextInfo.EntitySetVariableName = modelInfo is null ?
-                string.Empty : EfDbContextHelpers.GetEntitySetVariableName(existingDbContextClass, modelInfo.ModelTypeName);
+                string.Empty : EfDbContextHelpers.GetEntitySetVariableName(existingDbContextClass, modelInfo.ModelTypeName, modelInfo.ModelFullName ?? modelInfo.ModelTypeName);
         }
         //properties for creating a new DbContext
         else

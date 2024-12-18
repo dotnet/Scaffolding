@@ -76,7 +76,7 @@ public class <#= Model.ControllerName #> : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("ID,Title,ReleaseDate,Genre,Price")] <#= modelName #> movie)
+    public async Task<IActionResult> Create([Bind("ID,Title,ReleaseDate,Genre,Price")] <#= modelName #> <#= modelNameLowerInv #>)
     {
         if (ModelState.IsValid)
         {
@@ -108,7 +108,7 @@ public class <#= Model.ControllerName #> : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>, [Bind("ID,Title,ReleaseDate,Genre,Price")] <#= modelName #> movie)
+    public async Task<IActionResult> Edit(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>, [Bind("ID,Title,ReleaseDate,Genre,Price")] <#= modelName #> <#= modelNameLowerInv #>)
     {
         if (<#= primaryKeyNameLowerInv #> != <#= modelNameLowerInv #>.<#= primaryKeyName #>)
         {

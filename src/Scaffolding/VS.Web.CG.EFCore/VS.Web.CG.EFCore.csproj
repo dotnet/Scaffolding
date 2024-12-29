@@ -24,7 +24,7 @@
          starting with VS 17.3 Preview 3. This is a placeholder fix. 
          Extra deps are pulled into the project but only for 2 scenarios, area and view.
          The rest of them pull in EF dependencies regardless. -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(MicrosoftEntityFrameworkCoreDesignPackageVersion)"/>
   </ItemGroup>
 
   <ItemGroup>

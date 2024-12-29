@@ -20,7 +20,11 @@
        without adding EntityFrameworkCore dependency.
        https://github.com/dotnet/scaffolding/issues/434
        -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="All" Version="$(MicrosoftEntityFrameworkCoreDesignPackageVersion)" />
+    <!-- Would ideally have this private but this dependency is failing to load on runtime 
+         starting with VS 17.3 Preview 3. This is a placeholder fix. 
+         Extra deps are pulled into the project but only for 2 scenarios, area and view.
+         The rest of them pull in EF dependencies regardless. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design"/>
   </ItemGroup>
 
   <ItemGroup>

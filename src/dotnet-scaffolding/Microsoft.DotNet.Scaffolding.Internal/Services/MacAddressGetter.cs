@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
+using Microsoft.DotNet.Scaffolding.Internal.Shared;
 
 namespace Microsoft.DotNet.Scaffolding.Internal.Services;
 

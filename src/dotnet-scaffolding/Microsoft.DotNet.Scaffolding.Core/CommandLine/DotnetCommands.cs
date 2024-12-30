@@ -1,6 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
+using Microsoft.DotNet.Scaffolding.Internal.Shared;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Core.CommandLine;
@@ -28,7 +28,7 @@ internal static class DotnetCommands
                 arguments.Add("--prerelease");
             }
 
-            logger.LogInformation(string.Format("\nAdding package '{0}'...", packageName));
+            logger.LogInformation(string.Format("Adding package '{0}'...", packageName));
             var runner = DotnetCliRunner.CreateDotNet("add", arguments);
 
             // Buffer the output here because we'll only display it in the failure scenario

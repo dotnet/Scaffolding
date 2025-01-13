@@ -38,7 +38,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
                 return rootNode;
             }
 
-            if (rootNode.Usings.Any(usingNode => usingNode.Name.ToString() == namespaceName))
+            if (rootNode.Usings.Any(usingNode => usingNode.Name.NormalizeWhitespace().ToString() == namespaceName))
             {
                 // Using already present, return this node
                 return rootNode;

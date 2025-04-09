@@ -49,7 +49,7 @@
     <PackageVersion Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
     <PackageVersion Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataVersion)" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
+    <PackageVersion Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
     <PackageVersion Include="xunit.skippablefact" Version="$(XunitSkippableFactPackageVersion)" />
   </ItemGroup>
 

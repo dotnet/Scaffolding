@@ -118,6 +118,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
+    <SystemTextJsonVersion>9.0.4</SystemTextJsonVersion>
   </PropertyGroup>
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>

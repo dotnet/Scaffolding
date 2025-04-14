@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal;
+using Microsoft.DotNet.Scaffolding.Internal.Shared;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.Extensions.Logging;
 

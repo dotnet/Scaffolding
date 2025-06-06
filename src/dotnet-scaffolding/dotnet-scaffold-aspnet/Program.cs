@@ -1,11 +1,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Text.Json;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Internal;
+using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -18,6 +21,7 @@ public static class Program
 {
     public static void Main(string[] args)
     {
+        System.Diagnostics.Debugger.Launch();
         var builder = Host.CreateScaffoldBuilder();
         ConfigureServices(builder.Services);
         ConfigureSteps(builder.Services);
@@ -25,7 +29,8 @@ public static class Program
             out var projectOption, out var prereleaseOption, out var fileNameOption, out var actionsOption,
             out var areaNameOption, out var modelNameOption, out var endpointsClassOption, out var databaseProviderOption,
             out var databaseProviderRequiredOption, out var identityDbProviderRequiredOption, out var dataContextClassOption, out var dataContextClassRequiredOption,
-            out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption, out var overwriteOption);
+            out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption, out var overwriteOption,
+            out var usernameOption, out var tenantIdOption, out var applicationOption, out var selectApplicationOption);
 
         builder.AddScaffolder("blazor-empty")
             .WithDisplayName("Razor Component")
@@ -269,7 +274,7 @@ public static class Program
             .WithBlazorIdentityTextTemplatingStep()
             .WithBlazorIdentityCodeChangeStep();
 
-        builder.AddScaffolder("identity")
+            builder.AddScaffolder("identity")
             .WithDisplayName("ASP.NET Core Identity")
             .WithCategory("Identity")
             .WithDescription("Add ASP.NET Core identity to a project.")
@@ -289,6 +294,29 @@ public static class Program
             .WithConnectionStringStep()
             .WithIdentityTextTemplatingStep()
             .WithIdentityCodeChangeStep();
+
+        builder.AddScaffolder("entra-id")
+        .WithDisplayName("Entra ID")
+        .WithCategory("Entra ID")
+        .WithDescription("Add Entra auth")
+        .WithOptions([usernameOption, projectOption, tenantIdOption, applicationOption, selectApplicationOption])
+        .WithStep<ValidateEntraIdStep>(config =>
+        {
+            var step = config.Step;
+            var context = config.Context;
+            step.Username = context.GetOptionResult(usernameOption);
+            step.Project = context.GetOptionResult(projectOption);
+            step.TenantId = context.GetOptionResult(tenantIdOption);
+            step.Application = context.GetOptionResult(applicationOption);
+            step.SelectApplication = context.GetOptionResult(selectApplicationOption);
+        })
+        .WithRegisterAppStep()
+        .WithAddClientSecretStep()
+        .WithUpdateAppSettingsStep()
+        .WithUpdateAppAuthorizationStep()
+        .WithEntraAddPackagesStep()
+        .WithEntraIdCodeChangeStep()
+        .WithEntraIdTextTemplatingStep();
 
         var runner = builder.Build();
         var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
@@ -338,8 +366,14 @@ public static class Program
         out ScaffolderOption<string> pageTypeOption,
         out ScaffolderOption<string> controllerNameOption,
         out ScaffolderOption<bool> viewsOption,
-        out ScaffolderOption<bool> overwriteOption)
+        out ScaffolderOption<bool> overwriteOption,
+        out ScaffolderOption<string> usernameOption,
+        out ScaffolderOption<string> tenantIdOption,
+        out ScaffolderOption<string> applicationOption,
+        out ScaffolderOption<string> selectApplicationOption
+        )
     {
+        var (usernames, tenants, appIds) = GetAzureInformation();
         projectOption = new ScaffolderOption<string>
         {
             DisplayName = ".NET project file",
@@ -490,6 +524,155 @@ public static class Program
             Required = true,
             PickerType = InteractivePickerType.YesNo
         };
+
+        usernameOption = new ScaffolderOption<string>
+        {
+            DisplayName = "Select username",
+            CliOption = Constants.CliOptions.UsernameOption,
+            Description = "User name for the identity user",
+            Required = true,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = usernames 
+        };
+
+        tenantIdOption = new ScaffolderOption<string>
+        {
+            DisplayName = "Tenant Id",
+            CliOption = Constants.CliOptions.TenantIdOption,
+            Description = "Tenant Id for the identity user",
+            Required = true,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = tenants 
+        };
+
+        applicationOption = new ScaffolderOption<string>
+        {
+            DisplayName = "Create or Select Application",
+            Description = "Create or select existing application",
+            Required = true,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = new[] { "Create a new Azure application object", "Select an existing Azure application object" } 
+        };
+
+        selectApplicationOption = new ScaffolderOption<string>
+        {
+            DisplayName = "Select Application",
+            CliOption = Constants.CliOptions.ApplicationIdOption,
+            Description = "Select existing application",
+            Required = false,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = appIds
+        };
+    }
+
+    
+    private static (IEnumerable<string> usernames, IEnumerable<string> tenants, IEnumerable<string> appIds) GetAzureInformation()
+    {
+        IEnumerable<string> defaultUsernames = new[] { "User1", "User2", "User3" };
+        IEnumerable<string> defaultTenants = new[] { "tenantId1", "tenantId2" };
+        IEnumerable<string> defaultAppIds = new[] { "111111111111", "222222222222" };
+
+        try
+        {
+            var usernames = new List<string>();
+            var tenants = new List<string>();
+            var appIds = new List<string>();
+
+            // Create a runner to execute the 'az account list' command with json output format
+            var runner = AzCliRunner.Create();
+
+            var exitCode = runner.RunAzCli("account list --output json", out var stdOut, out var stdErr);
+
+            if (stdOut is not null)
+            {
+                var result = StringUtil.ConvertStringToArray(stdOut);
+                if (result.Length is 0)
+                {
+                    exitCode = runner.RunAzCli("login", out stdOut, out stdErr);
+                }
+            }
+
+            if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
+            {
+                // Parse the JSON output
+                using JsonDocument doc = JsonDocument.Parse(stdOut);
+                JsonElement root = doc.RootElement;
+
+                if (root.ValueKind == JsonValueKind.Array)
+                {
+
+                    foreach (JsonElement account in root.EnumerateArray())
+                    {
+                        if (account.TryGetProperty("user", out JsonElement user) &&
+                            user.TryGetProperty("name", out JsonElement name))
+                        {
+                            string? username = name.GetString();
+                            if (!string.IsNullOrEmpty(username))
+                            {
+                                usernames.Add(username);
+                            }
+                        }
+
+                        // Extract tenant ID from the JSON array
+                        if (account.TryGetProperty("tenantId", out JsonElement tenant))
+                        {
+                            string? id = tenant.GetString();
+                            if (!string.IsNullOrEmpty(id))
+                            {
+                                tenants.Add(id);
+                            }
+                        }
+                    }
+ 
+                }
+            }
+
+            exitCode = runner.RunAzCli("ad app list --output json", out stdOut, out stdErr);
+
+            if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
+            {
+                // Parse the JSON output
+                using JsonDocument doc = JsonDocument.Parse(stdOut);
+                JsonElement root = doc.RootElement;
+
+                if (root.ValueKind == JsonValueKind.Array)
+                {
+
+                    foreach (JsonElement app in root.EnumerateArray())
+                    {
+                        if (app.TryGetProperty("appId", out JsonElement appId))
+                        {
+                            string? id = appId.GetString();
+                            string? displayName = app.TryGetProperty("displayName", out JsonElement name) ?
+                                                 name.GetString() : "Unknown App";
+
+                            if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(displayName))
+                            {
+                                // Format as "DisplayName (AppId)" for better user experience
+                                appIds.Add($"{displayName} ({id})");
+                            }
+                        }
+                    }
+
+                    return (usernames.Count > 0 ? usernames : defaultUsernames, tenants.Count > 0 ? tenants : defaultTenants, appIds.Count > 0 ? appIds : defaultAppIds);
+                    
+                }
+            }
+
+            if (!string.IsNullOrEmpty(stdErr))
+            {
+                Console.WriteLine($"Error executing 'az ad app list': {stdErr}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle any exceptions, like az CLI not being installed
+            Console.WriteLine($"Error getting Azure accounts: {ex.Message}");
+        }
+
+        // Fallback values if the command fails
+        return (defaultUsernames, defaultTenants, defaultAppIds);
     }
 }
+
 

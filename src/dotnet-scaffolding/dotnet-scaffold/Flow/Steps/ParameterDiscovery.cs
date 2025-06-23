@@ -110,6 +110,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 case InteractivePickerType.CustomPicker:
                     stepOptions = GetCustomValues(_parameter.CustomPickerValues);
                     break;
+                case InteractivePickerType.ConditionalPicker:
+                    var affirmative = _parameter.CustomPickerValues?.FirstOrDefault("");
+                    var negative = _parameter.CustomPickerValues?.LastOrDefault("");
+                    if(!string.IsNullOrEmpty(affirmative) && !string.IsNullOrEmpty(negative))
+                    {
+                        stepOptions = [new() { Name = affirmative, Value = "true" }, new() { Name = negative, Value = "false" }];
+                        converter = GetDisplayNameForYesNo;
+                    }
+                    
+                    break;
             }
 
             if (ShouldAddNoneOption(pickerType, stepOptions))

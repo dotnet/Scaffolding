@@ -13,7 +13,6 @@ public abstract class ScaffolderOption
     public string? Description { get; init; }
     public InteractivePickerType PickerType { get; init; } = InteractivePickerType.None;
     public IEnumerable<string>? CustomPickerValues { get; init; } = null;
-
     internal abstract Option ToCliOption();
     internal abstract Parameter ToParameter();
 }

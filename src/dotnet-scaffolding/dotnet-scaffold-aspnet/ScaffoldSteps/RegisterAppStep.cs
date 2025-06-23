@@ -43,20 +43,43 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return Task.FromResult(false);
             }
 
-            _logger.LogInformation("Registering project...");
-
-            // Initialize user secrets
-            bool success = RegisterApp(context);
-            if (!success)
+            if(ClientId is not null)
             {
-                _logger.LogError("Failed to Register App.");
-                return Task.FromResult(false);
+
+                _logger.LogInformation("Updating project...");
+
+                // Initialize user secrets
+                bool success = UpdateApp(context);
+                if (!success)
+                {
+                    _logger.LogError("Failed to Update App.");
+                    return Task.FromResult(false);
+                }
+
+
+
+                _logger.LogInformation("Successfully Updated App.");
+                return Task.FromResult(true);
+            }
+            else
+            {
+
+                _logger.LogInformation("Registering project...");
+
+                // Initialize user secrets
+                bool success = RegisterApp(context);
+                if (!success)
+                {
+                    _logger.LogError("Failed to Register App.");
+                    return Task.FromResult(false);
+                }
+
+
+
+                _logger.LogInformation("Successfully Registered App.");
+                return Task.FromResult(true);
             }
 
-            
-
-            _logger.LogInformation("Successfully Registered App.");
-            return Task.FromResult(true);
         }
 
         private bool RegisterApp(ScaffolderContext context)
@@ -78,7 +101,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 
                 if (exitCode != 0)
                 {
-                    _logger.LogError($"Error adding client secret: {stdErr}");
+                    _logger.LogError($"Error registering application: {stdErr}");
                     return false;
                 }
 
@@ -107,5 +130,54 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             }
         }
 
+        private bool UpdateApp(ScaffolderContext context)
+        {
+            try
+            {
+                // Fix for CS8620: Ensure all elements in the array are non-null by using null-coalescing operator
+                var args = new[]
+                {
+                    "--update-app-registration",
+                    "--client-id", ClientId ?? string.Empty,
+                    "--tenant-id", TenantId ?? string.Empty,
+                    "--username", Username ?? string.Empty,
+
+                };
+
+                // Fix for IDE0300: Simplify collection initialization
+                var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
+
+                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+
+                if (exitCode != 0)
+                {
+                    _logger.LogError($"Error updating registration: {stdErr}");
+                    return false;
+                }
+
+                if (!string.IsNullOrEmpty(stdOut))
+                {
+                    // Extract client ID using regex
+                    var match = Regex.Match(stdOut, @"Created app .+ - ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})");
+                    if (match.Success && match.Groups.Count > 1)
+                    {
+                        ClientId = match.Groups[1].Value;
+                        context.Properties["ClientId"] = ClientId;
+                        _logger.LogInformation($"Captured client ID: {ClientId}");
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Could not extract client ID from output");
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Error Registering App: {e.Message}");
+                return false;
+            }
+        }
     }
 }

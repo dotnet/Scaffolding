@@ -28,10 +28,10 @@ internal static class EntraIdHelper
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {
                 string extension = templateFullName.StartsWith("loginor", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
-                string templateNameWithNamespace = String.Equals(extension, ".razor") ? $"{entraIdModel.EntraIdNamespace}.Components.Layout" : $"{entraIdModel.EntraIdNamespace}";
+                string templateNameWithNamespace = String.Equals(extension, ".razor") ? $"{entraIdModel.BaseOutputPath}\\Components\\Layout" : $"{entraIdModel.BaseOutputPath}";
                 string outputFileName = Path.Combine(templateNameWithNamespace ?? "", templateFullName + extension);
 
-                Console.WriteLine($"Adding template: {templateNameWithNamespace}, Output: {outputFileName}");
+                Console.WriteLine($"Adding template: {templateFullName}, Output: {outputFileName}");
 
                 textTemplatingProperties.Add(new()
                 {

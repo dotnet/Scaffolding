@@ -47,6 +47,7 @@ internal class PackageConstants
         public const string OpenApiPackageName = "Microsoft.AspNetCore.OpenApi";
         public const string AspNetCoreIdentityEfPackageName = "Microsoft.AspNetCore.Identity.EntityFrameworkCore";
         public const string AspNetCoreIdentityUiPackageName = "Microsoft.AspNetCore.Identity.UI";
+        public const string AspNetCoreComponentsWebAssemblyAuthenticationPackageName = "Microsoft.AspNetCore.Components.WebAssembly.Authentication";
         public const string AspNetCoreAuthenticationJwtBearerPackageName = "Microsoft.AspNetCore.Authentication.JwtBearer";
         public const string AspNetCoreAuthenticationOpenIdConnectPackageName = "Microsoft.AspNetCore.Authentication.OpenIdConnect";
         public const string MicrosoftIdentityWebPackageName = "Microsoft.Identity.Web";

@@ -312,10 +312,13 @@ public static class Program
         })
         .WithRegisterAppStep()
         .WithAddClientSecretStep()
+        .WithDetectBlazorWasmStep()
         .WithUpdateAppSettingsStep()
         .WithUpdateAppAuthorizationStep()
         .WithEntraAddPackagesStep()
+        .WithEntraBlazorWasmAddPackagesStep()
         .WithEntraIdCodeChangeStep()
+        .WithEntraIdBlazorWasmCodeChangeStep()
         .WithEntraIdTextTemplatingStep();
 
         var runner = builder.Build();
@@ -550,8 +553,8 @@ public static class Program
             DisplayName = "Create or Select Application",
             Description = "Create or select existing application",
             Required = true,
-            PickerType = InteractivePickerType.CustomPicker,
-            CustomPickerValues = new[] { "Create a new Azure application object", "Select an existing Azure application object" } 
+            PickerType = InteractivePickerType.ConditionalPicker,
+            CustomPickerValues = new[] { "Select an existing Azure application object", "Create a new Azure application object"} 
         };
 
         selectApplicationOption = new ScaffolderOption<string>
@@ -649,7 +652,7 @@ public static class Program
                             if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(displayName))
                             {
                                 // Format as "DisplayName (AppId)" for better user experience
-                                appIds.Add($"{displayName} ({id})");
+                                appIds.Add($"{displayName} {id}");
                             }
                         }
                     }

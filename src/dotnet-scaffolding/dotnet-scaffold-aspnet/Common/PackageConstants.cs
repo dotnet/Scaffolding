@@ -52,5 +52,4 @@ internal class PackageConstants
         public const string AspNetCoreAuthenticationOpenIdConnectPackageName = "Microsoft.AspNetCore.Authentication.OpenIdConnect";
         public const string MicrosoftIdentityWebPackageName = "Microsoft.Identity.Web";
     }
-
 }

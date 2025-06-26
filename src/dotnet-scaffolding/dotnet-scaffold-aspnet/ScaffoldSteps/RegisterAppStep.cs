@@ -74,8 +74,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     return Task.FromResult(false);
                 }
 
-
-
                 _logger.LogInformation("Successfully Registered App.");
                 return Task.FromResult(true);
             }

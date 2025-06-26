@@ -16,7 +16,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _logger;
-        
         public ParameterBasedFlowStep(
             Parameter parameter,
             ParameterBasedFlowStep? nextStep,
@@ -57,7 +56,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 SelectParameter(context, parameterValue ?? string.Empty);
             }
 
-            if(Parameter.PickerType is InteractivePickerType.ConditionalPicker && string.Equals(parameterValue, "false"))
+            if (Parameter.PickerType is InteractivePickerType.ConditionalPicker && string.Equals(parameterValue, "false"))
             {
                 //Skip the current next step if it failed the conditional 
                 NextStep = NextStep?.NextStep;
@@ -110,7 +109,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
         }
 
-        private void    SelectParameter(IFlowContext context, string parameterValue)
+        private void SelectParameter(IFlowContext context, string parameterValue)
         {
             if (!string.IsNullOrEmpty(parameterValue))
             {

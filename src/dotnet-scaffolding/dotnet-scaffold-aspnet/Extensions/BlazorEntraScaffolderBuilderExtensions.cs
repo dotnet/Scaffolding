@@ -17,8 +17,8 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
-    internal static class BlazorEntraScaffolderBuilderExtensions
-    {
+internal static class BlazorEntraScaffolderBuilderExtensions
+{
 
     public static IScaffoldBuilder WithAddClientSecretStep(this IScaffoldBuilder builder)
     {
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
             if (!string.IsNullOrEmpty(entraSettings.SelectApplication))
             {
                 string id = entraSettings.SelectApplication.Split(" ").Last();
-                step.ClientId = id; 
+                step.ClientId = id;
                 context.Properties["ClientId"] = id;
             }
 
@@ -101,8 +101,8 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
             {
                 throw new InvalidOperationException("TenantId is not set in EntraIdSettings.");
             }
-            step.TenantId = entra.TenantId;            
-            
+            step.TenantId = entra.TenantId;
+
         });
     }
 
@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
                 step.ClientId = clientId;
             }
 
-            if(context.Properties.TryGetValue("ClientSecret", out var clientSecretObj) && clientSecretObj is string clientSecret)
+            if (context.Properties.TryGetValue("ClientSecret", out var clientSecretObj) && clientSecretObj is string clientSecret)
             {
                 step.ClientSecret = clientSecret;
             }
@@ -174,7 +174,8 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
             if (context.Properties.TryGetValue("ClientId", out var clientIdObj) && clientIdObj is string clientId)
             {
                 step.ClientId = clientId;
-            } else
+            }
+            else
             {
                 step.SkipStep = true;
             }
@@ -235,7 +236,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
         {
             var step = config.Step;
             var context = config.Context;
-         
+
             if (context.Properties.TryGetValue("IsBlazorWasmProject", out var isBlazorWasm) && isBlazorWasm is bool wasmProject && wasmProject)
             {
                 if (context.Properties.TryGetValue("BlazorWasmClientProjectPath", out var clientProjectPath) && clientProjectPath is string projectPath && !string.IsNullOrEmpty(projectPath))
@@ -287,7 +288,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
                 throw new InvalidOperationException("missing 'EntraIdSettings' in 'ScaffolderContext.Properties'");
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
-            
+
 
             //initialize CodeModificationStep's properties
             if (!string.IsNullOrEmpty(codeModificationFilePath) &&
@@ -331,7 +332,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
 
-            if(context.Properties.TryGetValue("BlazorWasmClientProjectPath", out var blazorWasmProject) && blazorWasmProject is string clientProjectPath && !string.IsNullOrEmpty(clientProjectPath))
+            if (context.Properties.TryGetValue("BlazorWasmClientProjectPath", out var blazorWasmProject) && blazorWasmProject is string clientProjectPath && !string.IsNullOrEmpty(clientProjectPath))
             {
                 step.ProjectPath = clientProjectPath;
                 //initialize CodeModificationStep's properties
@@ -359,8 +360,6 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
                 step.SkipStep = true;
                 return;
             }
-
-            
         });
 
         return builder;

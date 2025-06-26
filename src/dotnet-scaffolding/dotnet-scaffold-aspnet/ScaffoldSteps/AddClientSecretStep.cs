@@ -56,70 +56,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return Task.FromResult(false);
             }
 
-            /*// If ClientSecret is provided, set it in user secrets
-            if (!string.IsNullOrEmpty(ClientSecret) && !string.IsNullOrEmpty(SecretName))
-            {
-                success = SetUserSecret(SecretName, ClientSecret);
-                if (!success)
-                {
-                    _logger.LogError($"Failed to set client secret in user secrets.");
-                    return Task.FromResult(false);
-                }
-            }
-            else if (!string.IsNullOrEmpty(ClientId) && !string.IsNullOrEmpty(SecretName))
-            {
-                // Set a placeholder secret if ClientSecret is not provided but ClientId is
-                var placeholderSecret = $"placeholder-secret-for-{ClientId}-replace-with-real-secret";
-                success = SetUserSecret(SecretName, placeholderSecret);
-                if (!success)
-                {
-                    _logger.LogError($"Failed to set placeholder client secret in user secrets.");
-                    return Task.FromResult(false);
-                }
-
-                _logger.LogInformation($"Set placeholder client secret. Replace it with a real secret before running your application.");
-            }*/
-
             _logger.LogInformation("Successfully configured user secrets for the project.");
             return Task.FromResult(true);
-        }
-
-        private bool InitializeUserSecrets()
-        {
-            try
-            {
-                // Check if user secrets are already initialized by looking for UserSecretsId in the project file
-                string projectContent = _fileSystem.ReadAllText(ProjectPath);
-                if (projectContent.Contains("<UserSecretsId>"))
-                {
-                    _logger.LogInformation("User secrets are already initialized for this project.");
-                    ClientId = ExtractUserSecretsId(projectContent);
-                    return true;
-                }
-
-                // Run 'dotnet user-secrets init' command
-                var runner = DotnetCliRunner.CreateDotNet("user-secrets", new[] { "init", "--project", ProjectPath });
-                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
-
-                if (exitCode != 0)
-                {
-                    _logger.LogError($"Error initializing user secrets: {stdErr}");
-                    return false;
-                }
-
-                if (String.IsNullOrEmpty(stdOut))
-                {
-                    ClientId = ExtractUserSecretsId(projectContent);
-                }
-
-                _logger.LogInformation("User secrets initialized successfully.");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception when initializing user secrets: {ex.Message}");
-                return false;
-            }
         }
 
         private bool AddClientSecret(ScaffolderContext context)
@@ -183,41 +121,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             }
 
             return false;
-        }
-
-        private bool SetUserSecret(string key, string value)
-        {
-            try
-            {
-                // Run 'dotnet user-secrets set' command
-                var runner = DotnetCliRunner.CreateDotNet("user-secrets", new[] { "set", key, value, "--project", ProjectPath });
-                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
-
-                if (exitCode != 0)
-                {
-                    _logger.LogError($"Error setting user secret: {stdErr}");
-                    return false;
-                }
-
-                _logger.LogInformation($"Secret '{key}' set successfully.");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception when setting user secret: {ex.Message}");
-                return false;
-            }
-        }
-
-        private string? ExtractUserSecretsId(string projectContent)
-        {
-            // Use regex to extract the UserSecretsId value
-            var match = Regex.Match(projectContent, @"<UserSecretsId>(.*?)</UserSecretsId>");
-            if (match.Success && match.Groups.Count > 1)
-            {
-                return match.Groups[1].Value;
-            }
-            return null;
         }
     }
 }

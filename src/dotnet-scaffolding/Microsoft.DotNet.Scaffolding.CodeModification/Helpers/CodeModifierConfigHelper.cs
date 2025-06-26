@@ -21,9 +21,8 @@ internal static class CodeModifierConfigHelper
         {
             return System.Text.Json.JsonSerializer.Deserialize<CodeModifierConfig>(jsonText);
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            Console.WriteLine(e.ToString());
             return null;
         }
     }

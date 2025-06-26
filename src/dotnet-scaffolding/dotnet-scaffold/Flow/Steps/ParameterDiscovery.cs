@@ -113,12 +113,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 case InteractivePickerType.ConditionalPicker:
                     var affirmative = _parameter.CustomPickerValues?.FirstOrDefault("");
                     var negative = _parameter.CustomPickerValues?.LastOrDefault("");
-                    if(!string.IsNullOrEmpty(affirmative) && !string.IsNullOrEmpty(negative))
+                    if (!string.IsNullOrEmpty(affirmative) && !string.IsNullOrEmpty(negative))
                     {
                         stepOptions = [new() { Name = affirmative, Value = "true" }, new() { Name = negative, Value = "false" }];
                         converter = GetDisplayNameForYesNo;
                     }
-                    
+
                     break;
             }
 
@@ -257,7 +257,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             {
                 projects = _fileSystem.EnumerateFiles(workingDirectory, "*.csproj", SearchOption.AllDirectories).ToList();
             }
-            
+
             return projects.Select(x => new StepOption() { Name = GetProjectDisplayName(x), Value = x }).ToList();
         }
 
@@ -275,7 +275,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         internal List<string> AddUniqueProjects(List<string> baseList, List<string> projectPathsToAdd)
         {
             var baseProjectNames = baseList.Select(x => Path.GetFileName(x));
-            foreach(var projectPath in projectPathsToAdd)
+            foreach (var projectPath in projectPathsToAdd)
             {
                 var normalizedPath = StringUtil.NormalizePathSeparators(projectPath);
                 var projectName = Path.GetFileName(normalizedPath);

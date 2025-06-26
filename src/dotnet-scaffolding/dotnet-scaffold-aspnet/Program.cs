@@ -21,7 +21,6 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        System.Diagnostics.Debugger.Launch();
         var builder = Host.CreateScaffoldBuilder();
         ConfigureServices(builder.Services);
         ConfigureSteps(builder.Services);
@@ -274,7 +273,7 @@ public static class Program
             .WithBlazorIdentityTextTemplatingStep()
             .WithBlazorIdentityCodeChangeStep();
 
-            builder.AddScaffolder("identity")
+        builder.AddScaffolder("identity")
             .WithDisplayName("ASP.NET Core Identity")
             .WithCategory("Identity")
             .WithDescription("Add ASP.NET Core identity to a project.")
@@ -296,30 +295,30 @@ public static class Program
             .WithIdentityCodeChangeStep();
 
         builder.AddScaffolder("entra-id")
-        .WithDisplayName("Entra ID")
-        .WithCategory("Entra ID")
-        .WithDescription("Add Entra auth")
-        .WithOptions([usernameOption, projectOption, tenantIdOption, applicationOption, selectApplicationOption])
-        .WithStep<ValidateEntraIdStep>(config =>
-        {
-            var step = config.Step;
-            var context = config.Context;
-            step.Username = context.GetOptionResult(usernameOption);
-            step.Project = context.GetOptionResult(projectOption);
-            step.TenantId = context.GetOptionResult(tenantIdOption);
-            step.Application = context.GetOptionResult(applicationOption);
-            step.SelectApplication = context.GetOptionResult(selectApplicationOption);
-        })
-        .WithRegisterAppStep()
-        .WithAddClientSecretStep()
-        .WithDetectBlazorWasmStep()
-        .WithUpdateAppSettingsStep()
-        .WithUpdateAppAuthorizationStep()
-        .WithEntraAddPackagesStep()
-        .WithEntraBlazorWasmAddPackagesStep()
-        .WithEntraIdCodeChangeStep()
-        .WithEntraIdBlazorWasmCodeChangeStep()
-        .WithEntraIdTextTemplatingStep();
+            .WithDisplayName("Entra ID")
+            .WithCategory("Entra ID")
+            .WithDescription("Add Entra auth")
+            .WithOptions([usernameOption, projectOption, tenantIdOption, applicationOption, selectApplicationOption])
+            .WithStep<ValidateEntraIdStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.Username = context.GetOptionResult(usernameOption);
+                step.Project = context.GetOptionResult(projectOption);
+                step.TenantId = context.GetOptionResult(tenantIdOption);
+                step.Application = context.GetOptionResult(applicationOption);
+                step.SelectApplication = context.GetOptionResult(selectApplicationOption);
+            })
+            .WithRegisterAppStep()
+            .WithAddClientSecretStep()
+            .WithDetectBlazorWasmStep()
+            .WithUpdateAppSettingsStep()
+            .WithUpdateAppAuthorizationStep()
+            .WithEntraAddPackagesStep()
+            .WithEntraBlazorWasmAddPackagesStep()
+            .WithEntraIdCodeChangeStep()
+            .WithEntraIdBlazorWasmCodeChangeStep()
+            .WithEntraIdTextTemplatingStep();
 
         var runner = builder.Build();
         var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
@@ -677,5 +676,4 @@ public static class Program
         return (defaultUsernames, defaultTenants, defaultAppIds);
     }
 }
-
 

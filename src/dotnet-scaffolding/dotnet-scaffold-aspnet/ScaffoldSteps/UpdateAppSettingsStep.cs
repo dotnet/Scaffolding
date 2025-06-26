@@ -38,17 +38,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             _telemetryService = telemetryService;
         }
 
-        //public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
-        //{
-        //    if (context == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(context));
-        //    }
-
-        //    var result = UpdateSettings();
-        //    return Task.FromResult(result);
-        //}
-
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
             try
@@ -199,32 +188,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             return Task.FromResult(false);
             
         }
-
-        private bool UpdateSettings()
-        {
-            try
-            {
-                var args = new[] { "--update-project", "--client-id", ClientId ?? "", "--tenant-id", TenantId ?? "", "--username", Username ?? "", "--project-file-path", ProjectPath, "--code-update=true", "--calls-graph=false", "--calls-downstream-api=false" , "--json"};
-                // Run 'dotnet user-secrets init' command
-                var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
-                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
-
-                if (exitCode != 0)
-                {
-                    _logger.LogError($"Error updating app settings: {stdErr}");
-                    return false;
-                }
-
-                _logger.LogInformation("App Settings updated successfully.");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception when updating app settings: {ex.Message}");
-                return false;
-            }
-        }
-
 
         private void UpdateDevelopmentSettings(string baseProjectPath, JsonNode content)
         {

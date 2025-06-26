@@ -9,7 +9,6 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Files;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
-//TODO : combine with 'IdentityHelper', should be quite easy.
 internal static class EntraIdHelper
 {
     internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, EntraIdModel entraIdModel)
@@ -30,8 +29,6 @@ internal static class EntraIdHelper
                 string extension = templateFullName.StartsWith("loginor", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
                 string templateNameWithNamespace = String.Equals(extension, ".razor") ? $"{entraIdModel.BaseOutputPath}\\Components\\Layout" : $"{entraIdModel.BaseOutputPath}";
                 string outputFileName = Path.Combine(templateNameWithNamespace ?? "", templateFullName + extension);
-
-                Console.WriteLine($"Adding template: {templateFullName}, Output: {outputFileName}");
 
                 textTemplatingProperties.Add(new()
                 {

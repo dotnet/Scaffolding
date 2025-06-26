@@ -32,8 +32,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             _fileSystem = fileSystem;
             _telemetryService = telemetryService;
         }
-        // This step is a placeholder for detecting Blazor WebAssembly projects.
-        // It can be extended in the future to perform actual detection logic.
+        
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
             if (ProjectPath is not null)
@@ -47,18 +46,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     var references = ProjectReferenceParser.ParseProjectReferences(stdOut);
                     if (references.Count is not 0)
                     {
-                        foreach(var reference in references)
+                        foreach (var reference in references)
                         {
                             var projectInfo = ClassAnalyzers.GetProjectInfo(reference, _logger);
-
 
                             var baseDirectory = Path.GetDirectoryName(ProjectPath);
                             if (baseDirectory is not null)
                             {
                                 var fullPath = Path.GetFullPath(reference, baseDirectory);
 
-                                /*if (_fileSystem.FileExists(fullPath))
-                                {*/
                                 var projectRunner = DotnetCliRunner.CreateDotNet("package", new[] { "list", "--project", fullPath, "--format", "json" });
                                 int packageExitCode = projectRunner.ExecuteAndCaptureOutput(out var packageStdOut, out var packageStdErr);
 
@@ -81,10 +77,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                                                             foreach (var pkgElement in topLevelPackages.EnumerateArray())
                                                             {
                                                                 string id = pkgElement.GetProperty("id").GetString() ?? string.Empty;
-                                                              
+
                                                                 if (id.StartsWith("Microsoft.NET.Sdk.WebAssembly"))
                                                                 {
-                                                                   context.Properties["IsBlazorWasmProject"] = true;
+                                                                    context.Properties["IsBlazorWasmProject"] = true;
                                                                     context.Properties["BlazorWasmClientProjectPath"] = fullPath;
                                                                     _logger.LogInformation($"Detected Blazor WebAssembly project via package reference: {id}");
                                                                     return Task.FromResult(true);
@@ -95,11 +91,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                                                 }
                                             }
                                         }
-
                                     }
                                 }
                             }
-                            //}
                         }
                         // Detected Blazor WebAssembly project
                         context.Properties["IsBlazorWasmProject"] = false;
@@ -115,56 +109,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 }
 
             }
-            
+
             return Task.FromResult(false);
-            
-            
         }
-        
-    }
-}
-
-public static class DotnetPackageParser
-{
-    public record PackageInfo(string Id, string RequestedVersion, string ResolvedVersion);
-
-    /// <summary>
-    /// Parses the JSON output from "dotnet list package --format json"
-    /// and returns a list of packages with their versions.
-    /// </summary>
-    /// <param name="jsonContent">JSON string from the dotnet CLI</param>
-    /// <returns>List of PackageInfo objects containing package details</returns>
-    public static List<PackageInfo> ParsePackageJson(string jsonContent)
-    {
-        var results = new List<PackageInfo>();
-
-        using var document = JsonDocument.Parse(jsonContent);
-        var root = document.RootElement;
-
-        if (root.TryGetProperty("projects", out var projectsElement))
-        {
-            foreach (var project in projectsElement.EnumerateArray())
-            {
-                if (project.TryGetProperty("frameworks", out var frameworksElement))
-                {
-                    foreach (var framework in frameworksElement.EnumerateArray())
-                    {
-                        if (framework.TryGetProperty("topLevelPackages", out var topLevelPackages))
-                        {
-                            foreach (var pkgElement in topLevelPackages.EnumerateArray())
-                            {
-                                string id = pkgElement.GetProperty("id").GetString() ?? string.Empty;
-                                string requested = pkgElement.GetProperty("requestedVersion").GetString() ?? string.Empty;
-                                string resolved = pkgElement.GetProperty("resolvedVersion").GetString() ?? string.Empty;
-
-                                results.Add(new PackageInfo(id, requested, resolved));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return results;
     }
 }

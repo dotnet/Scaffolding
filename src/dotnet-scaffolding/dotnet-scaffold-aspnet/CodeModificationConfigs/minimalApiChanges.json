@@ -44,6 +44,37 @@
           ]
         }
       }
+    },
+    {
+      "FileName": "Program.cs",
+      "Usings": [],
+      "Options": [
+        "OpenApi"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddControllers();",
+              "InsertBefore": [ "var app = builder.Build();" ],
+              "Block": "WebApplication.CreateBuilder.Services.AddOpenApi()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "CheckBlock": "if (!app.Environment.IsDevelopment())",
+              "Block": "if (app.Environment.IsDevelopment())\r\n{\r\n   app.MapOpenApi();\r\n}",
+              "Options": [ "OpenApi" ],
+              "InsertAfter": "var app = WebApplication.CreateBuilder.Build();",
+              "InsertBefore": [ "app.UseHttpsRedirection();" ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      }
     }
   ]
 }

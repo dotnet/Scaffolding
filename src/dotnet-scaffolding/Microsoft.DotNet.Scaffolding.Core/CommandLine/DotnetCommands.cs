@@ -63,7 +63,6 @@ internal static class DotnetCommands
         var arguments = new List<string>();
         if (!string.IsNullOrEmpty(projectFile))
         {
-
             arguments.AddRange(["--project", projectFile]);
         }
 

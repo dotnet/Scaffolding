@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common
 
             using var sr = new StringReader(referencesOutput);
             string? line;
-            while ((line = sr.ReadLine()) != null)
+            while ((line = sr.ReadLine()) is not null)
             {
                 line = line.Trim();
 

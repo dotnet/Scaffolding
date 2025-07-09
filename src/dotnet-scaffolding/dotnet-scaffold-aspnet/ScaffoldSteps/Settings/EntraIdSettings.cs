@@ -17,6 +17,4 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         public string? Application { get; set; }
         public string? SelectApplication { get; set; }
     }
-
-
 }

@@ -56,14 +56,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     return Task.FromResult(false);
                 }
 
-
-
                 _logger.LogInformation("Successfully Updated App.");
                 return Task.FromResult(true);
             }
             else
             {
-
                 _logger.LogInformation("Registering project...");
 
                 // Initialize user secrets

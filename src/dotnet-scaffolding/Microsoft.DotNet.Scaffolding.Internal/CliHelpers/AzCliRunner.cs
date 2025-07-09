@@ -11,7 +11,6 @@ namespace Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 /// </summary>
 internal class AzCliRunner
 {
-
     public static AzCliRunner Create(string? commandName = null)
     {
         return new AzCliRunner(commandName);
@@ -27,7 +26,6 @@ internal class AzCliRunner
 
         var psi = _psi;
         psi.Arguments = arguments;
-
 
         string errorMessage = string.Empty;
         string output = string.Empty;
@@ -101,8 +99,7 @@ internal class AzCliRunner
     internal string _commandName;
     private AzCliRunner(string? commandName = null)
     {
-
-       _commandName = commandName ?? FindAzureCLIPath();
+        _commandName = string.IsNullOrEmpty(commandName) ? FindAzureCLIPath() : commandName;
 
         _psi = new ProcessStartInfo(_commandName)
         {
@@ -135,11 +132,11 @@ internal class AzCliRunner
                 }
             }
 
-            return "";
+            return String.Empty;
         }
         catch (Exception)
         {
-            return "";
+            return String.Empty;
         }
     }
 

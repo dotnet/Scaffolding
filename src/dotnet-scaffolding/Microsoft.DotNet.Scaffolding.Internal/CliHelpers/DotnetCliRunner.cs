@@ -143,9 +143,6 @@ internal class DotnetCliRunner
         var commandName = FindAzureCLIPath();
         var finalArguments = arguments;
 
-        //finalArguments = $"{arguments}";
-        
-
         var psi = new ProcessStartInfo(commandName, finalArguments)
         {
             CreateNoWindow = true,
@@ -154,7 +151,6 @@ internal class DotnetCliRunner
             UseShellExecute = false,
             StandardOutputEncoding = Encoding.UTF8
         };
-
 
         string errorMessage = string.Empty;
         string output = string.Empty;
@@ -168,8 +164,6 @@ internal class DotnetCliRunner
         try
         {
             process.Start();
-
-         
         }
         catch (Exception ex)
         {
@@ -191,7 +185,6 @@ internal class DotnetCliRunner
 
         return process.ExitCode;
     }
-
 
     /// <summary>
     /// Executes a command that requires user interaction (like 'az login')

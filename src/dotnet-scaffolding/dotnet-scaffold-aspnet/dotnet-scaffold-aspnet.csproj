@@ -30,14 +30,6 @@
 
   <ItemGroup>
     <!-- Blazor identity templates-->
-    <None Update="Templates\BlazorEntraId\LoginOrLogout.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>LoginOrLogout.cs</LastGenOutput>
-    </None>
-    <None Update="Templates\BlazorEntraId\LoginLogoutEndpointRouteBuilderExtensions.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>LoginLogoutEndpointRouteBuilderExtensions.cs</LastGenOutput>
-    </None>
     <None Update="Templates\BlazorIdentity\IdentityComponentsEndpointRouteBuilderExtensions.tt">
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>

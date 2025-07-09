@@ -115,7 +115,7 @@
                                         }
                                         catch
                                         {
-                                            // Skip invalid URLs
+                                            _logger.LogError("An error occurred while processing the URL: {0}", url);
                                         }
                                     }
                                 }

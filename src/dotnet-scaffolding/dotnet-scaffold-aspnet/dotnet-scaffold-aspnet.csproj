@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Scaffolding tool with specific components</Description>
@@ -214,6 +214,15 @@
     <None Update="Templates\EfController\MvcEfController.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>MvcEfController.cs</LastGenOutput>
+    </None>
+    <!-- Blazor Entra Id templates -->
+    <None Update="Templates\BlazorEntraId\LoginOrLogout.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>LoginOrLogout.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\BlazorEntraId\LoginLogoutEndpointRouteBuilderExtensions.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>LoginLogoutEndpointRouteBuilderExtensions.cs</LastGenOutput>
     </None>
     <!-- Blazor CRUD templates -->
     <None Update="Templates\BlazorCrud\Create.tt">
@@ -597,6 +606,16 @@
 
   <ItemGroup>
     <!-- ASPNET.Core Identity templates -->
+    <Compile Update="Templates\BlazorEntraId\LoginLogoutEndpointRouteBuilderExtensions.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LoginLogoutEndpointRouteBuilderExtensions.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Templates\BlazorEntraId\LoginOrLogout.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LoginOrLogout.tt</DependentUpon>
+    </Compile>
     <Compile Update="Templates\Identity\Pages\Account\ExternalLoginModel.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -1302,5 +1321,9 @@
 
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Templates\BlazorEntraId\Pages\" />
   </ItemGroup>
 </Project>

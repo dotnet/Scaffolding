@@ -1,0 +1,41 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": [ "var builder = WebApplication.CreateBuilder(args)" ],
+              "MultiLineBlock": [
+                "builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
+                "    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));",
+                "",
+                "builder.Services.AddAuthorization(options =>",
+                "{",
+                "    // By default, all incoming requests will be authorized according to the default policy.",
+                "    options.FallbackPolicy = options.DefaultPolicy;",
+                "});"
+              ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertBefore": [ "app.MapRazorComponents<App>()" ],
+              "Block": "app.MapGroup(\"/authentication\").MapLoginAndLogout();",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Microsoft.AspNetCore.Authentication.OpenIdConnect",
+        "Microsoft.Identity.Web",
+        "$(UserClassNamespace)"
+      ]
+    }
+  ]
+}

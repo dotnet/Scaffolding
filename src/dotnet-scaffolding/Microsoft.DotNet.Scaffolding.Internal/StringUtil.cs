@@ -218,4 +218,35 @@ internal static class StringUtil
         }
         return filePath;
     }
+
+    /// <summary>
+    /// Converts a string representation of an array "[item1,item2,item3]" to a string array.
+    /// </summary>
+    /// <param name="arrayString">String representation of an array, e.g. "[item1,item2,item3]"</param>
+    /// <returns>Array of strings, or empty array if input is invalid</returns>
+    internal static string[] ConvertStringToArray(string arrayString)
+    {
+        if (string.IsNullOrEmpty(arrayString))
+        {
+            return Array.Empty<string>();
+        }
+
+        // Remove the brackets and any whitespace
+        string trimmed = arrayString.Trim();
+        if (trimmed.StartsWith("[") && trimmed.EndsWith("]"))
+        {
+            trimmed = trimmed.Substring(1, trimmed.Length - 2);
+        }
+
+        // Handle empty array case
+        if (string.IsNullOrWhiteSpace(trimmed))
+        {
+            return Array.Empty<string>();
+        }
+
+        // Split by comma and trim each item
+        return trimmed.Split(',')
+                     .Select(item => item.Trim())
+                     .ToArray();
+    }
 }

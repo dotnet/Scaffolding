@@ -11,7 +11,6 @@
     <PackageReference Include="Moq" />
     <PackageReference Include="xunit.skippablefact" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
-    <PackageReference Include="System.Net.Http" />
     <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 </Project>

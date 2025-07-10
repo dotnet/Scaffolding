@@ -7,12 +7,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ModelTypesLocatorTestClassLibrary\ModelTypesLocatorTestClassLibrary.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Stores" />
   </ItemGroup>
 
 </Project>

@@ -9,5 +9,6 @@ public enum InteractivePickerType
     FilePicker,
     ProjectPicker,
     CustomPicker,
-    YesNo
+    YesNo,
+    ConditionalPicker
 }

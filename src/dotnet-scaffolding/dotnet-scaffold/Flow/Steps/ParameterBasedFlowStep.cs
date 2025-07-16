@@ -56,6 +56,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 SelectParameter(context, parameterValue ?? string.Empty);
             }
 
+            if (Parameter.PickerType is InteractivePickerType.ConditionalPicker && string.Equals(parameterValue, "false"))
+            {
+                //Skip the current next step if it failed the conditional 
+                NextStep = NextStep?.NextStep;
+            }
+
             if (NextStep != null)
             {
                 return new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { NextStep } };

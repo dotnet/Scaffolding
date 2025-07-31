@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Code Generators for ASP.NET Core MVC. Contains code generators for MVC Controllers and Views.</Description>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>$(BuildTfm)</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGenerators.Mvc</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGenerators.Mvc</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -14,16 +14,16 @@
   <ItemGroup>
     <!-- This embedded resource is also packaged in order to allow VS to inspect the file. -->
     <EmbeddedResource Include="BlazorIdentity\blazorIdentityChanges.json">
-      <PackagePath>lib\net9.0\</PackagePath>
+      <PackagePath>lib\$(BuildTfm)\</PackagePath>
       <Pack>true</Pack>
     </EmbeddedResource>
-    <EmbeddedResource Include="Identity\bootstrap5_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net9.0\" />
+    <EmbeddedResource Include="Identity\bootstrap5_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\$(BuildTfm)\" />
     <Content Remove="Identity\bootstrap5_identitygeneratorfilesconfig.json" />
-    <EmbeddedResource Include="Identity\bootstrap4_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\net9.0\" />
+    <EmbeddedResource Include="Identity\bootstrap4_identitygeneratorfilesconfig.json" Pack="true" PackagePath="lib\$(BuildTfm)\" />
     <Content Remove="Identity\bootstrap4_identitygeneratorfilesconfig.json" />
-    <EmbeddedResource Include="Identity\identityMinimalHostingChanges.json" Pack="true" PackagePath="lib\net9.0\" />
-    <EmbeddedResource Include="Minimal Api\minimalApiChanges.json" Pack="true" PackagePath="lib\net9.0\" />
-    <EmbeddedResource Include="Blazor\blazorWebCrudChanges.json" Pack="true" PackagePath="lib\net9.0\" />
+    <EmbeddedResource Include="Identity\identityMinimalHostingChanges.json" Pack="true" PackagePath="lib\$(BuildTfm)\" />
+    <EmbeddedResource Include="Minimal Api\minimalApiChanges.json" Pack="true" PackagePath="lib\$(BuildTfm)\" />
+    <EmbeddedResource Include="Blazor\blazorWebCrudChanges.json" Pack="true" PackagePath="lib\$(BuildTfm)\" />
     <Content Remove="Identity\identityMinimalHostingChanges.json" />
   </ItemGroup>
   <ItemGroup>

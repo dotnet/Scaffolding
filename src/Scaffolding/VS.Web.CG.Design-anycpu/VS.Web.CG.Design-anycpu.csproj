@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\Shared.props" />
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>$(BuildTfm)</TargetFramework>
     <PlatformTarget>AnyCpu</PlatformTarget>
     <IsPackable>false</IsPackable>
     <Nullable>disable</Nullable>

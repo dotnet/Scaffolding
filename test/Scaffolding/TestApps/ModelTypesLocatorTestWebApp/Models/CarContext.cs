@@ -14,7 +14,7 @@ namespace ModelTypesLocatorTestWebApp.Models
         {
         }
 
-        public DbSet<Car> Car { get; set; }
-        public DbSet<Manufacturer> Manufacturer { get; set; }
+        public required DbSet<Car> Car { get; set; }
+        public required DbSet<Manufacturer> Manufacturer { get; set; }
     }
 }

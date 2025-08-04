@@ -2,7 +2,7 @@
   <Import Project="..\Directory.Build.props" />
 
   <PropertyGroup>
-    <DeveloperBuildTestTfms>net9.0</DeveloperBuildTestTfms>
+    <DeveloperBuildTestTfms>net10.0</DeveloperBuildTestTfms>
     <StandardTestTfms>$(DeveloperBuildTestTfms)</StandardTestTfms>
     <RollForward>Major</RollForward>
   </PropertyGroup>

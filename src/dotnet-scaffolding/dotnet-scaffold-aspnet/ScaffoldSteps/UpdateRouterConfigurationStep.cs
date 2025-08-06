@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
@@ -16,7 +17,7 @@ internal class UpdateRouterConfigurationStep : ScaffoldStep
     public required BlazorCrudAppProperties AppProperties { get; init; }
     public IFileSystem? FileSystem { get; init; }
 
-    public override async Task<bool> ExecuteAsync(CancellationToken cancellationToken = default)
+    public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(ProjectPath) || AppProperties == null || FileSystem == null)
         {

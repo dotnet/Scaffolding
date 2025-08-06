@@ -166,7 +166,6 @@ internal static class BlazorCrudScaffolderBuilderExtensions
                     
                     step.ProjectPath = blazorCrudSettings.Project;
                     step.AppProperties = appProperties;
-                    step.FileSystem = blazorCrudModel.ProjectInfo.FileSystem;
                 }
                 else
                 {

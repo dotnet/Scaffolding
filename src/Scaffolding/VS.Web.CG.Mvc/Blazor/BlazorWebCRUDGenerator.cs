@@ -150,16 +150,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             // Update the status code middleware to use the detected route
             var programCsFile = minimalApiChangesConfig.Files.FirstOrDefault(x => x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
-            if (programCsFile?.Methods?.TryGetValue("Global", out var globalMethod) == true)
+            if (programCsFile?.Methods?.TryGetValue("Global", out var statusCodeGlobalMethod) == true)
             {
                 // Update status code middleware with detected route
-                for (int i = 0; i < globalMethod.CodeChanges.Length; i++)
+                for (int i = 0; i < statusCodeGlobalMethod.CodeChanges.Length; i++)
                 {
-                    var change = globalMethod.CodeChanges[i];
+                    var change = statusCodeGlobalMethod.CodeChanges[i];
                     if (change.Block?.Contains("UseStatusCodePagesWithReExecute") == true)
                     {
                         change.Block = change.Block.Replace("/not-found", appProperties.ExistingNotFoundRoute);
-                        globalMethod.CodeChanges[i] = change;
+                        statusCodeGlobalMethod.CodeChanges[i] = change;
                     }
                 }
             }

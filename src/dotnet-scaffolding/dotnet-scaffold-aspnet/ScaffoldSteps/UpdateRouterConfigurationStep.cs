@@ -13,13 +13,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 internal class UpdateRouterConfigurationStep : ScaffoldStep
 {
-    public required string ProjectPath { get; init; }
-    public required BlazorCrudAppProperties AppProperties { get; init; }
-    public IFileSystem? FileSystem { get; init; }
+    public required string ProjectPath { get; set; }
+    public required BlazorCrudAppProperties AppProperties { get; set; }
+    private readonly IFileSystem _fileSystem;
+
+    public UpdateRouterConfigurationStep(IFileSystem fileSystem)
+    {
+        _fileSystem = fileSystem;
+    }
 
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(ProjectPath) || AppProperties == null || FileSystem == null)
+        if (string.IsNullOrEmpty(ProjectPath) || AppProperties == null)
         {
             return false;
         }
@@ -35,12 +40,12 @@ internal class UpdateRouterConfigurationStep : ScaffoldStep
             string? targetFilePath = null;
             string notFoundPageType = "";
             
-            if (FileSystem.FileExists(routesRazorPath))
+            if (_fileSystem.FileExists(routesRazorPath))
             {
                 targetFilePath = routesRazorPath;
                 notFoundPageType = "typeof(Pages.NotFound)";
             }
-            else if (FileSystem.FileExists(appRazorPath))
+            else if (_fileSystem.FileExists(appRazorPath))
             {
                 targetFilePath = appRazorPath;
                 notFoundPageType = "typeof(Components.Pages.NotFound)";
@@ -48,7 +53,7 @@ internal class UpdateRouterConfigurationStep : ScaffoldStep
             
             if (!string.IsNullOrEmpty(targetFilePath))
             {
-                var content = FileSystem.ReadAllText(targetFilePath);
+                var content = _fileSystem.ReadAllText(targetFilePath);
                 
                 // Check if NotFoundPage parameter already exists
                 if (!content.Contains("NotFoundPage"))
@@ -58,7 +63,7 @@ internal class UpdateRouterConfigurationStep : ScaffoldStep
                         "<Router AppAssembly=\"@typeof(App).Assembly\">",
                         $"<Router AppAssembly=\"@typeof(App).Assembly\" NotFoundPage=\"{notFoundPageType}\">");
                     
-                    FileSystem.WriteAllText(targetFilePath, updatedContent);
+                    _fileSystem.WriteAllText(targetFilePath, updatedContent);
                     Console.WriteLine($"Updated {Path.GetFileName(targetFilePath)} with NotFoundPage configuration.");
                 }
                 else

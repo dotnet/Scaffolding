@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -93,6 +94,50 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 projectContext.Object,
                 entityFrameworkService.Object,
                 workspace);
+        }
+
+        [Fact]
+        public void CreateTemplate_GeneratesNullCoalescingAssignment()
+        {
+            // Verify that Create.tt template contains the null coalescing assignment pattern
+            var createTemplatePath = Path.Combine("Templates", "Blazor", "Create.tt");
+            var transformation = BlazorWebCRUDHelper.GetBlazorTransformation(createTemplatePath);
+            
+            Assert.NotNull(transformation);
+            
+            // Read the actual template file to verify the pattern
+            var templateContent = File.ReadAllText(Path.Combine("src", "Scaffolding", "VS.Web.CG.Mvc", "Templates", "Blazor", "Create.tt"));
+            
+            // Verify the new pattern exists
+            Assert.Contains("= default!", templateContent);
+            Assert.Contains("protected override void OnInitialized()", templateContent);
+            Assert.Contains("??= new()", templateContent);
+            
+            // Verify the old pattern is not used
+            Assert.DoesNotContain("{ get; set; } = new()", templateContent);
+        }
+
+        [Fact]
+        public void BlazorTemplates_UseNotFoundNavigation()
+        {
+            // Test that templates use NavigationManager.NotFound() instead of NavigateTo("notfound")
+            var templateFiles = new[] { "Edit.tt", "Details.tt", "Delete.tt" };
+            var templateBasePath = "src/Scaffolding/VS.Web.CG.Mvc/Templates/Blazor";
+            
+            foreach (var templateFile in templateFiles)
+            {
+                var templatePath = Path.Combine(templateBasePath, templateFile);
+                if (File.Exists(templatePath))
+                {
+                    var content = File.ReadAllText(templatePath);
+                    
+                    // Verify that NavigationManager.NotFound() is used
+                    Assert.Contains("NavigationManager.NotFound()", content);
+                    
+                    // Verify that old NavigateTo("notfound") pattern is not used
+                    Assert.DoesNotContain("NavigationManager.NavigateTo(\"notfound\")", content);
+                }
+            }
         }
     }
 }

@@ -1,0 +1,17 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+#>
+@page "/not-found"
+@layout MainLayout
+
+<PageTitle>Not Found</PageTitle>
+
+<h3>Not Found</h3>
+<p>Sorry, the content you are looking for does not exist.</p>
+
+<a href="/" class="btn btn-primary">Return to Home</a>

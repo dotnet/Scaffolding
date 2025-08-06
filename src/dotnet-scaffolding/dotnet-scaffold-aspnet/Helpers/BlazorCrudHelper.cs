@@ -11,12 +11,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 internal static class BlazorCrudHelper
 {
     internal static string CrudPageType = "CRUD";
-    internal static List<string> CRUDPages = [CrudPageType, "Create", "Delete", "Details", "Edit", "Index"];
+    internal static List<string> CRUDPages = [CrudPageType, "Create", "Delete", "Details", "Edit", "Index", "NotFound"];
     internal const string CreateBlazorTemplate = "Create.tt";
     internal const string DeleteBlazorTemplate = "Delete.tt";
     internal const string DetailsBlazorTemplate = "Details.tt";
     internal const string EditBlazorTemplate = "Edit.tt";
     internal const string IndexBlazorTemplate = "Index.tt";
+    internal const string NotFoundBlazorTemplate = "NotFound.tt";
     internal const string IEndpointRouteBuilderContainingType = "Microsoft.AspNetCore.Routing.IEndpointRouteBuilder";
     internal const string IRazorComponentsBuilderType = "Microsoft.Extensions.DependencyInjection.IRazorComponentsBuilder";
     internal const string IServiceCollectionType = "Microsoft.Extensions.DependencyInjection.IServiceCollection";
@@ -108,6 +109,19 @@ internal static class BlazorCrudHelper
         }
     }";
 
+    internal const string AddStatusCodePagesMiddlewareSnippet = @"
+    {
+        ""Block"": ""app.UseStatusCodePagesWithReExecute(\""/not-found\"", createScopeForStatusCodePages: true)"",
+        ""InsertBefore"": [
+            ""app.Run()""
+        ],
+        ""CodeChangeType"": ""Default"",
+        ""LeadingTrivia"": {
+            ""Newline"": true,
+            ""NumberOfSpaces"": 0
+        }
+    }";
+
     internal static Type? GetTemplateType(string? templatePath)
     {
         if (string.IsNullOrEmpty(templatePath))
@@ -133,6 +147,9 @@ internal static class BlazorCrudHelper
                 break;
             case DetailsBlazorTemplate:
                 templateType = typeof(Details);
+                break;
+            case NotFoundBlazorTemplate:
+                templateType = typeof(NotFound);
                 break;
         }
 
@@ -241,6 +258,9 @@ internal static class BlazorCrudHelper
             codeChanges.Add(AddInteractiveServerRenderModeSnippet);
         }
 
+        // Always add status code pages middleware for NotFound functionality
+        codeChanges.Add(AddStatusCodePagesMiddlewareSnippet);
+
         return codeChanges;
     }
 
@@ -258,10 +278,23 @@ internal static class BlazorCrudHelper
                     break;
                 }
 
-                string baseOutputPath = GetBaseOutputPath(
-                    blazorCrudModel.ModelInfo.ModelTypeName,
-                    blazorCrudModel.ProjectInfo.ProjectPath);
-                string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.BlazorExtension}");
+                string baseOutputPath;
+                string outputFileName;
+                
+                // Special handling for NotFound page - place it in Components/Pages instead of model-specific folder
+                if (templateName.Equals("NotFound", StringComparison.OrdinalIgnoreCase))
+                {
+                    string projectBasePath = Path.GetDirectoryName(blazorCrudModel.ProjectInfo.ProjectPath) ?? Directory.GetCurrentDirectory();
+                    baseOutputPath = Path.Combine(projectBasePath, "Components", "Pages");
+                    outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.BlazorExtension}");
+                }
+                else
+                {
+                    baseOutputPath = GetBaseOutputPath(
+                        blazorCrudModel.ModelInfo.ModelTypeName,
+                        blazorCrudModel.ProjectInfo.ProjectPath);
+                    outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.BlazorExtension}");
+                }
 
                 textTemplatingProperties.Add(new()
                 {

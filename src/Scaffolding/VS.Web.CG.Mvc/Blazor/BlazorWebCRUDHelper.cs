@@ -22,6 +22,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         internal const string DetailsBlazorTemplate = "Details.tt";
         internal const string EditBlazorTemplate = "Edit.tt";
         internal const string IndexBlazorTemplate = "Index.tt";
+        internal const string NotFoundBlazorTemplate = "NotFound.tt";
         internal const string IEndpointRouteBuilderContainingType = "Microsoft.AspNetCore.Routing.IEndpointRouteBuilder";
         internal const string IRazorComponentsBuilderType = "Microsoft.Extensions.DependencyInjection.IRazorComponentsBuilder";
         internal const string IServiceCollectionType = "Microsoft.Extensions.DependencyInjection.IServiceCollection";
@@ -111,7 +112,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                         { "Delete", DeleteBlazorTemplate },
                         { "Details", DetailsBlazorTemplate },
                         { "Edit",  EditBlazorTemplate },
-                        { "Index", IndexBlazorTemplate }
+                        { "Index", IndexBlazorTemplate },
+                        { "NotFound", NotFoundBlazorTemplate }
                     };
                 }
 
@@ -166,6 +168,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     break;
                 case "Details.tt":
                     transformation = new Details() { Host = host };
+                    break;
+                case "NotFound.tt":
+                    transformation = new NotFound() { Host = host };
                     break;
             }
 

@@ -25,6 +25,13 @@
               "LeadingTrivia": {
                 "Newline": true
               }
+            },
+            {
+              "InsertBefore": [ "app.Run()" ],
+              "Block": "app.UseStatusCodePagesWithReExecute(\"/not-found\", createScopeForStatusCodePages: true)",
+              "LeadingTrivia": {
+                "Newline": true
+              }
             }
           ]
         }
@@ -42,6 +49,34 @@
       ],
       "Usings": [
         "Microsoft.EntityFrameworkCore"
+      ]
+    },
+    {
+      "FileName": "App.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "<Router AppAssembly=\"@typeof(App).Assembly\">"
+          ],
+          "MultiLineBlock": [
+            "<Router AppAssembly=\"@typeof(App).Assembly\" NotFoundPage=\"typeof(Components.Pages.NotFound)\">"
+          ],
+          "CheckBlock": "NotFoundPage"
+        }
+      ]
+    },
+    {
+      "FileName": "Routes.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "<Router AppAssembly=\"@typeof(App).Assembly\">"
+          ],
+          "MultiLineBlock": [
+            "<Router AppAssembly=\"@typeof(App).Assembly\" NotFoundPage=\"typeof(Pages.NotFound)\">"
+          ],
+          "CheckBlock": "NotFoundPage"
+        }
       ]
     }
   ]

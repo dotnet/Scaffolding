@@ -338,7 +338,18 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 var templatedString = templateInvoker.InvokeTemplate(contextTemplate, dictParams);
                 if (!string.IsNullOrEmpty(templatedString))
                 {
-                    string templatedFilePath = ValidateAndGetOutputPath(templateModel.ModelTypeName, t4TemplateName);
+                    string templatedFilePath;
+                    
+                    // Special handling for NotFound page - place it in Components/Pages instead of model-specific folder
+                    if (t4TemplateName.Equals("NotFound", StringComparison.OrdinalIgnoreCase))
+                    {
+                        templatedFilePath = ValidateAndGetOutputPath(string.Empty, t4TemplateName);
+                    }
+                    else
+                    {
+                        templatedFilePath = ValidateAndGetOutputPath(templateModel.ModelTypeName, t4TemplateName);
+                    }
+                    
                     var folderName = Path.GetDirectoryName(templatedFilePath);
                     if (!FileSystem.DirectoryExists(folderName))
                     {

@@ -112,8 +112,9 @@ internal static class BlazorCrudHelper
     internal const string AddStatusCodePagesMiddlewareSnippet = @"
     {
         ""Block"": ""app.UseStatusCodePagesWithReExecute(\""/not-found\"", createScopeForStatusCodePages: true)"",
-        ""InsertBefore"": [
-            ""app.Run()""
+        ""InsertAfter"": [
+            ""app.UseExceptionHandler"",
+            ""app.UseHsts""
         ],
         ""CodeChangeType"": ""Default"",
         ""LeadingTrivia"": {
@@ -216,12 +217,18 @@ internal static class BlazorCrudHelper
         blazorAppProperties.HasRoutesRazor = routesRazorDocument != null;
         blazorAppProperties.HasAppRazor = appRazorDocument != null;
         
+        // Routes.razor only contains Router definition, App.razor contains HeadOutlet
+        // Check HeadOutlet render modes only in App.razor
+        if (appRazorDocument != null)
+        {
+            blazorAppProperties.IsHeadOutletGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, GlobalServerRenderModeText) ||
+                await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, GlobalWebAssemblyRenderModeText);
+        }
+        
+        // Check Routes render modes in Routes.razor if available, otherwise App.razor
         var routerDocument = routesRazorDocument ?? appRazorDocument;
         if (routerDocument != null)
         {
-            blazorAppProperties.IsHeadOutletGlobal = await RoslynUtilities.CheckDocumentForTextAsync(routerDocument, GlobalServerRenderModeText) ||
-                await RoslynUtilities.CheckDocumentForTextAsync(routerDocument, GlobalWebAssemblyRenderModeText);
-
             blazorAppProperties.AreRoutesGlobal = await RoslynUtilities.CheckDocumentForTextAsync(routerDocument, GlobalServerRenderModeRoutesText) ||
                 await RoslynUtilities.CheckDocumentForTextAsync(routerDocument, GlobalWebAssemblyRenderModeRoutesText);
         }

@@ -27,7 +27,7 @@
               }
             },
             {
-              "InsertBefore": [ "app.Run()" ],
+              "InsertAfter": [ "app.UseExceptionHandler", "app.UseHsts" ],
               "Block": "app.UseStatusCodePagesWithReExecute(\"/not-found\", createScopeForStatusCodePages: true)",
               "LeadingTrivia": {
                 "Newline": true

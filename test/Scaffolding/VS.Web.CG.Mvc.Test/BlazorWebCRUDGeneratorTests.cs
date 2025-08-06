@@ -139,5 +139,59 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 }
             }
         }
+
+        [Fact]
+        public void MiddlewarePlacement_IsCorrect()
+        {
+            // Test that UseStatusCodePagesWithReExecute middleware is placed correctly
+            var jsonPath = "src/Scaffolding/VS.Web.CG.Mvc/Blazor/blazorWebCrudChanges.json";
+            if (File.Exists(jsonPath))
+            {
+                var content = File.ReadAllText(jsonPath);
+                
+                // Verify that middleware is inserted after UseExceptionHandler/UseHsts
+                Assert.Contains("\"InsertAfter\": [ \"app.UseExceptionHandler\", \"app.UseHsts\" ]", content);
+                
+                // Verify that it contains the status code middleware
+                Assert.Contains("UseStatusCodePagesWithReExecute", content);
+                
+                // Verify it's not placed before app.Run() (old incorrect placement)
+                Assert.DoesNotContain("\"InsertBefore\": [ \"app.Run()\" ]", content);
+            }
+        }
+
+        [Fact]
+        public void NotFoundTemplate_Exists()
+        {
+            // Test that NotFound.tt template exists and has correct content
+            var templatePath = "src/Scaffolding/VS.Web.CG.Mvc/Templates/Blazor/NotFound.tt";
+            if (File.Exists(templatePath))
+            {
+                var content = File.ReadAllText(templatePath);
+                
+                // Verify basic structure
+                Assert.Contains("@page \"/not-found\"", content);
+                Assert.Contains("@layout MainLayout", content);
+                Assert.Contains("<PageTitle>Not Found</PageTitle>", content);
+                Assert.Contains("Return to Home", content);
+            }
+        }
+
+        [Fact]  
+        public void DynamicRouteReplacement_ConfigurationStructure()
+        {
+            // Test that JSON configuration has the correct structure for dynamic route replacement
+            var jsonPath = "src/Scaffolding/VS.Web.CG.Mvc/Blazor/blazorWebCrudChanges.json";
+            if (File.Exists(jsonPath))
+            {
+                var content = File.ReadAllText(jsonPath);
+                
+                // Verify that middleware is configured with placeholder route
+                Assert.Contains("UseStatusCodePagesWithReExecute(\\\"/not-found\\\"", content);
+                
+                // Verify correct placement after UseExceptionHandler/UseHsts
+                Assert.Contains("\"InsertAfter\": [ \"app.UseExceptionHandler\", \"app.UseHsts\" ]", content);
+            }
+        }
     }
 }

@@ -180,14 +180,16 @@ internal static class BlazorCrudHelper
         {
             var programCsDocument = await codeService.GetDocumentAsync("Program.cs");
             var appRazorDocument = await codeService.GetDocumentAsync("App.razor");
-            var blazorAppProperties = await GetBlazorPropertiesAsync(programCsDocument, appRazorDocument);
+            var routesRazorDocument = await codeService.GetDocumentAsync("Routes.razor");
+            
+            var blazorAppProperties = await GetBlazorPropertiesAsync(programCsDocument, appRazorDocument, routesRazorDocument, blazorCrudModel.ProjectInfo.ProjectPath);
             return GetAdditionalBlazorCrudCodeChanges(blazorAppProperties);
         }
 
         return codeChanges;
     }
 
-    private static async Task<BlazorCrudAppProperties> GetBlazorPropertiesAsync(Document? programDocument, Document? appRazorDocument)
+    internal static async Task<BlazorCrudAppProperties> GetBlazorPropertiesAsync(Document? programDocument, Document? appRazorDocument, Document? routesRazorDocument, string projectPath)
     {
         var blazorAppProperties = new BlazorCrudAppProperties();
         if (programDocument is not null)
@@ -210,16 +212,63 @@ internal static class BlazorCrudHelper
             }
         }
 
-        if (appRazorDocument != null)
+        // Check for Routes.razor first (prioritize it), then App.razor
+        blazorAppProperties.HasRoutesRazor = routesRazorDocument != null;
+        blazorAppProperties.HasAppRazor = appRazorDocument != null;
+        
+        var routerDocument = routesRazorDocument ?? appRazorDocument;
+        if (routerDocument != null)
         {
-            blazorAppProperties.IsHeadOutletGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, GlobalServerRenderModeText) ||
-                await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, GlobalWebAssemblyRenderModeText);
+            blazorAppProperties.IsHeadOutletGlobal = await RoslynUtilities.CheckDocumentForTextAsync(routerDocument, GlobalServerRenderModeText) ||
+                await RoslynUtilities.CheckDocumentForTextAsync(routerDocument, GlobalWebAssemblyRenderModeText);
 
-            blazorAppProperties.AreRoutesGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, GlobalServerRenderModeRoutesText) ||
-                await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, GlobalWebAssemblyRenderModeRoutesText);
+            blazorAppProperties.AreRoutesGlobal = await RoslynUtilities.CheckDocumentForTextAsync(routerDocument, GlobalServerRenderModeRoutesText) ||
+                await RoslynUtilities.CheckDocumentForTextAsync(routerDocument, GlobalWebAssemblyRenderModeRoutesText);
         }
 
+        // Check for existing NotFound page and get its route
+        var existingNotFoundInfo = GetExistingNotFoundInfo(projectPath);
+        blazorAppProperties.ExistingNotFoundRoute = existingNotFoundInfo.Route;
+        blazorAppProperties.HasExistingNotFound = existingNotFoundInfo.Exists;
+
         return blazorAppProperties;
+    }
+    
+    private static (bool Exists, string Route) GetExistingNotFoundInfo(string projectPath)
+    {
+        string projectBasePath = Path.GetDirectoryName(projectPath) ?? Directory.GetCurrentDirectory();
+        var notFoundPath = Path.Combine(projectBasePath, "Components", "Pages", "NotFound.razor");
+        
+        if (File.Exists(notFoundPath))
+        {
+            try
+            {
+                var content = File.ReadAllText(notFoundPath);
+                var lines = content.Split('\n');
+                
+                // Look for @page directive in the first few lines
+                foreach (var line in lines.Take(5))
+                {
+                    var trimmedLine = line.Trim();
+                    if (trimmedLine.StartsWith("@page "))
+                    {
+                        // Extract route from @page directive
+                        var route = trimmedLine.Substring(6).Trim().Trim('"');
+                        return (true, route);
+                    }
+                }
+            }
+            catch
+            {
+                // If we can't parse the route, assume it exists with default route
+                return (true, "/not-found");
+            }
+            
+            // If we can't parse the route, assume it exists with default route
+            return (true, "/not-found");
+        }
+        
+        return (false, "/not-found");
     }
 
     private static IList<string> GetAdditionalBlazorCrudCodeChanges(BlazorCrudAppProperties appProperties)
@@ -258,8 +307,9 @@ internal static class BlazorCrudHelper
             codeChanges.Add(AddInteractiveServerRenderModeSnippet);
         }
 
-        // Always add status code pages middleware for NotFound functionality
-        codeChanges.Add(AddStatusCodePagesMiddlewareSnippet);
+        // Add status code pages middleware with dynamic route for NotFound functionality
+        var statusCodeMiddleware = AddStatusCodePagesMiddlewareSnippet.Replace("/not-found", appProperties.ExistingNotFoundRoute);
+        codeChanges.Add(statusCodeMiddleware);
 
         return codeChanges;
     }
@@ -287,6 +337,12 @@ internal static class BlazorCrudHelper
                     string projectBasePath = Path.GetDirectoryName(blazorCrudModel.ProjectInfo.ProjectPath) ?? Directory.GetCurrentDirectory();
                     baseOutputPath = Path.Combine(projectBasePath, "Components", "Pages");
                     outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.BlazorExtension}");
+                    
+                    // Check if NotFound page already exists and skip generation if it does
+                    if (File.Exists(outputFileName))
+                    {
+                        continue;
+                    }
                 }
                 else
                 {

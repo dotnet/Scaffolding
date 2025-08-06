@@ -153,5 +153,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         public bool InteractiveWebAssemblyRenderModeNeeded { get; set; }
         public bool IsHeadOutletGlobal { get; set; }
         public bool AreRoutesGlobal { get; set; }
+        
+        // if Routes.razor exists (should be prioritized over App.razor)
+        public bool HasRoutesRazor { get; set; }
+        // if App.razor exists  
+        public bool HasAppRazor { get; set; }
+        // if an existing NotFound page was found
+        public bool HasExistingNotFound { get; set; }
+        // the route from an existing NotFound page (default: "/not-found")
+        public string ExistingNotFoundRoute { get; set; } = "/not-found";
     }
 }

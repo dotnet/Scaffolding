@@ -148,7 +148,22 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 return;
             }
 
+            // Update the status code middleware to use the detected route
             var programCsFile = minimalApiChangesConfig.Files.FirstOrDefault(x => x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
+            if (programCsFile?.Methods?.TryGetValue("Global", out var globalMethod) == true)
+            {
+                // Update status code middleware with detected route
+                for (int i = 0; i < globalMethod.CodeChanges.Length; i++)
+                {
+                    var change = globalMethod.CodeChanges[i];
+                    if (change.Block?.Contains("UseStatusCodePagesWithReExecute") == true)
+                    {
+                        change.Block = change.Block.Replace("/not-found", appProperties.ExistingNotFoundRoute);
+                        globalMethod.CodeChanges[i] = change;
+                    }
+                }
+            }
+            
             programCsFile = AddBlazorChangesToCodeFile(programCsFile, appProperties);
             var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
             var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
@@ -198,6 +213,50 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             //ApplyTextReplacements will write the updated document to disk (takes changes from above as well).
             await DocumentBuilder.ApplyTextReplacements(programCsFile, changedDocument, new CodeChangeOptions(), FileSystem);
             ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
+            
+            // Handle Router configuration in App.razor or Routes.razor
+            await ModifyRouterConfigurationAsync(appProperties);
+        }
+        
+        private async Task ModifyRouterConfigurationAsync(BlazorWebAppProperties appProperties)
+        {
+            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
+            
+            // Prioritize Routes.razor over App.razor as mentioned in the comment
+            var routesRazorDocument = project.GetDocumentFromName("Routes.razor", FileSystem);
+            var appRazorDocument = project.GetDocumentFromName("App.razor", FileSystem);
+            
+            var targetDocument = routesRazorDocument ?? appRazorDocument;
+            var targetFileName = routesRazorDocument != null ? "Routes.razor" : "App.razor";
+            var notFoundPageType = routesRazorDocument != null ? "typeof(Pages.NotFound)" : "typeof(Components.Pages.NotFound)";
+            
+            if (targetDocument != null)
+            {
+                try
+                {
+                    var content = FileSystem.ReadAllText(targetDocument.FilePath);
+                    
+                    // Check if NotFoundPage parameter already exists
+                    if (!content.Contains("NotFoundPage"))
+                    {
+                        // Replace Router opening tag to include NotFoundPage parameter
+                        var updatedContent = content.Replace(
+                            "<Router AppAssembly=\"@typeof(App).Assembly\">",
+                            $"<Router AppAssembly=\"@typeof(App).Assembly\" NotFoundPage=\"{notFoundPageType}\">");
+                        
+                        FileSystem.WriteAllText(targetDocument.FilePath, updatedContent);
+                        Logger.LogMessage($"Updated {targetFileName} with NotFoundPage configuration.");
+                    }
+                    else
+                    {
+                        Logger.LogMessage($"{targetFileName} already has NotFoundPage configuration.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogMessage($"Error updating {targetFileName}: {ex.Message}");
+                }
+            }
         }
 
         internal CodeFile AddBlazorChangesToCodeFile(CodeFile programCsFile, BlazorWebAppProperties appProperties)
@@ -274,17 +333,65 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 blazorAppProperties.InteractiveWebAssemblyRenderModeNeeded = !hasInteractiveWebAssemblyRenderMode && blazorAppProperties.InteractiveWebAssemblyComponentsExists;
             }
 
+            // Check for Routes.razor first (prioritize it), then App.razor
+            var routesRazorDocument = project.GetDocumentFromName("Routes.razor", FileSystem);
             var appRazorDocument = project.GetDocumentFromName("App.razor", FileSystem);
-            if (appRazorDocument != null)
+            
+            // Set which file contains the Router component (prioritize Routes.razor)
+            blazorAppProperties.HasRoutesRazor = routesRazorDocument != null;
+            blazorAppProperties.HasAppRazor = appRazorDocument != null;
+            
+            var routerDocument = routesRazorDocument ?? appRazorDocument;
+            if (routerDocument != null)
             {
-                blazorAppProperties.IsHeadOutletGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalServerRenderModeText) ||
-                    await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalWebAssemblyRenderModeText);
+                blazorAppProperties.IsHeadOutletGlobal = await RoslynUtilities.CheckDocumentForTextAsync(routerDocument, BlazorWebCRUDHelper.GlobalServerRenderModeText) ||
+                    await RoslynUtilities.CheckDocumentForTextAsync(routerDocument, BlazorWebCRUDHelper.GlobalWebAssemblyRenderModeText);
 
-                blazorAppProperties.AreRoutesGlobal = await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalServerRenderModeRoutesText) ||
-                    await RoslynUtilities.CheckDocumentForTextAsync(appRazorDocument, BlazorWebCRUDHelper.GlobalWebAssemblyRenderModeRoutesText);
+                blazorAppProperties.AreRoutesGlobal = await RoslynUtilities.CheckDocumentForTextAsync(routerDocument, BlazorWebCRUDHelper.GlobalServerRenderModeRoutesText) ||
+                    await RoslynUtilities.CheckDocumentForTextAsync(routerDocument, BlazorWebCRUDHelper.GlobalWebAssemblyRenderModeRoutesText);
             }
             
+            // Check for existing NotFound page and get its route
+            var existingNotFoundInfo = GetExistingNotFoundInfo();
+            blazorAppProperties.ExistingNotFoundRoute = existingNotFoundInfo.Route;
+            blazorAppProperties.HasExistingNotFound = existingNotFoundInfo.Exists;
+            
             return blazorAppProperties;
+        }
+        
+        private (bool Exists, string Route) GetExistingNotFoundInfo()
+        {
+            var notFoundPath = ValidateAndGetOutputPath(string.Empty, "NotFound");
+            
+            if (FileSystem.FileExists(notFoundPath))
+            {
+                try
+                {
+                    var content = FileSystem.ReadAllText(notFoundPath);
+                    var lines = content.Split('\n');
+                    
+                    // Look for @page directive in the first few lines
+                    foreach (var line in lines.Take(5))
+                    {
+                        var trimmedLine = line.Trim();
+                        if (trimmedLine.StartsWith("@page "))
+                        {
+                            // Extract route from @page directive
+                            var route = trimmedLine.Substring(6).Trim().Trim('"');
+                            return (true, route);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogMessage($"Error reading existing NotFound page: {ex.Message}");
+                }
+                
+                // If we can't parse the route, assume it exists with default route
+                return (true, "/not-found");
+            }
+            
+            return (false, "/not-found");
         }
 
         private CodeModifierConfig GetBlazorCodeModifierConfig()
@@ -344,6 +451,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     if (t4TemplateName.Equals("NotFound", StringComparison.OrdinalIgnoreCase))
                     {
                         templatedFilePath = ValidateAndGetOutputPath(string.Empty, t4TemplateName);
+                        
+                        // Check if NotFound page already exists and avoid overriding it
+                        if (FileSystem.FileExists(templatedFilePath))
+                        {
+                            Logger.LogMessage($"NotFound page already exists at {templatedFilePath}, skipping generation.");
+                            continue;
+                        }
                     }
                     else
                     {

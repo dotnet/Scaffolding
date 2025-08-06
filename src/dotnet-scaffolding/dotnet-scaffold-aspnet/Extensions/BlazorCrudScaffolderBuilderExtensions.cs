@@ -137,4 +137,46 @@ internal static class BlazorCrudScaffolderBuilderExtensions
 
         return builder;
     }
+
+    public static IScaffoldBuilder WithBlazorCrudRouterConfigurationStep(this IScaffoldBuilder builder)
+    {
+        return builder.WithStep<UpdateRouterConfigurationStep>(config =>
+        {
+            var step = config.Step;
+            var context = config.Context;
+            
+            context.Properties.TryGetValue(nameof(CrudSettings), out var blazorCrudSettingsObj);
+            context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj);
+            
+            var blazorCrudSettings = blazorCrudSettingsObj as CrudSettings;
+            var blazorCrudModel = blazorCrudModelObj as BlazorCrudModel;
+            
+            if (blazorCrudSettings is not null && blazorCrudModel is not null)
+            {
+                // Get the app properties that were determined earlier
+                var codeService = blazorCrudModel.ProjectInfo?.CodeService;
+                if (codeService is not null)
+                {
+                    var programCsDocument = codeService.GetDocumentAsync("Program.cs").Result;
+                    var appRazorDocument = codeService.GetDocumentAsync("App.razor").Result;
+                    var routesRazorDocument = codeService.GetDocumentAsync("Routes.razor").Result;
+                    
+                    var appProperties = BlazorCrudHelper.GetBlazorPropertiesAsync(
+                        programCsDocument, appRazorDocument, routesRazorDocument, blazorCrudModel.ProjectInfo.ProjectPath).Result;
+                    
+                    step.ProjectPath = blazorCrudSettings.Project;
+                    step.AppProperties = appProperties;
+                    step.FileSystem = blazorCrudModel.ProjectInfo.FileSystem;
+                }
+                else
+                {
+                    step.SkipStep = true;
+                }
+            }
+            else
+            {
+                step.SkipStep = true;
+            }
+        });
+    }
 }

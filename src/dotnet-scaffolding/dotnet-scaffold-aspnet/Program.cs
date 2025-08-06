@@ -174,7 +174,8 @@ public static class Program
             .WithDbContextStep()
             .WithConnectionStringStep()
             .WithBlazorCrudTextTemplatingStep()
-            .WithBlazorCrudCodeChangeStep();
+            .WithBlazorCrudCodeChangeStep()
+            .WithBlazorCrudRouterConfigurationStep();
 
         builder.AddScaffolder("razorpages-crud")
             .WithDisplayName("Razor Pages with Entity Framework (CRUD)")

@@ -183,8 +183,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             //add code snippets/changes.
             if (programCsFile.Methods != null && programCsFile.Methods.Count != 0)
             {
-                var globalMethod = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
-                var globalChanges = globalMethod.CodeChanges;
+                var globalMethodForModification = programCsFile.Methods.Where(x => x.Key.Equals("Global", StringComparison.OrdinalIgnoreCase)).First().Value;
+                var globalChanges = globalMethodForModification.CodeChanges;
                 var updatedIdentifer = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(newRoot.Members);
                 if (updatedIdentifer.HasValue)
                 {
@@ -215,10 +215,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
             
             // Handle Router configuration in App.razor or Routes.razor
-            await ModifyRouterConfigurationAsync(appProperties);
+            ModifyRouterConfiguration(appProperties);
         }
         
-        private async Task ModifyRouterConfigurationAsync(BlazorWebAppProperties appProperties)
+        private void ModifyRouterConfiguration(BlazorWebAppProperties appProperties)
         {
             var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
             

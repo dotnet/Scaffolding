@@ -122,13 +122,13 @@
   </PropertyGroup>
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>
-    <AzureIdentityVersion>1.13.1</AzureIdentityVersion>
+    <AzureIdentityVersion>1.14.2</AzureIdentityVersion>
     <CodeAnalysisVersion>$(MicrosoftCodeAnalysisVersion)</CodeAnalysisVersion>
     <MicrosoftExtensionsConfigurationVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsConfigurationVersion>
     <MicrosoftExtensionsConfigurationBinderVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsConfigurationBinderVersion>
     <MicrosoftExtensionsConfigurationCommandLineVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsConfigurationCommandLineVersion>
     <MicrosoftGraphVersion>5.66.0</MicrosoftGraphVersion>
-    <MicrosoftIdentityClientExtensionsMsalVersion>4.66.2</MicrosoftIdentityClientExtensionsMsalVersion>
+    <MicrosoftIdentityClientExtensionsMsalVersion>4.73.1</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>6.12.1</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0-beta4.22613.1</SystemCommandLineVersion>
     <SystemSecurityCryptographyProtectedDataVersion>9.0.4</SystemSecurityCryptographyProtectedDataVersion>

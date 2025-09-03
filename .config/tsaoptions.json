@@ -1,11 +1,13 @@
 {  
-    "instanceUrl": "https://dev.azure.com/devdiv/",
-    "template": "TFSDEVDIV",
-    "projectName": "DEVDIV",
-    "areaPath": "DevDiv\\Web Tools\\Web\\Scaffolding",
-    "iterationPath": "DevDiv",
-    "notificationAliases": [ "webproject@microsoft.com" ],
-    "repositoryName":"dotnet-scaffolding",
     "codebaseName": "dotnet-scaffolding",
+    "notificationAliases":
+    [
+       "webproject@microsoft.com"
+    ],
+    "instanceUrl": "https://dev.azure.com/devdiv/",
+    "projectName": "DevDiv",
+    "areaPath": "DevDiv\\NET Tools\\Web Tools\\Web\\Scaffolding",
+    "iterationPath": "DevDiv",
+    "repositoryName":"dotnet-scaffolding",
     "serviceTreeId": "225159cd-5cda-4eaf-9b48-9bc4ff385b23"
 }

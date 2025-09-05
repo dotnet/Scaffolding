@@ -236,6 +236,10 @@
       <LastGenOutput>Index.cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
+    <None Update="Templates\BlazorCrud\NotFound.tt">
+      <LastGenOutput>NotFound.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
     <!-- ASPNET.Core Identity templates -->
     <None Update="Templates\Identity\Pages\Account\AccessDenied.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
@@ -965,6 +969,11 @@
     </Compile>
     <Compile Update="Templates\BlazorCrud\Index.cs">
       <DependentUpon>Index.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Templates\BlazorCrud\NotFound.cs">
+      <DependentUpon>NotFound.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>

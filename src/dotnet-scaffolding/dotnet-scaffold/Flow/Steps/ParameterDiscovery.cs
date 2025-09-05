@@ -12,11 +12,19 @@ using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {
+    /// <summary>
+    /// Handles the discovery and user input for a parameter, including interactive pickers and validation.
+    /// Supports various picker types such as class, file, project, yes/no, and custom pickers.
+    /// </summary>
     internal class ParameterDiscovery
     {
         private readonly Parameter _parameter;
         private readonly IFileSystem _fileSystem;
         private readonly IEnvironmentService _environmentService;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ParameterDiscovery"/> class.
+        /// </summary>
         public ParameterDiscovery(
             Parameter parameter,
             IFileSystem fileSystem,
@@ -26,17 +34,28 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             _fileSystem = fileSystem;
             _environmentService = environmentService;
         }
+        /// <summary>
+        /// Gets the state of the flow step after execution.
+        /// </summary>
         public FlowStepState State { get; private set; }
 
+        /// <summary>
+        /// Discovers the value for the parameter, prompting the user as needed.
+        /// </summary>
+        /// <param name="context">The flow context.</param>
+        /// <returns>The discovered value as a string.</returns>
         public async Task<string> DiscoverAsync(IFlowContext context)
         {
             var optionParameterAddition = _parameter.Required ? "(" : "(empty to skip, ";
             return await PromptAsync(context, $"Enter a new value for '{_parameter.DisplayName}' {optionParameterAddition}[sandybrown]<[/] to go back) : ");
         }
 
+        /// <summary>
+        /// Prompts the user for input, using the appropriate picker or text prompt.
+        /// </summary>
         private async Task<string> PromptAsync(IFlowContext context, string title)
         {
-            //check if Parameter has a InteractivePickerType
+            // Check if Parameter has an InteractivePickerType
             if (_parameter.PickerType is InteractivePickerType.None)
             {
                 var prompt = new TextPrompt<string>($"[lightseagreen]{title}[/]")
@@ -65,6 +84,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
         }
 
+        /// <summary>
+        /// Prompts the user using an interactive picker based on the parameter's picker type.
+        /// </summary>
         private async Task<string?> PromptInteractivePicker(IFlowContext context, InteractivePickerType? pickerType)
         {
             List<StepOption> stepOptions = [];
@@ -73,8 +95,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             switch (pickerType)
             {
                 case InteractivePickerType.ClassPicker:
-                    //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
-                    //will add better documentation so users will know what to expect.
+                    // ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
                     if (codeService is null)
                     {
                         stepOptions = [];
@@ -83,11 +104,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                     {
                         stepOptions = await GetClassDisplayNamesAsync(codeService);
                     }
-
                     break;
                 case InteractivePickerType.FilePicker:
-                    //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
-                    //will add better documentation so users will know what to expect.
                     if (codeService is null)
                     {
                         stepOptions = [];
@@ -97,7 +115,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                         var allDocuments = await codeService.GetAllDocumentsAsync();
                         stepOptions = GetDocumentNames(allDocuments);
                     }
-
                     break;
                 case InteractivePickerType.ProjectPicker:
                     stepOptions = GetProjectFiles();
@@ -118,7 +135,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                         stepOptions = [new() { Name = affirmative, Value = "true" }, new() { Name = negative, Value = "false" }];
                         converter = GetDisplayNameForYesNo;
                     }
-
                     break;
             }
 
@@ -137,6 +153,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return result.Value?.Value;
         }
 
+        /// <summary>
+        /// Determines if a 'None' option should be added to the picker.
+        /// </summary>
         private bool ShouldAddNoneOption(InteractivePickerType? pickerType, List<StepOption> stepOptions)
         {
             return pickerType is not InteractivePickerType.YesNo && // Don't add it for Yes/No
@@ -144,6 +163,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                    stepOptions.Any(x => x.Name.Equals("None")); // Don't add it if its already in the list
         }
 
+        /// <summary>
+        /// Gets custom picker values as step options.
+        /// </summary>
         private static List<StepOption> GetCustomValues(IEnumerable<string>? customPickerValues)
         {
             if (customPickerValues is null || customPickerValues.Count() == 0)
@@ -154,20 +176,32 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return customPickerValues.Select(x => new StepOption() { Name = x, Value = x }).ToList();
         }
 
+        /// <summary>
+        /// Gets the display name for a step option.
+        /// </summary>
         private static string GetDisplayName(StepOption stepOption)
         {
             bool displayNone = stepOption.Name.Equals("None", StringComparison.OrdinalIgnoreCase);
             return displayNone ? $"[sandybrown]{stepOption.Name} (empty to skip parameter)[/]" : $"{stepOption.Name} {stepOption.Value.ToSuggestion(withBrackets: true)}";
         }
 
+        /// <summary>
+        /// Gets the display name for a project step option.
+        /// </summary>
         private string GetDisplayNameForProjects(StepOption stepOption)
         {
             var pathDisplay = stepOption.Value.MakeRelativePath(_environmentService.CurrentDirectory) ?? stepOption.Value;
             return $"{stepOption.Name} {pathDisplay.ToSuggestion(withBrackets: true)}";
         }
 
+        /// <summary>
+        /// Gets the display name for a yes/no step option.
+        /// </summary>
         private string GetDisplayNameForYesNo(StepOption stepOption) => stepOption.Name;
 
+        /// <summary>
+        /// Validates the user input for the parameter.
+        /// </summary>
         private ValidationResult Validate(IFlowContext context, string promptVal)
         {
             if (!_parameter.Required && string.IsNullOrEmpty(promptVal))
@@ -183,6 +217,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return ValidationResult.Success();
         }
 
+        /// <summary>
+        /// Gets all class display names from the code service.
+        /// </summary>
         private static async Task<List<StepOption>> GetClassDisplayNamesAsync(ICodeService codeService)
         {
             var allClassSymbols = await AnsiConsole
@@ -190,8 +227,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 .WithSpinner()
                 .StartAsync("Finding model classes", async statusContext =>
                 {
-                    //ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
-                    //will add better documentation so users will know what to expect.
                     if (codeService is null)
                     {
                         return [];
@@ -216,6 +251,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return classNames;
         }
 
+        /// <summary>
+        /// Gets document names as step options from a list of Roslyn documents.
+        /// </summary>
         internal static List<StepOption> GetDocumentNames(List<Document> documents)
         {
             List<StepOption> classNames = [];
@@ -235,6 +273,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return classNames;
         }
 
+        /// <summary>
+        /// Gets project files as step options from the file system.
+        /// </summary>
         internal List<StepOption> GetProjectFiles()
         {
             var workingDirectory = _environmentService.CurrentDirectory;
@@ -252,7 +293,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             List<string> projectsFromSlnFiles = GetProjectsFromSolutionFiles(slnFiles, workingDirectory);
             projects = AddUniqueProjects(projects, projectsFromSlnFiles);
 
-            //should we search in all directories if nothing in top level? (yes, for now)
             if (projects.Count == 0)
             {
                 projects = _fileSystem.EnumerateFiles(workingDirectory, "*.csproj", SearchOption.AllDirectories).ToList();
@@ -261,6 +301,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return projects.Select(x => new StepOption() { Name = GetProjectDisplayName(x), Value = x }).ToList();
         }
 
+        /// <summary>
+        /// Gets project paths from a list of solution files.
+        /// </summary>
         internal List<string> GetProjectsFromSolutionFiles(List<string> solutionFiles, string workingDir)
         {
             List<string> projectPaths = [];
@@ -272,6 +315,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return projectPaths;
         }
 
+        /// <summary>
+        /// Adds unique project paths to the base list.
+        /// </summary>
         internal List<string> AddUniqueProjects(List<string> baseList, List<string> projectPathsToAdd)
         {
             var baseProjectNames = baseList.Select(x => Path.GetFileName(x));
@@ -279,7 +325,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             {
                 var normalizedPath = StringUtil.NormalizePathSeparators(projectPath);
                 var projectName = Path.GetFileName(normalizedPath);
-                //not making a case-sensitive comparison, seems like macOS/Linux project names in the .sln file are not case sensitive. 
                 if (!baseProjectNames.Contains(projectName, StringComparer.OrdinalIgnoreCase))
                 {
                     baseList.Add(normalizedPath);
@@ -289,6 +334,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return baseList;
         }
 
+        /// <summary>
+        /// Gets project paths from a single solution file.
+        /// </summary>
         internal IList<string> GetProjectsFromSolutionFile(string solutionFilePath, string workingDir)
         {
             List<string> projectPaths = new();
@@ -311,6 +359,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return projectPaths;
         }
 
+        /// <summary>
+        /// Gets the display name for a project path.
+        /// </summary>
         private static string GetProjectDisplayName(string projectPath)
         {
             return Path.GetFileNameWithoutExtension(projectPath);
@@ -333,6 +384,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
         }
 
+        /// <summary>
+        /// Represents an option for a step in the parameter discovery flow.
+        /// </summary>
         internal class StepOption
         {
             public required string Name { get; set; }

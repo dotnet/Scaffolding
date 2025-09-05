@@ -9,12 +9,20 @@ using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold;
 
+/// <summary>
+/// Builds and configures the <see cref="ScaffoldCommandApp"/>, including service registration and command setup.
+/// </summary>
 internal class ScaffoldCommandAppBuilder(string[] args)
 {
+    // Command-line arguments passed to the application.
     private readonly string[] _args = args;
-    //try to update this every release
+    // Backup version string for dotnet-scaffold, updated every release.
     private readonly string _backupDotNetScaffoldVersion = "9.0.0";
 
+    /// <summary>
+    /// Builds and configures the <see cref="ScaffoldCommandApp"/> with all required services and commands.
+    /// </summary>
+    /// <returns>A configured <see cref="ScaffoldCommandApp"/> instance.</returns>
     public ScaffoldCommandApp Build()
     {
         var serviceRegistrations = GetDefaultServices();
@@ -35,9 +43,14 @@ internal class ScaffoldCommandAppBuilder(string[] args)
         return new ScaffoldCommandApp(commandApp, _args);
     }
 
+    /// <summary>
+    /// Registers the default services required for the scaffold command application.
+    /// </summary>
+    /// <returns>A <see cref="TypeRegistrar"/> with all required services registered.</returns>
     private static TypeRegistrar? GetDefaultServices()
     {
         var registrar = new TypeRegistrar();
+        // Register core services for dependency injection.
         registrar.Register(typeof(IFileSystem), typeof(FileSystem));
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));
         registrar.Register(typeof(IFlowProvider), typeof(FlowProvider));
@@ -45,6 +58,7 @@ internal class ScaffoldCommandAppBuilder(string[] args)
         registrar.Register(typeof(IToolManager), typeof(ToolManager));
         registrar.Register(typeof(IToolManifestService), typeof(ToolManifestService));
         registrar.Register(typeof(IFirstTimeUseNoticeSentinel), typeof(FirstTimeUseNoticeSentinel));
+        // Register a lazy singleton for the first time use notice sentinel.
         registrar.RegisterLazy(typeof(IFirstTimeUseNoticeSentinel), (serviceProvider) =>
         {
             return new FirstTimeUseNoticeSentinel(serviceProvider.GetRequiredService<IFileSystem>(),

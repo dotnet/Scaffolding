@@ -5,11 +5,20 @@ using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Command;
 
+/// <summary>
+/// Represents the settings used for uninstalling a tool via the scaffold CLI.
+/// </summary>
 internal class ToolUninstallSettings : ToolSettings
 {
+    /// <summary>
+    /// Gets or sets the package name of the tool to uninstall.
+    /// </summary>
     [CommandArgument(0, "<PACKAGE_NAME>")]
     public required string PackageName { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether to uninstall the tool globally.
+    /// </summary>
     [CommandOption("--global")]
     public bool Global { get; set; }
 }

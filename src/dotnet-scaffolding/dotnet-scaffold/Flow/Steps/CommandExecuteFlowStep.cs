@@ -12,33 +12,42 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {
     /// <summary>
     /// IFlowStep where we gather all the parameter values, and then execute the chosen/given component (dotnet tool).
-    /// Print out stdout/stderr
+    /// Prints out stdout/stderr and tracks telemetry for the execution.
     /// </summary>
     internal class CommandExecuteFlowStep : IFlowStep
     {
         private readonly ITelemetryService _telemetryService;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CommandExecuteFlowStep"/> class.
+        /// </summary>
+        /// <param name="telemetryService">The telemetry service to use for tracking events.</param>
         public CommandExecuteFlowStep(ITelemetryService telemetryService)
         {
             _telemetryService = telemetryService;
         }
 
+        /// <inheritdoc/>
         public string Id => nameof(CommandExecuteFlowStep);
-
+        /// <inheritdoc/>
         public string DisplayName => "Command Execute";
 
+        /// <inheritdoc/>
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             return ValueTask.CompletedTask;
         }
 
+        /// <inheritdoc/>
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             return new ValueTask<FlowStepResult>(FlowStepResult.Success);
         }
 
+        /// <inheritdoc/>
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            //need all 3 things, throw if not found
+            // Need all 3 things, throw if not found
             var dotnetToolInfo = context.GetComponentObj();
             var commandObj = context.GetCommandObj();
             if (dotnetToolInfo is null || commandObj is null || string.IsNullOrEmpty(dotnetToolInfo.Command))
@@ -79,6 +88,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return new ValueTask<FlowStepResult>(FlowStepResult.Failure());
         }
 
+        /// <summary>
+        /// Gathers all parameter values from the context for the given command.
+        /// </summary>
+        /// <param name="context">The flow context.</param>
+        /// <param name="commandInfo">The command info object.</param>
+        /// <returns>A list of parameter values to pass to the CLI runner.</returns>
         private List<string> GetAllParameterValues(IFlowContext context, CommandInfo commandInfo)
         {
             var parameterValues = new List<string> { commandInfo.Name };

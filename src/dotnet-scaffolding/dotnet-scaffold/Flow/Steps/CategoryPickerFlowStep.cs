@@ -8,23 +8,29 @@ using Spectre.Console.Flow;
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {
     /// <summary>
-    /// IFlowStep that deals with the selection of the component(DotnetToolInfo) and the associated command(CommandInfo).
-    /// if provided by the user, verify if the component is installed and the command is supported.
+    /// IFlowStep that deals with the selection of the component (DotNetToolInfo) and the associated command (CommandInfo).
+    /// If provided by the user, verifies if the component is installed and the command is supported.
     /// </summary>
     internal class CategoryPickerFlowStep : IFlowStep
     {
         private readonly ILogger _logger;
         private readonly IDotNetToolService _dotnetToolService;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CategoryPickerFlowStep"/> class.
+        /// </summary>
         public CategoryPickerFlowStep(ILogger logger, IDotNetToolService dotnetToolService)
         {
             _logger = logger;
             _dotnetToolService = dotnetToolService;
         }
 
+        /// <inheritdoc/>
         public string Id => nameof(CategoryPickerFlowStep);
-
+        /// <inheritdoc/>
         public string DisplayName => "Scaffolding Category";
 
+        /// <inheritdoc/>
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             context.Unset(FlowContextProperties.ScaffoldingCategories);
@@ -36,6 +42,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return new ValueTask();
         }
 
+        /// <inheritdoc/>
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var settings = context.GetCommandSettings();
@@ -64,6 +71,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return new ValueTask<FlowStepResult>(FlowStepResult.Success);
         }
 
+        /// <inheritdoc/>
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var settings = context.GetCommandSettings();
@@ -72,8 +80,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var commandName = settings?.CommandName;
             CommandInfo? commandInfo = null;
 
-            //check if user input included a component name.
-            //if included, check for a command name, and get the CommandInfo object.
+            // Check if user input included a component name.
+            // If included, check for a command name, and get the CommandInfo object.
             var dotnetTools = _dotnetToolService.GetDotNetTools();
             var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             if (dotnetToolComponent != null)
@@ -97,6 +105,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return new ValueTask<FlowStepResult>(FlowStepResult.Success);
         }
 
+        /// <summary>
+        /// Sets the available categories in the flow context.
+        /// </summary>
         private void SelectCategories(IFlowContext context, List<string> categories)
         {
             context.Set(new FlowProperty(
@@ -106,6 +117,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 isVisible: false));
         }
 
+        /// <summary>
+        /// Sets the chosen category in the flow context.
+        /// </summary>
         private void SelectChosenCategory(IFlowContext context, string category)
         {
             context.Set(new FlowProperty(
@@ -115,6 +129,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 isVisible: true));
         }
 
+        /// <summary>
+        /// Sets the selected command in the flow context.
+        /// </summary>
         private void SelectCommand(IFlowContext context, CommandInfo command)
         {
             context.Set(new FlowProperty(
@@ -129,6 +146,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 isVisible: false));
         }
 
+        /// <summary>
+        /// Sets the selected component in the flow context.
+        /// </summary>
         private void SelectComponent(IFlowContext context, DotNetToolInfo dotnetToolInfo)
         {
             context.Set(new FlowProperty(

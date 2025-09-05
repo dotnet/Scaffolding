@@ -9,8 +9,8 @@ using Spectre.Console.Flow;
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {
     /// <summary>
-    /// IFlowStep that deals with the selection of the component(DotnetToolInfo) and the associated command(CommandInfo).
-    /// if provided by the user, verify if the component is installed and the command is supported.
+    /// IFlowStep that deals with the selection of the component (DotNetToolInfo) and the associated command (CommandInfo).
+    /// If provided by the user, verifies if the component is installed and the command is supported.
     /// </summary>
     internal class CommandPickerFlowStep : IFlowStep
     {
@@ -18,6 +18,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         private readonly IDotNetToolService _dotnetToolService;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CommandPickerFlowStep"/> class.
+        /// </summary>
         public CommandPickerFlowStep(
             ILogger logger,
             IDotNetToolService dotnetToolService,
@@ -30,10 +34,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             _fileSystem = fileSystem;
         }
 
+        /// <inheritdoc/>
         public string Id => nameof(CommandPickerFlowStep);
-
+        /// <inheritdoc/>
         public string DisplayName => "Command Name";
 
+        /// <inheritdoc/>
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             context.Unset(FlowContextProperties.ComponentName);
@@ -43,12 +49,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return new ValueTask();
         }
 
+        /// <inheritdoc/>
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var settings = context.GetCommandSettings();
             var componentName = settings?.ComponentName;
             var commandName = settings?.CommandName;
-            //KeyValuePair with key being name of the DotnetToolInfo (component) and value being the CommandInfo supported by that component.
+            // KeyValuePair with key being name of the DotNetToolInfo (component) and value being the CommandInfo supported by that component.
             KeyValuePair<string, CommandInfo>? commandInfoKvp = null;
             CommandInfo? commandInfo = null;
             var dotnetTools = _dotnetToolService.GetDotNetTools();
@@ -86,6 +93,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
         }
 
+        /// <inheritdoc/>
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var settings = context.GetCommandSettings();
@@ -94,8 +102,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var commandName = settings?.CommandName;
             CommandInfo? commandInfo = null;
 
-            //check if user input included a component name.
-            //if included, check for a command name, and get the CommandInfo object.
+            // Check if user input included a component name.
+            // If included, check for a command name, and get the CommandInfo object.
             var dotnetTools = _dotnetToolService.GetDotNetTools();
             var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             if (dotnetToolComponent != null)
@@ -124,7 +132,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
         }
 
-        //Wrapper to get the first ParameterBasedFlowStep. Use 'BuildParameterFlowSteps'
+        /// <summary>
+        /// Wrapper to get the first ParameterBasedFlowStep. Uses 'BuildParameterFlowSteps'.
+        /// </summary>
         internal ParameterBasedFlowStep? GetFirstParameterBasedStep(CommandInfo commandInfo)
         {
             ParameterBasedFlowStep? firstParameterStep = null;
@@ -137,9 +147,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         }
 
         /// <summary>
-        /// Take all the 'Parameter's, create ParameterBasedFlowSteps with connecting them using 'NextStep'.
+        /// Takes all the 'Parameter's, creates ParameterBasedFlowSteps, and connects them using 'NextStep'.
         /// </summary>
-        /// <returns>first step from the connected ParameterBasedFlowSteps</returns>
+        /// <returns>The first step from the connected ParameterBasedFlowSteps.</returns>
         internal ParameterBasedFlowStep? BuildParameterFlowSteps(List<Parameter> parameters)
         {
             ParameterBasedFlowStep? firstStep = null;
@@ -173,6 +183,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             return firstStep;
         }
 
+        /// <summary>
+        /// Sets the selected command in the flow context.
+        /// </summary>
         private void SelectCommand(IFlowContext context, CommandInfo command)
         {
             context.Set(new FlowProperty(
@@ -187,6 +200,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 isVisible: false));
         }
 
+        /// <summary>
+        /// Sets the selected component in the flow context.
+        /// </summary>
         private void SelectComponent(IFlowContext context, DotNetToolInfo dotnetToolInfo)
         {
             context.Set(new FlowProperty(

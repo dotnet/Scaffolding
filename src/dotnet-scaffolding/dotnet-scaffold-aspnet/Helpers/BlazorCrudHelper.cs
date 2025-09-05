@@ -11,12 +11,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 internal static class BlazorCrudHelper
 {
     internal static string CrudPageType = "CRUD";
-    internal static List<string> CRUDPages = [CrudPageType, "Create", "Delete", "Details", "Edit", "Index"];
+    internal static List<string> CRUDPages = [CrudPageType, "Create", "Delete", "Details", "Edit", "Index", "NotFound"];
     internal const string CreateBlazorTemplate = "Create.tt";
     internal const string DeleteBlazorTemplate = "Delete.tt";
     internal const string DetailsBlazorTemplate = "Details.tt";
     internal const string EditBlazorTemplate = "Edit.tt";
     internal const string IndexBlazorTemplate = "Index.tt";
+    internal const string NotFoundBlazorTemplate = "NotFound.tt";
     internal const string IEndpointRouteBuilderContainingType = "Microsoft.AspNetCore.Routing.IEndpointRouteBuilder";
     internal const string IRazorComponentsBuilderType = "Microsoft.Extensions.DependencyInjection.IRazorComponentsBuilder";
     internal const string IServiceCollectionType = "Microsoft.Extensions.DependencyInjection.IServiceCollection";
@@ -133,6 +134,9 @@ internal static class BlazorCrudHelper
                 break;
             case DetailsBlazorTemplate:
                 templateType = typeof(Details);
+                break;
+            case NotFoundBlazorTemplate:
+                templateType = typeof(NotFound);
                 break;
         }
 

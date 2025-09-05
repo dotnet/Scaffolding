@@ -7,12 +7,23 @@ using Microsoft.DotNet.Tools.Scaffold.Models;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Services;
 
+/// <summary>
+/// Service for managing the dotnet-scaffold tool manifest (tools.json).
+/// Handles adding, removing, and retrieving scaffold tools from the manifest file.
+/// </summary>
 internal class ToolManifestService(IFileSystem fileSystem) : IToolManifestService
 {
+    // The current version of the manifest schema.
     private static readonly string CURRENT_MANIFEST_VERSION = "0.1";
 
+    // File system abstraction for reading/writing files and directories.
     private readonly IFileSystem _fileSystem = fileSystem;
 
+    /// <summary>
+    /// Adds a tool to the manifest if it does not already exist.
+    /// </summary>
+    /// <param name="toolName">The name of the tool to add.</param>
+    /// <returns>True if the tool was added or already exists.</returns>
     public bool AddTool(string toolName)
     {
         var currentManifest = GetManifest();
@@ -25,11 +36,18 @@ internal class ToolManifestService(IFileSystem fileSystem) : IToolManifestServic
         return true;
     }
 
+    /// <summary>
+    /// Ensures the manifest directory exists, creating it if necessary.
+    /// </summary>
     private void EnsureManifestDirectory()
     {
         _fileSystem.CreateDirectoryIfNotExists(GetToolManifestDirectory());
     }
 
+    /// <summary>
+    /// Retrieves the current scaffold manifest, creating a default one if it does not exist.
+    /// </summary>
+    /// <returns>The current <see cref="ScaffoldManifest"/>.</returns>
     public ScaffoldManifest GetManifest()
     {
         EnsureManifestDirectory();
@@ -47,6 +65,11 @@ internal class ToolManifestService(IFileSystem fileSystem) : IToolManifestServic
         return CreateDefaultManifest();
     }
 
+    /// <summary>
+    /// Removes a tool from the manifest by name.
+    /// </summary>
+    /// <param name="toolName">The name of the tool to remove.</param>
+    /// <returns>True if the tool was removed; false if not found.</returns>
     public bool RemoveTool(string toolName)
     {
         var currentManifest = GetManifest();
@@ -63,6 +86,10 @@ internal class ToolManifestService(IFileSystem fileSystem) : IToolManifestServic
         }
     }
 
+    /// <summary>
+    /// Writes the manifest to disk as JSON.
+    /// </summary>
+    /// <param name="manifest">The manifest to write.</param>
     private void WriteManifest(ScaffoldManifest manifest)
     {
         EnsureManifestDirectory();
@@ -70,10 +97,20 @@ internal class ToolManifestService(IFileSystem fileSystem) : IToolManifestServic
         _fileSystem.WriteAllText(GetToolManifestPath(), json);
     }
 
+    /// <summary>
+    /// Gets the directory path for the tool manifest.
+    /// </summary>
     private static string GetToolManifestDirectory()
-    => Path.Combine(Environment.GetEnvironmentVariable("USERPROFILE") ?? "", ".dotnet-scaffold");
+        => Path.Combine(Environment.GetEnvironmentVariable("USERPROFILE") ?? "", ".dotnet-scaffold");
+
+    /// <summary>
+    /// Gets the file path for the tool manifest (tools.json).
+    /// </summary>
     private static string GetToolManifestPath()
         => Path.Combine(GetToolManifestDirectory(), "tools.json");
 
+    /// <summary>
+    /// Creates a default scaffold manifest with the current version and no tools.
+    /// </summary>
     private static ScaffoldManifest CreateDefaultManifest() => new() { Version = CURRENT_MANIFEST_VERSION, Tools = [] };
 }

@@ -1,4 +1,4 @@
-VERSION=1.0.0-dev
+VERSION=2.0.7-dev
 DEFAULT_NUPKG_PATH=~/.nuget/packages
 SRC_DIR=$(pwd)
 NUPKG=artifacts/packages/Debug/Shipping/

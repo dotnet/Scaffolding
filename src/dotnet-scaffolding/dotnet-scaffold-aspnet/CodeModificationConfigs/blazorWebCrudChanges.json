@@ -52,6 +52,21 @@
       "Usings": [
         "Microsoft.EntityFrameworkCore"
       ]
+    },
+    {
+      "FileName": "Routes.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "<Router AppAssembly=\"typeof(Program).Assembly\">" ],
+          "Block": "<Router AppAssembly=\"typeof(Program).Assembly\" NotFoundPage=\"typeof(Pages.NotFound)\">",
+          "CheckBlock": "NotFoundPage=\"typeof(Pages.NotFound)\""
+        },
+        {
+          "ReplaceSnippet": [ "<Router AppAssembly=\"typeof(Program).Assembly\" AdditionalAssemblies=\"new[] { typeof($(AutoGenProjectName).Client._Imports).Assembly }\">" ],
+          "Block": "<Router AppAssembly=\"typeof(Program).Assembly\" AdditionalAssemblies=\"new[] { typeof($(AutoGenProjectName).Client._Imports).Assembly }\" NotFoundPage=\"typeof(Pages.NotFound)\">",
+          "CheckBlock": "NotFoundPage=\"typeof(Pages.NotFound)\""
+        }
+      ]
     }
   ]
 }

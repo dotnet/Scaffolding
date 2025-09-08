@@ -9,13 +9,27 @@ using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {
+    /// <summary>
+    /// Represents a flow step that handles user input for a specific parameter, including validation and navigation.
+    /// Supports chaining to the next parameter step and conditional skipping.
+    /// </summary>
     internal class ParameterBasedFlowStep : IFlowStep
     {
+        /// <summary>
+        /// The parameter associated with this step.
+        /// </summary>
         public Parameter Parameter { get; set; }
+        /// <summary>
+        /// The next step in the parameter flow, if any.
+        /// </summary>
         public ParameterBasedFlowStep? NextStep { get; set; }
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
         private readonly ILogger _logger;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ParameterBasedFlowStep"/> class.
+        /// </summary>
         public ParameterBasedFlowStep(
             Parameter parameter,
             ParameterBasedFlowStep? nextStep,
@@ -30,17 +44,22 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             _logger = logger;
         }
 
+        /// <inheritdoc/>
         public string Id => nameof(ParameterBasedFlowStep);
+        /// <inheritdoc/>
         public string DisplayName => Parameter.DisplayName;
 
+        /// <inheritdoc/>
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             context.Unset(Parameter.Name);
             return new ValueTask();
         }
 
+        /// <inheritdoc/>
         public async ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
+            // Discover the parameter value using ParameterDiscovery
             ParameterDiscovery paraDiscovery = new ParameterDiscovery(Parameter, _fileSystem, _environmentService);
             var parameterValue = await paraDiscovery.DiscoverAsync(context);
             if (string.Equals(parameterValue, FlowNavigation.BackInputToken, StringComparison.OrdinalIgnoreCase))
@@ -56,9 +75,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 SelectParameter(context, parameterValue ?? string.Empty);
             }
 
+            // Skip the next step if this is a conditional picker and the value is 'false'
             if (Parameter.PickerType is InteractivePickerType.ConditionalPicker && string.Equals(parameterValue, "false"))
             {
-                //Skip the current next step if it failed the conditional 
                 NextStep = NextStep?.NextStep;
             }
 
@@ -72,9 +91,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
         }
 
+        /// <inheritdoc/>
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            //check for parameter in the context using --name
+            // Check for parameter in the context using command-line args
             var cmdlineArgs = context.GetArgsDict();
             var commandSettings = context.GetCommandSettings();
             if (cmdlineArgs != null && cmdlineArgs.Count != 0)
@@ -95,6 +115,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 }
             }
 
+            // If required or in interactive mode, fail if not found
             if (Parameter.Required || (commandSettings != null && !commandSettings.NonInteractive))
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"No value found for option '{Parameter.Name}'"));
@@ -109,6 +130,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
         }
 
+        /// <summary>
+        /// Sets the parameter value in the context and initializes code service if needed.
+        /// </summary>
         private void SelectParameter(IFlowContext context, string parameterValue)
         {
             if (!string.IsNullOrEmpty(parameterValue))
@@ -122,6 +146,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             }
         }
 
+        /// <summary>
+        /// Initializes the code service in the context if the parameter is a project picker.
+        /// </summary>
         private void SelectCodeService(IFlowContext context, string projectPath)
         {
             var codeService = context.GetCodeService();

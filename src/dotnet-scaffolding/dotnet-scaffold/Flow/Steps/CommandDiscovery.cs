@@ -7,18 +7,36 @@ using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 
+/// <summary>
+/// Handles the discovery and selection of a scaffolding command for a given component or category.
+/// Presents a prompt to the user to pick a command, and manages the state of the flow step.
+/// </summary>
 internal class CommandDiscovery
 {
     private readonly IDotNetToolService _dotnetToolService;
     private readonly DotNetToolInfo? _componentPicked;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CommandDiscovery"/> class.
+    /// </summary>
+    /// <param name="dotnetToolService">Service for dotnet tool operations.</param>
+    /// <param name="componentPicked">The selected component, if any.</param>
     public CommandDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked)
     {
         _dotnetToolService = dotnetToolService;
         _componentPicked = componentPicked;
     }
 
+    /// <summary>
+    /// Gets the state of the flow step after execution.
+    /// </summary>
     public FlowStepState State { get; private set; }
 
+    /// <summary>
+    /// Discovers available commands and prompts the user to select one.
+    /// </summary>
+    /// <param name="context">The flow context.</param>
+    /// <returns>The selected command as a KeyValuePair, or null if none selected.</returns>
     public KeyValuePair<string, CommandInfo>? Discover(IFlowContext context)
     {
         var allCommands = context.GetCommandInfos();
@@ -42,6 +60,11 @@ internal class CommandDiscovery
         return Prompt(context);
     }
 
+    /// <summary>
+    /// Prompts the user to select a scaffolding command from the available options.
+    /// </summary>
+    /// <param name="context">The flow context.</param>
+    /// <returns>The selected command as a KeyValuePair, or null if none selected.</returns>
     private KeyValuePair<string, CommandInfo>? Prompt(IFlowContext context)
     {
         var allCommands = context.GetCommandInfos();
@@ -54,7 +77,7 @@ internal class CommandDiscovery
         var scaffoldingCategory = context.GetChosenCategory();
         if (string.IsNullOrEmpty(scaffoldingCategory))
         {
-            //get all categories for non-interactive scenario (since no chosen one was found)
+            // Get all categories for non-interactive scenario (since no chosen one was found)
             var possibleScaffoldingCategories = context.GetScaffoldingCategories();
             if (possibleScaffoldingCategories is null || possibleScaffoldingCategories.Count == 0)
             {
@@ -85,6 +108,11 @@ internal class CommandDiscovery
         return result.Value;
     }
 
+    /// <summary>
+    /// Gets the display name for a command info entry.
+    /// </summary>
+    /// <param name="commandInfo">The command info key-value pair.</param>
+    /// <returns>The display name for the command.</returns>
     private string GetCommandInfoDisplayName(KeyValuePair<string, CommandInfo> commandInfo)
     {
         return $"{commandInfo.Value.DisplayName} {commandInfo.Key.ToSuggestion(withBrackets: true)}";

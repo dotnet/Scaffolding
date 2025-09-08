@@ -30,7 +30,7 @@ internal class ScaffoldCommandAppBuilder(string[] args)
         commandApp.Configure(config =>
         {
             config
-                .SetApplicationName("dotnet-scaffold")
+                .SetApplicationName("dotnet scaffold")
                 .SetApplicationVersion(ToolHelper.GetToolVersion() ?? _backupDotNetScaffoldVersion)
                 .AddBranch<ToolSettings>("tool", tool =>
                 {

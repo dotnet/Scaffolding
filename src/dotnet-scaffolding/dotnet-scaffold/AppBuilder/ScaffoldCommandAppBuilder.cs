@@ -17,7 +17,7 @@ internal class ScaffoldCommandAppBuilder(string[] args)
     // Command-line arguments passed to the application.
     private readonly string[] _args = args;
     // Backup version string for dotnet-scaffold, updated every release.
-    private readonly string _backupDotNetScaffoldVersion = "9.0.0";
+    private readonly string _backupDotNetScaffoldVersion = "10.0.0";
 
     /// <summary>
     /// Builds and configures the <see cref="ScaffoldCommandApp"/> with all required services and commands.

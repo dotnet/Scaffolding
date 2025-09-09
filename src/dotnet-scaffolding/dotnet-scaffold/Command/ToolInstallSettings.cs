@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.ComponentModel;
 using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Command;
@@ -13,6 +14,7 @@ internal class ToolInstallSettings : ToolSettings
     /// <summary>
     /// Gets or sets the package name of the tool to install.
     /// </summary>
+    [Description("Available packages are dotnet-scaffold-aspnet and dotnet-scaffold-aspire.")]
     [CommandArgument(0, "<PACKAGE_NAME>")]
     public required string PackageName { get; set; }
 

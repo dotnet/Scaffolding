@@ -14,8 +14,6 @@ variables:
   # Cannot use key:value syntax in root defined variables
   - name: _TeamName
     value: DotNetCore
-  - name: _PublishUsingPipelines
-    value: true
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - template: /eng/common/templates/variables/pool-providers.yml
@@ -24,13 +22,13 @@ stages:
 - stage: build
   displayName: Build
   jobs:
-  - template: /eng/common/templates/jobs/jobs.yml
+  - template: /eng/common/templates/job/job.yml
     parameters:
       enableMicrobuild: true
-      enablePublishBuildArtifacts: true
-      enablePublishTestResults: true
+      enablePublishBuildArtifacts: false
+      enablePublishTestResults: false
       enablePublishBuildAssets: true
-      enablePublishUsingPipelines: ${{ variables._PublishUsingPipelines }}
+      enablePublishUsingPipelines: false
       enableTelemetry: true
       helixRepo: dotnet/scaffolding
       codeSign: true
@@ -73,7 +71,7 @@ stages:
             -prepareMachine
             $(_InternalBuildArgs)
             $(_ValidateSdkArgs)
-          displayName: Windows Build / Publish
+          displayName: Windows Build
 
       - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
         - job: OSX

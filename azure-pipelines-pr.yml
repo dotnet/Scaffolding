@@ -45,9 +45,9 @@ stages:
             demands: ImageOverride -equals 1es-windows-2019-open
 
         variables:
-        - _Script: eng\common\cibuild.cmd
+        - _Script: eng\common\build.cmd
         - _ValidateSdkArgs: ''
-        - _InternalBuildArgs: ''
+        - _InternalBuildArgs: '-restore -build -test -sign -pack -ci'
 
         strategy:
           matrix:
@@ -64,6 +64,7 @@ stages:
                 _PublishType: none
                 _SignType: test
                 _DotNetPublishToBlobFeed : false
+                _PublishPackages: '-publish'
         steps:
         - checkout: self
           clean: true
@@ -72,6 +73,7 @@ stages:
             -configuration $(_BuildConfig)
             -prepareMachine
             $(_InternalBuildArgs)
+            $(_PublishPackages)
             $(_ValidateSdkArgs)
           displayName: Windows Build / Publish
 
@@ -80,6 +82,7 @@ stages:
           timeoutInMinutes: 180
           pool:
             vmImage: macOS-13
+
           strategy:
             matrix:
               release_configuration:
@@ -90,9 +93,10 @@ stages:
           steps:
           - checkout: self
             clean: true
-          - script: eng/common/cibuild.sh
+          - script: eng/common/build.sh
               --configuration $(_BuildConfig)
               --prepareMachine
+              --restore --build --test --pack --ci
             name: Build
             displayName: Build
             condition: succeeded()
@@ -112,9 +116,10 @@ stages:
           steps:
           - checkout: self
             clean: true
-          - script: eng/common/cibuild.sh
+          - script: eng/common/build.sh
               --configuration $(_BuildConfig)
               --prepareMachine
+              --restore --build --test --pack --ci              
             name: Build
             displayName: Build
             condition: succeeded()

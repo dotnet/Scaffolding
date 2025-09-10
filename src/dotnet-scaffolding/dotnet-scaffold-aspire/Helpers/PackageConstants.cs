@@ -1,5 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
+// PackageConstants contains constant values for package names and mappings used in Aspire scaffolding.
+// It organizes package names for caching, storage, and database scenarios, and provides lookup dictionaries for each.
+
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers
 {
     internal class PackageConstants

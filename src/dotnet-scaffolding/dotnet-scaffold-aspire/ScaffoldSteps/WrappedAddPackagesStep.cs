@@ -9,10 +9,19 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 
+/// <summary>
+/// A scaffold step that wraps the AddPackagesStep to add telemetry tracking for package installation.
+/// </summary>
 internal class WrappedAddPackagesStep : AddPackagesStep
 {
     private readonly ILogger _logger;
     private readonly ITelemetryService _telemetryService;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WrappedAddPackagesStep"/> class.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="telemetryService">The telemetry service instance.</param>
     public WrappedAddPackagesStep(
         ILogger<WrappedAddPackagesStep> logger,
         ITelemetryService telemetryService) : base(logger)
@@ -21,6 +30,12 @@ internal class WrappedAddPackagesStep : AddPackagesStep
         _telemetryService = telemetryService;
     }
 
+    /// <summary>
+    /// Executes the package installation step and tracks the result in telemetry.
+    /// </summary>
+    /// <param name="context">The scaffolder context.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>True if the package installation succeeded; otherwise, false.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var result = await base.ExecuteAsync(context, cancellationToken);

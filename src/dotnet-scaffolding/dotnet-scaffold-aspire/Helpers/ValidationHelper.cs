@@ -7,6 +7,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 
+/// <summary>
+/// ValidationHelper provides static methods for validating command options for caching, database, and storage scenarios in Aspire scaffolding.
+/// It ensures required options are present and valid, and prepares context properties for further processing.
+/// </summary>
 internal static class ValidationHelper
 {
     internal static bool ValidateCachingSettings(ScaffolderContext context, ILogger logger)

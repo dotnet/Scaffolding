@@ -4,6 +4,9 @@ using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 
+// AspireCommandHelpers provides helper properties and methods for handling Aspire-related command options and defaults.
+// It includes default values for supported database types, CLI options, and custom value lists for use in command validation and processing.
+
 internal static class AspireCommandHelpers
 {
     internal static DatabaseProperties SqlServerDefaults = new()

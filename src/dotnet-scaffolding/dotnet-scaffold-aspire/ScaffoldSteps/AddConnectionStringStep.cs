@@ -8,8 +8,12 @@ using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
 using Microsoft.Extensions.Logging;
 using TelemetryConstants = Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry.TelemetryConstants;
+
 namespace Microsoft.DotNet.Scaffolding.Core.Steps;
 
+/// <summary>
+/// A scaffold step that adds a connection string to the appsettings.json file of a project.
+/// </summary>
 internal class AddConnectionStringStep : ScaffoldStep
 {
     public required string BaseProjectPath { get; set; }
@@ -18,6 +22,13 @@ internal class AddConnectionStringStep : ScaffoldStep
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly ITelemetryService _telemetryService;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AddConnectionStringStep"/> class.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="fileSystem">The file system abstraction.</param>
+    /// <param name="telemetryService">The telemetry service instance.</param>
     public AddConnectionStringStep(
         ILogger<AddConnectionStringStep> logger,
         IFileSystem fileSystem,
@@ -28,6 +39,12 @@ internal class AddConnectionStringStep : ScaffoldStep
         _telemetryService = telemetryService;
     }
 
+    /// <summary>
+    /// Executes the step to add a connection string to appsettings.json, creating the file if necessary.
+    /// </summary>
+    /// <param name="context">The scaffolder context.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>True if the connection string was added or already present; otherwise, false.</returns>
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var appSettingsFileSearch = _fileSystem.EnumerateFiles(BaseProjectPath, "appsettings.json", SearchOption.AllDirectories);
@@ -36,11 +53,13 @@ internal class AddConnectionStringStep : ScaffoldStep
         bool writeContent = false;
         if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
         {
+            // Create a new appsettings.json if it doesn't exist
             content = new JsonObject();
             writeContent = true;
         }
         else
         {
+            // Parse the existing appsettings.json
             var jsonString = _fileSystem.ReadAllText(appSettingsFile);
             content = JsonNode.Parse(jsonString);
         }
@@ -54,14 +73,14 @@ internal class AddConnectionStringStep : ScaffoldStep
 
         string connectionStringNodeName = "ConnectionStrings";
 
-        //find the "ConnectionStrings" node.
+        // Find or create the "ConnectionStrings" node
         if (content[connectionStringNodeName] is null)
         {
             writeContent = true;
             content[connectionStringNodeName] = new JsonObject();
         }
 
-        //if a key with the 'databaseName' already exists, skipping adding a connection string.
+        // If a key with the 'databaseName' does not exist, add the connection string
         if (content[connectionStringNodeName] is JsonObject connectionStringObject &&
             connectionStringObject[ConnectionStringName] is null &&
             !string.IsNullOrEmpty(ConnectionString))
@@ -73,6 +92,7 @@ internal class AddConnectionStringStep : ScaffoldStep
 
         if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
         {
+            // Write the updated content to appsettings.json
             var options = new JsonSerializerOptions { WriteIndented = true };
             _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");

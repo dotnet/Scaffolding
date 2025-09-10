@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Logging;
 /// <summary>
 /// Provides extension methods for configuring console logging with the <see cref="CleanConsoleFormatter"/>.
 /// </summary>
-public static class ConsoleLoggerExtensions
+internal static class ConsoleLoggerExtensions
 {
     /// <summary>
     /// Adds the <see cref="CleanConsoleFormatter"/> to the logging builder, configuring it as the default console formatter.

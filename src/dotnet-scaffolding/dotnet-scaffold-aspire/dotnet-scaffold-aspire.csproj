@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Scaffolding tool for .NET Aspire scenarios</Description>
@@ -18,7 +18,6 @@
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.CodeModification\Microsoft.DotNet.Scaffolding.CodeModification.csproj" />
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Microsoft.DotNet.Scaffolding.Core.csproj" />
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\Microsoft.DotNet.Scaffolding.TextTemplating.csproj" />
-    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\dotnet-scaffold\dotnet-scaffold.csproj" />
   </ItemGroup>
 
   <ItemGroup>

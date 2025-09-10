@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 
-public enum CliTypes
+internal enum CliTypes
 {
     Bool,
     Int,

@@ -6,7 +6,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 /// <summary>
 /// Represents information about a .NET tool as reported by 'dotnet tool list' and 'dotnet tool list -g'.
 /// </summary>
-public class DotNetToolInfo
+internal class DotNetToolInfo
 {
     /// <summary>
     /// Gets or sets the package name of the .NET tool.

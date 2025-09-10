@@ -13,16 +13,34 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
+/// <summary>
+/// Scaffold step for invoking 'dotnet new' to add new files (e.g., Razor pages, components, views) to a project.
+/// </summary>
 internal class DotnetNewScaffolderStep : ScaffoldStep
 {
+    /// <summary>
+    /// Gets or sets the project file path.
+    /// </summary>
     public string? ProjectPath { get; set; }
+    /// <summary>
+    /// Gets or sets the dotnet new command name (e.g., 'page', 'view').
+    /// </summary>
     public required string CommandName { get; set; }
+    /// <summary>
+    /// Gets or sets the namespace for the new file.
+    /// </summary>
     public string? NamespaceName { get; set; }
+    /// <summary>
+    /// Gets or sets the file name for the new file.
+    /// </summary>
     public string? FileName { get; set; }
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly ITelemetryService _telemetryService;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DotnetNewScaffolderStep"/> class.
+    /// </summary>
     public DotnetNewScaffolderStep(ILogger<DotnetNewScaffolderStep> logger, IFileSystem fileSystem, ITelemetryService telemetryService)
     {
         _logger = logger;
@@ -30,6 +48,7 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
         _telemetryService = telemetryService;
     }
 
+    /// <inheritdoc />
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation($"Adding '{CommandName}' using 'dotnet new'...");
@@ -53,6 +72,9 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
         return Task.FromResult(result);
     }
 
+    /// <summary>
+    /// Invokes the 'dotnet new' command with the specified settings.
+    /// </summary>
     private bool InvokeDotnetNew(DotnetNewStepSettings stepSettings)
     {
         var outputDirectory = Path.GetDirectoryName(stepSettings.Project);
@@ -92,6 +114,9 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
         return false;
     }
 
+    /// <summary>
+    /// Validates the dotnet new command settings and returns the settings object if valid.
+    /// </summary>
     private DotnetNewStepSettings? ValidateDotnetNewCommandSettings()
     {
         if (string.IsNullOrEmpty(ProjectPath) || !_fileSystem.FileExists(ProjectPath))

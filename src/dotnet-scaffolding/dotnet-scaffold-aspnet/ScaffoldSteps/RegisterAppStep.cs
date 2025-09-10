@@ -12,18 +12,36 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 {
+    /// <summary>
+    /// Scaffold step for registering or updating an Azure AD application using the msidentity CLI.
+    /// Captures and stores the client ID in the scaffolding context.
+    /// </summary>
     internal class RegisterAppStep : ScaffoldStep
     {
-        // Required properties
+        /// <summary>
+        /// Gets or sets the project file path.
+        /// </summary>
         public required string ProjectPath { get; set; }
+        /// <summary>
+        /// Gets or sets the username for Azure AD.
+        /// </summary>
         public string? Username { get; set; }
+        /// <summary>
+        /// Gets or sets the Azure AD tenant ID.
+        /// </summary>
         public string? TenantId { get; set; }
+        /// <summary>
+        /// Gets or sets the Azure AD client ID (if updating an existing app).
+        /// </summary>
         public string? ClientId { get; set; }
 
         private readonly ILogger _logger;
         private readonly IFileSystem _fileSystem;
         private readonly ITelemetryService _telemetryService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RegisterAppStep"/> class.
+        /// </summary>
         public RegisterAppStep(
             ILogger<AddClientSecretStep> logger,
             IFileSystem fileSystem,
@@ -34,6 +52,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             _telemetryService = telemetryService;
         }
 
+        /// <inheritdoc />
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
             // Validate project path
@@ -45,9 +64,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 
             if(ClientId is not null)
             {
-
                 _logger.LogInformation("Updating project...");
-
                 // Initialize user secrets
                 bool success = UpdateApp(context);
                 if (!success)
@@ -55,14 +72,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     _logger.LogError("Failed to Update App.");
                     return Task.FromResult(false);
                 }
-
                 _logger.LogInformation("Successfully Updated App.");
                 return Task.FromResult(true);
             }
             else
             {
                 _logger.LogInformation("Registering project...");
-
                 // Initialize user secrets
                 bool success = RegisterApp(context);
                 if (!success)
@@ -70,13 +85,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     _logger.LogError("Failed to Register App.");
                     return Task.FromResult(false);
                 }
-
                 _logger.LogInformation("Successfully Registered App.");
                 return Task.FromResult(true);
             }
-
         }
 
+        /// <summary>
+        /// Registers a new Azure AD application and captures the client ID.
+        /// </summary>
         private bool RegisterApp(ScaffolderContext context)
         {
             try
@@ -88,18 +104,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     "--tenant-id", TenantId ?? string.Empty,
                     "--username", Username ?? string.Empty
                 };
-
                 // Fix for IDE0300: Simplify collection initialization
                 var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
-
                 int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
-
                 if (exitCode != 0)
                 {
                     _logger.LogError($"Error registering application: {stdErr}");
                     return false;
                 }
-
                 if (!string.IsNullOrEmpty(stdOut))
                 {
                     // Extract client ID using regex
@@ -115,7 +127,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                         _logger.LogWarning("Could not extract client ID from output");
                     }
                 }
-
                 return true;
             }
             catch (Exception e)
@@ -125,6 +136,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             }
         }
 
+        /// <summary>
+        /// Updates an existing Azure AD application registration.
+        /// </summary>
         private bool UpdateApp(ScaffolderContext context)
         {
             try
@@ -136,20 +150,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     "--client-id", ClientId ?? string.Empty,
                     "--tenant-id", TenantId ?? string.Empty,
                     "--username", Username ?? string.Empty,
-
                 };
-
                 // Fix for IDE0300: Simplify collection initialization
                 var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
-
                 int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
-
                 if (exitCode != 0)
                 {
                     _logger.LogError($"Error updating registration: {stdErr}");
                     return false;
                 }
-
                 if (!string.IsNullOrEmpty(stdOut))
                 {
                     // Extract client ID using regex
@@ -165,7 +174,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                         _logger.LogWarning("Could not extract client ID from output");
                     }
                 }
-
                 return true;
             }
             catch (Exception e)

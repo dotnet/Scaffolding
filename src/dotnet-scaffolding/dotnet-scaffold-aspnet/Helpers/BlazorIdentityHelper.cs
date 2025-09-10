@@ -9,8 +9,17 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Files;
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 //TODO : combine with 'IdentityHelper', should be quite easy.
+/// <summary>
+/// Helper methods for Blazor Identity scaffolding, including template and output path utilities.
+/// </summary>
 internal static class BlazorIdentityHelper
 {
+    /// <summary>
+    /// Retrieves the text templating properties for the given T4 templates and Blazor identity model.
+    /// </summary>
+    /// <param name="allT4TemplatePaths">The paths of all T4 templates.</param>
+    /// <param name="blazorIdentityModel">The Blazor identity model containing project and identity information.</param>
+    /// <returns>An <see cref="IEnumerable{TextTemplatingProperty}"/> collection containing the text templating properties for the specified templates.</returns>
     internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, IdentityModel blazorIdentityModel)
     {
         var textTemplatingProperties = new List<TextTemplatingProperty>();
@@ -43,6 +52,11 @@ internal static class BlazorIdentityHelper
         return textTemplatingProperties;
     }
 
+    /// <summary>
+    /// Retrieves the formatted relative identity file path from the full file name.
+    /// </summary>
+    /// <param name="fullFileName">The full file name to retrieve the relative identity file path from.</param>
+    /// <returns>The formatted relative identity file path.</returns>
     private static string GetFormattedRelativeIdentityFile(string fullFileName)
     {
         string identifier = $"BlazorIdentity{Path.DirectorySeparatorChar}";
@@ -57,6 +71,12 @@ internal static class BlazorIdentityHelper
         return string.Empty;
     }
 
+    /// <summary>
+    /// Retrieves the text templating property for the application user template.
+    /// </summary>
+    /// <param name="applicationUserTemplate">The path of the application user template.</param>
+    /// <param name="blazorIdentityModel">The Blazor identity model containing project and identity information.</param>
+    /// <returns>A <see cref="TextTemplatingProperty"/> object containing the text templating property for the application user template, or null if the template path or project directory is invalid.</returns>
     internal static TextTemplatingProperty? GetApplicationUserTextTemplatingProperty(string? applicationUserTemplate, IdentityModel blazorIdentityModel)
     {
         var projectDirectory = Path.GetDirectoryName(blazorIdentityModel.ProjectInfo.ProjectPath);

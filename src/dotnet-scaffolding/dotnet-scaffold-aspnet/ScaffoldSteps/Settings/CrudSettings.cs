@@ -2,7 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
+/// <summary>
+/// Settings for CRUD scaffolding steps, including the page type.
+/// </summary>
 internal class CrudSettings : EfWithModelStepSettings
 {
+    /// <summary>
+    /// The page type for CRUD scaffolding (e.g., Create, Read, Update, Delete).
+    /// </summary>
     public required string Page { get; set; }
 }

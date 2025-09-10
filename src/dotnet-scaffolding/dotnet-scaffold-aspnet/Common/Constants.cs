@@ -2,8 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 
+/// <summary>
+/// Contains constant values used throughout the ASP.NET scaffolding tools.
+/// </summary>
 internal class Constants
 {
+    /// <summary>
+    /// File extension constants.
+    /// </summary>
     public const string CSharpExtension = ".cs";
     public const string BlazorExtension = ".razor";
     public const string ViewExtension = ".cshtml";
@@ -12,6 +18,9 @@ internal class Constants
     public const string GlobalNamespace = "<global namespace>";
     public const string NewDbContext = nameof(NewDbContext);
 
+    /// <summary>
+    /// CLI option constants for scaffolding commands.
+    /// </summary>
     public class CliOptions
     {
         public const string ProjectCliOption = "--project";
@@ -34,15 +43,20 @@ internal class Constants
         public const string UsernameOption = "--username";
         public const string TenantIdOption = "--tenantId";
         public const string ApplicationIdOption = "--applicationId";
-
     }
 
+    /// <summary>
+    /// Identity-related constant values.
+    /// </summary>
     public class Identity
     {
         public const string UserClassName = "ApplicationUser";
         public const string DbContextName = "NewIdentityDbContext";
     }
 
+    /// <summary>
+    /// Constants for dotnet CLI commands and their default outputs.
+    /// </summary>
     public class DotnetCommands
     {
         public const string RazorPageCommandName = "page";

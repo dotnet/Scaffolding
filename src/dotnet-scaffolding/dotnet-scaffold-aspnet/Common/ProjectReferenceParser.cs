@@ -9,8 +9,16 @@ using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common
 {
+    /// <summary>
+    /// Provides methods for parsing project references from command output.
+    /// </summary>
     internal class ProjectReferenceParser
     {
+        /// <summary>
+        /// Parses the project references from the given references output string.
+        /// </summary>
+        /// <param name="referencesOutput">The output string containing project references.</param>
+        /// <returns>A list of project reference strings.</returns>
         public static List<string> ParseProjectReferences(string referencesOutput)
         {
             var references = new List<string>();

@@ -17,6 +17,9 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 {
+    /// <summary>
+    /// Scaffold step to validate Entra ID settings and initialize the EntraIdModel for scaffolding.
+    /// </summary>
     internal class ValidateEntraIdStep : ScaffoldStep
     {
         private readonly IFileSystem _fileSystem;
@@ -24,12 +27,33 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         private readonly ITelemetryService _telemetryService;
 
         // Properties as requested
+        /// <summary>
+        /// Username for Entra ID configuration.
+        /// </summary>
         public string? Username { get; set; }
+        /// <summary>
+        /// Path to the project file.
+        /// </summary>
         public string? Project { get; set; }
+        /// <summary>
+        /// Tenant ID for Entra ID configuration.
+        /// </summary>
         public string? TenantId { get; set; }
+        /// <summary>
+        /// Application name for Entra ID configuration.
+        /// </summary>
         public string? Application { get; set; }
+        /// <summary>
+        /// Option to select application interactively.
+        /// </summary>
         public string? SelectApplication { get; set; }
 
+        /// <summary>
+        /// Constructor for ValidateEntraIdStep.
+        /// </summary>
+        /// <param name="fileSystem">File system service.</param>
+        /// <param name="logger">Logger service.</param>
+        /// <param name="telemetryService">Telemetry service.</param>
         public ValidateEntraIdStep(
             IFileSystem fileSystem,
             ILogger<ValidateEntraIdStep> logger,
@@ -40,6 +64,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             _telemetryService = telemetryService;
         }
 
+        /// <summary>
+        /// Executes the step to validate Entra ID settings and initialize the EntraIdModel.
+        /// </summary>
         public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
             var entraIdSettings = ValidateEntraIdSettings();
@@ -90,6 +117,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             return true;
         }
 
+        /// <summary>
+        /// Validates the Entra ID settings provided by the user.
+        /// </summary>
         private EntraIdSettings? ValidateEntraIdSettings()
         {
             if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
@@ -126,6 +156,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             };
         }
 
+        /// <summary>
+        /// Initializes and returns the EntraIdModel for scaffolding.
+        /// </summary>
         private async Task<EntraIdModel?> GetEntraIdModelAsync(EntraIdSettings settings)
         {
             if (string.IsNullOrEmpty(settings.Project))

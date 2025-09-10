@@ -8,11 +8,17 @@ using System.Reflection;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
+/// <summary>
+/// Helper methods for Identity scaffolding, including template and output path utilities.
+/// </summary>
 internal static class IdentityHelper
 {
     /// <summary>
-    /// use the template paths and IdentityModel to create valid 'TextTemplateProperty' objects.
+    /// Use the template paths and IdentityModel to create valid 'TextTemplateProperty' objects.
     /// </summary>
+    /// <param name="allFilePaths">All file paths.</param>
+    /// <param name="identityModel">The identity model.</param>
+    /// <returns>An enumerable of TextTemplatingProperty.</returns>
     internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allFilePaths, IdentityModel identityModel)
     {
         var textTemplatingProperties = new List<TextTemplatingProperty>();
@@ -55,11 +61,22 @@ internal static class IdentityHelper
         return textTemplatingProperties;
     }
 
+    /// <summary>
+    /// Gets the additional text templating properties.
+    /// </summary>
+    /// <param name="allFilePaths">All file paths.</param>
+    /// <param name="identityModel">The identity model.</param>
+    /// <returns>An enumerable of additional TextTemplatingProperty.</returns>
     internal static IEnumerable<TextTemplatingProperty> GetAdditionalTextTemplatingProperties(IEnumerable<string> allFilePaths, IdentityModel identityModel)
     {
         return [];
     }
 
+    /// <summary>
+    /// Gets the formatted relative identity file path from the full file name.
+    /// </summary>
+    /// <param name="fullFileName">The full file name.</param>
+    /// <returns>The formatted relative identity file path.</returns>
     private static string GetFormattedRelativeIdentityFile(string fullFileName)
     {
         string identifier = $"Identity{Path.DirectorySeparatorChar}";
@@ -74,6 +91,12 @@ internal static class IdentityHelper
         return string.Empty;
     }
 
+    /// <summary>
+    /// Gets the application user text templating property.
+    /// </summary>
+    /// <param name="applicationUserTemplate">The application user template.</param>
+    /// <param name="identityModel">The identity model.</param>
+    /// <returns>A TextTemplatingProperty for the application user.</returns>
     internal static TextTemplatingProperty? GetApplicationUserTextTemplatingProperty(string? applicationUserTemplate, IdentityModel identityModel)
     {
         var projectDirectory = Path.GetDirectoryName(identityModel.ProjectInfo.ProjectPath);

@@ -12,22 +12,55 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 {
+    /// <summary>
+    /// Scaffold step to update Azure AD configuration in appsettings.json and appsettings.Development.json files.
+    /// </summary>
     internal class UpdateAppSettingsStep : ScaffoldStep
     {
         // Required properties for the AzureAD configuration
+        /// <summary>
+        /// Path to the project file.
+        /// </summary>
         public required string ProjectPath { get; set; }
+        /// <summary>
+        /// Username for Azure AD configuration.
+        /// </summary>
         public string? Username { get; set; }
+        /// <summary>
+        /// Azure AD application client ID.
+        /// </summary>
         public string? ClientId { get; set; }
+        /// <summary>
+        /// Azure AD domain.
+        /// </summary>
         public string? Domain { get; set; }
+        /// <summary>
+        /// Azure AD instance URL.
+        /// </summary>
         public string? Instance { get; set; }
+        /// <summary>
+        /// Azure AD tenant ID.
+        /// </summary>
         public string? TenantId { get; set; }
+        /// <summary>
+        /// Callback path for authentication.
+        /// </summary>
         public string? CallbackPath { get; set; }
+        /// <summary>
+        /// Azure AD client secret.
+        /// </summary>
         public string? ClientSecret { get; set; }
 
         private readonly ILogger _logger;
         private readonly IFileSystem _fileSystem;
         private readonly ITelemetryService _telemetryService;
 
+        /// <summary>
+        /// Constructor for UpdateAppSettingsStep.
+        /// </summary>
+        /// <param name="logger">Logger for this step.</param>
+        /// <param name="fileSystem">File system helper.</param>
+        /// <param name="telemetryService">Telemetry service for logging events.</param>
         public UpdateAppSettingsStep(
             ILogger<UpdateAppSettingsStep> logger,
             IFileSystem fileSystem,
@@ -38,6 +71,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             _telemetryService = telemetryService;
         }
 
+        /// <summary>
+        /// Executes the step to update Azure AD configuration in appsettings files.
+        /// </summary>
+        /// <param name="context">Scaffolder context.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task representing the asynchronous operation.</returns>
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
             try
@@ -189,6 +228,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             
         }
 
+        /// <summary>
+        /// Updates the appsettings.Development.json file with AzureAd configuration.
+        /// </summary>
+        /// <param name="baseProjectPath">Base project path.</param>
+        /// <param name="content">Content of the appsettings.json file.</param>
         private void UpdateDevelopmentSettings(string baseProjectPath, JsonNode content)
         {
             var devSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");

@@ -10,14 +10,30 @@ using Microsoft.Extensions.Logging;
 using TelemetryConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry.TelemetryConstants;
 namespace Microsoft.DotNet.Scaffolding.Core.Steps;
 
+/// <summary>
+/// Scaffold step for adding a connection string to the appsettings.json file of a project.
+/// Updates or creates the ConnectionStrings section as needed.
+/// </summary>
 internal class AddConnectionStringStep : ScaffoldStep
 {
+    /// <summary>
+    /// Gets or sets the base project path to search for appsettings.json.
+    /// </summary>
     public required string BaseProjectPath { get; set; }
+    /// <summary>
+    /// Gets or sets the name of the connection string.
+    /// </summary>
     public required string ConnectionStringName { get; set; }
+    /// <summary>
+    /// Gets or sets the connection string value.
+    /// </summary>
     public required string ConnectionString { get; set; }
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly ITelemetryService _telemetryService;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AddConnectionStringStep"/> class.
+    /// </summary>
     public AddConnectionStringStep(
         ILogger<AddConnectionStringStep> logger,
         IFileSystem fileSystem,
@@ -28,6 +44,7 @@ internal class AddConnectionStringStep : ScaffoldStep
         _telemetryService = telemetryService;
     }
 
+    /// <inheritdoc />
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var appSettingsFileSearch = _fileSystem.EnumerateFiles(BaseProjectPath, "appsettings.json", SearchOption.AllDirectories);

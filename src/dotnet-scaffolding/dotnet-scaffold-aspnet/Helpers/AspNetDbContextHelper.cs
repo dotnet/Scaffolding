@@ -7,8 +7,14 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
+/// <summary>
+/// Helper methods for working with ASP.NET DbContext and related code generation.
+/// </summary>
 internal class AspNetDbContextHelper
 {
+    /// <summary>
+    /// Default DbContext properties for each supported database provider.
+    /// </summary>
     internal static Dictionary<string, DbContextProperties?> DbContextTypeDefaults = new()
     {
         { PackageConstants.EfConstants.Postgres, DbContextHelper.NpgsqlDefaults },
@@ -17,12 +23,18 @@ internal class AspNetDbContextHelper
         { PackageConstants.EfConstants.CosmosDb, DbContextHelper.CosmosDefaults }
     };
 
+    /// <summary>
+    /// Default IdentityDbContext properties for supported providers.
+    /// </summary>
     internal static Dictionary<string, DbContextProperties?> IdentityDbContextTypeDefaults = new()
     {
         { PackageConstants.EfConstants.SqlServer, DbContextHelper.SqlServerDefaults },
         { PackageConstants.EfConstants.SQLite, DbContextHelper.SqliteDefaults }
     };
 
+    /// <summary>
+    /// Gets code modifier properties for a given DbContextInfo.
+    /// </summary>
     internal static Dictionary<string, string> GetDbContextCodeModifierProperties(DbContextInfo dbContextInfo)
     {
         var dbContextProperties = new Dictionary<string, string>();
@@ -52,6 +64,9 @@ internal class AspNetDbContextHelper
         return dbContextProperties;
     }
 
+    /// <summary>
+    /// Gets DbContextProperties for a given project and DbContextInfo.
+    /// </summary>
     internal static DbContextProperties? GetDbContextProperties(string projectPath, DbContextInfo dbContextInfo)
     {
         var projectBasePath = Path.GetDirectoryName(projectPath);
@@ -71,6 +86,9 @@ internal class AspNetDbContextHelper
         return null;
     }
 
+    /// <summary>
+    /// Gets the file path for a new Identity data context class.
+    /// </summary>
     internal static string GetIdentityDataContextPath(string projectPath, string className)
     {
         var newFilePath = string.Empty;

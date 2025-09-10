@@ -12,8 +12,14 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
+/// <summary>
+/// Provides extension methods for <see cref="IScaffoldBuilder"/> to add Blazor CRUD scaffolding steps.
+/// </summary>
 internal static class BlazorCrudScaffolderBuilderExtensions
 {
+    /// <summary>
+    /// Adds a step for generating Blazor CRUD text templating files.
+    /// </summary>
     public static IScaffoldBuilder WithBlazorCrudTextTemplatingStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedTextTemplatingStep>(config =>
@@ -39,6 +45,9 @@ internal static class BlazorCrudScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a step for adding required NuGet packages for Blazor CRUD scaffolding.
+    /// </summary>
     public static IScaffoldBuilder WithBlazorCrudAddPackagesStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedAddPackagesStep>(config =>
@@ -73,6 +82,9 @@ internal static class BlazorCrudScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds steps for code modification and additional code changes for Blazor CRUD scaffolding.
+    /// </summary>
     public static IScaffoldBuilder WithBlazorCrudCodeChangeStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>

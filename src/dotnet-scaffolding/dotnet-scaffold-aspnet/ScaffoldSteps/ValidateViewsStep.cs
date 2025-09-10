@@ -14,15 +14,34 @@ using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
+/// <summary>
+/// Scaffold step to validate View settings and initialize the ViewModel for scaffolding.
+/// </summary>
 internal class ValidateViewsStep : ScaffoldStep
 {
+    /// <summary>
+    /// Path to the project file.
+    /// </summary>
+    public string? Project { get; set; }
+    /// <summary>
+    /// Name of the model class for the view.
+    /// </summary>
+    public string? Model { get; set; }
+    /// <summary>
+    /// Page type for view scaffolding.
+    /// </summary>
+    public string? Page { get; set; }
+
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     private readonly ITelemetryService _telemetryService;
-    public string? Project { get; set; }
-    public string? Model { get; set; }
-    public string? Page { get; set; }
 
+    /// <summary>
+    /// Constructor for ValidateViewsStep.
+    /// </summary>
+    /// <param name="fileSystem">File system interface.</param>
+    /// <param name="logger">Logger interface.</param>
+    /// <param name="telemetryService">Telemetry service interface.</param>
     public ValidateViewsStep(
         IFileSystem fileSystem,
         ILogger<ValidateViewsStep> logger,
@@ -33,6 +52,12 @@ internal class ValidateViewsStep : ScaffoldStep
         _telemetryService = telemetryService;
     }
 
+    /// <summary>
+    /// Executes the step to validate View settings and initialize the ViewModel.
+    /// </summary>
+    /// <param name="context">Scaffolder context.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Task that represents the asynchronous operation, with a boolean result indicating success or failure.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var viewSettings = ValidateViewsSettings();
@@ -63,6 +88,10 @@ internal class ValidateViewsStep : ScaffoldStep
         return true;
     }
 
+    /// <summary>
+    /// Validates the View settings provided by the user.
+    /// </summary>
+    /// <returns>CrudSettings object if valid, null otherwise.</returns>
     private CrudSettings? ValidateViewsSettings()
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
@@ -96,6 +125,11 @@ internal class ValidateViewsStep : ScaffoldStep
         };
     }
 
+    /// <summary>
+    /// Initializes and returns the ViewModel for scaffolding.
+    /// </summary>
+    /// <param name="settings">CrudSettings object containing the settings for scaffolding.</param>
+    /// <returns>Task that represents the asynchronous operation, with a ViewModel result if successful, null otherwise.</returns>
     private async Task<ViewModel?> GetViewModelAsync(CrudSettings settings)
     {
         var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);

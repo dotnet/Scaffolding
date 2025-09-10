@@ -5,8 +5,17 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
+/// <summary>
+/// Helper methods for EF Controller scaffolding, including template and output path utilities.
+/// </summary>
 internal static class EfControllerHelper
 {
+    /// <summary>
+    /// Gets the text templating properties for the EF Controller based on the given model.
+    /// </summary>
+    /// <param name="efControllerModel">The model containing information about the EF Controller.</param>
+    /// <returns>A <see cref="TextTemplatingProperty"/> representing the properties needed for text templating.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the template for the specified controller type cannot be found.</exception>
     internal static TextTemplatingProperty GetEfControllerTemplatingProperty(EfControllerModel efControllerModel)
     {
         var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["EfController"]);
@@ -38,6 +47,11 @@ internal static class EfControllerHelper
         };
     }
 
+    /// <summary>
+    /// Gets the CRUD controller type associated with the specified template path.
+    /// </summary>
+    /// <param name="templatePath">The path of the template file.</param>
+    /// <returns>The <see cref="Type"/> representing the CRUD controller, or null if the template path is null or empty.</returns>
     private static Type? GetCrudControllerType(string? templatePath)
     {
         if (string.IsNullOrEmpty(templatePath))

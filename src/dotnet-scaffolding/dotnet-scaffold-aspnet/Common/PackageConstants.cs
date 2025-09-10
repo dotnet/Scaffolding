@@ -2,8 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 
+/// <summary>
+/// Contains constants for NuGet package names and EF Core provider mappings used in ASP.NET scaffolding.
+/// </summary>
 internal class PackageConstants
 {
+    /// <summary>
+    /// Constants and mappings related to Entity Framework Core providers and packages.
+    /// </summary>
     public static class EfConstants
     {
         public const string SqlServer = "sqlserver-efcore";
@@ -17,6 +23,9 @@ internal class PackageConstants
         public const string CosmosPakcageName = "Microsoft.EntityFrameworkCore.Cosmos";
         public const string PostgresPackageName = "Npgsql.EntityFrameworkCore.PostgreSQL";
         public const string ConnectionStringVariableName = "connectionString";
+        /// <summary>
+        /// Maps provider keys to their corresponding NuGet package names.
+        /// </summary>
         public static readonly IDictionary<string, string> EfPackagesDict = new Dictionary<string, string>
         {
             { SqlServer, SqlServerPackageName },
@@ -25,12 +34,18 @@ internal class PackageConstants
             { Postgres, PostgresPackageName }
         };
 
+        /// <summary>
+        /// Maps provider keys to their corresponding Identity EF package names.
+        /// </summary>
         public static readonly IDictionary<string, string> IdentityEfPackagesDict = new Dictionary<string, string>
         {
             { SqlServer, SqlServerPackageName },
             { SQLite, SqlitePackageName },
         };
 
+        /// <summary>
+        /// Maps provider keys to their corresponding UseDatabase method names.
+        /// </summary>
         internal static Dictionary<string, string> UseDatabaseMethods = new()
         {
             { SqlServer, "UseSqlServer" },
@@ -40,6 +55,9 @@ internal class PackageConstants
         };
     }
 
+    /// <summary>
+    /// Constants for ASP.NET Core related NuGet package names.
+    /// </summary>
     public static class AspNetCorePackages
     {
         public const string QuickGridEfAdapterPackageName = "Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter";

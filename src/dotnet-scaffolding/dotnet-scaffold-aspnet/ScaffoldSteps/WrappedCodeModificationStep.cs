@@ -9,10 +9,18 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
+/// <summary>
+/// Scaffold step that wraps CodeModificationStep and adds telemetry tracking for code modification.
+/// </summary>
 internal class WrappedCodeModificationStep : CodeModificationStep
 {
     private readonly ILogger _logger;
     private readonly ITelemetryService _telemetryService;
+    /// <summary>
+    /// Constructor for WrappedCodeModificationStep.
+    /// </summary>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="telemetryService">Telemetry service instance.</param>
     public WrappedCodeModificationStep(
         ILogger<WrappedCodeModificationStep> logger,
         ITelemetryService telemetryService) : base(logger)
@@ -21,6 +29,12 @@ internal class WrappedCodeModificationStep : CodeModificationStep
         _telemetryService = telemetryService;
     }
 
+    /// <summary>
+    /// Executes the step to modify code and track telemetry.
+    /// </summary>
+    /// <param name="context">The scaffolder context.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task that represents the asynchronous operation, containing a boolean result.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var result = await base.ExecuteAsync(context, cancellationToken);

@@ -17,18 +17,46 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
+/// <summary>
+/// Scaffold step to validate Blazor CRUD settings and initialize the BlazorCrudModel for scaffolding.
+/// </summary>
 internal class ValidateBlazorCrudStep : ScaffoldStep
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     private readonly ITelemetryService _telemetryService;
+
+    /// <summary>
+    /// Path to the project file.
+    /// </summary>
     public string? Project { get; set; }
+    /// <summary>
+    /// Indicates if prerelease packages should be used.
+    /// </summary>
     public bool Prerelease { get; set; }
+    /// <summary>
+    /// Database provider for the DbContext.
+    /// </summary>
     public string? DatabaseProvider { get; set; }
+    /// <summary>
+    /// Name of the DbContext class.
+    /// </summary>
     public string? DataContext { get; set; }
+    /// <summary>
+    /// Name of the model class for CRUD operations.
+    /// </summary>
     public string? Model { get; set; }
+    /// <summary>
+    /// Page type for CRUD scaffolding.
+    /// </summary>
     public string? Page { get; set; }
 
+    /// <summary>
+    /// Constructor for ValidateBlazorCrudStep.
+    /// </summary>
+    /// <param name="fileSystem">The file system object.</param>
+    /// <param name="logger">The logger object.</param>
+    /// <param name="telemetryService">The telemetry service object.</param>
     public ValidateBlazorCrudStep(
         IFileSystem fileSystem,
         ILogger<ValidateBlazorCrudStep> logger,
@@ -39,6 +67,12 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
         _telemetryService = telemetryService;
     }
 
+    /// <summary>
+    /// Executes the step to validate Blazor CRUD settings and initialize the BlazorCrudModel.
+    /// </summary>
+    /// <param name="context">The scaffolder context.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>A task representing the asynchronous operation, with a result indicating success or failure.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var blazorCrudSettings = ValidateBlazorCrudSettings();
@@ -98,6 +132,10 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
         return true;
     }
 
+    /// <summary>
+    /// Validates the Blazor CRUD settings provided by the user.
+    /// </summary>
+    /// <returns>A CrudSettings object containing the validated settings, or null if validation fails.</returns>
     private CrudSettings? ValidateBlazorCrudSettings()
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
@@ -154,6 +192,11 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
         };
     }
 
+    /// <summary>
+    /// Initializes and returns the BlazorCrudModel for scaffolding.
+    /// </summary>
+    /// <param name="settings">The CRUD settings containing user input.</param>
+    /// <returns>A task representing the asynchronous operation, with a result containing the BlazorCrudModel, or null if initialization fails.</returns>
     private async Task<BlazorCrudModel?> GetBlazorCrudModelAsync(CrudSettings settings)
     {
         var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);

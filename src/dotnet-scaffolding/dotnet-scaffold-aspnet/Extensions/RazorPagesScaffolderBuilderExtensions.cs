@@ -11,8 +11,16 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
+/// <summary>
+/// Provides extension methods for <see cref="IScaffoldBuilder"/> to add Razor Pages scaffolding steps.
+/// </summary>
 internal static class RazorPagesScaffolderBuilderExtensions
 {
+    /// <summary>
+    /// Adds a code change step for Razor Pages to the scaffold builder.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithRazorPagesCodeChangeStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
@@ -52,6 +60,11 @@ internal static class RazorPagesScaffolderBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds a text templating step for Razor Pages to the scaffold builder.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithRazorPagesTextTemplatingStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedTextTemplatingStep>(config =>
@@ -77,6 +90,11 @@ internal static class RazorPagesScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a step to add packages for Razor Pages to the scaffold builder.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithRazorPagesAddPackagesStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedAddPackagesStep>(config =>

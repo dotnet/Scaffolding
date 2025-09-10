@@ -11,9 +11,16 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
+/// <summary>
+/// Provides extension methods for <see cref="IScaffoldBuilder"/> to add Minimal API scaffolding steps.
+/// </summary>
 internal static class MinimalApiScaffolderBuilderExtensions
 {
-
+    /// <summary>
+    /// Adds a code change step for the Minimal API to the scaffold builder.
+    /// </summary>
+    /// <param name="builder">The scaffold builder to extend.</param>
+    /// <returns>The modified scaffold builder.</returns>
     public static IScaffoldBuilder WithMinimalApiCodeChangeStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
@@ -53,6 +60,11 @@ internal static class MinimalApiScaffolderBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds a step to add the necessary packages for the Minimal API to the scaffold builder.
+    /// </summary>
+    /// <param name="builder">The scaffold builder to extend.</param>
+    /// <returns>The modified scaffold builder.</returns>
     public static IScaffoldBuilder WithMinimalApiAddPackagesStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedAddPackagesStep>(config =>
@@ -89,6 +101,11 @@ internal static class MinimalApiScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a text templating step for the Minimal API to the scaffold builder.
+    /// </summary>
+    /// <param name="builder">The scaffold builder to extend.</param>
+    /// <returns>The modified scaffold builder.</returns>
     public static IScaffoldBuilder WithMinimalApiTextTemplatingStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedTextTemplatingStep>(config =>

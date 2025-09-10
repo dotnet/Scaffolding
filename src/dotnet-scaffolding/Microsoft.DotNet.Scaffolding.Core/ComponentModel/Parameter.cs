@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 /// <summary>
 /// Represents a parameter for a command, including its name, type, and additional metadata.
 /// </summary>
-internal class Parameter
+public class Parameter
 {
     /// <summary>
     /// Gets the unique name of the parameter.

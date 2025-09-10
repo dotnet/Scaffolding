@@ -6,7 +6,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 /// <summary>
 /// Provides helper methods for working with command parameters and their types.
 /// </summary>
-internal static class ParameterHelpers
+public static class ParameterHelpers
 {
     /// <summary>
     /// Checks if the provided string value can be converted to the expected type for the given CLI type.

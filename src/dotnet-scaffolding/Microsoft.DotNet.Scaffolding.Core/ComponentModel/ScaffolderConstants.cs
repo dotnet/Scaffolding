@@ -6,10 +6,10 @@ namespace Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 /// <summary>
 /// Contains constant values used by the scaffolder components.
 /// </summary>
-internal static class ScaffolderConstants
+public static class ScaffolderConstants
 {
     /// <summary>
     /// The default category name used for scaffolding components.
     /// </summary>
-    internal const string DEFAULT_CATEGORY = "All";
+    public const string DEFAULT_CATEGORY = "All";
 }

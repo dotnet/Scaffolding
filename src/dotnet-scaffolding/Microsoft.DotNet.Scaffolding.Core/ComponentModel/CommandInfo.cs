@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 /// Represents the information about a command that components should initialize and return
 /// (serialized as JSON to stdout) when the 'get-commands' operation is invoked.
 /// </summary>
-internal class CommandInfo
+public class CommandInfo
 {
     /// <summary>
     /// Gets the unique name of the command.

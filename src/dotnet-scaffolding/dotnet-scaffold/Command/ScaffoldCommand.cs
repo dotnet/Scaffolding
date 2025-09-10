@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Services;
@@ -58,6 +59,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         /// <summary>
         /// Gets or sets the component name to scaffold.
         /// </summary>
+        [Description("dotnet-scaffold-aspnet or dotnet-scaffold-aspire")]
         [CommandArgument(0, "[COMPONENT]")]
         public string? ComponentName { get; set; }
 

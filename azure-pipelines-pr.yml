@@ -58,6 +58,7 @@ stages:
                 _PublishType: none
                 _SignType: test
                 _DotNetPublishToBlobFeed : false
+                _PublishPackages: ''
             ${{ if eq(variables['System.TeamProject'], 'public') }}:
               Build_Debug:
                 _BuildConfig: Debug
@@ -119,7 +120,7 @@ stages:
           - script: eng/common/build.sh
               --configuration $(_BuildConfig)
               --prepareMachine
-              --restore --build --test --pack --ci              
+              --restore --build --test --pack --ci
             name: Build
             displayName: Build
             condition: succeeded()

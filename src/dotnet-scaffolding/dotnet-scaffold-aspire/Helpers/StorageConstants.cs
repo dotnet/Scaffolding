@@ -1,5 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+// StorageConstants defines constants and property mappings for Azure storage scenarios in Aspire scaffolding.
+// It provides variable names, method names, and a dictionary for storage type to property mapping.
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 
 internal static class StorageConstants

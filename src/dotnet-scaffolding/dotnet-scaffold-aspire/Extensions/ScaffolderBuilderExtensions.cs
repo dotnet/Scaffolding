@@ -6,23 +6,34 @@ using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
+/// <summary>
+/// Extension methods for <see cref="IScaffoldBuilder"/> to add common scaffolding steps.
+/// </summary>
 internal static class ScaffolderBuilderExtensions
 {
+    /// <summary>
+    /// Adds a step to the <see cref="IScaffoldBuilder"/> for adding a connection string to the project.
+    /// </summary>
+    /// <param name="builder">The scaffold builder to extend.</param>
+    /// <returns>The scaffold builder with the connection string step added.</returns>
     public static IScaffoldBuilder WithConnectionStringStep(
         this IScaffoldBuilder builder)
     {
+        // Add a step to insert a connection string into the project configuration
         builder = builder.WithStep<AddConnectionStringStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;
 
             DbContextProperties? dbContextProperties = null;
+            // Try to retrieve DbContextProperties from the context
             if (context.Properties.TryGetValue("DbContextProperties", out var dbContextPropertiesObj) &&
                 dbContextPropertiesObj is DbContextProperties)
             {
                 dbContextProperties = dbContextPropertiesObj as DbContextProperties;
             }
 
+            // Skip step if required DbContextProperties are missing
             if (dbContextProperties is null ||
                 string.IsNullOrEmpty(dbContextProperties.DbContextPath) ||
                 string.IsNullOrEmpty(dbContextProperties.NewDbConnectionString))
@@ -31,6 +42,7 @@ internal static class ScaffolderBuilderExtensions
                 return;
             }
 
+            // Retrieve the base project path from context
             context.Properties.TryGetValue("BaseProjectPath", out var baseProjectPathObj);
             var baseProjectPathVal = baseProjectPathObj?.ToString();
             if (string.IsNullOrEmpty(baseProjectPathVal))
@@ -38,6 +50,7 @@ internal static class ScaffolderBuilderExtensions
                 throw new ArgumentException("'BaseProjectPath' not provided in 'WithAddDbContextStep' or provided in ScaffolderContext.Properties");
             }
 
+            // Set properties for the AddConnectionStringStep
             step.BaseProjectPath = baseProjectPathVal;
             step.ConnectionString = string.Format(dbContextProperties.NewDbConnectionString, dbContextProperties.DbContextName);
             step.ConnectionStringName = dbContextProperties.DbContextName;

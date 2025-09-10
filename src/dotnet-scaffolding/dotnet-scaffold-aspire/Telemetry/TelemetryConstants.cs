@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
 
+/// <summary>
+/// Constants used for telemetry event results and statuses.
+/// </summary>
 internal static class TelemetryConstants
 {
     public static readonly string Added = "Added";

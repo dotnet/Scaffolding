@@ -8,25 +8,37 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
+/// <summary>
+/// Builder for configuring and creating a scaffold runner with services and scaffolders.
+/// </summary>
 internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
 {
+    // Service collection for dependency injection
     private readonly ServiceCollection _serviceCollection = new();
+    // Logging builder for configuring logging
     private readonly LoggingBuilder _logging;
+    // List of scaffold builders
     private readonly List<ScaffoldBuilder> _scaffoldBuilders = [];
 
     private IServiceProvider? _appServices;
     private bool _built;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScaffoldRunnerBuilder"/> class.
+    /// </summary>
     public ScaffoldRunnerBuilder()
     {
         _logging = new LoggingBuilder(Services);
-
         AddDefaultServices();
     }
 
+    /// <inheritdoc/>
     public ILoggingBuilder Logging => _logging;
+    /// <inheritdoc/>
     public IServiceCollection Services => _serviceCollection;
+    /// <inheritdoc/>
     public IEnumerable<IScaffoldBuilder> Scaffolders => _scaffoldBuilders;
+    /// <inheritdoc/>
     public IServiceProvider? ServiceProvider
     {
         get
@@ -35,11 +47,11 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
             {
                 return null;
             }
-
             return _appServices!;
         }
     }
 
+    /// <inheritdoc/>
     public IScaffoldRunner Build()
     {
         if (_built)
@@ -57,6 +69,7 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
         return scaffoldRunner;
     }
 
+    /// <inheritdoc/>
     public IScaffoldBuilder AddScaffolder(string name)
     {
         var scaffoldBuilder = new ScaffoldBuilder(name);
@@ -64,12 +77,14 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
         return scaffoldBuilder;
     }
 
+    // Adds default services required for scaffolding
     private void AddDefaultServices()
     {
         AddCoreServices();
         Services.AddSingleton<IScaffoldRunner, ScaffoldRunner>();
     }
 
+    // Adds core services such as logging
     private void AddCoreServices()
     {
         Services.AddLogging();
@@ -77,6 +92,9 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
         Logging.AddDebug();
     }
 
+    /// <summary>
+    /// Internal logging builder implementation for DI.
+    /// </summary>
     private sealed class LoggingBuilder(IServiceCollection services) : ILoggingBuilder
     {
         public IServiceCollection Services { get; } = services;

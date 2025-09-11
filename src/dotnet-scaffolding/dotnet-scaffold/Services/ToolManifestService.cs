@@ -87,6 +87,18 @@ internal class ToolManifestService(IFileSystem fileSystem) : IToolManifestServic
     }
 
     /// <summary>
+    /// Returns true if the specified tool is listed in the manifest.
+    /// </summary>
+    /// <param name="toolName">The name of the tool.</param>
+    /// <returns>True if the tool is installed; false if otherwise.</returns>
+    public bool IsToolInstalled(string toolName)
+    {
+        var currentManifest = GetManifest();
+        var tool = currentManifest.Tools.FirstOrDefault(t => string.Equals(toolName, t.Name, StringComparison.OrdinalIgnoreCase));
+        return tool is not null;
+    }
+
+    /// <summary>
     /// Writes the manifest to disk as JSON.
     /// </summary>
     /// <param name="manifest">The manifest to write.</param>

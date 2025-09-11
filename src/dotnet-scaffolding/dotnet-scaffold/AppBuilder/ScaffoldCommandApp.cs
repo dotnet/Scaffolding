@@ -1,4 +1,5 @@
 using Microsoft.DotNet.Tools.Scaffold.Command;
+using Spectre.Console.Cli;
 
 namespace Microsoft.DotNet.Tools.Scaffold;
 
@@ -12,14 +13,14 @@ internal class ScaffoldCommandApp
     private readonly string[] _args;
 
     // The Spectre.Console command application instance for the scaffold command.
-    private readonly Spectre.Console.Cli.CommandApp<ScaffoldCommand> _commandApp;
+    private readonly CommandApp<ScaffoldCommand> _commandApp;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ScaffoldCommandApp"/> class.
     /// </summary>
     /// <param name="commandApp">The command application to execute.</param>
     /// <param name="args">The command-line arguments.</param>
-    public ScaffoldCommandApp(Spectre.Console.Cli.CommandApp<ScaffoldCommand> commandApp, string[] args)
+    public ScaffoldCommandApp(CommandApp<ScaffoldCommand> commandApp, string[] args)
     {
         _commandApp = commandApp;
         _args = args;

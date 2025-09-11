@@ -24,6 +24,11 @@ internal interface IToolManifestService
     ScaffoldManifest GetManifest();
 
     /// <summary>
+    /// Checks if a tool is installed in the manifest by name.
+    /// </summary>
+    bool IsToolInstalled(string packageName);
+
+    /// <summary>
     /// Removes a tool from the manifest by name.
     /// </summary>
     /// <param name="toolName">The name of the tool to remove.</param>

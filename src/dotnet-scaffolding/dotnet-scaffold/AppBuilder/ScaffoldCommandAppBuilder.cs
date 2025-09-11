@@ -30,13 +30,13 @@ internal class ScaffoldCommandAppBuilder(string[] args)
         commandApp.Configure(config =>
         {
             config
-                .SetApplicationName("dotnet scaffold")
+                .SetApplicationName(CommandStrings.ToolBranchName)
                 .SetApplicationVersion(ToolHelper.GetToolVersion() ?? _backupDotNetScaffoldVersion)
-                .AddBranch<ToolSettings>("tool", tool =>
+                .AddBranch<ToolSettings>(CommandStrings.ToolBranchName, tool =>
                 {
-                    tool.AddCommand<ToolInstallCommand>("install");
-                    tool.AddCommand<ToolListCommand>("list");
-                    tool.AddCommand<ToolUninstallCommand>("uninstall");
+                    tool.AddCommand<ToolInstallCommand>(CommandStrings.ToolInstallCommandName);
+                    tool.AddCommand<ToolListCommand>(CommandStrings.ToolListCommandName);
+                    tool.AddCommand<ToolUninstallCommand>(CommandStrings.ToolUninstallCommandName);
                 });
         });
 

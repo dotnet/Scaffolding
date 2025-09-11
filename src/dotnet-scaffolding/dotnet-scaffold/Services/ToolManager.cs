@@ -87,6 +87,16 @@ internal class ToolManager(
     }
 
     /// <summary>
+    /// Determines if a tool is installed by checking the manifest.
+    /// </summary>
+    /// <param name="packageName">The name of the tool package to check.</param>
+    /// <returns>True if the tool is installed; otherwise, false.</returns>
+    public bool IsToolInstalled(string packageName)
+    {
+        return _toolManifestService.IsToolInstalled(packageName);
+    }
+
+    /// <summary>
     /// Lists all scaffold tools currently in the manifest and displays them in a table.
     /// </summary>
     public void ListTools()

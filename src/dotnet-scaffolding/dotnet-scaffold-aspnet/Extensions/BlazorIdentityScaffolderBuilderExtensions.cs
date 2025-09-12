@@ -13,8 +13,14 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
+/// <summary>
+/// Provides extension methods for <see cref="IScaffoldBuilder"/> to add Blazor Identity scaffolding steps.
+/// </summary>
 internal static class BlazorIdentityScaffolderBuilderExtensions
 {
+    /// <summary>
+    /// Adds a code change step for Blazor Identity scaffolding.
+    /// </summary>
     public static IScaffoldBuilder WithBlazorIdentityCodeChangeStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
@@ -54,6 +60,9 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds a text templating step for Blazor Identity scaffolding.
+    /// </summary>
     public static IScaffoldBuilder WithBlazorIdentityTextTemplatingStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<WrappedTextTemplatingStep>(config =>
@@ -90,6 +99,9 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds a step to add NuGet packages required for Blazor Identity scaffolding.
+    /// </summary>
     public static IScaffoldBuilder WithBlazorIdentityAddPackagesStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedAddPackagesStep>(config =>

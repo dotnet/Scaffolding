@@ -12,8 +12,16 @@ using Constants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
+/// <summary>
+/// Provides extension methods for <see cref="IScaffoldBuilder"/> to add EF Controller scaffolding steps.
+/// </summary>
 internal static class EfControllerScaffolderBuilderExtensions
 {
+    /// <summary>
+    /// Adds a text templating step for the EF Controller to the scaffold builder.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithEfControllerTextTemplatingStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedTextTemplatingStep>(config =>
@@ -38,6 +46,11 @@ internal static class EfControllerScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a step to add required packages for the EF Controller to the scaffold builder.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithEfControllerAddPackagesStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedAddPackagesStep>(config =>
@@ -66,6 +79,11 @@ internal static class EfControllerScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a code modification step for the EF Controller to the scaffold builder.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithEfControllerCodeChangeStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
@@ -105,6 +123,11 @@ internal static class EfControllerScaffolderBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds MVC views scaffolding steps to the scaffold builder.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithMvcViewsStep(this IScaffoldBuilder builder)
     {
         string missingViewModelExceptionMssg =

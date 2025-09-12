@@ -8,8 +8,20 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 
+/// <summary>
+/// Provides static methods for analyzing classes related to Entity Framework DbContext and model classes.
+/// </summary>
 internal static class ClassAnalyzers
 {
+    /// <summary>
+    /// Gets information about a DbContext, either existing or to be created, including its name, path, namespace, and entity set variable.
+    /// </summary>
+    /// <param name="projectPath">The path to the project.</param>
+    /// <param name="existingDbContextClass">The symbol representing an existing DbContext class, or null if creating a new one.</param>
+    /// <param name="dbContextClassName">The name of the DbContext class to use or create.</param>
+    /// <param name="dbProvider">The database provider (e.g., SQL Server, SQLite).</param>
+    /// <param name="modelInfo">Optional model information for generating entity set variable or DbSet statement.</param>
+    /// <returns>A <see cref="DbContextInfo"/> object with details about the DbContext.</returns>
     internal static DbContextInfo GetDbContextInfo(
         string projectPath,
         ISymbol? existingDbContextClass,
@@ -48,6 +60,14 @@ internal static class ClassAnalyzers
         return dbContextInfo;
     }
 
+    /// <summary>
+    /// Gets information about an Identity DbContext, either existing or to be created, including its name, path, and namespace.
+    /// </summary>
+    /// <param name="projectPath">The path to the project.</param>
+    /// <param name="existingDbContextClass">The symbol representing an existing Identity DbContext class, or null if creating a new one.</param>
+    /// <param name="dbContextClassName">The name of the Identity DbContext class to use or create.</param>
+    /// <param name="dbProvider">The database provider (e.g., SQL Server, SQLite).</param>
+    /// <returns>A <see cref="DbContextInfo"/> object with details about the Identity DbContext.</returns>
     internal static DbContextInfo GetIdentityDbContextInfo(
         string projectPath,
         ISymbol? existingDbContextClass,
@@ -88,6 +108,11 @@ internal static class ClassAnalyzers
         return dbContextInfo;
     }
 
+    /// <summary>
+    /// Gets information about a model class, including its name, namespace, full name, primary key, and properties.
+    /// </summary>
+    /// <param name="modelClassSymbol">The symbol representing the model class.</param>
+    /// <returns>A <see cref="ModelInfo"/> object with details about the model class.</returns>
     internal static ModelInfo GetModelClassInfo(ISymbol modelClassSymbol)
     {
         var modelInfo = new ModelInfo();
@@ -125,9 +150,9 @@ internal static class ClassAnalyzers
     /// <summary>
     /// Check if atleast one property and a primary key property were found for given --model class.
     /// </summary>
-    /// <param name="modelInfo"></param>
-    /// <param name="logger"></param>
-    /// <returns></returns>
+    /// <param name="modelInfo">The model information to validate.</param>
+    /// <param name="logger">The logger to use for error messages.</param>
+    /// <returns>True if the model is valid for CRUD scaffolders; otherwise, false.</returns>
     internal static bool ValidateModelForCrudScaffolders(ModelInfo modelInfo, ILogger logger)
     {
         if (modelInfo is null || string.IsNullOrEmpty(modelInfo.ModelTypeName))
@@ -148,6 +173,12 @@ internal static class ClassAnalyzers
         return true;
     }
 
+    /// <summary>
+    /// Gets information about a project, including its path, code service, lowest target framework, and capabilities.
+    /// </summary>
+    /// <param name="projectPath">The path to the project.</param>
+    /// <param name="logger">The logger to use for initialization and diagnostics.</param>
+    /// <returns>A <see cref="ProjectInfo"/> object with details about the project.</returns>
     internal static ProjectInfo GetProjectInfo(string projectPath, ILogger logger)
     {
         /* to use MSBuildProjectService, we need to initialize the MsBuildInitializer

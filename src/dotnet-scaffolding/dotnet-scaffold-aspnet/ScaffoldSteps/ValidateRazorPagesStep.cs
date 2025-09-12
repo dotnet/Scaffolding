@@ -17,18 +17,46 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
+/// <summary>
+/// Scaffold step to validate Razor Pages settings and initialize the RazorPageModel for scaffolding.
+/// </summary>
 internal class ValidateRazorPagesStep : ScaffoldStep
 {
+    /// <summary>
+    /// Path to the project file.
+    /// </summary>
+    public string? Project { get; set; }
+    /// <summary>
+    /// Indicates if prerelease packages should be used.
+    /// </summary>
+    public bool Prerelease { get; set; }
+    /// <summary>
+    /// Database provider for the DbContext.
+    /// </summary>
+    public string? DatabaseProvider { get; set; }
+    /// <summary>
+    /// Name of the DbContext class.
+    /// </summary>
+    public string? DataContext { get; set; }
+    /// <summary>
+    /// Name of the model class for the Razor Page.
+    /// </summary>
+    public string? Model { get; set; }
+    /// <summary>
+    /// Page type for Razor Pages scaffolding.
+    /// </summary>
+    public string? Page { get; set; }
+
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     private readonly ITelemetryService _telemetryService;
-    public string? Project { get; set; }
-    public bool Prerelease { get; set; }
-    public string? DatabaseProvider { get; set; }
-    public string? DataContext { get; set; }
-    public string? Model { get; set; }
-    public string? Page { get; set; }
 
+    /// <summary>
+    /// Constructor for ValidateRazorPagesStep.
+    /// </summary>
+    /// <param name="fileSystem">The file system.</param>
+    /// <param name="logger">The logger.</param>
+    /// <param name="telemetryService">The telemetry service.</param>
     public ValidateRazorPagesStep(
         IFileSystem fileSystem,
         ILogger<ValidateRazorPagesStep> logger,
@@ -39,6 +67,12 @@ internal class ValidateRazorPagesStep : ScaffoldStep
         _telemetryService = telemetryService;
     }
 
+    /// <summary>
+    /// Executes the step to validate Razor Pages settings and initialize the RazorPageModel.
+    /// </summary>
+    /// <param name="context">The scaffolder context.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that represents the asynchronous operation, with a boolean result indicating success or failure.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var razorPagesSettings = ValidateRazorPagesSettings();
@@ -90,6 +124,10 @@ internal class ValidateRazorPagesStep : ScaffoldStep
         return true;
     }
 
+    /// <summary>
+    /// Validates the Razor Pages settings provided by the user.
+    /// </summary>
+    /// <returns>A CrudSettings object with the validated settings, or null if validation fails.</returns>
     private CrudSettings? ValidateRazorPagesSettings()
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
@@ -146,6 +184,11 @@ internal class ValidateRazorPagesStep : ScaffoldStep
         };
     }
 
+    /// <summary>
+    /// Initializes and returns the RazorPageModel for scaffolding.
+    /// </summary>
+    /// <param name="settings">The validated CRUD settings.</param>
+    /// <returns>A task that represents the asynchronous operation, with the RazorPageModel as the result.</returns>
     private async Task<RazorPageModel?> GetRazorPageModelAsync(CrudSettings settings)
     {
         var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);

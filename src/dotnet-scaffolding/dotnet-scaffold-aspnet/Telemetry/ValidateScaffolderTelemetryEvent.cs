@@ -4,8 +4,17 @@ using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 
+/// <summary>
+/// Telemetry event for tracking validation steps in scaffolders.
+/// </summary>
 internal class ValidateScaffolderTelemetryEvent : TelemetryEventBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidateScaffolderTelemetryEvent"/> class.
+    /// </summary>
+    /// <param name="validateStepName">The name of the validation step.</param>
+    /// <param name="scaffolderName">The name of the scaffolder.</param>
+    /// <param name="result">The result status (Success/Failure).</param>
     public ValidateScaffolderTelemetryEvent(string validateStepName, string scaffolderName, bool result) : base($"{validateStepName}Event")
     {
         SetProperty("ScaffolderName", scaffolderName);

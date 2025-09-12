@@ -5,8 +5,17 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
+/// <summary>
+/// Helper methods for Minimal API scaffolding, including template and output path utilities.
+/// </summary>
 internal static class MinimalApiHelper
 {
+    /// <summary>
+    /// Gets the <see cref="TextTemplatingProperty"/> for the specified <see cref="MinimalApiModel"/>.
+    /// </summary>
+    /// <param name="minimalApiModel">The model for which to get the templating property.</param>
+    /// <returns>The <see cref="TextTemplatingProperty"/> for the specified model.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the minimal API template cannot be determined.</exception>
     internal static TextTemplatingProperty GetMinimalApiTemplatingProperty(MinimalApiModel minimalApiModel)
     {
         var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["MinimalApi"]);
@@ -39,6 +48,11 @@ internal static class MinimalApiHelper
         };
     }
 
+    /// <summary>
+    /// Gets the template type for the specified template path.
+    /// </summary>
+    /// <param name="templatePath">The path of the template for which to get the type.</param>
+    /// <returns>The template type, or null if the template path is invalid.</returns>
     private static Type? GetMinimalApiTemplateType(string? templatePath)
     {
         if (string.IsNullOrEmpty(templatePath))

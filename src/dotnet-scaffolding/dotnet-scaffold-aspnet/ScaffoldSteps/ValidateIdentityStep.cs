@@ -17,18 +17,47 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
+/// <summary>
+/// Scaffold step to validate Identity settings and initialize the IdentityModel for scaffolding.
+/// </summary>
 //TODO: pull all the duplicate logic from all these 'Validation' ScaffolderSteps into a common one.
 internal class ValidateIdentityStep : ScaffoldStep
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     private readonly ITelemetryService _telemetryService;
+
+    /// <summary>
+    /// Indicates whether to overwrite existing files.
+    /// </summary>
     public bool Overwrite { get; set; }
+    /// <summary>
+    /// Indicates whether the scenario is for Blazor.
+    /// </summary>
     public bool BlazorScenario { get; set; }
+    /// <summary>
+    /// Path to the project file.
+    /// </summary>
     public string? Project { get; set; }
+    /// <summary>
+    /// Indicates if prerelease packages should be used.
+    /// </summary>
     public bool Prerelease { get; set; }
+    /// <summary>
+    /// Database provider for the DbContext.
+    /// </summary>
     public string? DatabaseProvider { get; set; }
+    /// <summary>
+    /// Name of the DbContext class.
+    /// </summary>
     public string? DataContext { get; set; }
+
+    /// <summary>
+    /// Constructor for ValidateIdentityStep.
+    /// </summary>
+    /// <param name="fileSystem">File system service.</param>
+    /// <param name="logger">Logger.</param>
+    /// <param name="telemetryService">Telemetry service.</param>
     public ValidateIdentityStep(
         IFileSystem fileSystem,
         ILogger<ValidateIdentityStep> logger,
@@ -39,6 +68,12 @@ internal class ValidateIdentityStep : ScaffoldStep
         _telemetryService = telemetryService;
     }
 
+    /// <summary>
+    /// Executes the step to validate Identity settings and initialize the IdentityModel.
+    /// </summary>
+    /// <param name="context">Scaffolder context.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Task that represents the asynchronous operation, with a boolean result indicating success or failure.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var identitySettings = ValidateIdentitySettings();
@@ -100,6 +135,10 @@ internal class ValidateIdentityStep : ScaffoldStep
         return true;
     }
 
+    /// <summary>
+    /// Validates the Identity settings provided by the user.
+    /// </summary>
+    /// <returns>Returns the validated IdentitySettings object, or null if validation failed.</returns>
     private IdentitySettings? ValidateIdentitySettings()
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
@@ -139,6 +178,11 @@ internal class ValidateIdentityStep : ScaffoldStep
         };
     }
 
+    /// <summary>
+    /// Initializes and returns the IdentityModel for scaffolding.
+    /// </summary>
+    /// <param name="settings">The IdentitySettings used to initialize the model.</param>
+    /// <returns>A task that represents the asynchronous operation, with a result of the IdentityModel.</returns>
     private async Task<IdentityModel?> GetIdentityModelAsync(IdentitySettings settings)
     {
         var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);

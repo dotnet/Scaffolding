@@ -11,8 +11,16 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
+/// <summary>
+/// Provides extension methods for <see cref="IScaffoldBuilder"/> to add Identity scaffolding steps.
+/// </summary>
 internal static class IdentityScaffolderBuilderExtensions
 {
+    /// <summary>
+    /// Adds a step to the scaffold builder to install the necessary NuGet packages for Identity.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithIdentityAddPackagesStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedAddPackagesStep>(config =>
@@ -46,6 +54,11 @@ internal static class IdentityScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a step to the scaffold builder to perform text templating for Identity files.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithIdentityTextTemplatingStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<WrappedTextTemplatingStep>(config =>
@@ -84,6 +97,11 @@ internal static class IdentityScaffolderBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds a step to the scaffold builder to apply code changes for Identity.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithIdentityCodeChangeStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>

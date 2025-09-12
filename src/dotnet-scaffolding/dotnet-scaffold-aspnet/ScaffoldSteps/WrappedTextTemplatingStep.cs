@@ -9,10 +9,18 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
+/// <summary>
+/// Scaffold step that wraps TextTemplatingStep and adds telemetry tracking for text templating.
+/// </summary>
 internal class WrappedTextTemplatingStep : TextTemplatingStep
 {
     private readonly ILogger _logger;
     private readonly ITelemetryService _telemetryService;
+    /// <summary>
+    /// Constructor for WrappedTextTemplatingStep.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="telemetryService">The telemetry service instance.</param>
     public WrappedTextTemplatingStep(
         ILogger<WrappedTextTemplatingStep> logger,
         ITelemetryService telemetryService) : base(logger)
@@ -21,6 +29,12 @@ internal class WrappedTextTemplatingStep : TextTemplatingStep
         _telemetryService = telemetryService;
     }
 
+    /// <summary>
+    /// Executes the step to perform text templating and track telemetry.
+    /// </summary>
+    /// <param name="context">The scaffolder context.</param>
+    /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
+    /// <returns>A task that represents the asynchronous operation, with a boolean result indicating success or failure.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var result = await base.ExecuteAsync(context, cancellationToken);

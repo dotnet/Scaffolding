@@ -9,8 +9,16 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
+/// <summary>
+/// Provides extension methods for <see cref="IScaffoldBuilder"/> to add Razor view scaffolding steps.
+/// </summary>
 internal static class ViewScaffoldeBuilderExtensions
 {
+    /// <summary>
+    /// Adds a step to the scaffold builder that configures text templating for Razor view files.
+    /// </summary>
+    /// <param name="builder">The scaffold builder instance.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithViewsTextTemplatingStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedTextTemplatingStep>(config =>
@@ -36,6 +44,11 @@ internal static class ViewScaffoldeBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a step to the scaffold builder that configures the addition of the "_ValidationScriptsPartial.cshtml" file.
+    /// </summary>
+    /// <param name="builder">The scaffold builder instance.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithViewsAddFileStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<AddFileStep>(config =>

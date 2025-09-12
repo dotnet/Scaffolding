@@ -9,8 +9,16 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
+/// <summary>
+/// Provides extension methods for <see cref="IScaffoldBuilder"/> to add general scaffolding steps.
+/// </summary>
 internal static class ScaffolderBuilderExtensions
 {
+    /// <summary>
+    /// Adds a step to configure the connection string.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithConnectionStringStep(
         this IScaffoldBuilder builder)
     {

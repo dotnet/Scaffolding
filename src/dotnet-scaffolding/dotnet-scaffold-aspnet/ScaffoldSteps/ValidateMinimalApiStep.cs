@@ -18,20 +18,50 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
+/// <summary>
+/// Scaffold step to validate Minimal API settings and initialize the MinimalApiModel for scaffolding.
+/// </summary>
 internal class ValidateMinimalApiStep : ScaffoldStep
 {
+    /// <summary>
+    /// Path to the project file.
+    /// </summary>
+    public string? Project { get; set; }
+    /// <summary>
+    /// Indicates if prerelease packages should be used.
+    /// </summary>
+    public bool Prerelease { get; set; }
+    /// <summary>
+    /// Endpoints file or class name for the minimal API.
+    /// </summary>
+    public string? Endpoints { get; set; }
+    /// <summary>
+    /// Indicates if OpenAPI should be enabled.
+    /// </summary>
+    public bool OpenApi { get; set; } = true;
+    /// <summary>
+    /// Database provider for the DbContext.
+    /// </summary>
+    public string? DatabaseProvider { get; set; }
+    /// <summary>
+    /// Name of the DbContext class.
+    /// </summary>
+    public string? DataContext { get; set; }
+    /// <summary>
+    /// Name of the model class for the minimal API.
+    /// </summary>
+    public string? Model { get; set; }
+
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     private readonly ITelemetryService _telemetryService;
 
-    public string? Project { get; set; }
-    public bool Prerelease { get; set; }
-    public string? Endpoints { get; set; }
-    public bool OpenApi { get; set; } = true;
-    public string? DatabaseProvider { get; set; }
-    public string? DataContext { get; set; }
-    public string? Model { get; set; }
-
+    /// <summary>
+    /// Constructor for ValidateMinimalApiStep.
+    /// </summary>
+    /// <param name="fileSystem">File system interface.</param>
+    /// <param name="logger">Logger interface.</param>
+    /// <param name="telemetryService">Telemetry service interface.</param>
     public ValidateMinimalApiStep(
         IFileSystem fileSystem,
         ILogger<ValidateMinimalApiStep> logger,
@@ -42,6 +72,12 @@ internal class ValidateMinimalApiStep : ScaffoldStep
         _telemetryService = telemetryService;
     }
 
+    /// <summary>
+    /// Executes the step to validate Minimal API settings and initialize the MinimalApiModel.
+    /// </summary>
+    /// <param name="context">Scaffolder context.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Task indicating the result of the execution.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var minimalApiSettings = ValidateMinimalApiSettings(context);
@@ -101,6 +137,11 @@ internal class ValidateMinimalApiStep : ScaffoldStep
         return true;
     }
 
+    /// <summary>
+    /// Validates the Minimal API settings provided by the user.
+    /// </summary>
+    /// <param name="context">Scaffolder context.</param>
+    /// <returns>Validated MinimalApiSettings object or null if validation fails.</returns>
     private MinimalApiSettings? ValidateMinimalApiSettings(ScaffolderContext context)
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
@@ -144,6 +185,11 @@ internal class ValidateMinimalApiStep : ScaffoldStep
         return commandSettings;
     }
 
+    /// <summary>
+    /// Initializes and returns the MinimalApiModel for scaffolding.
+    /// </summary>
+    /// <param name="settings">MinimalApiSettings object containing the settings for the scaffolding.</param>
+    /// <returns>Task containing the MinimalApiModel or null if initialization fails.</returns>
     private async Task<MinimalApiModel?> GetMinimalApiModelAsync(MinimalApiSettings settings)
     {
         var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);

@@ -19,13 +19,23 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 {
+    /// <summary>
+    /// Scaffold step for detecting if a referenced project is a Blazor WebAssembly project by inspecting package references.
+    /// Sets context properties if a Blazor WASM project is detected.
+    /// </summary>
     internal class DetectBlazorWasmStep : ScaffoldStep
     {
+        /// <summary>
+        /// Gets or sets the project file path to inspect.
+        /// </summary>
         public string? ProjectPath { get; set; }
         private readonly ILogger _logger;
         private readonly IFileSystem _fileSystem;
         private readonly ITelemetryService _telemetryService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DetectBlazorWasmStep"/> class.
+        /// </summary>
         public DetectBlazorWasmStep(ILogger<DetectBlazorWasmStep> logger, IFileSystem fileSystem, ITelemetryService telemetryService)
         {
             _logger = logger;
@@ -33,6 +43,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             _telemetryService = telemetryService;
         }
         
+        /// <inheritdoc />
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
             if (ProjectPath is not null)

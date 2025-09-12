@@ -13,20 +13,44 @@ using System.Text.RegularExpressions;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 {
+    /// <summary>
+    /// Scaffold step for adding a client secret to an Azure AD application registration using the msidentity CLI.
+    /// Extracts and stores the client secret in the scaffolding context.
+    /// </summary>
     internal class AddClientSecretStep : ScaffoldStep
     {
-        // Required properties
+        /// <summary>
+        /// Gets or sets the project file path.
+        /// </summary>
         public required string ProjectPath { get; set; }
+        /// <summary>
+        /// Gets or sets the Azure AD client ID.
+        /// </summary>
         public string? ClientId { get; set; }
+        /// <summary>
+        /// Gets or sets the client secret value.
+        /// </summary>
         public string? ClientSecret { get; set; }
+        /// <summary>
+        /// Gets or sets the secret name in user secrets.
+        /// </summary>
         public string? SecretName { get; set; } = "Authentication:AzureAd:ClientSecret";
+        /// <summary>
+        /// Gets or sets the username for Azure AD.
+        /// </summary>
         public string? Username { get; set; }
+        /// <summary>
+        /// Gets or sets the Azure AD tenant ID.
+        /// </summary>
         public string? TenantId { get; set; }
 
         private readonly ILogger _logger;
         private readonly IFileSystem _fileSystem;
         private readonly ITelemetryService _telemetryService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AddClientSecretStep"/> class.
+        /// </summary>
         public AddClientSecretStep(
             ILogger<AddClientSecretStep> logger,
             IFileSystem fileSystem,
@@ -37,6 +61,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             _telemetryService = telemetryService;
         }
 
+        /// <inheritdoc />
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
             // Validate project path
@@ -60,6 +85,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             return Task.FromResult(true);
         }
 
+        /// <summary>
+        /// Adds a client secret to the Azure AD app registration and stores it in the context.
+        /// </summary>
         private bool AddClientSecret(ScaffolderContext context)
         {
             try

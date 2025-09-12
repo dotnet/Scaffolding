@@ -17,19 +17,50 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
+/// <summary>
+/// Scaffold step to validate EF Controller settings and initialize the EfControllerModel for scaffolding.
+/// </summary>
 internal class ValidateEfControllerStep : ScaffoldStep
 {
     private readonly IFileSystem _fileSystem;
     private readonly ILogger _logger;
     private readonly ITelemetryService _telemetryService;
+
+    /// <summary>
+    /// Path to the project file.
+    /// </summary>
     public string? Project { get; set; }
+    /// <summary>
+    /// Indicates if prerelease packages should be used.
+    /// </summary>
     public bool Prerelease { get; set; }
+    /// <summary>
+    /// Database provider for the DbContext.
+    /// </summary>
     public string? DatabaseProvider { get; set; }
+    /// <summary>
+    /// Name of the DbContext class.
+    /// </summary>
     public string? DataContext { get; set; }
+    /// <summary>
+    /// Name of the model class for the controller.
+    /// </summary>
     public string? Model { get; set; }
+    /// <summary>
+    /// Name of the controller to be scaffolded.
+    /// </summary>
     public string? ControllerName { get; set; }
+    /// <summary>
+    /// Type of the controller (API or MVC).
+    /// </summary>
     public string? ControllerType { get; set; }
 
+    /// <summary>
+    /// Constructor for ValidateEfControllerStep.
+    /// </summary>
+    /// <param name="fileSystem">File system interface.</param>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="telemetryService">Telemetry service instance.</param>
     public ValidateEfControllerStep(
         IFileSystem fileSystem,
         ILogger<ValidateEfControllerStep> logger,
@@ -40,6 +71,12 @@ internal class ValidateEfControllerStep : ScaffoldStep
         _telemetryService = telemetryService;
     }
 
+    /// <summary>
+    /// Executes the step to validate EF Controller settings and initialize the EfControllerModel.
+    /// </summary>
+    /// <param name="context">Scaffolder context.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Task indicating the completion of the operation.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var efControllerSettings = ValidateEfControllerSettings();
@@ -91,6 +128,10 @@ internal class ValidateEfControllerStep : ScaffoldStep
         return true;
     }
 
+    /// <summary>
+    /// Validates the EF Controller settings provided by the user.
+    /// </summary>
+    /// <returns>Validated EF Controller settings.</returns>
     private EfControllerSettings? ValidateEfControllerSettings()
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
@@ -161,6 +202,11 @@ internal class ValidateEfControllerStep : ScaffoldStep
         };
     }
 
+    /// <summary>
+    /// Initializes and returns the EfControllerModel for scaffolding.
+    /// </summary>
+    /// <param name="settings">EF Controller settings.</param>
+    /// <returns>Initialized EfControllerModel.</returns>
     private async Task<EfControllerModel?> GetEfControllerModelAsync(EfControllerSettings settings)
     {
         var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);

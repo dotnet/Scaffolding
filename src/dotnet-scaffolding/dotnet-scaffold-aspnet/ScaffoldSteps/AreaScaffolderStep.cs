@@ -8,13 +8,25 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
+/// <summary>
+/// Scaffold step for creating the folder layout for an ASP.NET Core Area, including Controllers, Models, Data, and Views folders.
+/// </summary>
 internal class AreaScaffolderStep : ScaffoldStep
 {
+    /// <summary>
+    /// Gets or sets the project file path.
+    /// </summary>
     public string? Project { get; set; }
+    /// <summary>
+    /// Gets or sets the name of the area to scaffold.
+    /// </summary>
     public string? Name { get; set; }
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly IEnvironmentService _environmentService;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AreaScaffolderStep"/> class.
+    /// </summary>
     public AreaScaffolderStep(IFileSystem fileSystem, ILogger<AreaScaffolderStep> logger, IEnvironmentService environmentService)
     {
         _environmentService = environmentService;
@@ -22,6 +34,9 @@ internal class AreaScaffolderStep : ScaffoldStep
         _logger = logger;
     }
 
+    /// <summary>
+    /// Validates the area command settings and returns the settings object if valid.
+    /// </summary>
     private AreaStepSettings? ValidateAreaCommandSettings()
     {
         if (string.IsNullOrEmpty(Name))
@@ -43,6 +58,9 @@ internal class AreaScaffolderStep : ScaffoldStep
         };
     }
 
+    /// <summary>
+    /// Ensures the folder layout for the area exists, creating necessary directories.
+    /// </summary>
     private void EnsureFolderLayout(AreaStepSettings stepSettings)
     {
         _logger.LogInformation($"Adding area '{stepSettings.Name}'...");
@@ -68,6 +86,7 @@ internal class AreaScaffolderStep : ScaffoldStep
         _logger.LogInformation("Done");
     }
 
+    /// <inheritdoc />
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var stepSettings = ValidateAreaCommandSettings();

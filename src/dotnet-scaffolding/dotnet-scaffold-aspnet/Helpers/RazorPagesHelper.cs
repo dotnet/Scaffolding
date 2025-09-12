@@ -5,6 +5,9 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
+/// <summary>
+/// Helper methods for Razor Pages scaffolding, including template and output path utilities.
+/// </summary>
 internal static class RazorPagesHelper
 {
     internal const string CreateTemplate = "Create.tt";
@@ -17,6 +20,12 @@ internal static class RazorPagesHelper
     internal const string EditModelTemplate = "EditModel.tt";
     internal const string IndexTemplate = "Index.tt";
     internal const string IndexModelTemplate = "IndexModel.tt";
+
+    /// <summary>
+    /// Gets the template type for a given template path.
+    /// </summary>
+    /// <param name="templatePath">The template path.</param>
+    /// <returns>The type of the template, or null if the template path is null or empty.</returns>
     internal static Type? GetTemplateType(string? templatePath)
     {
         if (string.IsNullOrEmpty(templatePath))
@@ -62,6 +71,12 @@ internal static class RazorPagesHelper
         return templateType;
     }
 
+    /// <summary>
+    /// Determines whether the specified template type is valid for the given template file name.
+    /// </summary>
+    /// <param name="templateType">The template type.</param>
+    /// <param name="templateFileName">The template file name.</param>
+    /// <returns>true if the template type is valid; otherwise, false.</returns>
     internal static bool IsValidTemplate(string templateType, string templateFileName)
     {
         if (string.Equals(templateType, "CRUD", StringComparison.OrdinalIgnoreCase))
@@ -74,12 +89,24 @@ internal static class RazorPagesHelper
             string.Equals(templateFileName, $"{templateType}Model", StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Gets the base output path for generated files based on model name and project path.
+    /// </summary>
+    /// <param name="modelName">The model name.</param>
+    /// <param name="projectPath">The project path.</param>
+    /// <returns>The base output path.</returns>
     internal static string GetBaseOutputPath(string modelName, string? projectPath)
     {
         string projectBasePath = Path.GetDirectoryName(projectPath) ?? Directory.GetCurrentDirectory();
         return Path.Combine(projectBasePath, "Pages", $"{modelName}Pages");
     }
 
+    /// <summary>
+    /// Gets the text templating properties for the specified T4 template paths and Razor page model.
+    /// </summary>
+    /// <param name="allT4TemplatePaths">The collection of all T4 template paths.</param>
+    /// <param name="razorPagesModel">The Razor page model.</param>
+    /// <returns>A collection of <see cref="TextTemplatingProperty"/> instances that represent the text templating properties.</returns>
     internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, RazorPageModel razorPagesModel)
     {
         var textTemplatingProperties = new List<TextTemplatingProperty>();

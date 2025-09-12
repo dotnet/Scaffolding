@@ -8,20 +8,33 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
+/// <summary>
+/// Scaffold step for adding a file from the template folder to the output directory if it does not already exist.
+/// </summary>
 internal class AddFileStep : ScaffoldStep
 {
     //this file name should be found in dotnet-scaffold-aspnet\Templates\Files
+    /// <summary>
+    /// Gets or sets the file name to add (should exist in the template folder).
+    /// </summary>
     public required string FileName { get; set; }
+    /// <summary>
+    /// Gets or sets the base output directory where the file will be added.
+    /// </summary>
     public required string BaseOutputDirectory { get; set; }
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AddFileStep"/> class.
+    /// </summary>
     public AddFileStep(ILogger<AddFileStep> logger, IFileSystem fileSystem)
     {
         _logger = logger;
         _fileSystem = fileSystem;
     }
 
+    /// <inheritdoc />
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(BaseOutputDirectory) ||

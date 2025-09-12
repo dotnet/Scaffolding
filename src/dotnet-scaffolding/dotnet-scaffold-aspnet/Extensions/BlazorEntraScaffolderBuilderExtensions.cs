@@ -17,9 +17,17 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
+/// <summary>
+/// Provides extension methods for <see cref="IScaffoldBuilder"/> to add Blazor Entra ID scaffolding steps.
+/// </summary>
 internal static class BlazorEntraScaffolderBuilderExtensions
 {
-
+    /// <summary>
+    /// Adds a step to register the application in Entra ID.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when required properties are missing.</exception>
     public static IScaffoldBuilder WithAddClientSecretStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<AddClientSecretStep>(config =>
@@ -60,6 +68,12 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a step to register the application in Entra ID.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when required properties are missing.</exception>
     public static IScaffoldBuilder WithRegisterAppStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<RegisterAppStep>(config =>
@@ -106,6 +120,12 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a step to update the application settings in Entra ID.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when required properties are missing.</exception>
     public static IScaffoldBuilder WithUpdateAppSettingsStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<UpdateAppSettingsStep>(config =>
@@ -151,6 +171,12 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a step to update the application authorization in Entra ID.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when required properties are missing.</exception>
     public static IScaffoldBuilder WithUpdateAppAuthorizationStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<UpdateAppAuthorizationStep>(config =>
@@ -182,6 +208,12 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a step to detect Blazor WebAssembly project.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when required properties are missing.</exception>
     public static IScaffoldBuilder WithDetectBlazorWasmStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<DetectBlazorWasmStep>(config =>
@@ -199,6 +231,12 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a step to install necessary packages for Entra ID.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the project path is not set.</exception>
     public static IScaffoldBuilder WithEntraAddPackagesStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedAddPackagesStep>(config =>
@@ -230,6 +268,12 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a step to install necessary packages for Blazor WebAssembly Entra ID.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the project path is not set.</exception>
     public static IScaffoldBuilder WithEntraBlazorWasmAddPackagesStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedAddPackagesStep>(config =>
@@ -272,6 +316,12 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         });
     }
 
+    /// <summary>
+    /// Adds a step to apply code changes for Entra ID.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when required properties are missing.</exception>
     public static IScaffoldBuilder WithEntraIdCodeChangeStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
@@ -315,6 +365,12 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds a step to apply code changes for Blazor WebAssembly Entra ID.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when required properties are missing.</exception>
     public static IScaffoldBuilder WithEntraIdBlazorWasmCodeChangeStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
@@ -365,6 +421,12 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Adds a step for Entra ID text templating.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when required properties are missing.</exception>
     public static IScaffoldBuilder WithEntraIdTextTemplatingStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<WrappedTextTemplatingStep>(config =>

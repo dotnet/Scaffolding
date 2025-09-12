@@ -6,6 +6,9 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
+/// <summary>
+/// Interface for configuring a scaffolder with options and steps.
+/// </summary>
 public interface IScaffoldBuilder
 {
     /// <summary>

@@ -6,6 +6,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
+/// <summary>
+/// Interface for configuring and building a scaffold runner with services and scaffolders.
+/// </summary>
 public interface IScaffoldRunnerBuilder
 {
     /// <summary>

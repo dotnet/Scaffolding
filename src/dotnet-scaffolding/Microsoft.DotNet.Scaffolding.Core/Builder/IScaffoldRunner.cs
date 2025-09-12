@@ -5,6 +5,9 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
+/// <summary>
+/// Interface for executing scaffolders and managing their collection.
+/// </summary>
 public interface IScaffoldRunner
 {
     /// <summary>

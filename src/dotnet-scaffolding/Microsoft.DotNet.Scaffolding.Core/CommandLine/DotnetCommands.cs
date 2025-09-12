@@ -5,8 +5,21 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Core.CommandLine;
 
+/// <summary>
+/// Provides static methods for executing dotnet CLI commands related to scaffolding.
+/// </summary>
 internal static class DotnetCommands
 {
+    /// <summary>
+    /// Adds a NuGet package to a project using the dotnet CLI.
+    /// </summary>
+    /// <param name="packageName">The name of the package to add.</param>
+    /// <param name="logger">The logger for output.</param>
+    /// <param name="projectFile">The project file to add the package to (optional).</param>
+    /// <param name="packageVersion">The version of the package to add (optional).</param>
+    /// <param name="tfm">The target framework (optional).</param>
+    /// <param name="includePrerelease">Whether to include prerelease versions.</param>
+    /// <returns>True if the package was added successfully; otherwise, false.</returns>
     public static bool AddPackage(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
     {
         if (!string.IsNullOrEmpty(packageName))
@@ -58,6 +71,16 @@ internal static class DotnetCommands
         return false;
     }
 
+    /// <summary>
+    /// Finds project references for a given package using the dotnet CLI.
+    /// </summary>
+    /// <param name="packageName">The name of the package to search for.</param>
+    /// <param name="logger">The logger for output.</param>
+    /// <param name="projectFile">The project file to search in (optional).</param>
+    /// <param name="packageVersion">The version of the package (optional).</param>
+    /// <param name="tfm">The target framework (optional).</param>
+    /// <param name="includePrerelease">Whether to include prerelease versions.</param>
+    /// <returns>True if the command succeeded; otherwise, false.</returns>
     public static bool FindProjectReferences(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
     {
         var arguments = new List<string>();

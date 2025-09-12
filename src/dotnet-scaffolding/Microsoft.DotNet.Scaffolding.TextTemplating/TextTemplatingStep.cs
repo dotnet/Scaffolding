@@ -5,23 +5,44 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.TextTemplating;
+
 /// <summary>
 /// Provided all the required properties, this ScaffoldStep can template T4 onto a file on disk.
 /// </summary>
 public class TextTemplatingStep : ScaffoldStep
 {
+    /// <summary>
+    /// Display name for the step (used in logs/UI).
+    /// </summary>
     public string? DisplayName { get; set; } = "files";
+
+    /// <summary>
+    /// The collection of T4 text templating properties to process.
+    /// </summary>
     public required IEnumerable<TextTemplatingProperty> TextTemplatingProperties { get; set; }
-    //by default, Overwrite should be false, if a file already exists, don't overwrite it.
+
+    /// <summary>
+    /// By default Overwrite should be false. If true, overwrite existing files. Otherwise, do not overwrite.
+    /// </summary>
     public bool Overwrite { get; set; }
 
     private readonly ILogger _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TextTemplatingStep"/> class.
+    /// </summary>
+    /// <param name="logger">Logger for diagnostic output.</param>
     public TextTemplatingStep(ILogger<TextTemplatingStep> logger)
     {
         _logger = logger;
     }
 
+    /// <summary>
+    /// Executes the text templating step, generating files as specified.
+    /// </summary>
+    /// <param name="context">The scaffolder context.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if successful, false otherwise.</returns>
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         if (TextTemplatingProperties is null || !TextTemplatingProperties.Any())
@@ -32,7 +53,7 @@ public class TextTemplatingStep : ScaffoldStep
 
         var templateInvoker = new TemplateInvoker();
         _logger.LogInformation($"Adding {DisplayName}...");
-        foreach(var templatingProperty in TextTemplatingProperties)
+        foreach (var templatingProperty in TextTemplatingProperties)
         {
             var dictParams = new Dictionary<string, object>()
             {
@@ -43,7 +64,7 @@ public class TextTemplatingStep : ScaffoldStep
             ITextTransformation? textTransformation = null;
             try
             {
-                //need to re-instantiate the ITextTransformation type provided (using the TextTemplatingFilePreprocessor in the scaffolder)
+                // Re-instantiate the ITextTransformation type provided (using the TextTemplatingFilePreprocessor in the scaffolder)
                 textTransformation = Activator.CreateInstance(templatingProperty.TemplateType) as ITextTransformation;
                 if (textTransformation != null)
                 {
@@ -60,7 +81,7 @@ public class TextTemplatingStep : ScaffoldStep
             {
                 var templatedString = templateInvoker.InvokeTemplate(textTransformation, dictParams);
                 var outputFolderPath = Path.GetDirectoryName(templatingProperty.OutputPath);
-                //create the directory for the output file incase not already there.
+                // Create the directory for the output file in case not already there.
                 if (!string.IsNullOrEmpty(templatedString) && !string.IsNullOrEmpty(outputFolderPath))
                 {
                     if (!Directory.Exists(outputFolderPath))
@@ -68,7 +89,7 @@ public class TextTemplatingStep : ScaffoldStep
                         Directory.CreateDirectory(outputFolderPath);
                     }
 
-                    //if Overwrite is true, write file, or if it doesn't exist
+                    // If Overwrite is true, write file, or if it doesn't exist
                     if (Overwrite || !File.Exists(templatingProperty.OutputPath))
                     {
                         File.WriteAllText(templatingProperty.OutputPath, templatedString);

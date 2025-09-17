@@ -29,7 +29,7 @@ public static class Program
             out var areaNameOption, out var modelNameOption, out var endpointsClassOption, out var databaseProviderOption,
             out var databaseProviderRequiredOption, out var identityDbProviderRequiredOption, out var dataContextClassOption, out var dataContextClassRequiredOption,
             out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption, out var overwriteOption,
-            out var usernameOption, out var tenantIdOption, out var applicationOption, out var selectApplicationOption);
+            out var usernameOption, out var tenantIdOption, out var applicationOption, out var selectApplicationOption, out bool areAzCliCommandsSuccessful);
 
         builder.AddScaffolder("blazor-empty")
             .WithDisplayName("Razor Component")
@@ -294,31 +294,34 @@ public static class Program
             .WithIdentityTextTemplatingStep()
             .WithIdentityCodeChangeStep();
 
-        builder.AddScaffolder("entra-id")
-            .WithDisplayName("Entra ID")
-            .WithCategory("Entra ID")
-            .WithDescription("Add Entra auth")
-            .WithOptions([usernameOption, projectOption, tenantIdOption, applicationOption, selectApplicationOption])
-            .WithStep<ValidateEntraIdStep>(config =>
-            {
-                var step = config.Step;
-                var context = config.Context;
-                step.Username = context.GetOptionResult(usernameOption);
-                step.Project = context.GetOptionResult(projectOption);
-                step.TenantId = context.GetOptionResult(tenantIdOption);
-                step.Application = context.GetOptionResult(applicationOption);
-                step.SelectApplication = context.GetOptionResult(selectApplicationOption);
-            })
-            .WithRegisterAppStep()
-            .WithAddClientSecretStep()
-            .WithDetectBlazorWasmStep()
-            .WithUpdateAppSettingsStep()
-            .WithUpdateAppAuthorizationStep()
-            .WithEntraAddPackagesStep()
-            .WithEntraBlazorWasmAddPackagesStep()
-            .WithEntraIdCodeChangeStep()
-            .WithEntraIdBlazorWasmCodeChangeStep()
-            .WithEntraIdTextTemplatingStep();
+        if (areAzCliCommandsSuccessful)
+        {
+            builder.AddScaffolder("entra-id")
+                .WithDisplayName("Entra ID")
+                .WithCategory("Entra ID")
+                .WithDescription("Add Entra auth")
+                .WithOptions([usernameOption, projectOption, tenantIdOption, applicationOption, selectApplicationOption])
+                .WithStep<ValidateEntraIdStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.Username = context.GetOptionResult(usernameOption);
+                    step.Project = context.GetOptionResult(projectOption);
+                    step.TenantId = context.GetOptionResult(tenantIdOption);
+                    step.Application = context.GetOptionResult(applicationOption);
+                    step.SelectApplication = context.GetOptionResult(selectApplicationOption);
+                })
+                .WithRegisterAppStep()
+                .WithAddClientSecretStep()
+                .WithDetectBlazorWasmStep()
+                .WithUpdateAppSettingsStep()
+                .WithUpdateAppAuthorizationStep()
+                .WithEntraAddPackagesStep()
+                .WithEntraBlazorWasmAddPackagesStep()
+                .WithEntraIdCodeChangeStep()
+                .WithEntraIdBlazorWasmCodeChangeStep()
+                .WithEntraIdTextTemplatingStep();
+        }
 
         var runner = builder.Build();
         var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
@@ -372,10 +375,12 @@ public static class Program
         out ScaffolderOption<string> usernameOption,
         out ScaffolderOption<string> tenantIdOption,
         out ScaffolderOption<string> applicationOption,
-        out ScaffolderOption<string> selectApplicationOption
+        out ScaffolderOption<string> selectApplicationOption,
+        out bool areAzCliCommandsSuccessful
         )
     {
-        var (usernames, tenants, appIds) = GetAzureInformation();
+        areAzCliCommandsSuccessful = AzCliHelper.GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds);
+
         projectOption = new ScaffolderOption<string>
         {
             DisplayName = ".NET project file",
@@ -568,112 +573,5 @@ public static class Program
     }
 
     
-    private static (IEnumerable<string> usernames, IEnumerable<string> tenants, IEnumerable<string> appIds) GetAzureInformation()
-    {
-        IEnumerable<string> defaultUsernames = new[] { "User1", "User2", "User3" };
-        IEnumerable<string> defaultTenants = new[] { "tenantId1", "tenantId2" };
-        IEnumerable<string> defaultAppIds = new[] { "111111111111", "222222222222" };
-
-        try
-        {
-            var usernames = new List<string>();
-            var tenants = new List<string>();
-            var appIds = new List<string>();
-
-            // Create a runner to execute the 'az account list' command with json output format
-            var runner = AzCliRunner.Create();
-
-            var exitCode = runner.RunAzCli("account list --output json", out var stdOut, out var stdErr);
-
-            if (stdOut is not null)
-            {
-                var result = StringUtil.ConvertStringToArray(stdOut);
-                if (result.Length is 0)
-                {
-                    exitCode = runner.RunAzCli("login", out stdOut, out stdErr);
-                }
-            }
-
-            if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
-            {
-                // Parse the JSON output
-                using JsonDocument doc = JsonDocument.Parse(stdOut);
-                JsonElement root = doc.RootElement;
-
-                if (root.ValueKind == JsonValueKind.Array)
-                {
-
-                    foreach (JsonElement account in root.EnumerateArray())
-                    {
-                        if (account.TryGetProperty("user", out JsonElement user) &&
-                            user.TryGetProperty("name", out JsonElement name))
-                        {
-                            string? username = name.GetString();
-                            if (!string.IsNullOrEmpty(username))
-                            {
-                                usernames.Add(username);
-                            }
-                        }
-
-                        // Extract tenant ID from the JSON array
-                        if (account.TryGetProperty("tenantId", out JsonElement tenant))
-                        {
-                            string? id = tenant.GetString();
-                            if (!string.IsNullOrEmpty(id))
-                            {
-                                tenants.Add(id);
-                            }
-                        }
-                    }
- 
-                }
-            }
-
-            exitCode = runner.RunAzCli("ad app list --output json", out stdOut, out stdErr);
-
-            if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
-            {
-                // Parse the JSON output
-                using JsonDocument doc = JsonDocument.Parse(stdOut);
-                JsonElement root = doc.RootElement;
-
-                if (root.ValueKind == JsonValueKind.Array)
-                {
-
-                    foreach (JsonElement app in root.EnumerateArray())
-                    {
-                        if (app.TryGetProperty("appId", out JsonElement appId))
-                        {
-                            string? id = appId.GetString();
-                            string? displayName = app.TryGetProperty("displayName", out JsonElement name) ?
-                                                 name.GetString() : "Unknown App";
-
-                            if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(displayName))
-                            {
-                                // Format as "DisplayName (AppId)" for better user experience
-                                appIds.Add($"{displayName} {id}");
-                            }
-                        }
-                    }
-
-                    return (usernames.Count > 0 ? usernames : defaultUsernames, tenants.Count > 0 ? tenants : defaultTenants, appIds.Count > 0 ? appIds : defaultAppIds);
-                    
-                }
-            }
-
-            if (!string.IsNullOrEmpty(stdErr))
-            {
-                Console.WriteLine($"Error executing 'az ad app list': {stdErr}");
-            }
-        }
-        catch (Exception ex)
-        {
-            // Handle any exceptions, like az CLI not being installed
-            Console.WriteLine($"Error getting Azure accounts: {ex.Message}");
-        }
-
-        // Fallback values if the command fails
-        return (defaultUsernames, defaultTenants, defaultAppIds);
-    }
 }
 

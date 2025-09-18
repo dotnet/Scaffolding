@@ -50,7 +50,21 @@ internal class AzCliRunner
         var taskOut = outStream.BeginRead(process.StandardOutput);
         var taskErr = errStream.BeginRead(process.StandardError);
 
-        process.WaitForExit();
+        // Wait for process to exit with a timeout (e.g., 30 seconds)
+        const int timeoutMilliseconds = 30000;
+        bool exited = process.WaitForExit(timeoutMilliseconds);
+
+        if (!exited)
+        {
+            try
+            {
+                process.Kill(entireProcessTree: true);
+            }
+            catch
+            {
+                // Ignore exceptions from killing the process
+            }
+        }
 
         taskOut.Wait();
         taskErr.Wait();

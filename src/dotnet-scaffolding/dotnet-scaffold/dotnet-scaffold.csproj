@@ -11,18 +11,6 @@
     <RootNamespace>Microsoft.DotNet.Tools.Scaffold</RootNamespace>
     <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
-  <ItemGroup>
-    <!--
-      TODO: Find a better place for these files to live that is shared between .Core and dotnet-scaffold. Linking them like this is temporary
-      to get around the fact that dotnet-scaffold doesn't (and likely won't) have a dependency on .Core.
-    -->
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Logging\CleanConsoleFormatter.cs" Link="Logging\CleanConsoleFormatter.cs" />
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Logging\CleanConsoleFormatterOptions.cs" Link="Logging\CleanConsoleFormatterOptions.cs" />
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Logging\ConsoleLoggerExtensions.cs" Link="Logging\ConsoleLoggerExtensions.cs" />
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\ComponentModel\*.cs">
-      <Link>ComponentModel\%(Filename)%(Extension)</Link>
-    </Compile>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Spectre.Console.Flow" />
@@ -30,11 +18,13 @@
     <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+    <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Internal\Microsoft.DotNet.Scaffolding.Internal.csproj" />
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Roslyn\Microsoft.DotNet.Scaffolding.Roslyn.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Microsoft.DotNet.Scaffolding.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

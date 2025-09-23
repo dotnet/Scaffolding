@@ -3,6 +3,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.CommandLine.Invocation;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -41,4 +42,15 @@ public interface IScaffoldRunnerBuilder
     /// </summary>
     /// <param name="name">The name of the scaffolder. This will be used as the command line command to execute that scaffolder.</param>
     IScaffoldBuilder AddScaffolder(string name);
+
+    /// <summary>
+    /// Adds a new <see cref="ScaffolderOption"/> to the builder.
+    /// </summary>
+    /// <param name="option">The option to add to the larger "dotnet-scaffold" tool.</param>
+    void AddOption(ScaffolderOption option);
+
+    /// <summary>
+    /// Adds a handler to the RootCommand doing the action passed in the handle parameter.
+    /// </summary>
+    void AddHandler(Func<InvocationContext, Task> handle);
 }

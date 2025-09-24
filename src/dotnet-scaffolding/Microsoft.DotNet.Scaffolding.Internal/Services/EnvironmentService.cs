@@ -162,9 +162,9 @@ internal class EnvironmentService : IEnvironmentService
         return Environment.ExpandEnvironmentVariables(name);
     }
 
-    public string? GetMacAddress()
+    public async Task<string?> GetMacAddressAsync()
     {
-        return MacAddressGetter.GetMacAddress();
+        return await MacAddressGetter.GetMacAddressAsync();
     }
 
     private bool _didCheckForContainer;

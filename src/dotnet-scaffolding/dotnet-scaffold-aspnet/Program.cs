@@ -1,14 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Text.Json;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
-using Microsoft.DotNet.Scaffolding.Internal;
-using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -21,15 +18,14 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        var builder = Host.CreateScaffoldBuilder();
+        IScaffoldRunnerBuilder builder = Host.CreateScaffoldBuilder();
         ConfigureServices(builder.Services);
         ConfigureSteps(builder.Services);
         CreateOptions(
             out var projectOption, out var prereleaseOption, out var fileNameOption, out var actionsOption,
             out var areaNameOption, out var modelNameOption, out var endpointsClassOption, out var databaseProviderOption,
             out var databaseProviderRequiredOption, out var identityDbProviderRequiredOption, out var dataContextClassOption, out var dataContextClassRequiredOption,
-            out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption, out var overwriteOption,
-            out var usernameOption, out var tenantIdOption, out var applicationOption, out var selectApplicationOption, out bool areAzCliCommandsSuccessful);
+            out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption, out var overwriteOption);
 
         builder.AddScaffolder("blazor-empty")
             .WithDisplayName("Razor Component")
@@ -294,34 +290,7 @@ public static class Program
             .WithIdentityTextTemplatingStep()
             .WithIdentityCodeChangeStep();
 
-        if (areAzCliCommandsSuccessful)
-        {
-            builder.AddScaffolder("entra-id")
-                .WithDisplayName("Entra ID")
-                .WithCategory("Entra ID")
-                .WithDescription("Add Entra auth")
-                .WithOptions([usernameOption, projectOption, tenantIdOption, applicationOption, selectApplicationOption])
-                .WithStep<ValidateEntraIdStep>(config =>
-                {
-                    var step = config.Step;
-                    var context = config.Context;
-                    step.Username = context.GetOptionResult(usernameOption);
-                    step.Project = context.GetOptionResult(projectOption);
-                    step.TenantId = context.GetOptionResult(tenantIdOption);
-                    step.Application = context.GetOptionResult(applicationOption);
-                    step.SelectApplication = context.GetOptionResult(selectApplicationOption);
-                })
-                .WithRegisterAppStep()
-                .WithAddClientSecretStep()
-                .WithDetectBlazorWasmStep()
-                .WithUpdateAppSettingsStep()
-                .WithUpdateAppAuthorizationStep()
-                .WithEntraAddPackagesStep()
-                .WithEntraBlazorWasmAddPackagesStep()
-                .WithEntraIdCodeChangeStep()
-                .WithEntraIdBlazorWasmCodeChangeStep()
-                .WithEntraIdTextTemplatingStep();
-        }
+        BuildEntraIdAzureScaffolderAsync(builder, projectOption).Wait();
 
         var runner = builder.Build();
         var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
@@ -371,16 +340,9 @@ public static class Program
         out ScaffolderOption<string> pageTypeOption,
         out ScaffolderOption<string> controllerNameOption,
         out ScaffolderOption<bool> viewsOption,
-        out ScaffolderOption<bool> overwriteOption,
-        out ScaffolderOption<string> usernameOption,
-        out ScaffolderOption<string> tenantIdOption,
-        out ScaffolderOption<string> applicationOption,
-        out ScaffolderOption<string> selectApplicationOption,
-        out bool areAzCliCommandsSuccessful
+        out ScaffolderOption<bool> overwriteOption
         )
     {
-        areAzCliCommandsSuccessful = AzCliHelper.GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds);
-
         projectOption = new ScaffolderOption<string>
         {
             DisplayName = ".NET project file",
@@ -530,48 +492,80 @@ public static class Program
             Description = "Option to enable overwriting existing files",
             Required = true,
             PickerType = InteractivePickerType.YesNo
-        };
-
-        usernameOption = new ScaffolderOption<string>
-        {
-            DisplayName = "Select username",
-            CliOption = Constants.CliOptions.UsernameOption,
-            Description = "User name for the identity user",
-            Required = true,
-            PickerType = InteractivePickerType.CustomPicker,
-            CustomPickerValues = usernames 
-        };
-
-        tenantIdOption = new ScaffolderOption<string>
-        {
-            DisplayName = "Tenant Id",
-            CliOption = Constants.CliOptions.TenantIdOption,
-            Description = "Tenant Id for the identity user",
-            Required = true,
-            PickerType = InteractivePickerType.CustomPicker,
-            CustomPickerValues = tenants 
-        };
-
-        applicationOption = new ScaffolderOption<string>
-        {
-            DisplayName = "Create or Select Application",
-            Description = "Create or select existing application",
-            Required = true,
-            PickerType = InteractivePickerType.ConditionalPicker,
-            CustomPickerValues = new[] { "Select an existing Azure application object", "Create a new Azure application object"} 
-        };
-
-        selectApplicationOption = new ScaffolderOption<string>
-        {
-            DisplayName = "Select Application",
-            CliOption = Constants.CliOptions.ApplicationIdOption,
-            Description = "Select existing application",
-            Required = false,
-            PickerType = InteractivePickerType.CustomPicker,
-            CustomPickerValues = appIds
-        };
+        };   
     }
 
-    
+    static async Task BuildEntraIdAzureScaffolderAsync(IScaffoldRunnerBuilder builder, ScaffolderOption<string> projectOption)
+    {
+        (bool areAzCliCommandsSuccessful, List<string> usernames, List<string> tenants, List<string> appIds) = await AzCliHelper.GetAzureInformationAsync();
+
+        if (areAzCliCommandsSuccessful)
+        {
+            ScaffolderOption<string> usernameOption = new ScaffolderOption<string>
+            {
+                DisplayName = "Select username",
+                CliOption = Constants.CliOptions.UsernameOption,
+                Description = "User name for the identity user",
+                Required = true,
+                PickerType = InteractivePickerType.CustomPicker,
+                CustomPickerValues = usernames
+            };
+
+            ScaffolderOption<string> tenantIdOption = new ScaffolderOption<string>
+            {
+                DisplayName = "Tenant Id",
+                CliOption = Constants.CliOptions.TenantIdOption,
+                Description = "Tenant Id for the identity user",
+                Required = true,
+                PickerType = InteractivePickerType.CustomPicker,
+                CustomPickerValues = tenants
+            };
+
+            ScaffolderOption<string> applicationOption = new ScaffolderOption<string>
+            {
+                DisplayName = "Create or Select Application",
+                Description = "Create or select existing application",
+                Required = true,
+                PickerType = InteractivePickerType.ConditionalPicker,
+                CustomPickerValues = new[] { "Select an existing Azure application object", "Create a new Azure application object" }
+            };
+
+            ScaffolderOption<string> selectApplicationOption = new ScaffolderOption<string>
+            {
+                DisplayName = "Select Application",
+                CliOption = Constants.CliOptions.ApplicationIdOption,
+                Description = "Select existing application",
+                Required = false,
+                PickerType = InteractivePickerType.CustomPicker,
+                CustomPickerValues = appIds
+            };
+
+            builder.AddScaffolder("entra-id")
+                .WithDisplayName("Entra ID")
+                .WithCategory("Entra ID")
+                .WithDescription("Add Entra auth")
+                .WithOptions([usernameOption, projectOption, tenantIdOption, applicationOption, selectApplicationOption])
+                .WithStep<ValidateEntraIdStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.Username = context.GetOptionResult(usernameOption);
+                    step.Project = context.GetOptionResult(projectOption);
+                    step.TenantId = context.GetOptionResult(tenantIdOption);
+                    step.Application = context.GetOptionResult(applicationOption);
+                    step.SelectApplication = context.GetOptionResult(selectApplicationOption);
+                })
+                .WithRegisterAppStep()
+                .WithAddClientSecretStep()
+                .WithDetectBlazorWasmStep()
+                .WithUpdateAppSettingsStep()
+                .WithUpdateAppAuthorizationStep()
+                .WithEntraAddPackagesStep()
+                .WithEntraBlazorWasmAddPackagesStep()
+                .WithEntraIdCodeChangeStep()
+                .WithEntraIdBlazorWasmCodeChangeStep()
+                .WithEntraIdTextTemplatingStep();
+        }
+    }
 }
 

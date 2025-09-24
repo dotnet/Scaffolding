@@ -37,19 +37,19 @@ internal class CommandDiscovery
     /// </summary>
     /// <param name="context">The flow context.</param>
     /// <returns>The selected command as a KeyValuePair, or null if none selected.</returns>
-    public KeyValuePair<string, CommandInfo>? Discover(IFlowContext context)
+    public async Task<KeyValuePair<string, CommandInfo>?> DiscoverAsync(IFlowContext context)
     {
         var allCommands = context.GetCommandInfos();
         var envVars = context.GetTelemetryEnvironmentVariables();
         if (allCommands is null || allCommands.Count == 0)
         {
-            allCommands = AnsiConsole
-            .Status()
-            .WithSpinner()
-            .Start("Discovering scaffolders", statusContext =>
-            {
-                return _dotnetToolService.GetAllCommandsParallel(envVars: envVars);
-            });
+            allCommands = await AnsiConsole
+                .Status()
+                .WithSpinner()
+                .StartAsync("Discovering scaffolders", async statusContext =>
+                {
+                    return await _dotnetToolService.GetAllCommandsParallelAsync(envVars: envVars);
+                });
 
             if (allCommands is not null)
             {

@@ -20,7 +20,7 @@ internal static class DotnetCommands
     /// <param name="tfm">The target framework (optional).</param>
     /// <param name="includePrerelease">Whether to include prerelease versions.</param>
     /// <returns>True if the package was added successfully; otherwise, false.</returns>
-    public static bool AddPackage(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
+    public static async Task<bool> AddPackageAsync(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
     {
         if (!string.IsNullOrEmpty(packageName))
         {
@@ -45,7 +45,7 @@ internal static class DotnetCommands
             var runner = DotnetCliRunner.CreateDotNet("add", arguments);
 
             // Buffer the output here because we'll only display it in the failure scenario
-            var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+            (int exitCode, string? stdOut, string? stdErr) = await runner.ExecuteAndCaptureOutputAsync();
 
             if (exitCode != 0)
             {
@@ -81,7 +81,7 @@ internal static class DotnetCommands
     /// <param name="tfm">The target framework (optional).</param>
     /// <param name="includePrerelease">Whether to include prerelease versions.</param>
     /// <returns>True if the command succeeded; otherwise, false.</returns>
-    public static bool FindProjectReferences(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
+    public static async Task<bool> FindProjectReferencesAsync(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
     {
         var arguments = new List<string>();
         if (!string.IsNullOrEmpty(projectFile))
@@ -93,7 +93,7 @@ internal static class DotnetCommands
         var runner = DotnetCliRunner.CreateDotNet("reference list", arguments);
 
         // Buffer the output here because we'll only display it in the failure scenario
-        var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+        (int exitCode, string? stdOut, string? stdErr) = await runner.ExecuteAndCaptureOutputAsync();
 
         if (exitCode != 0)
         {

@@ -30,10 +30,8 @@ internal class TelemetryCommonProperties
     private const string DockerContainer = "Docker Container";
     private const string MacAddressHash = "Mac Address Hash";
     private const string KernelVersion = "Kernel Version";
-    private const string MacAddressHashCacheKey = "MachineId";
-    private const string IsDockerContainerCacheKey = "IsDockerContainer";
 
-    public Dictionary<string, string> GetTelemetryCommonProperties()
+    public async Task<Dictionary<string, string>> GetTelemetryCommonPropertiesAsync()
     {
         return new Dictionary<string, string>
             {
@@ -42,14 +40,14 @@ internal class TelemetryCommonProperties
                 {RuntimeId, RuntimeEnvironment.GetRuntimeIdentifier()},
                 {ProductVersion, _productVersion},
                 {DockerContainer, IsDockerContainer()},
-                {MacAddressHash, GetMacAddress() },
+                {MacAddressHash, await GetMacAddressAsync() },
                 {KernelVersion, GetKernelVersion()}
             };
     }
 
-    private string GetMacAddress()
+    private async Task<string> GetMacAddressAsync()
     {
-        var macAddress = _environmentService.GetMacAddress();
+        string macAddress = await _environmentService.GetMacAddressAsync() ?? string.Empty;
         return macAddress != null ? macAddress.Hash() : Guid.NewGuid().ToString();
     }
 

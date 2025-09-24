@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using System;
 using System.Diagnostics;
-using System.Text;
 
 namespace Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 
@@ -62,8 +60,11 @@ internal class DotnetCliRunner
         return process.ExitCode;
     }
 
-    public int ExecuteAndCaptureOutput(out string? stdOut, out string? stdErr)
+    public async Task<(int exitCode, string? stdOut, string? stdErr)> ExecuteAndCaptureOutputAsync()
     {
+        string? stdOut = null;
+        string? stdErr = null;
+
         using var outStream = new ProcessOutputStreamReader();
         using var errStream = new ProcessOutputStreamReader();
 
@@ -85,24 +86,23 @@ internal class DotnetCliRunner
         {
             stdOut = string.Empty;
             stdErr = e.Message;
-            return -1;
+            return (-1, stdOut, stdErr);
         }
 
         var taskOut = outStream.BeginRead(process.StandardOutput);
         var taskErr = errStream.BeginRead(process.StandardError);
 
-        process.WaitForExit();
+        await process.WaitForExitAsync();
 
-        taskOut.Wait();
-        taskErr.Wait();
+        await Task.WhenAll(taskOut, taskErr);
 
         stdOut = outStream.CapturedOutput;
         stdErr = errStream.CapturedOutput;
 
-        return process.ExitCode;
+        return (process.ExitCode, stdOut, stdErr);
     }
 
-    public static string FindAzureCLIPath()
+    public static async Task<string> FindAzureCLIPathAsync()
     {
         try
         {
@@ -111,7 +111,7 @@ internal class DotnetCliRunner
             string searchArg = Environment.OSVersion.Platform == PlatformID.Win32NT ? "az.cmd" : "az";
 
             var runner = DotnetCliRunner.Create(whereCommand, new[] { searchArg });
-            int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var _);
+            (int exitCode, string? stdOut, _) = await runner.ExecuteAndCaptureOutputAsync();
 
             if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
             {
@@ -130,93 +130,6 @@ internal class DotnetCliRunner
             return "";
         }
     }
-
-
-    public int RunAzCli(string arguments, out string? stdOut, out string? stdErr)
-    {
-        using var outStream = new ProcessOutputStreamReader();
-        using var errStream = new ProcessOutputStreamReader();
-
-        outStream.Capture();
-        errStream.Capture();
-
-        var commandName = FindAzureCLIPath();
-        var finalArguments = arguments;
-
-        var psi = new ProcessStartInfo(commandName, finalArguments)
-        {
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            StandardOutputEncoding = Encoding.UTF8
-        };
-
-        string errorMessage = string.Empty;
-        string output = string.Empty;
-
-        Process process = new Process
-        {
-            StartInfo = psi,
-            EnableRaisingEvents = true
-        };
-
-        try
-        {
-            process.Start();
-        }
-        catch (Exception ex)
-        {
-            stdOut = string.Empty;
-            stdErr = ex.Message;
-            return -1;
-        }
-
-        var taskOut = outStream.BeginRead(process.StandardOutput);
-        var taskErr = errStream.BeginRead(process.StandardError);
-
-        process.WaitForExit();
-
-        taskOut.Wait();
-        taskErr.Wait();
-
-        stdOut = outStream.CapturedOutput?.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)[0];
-        stdErr = errStream.CapturedOutput;
-
-        return process.ExitCode;
-    }
-
-    /// <summary>
-    /// Executes a command that requires user interaction (like 'az login')
-    /// </summary>
-    /// <returns>Exit code of the process</returns>
-    public int ExecuteInteractive()
-    {
-        // For interactive processes, we shouldn't redirect standard input/output
-        _psi.RedirectStandardInput = false;
-        _psi.RedirectStandardOutput = false;
-        _psi.RedirectStandardError = false;
-
-        // Use shell execute to allow browser windows to be launched
-        _psi.UseShellExecute = true;
-
-        using var process = new Process
-        {
-            StartInfo = _psi
-        };
-
-        try
-        {
-            process.Start();
-            process.WaitForExit();
-            return process.ExitCode;
-        }
-        catch (Exception)
-        {
-            return -1;
-        }
-    }
-
 
     internal ProcessStartInfo _psi;
     private DotnetCliRunner(string commandName, IEnumerable<string> args, IDictionary<string, string>? environmentVariables = null)

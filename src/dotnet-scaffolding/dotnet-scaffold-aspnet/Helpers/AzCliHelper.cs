@@ -12,60 +12,57 @@ internal class AzCliHelper
     /// <summary>
     /// Gets Azure usernames, tenant IDs, and application IDs using the Azure CLI.
     /// </summary>
-    /// <param name="usernames">the user IDs</param>
-    /// <param name="tenants">the tenant IDs</param>
-    /// <param name="appIds">the app IDs</param>
     /// <returns>if successful, return true</returns>
-    public static bool GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds)
+    public static async Task<(bool success, List<string> usernames, List<string> tenants, List<string> appIds)> GetAzureInformationAsync()
     {
         // Create a runner to execute the 'az account list' command with json output format
         var runner = AzCliRunner.Create();
 
-        if (EnsureUserIsLoggedIn(runner, out string? output) && !string.IsNullOrEmpty(output))
+        List<string> usernames = [];
+        List<string> tenants = [];
+        List<string> appIds = [];
+
+        (bool exitCode, string? output) = await EnsureUserIsLoggedInAsync(runner);
+
+        if (exitCode && !string.IsNullOrEmpty(output))
         {
             if (GetAzureUsernamesAndTenatIds(runner, output, out usernames, out tenants))
             {
-                if (GetAzureAppIds(runner, out appIds))
+                (bool canGetAppIds, appIds) = await GetAzureAppIdsAsync(runner);
+                if (canGetAppIds)
                 {
-                    return true;
+                    return (true, usernames, tenants, appIds);
                 }
             }
         }
-        usernames = [];
-        tenants = [];
-        appIds = [];
-
-        return false;
+        return (false, usernames, tenants, appIds);
     }
 
     /// <summary>
     /// Ensures the user is logged into Azure CLI. If not logged in, it will prompt for login.
     /// </summary>
     /// <param name="runner">the az cli runner</param>
-    /// <param name="output">the CLI output if available</param>
     /// <returns>if successful, return true</returns>
-    private static bool EnsureUserIsLoggedIn(AzCliRunner runner, out string? output)
+    private static async Task<(bool exitCode, string? output)> EnsureUserIsLoggedInAsync(AzCliRunner runner)
     {
         try
         {
-            int exitCode = runner.RunAzCli("account list --output json", out var stdOut, out var stdErr);
+            (int exitCode, string? stdOut, string? stdErr) = await runner.RunAzCliAsync("account list --output json");
 
             if (stdOut is not null)
             {
                 var result = StringUtil.ConvertStringToArray(stdOut);
                 if (result.Length is 0)
                 {
-                    exitCode = runner.RunAzCli("login", out stdOut, out stdErr);
+                    (exitCode, stdOut, stdErr) = await runner.RunAzCliAsync("login");
                 }
             }
-            output = stdOut;
-            return exitCode == 0 && string.IsNullOrEmpty(stdErr);
+            return (exitCode == 0 && string.IsNullOrEmpty(stdErr) , stdOut);
         }
         catch (Exception ex)
         {
-            output = null;
             Console.WriteLine($"Error checking Azure login status: {ex.Message}");
-            return false;
+            return (false, null);
         }
     }
 
@@ -131,15 +128,14 @@ internal class AzCliHelper
     /// Gets Azure application IDs using the Azure CLI.
     /// </summary>
     /// <param name="runner">the az cli runner</param>
-    /// <param name="appIds"> the appIds</param>
     /// <returns>if successful, returns true</returns>
-    private static bool GetAzureAppIds(AzCliRunner runner, out List<string> appIds)
+    private static async Task<(bool success, List<string> appIds)> GetAzureAppIdsAsync(AzCliRunner runner)
     {
+        List<string> appIds = [];
         try
         {
-
-            appIds = [];
-            var exitCode = runner.RunAzCli("ad app list --output json", out string? stdOut, out string? stdErr);
+            
+            (int exitCode, string? stdOut, string? stdErr) = await runner.RunAzCliAsync("ad app list --output json");
 
             if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
             {
@@ -165,7 +161,7 @@ internal class AzCliHelper
                             }
                         }
                     }
-                    return true;
+                    return (true, appIds);
                 }
             }
 
@@ -176,10 +172,9 @@ internal class AzCliHelper
         }
         catch (Exception ex)
         {
-            appIds = [];
             // Handle any exceptions, like az CLI not being installed
             Console.WriteLine($"Error getting Azure apps: {ex.Message}");
         }
-        return false;
+        return (false, appIds);
     }
 }

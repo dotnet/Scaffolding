@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -33,10 +34,10 @@ internal class FirstPartyComponentInitializer
     /// Installs any missing first-party scaffold tools required by the CLI.
     /// </summary>
     /// <param name="envVars">Environment variables to use during tool installation.</param>
-    public void Initialize(IDictionary<string, string> envVars)
+    public async Task InitializeAsync(IDictionary<string, string> envVars)
     {
         List<string> toolsToInstall = [];
-        var installedTools = _dotnetToolService.GetDotNetTools(refresh: true, envVars);
+        IList<DotNetToolInfo> installedTools = await _dotnetToolService.GetDotNetToolsAsync(refresh: true, envVars);
         foreach (var tool in _firstPartyTools)
         {
             if (installedTools.FirstOrDefault(x => x.PackageName.Equals(tool, System.StringComparison.OrdinalIgnoreCase)) is null)
@@ -51,8 +52,7 @@ internal class FirstPartyComponentInitializer
             foreach (var tool in toolsToInstall)
             {
                 _logger.LogInformation("Installing {tool}.", tool);
-                var successfullyInstalled = _dotnetToolService.InstallDotNetTool(tool, prerelease : isDotnetScaffoldPrerelease);
-                if (!successfullyInstalled)
+                if (!await _dotnetToolService.InstallDotNetToolAsync(tool, prerelease: isDotnetScaffoldPrerelease))
                 {
                     _logger.LogInformation("Failed to install {tool}.", tool);
                 }

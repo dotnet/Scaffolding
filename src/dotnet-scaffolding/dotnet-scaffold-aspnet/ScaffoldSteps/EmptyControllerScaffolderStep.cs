@@ -31,14 +31,14 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
         _telemetryService = telemetryService;
     }
 
-    public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation($"Adding '{CommandName}' using 'dotnet new'...");
         var stepSettings = ValidateEmptyControllerCommandSettings();
         var result = false;
         if (stepSettings is not null)
         {
-            result = InvokeDotnetNew(stepSettings);
+            result = await InvokeDotnetNewAsync(stepSettings);
         }
 
         if (result)
@@ -51,10 +51,10 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
         }
 
         _telemetryService.TrackEvent(new EmptyControllerScaffolderTelemetryEvent(context.Scaffolder.DisplayName, Actions, stepSettings is not null, result));
-        return Task.FromResult(result);
+        return result;
     }
 
-    private bool InvokeDotnetNew(EmptyControllerStepSettings settings)
+    private async Task<bool> InvokeDotnetNewAsync(EmptyControllerStepSettings settings)
     {
         var outputDirectory = Path.GetDirectoryName(settings.Project);
         if (!string.IsNullOrEmpty(outputDirectory))
@@ -92,7 +92,7 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
             }
 
             var runner = DotnetCliRunner.CreateDotNet("new", args);
-            var exitCode = runner.ExecuteAndCaptureOutput(out _, out _);
+            (int exitCode, _, _) = await runner.ExecuteAndCaptureOutputAsync();
             return exitCode == 0;
         }
 

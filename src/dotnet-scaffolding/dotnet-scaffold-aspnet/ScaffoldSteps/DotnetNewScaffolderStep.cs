@@ -49,14 +49,14 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
     }
 
     /// <inheritdoc />
-    public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation($"Adding '{CommandName}' using 'dotnet new'...");
         var result = false;
         var stepSettings = ValidateDotnetNewCommandSettings();
         if (stepSettings is not null)
         {
-            result = InvokeDotnetNew(stepSettings);
+            result = await InvokeDotnetNewAsync(stepSettings);
         }
 
         if (result)
@@ -69,13 +69,13 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
         }
 
         _telemetryService.TrackEvent(new DotnetNewScaffolderTelemetryEvent(context.Scaffolder.DisplayName, stepSettings is not null, result));
-        return Task.FromResult(result);
+        return result;
     }
 
     /// <summary>
     /// Invokes the 'dotnet new' command with the specified settings.
     /// </summary>
-    private bool InvokeDotnetNew(DotnetNewStepSettings stepSettings)
+    private async Task<bool> InvokeDotnetNewAsync(DotnetNewStepSettings stepSettings)
     {
         var outputDirectory = Path.GetDirectoryName(stepSettings.Project);
         //invoking a command with a specific output folder, if not, use the default output folder (project root)
@@ -107,7 +107,7 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
             }
 
             var runner = DotnetCliRunner.CreateDotNet("new", args);
-            var exitCode = runner.ExecuteAndCaptureOutput(out _, out _);
+            (int exitCode, _, _) = await runner.ExecuteAndCaptureOutputAsync();
             return exitCode == 0;
         }
 

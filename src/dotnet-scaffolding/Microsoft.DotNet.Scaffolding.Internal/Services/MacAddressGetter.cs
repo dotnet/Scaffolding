@@ -18,11 +18,11 @@ internal static class MacAddressGetter
     private const string ZeroRegex = @"(?:00[:\-]){5}00";
     private const int ErrorFileNotFound = 0x2;
 
-    public static string? GetMacAddress()
+    public static async Task<string?> GetMacAddressAsync()
     {
         try
         {
-            var macAddress = GetMacAddressCore();
+            string? macAddress = await GetMacAddressCoreAsync();
             if (string.IsNullOrWhiteSpace(macAddress) || macAddress!.Equals(InvalidMacAddress, StringComparison.OrdinalIgnoreCase))
             {
                 return GetMacAddressByNetworkInterface();
@@ -38,11 +38,11 @@ internal static class MacAddressGetter
         }
     }
 
-    private static string? GetMacAddressCore()
+    private static async Task<string?> GetMacAddressCoreAsync()
     {
         try
         {
-            var shelloutput = GetShellOutMacAddressOutput();
+            string? shelloutput = await GetShellOutMacAddressOutputAsync();
             if (string.IsNullOrWhiteSpace(shelloutput))
             {
                 return null;
@@ -76,9 +76,9 @@ internal static class MacAddressGetter
         return null;
     }
 
-    private static string? GetIpCommandOutput()
+    private static async Task<string?> GetIpCommandOutputAsync()
     {
-        var ipResult = DotnetCliRunner.Create("ip", ["link"]).ExecuteAndCaptureOutput(out var ipStdOut, out _);
+        (int ipResult, string? ipStdOut, _) = await DotnetCliRunner.Create("ip", ["link"]).ExecuteAndCaptureOutputAsync();
         if (ipResult == 0)
         {
             return ipStdOut;
@@ -89,11 +89,11 @@ internal static class MacAddressGetter
         }
     }
 
-    private static string? GetShellOutMacAddressOutput()
+    private static async Task<string?> GetShellOutMacAddressOutputAsync()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            var result = DotnetCliRunner.Create("getmac.exe", []).ExecuteAndCaptureOutput(out var stdOut, out _);
+            (int result, string? stdOut, _) = await DotnetCliRunner.Create("getmac.exe", []).ExecuteAndCaptureOutputAsync();
             if (result == 0)
             {
                 return stdOut;
@@ -107,21 +107,21 @@ internal static class MacAddressGetter
         {
             try
             {
-                var ifconfigResult = DotnetCliRunner.Create("ifconfig", ["-a"]).ExecuteAndCaptureOutput(out var ifconfigStdOut, out var ifconfigStdErr);
+                (int ifconfigResult, string? ifconfigStdOut, string? ifconfigStdErr) = await DotnetCliRunner.Create("ifconfig", ["-a"]).ExecuteAndCaptureOutputAsync();
                 if (ifconfigResult == 0)
                 {
                     return ifconfigStdOut;
                 }
                 else
                 {
-                    return GetIpCommandOutput();
+                    return await GetIpCommandOutputAsync();
                 }
             }
             catch (Win32Exception e)
             {
                 if (e.NativeErrorCode == ErrorFileNotFound)
                 {
-                    return GetIpCommandOutput();
+                    return await GetIpCommandOutputAsync();
                 }
                 else
                 {

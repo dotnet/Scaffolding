@@ -58,18 +58,18 @@ internal class StartupFlowStep : IFlowStep
     }
 
     /// <inheritdoc/>
-    public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
+    public async ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
     {
-        AnsiConsole.Status()
+        await AnsiConsole.Status()
             .WithSpinner()
-            .Start("Initializing dotnet-scaffold", statusContext =>
+            .StartAsync("Initializing dotnet-scaffold", async statusContext =>
             {
                 statusContext.Refresh();
                 var envVars = InitializeFirstTimeTelemetry();
                 SelectTelemetryEnvironmentVariables(context, envVars);
                 // Initialize 1st party components (dotnet tools)
                 statusContext.Status = "Getting ready";
-                new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize(envVars);
+                await new FirstPartyComponentInitializer(_logger, _dotnetToolService).InitializeAsync(envVars);
                 statusContext.Status = "Done\n";
                 // Parse args passed
                 statusContext.Status = "Parsing args.";
@@ -86,7 +86,7 @@ internal class StartupFlowStep : IFlowStep
                 statusContext.Status = "Done\n";
             });
 
-        return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+        return FlowStepResult.Success;
     }
 
     /// <summary>

@@ -32,9 +32,9 @@ internal class ComponentDiscovery
     /// </summary>
     /// <param name="context">The flow context.</param>
     /// <returns>The selected <see cref="DotNetToolInfo"/>, or null if none selected.</returns>
-    public DotNetToolInfo? Discover(IFlowContext context)
+    public async Task<DotNetToolInfo?> DiscoverAsync(IFlowContext context)
     {
-        var dotnetTools = _dotnetToolService.GetDotNetTools();
+        IList<DotNetToolInfo> dotnetTools = await _dotnetToolService.GetDotNetToolsAsync();
         return Prompt(context, "Pick a scaffolding component ('dotnet tool')", dotnetTools);
     }
 

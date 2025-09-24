@@ -53,47 +53,47 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         }
 
         /// <inheritdoc />
-        public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+        public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
             // Validate project path
             if (string.IsNullOrEmpty(ProjectPath) || !_fileSystem.FileExists(ProjectPath))
             {
                 _logger.LogError($"Invalid project path: {ProjectPath}");
-                return Task.FromResult(false);
+                return false;
             }
 
             if(ClientId is not null)
             {
                 _logger.LogInformation("Updating project...");
                 // Initialize user secrets
-                bool success = UpdateApp(context);
+                bool success = await UpdateAppAsync(context);
                 if (!success)
                 {
                     _logger.LogError("Failed to Update App.");
-                    return Task.FromResult(false);
+                    return false;
                 }
                 _logger.LogInformation("Successfully Updated App.");
-                return Task.FromResult(true);
+                return true;
             }
             else
             {
                 _logger.LogInformation("Registering project...");
                 // Initialize user secrets
-                bool success = RegisterApp(context);
+                bool success = await RegisterAppAsync(context);
                 if (!success)
                 {
                     _logger.LogError("Failed to Register App.");
-                    return Task.FromResult(false);
+                    return false;
                 }
                 _logger.LogInformation("Successfully Registered App.");
-                return Task.FromResult(true);
+                return true;
             }
         }
 
         /// <summary>
         /// Registers a new Azure AD application and captures the client ID.
         /// </summary>
-        private bool RegisterApp(ScaffolderContext context)
+        private async Task<bool> RegisterAppAsync(ScaffolderContext context)
         {
             try
             {
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 };
                 // Fix for IDE0300: Simplify collection initialization
                 var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
-                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+                (int exitCode, string? stdOut, string? stdErr) = await runner.ExecuteAndCaptureOutputAsync();
                 if (exitCode != 0)
                 {
                     _logger.LogError($"Error registering application: {stdErr}");
@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// <summary>
         /// Updates an existing Azure AD application registration.
         /// </summary>
-        private bool UpdateApp(ScaffolderContext context)
+        private async Task<bool> UpdateAppAsync(ScaffolderContext context)
         {
             try
             {
@@ -153,7 +153,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 };
                 // Fix for IDE0300: Simplify collection initialization
                 var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
-                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+                (int exitCode, string? stdOut, string? stdErr) = await runner.ExecuteAndCaptureOutputAsync();
                 if (exitCode != 0)
                 {
                     _logger.LogError($"Error updating registration: {stdErr}");

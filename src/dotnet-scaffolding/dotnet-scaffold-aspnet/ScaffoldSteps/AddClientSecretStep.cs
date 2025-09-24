@@ -62,33 +62,33 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         }
 
         /// <inheritdoc />
-        public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+        public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
             // Validate project path
             if (string.IsNullOrEmpty(ProjectPath) || !_fileSystem.FileExists(ProjectPath))
             {
                 _logger.LogError($"Invalid project path: {ProjectPath}");
-                return Task.FromResult(false);
+                return false;
             }
 
             _logger.LogInformation("Initializing user secrets for project...");
 
             // Initialize user secrets
-            bool success = AddClientSecret(context);
+            bool success = await AddClientSecretAsync(context);
             if (!success)
             {
                 _logger.LogError("Failed to add client secret.");
-                return Task.FromResult(false);
+                return false;
             }
 
             _logger.LogInformation("Successfully configured user secrets for the project.");
-            return Task.FromResult(true);
+            return true;
         }
 
         /// <summary>
         /// Adds a client secret to the Azure AD app registration and stores it in the context.
         /// </summary>
-        private bool AddClientSecret(ScaffolderContext context)
+        private async Task<bool> AddClientSecretAsync(ScaffolderContext context)
         {
             try
             {
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     "msidentity",
                     new[] { "--create-client-secret", "--tenant-id", TenantId ?? string.Empty, "--username", Username ?? string.Empty, "--client-id", ClientId ?? string.Empty, "--json" }
                 );
-                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+                (int exitCode, string? stdOut, string? stdErr) = await runner.ExecuteAndCaptureOutputAsync();
 
                 if (exitCode != 0)
                 {

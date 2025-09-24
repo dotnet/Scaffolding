@@ -17,6 +17,6 @@ internal interface IEnvironmentService
     void SetEnvironmentVariable(string name, string value, EnvironmentVariableTarget envTarget = EnvironmentVariableTarget.Process);
     string GetFolderPath(System.Environment.SpecialFolder specifalFolder);
     string ExpandEnvironmentVariables(string name);
-    string? GetMacAddress();
+    Task<string?> GetMacAddressAsync();
     IsDockerContainer IsDockerContainer { get; }
 }

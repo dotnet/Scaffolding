@@ -43,17 +43,17 @@ public class AddPackagesStep : ScaffoldStep
     /// <param name="context">The scaffolder context for the current operation.</param>
     /// <param name="cancellationToken">A cancellation token for the operation.</param>
     /// <returns>True if the packages were added successfully; otherwise, false.</returns>
-    public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public async override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         foreach (var packageName in PackageNames)
         {
-            DotnetCommands.AddPackage(
+            await DotnetCommands.AddPackageAsync(
                 packageName: packageName,
                 logger: _logger,
                 projectFile: ProjectPath,
                 includePrerelease: Prerelease);
         }
 
-        return Task.FromResult(true);
+        return true;
     }
 }

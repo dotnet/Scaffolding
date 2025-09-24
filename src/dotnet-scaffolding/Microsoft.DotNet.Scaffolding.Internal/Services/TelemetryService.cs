@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -64,7 +65,7 @@ internal class TelemetryService : ITelemetryService, IDisposable
         _trackEventTask.Wait();
     }
 
-    private void InitializeClient()
+    private async Task InitializeClient()
     {
         _telemetryConfig = TelemetryConfiguration.CreateDefault();
         _telemetryConfig.ConnectionString = TelemetryConstants.CONNECTION_STRING;
@@ -78,7 +79,7 @@ internal class TelemetryService : ITelemetryService, IDisposable
         _client.Context.Session.Id = _currentSessionId;
         _client.Context.Device.OperatingSystem = RuntimeEnvironment.OperatingSystem;
         //add common properties
-        _commonProperties = new TelemetryCommonProperties(_environmentService, _firstTimeUseNoticeSentinel.ProductFullVersion).GetTelemetryCommonProperties();
+        _commonProperties = await new TelemetryCommonProperties(_environmentService, _firstTimeUseNoticeSentinel.ProductFullVersion).GetTelemetryCommonPropertiesAsync();
     }
 
     private void TrackEventTask(

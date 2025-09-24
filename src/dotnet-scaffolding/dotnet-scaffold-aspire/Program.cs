@@ -63,7 +63,7 @@ storage.WithCategory("Aspire")
 var runner = builder.Build();
 var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
 telemetryWrapper?.ConfigureFirstTimeTelemetry();
-runner.RunAsync(args).Wait();
+await runner.RunAsync(args);
 telemetryWrapper?.Flush();
 
 static void ConfigureServices(IServiceCollection services)

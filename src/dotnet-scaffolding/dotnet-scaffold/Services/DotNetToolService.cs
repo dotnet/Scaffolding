@@ -42,14 +42,14 @@ internal class DotNetToolService : IDotNetToolService
     /// <param name="dotnetTool">The .NET tool information.</param>
     /// <param name="envVars">Optional environment variables.</param>
     /// <returns>List of <see cref="CommandInfo"/> objects, or an empty list if none found.</returns>
-    public List<CommandInfo> GetCommands(DotNetToolInfo dotnetTool, IDictionary<string, string>? envVars = null)
+    public async Task<List<CommandInfo>> GetCommandsAsync(DotNetToolInfo dotnetTool, IDictionary<string, string>? envVars = null)
     {
         List<CommandInfo>? commands = null;
         var runner = dotnetTool.IsGlobalTool ?
             DotnetCliRunner.Create(dotnetTool.Command, ["get-commands"], envVars) :
             DotnetCliRunner.CreateDotNet(dotnetTool.Command, ["get-commands"], envVars);
 
-        var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
+        (int exitCode, string? stdOut, _) = await runner.ExecuteAndCaptureOutputAsync();
         if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
         {
             try
@@ -72,13 +72,13 @@ internal class DotNetToolService : IDotNetToolService
     /// <param name="componentName">The name of the component/tool.</param>
     /// <param name="version">Optional version string.</param>
     /// <returns>The matching <see cref="DotNetToolInfo"/>, or null if not found.</returns>
-    public DotNetToolInfo? GetDotNetTool(string? componentName, string? version = null)
+    public async Task<DotNetToolInfo?> GetDotNetToolAsync(string? componentName, string? version = null)
     {
         if (string.IsNullOrEmpty(componentName))
         {
             return null;
         }
-        var dotnetTools = GetDotNetTools();
+        var dotnetTools = await GetDotNetToolsAsync();
         var matchingTools = dotnetTools.Where(x =>
             x.PackageName.Equals(componentName, StringComparison.OrdinalIgnoreCase) ||
             x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
@@ -99,11 +99,11 @@ internal class DotNetToolService : IDotNetToolService
     /// <param name="components">Optional list of components to query. If null, all tools are queried.</param>
     /// <param name="envVars">Optional environment variables.</param>
     /// <returns>List of key-value pairs of tool command and <see cref="CommandInfo"/>.</returns>
-    public IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null)
+    public async Task<IList<KeyValuePair<string, CommandInfo>>> GetAllCommandsParallelAsync(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null)
     {
         if (components is null || components.Count == 0)
         {
-            components = GetDotNetTools(refresh: true, envVars);
+            components = await GetDotNetToolsAsync(refresh: true, envVars);
         }
 
         //if any local tools are present, we need to restore them first
@@ -112,7 +112,7 @@ internal class DotNetToolService : IDotNetToolService
         if (anyLocalTools)
         {
             var runner = DotnetCliRunner.CreateDotNet("tool", ["restore"], envVars);
-            runner.ExecuteAndCaptureOutput(out _, out _);
+            await runner.ExecuteAndCaptureOutputAsync();
         }
 
         var options = new ParallelOptions
@@ -121,9 +121,9 @@ internal class DotNetToolService : IDotNetToolService
         };
 
         var commands = new ConcurrentBag<KeyValuePair<string, CommandInfo>>();
-        Parallel.ForEach(components, options, dotnetTool =>
+        IEnumerable<Task> commandTasks = components.Select(async dotnetTool =>
         {
-            var commandInfo = GetCommands(dotnetTool, envVars);
+            List<CommandInfo> commandInfo = await GetCommandsAsync(dotnetTool, envVars);
             if (commandInfo != null)
             {
                 foreach (var cmd in commandInfo)
@@ -132,6 +132,7 @@ internal class DotNetToolService : IDotNetToolService
                 }
             }
         });
+        await Task.WhenAll(commandTasks);
 
         return commands.ToList();
     }
@@ -146,7 +147,7 @@ internal class DotNetToolService : IDotNetToolService
     /// <param name="addSources">Optional additional NuGet sources.</param>
     /// <param name="configFile">Optional NuGet config file path.</param>
     /// <returns>True if installation succeeded, otherwise false.</returns>
-    public bool InstallDotNetTool(string toolName, string? version = null, bool global = false, bool prerelease = false, string[]? addSources = null, string? configFile = null)
+    public async Task<bool> InstallDotNetToolAsync(string toolName, string? version = null, bool global = false, bool prerelease = false, string[]? addSources = null, string? configFile = null)
     {
         if (string.IsNullOrEmpty(toolName))
         {
@@ -190,7 +191,7 @@ internal class DotNetToolService : IDotNetToolService
         }
 
         var runner = DotnetCliRunner.CreateDotNet("tool", installParams);
-        var exitCode = runner.ExecuteAndCaptureOutput(out _, out _);
+        (int exitCode, _, _) = await runner.ExecuteAndCaptureOutputAsync();
         return exitCode == 0;
     }
 
@@ -200,7 +201,7 @@ internal class DotNetToolService : IDotNetToolService
     /// <param name="toolName">The name of the tool to uninstall.</param>
     /// <param name="global">Whether to uninstall the tool globally.</param>
     /// <returns>True if uninstallation succeeded, otherwise false.</returns>
-    public bool UninstallDotNetTool(string toolName, bool global = false)
+    public async Task<bool> UninstallDotNetToolAsync(string toolName, bool global = false)
     {
         if (string.IsNullOrEmpty(toolName))
         {
@@ -214,7 +215,7 @@ internal class DotNetToolService : IDotNetToolService
         }
 
         var runner = DotnetCliRunner.CreateDotNet("tool", uninstallParams);
-        var exitCode = runner.ExecuteAndCaptureOutput(out _, out _);
+        (int exitCode, _, _) = await runner.ExecuteAndCaptureOutputAsync();
         return exitCode == 0;
     }
 
@@ -224,7 +225,7 @@ internal class DotNetToolService : IDotNetToolService
     /// <param name="refresh">Whether to refresh the tool list.</param>
     /// <param name="envVars">Optional environment variables.</param>
     /// <returns>List of <see cref="DotNetToolInfo"/> objects.</returns>
-    public IList<DotNetToolInfo> GetDotNetTools(bool refresh = false, IDictionary<string, string> ? envVars = null)
+    public async Task<IList<DotNetToolInfo>> GetDotNetToolsAsync(bool refresh = false, IDictionary<string, string> ? envVars = null)
     {
         if (refresh || _dotNetTools.Count == 0)
         {
@@ -232,8 +233,8 @@ internal class DotNetToolService : IDotNetToolService
             var dotnetToolList = new List<DotNetToolInfo>();
             var runner = DotnetCliRunner.CreateDotNet("tool", ["list", "-g"], envVars);
             var localRunner = DotnetCliRunner.CreateDotNet("tool", ["list"], envVars);
-            var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
-            var localExitCode = localRunner.ExecuteAndCaptureOutput(out var localStdOut, out var localStdErr);
+            (int exitCode, string? stdOut, _) = await runner.ExecuteAndCaptureOutputAsync();
+            (int localExitCode, string? localStdOut, string? localStdErr) = await localRunner.ExecuteAndCaptureOutputAsync();
             // Parse through local dotnet tools first.
             if (localExitCode == 0 && !string.IsNullOrEmpty(localStdOut))
             {

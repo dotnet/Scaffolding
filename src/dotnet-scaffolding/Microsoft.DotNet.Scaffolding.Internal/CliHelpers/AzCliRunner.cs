@@ -11,13 +11,23 @@ namespace Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 /// </summary>
 internal class AzCliRunner
 {
+    public static async Task<AzCliRunner> CreateAsync(string? commandName = null)
+    {
+        string resolvedCommandName = string.IsNullOrEmpty(commandName) ? await FindAzureCLIPathAsync() : commandName!;
+        return new AzCliRunner(resolvedCommandName);
+    }
+
     public static AzCliRunner Create(string? commandName = null)
     {
+        // Synchronous fallback, does not resolve CLI path
         return new AzCliRunner(commandName);
     }
 
-    public int RunAzCli(string arguments, out string? stdOut, out string? stdErr)
+    public async Task<(int errorCode, string? stdOut, string? stdErr)> RunAzCliAsync(string arguments)
     {
+        string? stdOut = null;
+        string? stdErr = null;
+
         using var outStream = new ProcessOutputStreamReader();
         using var errStream = new ProcessOutputStreamReader();
 
@@ -25,14 +35,14 @@ internal class AzCliRunner
         errStream.Capture();
 
         var psi = _psi;
-        psi.Arguments = arguments;
+        psi?.Arguments = arguments;
 
         string errorMessage = string.Empty;
         string output = string.Empty;
 
         Process process = new Process
         {
-            StartInfo = psi,
+            StartInfo = psi!,
             EnableRaisingEvents = true
         };
 
@@ -44,11 +54,11 @@ internal class AzCliRunner
         {
             stdOut = string.Empty;
             stdErr = ex.Message;
-            return -1;
+            return (-1, stdOut, stdErr);
         }
 
-        var taskOut = outStream.BeginRead(process.StandardOutput);
-        var taskErr = errStream.BeginRead(process.StandardError);
+        Task taskOut = outStream.BeginRead(process.StandardOutput);
+        Task taskErr = errStream.BeginRead(process.StandardError);
 
         // Wait for process to exit with a timeout (e.g., 30 seconds)
         const int timeoutMilliseconds = 30000;
@@ -66,13 +76,12 @@ internal class AzCliRunner
             }
         }
 
-        taskOut.Wait();
-        taskErr.Wait();
+        await Task.WhenAll(taskOut, taskErr);
 
         stdOut = outStream.CapturedOutput?.Trim();
         stdErr = errStream.CapturedOutput;
 
-        return process.ExitCode;
+        return (process.ExitCode, stdOut, stdErr);
     }
 
 
@@ -83,16 +92,16 @@ internal class AzCliRunner
     public int ExecuteInteractive()
     {
         // For interactive processes, we shouldn't redirect standard input/output
-        _psi.RedirectStandardInput = false;
-        _psi.RedirectStandardOutput = false;
-        _psi.RedirectStandardError = false;
+        _psi?.RedirectStandardInput = false;
+        _psi?.RedirectStandardOutput = false;
+        _psi?.RedirectStandardError = false;
 
         // Use shell execute to allow browser windows to be launched
-        _psi.UseShellExecute = true;
+        _psi?.UseShellExecute = true;
 
         using var process = new Process
         {
-            StartInfo = _psi
+            StartInfo = _psi!
         };
 
         try
@@ -108,13 +117,11 @@ internal class AzCliRunner
     }
 
 
-    internal ProcessStartInfo _psi;
-
-    internal string _commandName;
+    internal ProcessStartInfo? _psi = null;
+    internal string _commandName = string.Empty;
     private AzCliRunner(string? commandName = null)
     {
-        _commandName = string.IsNullOrEmpty(commandName) ? FindAzureCLIPath() : commandName;
-
+        _commandName = commandName ?? string.Empty;
         _psi = new ProcessStartInfo(_commandName)
         {
             CreateNoWindow = true,
@@ -125,7 +132,7 @@ internal class AzCliRunner
         };
     }
 
-    private static string FindAzureCLIPath()
+    private static async Task<string> FindAzureCLIPathAsync()
     {
         try
         {
@@ -134,7 +141,7 @@ internal class AzCliRunner
             string searchArg = Environment.OSVersion.Platform == PlatformID.Win32NT ? "az.cmd" : "az";
 
             var runner = DotnetCliRunner.Create(whereCommand, new[] { searchArg });
-            int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var _);
+            (int exitCode, string? stdOut, _) = await runner.ExecuteAndCaptureOutputAsync();
 
             if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
             {

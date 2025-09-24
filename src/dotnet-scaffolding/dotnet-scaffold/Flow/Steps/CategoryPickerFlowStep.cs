@@ -43,36 +43,36 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         }
 
         /// <inheritdoc/>
-        public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
+        public async ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var settings = context.GetCommandSettings();
             var componentName = settings?.ComponentName;
             var commandName = settings?.CommandName;
             string? displayCategory = null;
-            var dotnetTools = _dotnetToolService.GetDotNetTools();
+            IList<DotNetToolInfo> dotnetTools = await _dotnetToolService.GetDotNetToolsAsync();
             var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
 
             CategoryDiscovery categoryDiscovery = new(_dotnetToolService, dotnetToolComponent);
-            displayCategory = categoryDiscovery.Discover(context);
+            displayCategory = await categoryDiscovery.DiscoverAsync(context);
             if (categoryDiscovery.State.IsNavigation())
             {
-                return new ValueTask<FlowStepResult>(new FlowStepResult { State = categoryDiscovery.State });
+                return new FlowStepResult { State = categoryDiscovery.State };
             }
 
             if (string.IsNullOrEmpty(displayCategory))
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Unable to find any component categories."));
+                return FlowStepResult.Failure("Unable to find any component categories.");
             }
             else
             {
                 SelectChosenCategory(context, displayCategory);
             }
 
-            return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+            return FlowStepResult.Success;
         }
 
         /// <inheritdoc/>
-        public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
+        public async ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var settings = context.GetCommandSettings();
             var envVars = context.GetTelemetryEnvironmentVariables();
@@ -82,27 +82,27 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             // Check if user input included a component name.
             // If included, check for a command name, and get the CommandInfo object.
-            var dotnetTools = _dotnetToolService.GetDotNetTools();
+            IList<DotNetToolInfo> dotnetTools = await _dotnetToolService.GetDotNetToolsAsync();
             var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             if (dotnetToolComponent != null)
             {
-                var allCommands = _dotnetToolService.GetCommands(dotnetToolComponent, envVars);
+                List<CommandInfo> allCommands = await _dotnetToolService.GetCommandsAsync(dotnetToolComponent, envVars);
                 commandInfo = allCommands.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
             }
             else
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("No component (dotnet tool) provided."));
+                return FlowStepResult.Failure("No component (dotnet tool) provided.");
             }
 
             if (commandInfo is null)
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Invalid or empty command provided for component '{componentName}'"));
+                return FlowStepResult.Failure($"Invalid or empty command provided for component '{componentName}'");
             }
 
             SelectComponent(context, dotnetToolComponent);
             SelectCommand(context, commandInfo);
             SelectCategories(context, commandInfo.DisplayCategories);
-            return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+            return FlowStepResult.Success;
         }
 
         /// <summary>

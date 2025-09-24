@@ -27,7 +27,7 @@ internal class ToolInstallCommand(IToolManager toolManager) : Command<ToolInstal
     public override int Execute([NotNull] CommandContext context, [NotNull] ToolInstallSettings settings)
     {
         // Add the tool using the provided settings.
-        _toolManager.AddTool(settings.PackageName, settings.AddSources, settings.ConfigFile, settings.Prerelease, settings.Version, settings.Global);
+        _toolManager.AddToolAsync(settings.PackageName, settings.AddSources, settings.ConfigFile, settings.Prerelease, settings.Version, settings.Global).Wait();
         return 0;
     }
 }

@@ -44,13 +44,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         }
         
         /// <inheritdoc />
-        public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+        public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
             if (ProjectPath is not null)
             {
                 var runner = DotnetCliRunner.CreateDotNet("reference", new[] { "list", "--project", ProjectPath });
 
-                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+                (int exitCode, string? stdOut, string? stdErr) = await runner.ExecuteAndCaptureOutputAsync();
 
                 if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
                 {
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                                 var fullPath = Path.GetFullPath(reference, baseDirectory);
 
                                 var projectRunner = DotnetCliRunner.CreateDotNet("package", new[] { "list", "--project", fullPath, "--format", "json" });
-                                int packageExitCode = projectRunner.ExecuteAndCaptureOutput(out var packageStdOut, out var packageStdErr);
+                                (int packageExitCode, string? packageStdOut, string? packageStdErr) = await projectRunner.ExecuteAndCaptureOutputAsync();
 
                                 if (packageExitCode == 0 && !string.IsNullOrEmpty(packageStdOut))
                                 {
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                                                                     context.Properties["IsBlazorWasmProject"] = true;
                                                                     context.Properties["BlazorWasmClientProjectPath"] = fullPath;
                                                                     _logger.LogInformation($"Detected Blazor WebAssembly project via package reference: {id}");
-                                                                    return Task.FromResult(true);
+                                                                    return true;
                                                                 }
                                                             }
                                                         }
@@ -108,20 +108,20 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                         }
                         // Detected Blazor WebAssembly project
                         context.Properties["IsBlazorWasmProject"] = false;
-                        return Task.FromResult(true);
+                        return true;
 
                     }
                     else
                     {
                         context.Properties["IsBlazorWasmProject"] = false;
-                        return Task.FromResult(true);
+                        return true;
 
                     }
                 }
 
             }
 
-            return Task.FromResult(false);
+            return false;
         }
     }
 }

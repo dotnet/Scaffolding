@@ -32,11 +32,11 @@ internal class ToolManager(
     /// <param name="version">Optional version to install.</param>
     /// <param name="global">Whether to install the tool globally.</param>
     /// <returns>True if the tool was installed and added to the manifest; otherwise, false.</returns>
-    public bool AddTool(string packageName, string[] addSources, string? configFile, bool prerelease, string? version, bool global)
+    public async Task<bool> AddToolAsync(string packageName, string[] addSources, string? configFile, bool prerelease, string? version, bool global)
     {
         _logger.LogInformation("Installing {packageName}...", packageName);
 
-        if (_dotnetToolService.GetDotNetTool(packageName) is not null || _dotnetToolService.InstallDotNetTool(packageName, version, global: global, prerelease, addSources, configFile))
+        if (await _dotnetToolService.GetDotNetToolAsync(packageName) is not null || await _dotnetToolService.InstallDotNetToolAsync(packageName, version, global: global, prerelease, addSources, configFile))
         {
             if (_toolManifestService.AddTool(packageName))
             {
@@ -62,13 +62,13 @@ internal class ToolManager(
     /// <param name="packageName">The name of the tool package to remove.</param>
     /// <param name="global">Whether the tool is installed globally.</param>
     /// <returns>True if the tool was removed and uninstalled; otherwise, false.</returns>
-    public bool RemoveTool(string packageName, bool global)
+    public async Task<bool> RemoveToolAsync(string packageName, bool global)
     {
         _logger.LogInformation("Uninstalling {packageName}...", packageName);
 
         if (_toolManifestService.RemoveTool(packageName))
         {
-            if (_dotnetToolService.UninstallDotNetTool(packageName, global))
+            if (await _dotnetToolService.UninstallDotNetToolAsync(packageName, global))
             {
                 _logger.LogInformation("Tool {packageName} removed successfully", packageName);
                 return true;

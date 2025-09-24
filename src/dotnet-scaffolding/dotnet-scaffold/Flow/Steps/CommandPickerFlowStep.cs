@@ -50,7 +50,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
         }
 
         /// <inheritdoc/>
-        public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
+        public async ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var settings = context.GetCommandSettings();
             var componentName = settings?.ComponentName;
@@ -58,24 +58,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             // KeyValuePair with key being name of the DotNetToolInfo (component) and value being the CommandInfo supported by that component.
             KeyValuePair<string, CommandInfo>? commandInfoKvp = null;
             CommandInfo? commandInfo = null;
-            var dotnetTools = _dotnetToolService.GetDotNetTools();
+            IList<DotNetToolInfo> dotnetTools = await _dotnetToolService.GetDotNetToolsAsync();
             var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             CommandDiscovery commandDiscovery = new(_dotnetToolService, dotnetToolComponent);
-            commandInfoKvp = commandDiscovery.Discover(context);
+            commandInfoKvp = await commandDiscovery.DiscoverAsync(context);
             if (commandDiscovery.State.IsNavigation())
             {
-                return new ValueTask<FlowStepResult>(new FlowStepResult { State = commandDiscovery.State });
+                return new FlowStepResult { State = commandDiscovery.State };
             }
 
             if (commandInfoKvp is null || !commandInfoKvp.HasValue || commandInfoKvp.Value.Value is null || string.IsNullOrEmpty(commandInfoKvp.Value.Key))
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Unable to find any commands."));
+                return FlowStepResult.Failure("Unable to find any commands.");
             }
             else
             {
                 commandInfo = commandInfoKvp.Value.Value;
                 componentName = commandInfoKvp.Value.Key;
-                dotnetToolComponent ??= _dotnetToolService.GetDotNetTool(componentName);
+                dotnetToolComponent ??= await _dotnetToolService.GetDotNetToolAsync(componentName);
                 if (dotnetToolComponent != null)
                 {
                     SelectComponent(context, dotnetToolComponent);
@@ -87,14 +87,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var commandFirstStep = GetFirstParameterBasedStep(commandInfo);
             if (commandFirstStep is null)
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Failed to get/parse parameters for command '{commandInfo.Name}'"));
+                return FlowStepResult.Failure($"Failed to get/parse parameters for command '{commandInfo.Name}'");
             }
 
-            return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
+            return new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } };
         }
 
         /// <inheritdoc/>
-        public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
+        public async ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var settings = context.GetCommandSettings();
             var envVars = context.GetTelemetryEnvironmentVariables();
@@ -104,32 +104,32 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
             // Check if user input included a component name.
             // If included, check for a command name, and get the CommandInfo object.
-            var dotnetTools = _dotnetToolService.GetDotNetTools();
+            IList<DotNetToolInfo> dotnetTools = await _dotnetToolService.GetDotNetToolsAsync();
             var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             if (dotnetToolComponent != null)
             {
-                var allCommands = _dotnetToolService.GetCommands(dotnetToolComponent, envVars);
+                List<CommandInfo> allCommands = await _dotnetToolService.GetCommandsAsync(dotnetToolComponent, envVars);
                 commandInfo = allCommands.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
             }
             else
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("No component (dotnet tool) provided."));
+                return FlowStepResult.Failure("No component (dotnet tool) provided.");
             }
 
             if (commandInfo is null)
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Invalid or empty command provided for component '{componentName}'"));
+                return FlowStepResult.Failure($"Invalid or empty command provided for component '{componentName}'");
             }
 
             var commandFirstStep = GetFirstParameterBasedStep(commandInfo);
             if (commandFirstStep is null)
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Failed to get/parse parameters for command '{commandInfo.Name}'"));
+                return FlowStepResult.Failure($"Failed to get/parse parameters for command '{commandInfo.Name}'");
             }
 
             SelectComponent(context, dotnetToolComponent);
             SelectCommand(context, commandInfo);
-            return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
+            return new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } };
         }
 
         /// <summary>

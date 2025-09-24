@@ -32,6 +32,14 @@ internal static class CommandLineExtensions
             commandInfo.Add(scaffolder.ToCommandInfo());
         }
 
+        if (scaffoldRunner.Options is not null)
+        {
+            foreach (ScaffolderOption option in scaffoldRunner.Options)
+            {
+                rootCommand.AddOption(option.ToCliOption());
+            }
+        }
+
         rootCommand.AddGetCommandsCommand(commandInfo);
 
         ((ScaffoldRunner)scaffoldRunner).RootCommand = rootCommand;

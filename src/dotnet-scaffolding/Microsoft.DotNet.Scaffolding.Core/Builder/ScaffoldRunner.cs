@@ -4,6 +4,7 @@
 using System.CommandLine;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.Extensions.Logging;
+using System.CommandLine.Invocation;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -17,6 +18,12 @@ internal class ScaffoldRunner(ILogger<ScaffoldRunner> logger) : IScaffoldRunner
 
     /// <inheritdoc/>
     public IEnumerable<IScaffolder>? Scaffolders { get; set; }
+
+    /// <summary>
+    /// Options for the "dotnet-scaffold" tool
+    /// </summary>
+    public IEnumerable<ScaffolderOption>? Options { get; set; }
+
     /// <summary>
     /// Gets or sets the root command for the CLI.
     /// </summary>
@@ -32,5 +39,19 @@ internal class ScaffoldRunner(ILogger<ScaffoldRunner> logger) : IScaffoldRunner
 
         // Invokes the root command with the provided arguments
         await RootCommand.InvokeAsync(args);
+    }
+
+    /// <summary>
+    /// Adds a handler to the RootCommand doing the action passed in the handle parameter.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"></exception>
+    public void AddHandler(Func<InvocationContext, Task> handle)
+    {
+        if (RootCommand is null)
+        {
+            throw new InvalidOperationException("RootCommand is not set.");
+        }
+
+        RootCommand.SetHandler(handle);
     }
 }

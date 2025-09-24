@@ -5,6 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.CommandLine;
 using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.CommandLine.Invocation;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -19,6 +20,8 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     private readonly LoggingBuilder _logging;
     // List of scaffold builders
     private readonly List<ScaffoldBuilder> _scaffoldBuilders = [];
+
+    private List<ScaffolderOption>? _options;
 
     private IServiceProvider? _appServices;
     private bool _built;
@@ -65,6 +68,9 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
 
         var scaffoldRunner = _appServices.GetRequiredService<IScaffoldRunner>();
         scaffoldRunner.Scaffolders = Scaffolders.Select(s => s.Build(_appServices));
+
+        scaffoldRunner.Options = _options;
+
         scaffoldRunner.BuildRootCommand();
         return scaffoldRunner;
     }
@@ -76,6 +82,35 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
         _scaffoldBuilders.Add(scaffoldBuilder);
         return scaffoldBuilder;
     }
+
+    /// <summary>
+    /// Add a new <see cref="ScaffolderOption"/> to the builder.
+    /// </summary>
+    public void AddOption(ScaffolderOption option)
+    {
+        if (_options is null)
+        {
+            _options = [option];
+        }
+        else
+        {
+            _options.Add(option);
+        }
+    }
+
+    /// <summary>
+    /// Adds a handler to the RootCommand doing the action passed in the handle parameter.
+    /// </summary>
+    public void AddHandler(Func<InvocationContext, Task> handle)
+    {
+        if (_appServices is null)
+        {
+            return;
+        }
+        IScaffoldRunner scaffoldRunner = _appServices.GetRequiredService<IScaffoldRunner>();
+        scaffoldRunner.AddHandler(handle);
+    }
+
 
     // Adds default services required for scaffolding
     private void AddDefaultServices()

@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 using Microsoft.DotNet.Scaffolding.Internal.Services;
-using Microsoft.DotNet.Tools.Scaffold.Flow;
-using Microsoft.DotNet.Tools.Scaffold.Services;
+using Microsoft.DotNet.Tools.Scaffold.Interactive.Flow;
+using Microsoft.DotNet.Tools.Scaffold.Interactive.Services;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Command;
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Command;
 
 /// <summary>
 /// Provides a base class for scaffold commands, handling flow execution and telemetry.

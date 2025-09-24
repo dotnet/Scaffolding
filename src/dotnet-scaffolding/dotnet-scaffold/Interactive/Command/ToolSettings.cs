@@ -3,7 +3,7 @@
 
 using Spectre.Console.Cli;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Command
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Command
 {
     /// <summary>
     /// Base settings class for tool-related scaffold commands.

@@ -1,12 +1,13 @@
 using System.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
-using Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
+using Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps;
+using Microsoft.DotNet.Tools.Scaffold.Interactive.Services;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Command;
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Command;
 
 /// <summary>
 /// Implements the main scaffold command, orchestrating the flow of user interaction and code generation.

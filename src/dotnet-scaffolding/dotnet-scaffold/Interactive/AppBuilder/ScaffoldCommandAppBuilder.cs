@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 using Microsoft.DotNet.Scaffolding.Internal.Services;
-using Microsoft.DotNet.Tools.Scaffold.AppBuilder;
-using Microsoft.DotNet.Tools.Scaffold.Command;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.Interactive.Command;
+using Microsoft.DotNet.Tools.Scaffold.Interactive.Services;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
 
-namespace Microsoft.DotNet.Tools.Scaffold;
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.AppBuilder;
 
 /// <summary>
 /// Builds and configures the <see cref="ScaffoldCommandApp"/>, including service registration and command setup.

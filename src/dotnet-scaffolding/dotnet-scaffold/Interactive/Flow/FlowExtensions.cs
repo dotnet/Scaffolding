@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
-using Microsoft.DotNet.Tools.Scaffold.Command;
+using Microsoft.DotNet.Tools.Scaffold.Interactive.Command;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Spectre.Console.Flow;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Flow
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow
 {
     /// <summary>
     /// Extension methods for <see cref="IFlowContext"/> to simplify retrieval of common scaffolding context values.

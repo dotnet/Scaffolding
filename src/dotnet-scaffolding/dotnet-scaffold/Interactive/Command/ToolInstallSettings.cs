@@ -4,7 +4,7 @@
 using System.ComponentModel;
 using Spectre.Console.Cli;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Command;
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Command;
 
 /// <summary>
 /// Represents the settings used for installing a tool via the scaffold CLI.

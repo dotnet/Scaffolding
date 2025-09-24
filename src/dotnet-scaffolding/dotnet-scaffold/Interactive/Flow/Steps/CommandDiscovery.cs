@@ -5,7 +5,7 @@ using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console;
 using Spectre.Console.Flow;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps;
 
 /// <summary>
 /// Handles the discovery and selection of a scaffolding command for a given component or category.

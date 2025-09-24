@@ -2,7 +2,7 @@
 
 using Spectre.Console.Flow;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Services;
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Services;
 
 /// <summary>
 /// Provides functionality to create and manage interactive flows for CLI operations.

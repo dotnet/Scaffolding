@@ -1,44 +1,51 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.Logging;
 using Spectre.Console.Flow;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
 {
     /// <summary>
     /// IFlowStep that deals with the selection of the component (DotNetToolInfo) and the associated command (CommandInfo).
     /// If provided by the user, verifies if the component is installed and the command is supported.
     /// </summary>
-    internal class CategoryPickerFlowStep : IFlowStep
+    internal class CommandPickerFlowStep : IFlowStep
     {
         private readonly ILogger _logger;
         private readonly IDotNetToolService _dotnetToolService;
+        private readonly IEnvironmentService _environmentService;
+        private readonly IFileSystem _fileSystem;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CategoryPickerFlowStep"/> class.
+        /// Initializes a new instance of the <see cref="CommandPickerFlowStep"/> class.
         /// </summary>
-        public CategoryPickerFlowStep(ILogger logger, IDotNetToolService dotnetToolService)
+        public CommandPickerFlowStep(
+            ILogger logger,
+            IDotNetToolService dotnetToolService,
+            IEnvironmentService environmentService,
+            IFileSystem fileSystem)
         {
             _logger = logger;
             _dotnetToolService = dotnetToolService;
+            _environmentService = environmentService;
+            _fileSystem = fileSystem;
         }
 
         /// <inheritdoc/>
-        public string Id => nameof(CategoryPickerFlowStep);
+        public string Id => nameof(CommandPickerFlowStep);
         /// <inheritdoc/>
-        public string DisplayName => "Scaffolding Category";
+        public string DisplayName => "Command Name";
 
         /// <inheritdoc/>
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            context.Unset(FlowContextProperties.ScaffoldingCategories);
-            context.Unset(FlowContextProperties.ChosenCategory);
             context.Unset(FlowContextProperties.ComponentName);
             context.Unset(FlowContextProperties.ComponentObj);
             context.Unset(FlowContextProperties.CommandName);
-            context.Unset(FlowContextProperties.CommandObj); 
+            context.Unset(FlowContextProperties.CommandObj);
             return new ValueTask();
         }
 
@@ -48,27 +55,42 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             var settings = context.GetCommandSettings();
             var componentName = settings?.ComponentName;
             var commandName = settings?.CommandName;
-            string? displayCategory = null;
+            // KeyValuePair with key being name of the DotNetToolInfo (component) and value being the CommandInfo supported by that component.
+            KeyValuePair<string, CommandInfo>? commandInfoKvp = null;
+            CommandInfo? commandInfo = null;
             var dotnetTools = _dotnetToolService.GetDotNetTools();
             var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
-
-            CategoryDiscovery categoryDiscovery = new(_dotnetToolService, dotnetToolComponent);
-            displayCategory = categoryDiscovery.Discover(context);
-            if (categoryDiscovery.State.IsNavigation())
+            CommandDiscovery commandDiscovery = new(_dotnetToolService, dotnetToolComponent);
+            commandInfoKvp = commandDiscovery.Discover(context);
+            if (commandDiscovery.State.IsNavigation())
             {
-                return new ValueTask<FlowStepResult>(new FlowStepResult { State = categoryDiscovery.State });
+                return new ValueTask<FlowStepResult>(new FlowStepResult { State = commandDiscovery.State });
             }
 
-            if (string.IsNullOrEmpty(displayCategory))
+            if (commandInfoKvp is null || !commandInfoKvp.HasValue || commandInfoKvp.Value.Value is null || string.IsNullOrEmpty(commandInfoKvp.Value.Key))
             {
-                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Unable to find any component categories."));
+                return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Unable to find any commands."));
             }
             else
             {
-                SelectChosenCategory(context, displayCategory);
+                commandInfo = commandInfoKvp.Value.Value;
+                componentName = commandInfoKvp.Value.Key;
+                dotnetToolComponent ??= _dotnetToolService.GetDotNetTool(componentName);
+                if (dotnetToolComponent != null)
+                {
+                    SelectComponent(context, dotnetToolComponent);
+                }
+
+                SelectCommand(context, commandInfo);
             }
 
-            return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+            var commandFirstStep = GetFirstParameterBasedStep(commandInfo);
+            if (commandFirstStep is null)
+            {
+                return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Failed to get/parse parameters for command '{commandInfo.Name}'"));
+            }
+
+            return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
         }
 
         /// <inheritdoc/>
@@ -99,34 +121,66 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Invalid or empty command provided for component '{componentName}'"));
             }
 
+            var commandFirstStep = GetFirstParameterBasedStep(commandInfo);
+            if (commandFirstStep is null)
+            {
+                return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Failed to get/parse parameters for command '{commandInfo.Name}'"));
+            }
+
             SelectComponent(context, dotnetToolComponent);
             SelectCommand(context, commandInfo);
-            SelectCategories(context, commandInfo.DisplayCategories);
-            return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+            return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
         }
 
         /// <summary>
-        /// Sets the available categories in the flow context.
+        /// Wrapper to get the first ParameterBasedFlowStep. Uses 'BuildParameterFlowSteps'.
         /// </summary>
-        private void SelectCategories(IFlowContext context, List<string> categories)
+        internal ParameterBasedFlowStep? GetFirstParameterBasedStep(CommandInfo commandInfo)
         {
-            context.Set(new FlowProperty(
-                FlowContextProperties.ScaffoldingCategories,
-                categories,
-                "Scaffolding Categories",
-                isVisible: false));
+            ParameterBasedFlowStep? firstParameterStep = null;
+            if (commandInfo.Parameters != null && commandInfo.Parameters.Length != 0)
+            {
+                firstParameterStep = BuildParameterFlowSteps([.. commandInfo.Parameters]);
+            }
+
+            return firstParameterStep;
         }
 
         /// <summary>
-        /// Sets the chosen category in the flow context.
+        /// Takes all the 'Parameter's, creates ParameterBasedFlowSteps, and connects them using 'NextStep'.
         /// </summary>
-        private void SelectChosenCategory(IFlowContext context, string category)
+        /// <returns>The first step from the connected ParameterBasedFlowSteps.</returns>
+        internal ParameterBasedFlowStep? BuildParameterFlowSteps(List<Parameter> parameters)
         {
-            context.Set(new FlowProperty(
-                FlowContextProperties.ChosenCategory,
-                category,
-                "Scaffolding Category",
-                isVisible: true));
+            ParameterBasedFlowStep? firstStep = null;
+            ParameterBasedFlowStep? previousStep = null;
+
+            foreach (var parameter in parameters)
+            {
+                var step = new ParameterBasedFlowStep(
+                    parameter,
+                    null,
+                    _environmentService,
+                    _fileSystem,
+                    _logger);
+                if (firstStep == null)
+                {
+                    // This is the first step
+                    firstStep = step;
+                }
+                else
+                {
+                    if (previousStep != null)
+                    {
+                        // Connect the previous step to this step
+                        previousStep.NextStep = step;
+                    }
+                }
+
+                previousStep = step;
+            }
+
+            return firstStep;
         }
 
         /// <summary>

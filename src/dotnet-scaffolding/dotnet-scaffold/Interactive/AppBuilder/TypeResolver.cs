@@ -2,7 +2,7 @@
 
 using Spectre.Console.Cli;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.AppBuilder;
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.AppBuilder;
 
 /// <summary>
 /// Resolves service types using the provided <see cref="IServiceProvider"/>.

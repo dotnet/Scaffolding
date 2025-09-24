@@ -8,7 +8,7 @@ using Microsoft.DotNet.Tools.Scaffold.Telemetry;
 using Spectre.Console;
 using Spectre.Console.Flow;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
 {
     /// <summary>
     /// IFlowStep where we gather all the parameter values, and then execute the chosen/given component (dotnet tool).

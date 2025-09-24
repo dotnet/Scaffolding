@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console.Cli;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Command;
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Command;
 
 /// <summary>
 /// Command to handle the installation of tools via the scaffold CLI.

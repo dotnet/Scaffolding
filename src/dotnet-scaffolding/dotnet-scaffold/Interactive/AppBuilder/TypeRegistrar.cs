@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 
 using Microsoft.DotNet.Scaffolding.Core.Logging;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.AppBuilder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AppBuilder;
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.AppBuilder;
 
 /// <summary>
 /// Provides a custom type registrar for dependency injection, used by Spectre.Console.Cli to resolve services.

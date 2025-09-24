@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Spectre.Console.Flow;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps;
+namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps;
 
 /// <summary>
 /// Startup flow step that performs first-time initialization, telemetry setup, and argument parsing.

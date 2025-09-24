@@ -1,10 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.CommandLine;
-using Microsoft.DotNet.Tools.Scaffold;
-using Microsoft.DotNet.Tools.Scaffold.Command;
+using Microsoft.DotNet.Tools.Scaffold.Interactive.AppBuilder;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
+using Microsoft.DotNet.Tools.Scaffold.Command;
 
 IScaffoldRunnerBuilder builder = Host.CreateScaffoldBuilder();
 

@@ -16,7 +16,7 @@ internal class FirstPartyComponentInitializer
     // Service for managing .NET CLI tools.
     private readonly IDotNetToolService _dotnetToolService;
     // List of required first-party tool package names.
-    private readonly List<string> _firstPartyTools = ["Microsoft.dotnet-scaffold-aspnet", "Microsoft.dotnet-scaffold-aspire"];
+    private readonly List<string> _firstPartyTools = ["Microsoft.dotnet-scaffold-aspnet"];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FirstPartyComponentInitializer"/> class.

@@ -3,7 +3,6 @@
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
-
 /// <summary>
 /// Telemetry event for tracking the result of the ValidateOptionsStep.
 /// </summary>

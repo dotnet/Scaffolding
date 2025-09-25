@@ -17,7 +17,7 @@ internal class ScaffoldRunner(ILogger<ScaffoldRunner> logger) : IScaffoldRunner
     private readonly ILogger<ScaffoldRunner> _logger = logger;
 
     /// <inheritdoc/>
-    public IEnumerable<IScaffolder>? Scaffolders { get; set; }
+    public IReadOnlyDictionary<ScaffolderCatagory, IEnumerable<IScaffolder>>? Scaffolders { get; set; }
 
     /// <summary>
     /// Options for the "dotnet-scaffold" tool

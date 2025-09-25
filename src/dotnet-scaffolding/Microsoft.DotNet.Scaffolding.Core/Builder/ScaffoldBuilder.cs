@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 /// <summary>
 /// Builder for configuring and creating a scaffolder with options and steps.
 /// </summary>
-internal class ScaffoldBuilder(string name) : IScaffoldBuilder
+public class ScaffoldBuilder(string name) : IScaffoldBuilder
 {
     // Default category for scaffolders
     private const string DEFAULT_CATEGORY = ScaffolderConstants.DEFAULT_CATEGORY;

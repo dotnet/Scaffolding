@@ -4,6 +4,7 @@ using System.CommandLine;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.AppBuilder;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Tools.Scaffold.Command;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -28,7 +29,7 @@ Option nonInteractiveOption = nonInteractiveScaffoldOption.ToCliOption();
 CreateOptions(out var cachingTypeOption, out var databaseTypeOption, out var storageTypeOption,
               out var appHostProjectOption, out var projectOption, out var prereleaseOption);
 
-var caching = builder.AddScaffolder("caching");
+var caching = builder.AddScaffolder(ScaffolderCatagory.Aspire, "caching");
 caching.WithCategory("Aspire")
        .WithDescription("Modified Aspire project to make it caching ready.")
        .WithOption(cachingTypeOption)
@@ -42,7 +43,7 @@ caching.WithCategory("Aspire")
        .WithCachingAddPackageSteps()
        .WithCachingCodeModificationSteps();
 
-var database = builder.AddScaffolder("database");
+var database = builder.AddScaffolder(ScaffolderCatagory.Aspire, "database");
 database.WithCategory("Aspire")
         .WithDescription("Modifies Aspire project to make it database ready.")
         .WithOption(databaseTypeOption)
@@ -58,7 +59,7 @@ database.WithCategory("Aspire")
         .WithConnectionStringStep()
         .WithDatabaseCodeModificationSteps();
 
-var storage = builder.AddScaffolder("storage");
+var storage = builder.AddScaffolder(ScaffolderCatagory.Aspire, "storage");
 storage.WithCategory("Aspire")
        .WithDescription("Modifies Aspire project to make it storage ready.")
        .WithOption(storageTypeOption)

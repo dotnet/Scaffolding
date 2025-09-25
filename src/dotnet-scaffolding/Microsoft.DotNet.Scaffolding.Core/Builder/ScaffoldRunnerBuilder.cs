@@ -6,6 +6,7 @@ using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.CommandLine.Invocation;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -19,7 +20,7 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     // Logging builder for configuring logging
     private readonly LoggingBuilder _logging;
     // List of scaffold builders
-    private readonly List<ScaffoldBuilder> _scaffoldBuilders = [];
+    private readonly Dictionary<ScaffolderCatagory, List<ScaffoldBuilder>> _scaffoldBuilders = [];
 
     private List<ScaffolderOption>? _options;
 
@@ -40,7 +41,7 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     /// <inheritdoc/>
     public IServiceCollection Services => _serviceCollection;
     /// <inheritdoc/>
-    public IEnumerable<IScaffoldBuilder> Scaffolders => _scaffoldBuilders;
+    public IReadOnlyDictionary<ScaffolderCatagory, List<ScaffoldBuilder>> Scaffolders => _scaffoldBuilders;
     /// <inheritdoc/>
     public IServiceProvider? ServiceProvider
     {
@@ -67,7 +68,21 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
         _serviceCollection.MakeReadOnly();
 
         var scaffoldRunner = _appServices.GetRequiredService<IScaffoldRunner>();
-        scaffoldRunner.Scaffolders = Scaffolders.Select(s => s.Build(_appServices));
+
+        // Build all scaffolders and add them to the commands for each subcommand
+        Dictionary<ScaffolderCatagory, IEnumerable<IScaffolder>> builtScaffolders = new();
+        foreach (KeyValuePair<ScaffolderCatagory, List<ScaffoldBuilder>> kvp in Scaffolders)
+        {
+            ScaffolderCatagory category = kvp.Key;
+            List<ScaffoldBuilder> builders = kvp.Value;
+            var builtList = new List<IScaffolder>();
+            foreach (ScaffoldBuilder builder in builders)
+            {
+                builtList.Add(builder.Build(_appServices));
+            }
+            builtScaffolders[category] = builtList;
+        }
+        scaffoldRunner.Scaffolders = builtScaffolders;
 
         scaffoldRunner.Options = _options;
 
@@ -76,10 +91,15 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     }
 
     /// <inheritdoc/>
-    public IScaffoldBuilder AddScaffolder(string name)
+    public IScaffoldBuilder AddScaffolder(ScaffolderCatagory category, string name)
     {
         var scaffoldBuilder = new ScaffoldBuilder(name);
-        _scaffoldBuilders.Add(scaffoldBuilder);
+        if (!_scaffoldBuilders.TryGetValue(category, out var builders))
+        {
+            builders = new List<ScaffoldBuilder>();
+            _scaffoldBuilders[category] = builders;
+        }
+        builders.Add(scaffoldBuilder);
         return scaffoldBuilder;
     }
 

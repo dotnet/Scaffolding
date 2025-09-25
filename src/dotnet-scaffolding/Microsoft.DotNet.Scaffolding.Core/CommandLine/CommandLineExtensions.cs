@@ -26,10 +26,15 @@ internal static class CommandLineExtensions
 
         List<CommandInfo> commandInfo = [];
         var rootCommand = new RootCommand();
-        foreach (var scaffolder in scaffoldRunner.Scaffolders)
+        foreach (KeyValuePair<ScaffolderCatagory,IEnumerable<IScaffolder>> categoryWithScaffolder in scaffoldRunner.Scaffolders)
         {
-            rootCommand.AddCommand(scaffolder.ToCommand());
-            commandInfo.Add(scaffolder.ToCommandInfo());
+            Command categoryCommand = GetCategoryCommand(categoryWithScaffolder.Key);
+            foreach (var scaffolder in categoryWithScaffolder.Value)
+            {
+                categoryCommand.AddCommand(scaffolder.ToCommand());
+                commandInfo.Add(scaffolder.ToCommandInfo());
+            }
+            rootCommand.AddCommand(categoryCommand);
         }
 
         if (scaffoldRunner.Options is not null)
@@ -43,6 +48,19 @@ internal static class CommandLineExtensions
         rootCommand.AddGetCommandsCommand(commandInfo);
 
         ((ScaffoldRunner)scaffoldRunner).RootCommand = rootCommand;
+
+        static Command GetCategoryCommand(ScaffolderCatagory catagory)
+        {
+            if (catagory == ScaffolderCatagory.Aspire)
+            {
+                //TODO put strings in CliOptions when this is folded into  dotnet-scaffold
+                return new Command("aspire", "Commands related to Aspire project scaffolding");
+            }
+            else
+            {
+                return new Command ("aspnet", "Commands related to ASP.NET project scaffolding");
+            }
+        }
     }
 
     /// <summary>

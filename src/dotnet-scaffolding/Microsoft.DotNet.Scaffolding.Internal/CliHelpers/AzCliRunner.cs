@@ -75,39 +75,6 @@ internal class AzCliRunner
         return process.ExitCode;
     }
 
-
-    /// <summary>
-    /// Executes a command that requires user interaction (like 'az login')
-    /// </summary>
-    /// <returns>Exit code of the process</returns>
-    public int ExecuteInteractive()
-    {
-        // For interactive processes, we shouldn't redirect standard input/output
-        _psi.RedirectStandardInput = false;
-        _psi.RedirectStandardOutput = false;
-        _psi.RedirectStandardError = false;
-
-        // Use shell execute to allow browser windows to be launched
-        _psi.UseShellExecute = true;
-
-        using var process = new Process
-        {
-            StartInfo = _psi
-        };
-
-        try
-        {
-            process.Start();
-            process.WaitForExit();
-            return process.ExitCode;
-        }
-        catch (Exception)
-        {
-            return -1;
-        }
-    }
-
-
     internal ProcessStartInfo _psi;
 
     internal string _commandName;

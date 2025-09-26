@@ -1,1 +1,0 @@
-Aspire scaffolders for dotnet-scaffold

@@ -7,8 +7,7 @@ using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
-using Microsoft.DotNet.Scaffolding.Internal;
-using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -31,7 +30,7 @@ public static class Program
             out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption, out var overwriteOption,
             out var usernameOption, out var tenantIdOption, out var applicationOption, out var selectApplicationOption, out bool areAzCliCommandsSuccessful);
 
-        builder.AddScaffolder("blazor-empty")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "blazor-empty")
             .WithDisplayName("Razor Component")
             .WithCategory("Blazor")
             .WithDescription("Add an empty razor component to a given project")
@@ -46,7 +45,7 @@ public static class Program
                 step.CommandName = Constants.DotnetCommands.RazorComponentCommandName;
             });
 
-        builder.AddScaffolder("razorview-empty")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "razorview-empty")
             .WithDisplayName("Razor View - Empty")
             .WithCategory("MVC")
             .WithDescription("Add an empty razor view to a given project")
@@ -61,7 +60,7 @@ public static class Program
                 step.CommandName = Constants.DotnetCommands.ViewCommandName;
             });
 
-        builder.AddScaffolder("razorpage-empty")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "razorpage-empty")
             .WithDisplayName("Razor Page - Empty")
             .WithCategory("Razor Pages")
             .WithDescription("Add an empty razor page to a given project")
@@ -77,7 +76,7 @@ public static class Program
                 step.CommandName = Constants.DotnetCommands.RazorPageCommandName;
             });
 
-        builder.AddScaffolder("apicontroller")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "apicontroller")
             .WithDisplayName("API Controller")
             .WithCategory("API")
             .WithDescription("Add an empty API Controller to a given project")
@@ -92,7 +91,7 @@ public static class Program
                 step.CommandName = "apicontroller";
             });
 
-        builder.AddScaffolder("mvccontroller")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "mvccontroller")
             .WithDisplayName("MVC Controller")
             .WithCategory("MVC")
             .WithDescription("Add an empty MVC Controller to a given project")
@@ -107,7 +106,7 @@ public static class Program
                 step.CommandName = "mvccontroller";
             });
 
-        builder.AddScaffolder("apicontroller-crud")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "apicontroller-crud")
             .WithDisplayName("API Controller with actions, using Entity Framework (CRUD)")
             .WithCategory("API")
             .WithDescription("Create an API controller with REST actions to create, read, update, delete, and list entities")
@@ -130,7 +129,7 @@ public static class Program
             .WithEfControllerTextTemplatingStep()
             .WithEfControllerCodeChangeStep();
 
-        builder.AddScaffolder("mvccontroller-crud")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "mvccontroller-crud")
             .WithDisplayName("MVC Controller with views, using Entity Framework (CRUD)")
             .WithCategory("MVC")
             .WithDescription("Create a MVC controller with read/write actions and views using Entity Framework")
@@ -154,7 +153,7 @@ public static class Program
             .WithEfControllerCodeChangeStep()
             .WithMvcViewsStep();
 
-        builder.AddScaffolder("blazor-crud")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "blazor-crud")
             .WithDisplayName("Razor Components with EntityFrameworkCore (CRUD)")
             .WithCategory("Blazor")
             .WithDescription("Generates Razor Components using Entity Framework for Create, Delete, Details, Edit and List operations for the given model")
@@ -176,7 +175,7 @@ public static class Program
             .WithBlazorCrudTextTemplatingStep()
             .WithBlazorCrudCodeChangeStep();
 
-        builder.AddScaffolder("razorpages-crud")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "razorpages-crud")
             .WithDisplayName("Razor Pages with Entity Framework (CRUD)")
             .WithCategory("Razor Pages")
             .WithDescription("Generates Razor pages using Entity Framework for Create, Delete, Details, Edit and List operations for the given model")
@@ -198,7 +197,7 @@ public static class Program
             .WithRazorPagesTextTemplatingStep()
             .WithRazorPagesCodeChangeStep();
 
-        builder.AddScaffolder("views")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "views")
             .WithDisplayName("Razor Views")
             .WithCategory("MVC")
             .WithDescription("Generates Razor views for Create, Delete, Details, Edit and List operations for the given model")
@@ -214,7 +213,7 @@ public static class Program
             .WithViewsTextTemplatingStep()
             .WithViewsAddFileStep();
 
-        builder.AddScaffolder("minimalapi")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "minimalapi")
             .WithDisplayName("Minimal API")
             .WithCategory("API")
             .WithDescription("Generates an endpoints file (with CRUD API endpoints) given a model and optional DbContext.")
@@ -237,7 +236,7 @@ public static class Program
             .WithMinimalApiTextTemplatingStep()
             .WithMinimalApiCodeChangeStep();
 
-        builder.AddScaffolder("area")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "area")
             .WithDisplayName("Area")
             .WithCategory("MVC")
             .WithDescription("Creates a MVC Area folder structure.")
@@ -250,7 +249,7 @@ public static class Program
                 step.Name = context.GetOptionResult(areaNameOption);
             });
 
-        builder.AddScaffolder("blazor-identity")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "blazor-identity")
             .WithDisplayName("Blazor Identity")
             .WithCategory("Blazor")
             .WithCategory("Identity")
@@ -273,7 +272,7 @@ public static class Program
             .WithBlazorIdentityTextTemplatingStep()
             .WithBlazorIdentityCodeChangeStep();
 
-        builder.AddScaffolder("identity")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "identity")
             .WithDisplayName("ASP.NET Core Identity")
             .WithCategory("Identity")
             .WithDescription("Add ASP.NET Core identity to a project.")
@@ -296,7 +295,7 @@ public static class Program
 
         if (areAzCliCommandsSuccessful)
         {
-            builder.AddScaffolder("entra-id")
+            builder.AddScaffolder(ScaffolderCatagory.AspNet, "entra-id")
                 .WithDisplayName("Entra ID")
                 .WithCategory("Entra ID")
                 .WithDescription("Add Entra auth")

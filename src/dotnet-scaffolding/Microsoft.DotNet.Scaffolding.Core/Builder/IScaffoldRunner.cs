@@ -12,10 +12,13 @@ namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 public interface IScaffoldRunner
 {
     /// <summary>
-    /// The collection of configured <see cref="IScaffolder"/>s that can be executed by the runner
+    /// The collection of configured <see cref="IScaffolder"/>s that can be executed by the runner. They are keyed by their category, aspnet or aspire.
     /// </summary>
-    IEnumerable<IScaffolder>? Scaffolders { get; set; }
+    IReadOnlyDictionary<ScaffolderCatagory, IEnumerable<IScaffolder>>? Scaffolders { get; set; }
 
+    /// <summary>
+    /// The collections of options to be added to the overall "dotnet-scaffold" tool
+    /// </summary>
     IEnumerable<ScaffolderOption>? Options { get; set; }
 
     /// <summary>

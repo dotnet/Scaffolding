@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
@@ -9,7 +10,7 @@ using Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
 using Microsoft.Extensions.Logging;
 using TelemetryConstants = Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry.TelemetryConstants;
 
-namespace Microsoft.DotNet.Scaffolding.Core.Steps;
+namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 
 /// <summary>
 /// A scaffold step that adds a connection string to the appsettings.json file of a project.

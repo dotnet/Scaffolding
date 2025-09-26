@@ -4,6 +4,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.CommandLine.Invocation;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -30,7 +31,7 @@ public interface IScaffoldRunnerBuilder
     /// <summary>
     /// Gets the collection of <see cref="IScaffoldBuilder"/>s being configured by this <see cref="IScaffoldRunnerBuilder"/>
     /// </summary>
-    IEnumerable<IScaffoldBuilder> Scaffolders { get; }
+    IReadOnlyDictionary<ScaffolderCatagory, List<ScaffoldBuilder>> Scaffolders { get; }
 
     /// <summary>
     /// Builds the <see cref="IScaffoldRunner"/> from the scaffolders and services configured in the builder.
@@ -38,10 +39,11 @@ public interface IScaffoldRunnerBuilder
     IScaffoldRunner Build();
 
     /// <summary>
-    /// Adds a new <see cref="IScaffoldBuilder"/> to the builder with the specified name.
+    /// Adds a new <see cref="IScaffoldBuilder"/> to the builder with the specified name to the specified scaffolder category.
     /// </summary>
+    /// /// <param name="category">The category of the scaffolder, either AspNet or Aspire.</param>
     /// <param name="name">The name of the scaffolder. This will be used as the command line command to execute that scaffolder.</param>
-    IScaffoldBuilder AddScaffolder(string name);
+    IScaffoldBuilder AddScaffolder(ScaffolderCatagory category, string name);
 
     /// <summary>
     /// Adds a new <see cref="ScaffolderOption"/> to the builder.

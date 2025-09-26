@@ -74,44 +74,6 @@ internal static class StringUtil
         return path.Replace(otherSeparator, currentSeparator);
     }
 
-    //remove prefix from namespace, used to remove the project name from namespace when creating the path
-    public static string RemovePrefix(string projectNamespace, string basePath, string prefix)
-    {
-        string[] namespaceParts = projectNamespace.Split('.');
-        string[] basePathParts = basePath.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
-        if (namespaceParts.Length > 0 && namespaceParts[0] == prefix && basePathParts[basePathParts.Length - 1] == prefix)
-        {
-            projectNamespace = string.Join(".", namespaceParts, 1, namespaceParts.Length - 1);
-        }
-
-        return projectNamespace;
-    }
-
-    /// <summary>
-    /// expecting unrooted paths (no drive letter)
-    /// </summary>
-    /// <param name="path"></param>
-    /// <returns></returns>
-    public static string ToNamespace(string path)
-    {
-        string ns = path ?? "";
-        if (!string.IsNullOrEmpty(ns))
-        {
-            ns = Path.HasExtension(ns) ? Path.GetDirectoryName(ns) ?? ns : ns;
-            if (ns.Contains(Path.DirectorySeparatorChar))
-            {
-                ns = ns.Replace(Path.DirectorySeparatorChar.ToString(), ".");
-            }
-
-            if (ns.Last() == '.')
-            {
-                ns = ns.Remove(ns.Length - 1);
-            }
-        }
-
-        return ns;
-    }
-
     /// <summary>
     /// get the full file path without extension, not just the file name
     /// </summary>
@@ -140,41 +102,6 @@ internal static class StringUtil
     {
         string[] parts = templateName.Split('.');
         return parts[parts.Length - 1];
-    }
-
-    public static string NormalizeLineEndings(string text)
-    {
-        //change all line endings to "\n" and then replace them with the appropriate ending
-        return text.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", System.Environment.NewLine);
-    }
-
-    public static List<string> ToStringList(this List<string?> listWithNullableStrings)
-    {
-        return listWithNullableStrings.ConvertAll(s => s ?? string.Empty).Where(s => s.Equals(string.Empty)).ToList();
-    }
-
-    public static Dictionary<string, string> ParseArguments(List<string> args)
-    {
-        var arguments = new Dictionary<string, string>();
-        if (args != null && args.Count > 0)
-        {
-            string currentKey = string.Empty;
-            foreach (var arg in args)
-            {
-                if (arg.StartsWith("--") || arg.StartsWith("-"))
-                {
-                    currentKey = arg;
-                    arguments[currentKey] = string.Empty;
-                }
-                else if (!string.IsNullOrEmpty(currentKey))
-                {
-                    arguments[currentKey] = arg;
-                    currentKey = string.Empty;
-                }
-            }
-        }
-
-        return arguments;
     }
 
     /// <summary>

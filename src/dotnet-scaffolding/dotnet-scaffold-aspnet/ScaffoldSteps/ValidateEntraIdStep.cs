@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -11,7 +10,6 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
-using Microsoft.DotNet.Scaffolding.Core.CommandLine;
 using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 

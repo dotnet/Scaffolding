@@ -4,8 +4,6 @@ using System.Reflection;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Files;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 

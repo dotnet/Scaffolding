@@ -62,17 +62,6 @@ internal static class IdentityHelper
     }
 
     /// <summary>
-    /// Gets the additional text templating properties.
-    /// </summary>
-    /// <param name="allFilePaths">All file paths.</param>
-    /// <param name="identityModel">The identity model.</param>
-    /// <returns>An enumerable of additional TextTemplatingProperty.</returns>
-    internal static IEnumerable<TextTemplatingProperty> GetAdditionalTextTemplatingProperties(IEnumerable<string> allFilePaths, IdentityModel identityModel)
-    {
-        return [];
-    }
-
-    /// <summary>
     /// Gets the formatted relative identity file path from the full file name.
     /// </summary>
     /// <param name="fullFileName">The full file name.</param>

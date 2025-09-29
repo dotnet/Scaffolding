@@ -12,28 +12,28 @@ https://github.com/dotnet/Scaffolding
 
 I recommend cloning it under your user profile directory.
 
-## 🚀 Getting Started
+## 🚀 Getting Started: Dev loop
 
-1. **Navigate** to the cloned `Scaffolding` directory.
-2. **Run** `start-code.cmd`. This should launch your installed version of Visual Studio Code.
-3. **From the terminal inside VS Code**, run:
+1. **Navigate** to the cloned `Scaffolding` directory. Edit as needed.
 
-   ```bash
-   scripts\install-scaffold-all
-   ```
+2. **Install dev package**
 
-   This command will:
-   - Set the tool version to the dev version (distinguishing it from the published version).
-   - Clear artifacts.
-   - Build the project.
-   - Run associated tests.
-   - Install the NuGet package produced in the `artifacts` folder.
+   from cmd: run `scripts\install-scaffold-all.cmd`
+   ***OR***
+   from powershell run: `scripts\install-scaffold-all.sh`
+
+   These scripts will install the Nuget Packages associated with your local changes on your machine.
+
+3. **Test changes**
+
+   From a cmd (or powershell), test your changes locally. Run `dotnet scaffold` or the command you are trying to test. For debugging testing, attach the debugger as outlined below and repeat these steps. 
+
 
 ## 🧪 Debugging Setup
 
 1. Open the `all.sln` solution in a separate instance of Visual Studio.
 2. Set any breakpoints you want to hit.
-3. Before running the install script, add the following line near the top of the project you want to debug (e.g., `dotnet-scaffold-aspnet`, `dotnet-scaffold-aspire`, etc.):
+3. Before running the install script, add the following line near the top of the project you want to debug (e.g., `dotnet-scaffold-aspnet`, etc.):
 
    ```csharp
    System.Diagnostics.Debugger.Launch();
@@ -41,7 +41,7 @@ I recommend cloning it under your user profile directory.
 
    This will automatically launch a debugger. Otherwise, you’ll need to attach one manually.
 
-4. In a **separate terminal**, navigate to a project that is ready for scaffolding (a relatively blank project with a basic model class).
+4. In a terminal, navigate to a project that is ready for scaffolding (a relatively blank project with a basic model class).
 5. Run `dotnet scaffold` from there.
 
 ## ✅ Requirements

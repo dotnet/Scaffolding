@@ -50,7 +50,7 @@ internal static class BlazorCrudScaffolderBuilderExtensions
     /// </summary>
     public static IScaffoldBuilder WithBlazorCrudAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<WrappedAddPackagesStep>(config =>
+        return builder.WithStep<AspNetWrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;

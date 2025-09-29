@@ -7,6 +7,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.Extensions.Logging;
+using Spectre.Console;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 {
@@ -219,7 +220,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                AnsiConsole.WriteLine(e.ToString());
             }
 
             return Task.FromResult(false);

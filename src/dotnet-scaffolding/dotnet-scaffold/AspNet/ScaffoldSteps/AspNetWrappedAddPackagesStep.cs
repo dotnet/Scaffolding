@@ -4,26 +4,25 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
-using Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 /// <summary>
-/// A scaffold step that wraps the AddPackagesStep to add telemetry tracking for package installation.
+/// Scaffold step that wraps AddPackagesStep and adds telemetry tracking for package installation.
 /// </summary>
-internal class WrappedAddPackagesStep : AddPackagesStep
+internal class AspNetWrappedAddPackagesStep : AddPackagesStep
 {
     private readonly ILogger _logger;
     private readonly ITelemetryService _telemetryService;
-
     /// <summary>
-    /// Initializes a new instance of the <see cref="WrappedAddPackagesStep"/> class.
+    /// Constructor for WrappedAddPackagesStep.
     /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="telemetryService">The telemetry service instance.</param>
-    public WrappedAddPackagesStep(
-        ILogger<WrappedAddPackagesStep> logger,
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="telemetryService">Telemetry service instance.</param>
+    public AspNetWrappedAddPackagesStep(
+        ILogger<AspNetWrappedAddPackagesStep> logger,
         ITelemetryService telemetryService) : base(logger)
     {
         _logger = logger;
@@ -31,11 +30,11 @@ internal class WrappedAddPackagesStep : AddPackagesStep
     }
 
     /// <summary>
-    /// Executes the package installation step and tracks the result in telemetry.
+    /// Executes the step to add packages and track telemetry.
     /// </summary>
-    /// <param name="context">The scaffolder context.</param>
-    /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>True if the package installation succeeded; otherwise, false.</returns>
+    /// <param name="context">Scaffolder context.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Task representing the asynchronous operation.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var result = await base.ExecuteAsync(context, cancellationToken);

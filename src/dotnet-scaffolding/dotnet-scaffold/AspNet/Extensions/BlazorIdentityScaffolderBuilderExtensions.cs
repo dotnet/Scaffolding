@@ -102,7 +102,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
     /// </summary>
     public static IScaffoldBuilder WithBlazorIdentityAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<WrappedAddPackagesStep>(config =>
+        return builder.WithStep<AspNetWrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;

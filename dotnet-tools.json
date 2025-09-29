@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "microsoft.dotnet-scaffold-aspnet": {
+      "version": "10.0.0-rc.2.25479.2",
+      "commands": [
+        "dotnet-scaffold-aspnet"
+      ],
+      "rollForward": false
+    }
+  }
+}

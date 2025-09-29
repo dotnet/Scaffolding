@@ -21,7 +21,7 @@ internal static class DatabaseScaffolderBuilderExtensions
     public static IScaffoldBuilder WithDatabaseAddPackageSteps(this IScaffoldBuilder builder)
     {
         // Step 1: Add database package to the AppHost project
-        builder = builder.WithStep<WrappedAddPackagesStep>(config =>
+        builder = builder.WithStep<AspireWrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var properties = config.Context.Properties;
@@ -51,7 +51,7 @@ internal static class DatabaseScaffolderBuilderExtensions
         });
 
         // Step 2: Add database package to the API service project
-        builder = builder.WithStep<WrappedAddPackagesStep>(config =>
+        builder = builder.WithStep<AspireWrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var properties = config.Context.Properties;

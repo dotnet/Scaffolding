@@ -21,7 +21,7 @@ internal static class StorageScaffolderBuilderExtensions
     public static IScaffoldBuilder WithStorageAddPackageSteps(this IScaffoldBuilder builder)
     {
         // Step 1: Add storage package to the AppHost project
-        builder = builder.WithStep<WrappedAddPackagesStep>(config =>
+        builder = builder.WithStep<AspireWrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var properties = config.Context.Properties;
@@ -43,7 +43,7 @@ internal static class StorageScaffolderBuilderExtensions
         });
 
         // Step 2: Add storage package to the target project
-        builder = builder.WithStep<WrappedAddPackagesStep>(config =>
+        builder = builder.WithStep<AspireWrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var properties = config.Context.Properties;

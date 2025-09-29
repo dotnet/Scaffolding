@@ -53,7 +53,7 @@ internal static class EfControllerScaffolderBuilderExtensions
     /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithEfControllerAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<WrappedAddPackagesStep>(config =>
+        return builder.WithStep<AspNetWrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;

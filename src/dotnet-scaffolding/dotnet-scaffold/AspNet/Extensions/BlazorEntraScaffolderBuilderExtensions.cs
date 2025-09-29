@@ -234,7 +234,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
     /// <exception cref="InvalidOperationException">Thrown when the project path is not set.</exception>
     public static IScaffoldBuilder WithEntraAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<WrappedAddPackagesStep>(config =>
+        return builder.WithStep<AspNetWrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;
@@ -271,7 +271,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
     /// <exception cref="InvalidOperationException">Thrown when the project path is not set.</exception>
     public static IScaffoldBuilder WithEntraBlazorWasmAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<WrappedAddPackagesStep>(config =>
+        return builder.WithStep<AspNetWrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;

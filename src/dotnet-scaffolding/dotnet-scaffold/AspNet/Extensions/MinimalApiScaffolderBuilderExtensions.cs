@@ -67,7 +67,7 @@ internal static class MinimalApiScaffolderBuilderExtensions
     /// <returns>The modified scaffold builder.</returns>
     public static IScaffoldBuilder WithMinimalApiAddPackagesStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<WrappedAddPackagesStep>(config =>
+        return builder.WithStep<AspNetWrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;

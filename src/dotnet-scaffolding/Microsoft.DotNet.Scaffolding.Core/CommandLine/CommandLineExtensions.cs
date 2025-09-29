@@ -26,10 +26,19 @@ internal static class CommandLineExtensions
 
         List<CommandInfo> commandInfo = [];
         var rootCommand = new RootCommand();
-        foreach (var scaffolder in scaffoldRunner.Scaffolders)
+        foreach (IScaffolder scaffolder in scaffoldRunner.Scaffolders)
         {
             rootCommand.AddCommand(scaffolder.ToCommand());
             commandInfo.Add(scaffolder.ToCommandInfo());
+        }
+
+        //add non scaffolding commands here
+        if (scaffoldRunner.NonScaffoldCommands is not null)
+        {
+            foreach (Command command in scaffoldRunner.NonScaffoldCommands)
+            {
+                rootCommand.AddCommand(command);
+            }
         }
 
         if (scaffoldRunner.Options is not null)

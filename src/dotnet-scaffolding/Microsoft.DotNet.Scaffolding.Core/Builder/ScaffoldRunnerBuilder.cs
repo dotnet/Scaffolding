@@ -5,6 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.CommandLine;
 using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.CommandLine;
 using System.CommandLine.Invocation;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
@@ -20,6 +21,9 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     private readonly LoggingBuilder _logging;
     // List of scaffold builders
     private readonly List<ScaffoldBuilder> _scaffoldBuilders = [];
+
+    // List of non-scaffolding comamnds
+    private readonly List<Command> _nonScaffoldCommands = [];
 
     private List<ScaffolderOption>? _options;
 
@@ -69,6 +73,8 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
         var scaffoldRunner = _appServices.GetRequiredService<IScaffoldRunner>();
         scaffoldRunner.Scaffolders = Scaffolders.Select(s => s.Build(_appServices));
 
+        scaffoldRunner.NonScaffoldCommands = _nonScaffoldCommands;
+
         scaffoldRunner.Options = _options;
 
         scaffoldRunner.BuildRootCommand();
@@ -81,6 +87,11 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
         var scaffoldBuilder = new ScaffoldBuilder(name);
         _scaffoldBuilders.Add(scaffoldBuilder);
         return scaffoldBuilder;
+    }
+
+    public void AddNonScaffoldCommand(Command command)
+    {
+        _nonScaffoldCommands.Add(command);
     }
 
     /// <summary>
@@ -117,10 +128,11 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     {
         AddCoreServices();
         Services.AddSingleton<IScaffoldRunner, ScaffoldRunner>();
+        //Services.AddSingleton<IToolManager, ToolManager>(); // Register ToolManager for DI  
     }
 
     // Adds core services such as logging
-    private void AddCoreServices()
+    private void AddCoreServices()  
     {
         Services.AddLogging();
         Logging.AddCleanConsoleFormatter();

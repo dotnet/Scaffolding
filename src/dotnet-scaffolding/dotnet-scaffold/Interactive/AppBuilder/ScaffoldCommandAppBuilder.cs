@@ -54,9 +54,6 @@ internal class ScaffoldCommandAppBuilder(string[] args)
         registrar.Register(typeof(IFileSystem), typeof(FileSystem));
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));
         registrar.Register(typeof(IFlowProvider), typeof(FlowProvider));
-        registrar.Register(typeof(IDotNetToolService), typeof(DotNetToolService));
-        registrar.Register(typeof(IToolManager), typeof(ToolManager));
-        registrar.Register(typeof(IToolManifestService), typeof(ToolManifestService));
         registrar.Register(typeof(IFirstTimeUseNoticeSentinel), typeof(FirstTimeUseNoticeSentinel));
         // Register a lazy singleton for the first time use notice sentinel.
         registrar.RegisterLazy(typeof(IFirstTimeUseNoticeSentinel), (serviceProvider) =>

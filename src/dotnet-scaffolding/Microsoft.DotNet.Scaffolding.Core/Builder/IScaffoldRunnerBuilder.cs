@@ -4,6 +4,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.CommandLine.Invocation;
+using System.CommandLine;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -53,4 +54,6 @@ public interface IScaffoldRunnerBuilder
     /// Adds a handler to the RootCommand doing the action passed in the handle parameter.
     /// </summary>
     void AddHandler(Func<InvocationContext, Task> handle);
+
+    void AddNonScaffoldCommand(Command command);
 }

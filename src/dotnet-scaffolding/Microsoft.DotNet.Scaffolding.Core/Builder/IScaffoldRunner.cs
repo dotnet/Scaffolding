@@ -3,6 +3,7 @@
 
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using System.CommandLine.Invocation;
+using System.CommandLine;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -15,6 +16,8 @@ public interface IScaffoldRunner
     /// The collection of configured <see cref="IScaffolder"/>s that can be executed by the runner
     /// </summary>
     IEnumerable<IScaffolder>? Scaffolders { get; set; }
+
+    IEnumerable<Command>? NonScaffoldCommands { get; set; }
 
     IEnumerable<ScaffolderOption>? Options { get; set; }
 

@@ -19,6 +19,8 @@ internal class ScaffoldRunner(ILogger<ScaffoldRunner> logger) : IScaffoldRunner
     /// <inheritdoc/>
     public IEnumerable<IScaffolder>? Scaffolders { get; set; }
 
+    public IEnumerable<Command>? NonScaffoldCommands { get; set; }
+
     /// <summary>
     /// Options for the "dotnet-scaffold" tool
     /// </summary>

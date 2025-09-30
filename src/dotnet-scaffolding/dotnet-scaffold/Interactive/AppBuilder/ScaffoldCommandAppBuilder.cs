@@ -1,5 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.Commands;
+using Microsoft.DotNet.Tools.Scaffold.Command;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.Command;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.Services;
@@ -23,9 +25,9 @@ internal class ScaffoldCommandAppBuilder(string[] args)
     /// Builds and configures the <see cref="ScaffoldCommandApp"/> with all required services and commands.
     /// </summary>
     /// <returns>A configured <see cref="ScaffoldCommandApp"/> instance.</returns>
-    public ScaffoldCommandApp Build()
+    public ScaffoldCommandApp Build(AspireCommandService aspireCommandBuilder)
     {
-        var serviceRegistrations = GetDefaultServices();
+        var serviceRegistrations = GetDefaultServices(aspireCommandBuilder);
         var commandApp = new CommandApp<ScaffoldCommand>(serviceRegistrations);
         commandApp.Configure(config =>
         {
@@ -47,7 +49,7 @@ internal class ScaffoldCommandAppBuilder(string[] args)
     /// Registers the default services required for the scaffold command application.
     /// </summary>
     /// <returns>A <see cref="TypeRegistrar"/> with all required services registered.</returns>
-    private static TypeRegistrar? GetDefaultServices()
+    private static TypeRegistrar? GetDefaultServices(AspireCommandService aspireCommandBuilder)
     {
         var registrar = new TypeRegistrar();
         // Register core services for dependency injection.
@@ -66,6 +68,10 @@ internal class ScaffoldCommandAppBuilder(string[] args)
                                                   "dotnetScaffold");
         });
         registrar.Register(typeof(ITelemetryService), typeof(TelemetryService));
+
+        // Register AspireCommandBuilder instance
+        registrar.RegisterInstance(typeof(ICommandService), aspireCommandBuilder);
+
         return registrar;
     }
 }

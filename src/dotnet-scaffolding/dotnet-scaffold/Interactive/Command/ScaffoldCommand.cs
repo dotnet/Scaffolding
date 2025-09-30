@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Tools.Scaffold.Command;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.Services;
 using Microsoft.DotNet.Tools.Scaffold.Services;
@@ -25,6 +26,8 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     // Sentinel for first-time use notice.
     private readonly IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
 
+    private readonly ICommandService _aspireCommandBuilder;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ScaffoldCommand"/> class.
     /// </summary>
@@ -35,6 +38,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     /// <param name="logger">The logger instance.</param>
     /// <param name="telemetry">The telemetry service.</param>
     /// <param name="firstTimeUseNoticeSentinel">The first-time use notice sentinel.</param>
+    /// <param name="aspireCommandBuilder">The aspire command builder.</param>
     public ScaffoldCommand(
         IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
@@ -42,7 +46,8 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         IFlowProvider flowProvider,
         ILogger<ScaffoldCommand> logger,
         ITelemetryService telemetry,
-        IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel)
+        IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
+        ICommandService  aspireCommandBuilder)
         : base(flowProvider, telemetry)
     {
         _dotnetToolService = dotnetToolService;
@@ -50,6 +55,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         _fileSystem = fileSystem;
         _logger = logger;
         _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
+        _aspireCommandBuilder = aspireCommandBuilder;
     }
 
     /// <summary>
@@ -89,8 +95,8 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         IEnumerable<IFlowStep> flowSteps =
         [
             new StartupFlowStep(_dotnetToolService, _environmentService, _fileSystem, _logger, _firstTimeUseNoticeSentinel),
-            new CategoryPickerFlowStep(_logger, _dotnetToolService),
-            new CommandPickerFlowStep(_logger, _dotnetToolService, _environmentService, _fileSystem),
+            new CategoryPickerFlowStep(_logger, _dotnetToolService, _aspireCommandBuilder),
+            new CommandPickerFlowStep(_logger, _dotnetToolService, _environmentService, _fileSystem, _aspireCommandBuilder),
             new CommandExecuteFlowStep(TelemetryService)
         ];
 

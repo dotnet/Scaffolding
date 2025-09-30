@@ -106,6 +106,18 @@ public class ScaffoldBuilder(string name) : IScaffoldBuilder
         return new Scaffolder(Name, DisplayName, Categories.ToList(), Description, _options, steps, _stepPreparers);
     }
 
+    public CommandInfo AsCommandInfo()
+    {
+        return new CommandInfo
+        {
+            Name = Name,
+            DisplayName = DisplayName,
+            DisplayCategories = Categories.ToList(),
+            Description = Description,
+            Parameters = Options.Select(o => o.ToParameter()).ToArray()
+        };
+    }
+
     /// <summary>
     /// Normalizes the scaffolder name by replacing spaces and converting to lower case.
     /// </summary>

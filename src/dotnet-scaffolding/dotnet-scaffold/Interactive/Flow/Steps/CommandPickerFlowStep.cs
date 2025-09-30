@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Tools.Scaffold.Command;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.Logging;
 using Spectre.Console.Flow;
@@ -18,6 +19,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         private readonly IDotNetToolService _dotnetToolService;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
+        private readonly ICommandService _aspireCommandBuilder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandPickerFlowStep"/> class.
@@ -26,12 +28,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             ILogger logger,
             IDotNetToolService dotnetToolService,
             IEnvironmentService environmentService,
-            IFileSystem fileSystem)
+            IFileSystem fileSystem,
+            ICommandService aspireCommandBuilder)
         {
             _logger = logger;
             _dotnetToolService = dotnetToolService;
             _environmentService = environmentService;
             _fileSystem = fileSystem;
+            _aspireCommandBuilder = aspireCommandBuilder;
         }
 
         /// <inheritdoc/>
@@ -60,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             CommandInfo? commandInfo = null;
             var dotnetTools = _dotnetToolService.GetDotNetTools();
             var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
-            CommandDiscovery commandDiscovery = new(_dotnetToolService, dotnetToolComponent);
+            CommandDiscovery commandDiscovery = new(_dotnetToolService, dotnetToolComponent, _aspireCommandBuilder);
             commandInfoKvp = commandDiscovery.Discover(context);
             if (commandDiscovery.State.IsNavigation())
             {
@@ -108,6 +112,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             if (dotnetToolComponent != null)
             {
+                // TODO add the commands from the aspire command builder here
                 var allCommands = _dotnetToolService.GetCommands(dotnetToolComponent, envVars);
                 commandInfo = allCommands.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
             }

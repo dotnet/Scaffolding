@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Tools.Scaffold.Command;
+using Microsoft.DotNet.Tools.Scaffold.Interactive.Services;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console;
 using Spectre.Console.Flow;
@@ -15,6 +17,8 @@ internal class CategoryDiscovery
 {
     private readonly IDotNetToolService _dotnetToolService;
     private readonly DotNetToolInfo? _componentPicked;
+    private readonly ICommandService _aspireCommandService;
+
     public FlowStepState State { get; private set; }
 
     /// <summary>
@@ -22,10 +26,12 @@ internal class CategoryDiscovery
     /// </summary>
     /// <param name="dotnetToolService">Service for dotnet tool operations.</param>
     /// <param name="componentPicked">The selected component, if any.</param>
-    public CategoryDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked)
+    /// <param name="aspireCommandService">the commandbuilser</param>
+    public CategoryDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked, ICommandService aspireCommandService)
     {
         _dotnetToolService = dotnetToolService;
         _componentPicked = componentPicked;
+        _aspireCommandService = aspireCommandService;
     }
 
     /// <summary>
@@ -36,7 +42,7 @@ internal class CategoryDiscovery
     public string? Discover(IFlowContext context)
     {
         var allCommands = context.GetCommandInfos();
-        var envVars = context.GetTelemetryEnvironmentVariables();
+        IDictionary<string, string>? envVars = context.GetTelemetryEnvironmentVariables();
         if (allCommands is null || allCommands.Count == 0)
         {
             allCommands = AnsiConsole
@@ -44,7 +50,7 @@ internal class CategoryDiscovery
             .WithSpinner()
             .Start("Discovering scaffolders", statusContext =>
             {
-                return _dotnetToolService.GetAllCommandsParallel(envVars: envVars);
+                return ICommandServiceExtensions.GetAllCommandsWithId([_aspireCommandService], _dotnetToolService, envVars);
             });
 
             if (allCommands is not null)

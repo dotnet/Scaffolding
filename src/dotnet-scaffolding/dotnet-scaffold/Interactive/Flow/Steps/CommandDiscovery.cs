@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Tools.Scaffold.Command;
+using Microsoft.DotNet.Tools.Scaffold.Interactive.Services;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console;
 using Spectre.Console.Flow;
@@ -15,16 +17,19 @@ internal class CommandDiscovery
 {
     private readonly IDotNetToolService _dotnetToolService;
     private readonly DotNetToolInfo? _componentPicked;
+    private readonly ICommandService _aspireCommandBuilder;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommandDiscovery"/> class.
     /// </summary>
     /// <param name="dotnetToolService">Service for dotnet tool operations.</param>
     /// <param name="componentPicked">The selected component, if any.</param>
-    public CommandDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked)
+    /// <param name="aspireCommandBuilder">dgdg</param>
+    public CommandDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked, ICommandService aspireCommandBuilder)
     {
         _dotnetToolService = dotnetToolService;
         _componentPicked = componentPicked;
+        _aspireCommandBuilder = aspireCommandBuilder;
     }
 
     /// <summary>
@@ -48,7 +53,7 @@ internal class CommandDiscovery
             .WithSpinner()
             .Start("Discovering scaffolders", statusContext =>
             {
-                return _dotnetToolService.GetAllCommandsParallel(envVars: envVars);
+                return ICommandServiceExtensions.GetAllCommandsWithId([_aspireCommandBuilder], _dotnetToolService, envVars);
             });
 
             if (allCommands is not null)

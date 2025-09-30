@@ -5,7 +5,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 /// <summary>
 /// Defines the types supported by the CLI for parameters.
 /// </summary>
-internal enum CliTypes
+public enum CliTypes
 {
     Bool,
     Int,

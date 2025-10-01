@@ -48,8 +48,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             // Need all 3 things, throw if not found
-            var dotnetToolInfo = context.GetComponentObj();
-            var commandObj = context.GetCommandObj();
+            DotNetToolInfo? dotnetToolInfo = context.GetComponentObj();
+            CommandInfo? commandObj = context.GetCommandObj();
             if (dotnetToolInfo is null || commandObj is null || string.IsNullOrEmpty(dotnetToolInfo.Command))
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure("Missing value for name of the component and/or command"));
@@ -60,14 +60,22 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             var chosenCategory = context.GetChosenCategory();
             if (!string.IsNullOrEmpty(dotnetToolInfo.Command) && parameterValues.Count != 0 && !string.IsNullOrEmpty(commandObj.Name))
             {
-                var componentExecutionString = $"{dotnetToolInfo.Command} {string.Join(" ", parameterValues)}";
+                string command = dotnetToolInfo.Command;
+
+                // TODO when the aspnet is folded into dotnet scaffold, this will be refactored
+                if (commandObj.IsCommandAnAspireCommand())
+                {
+                    command = $"{command} aspire";
+                }
+
+                var componentExecutionString = $"{command} {string.Join(" ", parameterValues)}";
                 int? exitCode = null;
                 AnsiConsole.Status()
-                    .Start($"Executing '{dotnetToolInfo.Command}'", statusContext =>
+                    .Start($"Executing '{command}'", statusContext =>
                     {
                         var cliRunner = dotnetToolInfo.IsGlobalTool?
-                            DotnetCliRunner.Create(dotnetToolInfo.Command, parameterValues, envVars) :
-                            DotnetCliRunner.CreateDotNet(dotnetToolInfo.Command, parameterValues, envVars);
+                            DotnetCliRunner.Create(command, parameterValues, envVars) :
+                            DotnetCliRunner.CreateDotNet(command, parameterValues, envVars);
                         exitCode = cliRunner.ExecuteWithCallbacks(
                             (s) => AnsiConsole.Console.MarkupLineInterpolated($"[green]{s}[/]"),
                             (s) => AnsiConsole.Console.MarkupLineInterpolated($"[red]{s}[/]"));

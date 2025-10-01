@@ -3,6 +3,7 @@
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.Command;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
@@ -15,14 +16,14 @@ internal static class ValidationHelper
 {
     internal static bool ValidateCachingSettings(ScaffolderContext context, ILogger logger)
     {
-        string? typeValue = context.GetOptionResult<string>(AspireCommandHelpers.TypeCliOption);
-        string? appHostProjectValue = context.GetOptionResult<string>(AspireCommandHelpers.AppHostCliOption);
-        string? workerProjectValue = context.GetOptionResult<string>(AspireCommandHelpers.WorkerProjectCliOption);
-        bool prereleaseValue = context.GetOptionResult<bool>(AspireCommandHelpers.PrereleaseCliOption);
-        if (string.IsNullOrEmpty(typeValue) || !AspireCommandHelpers.CachingTypeCustomValues.Contains(typeValue, StringComparer.OrdinalIgnoreCase))
+        string? typeValue = context.GetOptionResult<string>(AspireCliStrings.TypeCliOption);
+        string? appHostProjectValue = context.GetOptionResult<string>(AspireCliStrings.AppHostCliOption);
+        string? workerProjectValue = context.GetOptionResult<string>(AspireCliStrings.WorkerProjectCliOption);
+        bool prereleaseValue = context.GetOptionResult<bool>(AspireCliStrings.PrereleaseCliOption);
+        if (string.IsNullOrEmpty(typeValue) || !AspireCliStrings.CachingTypeCustomValues.Contains(typeValue, StringComparer.OrdinalIgnoreCase))
         {
-            string cachingTypeDisplayList = string.Join(", ", AspireCommandHelpers.CachingTypeCustomValues.GetRange(0, AspireCommandHelpers.CachingTypeCustomValues.Count - 1)) +
-                (AspireCommandHelpers.CachingTypeCustomValues.Count > 1 ? " and " : "") + AspireCommandHelpers.CachingTypeCustomValues[AspireCommandHelpers.CachingTypeCustomValues.Count - 1];
+            string cachingTypeDisplayList = string.Join(", ", AspireCliStrings.CachingTypeCustomValues.GetRange(0, AspireCliStrings.CachingTypeCustomValues.Count - 1)) +
+                (AspireCliStrings.CachingTypeCustomValues.Count > 1 ? " and " : "") + AspireCliStrings.CachingTypeCustomValues[AspireCliStrings.CachingTypeCustomValues.Count - 1];
             logger.LogError("Missing/Invalid --type option.");
             logger.LogError($"Valid options : {cachingTypeDisplayList}");
             return false;
@@ -54,14 +55,14 @@ internal static class ValidationHelper
 
     internal static bool ValidateDatabaseSettings(ScaffolderContext context, ILogger logger)
     {
-        string? typeValue = context.GetOptionResult<string>(AspireCommandHelpers.TypeCliOption);
-        string? appHostProjectValue = context.GetOptionResult<string>(AspireCommandHelpers.AppHostCliOption);
-        string? workerProjectValue = context.GetOptionResult<string>(AspireCommandHelpers.WorkerProjectCliOption);
-        bool prereleaseValue = context.GetOptionResult<bool>(AspireCommandHelpers.PrereleaseCliOption);
-        if (string.IsNullOrEmpty(typeValue) || !AspireCommandHelpers.DatabaseTypeCustomValues.Contains(typeValue, StringComparer.OrdinalIgnoreCase))
+        string? typeValue = context.GetOptionResult<string>(AspireCliStrings.TypeCliOption);
+        string? appHostProjectValue = context.GetOptionResult<string>(AspireCliStrings.AppHostCliOption);
+        string? workerProjectValue = context.GetOptionResult<string>(AspireCliStrings.WorkerProjectCliOption);
+        bool prereleaseValue = context.GetOptionResult<bool>(AspireCliStrings.PrereleaseCliOption);
+        if (string.IsNullOrEmpty(typeValue) || !AspireCliStrings.Database.DatabaseTypeCustomValues.Contains(typeValue, StringComparer.OrdinalIgnoreCase))
         {
-            string dbTypeDisplayList = string.Join(", ", AspireCommandHelpers.DatabaseTypeCustomValues.GetRange(0, AspireCommandHelpers.DatabaseTypeCustomValues.Count - 1)) +
-                (AspireCommandHelpers.DatabaseTypeCustomValues.Count > 1 ? " and " : "") + AspireCommandHelpers.DatabaseTypeCustomValues[AspireCommandHelpers.DatabaseTypeCustomValues.Count - 1];
+            string dbTypeDisplayList = string.Join(", ", AspireCliStrings.Database.DatabaseTypeCustomValues.GetRange(0, AspireCliStrings.Database.DatabaseTypeCustomValues.Count - 1)) +
+                (AspireCliStrings.Database.DatabaseTypeCustomValues.Count > 1 ? " and " : "") + AspireCliStrings.Database.DatabaseTypeCustomValues[AspireCliStrings.Database.DatabaseTypeCustomValues.Count - 1];
             logger.LogError("Missing/Invalid --type option.");
             logger.LogError($"Valid options : {dbTypeDisplayList}");
             return false;
@@ -104,14 +105,14 @@ internal static class ValidationHelper
 
     internal static bool ValidateStorageSettings(ScaffolderContext context, ILogger logger)
     {
-        string? typeValue = context.GetOptionResult<string>(AspireCommandHelpers.TypeCliOption);
-        string? appHostProjectValue = context.GetOptionResult<string>(AspireCommandHelpers.AppHostCliOption);
-        string? workerProjectValue = context.GetOptionResult<string>(AspireCommandHelpers.WorkerProjectCliOption);
-        bool prereleaseValue = context.GetOptionResult<bool>(AspireCommandHelpers.PrereleaseCliOption);
-        if (string.IsNullOrEmpty(typeValue) || !AspireCommandHelpers.StorageTypeCustomValues.Contains(typeValue, StringComparer.OrdinalIgnoreCase))
+        string? typeValue = context.GetOptionResult<string>(AspireCliStrings.TypeCliOption);
+        string? appHostProjectValue = context.GetOptionResult<string>(AspireCliStrings.AppHostCliOption);
+        string? workerProjectValue = context.GetOptionResult<string>(AspireCliStrings.WorkerProjectCliOption);
+        bool prereleaseValue = context.GetOptionResult<bool>(AspireCliStrings.PrereleaseCliOption);
+        if (string.IsNullOrEmpty(typeValue) || !AspireCliStrings.StorageTypeCustomValues.Contains(typeValue, StringComparer.OrdinalIgnoreCase))
         {
-            string storageTypeDisplayList = string.Join(", ", AspireCommandHelpers.StorageTypeCustomValues.GetRange(0, AspireCommandHelpers.StorageTypeCustomValues.Count - 1)) +
-                (AspireCommandHelpers.StorageTypeCustomValues.Count > 1 ? " and " : "") + AspireCommandHelpers.StorageTypeCustomValues[AspireCommandHelpers.StorageTypeCustomValues.Count - 1];
+            string storageTypeDisplayList = string.Join(", ", AspireCliStrings.StorageTypeCustomValues.GetRange(0, AspireCliStrings.StorageTypeCustomValues.Count - 1)) +
+                (AspireCliStrings.StorageTypeCustomValues.Count > 1 ? " and " : "") + AspireCliStrings.StorageTypeCustomValues[AspireCliStrings.StorageTypeCustomValues.Count - 1];
             logger.LogError("Missing/Invalid --type option.");
             logger.LogError($"Valid options : {storageTypeDisplayList}");
             return false;
@@ -148,7 +149,7 @@ internal static class ValidationHelper
     private static DbContextProperties? GetDbContextProperties(CommandSettings settings)
     {
         var newDbContextPath = CreateNewDbContextPath(settings);
-        if (AspireCommandHelpers.DbContextTypeDefaults.TryGetValue(settings.Type, out var dbContextProperties) &&
+        if (AspireCliStrings.Database.DbContextTypeDefaults.TryGetValue(settings.Type, out var dbContextProperties) &&
             dbContextProperties is not null)
         {
             dbContextProperties.DbContextPath = newDbContextPath;
@@ -160,7 +161,7 @@ internal static class ValidationHelper
 
     private static string CreateNewDbContextPath(CommandSettings commandSettings)
     {
-        if (!AspireCommandHelpers.DbContextTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) || dbContextProperties is null)
+        if (!AspireCliStrings.Database.DbContextTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) || dbContextProperties is null)
         {
             return string.Empty;
         }

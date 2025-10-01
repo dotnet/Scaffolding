@@ -11,45 +11,45 @@
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Ref packages from darc subscriptions-->
     <!-- Microsoft.EntityFrameworkCore.Design -->
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>10.0.0-rc.1.25451.107</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>10.0.0-rc.2.25476.107</MicrosoftEntityFrameworkCoreDesignPackageVersion>
     <!-- Microsoft.EntityFrameworkCore -->
-    <MicrosoftEntityFrameworkCorePackageVersion>10.0.0-rc.1.25451.107</MicrosoftEntityFrameworkCorePackageVersion>
+    <MicrosoftEntityFrameworkCorePackageVersion>10.0.0-rc.2.25476.107</MicrosoftEntityFrameworkCorePackageVersion>
     <!-- Microsoft.EntityFrameworkCore.SqlServer -->
-    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>10.0.0-rc.1.25451.107</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>10.0.0-rc.2.25476.107</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
     <!-- Microsoft.Extensions.DependencyInjection -->
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <!-- Microsoft.Extensions.Identity.Stores -->
-    <MicrosoftExtensionsIdentityStoresPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsIdentityStoresPackageVersion>
+    <MicrosoftExtensionsIdentityStoresPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsIdentityStoresPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Abstractions -->
-    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
+    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
-    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Json -->
-    <MicrosoftExtensionsConfigurationJsonPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsConfigurationJsonPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Secrets -->
-    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
+    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
     <!-- Microsoft.Extensions.DependencyModel -->
-    <MicrosoftExtensionsDependencyModelPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsDependencyModelPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <!-- Microsoft.Extensions.Hosting -->
-    <MicrosoftExtensionsHostingPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsHostingPackageVersion>
+    <MicrosoftExtensionsHostingPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsHostingPackageVersion>
     <!-- Microsoft.Extensions.Logging.Console -->
-    <MicrosoftExtensionsLoggingConsolePackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsLoggingConsolePackageVersion>
+    <MicrosoftExtensionsLoggingConsolePackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsLoggingConsolePackageVersion>
     <!-- Microsoft.Extensions.Logging.Debug -->
-    <MicrosoftExtensionsLoggingDebugPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsLoggingDebugPackageVersion>
+    <MicrosoftExtensionsLoggingDebugPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsLoggingDebugPackageVersion>
     <!-- Microsoft.Extensions.Logging -->
-    <MicrosoftExtensionsLoggingPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsLoggingPackageVersion>
     <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
-    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
     <!-- Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>10.0.0-rc.1.25451.107</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>10.0.0-rc.2.25476.107</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>10.0.0-rc.1.25451.107</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>10.0.0-rc.2.25476.107</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.UI -->
-    <MicrosoftAspNetCoreIdentityUIPackageVersion>10.0.0-rc.1.25451.107</MicrosoftAspNetCoreIdentityUIPackageVersion>
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>10.0.0-rc.2.25476.107</MicrosoftAspNetCoreIdentityUIPackageVersion>
     <!-- Mono.TextTemplating-->
     <MonoTextTemplatingVersion>3.0.0</MonoTextTemplatingVersion>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
@@ -118,15 +118,15 @@
   </PropertyGroup>
   <PropertyGroup>
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
-    <SystemTextJsonVersion>10.0.0-rc.1.25451.107</SystemTextJsonVersion>
+    <SystemTextJsonVersion>10.0.0-rc.2.25476.107</SystemTextJsonVersion>
   </PropertyGroup>
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>
     <AzureIdentityVersion>1.14.2</AzureIdentityVersion>
     <CodeAnalysisVersion>$(MicrosoftCodeAnalysisVersion)</CodeAnalysisVersion>
-    <MicrosoftExtensionsConfigurationVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsConfigurationVersion>
-    <MicrosoftExtensionsConfigurationBinderVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsConfigurationBinderVersion>
-    <MicrosoftExtensionsConfigurationCommandLineVersion>10.0.0-rc.1.25451.107</MicrosoftExtensionsConfigurationCommandLineVersion>
+    <MicrosoftExtensionsConfigurationVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsConfigurationVersion>
+    <MicrosoftExtensionsConfigurationBinderVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsConfigurationBinderVersion>
+    <MicrosoftExtensionsConfigurationCommandLineVersion>10.0.0-rc.2.25476.107</MicrosoftExtensionsConfigurationCommandLineVersion>
     <MicrosoftGraphVersion>5.66.0</MicrosoftGraphVersion>
     <MicrosoftIdentityClientExtensionsMsalVersion>4.73.1</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>6.12.1</NuGetProjectModelVersion>

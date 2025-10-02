@@ -301,7 +301,6 @@ internal class DotNetToolService : IDotNetToolService
     private static bool IsValidDotNetTool(DotNetToolInfo dotnetToolInfo)
     {
         return
-            !dotnetToolInfo.Command.Equals("dotnet-scaffold", StringComparison.OrdinalIgnoreCase) &&
             !dotnetToolInfo.PackageName.Equals("package", StringComparison.OrdinalIgnoreCase);
     }
 }

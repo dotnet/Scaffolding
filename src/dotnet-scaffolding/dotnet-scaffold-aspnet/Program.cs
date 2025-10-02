@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Text.Json;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
@@ -30,10 +30,10 @@ public static class Program
             out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption, out var overwriteOption,
             out var usernameOption, out var tenantIdOption, out var applicationOption, out var selectApplicationOption, out bool areAzCliCommandsSuccessful);
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "blazor-empty")
-            .WithDisplayName("Razor Component")
-            .WithCategory("Blazor")
-            .WithDescription("Add an empty razor component to a given project")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Blazor.Empty)
+            .WithDisplayName(AspnetStrings.Blazor.EmptyDisplayName)
+            .WithCategory(AspnetStrings.Catagories.Blazor)
+            .WithDescription(AspnetStrings.Blazor.EmptyDescription)
             .WithOption(projectOption)
             .WithOption(fileNameOption)
             .WithStep<DotnetNewScaffolderStep>(config =>
@@ -45,10 +45,10 @@ public static class Program
                 step.CommandName = Constants.DotnetCommands.RazorComponentCommandName;
             });
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "razorview-empty")
-            .WithDisplayName("Razor View - Empty")
-            .WithCategory("MVC")
-            .WithDescription("Add an empty razor view to a given project")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorView.Empty)
+            .WithDisplayName(AspnetStrings.RazorView.EmptyDisplayName)
+            .WithCategory(AspnetStrings.Catagories.MVC)
+            .WithDescription(AspnetStrings.RazorView.EmptyDescription)
             .WithOption(projectOption)
             .WithOption(fileNameOption)
             .WithStep<DotnetNewScaffolderStep>(config =>
@@ -60,10 +60,10 @@ public static class Program
                 step.CommandName = Constants.DotnetCommands.ViewCommandName;
             });
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "razorpage-empty")
-            .WithDisplayName("Razor Page - Empty")
-            .WithCategory("Razor Pages")
-            .WithDescription("Add an empty razor page to a given project")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorPage.Empty)
+            .WithDisplayName(AspnetStrings.RazorPage.EmptyDisplayName)
+            .WithCategory(AspnetStrings.Catagories.RazorPages)
+            .WithDescription(AspnetStrings.RazorPage.EmptyDescription)
             .WithOption(projectOption)
             .WithOption(fileNameOption)
             .WithStep<DotnetNewScaffolderStep>(config =>
@@ -76,10 +76,10 @@ public static class Program
                 step.CommandName = Constants.DotnetCommands.RazorPageCommandName;
             });
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "apicontroller")
-            .WithDisplayName("API Controller")
-            .WithCategory("API")
-            .WithDescription("Add an empty API Controller to a given project")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Api.ApiController)
+            .WithDisplayName(AspnetStrings.Api.ApiControllerDisplayName)
+            .WithCategory(AspnetStrings.Catagories.API)
+            .WithDescription(AspnetStrings.Api.ApiControllerDescription)
             .WithOptions([projectOption, fileNameOption, actionsOption])
             .WithStep<EmptyControllerScaffolderStep>(config =>
             {
@@ -88,13 +88,13 @@ public static class Program
                 step.ProjectPath = context.GetOptionResult(projectOption);
                 step.FileName = context.GetOptionResult(fileNameOption);
                 step.Actions = context.GetOptionResult(actionsOption);
-                step.CommandName = "apicontroller";
+                step.CommandName = AspnetStrings.Api.ApiController;
             });
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "mvccontroller")
-            .WithDisplayName("MVC Controller")
-            .WithCategory("MVC")
-            .WithDescription("Add an empty MVC Controller to a given project")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.MVC.Controller)
+            .WithDisplayName(AspnetStrings.MVC.DisplayName)
+            .WithCategory(AspnetStrings.Catagories.MVC)
+            .WithDescription(AspnetStrings.MVC.Description)
             .WithOptions([projectOption, fileNameOption, actionsOption])
             .WithStep<EmptyControllerScaffolderStep>(config =>
             {
@@ -103,13 +103,13 @@ public static class Program
                 step.ProjectPath = context.GetOptionResult(projectOption);
                 step.FileName = context.GetOptionResult(fileNameOption);
                 step.Actions = context.GetOptionResult(actionsOption);
-                step.CommandName = "mvccontroller";
+                step.CommandName = AspnetStrings.MVC.Controller;
             });
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "apicontroller-crud")
-            .WithDisplayName("API Controller with actions, using Entity Framework (CRUD)")
-            .WithCategory("API")
-            .WithDescription("Create an API controller with REST actions to create, read, update, delete, and list entities")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Api.ApiControllerCrud)
+            .WithDisplayName(AspnetStrings.Api.ApiControllerCrudDisplayName)
+            .WithCategory(AspnetStrings.Catagories.API)
+            .WithDescription(AspnetStrings.Api.ApiControllerCrudDescription)
             .WithOptions([projectOption, modelNameOption, controllerNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, prereleaseOption])
             .WithStep<ValidateEfControllerStep>(config =>
             {
@@ -120,7 +120,7 @@ public static class Program
                 step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderRequiredOption);
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
-                step.ControllerType = "API";
+                step.ControllerType = AspnetStrings.Catagories.API;
                 step.ControllerName = context.GetOptionResult(controllerNameOption);
             })
             .WithEfControllerAddPackagesStep()
@@ -129,10 +129,10 @@ public static class Program
             .WithEfControllerTextTemplatingStep()
             .WithEfControllerCodeChangeStep();
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "mvccontroller-crud")
-            .WithDisplayName("MVC Controller with views, using Entity Framework (CRUD)")
-            .WithCategory("MVC")
-            .WithDescription("Create a MVC controller with read/write actions and views using Entity Framework")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.MVC.ControllerCrud)
+            .WithDisplayName(AspnetStrings.MVC.CrudDisplayName)
+            .WithCategory(AspnetStrings.Catagories.MVC)
+            .WithDescription(AspnetStrings.MVC.CrudDescription)
             .WithOptions([projectOption, modelNameOption, controllerNameOption, viewsOption, dataContextClassRequiredOption, databaseProviderRequiredOption, prereleaseOption])
             .WithStep<ValidateEfControllerStep>(config =>
             {
@@ -143,7 +143,7 @@ public static class Program
                 step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderRequiredOption);
                 step.Prerelease = context.GetOptionResult(prereleaseOption);
-                step.ControllerType = "MVC";
+                step.ControllerType = AspnetStrings.Catagories.MVC;
                 step.ControllerName = context.GetOptionResult(controllerNameOption);
             })
             .WithEfControllerAddPackagesStep()
@@ -153,10 +153,10 @@ public static class Program
             .WithEfControllerCodeChangeStep()
             .WithMvcViewsStep();
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "blazor-crud")
-            .WithDisplayName("Razor Components with EntityFrameworkCore (CRUD)")
-            .WithCategory("Blazor")
-            .WithDescription("Generates Razor Components using Entity Framework for Create, Delete, Details, Edit and List operations for the given model")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Blazor.Crud)
+            .WithDisplayName(AspnetStrings.Blazor.CrudDisplayName)
+            .WithCategory(AspnetStrings.Catagories.Blazor)
+            .WithDescription(AspnetStrings.Blazor.CrudDescription)
             .WithOptions([projectOption, modelNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, pageTypeOption, prereleaseOption])
             .WithStep<ValidateBlazorCrudStep>(config =>
             {
@@ -175,10 +175,10 @@ public static class Program
             .WithBlazorCrudTextTemplatingStep()
             .WithBlazorCrudCodeChangeStep();
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "razorpages-crud")
-            .WithDisplayName("Razor Pages with Entity Framework (CRUD)")
-            .WithCategory("Razor Pages")
-            .WithDescription("Generates Razor pages using Entity Framework for Create, Delete, Details, Edit and List operations for the given model")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorPage.Crud)
+            .WithDisplayName(AspnetStrings.RazorPage.CrudDisplayName)
+            .WithCategory(AspnetStrings.Catagories.RazorPages)
+            .WithDescription(AspnetStrings.RazorPage.CrudDescription)
             .WithOptions([projectOption, modelNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, pageTypeOption, prereleaseOption])
             .WithStep<ValidateRazorPagesStep>(config =>
             {
@@ -197,10 +197,10 @@ public static class Program
             .WithRazorPagesTextTemplatingStep()
             .WithRazorPagesCodeChangeStep();
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "views")
-            .WithDisplayName("Razor Views")
-            .WithCategory("MVC")
-            .WithDescription("Generates Razor views for Create, Delete, Details, Edit and List operations for the given model")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorView.Views)
+            .WithDisplayName(AspnetStrings.RazorView.ViewsDisplayName)
+            .WithCategory(AspnetStrings.Catagories.MVC)
+            .WithDescription(AspnetStrings.RazorView.ViewsDescription)
             .WithOptions([projectOption, modelNameOption, pageTypeOption])
             .WithStep<ValidateViewsStep>(config =>
             {
@@ -213,10 +213,10 @@ public static class Program
             .WithViewsTextTemplatingStep()
             .WithViewsAddFileStep();
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "minimalapi")
-            .WithDisplayName("Minimal API")
-            .WithCategory("API")
-            .WithDescription("Generates an endpoints file (with CRUD API endpoints) given a model and optional DbContext.")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Api.MinimalApi)
+            .WithDisplayName(AspnetStrings.Api.MinimalApiDisplayName)
+            .WithCategory(AspnetStrings.Catagories.API)
+            .WithDescription(AspnetStrings.Api.MinimalApiDescription)
             .WithOptions([projectOption, modelNameOption, endpointsClassOption, openApiOption, dataContextClassOption, databaseProviderOption, prereleaseOption])
             .WithStep<ValidateMinimalApiStep>(config =>
             {
@@ -236,10 +236,10 @@ public static class Program
             .WithMinimalApiTextTemplatingStep()
             .WithMinimalApiCodeChangeStep();
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "area")
-            .WithDisplayName("Area")
-            .WithCategory("MVC")
-            .WithDescription("Creates a MVC Area folder structure.")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Area.Name)
+            .WithDisplayName(AspnetStrings.Area.DisplayName)
+            .WithCategory(AspnetStrings.Catagories.MVC)
+            .WithDescription(AspnetStrings.Area.Description)
             .WithOptions([projectOption, areaNameOption])
             .WithStep<AreaScaffolderStep>(config =>
             {
@@ -249,11 +249,11 @@ public static class Program
                 step.Name = context.GetOptionResult(areaNameOption);
             });
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "blazor-identity")
-            .WithDisplayName("Blazor Identity")
-            .WithCategory("Blazor")
-            .WithCategory("Identity")
-            .WithDescription("Add blazor identity to a project.")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Blazor.Identity)
+            .WithDisplayName(AspnetStrings.Blazor.IdentityDisplayName)
+            .WithCategory(AspnetStrings.Catagories.Blazor)
+            .WithCategory(AspnetStrings.Catagories.Identity)
+            .WithDescription(AspnetStrings.Blazor.IdentityDescription)
             .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, prereleaseOption])
             .WithStep<ValidateIdentityStep>(config =>
             {
@@ -272,10 +272,10 @@ public static class Program
             .WithBlazorIdentityTextTemplatingStep()
             .WithBlazorIdentityCodeChangeStep();
 
-        builder.AddScaffolder(ScaffolderCatagory.AspNet, "identity")
-            .WithDisplayName("ASP.NET Core Identity")
-            .WithCategory("Identity")
-            .WithDescription("Add ASP.NET Core identity to a project.")
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Identity.Name)
+            .WithDisplayName(AspnetStrings.Identity.DisplayName)
+            .WithCategory(AspnetStrings.Catagories.Identity)
+            .WithDescription(AspnetStrings.Identity.Description)
             .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, prereleaseOption])
             .WithStep<ValidateIdentityStep>(config =>
             {
@@ -295,10 +295,10 @@ public static class Program
 
         if (areAzCliCommandsSuccessful)
         {
-            builder.AddScaffolder(ScaffolderCatagory.AspNet, "entra-id")
-                .WithDisplayName("Entra ID")
-                .WithCategory("Entra ID")
-                .WithDescription("Add Entra auth")
+            builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.EntraId.Name)
+                .WithDisplayName(AspnetStrings.EntraId.DisplayName)
+                .WithCategory(AspnetStrings.Catagories.EntraId)
+                .WithDescription(AspnetStrings.EntraId.Description)
                 .WithOptions([usernameOption, projectOption, tenantIdOption, applicationOption, selectApplicationOption])
                 .WithStep<ValidateEntraIdStep>(config =>
                 {
@@ -382,132 +382,132 @@ public static class Program
 
         projectOption = new ScaffolderOption<string>
         {
-            DisplayName = ".NET project file",
+            DisplayName = AspnetStrings.Options.Project.DisplayName,
             CliOption = Constants.CliOptions.ProjectCliOption,
-            Description = ".NET project to be used for scaffolding (.csproj file)",
+            Description = AspnetStrings.Options.Project.Description,
             Required = true,
             PickerType = InteractivePickerType.ProjectPicker
         };
 
         prereleaseOption = new ScaffolderOption<bool>
         {
-            DisplayName = "Include Prerelease packages?",
+            DisplayName = AspnetStrings.Options.Prerelease.DisplayName,
             CliOption = Constants.CliOptions.PrereleaseCliOption,
-            Description = "Include prerelease package versions when installing latest Aspire components",
+            Description = AspnetStrings.Options.Prerelease.Description,
             Required = false,
             PickerType = InteractivePickerType.YesNo
         };
 
         fileNameOption = new ScaffolderOption<string>
         {
-            DisplayName = "File name",
+            DisplayName = AspnetStrings.Options.FileName.DisplayName,
             CliOption = Constants.CliOptions.NameOption,
-            Description = "File name for new file being created with 'dotnet new'",
+            Description = AspnetStrings.Options.FileName.Description,
             Required = true,
         };
 
         actionsOption = new ScaffolderOption<bool>
         {
-            DisplayName = "Read/Write Actions?",
+            DisplayName = AspnetStrings.Options.Actions.DisplayName,
             CliOption = Constants.CliOptions.ActionsOption,
-            Description = "Create controller with read/write actions?",
+            Description = AspnetStrings.Options.Actions.Description,
             Required = true,
             PickerType = InteractivePickerType.YesNo
         };
 
         controllerNameOption = new ScaffolderOption<string>
         {
-            DisplayName = "Controller Name",
+            DisplayName = AspnetStrings.Options.ControllerName.DisplayName,
             CliOption = Constants.CliOptions.ControllerNameOption,
-            Description = "Name for the controller being created",
+            Description = AspnetStrings.Options.ControllerName.Description,
             Required = true
         };
 
         areaNameOption = new ScaffolderOption<string>
         {
-            DisplayName = "Area Name",
+            DisplayName = AspnetStrings.Options.AreaName.DisplayName,
             CliOption = Constants.CliOptions.NameOption,
-            Description = "Name for the area being created",
+            Description = AspnetStrings.Options.AreaName.Description,
             Required = true
         };
 
         modelNameOption = new ScaffolderOption<string>
         {
-            DisplayName = "Model Name",
+            DisplayName = AspnetStrings.Options.ModelName.DisplayName,
             CliOption = Constants.CliOptions.ModelCliOption,
-            Description = "Name for the model class to be used for scaffolding",
+            Description = AspnetStrings.Options.ModelName.Description,
             Required = true,
             PickerType = InteractivePickerType.ClassPicker
         };
 
         endpointsClassOption = new ScaffolderOption<string>
         {
-            DisplayName = "Endpoints File Name",
+            DisplayName = AspnetStrings.Options.EndpointClassDisplayName,
             CliOption = Constants.CliOptions.EndpointsOption,
-            Description = "",
+            Description = string.Empty,
             Required = true
         };
 
         dataContextClassOption = new ScaffolderOption<string>
         {
-            DisplayName = "Data Context Class",
+            DisplayName = AspnetStrings.Options.DataContextClassDisplayName,
             CliOption = Constants.CliOptions.DataContextOption,
-            Description = "",
+            Description = string.Empty,
             Required = false
         };
 
         dataContextClassRequiredOption = new ScaffolderOption<string>
         {
-            DisplayName = "Data Context Class",
+            DisplayName = AspnetStrings.Options.DataContextClassDisplayName,
             CliOption = Constants.CliOptions.DataContextOption,
-            Description = "",
+            Description = string.Empty,
             Required = true
         };
 
         openApiOption = new ScaffolderOption<bool>
         {
-            DisplayName = "Open API Enabled",
+            DisplayName = AspnetStrings.Options.OpenApiDisplayName,
             CliOption = Constants.CliOptions.OpenApiOption,
-            Description = "",
+            Description = string.Empty,
             Required = false,
             PickerType = InteractivePickerType.YesNo
         };
 
         databaseProviderOption = new ScaffolderOption<string>
         {
-            DisplayName = "Database Provider",
+            DisplayName = AspnetStrings.Options.DbProviderDisplayName,
             CliOption = Constants.CliOptions.DbProviderOption,
-            Description = "",
+            Description = string.Empty,
             Required = false,
             PickerType = InteractivePickerType.CustomPicker,
-            CustomPickerValues = AspNetDbContextHelper.DbContextTypeDefaults.Keys.ToArray()
+            CustomPickerValues = [.. AspNetDbContextHelper.DbContextTypeDefaults.Keys]
         };
 
         databaseProviderRequiredOption = new ScaffolderOption<string>
         {
-            DisplayName = "Database Provider",
+            DisplayName = AspnetStrings.Options.DbProviderDisplayName,
             CliOption = Constants.CliOptions.DbProviderOption,
-            Description = "",
+            Description = string.Empty,
             Required = true,
             PickerType = InteractivePickerType.CustomPicker,
-            CustomPickerValues = AspNetDbContextHelper.DbContextTypeDefaults.Keys.ToArray()
+            CustomPickerValues = [.. AspNetDbContextHelper.DbContextTypeDefaults.Keys]
         };
 
         identityDbProviderRequiredOption = new ScaffolderOption<string>
         {
-            DisplayName = "Database Provider",
+            DisplayName = AspnetStrings.Options.DbProviderDisplayName,
             CliOption = Constants.CliOptions.DbProviderOption,
-            Description = "",
+            Description = string.Empty,
             Required = true,
             PickerType = InteractivePickerType.CustomPicker,
-            CustomPickerValues = AspNetDbContextHelper.IdentityDbContextTypeDefaults.Keys.ToArray()
+            CustomPickerValues = [.. AspNetDbContextHelper.IdentityDbContextTypeDefaults.Keys]
         };
 
         pageTypeOption = new ScaffolderOption<string>
         {
-            DisplayName = "Page Type",
+            DisplayName = AspnetStrings.Options.PageType.DisplayName,
             CliOption = Constants.CliOptions.PageTypeOption,
-            Description = "The CRUD page(s) to scaffold",
+            Description = AspnetStrings.Options.PageType.Description,
             Required = true,
             PickerType = InteractivePickerType.CustomPicker,
             CustomPickerValues = BlazorCrudHelper.CRUDPages
@@ -515,27 +515,27 @@ public static class Program
 
         viewsOption = new ScaffolderOption<bool>
         {
-            DisplayName = "With Views?",
+            DisplayName = AspnetStrings.Options.View.DisplayName,
             CliOption = Constants.CliOptions.ViewsOption,
-            Description = "Add CRUD razor views (.cshtml)",
+            Description = AspnetStrings.Options.View.Description,
             Required = true,
             PickerType = InteractivePickerType.YesNo
         };
 
         overwriteOption = new ScaffolderOption<bool>
         {
-            DisplayName = "Overwrite existing files?",
+            DisplayName = AspnetStrings.Options.Overwrite.DisplayName,
             CliOption = Constants.CliOptions.OverwriteOption,
-            Description = "Option to enable overwriting existing files",
+            Description = AspnetStrings.Options.Overwrite.Description,
             Required = true,
             PickerType = InteractivePickerType.YesNo
         };
 
         usernameOption = new ScaffolderOption<string>
         {
-            DisplayName = "Select username",
+            DisplayName = AspnetStrings.Options.Username.DisplayName,
             CliOption = Constants.CliOptions.UsernameOption,
-            Description = "User name for the identity user",
+            Description = AspnetStrings.Options.Username.Description,
             Required = true,
             PickerType = InteractivePickerType.CustomPicker,
             CustomPickerValues = usernames 
@@ -543,9 +543,9 @@ public static class Program
 
         tenantIdOption = new ScaffolderOption<string>
         {
-            DisplayName = "Tenant Id",
+            DisplayName = AspnetStrings.Options.TenantId.DisplayName,
             CliOption = Constants.CliOptions.TenantIdOption,
-            Description = "Tenant Id for the identity user",
+            Description = AspnetStrings.Options.TenantId.Description,
             Required = true,
             PickerType = InteractivePickerType.CustomPicker,
             CustomPickerValues = tenants 
@@ -553,24 +553,21 @@ public static class Program
 
         applicationOption = new ScaffolderOption<string>
         {
-            DisplayName = "Create or Select Application",
-            Description = "Create or select existing application",
+            DisplayName = AspnetStrings.Options.Application.DisplayName,
+            Description = AspnetStrings.Options.Application.Description,
             Required = true,
             PickerType = InteractivePickerType.ConditionalPicker,
-            CustomPickerValues = new[] { "Select an existing Azure application object", "Create a new Azure application object"} 
+            CustomPickerValues = AspnetStrings.Options.Application.Values
         };
 
         selectApplicationOption = new ScaffolderOption<string>
         {
-            DisplayName = "Select Application",
+            DisplayName = AspnetStrings.Options.SelectApplication.DisplayName,
             CliOption = Constants.CliOptions.ApplicationIdOption,
-            Description = "Select existing application",
+            Description = AspnetStrings.Options.SelectApplication.Description,
             Required = false,
             PickerType = InteractivePickerType.CustomPicker,
             CustomPickerValues = appIds
         };
     }
-
-    
 }
-

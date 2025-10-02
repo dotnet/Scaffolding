@@ -5,6 +5,7 @@ using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.Aspire;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
+using Microsoft.DotNet.Tools.Scaffold.Aspire.Command;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
@@ -155,7 +156,7 @@ internal static class DatabaseScaffolderBuilderExtensions
     internal static Dictionary<string, string> GetAppHostProperties(CommandSettings commandSettings)
     {
         var codeModifierProperties = new Dictionary<string, string>();
-        if (AspireCommandHelpers.DatabaseTypeDefaults.TryGetValue(commandSettings.Type, out var dbProperties) && dbProperties is not null)
+        if (AspireCliStrings.Database.DatabaseTypeDefaults.TryGetValue(commandSettings.Type, out var dbProperties) && dbProperties is not null)
         {
             codeModifierProperties.Add("$(DbName)", dbProperties.AspireDbName);
             codeModifierProperties.Add("$(AddDbMethod)", dbProperties.AspireAddDbMethod);
@@ -173,8 +174,8 @@ internal static class DatabaseScaffolderBuilderExtensions
     internal static Dictionary<string, string> GetApiProjectProperties(CommandSettings commandSettings)
     {
         var codeModifierProperties = new Dictionary<string, string>();
-        if (AspireCommandHelpers.DatabaseTypeDefaults.TryGetValue(commandSettings.Type, out var dbProperties) &&
-            AspireCommandHelpers.DbContextTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) &&
+        if (AspireCliStrings.Database.DatabaseTypeDefaults.TryGetValue(commandSettings.Type, out var dbProperties) &&
+            AspireCliStrings.Database.DbContextTypeDefaults.TryGetValue(commandSettings.Type, out var dbContextProperties) &&
             dbProperties is not null &&
             dbContextProperties is not null)
         {

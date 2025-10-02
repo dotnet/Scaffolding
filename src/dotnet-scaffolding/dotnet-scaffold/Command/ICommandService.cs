@@ -3,8 +3,8 @@
 
 namespace Microsoft.DotNet.Tools.Scaffold.Command
 {
-    internal static class CliOptions
+    internal interface ICommandService
     {
-        internal const string NonInteractiveCliOption = "--non-interactive";
+        void AddScaffolderCommands();
     }
 }

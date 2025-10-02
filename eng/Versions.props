@@ -77,7 +77,8 @@
     <!-- Microsoft.AspNetCore.Razor.Language -->
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.24</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.Build-->
-    <MicrosoftBuildPackageVersion>17.11.4 </MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>17.11.31</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildTasksCorePackageVersion>17.14.8</MicrosoftBuildTasksCorePackageVersion>
     <!-- Microsoft.Build.Utilities-->
     <MicrosoftBuildUtilitiesCorePackageVersion>17.14.8</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftBuildLocatorPackageVersion>1.9.1</MicrosoftBuildLocatorPackageVersion>

@@ -300,7 +300,9 @@ internal class DotNetToolService : IDotNetToolService
     /// <returns>True if valid; otherwise, false.</returns>
     private static bool IsValidDotNetTool(DotNetToolInfo dotnetToolInfo)
     {
-        return
-            !dotnetToolInfo.PackageName.Equals("package", StringComparison.OrdinalIgnoreCase);
+        // ignore dotnet-scaffold-aspire if the has a previous version on their machine.
+        // it is no longer relevant since aspire has been folded into dotnet-scaffold
+        return !dotnetToolInfo.Command.Equals("dotnet-scaffold-aspire", StringComparison.OrdinalIgnoreCase) &&
+        !dotnetToolInfo.PackageName.Equals("package", StringComparison.OrdinalIgnoreCase);
     }
 }

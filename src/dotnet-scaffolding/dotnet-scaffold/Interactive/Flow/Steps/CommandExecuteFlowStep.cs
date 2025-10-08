@@ -93,28 +93,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 {
                     string command = dotnetToolInfo.Command;
                     string componentExecutionString = $"{command} {string.Join(" ", parameterValues)}";
-                    int? exitCode = null;
-                    AnsiConsole.Status()
+                    int exitCode = AnsiConsole.Status()
                         .Start($"Executing '{command}'", statusContext =>
                         {
                             var cliRunner = dotnetToolInfo.IsGlobalTool ?
                                 DotnetCliRunner.Create(command, parameterValues, envVars) :
                                 DotnetCliRunner.CreateDotNet(command, parameterValues, envVars);
-                            exitCode = cliRunner.ExecuteWithCallbacks(
+                            return cliRunner.ExecuteWithCallbacks(
                                 (s) => AnsiConsole.Console.MarkupLineInterpolated($"[green]{s}[/]"),
                                 (s) => AnsiConsole.Console.MarkupLineInterpolated($"[red]{s}[/]"));
                         });
 
                     _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandInfo, exitCode, chosenCategory));
-                    if (exitCode != null)
+                    if (exitCode != 0)
                     {
-                        if (exitCode != 0)
-                        {
-                            AnsiConsole.Console.WriteLine($"\nCommand exit code: {exitCode}");
-                        }
-
-                        return FlowStepResult.Success;
+                        AnsiConsole.Console.WriteLine($"\nCommand exit code: {exitCode}");
                     }
+
+                    return FlowStepResult.Success;
                 }
             }
             return FlowStepResult.Failure();

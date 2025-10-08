@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -303,6 +304,7 @@ internal class DotNetToolService : IDotNetToolService
         // ignore dotnet-scaffold-aspire if the has a previous version on their machine.
         // it is no longer relevant since aspire has been folded into dotnet-scaffold
         return !dotnetToolInfo.Command.Equals("dotnet-scaffold-aspire", StringComparison.OrdinalIgnoreCase) &&
+            !dotnetToolInfo.Command.Equals("dotnet-scaffold-aspnet", StringComparison.OrdinalIgnoreCase) &&
         !dotnetToolInfo.PackageName.Equals("package", StringComparison.OrdinalIgnoreCase);
     }
 }

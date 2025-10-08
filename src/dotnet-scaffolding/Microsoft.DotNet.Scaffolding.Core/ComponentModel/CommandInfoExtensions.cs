@@ -9,4 +9,15 @@ internal static class CommandInfoExtensions
     {
         return commandInfo.DisplayCategories.Any(category => string.Equals(category, "Aspire", StringComparison.Ordinal));
     }
+
+    //TODO improve this logic, maybe put the scaffolder catagory in the commandInfo?
+    public static bool IsCommandAnAspNetCommand(this CommandInfo commandInfo)
+    {
+        return commandInfo.DisplayCategories.Any(category => string.Equals(category, "Blazor", StringComparison.Ordinal) ||
+            string.Equals(category, "MVC", StringComparison.Ordinal) ||
+            string.Equals(category, "Razor Pages", StringComparison.Ordinal) ||
+            string.Equals(category, "API", StringComparison.Ordinal) ||
+            string.Equals(category, "Identity", StringComparison.Ordinal) ||
+            string.Equals(category, "Entra ID", StringComparison.Ordinal));
+    }
 }

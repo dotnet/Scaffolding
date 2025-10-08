@@ -19,10 +19,10 @@ internal static class ScaffolderBuilderExtensions
     /// </summary>
     /// <param name="builder">The scaffold builder.</param>
     /// <returns>The updated scaffold builder.</returns>
-    public static IScaffoldBuilder WithConnectionStringStep(
+    public static IScaffoldBuilder WithAspNetConnectionStringStep(
         this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<AddConnectionStringStep>(config =>
+        builder = builder.WithStep<AddAspNetConnectionStringStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;

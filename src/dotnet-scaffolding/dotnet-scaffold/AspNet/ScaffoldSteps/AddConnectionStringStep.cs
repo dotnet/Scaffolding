@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Steps;
 /// Scaffold step for adding a connection string to the appsettings.json file of a project.
 /// Updates or creates the ConnectionStrings section as needed.
 /// </summary>
-internal class AddConnectionStringStep : ScaffoldStep
+internal class AddAspNetConnectionStringStep : ScaffoldStep
 {
     /// <summary>
     /// Gets or sets the base project path to search for appsettings.json.
@@ -32,10 +32,10 @@ internal class AddConnectionStringStep : ScaffoldStep
     private readonly IFileSystem _fileSystem;
     private readonly ITelemetryService _telemetryService;
     /// <summary>
-    /// Initializes a new instance of the <see cref="AddConnectionStringStep"/> class.
+    /// Initializes a new instance of the <see cref="AddAspNetConnectionStringStep"/> class.
     /// </summary>
-    public AddConnectionStringStep(
-        ILogger<AddConnectionStringStep> logger,
+    public AddAspNetConnectionStringStep(
+        ILogger<AddAspNetConnectionStringStep> logger,
         IFileSystem fileSystem,
         ITelemetryService telemetryService)
     {

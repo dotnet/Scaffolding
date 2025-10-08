@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 /// <summary>
 /// A scaffold step that adds a connection string to the appsettings.json file of a project.
 /// </summary>
-internal class AddConnectionStringStep : ScaffoldStep
+internal class AddAspireConnectionStringStep : ScaffoldStep
 {
     public required string BaseProjectPath { get; set; }
     public required string ConnectionStringName { get; set; }
@@ -25,13 +25,13 @@ internal class AddConnectionStringStep : ScaffoldStep
     private readonly ITelemetryService _telemetryService;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AddConnectionStringStep"/> class.
+    /// Initializes a new instance of the <see cref="AddAspireConnectionStringStep"/> class.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
     /// <param name="fileSystem">The file system abstraction.</param>
     /// <param name="telemetryService">The telemetry service instance.</param>
-    public AddConnectionStringStep(
-        ILogger<AddConnectionStringStep> logger,
+    public AddAspireConnectionStringStep(
+        ILogger<AddAspireConnectionStringStep> logger,
         IFileSystem fileSystem,
         ITelemetryService telemetryService)
     {

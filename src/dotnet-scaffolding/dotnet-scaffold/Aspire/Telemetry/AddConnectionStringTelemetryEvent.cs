@@ -7,17 +7,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
 /// <summary>
 /// Telemetry event for tracking the result of adding a connection string step.
 /// </summary>
-internal class AddConnectionStringTelemetryEvent : TelemetryEventBase
+internal class AddAspireConnectionStringTelemetryEvent : TelemetryEventBase
 {
-    private const string TelemetryEventName = "AddConnectionStringStep";
+    private const string TelemetryEventName = "AddAspireConnectionStringStep";
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AddConnectionStringTelemetryEvent"/> class.
+    /// Initializes a new instance of the <see cref="AddAspireConnectionStringTelemetryEvent"/> class.
     /// </summary>
     /// <param name="scaffolderName">The name of the scaffolder.</param>
     /// <param name="status">The status of the operation (e.g., Success, Failure).</param>
     /// <param name="failureReason">The reason for failure, if any.</param>
-    public AddConnectionStringTelemetryEvent(string scaffolderName, string status, string? failureReason = null) : base(TelemetryEventName)
+    public AddAspireConnectionStringTelemetryEvent(string scaffolderName, string status, string? failureReason = null) : base(TelemetryEventName)
     {
         SetProperty("ScaffolderName", scaffolderName);
         SetProperty("Result", status);

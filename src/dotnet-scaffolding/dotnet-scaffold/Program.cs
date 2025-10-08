@@ -9,6 +9,7 @@ using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.Aspire;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
+using Microsoft.DotNet.Tools.Scaffold.AspNet;
 using Microsoft.DotNet.Tools.Scaffold.Command;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.AppBuilder;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,9 @@ Option nonInteractiveOption = nonInteractiveScaffoldOption.ToCliOption();
 
 AspireCommandService aspireCommandService = new(builder);
 aspireCommandService.AddScaffolderCommands();
+
+AspNetCommandService aspNetCommandService = new(builder);
+aspNetCommandService.AddScaffolderCommands();
 
 IScaffoldRunner runner = builder.Build();
 
@@ -54,7 +58,9 @@ static void ConfigureServices(IServiceCollection services)
 {
     services.AddSingleton<IFileSystem, FileSystem>();
     services.AddSingleton<IEnvironmentService, EnvironmentService>();
+    //TODO figure out the telemetry story here
     services.AddTelemetry("dotnetScaffoldAspire");
+    services.AddTelemetry("dotnetScaffoldAspnet");
     services.AddSingleton<IFirstPartyToolTelemetryWrapper, FirstPartyToolTelemetryWrapper>();
 }
 
@@ -66,7 +72,15 @@ static void ConfigureSteps(IServiceCollection services)
     services.AddTransient<AddPackagesStep>();
     services.AddTransient<WrappedAddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();
-    services.AddTransient<AddConnectionStringStep>();
+    services.AddTransient<AddAspireConnectionStringStep>();
+    services.AddTransient<AddAspNetConnectionStringStep>();
+
+    var executingAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+    var scaffoldStepTypes = executingAssembly.GetTypes().Where(x => x.IsSubclassOf(typeof(ScaffoldStep)));
+    foreach (var type in scaffoldStepTypes)
+    {
+        services.AddTransient(type);
+    }
 }
 
 static ScaffolderOption<bool> GetNonInteractiveOption()

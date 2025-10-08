@@ -52,7 +52,7 @@ internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandSe
                 })
                 .WithDatabaseAddPackageSteps()
                 .WithDbContextStep()
-                .WithConnectionStringStep()
+                .WithAspireConnectionStringStep()
                 .WithDatabaseCodeModificationSteps();
 
         IScaffoldBuilder storage = _builder.AddScaffolder(ScaffolderCatagory.Aspire, AspireCliStrings.StorageTitle);

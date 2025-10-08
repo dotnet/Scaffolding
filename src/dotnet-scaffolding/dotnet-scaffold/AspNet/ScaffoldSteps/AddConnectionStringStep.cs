@@ -65,7 +65,7 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
         if (content is null)
         {
             _logger.LogError($"Failed to parse appsettings.json file at {appSettingsFile}");
-            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json"));
+            _telemetryService.TrackEvent(new AddAspNetConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json"));
             return Task.FromResult(false);
         }
 
@@ -93,11 +93,11 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
             var options = new JsonSerializerOptions { WriteIndented = true };
             _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
-            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));
+            _telemetryService.TrackEvent(new AddAspNetConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));
         }
         else
         {
-            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.NoChange));
+            _telemetryService.TrackEvent(new AddAspNetConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.NoChange));
         }
 
         return Task.FromResult(true);

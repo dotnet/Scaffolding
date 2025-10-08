@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 /// <summary>
 /// Provides extension methods for <see cref="IScaffoldBuilder"/> to add general scaffolding steps.
 /// </summary>
-internal static class ScaffolderBuilderExtensions
+internal static class ScaffolderBuilderAspNetExtensions
 {
     /// <summary>
     /// Adds a step to configure the connection string.

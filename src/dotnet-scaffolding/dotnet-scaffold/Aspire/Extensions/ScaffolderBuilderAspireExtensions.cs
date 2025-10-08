@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 /// <summary>
 /// Extension methods for <see cref="IScaffoldBuilder"/> to add common scaffolding steps.
 /// </summary>
-internal static class ScaffolderBuilderExtensions
+internal static class ScaffolderBuilderAspireExtensions
 {
     /// <summary>
     /// Adds a step to the <see cref="IScaffoldBuilder"/> for adding a connection string to the project.

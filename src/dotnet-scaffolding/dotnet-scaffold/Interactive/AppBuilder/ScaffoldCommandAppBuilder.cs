@@ -1,4 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
+using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.Command;
@@ -12,12 +13,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.AppBuilder;
 /// <summary>
 /// Builds and configures the <see cref="ScaffoldCommandApp"/>, including service registration and command setup.
 /// </summary>
-internal class ScaffoldCommandAppBuilder(string[] args)
+internal class ScaffoldCommandAppBuilder(IScaffoldRunner runnner, string[] args)
 {
     // Command-line arguments passed to the application.
     private readonly string[] _args = args;
     // Backup version string for dotnet-scaffold, updated every release.
     private readonly string _backupDotNetScaffoldVersion = "10.0.0";
+
+    private readonly IScaffoldRunner _scaffoldRunner = runnner;
 
     /// <summary>
     /// Builds and configures the <see cref="ScaffoldCommandApp"/> with all required services and commands.
@@ -47,7 +50,7 @@ internal class ScaffoldCommandAppBuilder(string[] args)
     /// Registers the default services required for the scaffold command application.
     /// </summary>
     /// <returns>A <see cref="TypeRegistrar"/> with all required services registered.</returns>
-    private static TypeRegistrar? GetDefaultServices()
+    private TypeRegistrar? GetDefaultServices()
     {
         var registrar = new TypeRegistrar();
         // Register core services for dependency injection.
@@ -66,6 +69,7 @@ internal class ScaffoldCommandAppBuilder(string[] args)
                                                   "dotnetScaffold");
         });
         registrar.Register(typeof(ITelemetryService), typeof(TelemetryService));
+        registrar.RegisterInstance(typeof(IScaffoldRunner), _scaffoldRunner);
         return registrar;
     }
 }

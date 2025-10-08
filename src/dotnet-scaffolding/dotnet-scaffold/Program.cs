@@ -39,8 +39,8 @@ builder.AddHandler(async (context) =>
     }
     else
     {
-        var builder = new ScaffoldCommandAppBuilder(context.ParseResult.Tokens.Select(t => t.Value).ToArray());
-        var app = builder.Build();
+        ScaffoldCommandAppBuilder builder = new(runner, [.. context.ParseResult.Tokens.Select(t => t.Value)]);
+        ScaffoldCommandApp app = builder.Build();
         await app.RunAsync();
     }
 });

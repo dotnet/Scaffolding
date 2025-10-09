@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using System.Collections.Generic;
 using System.CommandLine;
-using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
@@ -89,6 +87,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                     return FlowStepResult.Success;
                 }
                 //asp.net
+                else if (commandInfo.IsCommandAnAspNetCommand())
+                {
+                    // Build the argument list for System.CommandLine
+                    parameterValues.Insert(0, "aspnet");
+                    if (_scaffoldRunnner is null || _scaffoldRunnner is not ScaffoldRunner runner || runner.RootCommand is null)
+                    {
+                        return FlowStepResult.Failure("AspNet command infrastructure not available.");
+                    }
+                    // Invoke the command directly (async)
+                    int aspnetExitCode = await runner.RootCommand.InvokeAsync([.. parameterValues], cancellationToken: cancellationToken);
+                    _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandInfo, aspnetExitCode, chosenCategory));
+                    if (aspnetExitCode != 0)
+                    {
+                        AnsiConsole.Console.WriteLine($"\nAspNet command exit code: {aspnetExitCode}");
+                    }
+                    return FlowStepResult.Success;
+                }
+                //third party tools
                 else
                 {
                     string command = dotnetToolInfo.Command;
@@ -122,7 +138,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// <param name="context">The flow context.</param>
         /// <param name="commandInfo">The command info object.</param>
         /// <returns>A list of parameter values to pass to the CLI runner.</returns>
-        private List<string> GetAllParameterValues(IFlowContext context, CommandInfo commandInfo)
+        private static List<string> GetAllParameterValues(IFlowContext context, CommandInfo commandInfo)
         {
             var parameterValues = new List<string> { commandInfo.Name };
             foreach (var parameter in commandInfo.Parameters)

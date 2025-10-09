@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Steps;
 /// Scaffold step for adding a connection string to the appsettings.json file of a project.
 /// Updates or creates the ConnectionStrings section as needed.
 /// </summary>
-internal class AddConnectionStringStep : ScaffoldStep
+internal class AddAspNetConnectionStringStep : ScaffoldStep
 {
     /// <summary>
     /// Gets or sets the base project path to search for appsettings.json.
@@ -32,10 +32,10 @@ internal class AddConnectionStringStep : ScaffoldStep
     private readonly IFileSystem _fileSystem;
     private readonly ITelemetryService _telemetryService;
     /// <summary>
-    /// Initializes a new instance of the <see cref="AddConnectionStringStep"/> class.
+    /// Initializes a new instance of the <see cref="AddAspNetConnectionStringStep"/> class.
     /// </summary>
-    public AddConnectionStringStep(
-        ILogger<AddConnectionStringStep> logger,
+    public AddAspNetConnectionStringStep(
+        ILogger<AddAspNetConnectionStringStep> logger,
         IFileSystem fileSystem,
         ITelemetryService telemetryService)
     {
@@ -65,7 +65,7 @@ internal class AddConnectionStringStep : ScaffoldStep
         if (content is null)
         {
             _logger.LogError($"Failed to parse appsettings.json file at {appSettingsFile}");
-            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json"));
+            _telemetryService.TrackEvent(new AddAspNetConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json"));
             return Task.FromResult(false);
         }
 
@@ -93,11 +93,11 @@ internal class AddConnectionStringStep : ScaffoldStep
             var options = new JsonSerializerOptions { WriteIndented = true };
             _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
-            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));
+            _telemetryService.TrackEvent(new AddAspNetConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));
         }
         else
         {
-            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.NoChange));
+            _telemetryService.TrackEvent(new AddAspNetConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.NoChange));
         }
 
         return Task.FromResult(true);

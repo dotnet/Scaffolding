@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 /// <summary>
 /// A scaffold step that adds a connection string to the appsettings.json file of a project.
 /// </summary>
-internal class AddConnectionStringStep : ScaffoldStep
+internal class AddAspireConnectionStringStep : ScaffoldStep
 {
     public required string BaseProjectPath { get; set; }
     public required string ConnectionStringName { get; set; }
@@ -25,13 +25,13 @@ internal class AddConnectionStringStep : ScaffoldStep
     private readonly ITelemetryService _telemetryService;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AddConnectionStringStep"/> class.
+    /// Initializes a new instance of the <see cref="AddAspireConnectionStringStep"/> class.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
     /// <param name="fileSystem">The file system abstraction.</param>
     /// <param name="telemetryService">The telemetry service instance.</param>
-    public AddConnectionStringStep(
-        ILogger<AddConnectionStringStep> logger,
+    public AddAspireConnectionStringStep(
+        ILogger<AddAspireConnectionStringStep> logger,
         IFileSystem fileSystem,
         ITelemetryService telemetryService)
     {
@@ -68,7 +68,7 @@ internal class AddConnectionStringStep : ScaffoldStep
         if (content is null)
         {
             _logger.LogError($"Failed to parse appsettings.json file at {appSettingsFile}");
-            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json"));
+            _telemetryService.TrackEvent(new AddAspireConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json"));
             return Task.FromResult(false);
         }
 
@@ -97,11 +97,11 @@ internal class AddConnectionStringStep : ScaffoldStep
             var options = new JsonSerializerOptions { WriteIndented = true };
             _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
-            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));
+            _telemetryService.TrackEvent(new AddAspireConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));
         }
         else
         {
-            _telemetryService.TrackEvent(new AddConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.NoChange));
+            _telemetryService.TrackEvent(new AddAspireConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.NoChange));
         }
 
         return Task.FromResult(true);

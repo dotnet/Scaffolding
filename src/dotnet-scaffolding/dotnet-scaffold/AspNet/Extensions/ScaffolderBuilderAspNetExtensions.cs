@@ -12,17 +12,17 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 /// <summary>
 /// Provides extension methods for <see cref="IScaffoldBuilder"/> to add general scaffolding steps.
 /// </summary>
-internal static class ScaffolderBuilderExtensions
+internal static class ScaffolderBuilderAspNetExtensions
 {
     /// <summary>
     /// Adds a step to configure the connection string.
     /// </summary>
     /// <param name="builder">The scaffold builder.</param>
     /// <returns>The updated scaffold builder.</returns>
-    public static IScaffoldBuilder WithConnectionStringStep(
+    public static IScaffoldBuilder WithAspNetConnectionStringStep(
         this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<AddConnectionStringStep>(config =>
+        builder = builder.WithStep<AddAspNetConnectionStringStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;

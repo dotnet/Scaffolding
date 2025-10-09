@@ -8,7 +8,7 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.Aspire;
-using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
+using Microsoft.DotNet.Tools.Scaffold.AspNet;
 using Microsoft.DotNet.Tools.Scaffold.Command;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.AppBuilder;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 IScaffoldRunnerBuilder builder = Host.CreateScaffoldBuilder();
 
 ConfigureServices(builder.Services);
-ConfigureSteps(builder.Services);
+ConfigureSharedSteps(builder.Services);
 
 ScaffolderOption<bool> nonInteractiveScaffoldOption = GetNonInteractiveOption();
 builder.AddOption(nonInteractiveScaffoldOption);
@@ -24,6 +24,11 @@ Option nonInteractiveOption = nonInteractiveScaffoldOption.ToCliOption();
 
 AspireCommandService aspireCommandService = new(builder);
 aspireCommandService.AddScaffolderCommands();
+ConfigureCommandSteps(builder.Services, aspireCommandService);
+
+AspNetCommandService aspNetCommandService = new(builder);
+aspNetCommandService.AddScaffolderCommands();
+ConfigureCommandSteps(builder.Services, aspNetCommandService);
 
 IScaffoldRunner runner = builder.Build();
 
@@ -54,19 +59,29 @@ static void ConfigureServices(IServiceCollection services)
 {
     services.AddSingleton<IFileSystem, FileSystem>();
     services.AddSingleton<IEnvironmentService, EnvironmentService>();
+    //TODO figure out the telemetry story here
     services.AddTelemetry("dotnetScaffoldAspire");
+    services.AddTelemetry("dotnetScaffoldAspnet");
     services.AddSingleton<IFirstPartyToolTelemetryWrapper, FirstPartyToolTelemetryWrapper>();
 }
 
-static void ConfigureSteps(IServiceCollection services)
+static void ConfigureSharedSteps(IServiceCollection services)
 {
     services.AddTransient<CodeModificationStep>();
-    services.AddTransient<AddAspireCodeChangeStep>();
-    services.AddTransient<ValidateOptionsStep>();
     services.AddTransient<AddPackagesStep>();
-    services.AddTransient<WrappedAddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();
-    services.AddTransient<AddConnectionStringStep>();
+}
+
+static void ConfigureCommandSteps(IServiceCollection services, ICommandService commandService)
+{
+    Type[] stepTypes = commandService.GetScaffoldSteps();
+    if (stepTypes is not null)
+    {
+        foreach (Type stepType in stepTypes)
+        {
+            services.AddTransient(stepType);
+        }
+    }
 }
 
 static ScaffolderOption<bool> GetNonInteractiveOption()

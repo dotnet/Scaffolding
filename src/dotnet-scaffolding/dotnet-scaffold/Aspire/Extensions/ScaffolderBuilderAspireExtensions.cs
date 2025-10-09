@@ -9,18 +9,18 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 /// <summary>
 /// Extension methods for <see cref="IScaffoldBuilder"/> to add common scaffolding steps.
 /// </summary>
-internal static class ScaffolderBuilderExtensions
+internal static class ScaffolderBuilderAspireExtensions
 {
     /// <summary>
     /// Adds a step to the <see cref="IScaffoldBuilder"/> for adding a connection string to the project.
     /// </summary>
     /// <param name="builder">The scaffold builder to extend.</param>
     /// <returns>The scaffold builder with the connection string step added.</returns>
-    public static IScaffoldBuilder WithConnectionStringStep(
+    public static IScaffoldBuilder WithAspireConnectionStringStep(
         this IScaffoldBuilder builder)
     {
         // Add a step to insert a connection string into the project configuration
-        builder = builder.WithStep<AddConnectionStringStep>(config =>
+        builder = builder.WithStep<AddAspireConnectionStringStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;
@@ -50,7 +50,7 @@ internal static class ScaffolderBuilderExtensions
                 throw new ArgumentException("'BaseProjectPath' not provided in 'WithAddDbContextStep' or provided in ScaffolderContext.Properties");
             }
 
-            // Set properties for the AddConnectionStringStep
+            // Set properties for the AddAspireConnectionStringStep
             step.BaseProjectPath = baseProjectPathVal;
             step.ConnectionString = string.Format(dbContextProperties.NewDbConnectionString, dbContextProperties.DbContextName);
             step.ConnectionStringName = dbContextProperties.DbContextName;

@@ -52,7 +52,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// <inheritdoc/>
         public async ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            System.Diagnostics.Debugger.Launch();
             // Need all 3 things, throw if not found
             DotNetToolInfo? dotnetToolInfo = context.GetComponentObj();
             CommandInfo? commandInfo = context.GetCommandObj();

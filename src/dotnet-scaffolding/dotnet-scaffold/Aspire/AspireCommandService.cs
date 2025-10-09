@@ -16,6 +16,17 @@ internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandSe
 {
     IScaffoldRunnerBuilder _builder = builder;
 
+    public Type[] GetScaffoldSteps()
+    {
+        return
+        [
+            typeof(AddAspireCodeChangeStep),
+            typeof(AddAspireConnectionStringStep),
+            typeof(ValidateOptionsStep),
+            typeof(WrappedAddPackagesStep),
+        ];
+    }
+
     public void AddScaffolderCommands()
     {
         CreateAspireOptions(out var cachingTypeOption,

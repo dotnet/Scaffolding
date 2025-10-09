@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 /// </summary>
 internal class AddAspNetConnectionStringTelemetryEvent : TelemetryEventBase
 {
-    private const string TelemetryEventName = "AddAspNetConnectionStringStep";
+    private const string TelemetryEventName = "AddConnectionStringStep";
     /// <summary>
     /// Initializes a new instance of the <see cref="AddAspNetConnectionStringTelemetryEvent"/> class.
     /// </summary>

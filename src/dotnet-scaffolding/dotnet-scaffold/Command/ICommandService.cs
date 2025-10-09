@@ -6,5 +6,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Command
     internal interface ICommandService
     {
         void AddScaffolderCommands();
+
+        Type[] GetScaffoldSteps();
     }
 }

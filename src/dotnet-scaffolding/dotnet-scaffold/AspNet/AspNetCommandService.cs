@@ -10,12 +10,41 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.Command;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.DotNet.Scaffolding.Core.Steps;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet
 {
     internal class AspNetCommandService(IScaffoldRunnerBuilder builder) : ICommandService
     {
         IScaffoldRunnerBuilder _builder = builder;
+
+        public Type[] GetScaffoldSteps()
+        {
+            return
+            [
+                typeof(AddClientSecretStep),
+                typeof(AddAspNetConnectionStringStep),
+                typeof(AddFileStep),
+                typeof(AreaScaffolderStep),
+                typeof(DetectBlazorWasmStep),
+                typeof(DotnetNewScaffolderStep),
+                typeof(EmptyControllerScaffolderStep),
+                typeof(RegisterAppStep),
+                typeof(UpdateAppAuthorizationStep),
+                typeof(UpdateAppSettingsStep),
+                typeof(ValidateBlazorCrudStep),
+                typeof(ValidateEfControllerStep),
+                typeof(ValidateEntraIdStep),
+                typeof(ValidateIdentityStep),
+                typeof(ValidateMinimalApiStep),
+                typeof(ValidateRazorPagesStep),
+                typeof(ValidateViewsStep),
+                typeof(WrappedAddPackagesStep),
+                typeof(WrappedCodeModificationStep),
+                typeof(WrappedTextTemplatingStep)
+            ];
+        }
 
         public void AddScaffolderCommands()
         {

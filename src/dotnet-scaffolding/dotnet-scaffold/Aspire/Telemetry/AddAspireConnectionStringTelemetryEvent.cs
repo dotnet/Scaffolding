@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
 /// </summary>
 internal class AddAspireConnectionStringTelemetryEvent : TelemetryEventBase
 {
-    private const string TelemetryEventName = "AddAspireConnectionStringStep";
+    private const string TelemetryEventName = "AddConnectionStringStep";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AddAspireConnectionStringTelemetryEvent"/> class.

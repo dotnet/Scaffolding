@@ -18,9 +18,9 @@ I recommend cloning it under your user profile directory.
 
 2. **Install dev package**
 
-   from cmd: run `scripts\install-scaffold-all.cmd`
+   from cmd: run `scripts\install-scaffold.cmd`
    ***OR***
-   from powershell run: `scripts\install-scaffold-all.sh`
+   from powershell run: `scripts\install-scaffold.sh`
 
    These scripts will install the Nuget Packages associated with your local changes on your machine.
 

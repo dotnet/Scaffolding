@@ -161,23 +161,24 @@ internal class AspNetOptions
         PickerType = InteractivePickerType.YesNo
     };
 
-    private readonly bool _areAzCliCommandsSuccessful;
-    private readonly List<string> _usernames = [];
-    private readonly List<string> _tenants = [];
-    private readonly List<string> _appIds = [];
     private ScaffolderOption<string>? _username = null;
     private ScaffolderOption<string>? _tenantId = null;
     private ScaffolderOption<string>? _applicationId = null;
+    private AzureInformation? _azureInformation;
 
-    public AspNetOptions()
+
+    private AspNetOptions(AzureInformation? azureInformation)
     {
-        _areAzCliCommandsSuccessful = AzCliHelper.GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds);
-        _usernames = usernames;
-        _tenants = tenants;
-        _appIds = appIds;
+        _azureInformation = azureInformation;
     }
 
-    public bool AreAzCliCommandsSuccessful() => _areAzCliCommandsSuccessful;
+    public static async Task<AspNetOptions> CreateAsync()
+    {
+        AzureInformation? azureInfo = await AzCliHelper.GetAzureInformationAsync();
+        return new AspNetOptions(azureInfo);
+    }
+
+    public bool AreAzCliCommandsSuccessful() => _azureInformation is not null;
 
     public ScaffolderOption<string> Username => _username ??=  new()
     {
@@ -186,7 +187,7 @@ internal class AspNetOptions
         Description = AspnetStrings.Options.Username.Description,
         Required = true,
         PickerType = InteractivePickerType.CustomPicker,
-        CustomPickerValues = _usernames
+        CustomPickerValues = _azureInformation!.Usernames
     };
     
 
@@ -197,7 +198,7 @@ internal class AspNetOptions
         Description = AspnetStrings.Options.TenantId.Description,
         Required = true,
         PickerType = InteractivePickerType.CustomPicker,
-        CustomPickerValues = _tenants
+        CustomPickerValues = _azureInformation!.Tenants
     };
 
     public static ScaffolderOption<string> Application => new()
@@ -216,6 +217,6 @@ internal class AspNetOptions
         Description = AspnetStrings.Options.SelectApplication.Description,
         Required = false,
         PickerType = InteractivePickerType.CustomPicker,
-        CustomPickerValues = _appIds
+        CustomPickerValues = _azureInformation!.AppIds
     };
 }

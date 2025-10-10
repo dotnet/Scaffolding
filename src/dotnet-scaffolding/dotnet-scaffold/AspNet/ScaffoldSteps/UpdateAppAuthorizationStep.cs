@@ -28,11 +28,11 @@
                 _telemetryService = telemetryService;
             }
 
-            public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+            public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
             {
                 if (string.IsNullOrEmpty(ClientId))
                 {
-                    return Task.FromResult(false);
+                    return false;
                 }
 
                 if (AutoConfigureLocalUrls)
@@ -59,16 +59,16 @@
                     command += $" --public-client-redirect-uris {spaUrisJson}";
                 }
 
-                var exitCode = runner.RunAzCli(command, out var stdOut, out var stdErr);
+                (int exitCode, string? stdOut, string? stdErr) = await runner.RunAzCliAsync(command);
                 if (exitCode != 0 || !string.IsNullOrEmpty(stdErr))
                 {
                     _logger.LogError($"Failed to update app registration: {stdErr}");
-                    return Task.FromResult(false);
+                    return false;
                 }
 
                 _logger.LogInformation($"Updated App registration with ID token configuration and redirect URIs");
 
-                return Task.FromResult(true);
+                return true;
             }
 
             private void ConfigureLocalRedirectUris(string projectPath)

@@ -23,11 +23,13 @@ builder.AddOption(nonInteractiveScaffoldOption);
 Option nonInteractiveOption = nonInteractiveScaffoldOption.ToCliOption();
 
 AspireCommandService aspireCommandService = new(builder);
+
+//aspire command adding does not need to be async
 aspireCommandService.AddScaffolderCommands();
 ConfigureCommandSteps(builder.Services, aspireCommandService);
 
 AspNetCommandService aspNetCommandService = new(builder);
-aspNetCommandService.AddScaffolderCommands();
+await aspNetCommandService.AddScaffolderCommandsAsync();
 ConfigureCommandSteps(builder.Services, aspNetCommandService);
 
 IScaffoldRunner runner = builder.Build();

@@ -7,6 +7,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Command
     {
         void AddScaffolderCommands();
 
+        Task AddScaffolderCommandsAsync();
+
         Type[] GetScaffoldSteps();
     }
 }

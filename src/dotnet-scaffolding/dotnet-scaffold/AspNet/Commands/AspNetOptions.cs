@@ -1,12 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
-using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 
@@ -163,66 +161,44 @@ internal class AspNetOptions
         PickerType = InteractivePickerType.YesNo
     };
 
-    public bool AreAzCliCommandsSuccessful()
-    {
-        bool isSuccessful = AzCliHelper.GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds);
-        _usernames = usernames;
-        _tenants = tenants;
-        _appIds = appIds;
-
-        return isSuccessful;
-    }
-
-    List<string> _usernames = [];
-    List<string> _tenants = [];
-    List<string> _appIds = [];
+    private readonly bool _areAzCliCommandsSuccessful;
+    private readonly List<string> _usernames = [];
+    private readonly List<string> _tenants = [];
+    private readonly List<string> _appIds = [];
     private ScaffolderOption<string>? _username = null;
     private ScaffolderOption<string>? _tenantId = null;
     private ScaffolderOption<string>? _applicationId = null;
 
-    public ScaffolderOption<string> Username
+    public AspNetOptions()
     {
-        get
-        {
-            if (_username is null )
-            {
-                ScaffolderOption<string> option = new()
-                {
-                    DisplayName = AspnetStrings.Options.Username.DisplayName,
-                    CliOption = Constants.CliOptions.UsernameOption,
-                    Description = AspnetStrings.Options.Username.Description,
-                    Required = true,
-                    PickerType = InteractivePickerType.CustomPicker,
-                    CustomPickerValues = _usernames
-                };
-                _username = option;
-            }
-            return _username;
-        }
+        _areAzCliCommandsSuccessful = AzCliHelper.GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds);
+        _usernames = usernames;
+        _tenants = tenants;
+        _appIds = appIds;
     }
+
+    public bool AreAzCliCommandsSuccessful() => _areAzCliCommandsSuccessful;
+
+    public ScaffolderOption<string> Username => _username ??=  new()
+    {
+        DisplayName = AspnetStrings.Options.Username.DisplayName,
+        CliOption = Constants.CliOptions.UsernameOption,
+        Description = AspnetStrings.Options.Username.Description,
+        Required = true,
+        PickerType = InteractivePickerType.CustomPicker,
+        CustomPickerValues = _usernames
+    };
     
 
-    public ScaffolderOption<string> TenantId
+    public ScaffolderOption<string> TenantId => _tenantId ??= new()
     {
-        get
-        {
-            if (_tenantId is null)
-            {
-                ScaffolderOption<string> option = new()
-                {
-                    DisplayName = AspnetStrings.Options.TenantId.DisplayName,
-                    CliOption = Constants.CliOptions.TenantIdOption,
-                    Description = AspnetStrings.Options.TenantId.Description,
-                    Required = true,
-                    PickerType = InteractivePickerType.CustomPicker,
-                    CustomPickerValues = _tenants
-                };
-                _tenantId = option;
-            }
-            return _tenantId;
-        }
-        
-    }
+        DisplayName = AspnetStrings.Options.TenantId.DisplayName,
+        CliOption = Constants.CliOptions.TenantIdOption,
+        Description = AspnetStrings.Options.TenantId.Description,
+        Required = true,
+        PickerType = InteractivePickerType.CustomPicker,
+        CustomPickerValues = _tenants
+    };
 
     public static ScaffolderOption<string> Application => new()
     {
@@ -233,26 +209,13 @@ internal class AspNetOptions
         CustomPickerValues = AspnetStrings.Options.Application.Values
     };
 
-
-
-    public ScaffolderOption<string> SelectApplication
+    public ScaffolderOption<string> SelectApplication => _applicationId ??= new()
     {
-        get
-        {
-            if (_applicationId is null)
-            {
-                ScaffolderOption<string> option = new()
-                {
-                    DisplayName = AspnetStrings.Options.SelectApplication.DisplayName,
-                    CliOption = Constants.CliOptions.ApplicationIdOption,
-                    Description = AspnetStrings.Options.SelectApplication.Description,
-                    Required = false,
-                    PickerType = InteractivePickerType.CustomPicker,
-                    CustomPickerValues = _appIds
-                };
-                _applicationId = option;
-            }
-            return _applicationId;
-        }
-    }
+        DisplayName = AspnetStrings.Options.SelectApplication.DisplayName,
+        CliOption = Constants.CliOptions.ApplicationIdOption,
+        Description = AspnetStrings.Options.SelectApplication.Description,
+        Required = false,
+        PickerType = InteractivePickerType.CustomPicker,
+        CustomPickerValues = _appIds
+    };
 }

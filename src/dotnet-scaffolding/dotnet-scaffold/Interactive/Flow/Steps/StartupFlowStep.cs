@@ -67,10 +67,6 @@ internal class StartupFlowStep : IFlowStep
                 statusContext.Refresh();
                 var envVars = InitializeFirstTimeTelemetry();
                 SelectTelemetryEnvironmentVariables(context, envVars);
-                // Initialize 1st party components (dotnet tools)
-                statusContext.Status = "Getting ready";
-                new FirstPartyComponentInitializer(_logger, _dotnetToolService).Initialize(envVars);
-                statusContext.Status = "Done\n";
                 // Parse args passed
                 statusContext.Status = "Parsing args.";
                 var remainingArgs = context.GetRemainingArgs();

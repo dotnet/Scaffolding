@@ -75,7 +75,7 @@ internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandSe
                .WithStorageCodeModificationSteps();
     }
 
-    public Task AddScaffolderCommandsAsync()
+    public Task AddScaffolderCommandsAsync(CancellationToken cancellationToken)
     {
         //ignore
         throw new NotImplementedException();

@@ -172,9 +172,9 @@ internal class AspNetOptions
         _azureInformation = azureInformation;
     }
 
-    public static async Task<AspNetOptions> CreateAsync()
+    public static async Task<AspNetOptions> CreateAsync(CancellationToken cancellationToken)
     {
-        AzureInformation? azureInfo = await AzCliHelper.GetAzureInformationAsync();
+        AzureInformation? azureInfo = await AzCliHelper.GetAzureInformationAsync(cancellationToken);
         return new AspNetOptions(azureInfo);
     }
 

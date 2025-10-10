@@ -59,7 +59,7 @@
                     command += $" --public-client-redirect-uris {spaUrisJson}";
                 }
 
-                (int exitCode, string? stdOut, string? stdErr) = await runner.RunAzCliAsync(command);
+                (int exitCode, string? stdOut, string? stdErr) = await runner.RunAzCliAsync(command, cancellationToken);
                 if (exitCode != 0 || !string.IsNullOrEmpty(stdErr))
                 {
                     _logger.LogError($"Failed to update app registration: {stdErr}");

@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
             ];
         }
 
-        public async Task AddScaffolderCommandsAsync()
+        public async Task AddScaffolderCommandsAsync(CancellationToken cancellationToken)
         {
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Blazor.Empty)
                 .WithDisplayName(AspnetStrings.Blazor.EmptyDisplayName)
@@ -309,7 +309,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithIdentityTextTemplatingStep()
                 .WithIdentityCodeChangeStep();
 
-            AspNetOptions options = await AspNetOptions.CreateAsync();
+            AspNetOptions options = await AspNetOptions.CreateAsync(cancellationToken);
 
             if (options.AreAzCliCommandsSuccessful())
             {

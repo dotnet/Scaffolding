@@ -16,7 +16,7 @@ internal class AzCliRunner
         return new AzCliRunner(commandName);
     }
 
-    public async Task<(int ExitCode, string? StdOut, string? StdErr)> RunAzCliAsync(string arguments)
+    public async Task<(int ExitCode, string? StdOut, string? StdErr)> RunAzCliAsync(string arguments, CancellationToken cancellationToken)
     {
         using var outStream = new ProcessOutputStreamReader();
         using var errStream = new ProcessOutputStreamReader();
@@ -48,11 +48,24 @@ internal class AzCliRunner
         Task taskOut = outStream.BeginRead(process.StandardOutput);
         Task taskErr = errStream.BeginRead(process.StandardError);
 
-        // Wait for process to exit with a timeout (e.g., 30 seconds)
+        // Wait for process to exit with a timeout (e.g., 30 seconds) or cancellation
         const int timeoutMilliseconds = 30000;
-        bool exited = process.WaitForExit(timeoutMilliseconds);
+        Task<bool> waitForExitTask = Task.Run(() => process.WaitForExit(timeoutMilliseconds), cancellationToken);
+        try
+        {
+            await Task.WhenAny(waitForExitTask, Task.Delay(Timeout.Infinite, cancellationToken));
+        }
+        catch (OperationCanceledException)
+        {
+            try
+            {
+                process.Kill(entireProcessTree: true);
+            }
+            catch { }
+            throw;
+        }
 
-        if (!exited)
+        if (!waitForExitTask.Result)
         {
             try
             {

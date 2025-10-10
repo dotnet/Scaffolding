@@ -14,16 +14,16 @@ internal class AzCliHelper
     /// Gets Azure usernames, tenant IDs, and application IDs using the Azure CLI.
     /// </summary>
     /// <returns>non null AzureInformation if the commands run successfully</returns>
-    public static async Task<AzureInformation?> GetAzureInformationAsync()
+    public static async Task<AzureInformation?> GetAzureInformationAsync(CancellationToken cancellationToken)
     {
         // Create a runner to execute the 'az account list' command with json output format
         var runner = AzCliRunner.Create();
-        (bool isUserLoggedIn, string? output) = await EnsureUserIsLoggedInAsync(runner);
+        (bool isUserLoggedIn, string? output) = await EnsureUserIsLoggedInAsync(runner, cancellationToken);
         if (isUserLoggedIn && !string.IsNullOrEmpty(output))
         {
             if (GetAzureUsernamesAndTenatIds(runner, output, out List<string> usernames, out List<string> tenants))
             {
-                (bool areAppIdSuccessful, List<string> appIds) = await GetAzureAppIdsAsync(runner);
+                (bool areAppIdSuccessful, List<string> appIds) = await GetAzureAppIdsAsync(runner, cancellationToken);
                 if (areAppIdSuccessful)
                 {
                     return new AzureInformation(usernames, tenants, appIds);
@@ -38,19 +38,20 @@ internal class AzCliHelper
     /// Ensures the user is logged into Azure CLI. If not logged in, it will prompt for login.
     /// </summary>
     /// <param name="runner">the az cli runner</param>
+    /// <param name="cancellationToken">the cancellation token</param>
     /// <returns>if successful, return true and the output if applicable</returns>
-    private static async Task<(bool success, string? output)> EnsureUserIsLoggedInAsync(AzCliRunner runner)
+    private static async Task<(bool success, string? output)> EnsureUserIsLoggedInAsync(AzCliRunner runner, CancellationToken cancellationToken)
     {
         try
         {
-            (int exitCode, string?  stdOut, string? stdErr) = await runner.RunAzCliAsync("account list --output json");
+            (int exitCode, string?  stdOut, string? stdErr) = await runner.RunAzCliAsync("account list --output json", cancellationToken);
 
             if (stdOut is not null)
             {
                 var result = StringUtil.ConvertStringToArray(stdOut);
                 if (result.Length is 0)
                 {
-                    (exitCode, stdOut, stdErr) = await runner.RunAzCliAsync("login");
+                    (exitCode, stdOut, stdErr) = await runner.RunAzCliAsync("login", cancellationToken);
                 }
             }
             return (exitCode == 0 && string.IsNullOrEmpty(stdErr), stdOut);
@@ -124,13 +125,14 @@ internal class AzCliHelper
     /// Gets Azure application IDs using the Azure CLI.
     /// </summary>
     /// <param name="runner">the az cli runner</param>
+    /// <param name="cancellationToken">the cancellation token</param>
     /// <returns>if successful, returns true with the appIds if retrieved</returns>
-    private static async Task<(bool, List<string> appIds)> GetAzureAppIdsAsync(AzCliRunner runner)
+    private static async Task<(bool, List<string> appIds)> GetAzureAppIdsAsync(AzCliRunner runner, CancellationToken cancellationToken)
     {
         try
         {
             List<string> appIds = [];
-            (int exitCode, string? stdOut, string? stdErr) = await runner.RunAzCliAsync("ad app list --output json");
+            (int exitCode, string? stdOut, string? stdErr) = await runner.RunAzCliAsync("ad app list --output json", cancellationToken);
 
             if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
             {

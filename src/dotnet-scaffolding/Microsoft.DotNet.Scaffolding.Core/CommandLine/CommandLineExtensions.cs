@@ -70,7 +70,7 @@ internal static class CommandLineExtensions
     /// <returns>The created command.</returns>
     private static Command ToCommand(this IScaffolder scaffolder)
     {
-        var command = new Command(scaffolder.Name);
+        Command command = new(scaffolder.Name, scaffolder.Description);
 
         foreach (var option in scaffolder.Options)
         {
@@ -130,7 +130,7 @@ internal static class CommandLineExtensions
     /// <param name="commandInfo">The list of command info objects.</param>
     private static void AddGetCommandsCommand(this RootCommand rootCommand, List<CommandInfo> commandInfo)
     {
-        var getCommandsCommand = new Command("get-commands");
+        Command getCommandsCommand = new("get-commands");
         getCommandsCommand.SetHandler(() =>
         {
             var json = System.Text.Json.JsonSerializer.Serialize(commandInfo);

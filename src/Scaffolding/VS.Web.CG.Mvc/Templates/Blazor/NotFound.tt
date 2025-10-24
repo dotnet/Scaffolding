@@ -6,6 +6,7 @@
 
 
 @page "/not-found"
+@layout MainLayout
 
 
 <PageTitle>Not Found</PageTitle>

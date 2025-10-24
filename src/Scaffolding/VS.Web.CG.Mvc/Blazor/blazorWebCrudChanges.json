@@ -38,6 +38,11 @@
           "ReplaceSnippet": [
             "app.UseHsts()"
           ]
+        },
+        {
+          "ReplaceSnippet": [ "app.UseHttpsRedirection();" ],
+          "Block": "app.UseStatusCodePagesWithReExecute(\"/not-found\", createScopeForStatusCodePages: true);\n\napp.UseHttpsRedirection();",
+          "CheckBlock": "UseStatusCodePagesWithReExecute"
         }
       ],
       "Usings": [

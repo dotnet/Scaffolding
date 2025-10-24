@@ -141,8 +141,41 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             var blazorTemplateModel = await ValidateAndBuild(model);
             ExecuteTemplates(blazorTemplateModel);
+            CopyStaticPasskeyFiles(blazorTemplateModel);
             AddReadmeFile(blazorTemplateModel.BaseOutputPath);
             await ModifyFilesAsync(blazorTemplateModel);
+        }
+
+        internal void CopyStaticPasskeyFiles(BlazorIdentityModel templateModel)
+        {
+            // Copy PasskeySubmit.razor.js static file
+            var templateFolderPath = TemplateFolders.FirstOrDefault(x => x.Contains("BlazorIdentity", StringComparison.OrdinalIgnoreCase));
+            if (string.IsNullOrEmpty(templateFolderPath))
+            {
+                return;
+            }
+
+            var jsSourcePath = Path.Combine(templateFolderPath, "Shared", "PasskeySubmit.razor.js");
+            if (!FileSystem.FileExists(jsSourcePath))
+            {
+                return;
+            }
+
+            // Determine target path: Components/Account/Shared/PasskeySubmit.razor.js
+            var targetPath = Path.Combine(templateModel.BaseOutputPath, "Shared", "PasskeySubmit.razor.js");
+            var targetFolder = Path.GetDirectoryName(targetPath);
+            
+            if (!FileSystem.DirectoryExists(targetFolder))
+            {
+                FileSystem.CreateDirectory(targetFolder);
+            }
+
+            if (!FileSystem.FileExists(targetPath))
+            {
+                var jsContent = FileSystem.ReadAllText(jsSourcePath);
+                FileSystem.WriteAllText(targetPath, jsContent);
+                Logger.LogMessage($"Added Blazor identity file : {targetPath}");
+            }
         }
 
         internal void AddReadmeFile(string outputPath)

@@ -125,11 +125,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             ExecuteTemplates(templateModel);
             await ModifyProgramCsAsync(templateModel.BlazorWebAppProperties);
+            await ModifyRoutesRazorAsync();
         }
 
         internal string ValidateAndGetOutputPath(string modelName, string templateName, string relativeFolderPath = null)
         {
-            string outputFileName = string.IsNullOrEmpty(modelName) ?
+            // NotFound is a shared page that goes directly in Pages folder, not in model-specific subfolder
+            bool isNotFoundTemplate = templateName.Equals("NotFound", StringComparison.OrdinalIgnoreCase);
+            
+            string outputFileName = string.IsNullOrEmpty(modelName) || isNotFoundTemplate ?
                 $"{templateName}{Constants.BlazorExtension}" :
                 Path.Combine($"{modelName}Pages", $"{templateName}{Constants.BlazorExtension}");
             string outputFolder = string.IsNullOrEmpty(relativeFolderPath) ?
@@ -198,6 +202,33 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             //ApplyTextReplacements will write the updated document to disk (takes changes from above as well).
             await DocumentBuilder.ApplyTextReplacements(programCsFile, changedDocument, new CodeChangeOptions(), FileSystem);
             ConsoleLogger.LogMessage($"Modified {programDocument.Name}.\n");
+        }
+
+        internal async Task ModifyRoutesRazorAsync()
+        {
+            CodeModifierConfig blazorChangesConfig = GetBlazorCodeModifierConfig();
+            if (blazorChangesConfig is null)
+            {
+                return;
+            }
+
+            var routesRazorFile = blazorChangesConfig.Files.FirstOrDefault(x => x.FileName.Equals("Routes.razor", StringComparison.OrdinalIgnoreCase));
+            if (routesRazorFile is null || routesRazorFile.Replacements is null || routesRazorFile.Replacements.Length == 0)
+            {
+                return;
+            }
+
+            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
+            var routesDocument = project.GetDocumentFromName("Routes.razor", FileSystem);
+            
+            if (routesDocument is null)
+            {
+                return;
+            }
+
+            // Apply text replacements directly since Routes.razor is not C# code
+            await DocumentBuilder.ApplyTextReplacements(routesRazorFile, routesDocument, new CodeChangeOptions(), FileSystem);
+            ConsoleLogger.LogMessage($"Modified Routes.razor.\n");
         }
 
         internal CodeFile AddBlazorChangesToCodeFile(CodeFile programCsFile, BlazorWebAppProperties appProperties)

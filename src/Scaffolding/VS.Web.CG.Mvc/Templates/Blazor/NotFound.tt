@@ -1,0 +1,18 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel" name="Model" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Linq" #>
+
+
+@page "/not-found"
+
+
+<PageTitle>Not Found</PageTitle>
+
+
+<h1>Not Found</h1>
+<p>Sorry, there's nothing at this address.</p>
+
+
+<a href="/">Back to Home</a>

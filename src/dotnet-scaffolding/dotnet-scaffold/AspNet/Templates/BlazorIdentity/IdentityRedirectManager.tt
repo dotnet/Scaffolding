@@ -1,7 +1,7 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
 <#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
 using Microsoft.AspNetCore.Components;
-using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Identity;
 using <#= Model.UserClassNamespace #>;
 
 namespace <#= Model.BlazorIdentityNamespace #>
@@ -28,8 +28,6 @@ namespace <#= Model.BlazorIdentityNamespace #>
                 uri = navigationManager.ToBaseRelativePath(uri);
             }
 
-            // During static rendering, NavigateTo throws a NavigationException which is handled by the framework as a redirect.
-            // So as long as this is called from a statically rendered Identity component, the InvalidOperationException is never thrown.
             navigationManager.NavigateTo(uri);
         }
 
@@ -52,5 +50,8 @@ namespace <#= Model.BlazorIdentityNamespace #>
 
         public void RedirectToCurrentPageWithStatus(string message, HttpContext context)
             => RedirectToWithStatus(CurrentPath, message, context);
+
+        public void RedirectToInvalidUser(UserManager<<#= Model.UserClassName #>> userManager, HttpContext context)
+            => RedirectToWithStatus("Account/InvalidUser", $"Error: Unable to load user with ID '{userManager.GetUserId(context.User)}'.", context);
     }
 }

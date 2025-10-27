@@ -54,46 +54,52 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "form-label\">Email</label>\r\n                    <button type=\"submit\" class=\"btn " +
                     "btn-link\" form=\"send-verification-form\">Send verification email</button>\r\n      " +
                     "          </div>\r\n            }\r\n            <div class=\"form-floating mb-3\">\r\n " +
-                    "               <InputText @bind-Value=\"Input.NewEmail\" class=\"form-control\" auto" +
-                    "complete=\"email\" aria-required=\"true\" placeholder=\"Please enter new email.\" />\r\n" +
-                    "                <label for=\"new-email\" class=\"form-label\">New email</label>\r\n   " +
-                    "             <ValidationMessage For=\"() => Input.NewEmail\" class=\"text-danger\" /" +
-                    ">\r\n            </div>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg" +
-                    " btn-primary\">Change email</button>\r\n        </EditForm>\r\n    </div>\r\n</div>\r\n\r\n" +
-                    "@code {\r\n    private string? message;\r\n    private ");
+                    "               <InputText @bind-Value=\"Input.NewEmail\" id=\"Input.NewEmail\" class" +
+                    "=\"form-control\" autocomplete=\"email\" aria-required=\"true\" placeholder=\"Enter a n" +
+                    "ew email\" />\r\n                <label for=\"Input.NewEmail\" class=\"form-label\">New" +
+                    " email</label>\r\n                <ValidationMessage For=\"() => Input.NewEmail\" cl" +
+                    "ass=\"text-danger\" />\r\n            </div>\r\n            <button type=\"submit\" clas" +
+                    "s=\"w-100 btn btn-lg btn-primary\">Change email</button>\r\n        </EditForm>\r\n   " +
+                    " </div>\r\n</div>\r\n\r\n@code {\r\n    private string? message;\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(" user = default!;\r\n    private string? email;\r\n    private bool isEmailConfirmed;" +
-                    "\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpContext { get; set; } " +
-                    "= default!;\r\n\r\n    [SupplyParameterFromForm(FormName = \"change-email\")]\r\n    pri" +
-                    "vate InputModel Input { get; set; } = new();\r\n\r\n    protected override async Tas" +
-                    "k OnInitializedAsync()\r\n    {\r\n        user = await UserAccessor.GetRequiredUser" +
-                    "Async(HttpContext);\r\n        email = await UserManager.GetEmailAsync(user);\r\n   " +
-                    "     isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);\r\n\r\n      " +
-                    "  Input.NewEmail ??= email;\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync(" +
-                    ")\r\n    {\r\n        if (Input.NewEmail is null || Input.NewEmail == email)\r\n      " +
-                    "  {\r\n            message = \"Your email is unchanged.\";\r\n            return;\r\n   " +
-                    "     }\r\n\r\n        var userId = await UserManager.GetUserIdAsync(user);\r\n        " +
-                    "var code = await UserManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail)" +
-                    ";\r\n        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n  " +
-                    "      var callbackUrl = NavigationManager.GetUriWithQueryParameters(\r\n          " +
-                    "  NavigationManager.ToAbsoluteUri(\"Account/ConfirmEmailChange\").AbsoluteUri,\r\n  " +
-                    "          new Dictionary<string, object?> { [\"userId\"] = userId, [\"email\"] = Inp" +
-                    "ut.NewEmail, [\"code\"] = code });\r\n\r\n        await EmailSender.SendConfirmationLi" +
-                    "nkAsync(user, Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n     " +
-                    "   message = \"Confirmation link to change email sent. Please check your email.\";" +
-                    "\r\n    }\r\n\r\n    private async Task OnSendEmailVerificationAsync()\r\n    {\r\n       " +
-                    " if (email is null)\r\n        {\r\n            return;\r\n        }\r\n\r\n        var us" +
-                    "erId = await UserManager.GetUserIdAsync(user);\r\n        var code = await UserMan" +
-                    "ager.GenerateEmailConfirmationTokenAsync(user);\r\n        code = WebEncoders.Base" +
-                    "64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        var callbackUrl = Navigation" +
-                    "Manager.GetUriWithQueryParameters(\r\n            NavigationManager.ToAbsoluteUri(" +
-                    "\"Account/ConfirmEmail\").AbsoluteUri,\r\n            new Dictionary<string, object?" +
-                    "> { [\"userId\"] = userId, [\"code\"] = code });\r\n\r\n        await EmailSender.SendCo" +
-                    "nfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n  " +
-                    "      message = \"Verification email sent. Please check your email.\";\r\n    }\r\n\r\n " +
-                    "   private sealed class InputModel\r\n    {\r\n        [Required]\r\n        [EmailAdd" +
-                    "ress]\r\n        [Display(Name = \"New email\")]\r\n        public string? NewEmail { " +
-                    "get; set; }\r\n    }\r\n}\r\n");
+            this.Write("? user;\r\n    private string? email;\r\n    private bool isEmailConfirmed;\r\n\r\n    [C" +
+                    "ascadingParameter]\r\n    private HttpContext HttpContext { get; set; } = default!" +
+                    ";\r\n\r\n    [SupplyParameterFromForm(FormName = \"change-email\")]\r\n    private Input" +
+                    "Model Input { get; set; } = default!;\r\n\r\n    protected override async Task OnIni" +
+                    "tializedAsync()\r\n    {\r\n        Input ??= new();\r\n\r\n        user = await UserMan" +
+                    "ager.GetUserAsync(HttpContext.User);\r\n        if (user is null)\r\n        {\r\n    " +
+                    "        RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);\r\n      " +
+                    "      return;\r\n        }\r\n\r\n        email = await UserManager.GetEmailAsync(user" +
+                    ");\r\n        isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);\r\n\r" +
+                    "\n        Input.NewEmail ??= email;\r\n    }\r\n\r\n    private async Task OnValidSubmi" +
+                    "tAsync()\r\n    {\r\n        if (Input.NewEmail is null || Input.NewEmail == email)\r" +
+                    "\n        {\r\n            message = \"Your email is unchanged.\";\r\n            retur" +
+                    "n;\r\n        }\r\n\r\n        if (user is null)\r\n        {\r\n            RedirectManag" +
+                    "er.RedirectToInvalidUser(UserManager, HttpContext);\r\n            return;\r\n      " +
+                    "  }\r\n\r\n        var userId = await UserManager.GetUserIdAsync(user);\r\n        var" +
+                    " code = await UserManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);\r\n" +
+                    "        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n     " +
+                    "   var callbackUrl = NavigationManager.GetUriWithQueryParameters(\r\n            N" +
+                    "avigationManager.ToAbsoluteUri(\"Account/ConfirmEmailChange\").AbsoluteUri,\r\n     " +
+                    "       new Dictionary<string, object?> { [\"userId\"] = userId, [\"email\"] = Input." +
+                    "NewEmail, [\"code\"] = code });\r\n\r\n        await EmailSender.SendConfirmationLinkA" +
+                    "sync(user, Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n        " +
+                    "message = \"Confirmation link to change email sent. Please check your email.\";\r\n " +
+                    "   }\r\n\r\n    private async Task OnSendEmailVerificationAsync()\r\n    {\r\n        if" +
+                    " (email is null)\r\n        {\r\n            return;\r\n        }\r\n\r\n        if (user " +
+                    "is null)\r\n        {\r\n            RedirectManager.RedirectToInvalidUser(UserManag" +
+                    "er, HttpContext);\r\n            return;\r\n        }\r\n\r\n        var userId = await " +
+                    "UserManager.GetUserIdAsync(user);\r\n        var code = await UserManager.Generate" +
+                    "EmailConfirmationTokenAsync(user);\r\n        code = WebEncoders.Base64UrlEncode(E" +
+                    "ncoding.UTF8.GetBytes(code));\r\n        var callbackUrl = NavigationManager.GetUr" +
+                    "iWithQueryParameters(\r\n            NavigationManager.ToAbsoluteUri(\"Account/Conf" +
+                    "irmEmail\").AbsoluteUri,\r\n            new Dictionary<string, object?> { [\"userId\"" +
+                    "] = userId, [\"code\"] = code });\r\n\r\n        await EmailSender.SendConfirmationLin" +
+                    "kAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n        message" +
+                    " = \"Verification email sent. Please check your email.\";\r\n    }\r\n\r\n    private se" +
+                    "aled class InputModel\r\n    {\r\n        [Required]\r\n        [EmailAddress]\r\n      " +
+                    "  [Display(Name = \"New email\")]\r\n        public string? NewEmail { get; set; }\r\n" +
+                    "    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

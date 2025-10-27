@@ -164,7 +164,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             // Determine target path: Components/Account/Shared/PasskeySubmit.razor.js
             var targetPath = Path.Combine(templateModel.BaseOutputPath, "Shared", "PasskeySubmit.razor.js");
             var targetFolder = Path.GetDirectoryName(targetPath);
-            
+
             if (!FileSystem.DirectoryExists(targetFolder))
             {
                 FileSystem.CreateDirectory(targetFolder);
@@ -496,8 +496,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 var templatedString = templateInvoker.InvokeTemplate(contextTemplate, dictParams);
                 if (!string.IsNullOrEmpty(templatedString))
                 {
-                    //currently only Identity...cs files are of CSharp type, rest are razor
-                    string extension = templateName.StartsWith("identity", StringComparison.OrdinalIgnoreCase) ? ".cs" : ".razor";
+                    // Files in Pages and Shared folders are Razor components, others are C# files
+                    string extension = templateName.StartsWith("Pages", StringComparison.OrdinalIgnoreCase) ||
+                                       templateName.StartsWith("Shared", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
                     string templateNameWithNamespace = $"{templateModel.BlazorIdentityNamespace}.{templateName}";
                     string templatePath = StringUtil.ToPath(templateNameWithNamespace, templateModel.BaseOutputPath, ProjectContext.RootNamespace);
                     string templatedFilePath = $"{templatePath}{extension}";

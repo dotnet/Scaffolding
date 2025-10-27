@@ -56,8 +56,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         @if (requirePassword)
         {
             <div class=""form-floating mb-3"">
-                <InputText type=""password"" @bind-Value=""Input.Password"" class=""form-control"" autocomplete=""current-password"" aria-required=""true"" placeholder=""Please enter your password."" />
-                <label for=""password"" class=""form-label"">Password</label>
+                <InputText type=""password"" @bind-Value=""Input.Password"" id=""Input.Password"" class=""form-control"" autocomplete=""current-password"" aria-required=""true"" placeholder=""Please enter your password."" />
+                <label for=""Input.Password"" class=""form-label"">Password</label>
                 <ValidationMessage For=""() => Input.Password"" class=""text-danger"" />
             </div>
         }
@@ -69,51 +69,27 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
     private string? message;
     private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@" user = default!;
-    private bool requirePassword;
-
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
-
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        Input ??= new();
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        requirePassword = await UserManager.HasPasswordAsync(user);
-    }
-
-    private async Task OnValidSubmitAsync()
-    {
-        if (requirePassword && !await UserManager.CheckPasswordAsync(user, Input.Password))
-        {
-            message = ""Error: Incorrect password."";
-            return;
-        }
-
-        var result = await UserManager.DeleteAsync(user);
-        if (!result.Succeeded)
-        {
-            throw new InvalidOperationException(""Unexpected error occurred deleting user."");
-        }
-
-        await SignInManager.SignOutAsync();
-
-        var userId = await UserManager.GetUserIdAsync(user);
-        Logger.LogInformation(""User with ID '{UserId}' deleted themselves."", userId);
-
-        RedirectManager.RedirectToCurrentPage();
-    }
-
-    private sealed class InputModel
-    {
-        [DataType(DataType.Password)]
-        public string Password { get; set; } = """";
-    }
-}
-");
+            this.Write("? user;\r\n    private bool requirePassword;\r\n\r\n    [CascadingParameter]\r\n    priva" +
+                    "te HttpContext HttpContext { get; set; } = default!;\r\n\r\n    [SupplyParameterFrom" +
+                    "Form]\r\n    private InputModel Input { get; set; } = default!;\r\n\r\n    protected o" +
+                    "verride async Task OnInitializedAsync()\r\n    {\r\n        Input ??= new();\r\n\r\n    " +
+                    "    user = await UserManager.GetUserAsync(HttpContext.User);\r\n        if (user i" +
+                    "s null)\r\n        {\r\n            RedirectManager.RedirectToInvalidUser(UserManage" +
+                    "r, HttpContext);\r\n            return;\r\n        }\r\n        requirePassword = awai" +
+                    "t UserManager.HasPasswordAsync(user);\r\n    }\r\n\r\n    private async Task OnValidSu" +
+                    "bmitAsync()\r\n    {\r\n        if (user is null)\r\n        {\r\n            RedirectMa" +
+                    "nager.RedirectToInvalidUser(UserManager, HttpContext);\r\n            return;\r\n   " +
+                    "     }\r\n\r\n        if (requirePassword && !await UserManager.CheckPasswordAsync(u" +
+                    "ser, Input.Password))\r\n        {\r\n            message = \"Error: Incorrect passwo" +
+                    "rd.\";\r\n            return;\r\n        }\r\n\r\n        var result = await UserManager." +
+                    "DeleteAsync(user);\r\n        if (!result.Succeeded)\r\n        {\r\n            throw" +
+                    " new InvalidOperationException(\"Unexpected error occurred deleting user.\");\r\n   " +
+                    "     }\r\n\r\n        await SignInManager.SignOutAsync();\r\n\r\n        var userId = aw" +
+                    "ait UserManager.GetUserIdAsync(user);\r\n        Logger.LogInformation(\"User with " +
+                    "ID \'{UserId}\' deleted themselves.\", userId);\r\n\r\n        RedirectManager.Redirect" +
+                    "ToCurrentPage();\r\n    }\r\n\r\n    private sealed class InputModel\r\n    {\r\n        [" +
+                    "DataType(DataType.Password)]\r\n        public string Password { get; set; } = \"\";" +
+                    "\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

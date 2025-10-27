@@ -60,40 +60,44 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "end-code\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n                   " +
                     "         <DataAnnotationsValidator />\r\n                            <div class=\"f" +
                     "orm-floating mb-3\">\r\n                                <InputText @bind-Value=\"Inp" +
-                    "ut.Code\" class=\"form-control\" autocomplete=\"off\" placeholder=\"Please enter the c" +
-                    "ode.\" />\r\n                                <label for=\"code\" class=\"control-label" +
-                    " form-label\">Verification Code</label>\r\n                                <Validat" +
-                    "ionMessage For=\"() => Input.Code\" class=\"text-danger\" />\r\n                      " +
-                    "      </div>\r\n                            <button type=\"submit\" class=\"w-100 btn" +
-                    " btn-lg btn-primary\">Verify</button>\r\n                            <ValidationSum" +
-                    "mary class=\"text-danger\" role=\"alert\" />\r\n                        </EditForm>\r\n " +
-                    "                   </div>\r\n                </div>\r\n            </li>\r\n        </" +
-                    "ol>\r\n    </div>\r\n}\r\n\r\n@code {\r\n    private const string AuthenticatorUriFormat =" +
-                    " \"otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6\";\r\n\r\n    private string?" +
-                    " message;\r\n    private ");
+                    "ut.Code\" id=\"Input.Code\" class=\"form-control\" autocomplete=\"off\" placeholder=\"En" +
+                    "ter the code\" />\r\n                                <label for=\"Input.Code\" class=" +
+                    "\"control-label form-label\">Verification Code</label>\r\n                          " +
+                    "      <ValidationMessage For=\"() => Input.Code\" class=\"text-danger\" />\r\n        " +
+                    "                    </div>\r\n                            <button type=\"submit\" cl" +
+                    "ass=\"w-100 btn btn-lg btn-primary\">Verify</button>\r\n                            " +
+                    "<ValidationSummary class=\"text-danger\" role=\"alert\" />\r\n                        " +
+                    "</EditForm>\r\n                    </div>\r\n                </div>\r\n            </l" +
+                    "i>\r\n        </ol>\r\n    </div>\r\n}\r\n\r\n@code {\r\n    private const string Authentica" +
+                    "torUriFormat = \"otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6\";\r\n\r\n    p" +
+                    "rivate string? message;\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(" user = default!;\r\n    private string? sharedKey;\r\n    private string? authentica" +
-                    "torUri;\r\n    private IEnumerable<string>? recoveryCodes;\r\n\r\n    [CascadingParame" +
-                    "ter]\r\n    private HttpContext HttpContext { get; set; } = default!;\r\n\r\n    [Supp" +
-                    "lyParameterFromForm]\r\n    private InputModel Input { get; set; } = new();\r\n\r\n   " +
-                    " protected override async Task OnInitializedAsync()\r\n    {\r\n        user = await" +
-                    " UserAccessor.GetRequiredUserAsync(HttpContext);\r\n\r\n        await LoadSharedKeyA" +
-                    "ndQrCodeUriAsync(user);\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n " +
-                    "   {\r\n        // Strip spaces and hyphens\r\n        var verificationCode = Input." +
-                    "Code.Replace(\" \", string.Empty).Replace(\"-\", string.Empty);\r\n\r\n        var is2fa" +
-                    "TokenValid = await UserManager.VerifyTwoFactorTokenAsync(\r\n            user, Use" +
-                    "rManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);\r\n\r\n      " +
-                    "  if (!is2faTokenValid)\r\n        {\r\n            message = \"Error: Verification c" +
-                    "ode is invalid.\";\r\n            return;\r\n        }\r\n\r\n        await UserManager.S" +
-                    "etTwoFactorEnabledAsync(user, true);\r\n        var userId = await UserManager.Get" +
-                    "UserIdAsync(user);\r\n        Logger.LogInformation(\"User with ID \'{UserId}\' has e" +
-                    "nabled 2FA with an authenticator app.\", userId);\r\n\r\n        message = \"Your auth" +
-                    "enticator app has been verified.\";\r\n\r\n        if (await UserManager.CountRecover" +
-                    "yCodesAsync(user) == 0)\r\n        {\r\n            recoveryCodes = await UserManage" +
-                    "r.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);\r\n        }\r\n        else\r\n  " +
-                    "      {\r\n            RedirectManager.RedirectToWithStatus(\"Account/Manage/TwoFac" +
-                    "torAuthentication\", message, HttpContext);\r\n        }\r\n    }\r\n\r\n    private asyn" +
-                    "c ValueTask LoadSharedKeyAndQrCodeUriAsync(");
+            this.Write("? user;\r\n    private string? sharedKey;\r\n    private string? authenticatorUri;\r\n " +
+                    "   private IEnumerable<string>? recoveryCodes;\r\n\r\n    [CascadingParameter]\r\n    " +
+                    "private HttpContext HttpContext { get; set; } = default!;\r\n\r\n    [SupplyParamete" +
+                    "rFromForm]\r\n    private InputModel Input { get; set; } = default!;\r\n\r\n    protec" +
+                    "ted override async Task OnInitializedAsync()\r\n    {\r\n        Input ??= new();\r\n\r" +
+                    "\n        user = await UserManager.GetUserAsync(HttpContext.User);\r\n        if (u" +
+                    "ser is null)\r\n        {\r\n            RedirectManager.RedirectToInvalidUser(UserM" +
+                    "anager, HttpContext);\r\n            return;\r\n        }\r\n\r\n        await LoadShare" +
+                    "dKeyAndQrCodeUriAsync(user);\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync" +
+                    "()\r\n    {\r\n        if (user is null)\r\n        {\r\n            RedirectManager.Red" +
+                    "irectToInvalidUser(UserManager, HttpContext);\r\n            return;\r\n        }\r\n\r" +
+                    "\n        // Strip spaces and hyphens\r\n        var verificationCode = Input.Code." +
+                    "Replace(\" \", string.Empty).Replace(\"-\", string.Empty);\r\n\r\n        var is2faToken" +
+                    "Valid = await UserManager.VerifyTwoFactorTokenAsync(\r\n            user, UserMana" +
+                    "ger.Options.Tokens.AuthenticatorTokenProvider, verificationCode);\r\n\r\n        if " +
+                    "(!is2faTokenValid)\r\n        {\r\n            message = \"Error: Verification code i" +
+                    "s invalid.\";\r\n            return;\r\n        }\r\n\r\n        await UserManager.SetTwo" +
+                    "FactorEnabledAsync(user, true);\r\n        var userId = await UserManager.GetUserI" +
+                    "dAsync(user);\r\n        Logger.LogInformation(\"User with ID \'{UserId}\' has enable" +
+                    "d 2FA with an authenticator app.\", userId);\r\n\r\n        message = \"Your authentic" +
+                    "ator app has been verified.\";\r\n\r\n        if (await UserManager.CountRecoveryCode" +
+                    "sAsync(user) == 0)\r\n        {\r\n            recoveryCodes = await UserManager.Gen" +
+                    "erateNewTwoFactorRecoveryCodesAsync(user, 10);\r\n        }\r\n        else\r\n       " +
+                    " {\r\n            RedirectManager.RedirectToWithStatus(\"Account/Manage/TwoFactorAu" +
+                    "thentication\", message, HttpContext);\r\n        }\r\n    }\r\n\r\n    private async Val" +
+                    "ueTask LoadSharedKeyAndQrCodeUriAsync(");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user)\r\n    {\r\n        // Load the authenticator key & QR code URI to display on " +
                     "the form\r\n        var unformattedKey = await UserManager.GetAuthenticatorKeyAsyn" +

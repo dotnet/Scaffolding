@@ -34,8 +34,8 @@
         @if (requirePassword)
         {
             <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password." />
-                <label for="password" class="form-label">Password</label>
+                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter your password." />
+                <label for="Input.Password" class="form-label">Password</label>
                 <ValidationMessage For="() => Input.Password" class="text-danger" />
             </div>
         }
@@ -45,24 +45,36 @@
 
 @code {
     private string? message;
-    private <#= Model.UserClassName #> user = default!;
+    private <#= Model.UserClassName #>? user;
     private bool requirePassword;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+    private InputModel Input { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
         Input ??= new();
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+
+        user = await UserManager.GetUserAsync(HttpContext.User);
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            return;
+        }
         requirePassword = await UserManager.HasPasswordAsync(user);
     }
 
     private async Task OnValidSubmitAsync()
     {
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            return;
+        }
+
         if (requirePassword && !await UserManager.CheckPasswordAsync(user, Input.Password))
         {
             message = "Error: Incorrect password.";

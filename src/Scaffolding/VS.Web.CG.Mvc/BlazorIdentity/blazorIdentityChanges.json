@@ -21,13 +21,6 @@
             },
             {
               "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
-              "Block": "WebApplication.CreateBuilder.Services.AddScoped<IdentityUserAccessor>()",
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
-              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
               "Block": "WebApplication.CreateBuilder.Services.AddScoped<IdentityRedirectManager>()",
               "LeadingTrivia": {
                 "Newline": true

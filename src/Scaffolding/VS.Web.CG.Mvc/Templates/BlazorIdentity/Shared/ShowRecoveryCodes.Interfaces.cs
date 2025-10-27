@@ -1,11 +1,28 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿<StatusMessage Message="@StatusMessage" />
+<h3>Recovery codes</h3>
+<div class="alert alert-warning" role="alert">
+    <p>
+        <strong>Put these codes in a safe place.</strong>
+    </p>
+    <p>
+        If you lose your device and don't have the recovery codes you will lose access to your account.
+    </p>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        @foreach (var recoveryCode in RecoveryCodes)
+        {
+            <div>
+                <code class="recovery-code">@recoveryCode</code>
+            </div>
+        }
+    </div>
+</div>
 
-using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
+@code {
+    [Parameter]
+    public string[] RecoveryCodes { get; set; } = [];
 
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Shared
-{
-    public partial class ShowRecoveryCodes : ITextTransformation
-    {
-    }
+    [Parameter]
+    public string? StatusMessage { get; set; }
 }

@@ -1,11 +1,7 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿@page "/Account/InvalidUser"
 
-using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
+<PageTitle>Invalid user</PageTitle>
 
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages
-{
-    public partial class InvalidUser : ITextTransformation
-    {
-    }
-}
+<h3>Invalid user</h3>
+
+<StatusMessage />

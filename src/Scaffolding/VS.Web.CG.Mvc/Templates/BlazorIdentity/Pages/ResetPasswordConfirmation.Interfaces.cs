@@ -1,11 +1,7 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿@page "/Account/ResetPasswordConfirmation"
+<PageTitle>Reset password confirmation</PageTitle>
 
-using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
-
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages
-{
-    public partial class ResetPasswordConfirmation : ITextTransformation
-    {
-    }
-}
+<h1>Reset password confirmation</h1>
+<p role="alert">
+    Your password has been reset. Please <a href="Account/Login">click here to log in</a>.
+</p>

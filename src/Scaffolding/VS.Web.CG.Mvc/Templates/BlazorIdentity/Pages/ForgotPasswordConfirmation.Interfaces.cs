@@ -1,11 +1,8 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿@page "/Account/ForgotPasswordConfirmation"
 
-using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
+<PageTitle>Forgot password confirmation</PageTitle>
 
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages
-{
-    public partial class ForgotPasswordConfirmation : ITextTransformation
-    {
-    }
-}
+<h1>Forgot password confirmation</h1>
+<p role="alert">
+    Please check your email to reset your password.
+</p>

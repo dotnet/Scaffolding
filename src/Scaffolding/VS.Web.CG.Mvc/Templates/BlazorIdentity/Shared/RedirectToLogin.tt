@@ -3,7 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@inject NavigationManager NavigationManager
+﻿@inject NavigationManager NavigationManager
 
 @code {
     protected override void OnInitialized()

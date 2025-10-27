@@ -3,7 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@page "/Account/ResendEmailConfirmation"
+﻿@page "/Account/ResendEmailConfirmation"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text

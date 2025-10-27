@@ -1,11 +1,8 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿@page "/Account/Lockout"
 
-using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
+<PageTitle>Locked out</PageTitle>
 
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages
-{
-    public partial class Lockout : ITextTransformation
-    {
-    }
-}
+<header>
+    <h1 class="text-danger">Locked out</h1>
+    <p class="text-danger" role="alert">This account has been locked out, please try again later.</p>
+</header>

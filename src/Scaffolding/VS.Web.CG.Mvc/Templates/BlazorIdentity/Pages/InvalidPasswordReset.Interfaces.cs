@@ -1,11 +1,8 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿@page "/Account/InvalidPasswordReset"
 
-using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
+<PageTitle>Invalid password reset</PageTitle>
 
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages
-{
-    public partial class InvalidPasswordReset : ITextTransformation
-    {
-    }
-}
+<h1>Invalid password reset</h1>
+<p role="alert">
+    The password reset link is invalid.
+</p>

@@ -3,7 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@page "/Account/RegisterConfirmation"
+﻿@page "/Account/RegisterConfirmation"
 
 @using System.Text
 @using Microsoft.AspNetCore.Identity
@@ -30,7 +30,7 @@
 }
 else
 {
-    <p>Please check your email to confirm your account.</p>
+    <p role="alert">Please check your email to confirm your account.</p>
 }
 
 @code {
@@ -51,6 +51,7 @@ else
         if (Email is null)
         {
             RedirectManager.RedirectTo("");
+            return;
         }
 
         var user = await UserManager.FindByEmailAsync(Email);

@@ -5,7 +5,6 @@
 <#@  import namespace="System.Linq" #>
 @page "/Account/Manage/PersonalData"
 
-@inject IdentityUserAccessor UserAccessor
 
 <PageTitle>Personal Data</PageTitle>
 
@@ -34,6 +33,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _ = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        _ = await UserManager.GetUserAsync(HttpContext.User);
     }
 }

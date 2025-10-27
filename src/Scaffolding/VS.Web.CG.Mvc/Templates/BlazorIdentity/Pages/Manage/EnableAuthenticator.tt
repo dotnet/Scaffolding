@@ -13,7 +13,6 @@
 @using <#= Model.DbContextNamespace #>
 
 @inject UserManager<<#= Model.UserClassName #>> UserManager
-@inject IdentityUserAccessor UserAccessor
 @inject UrlEncoder UrlEncoder
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<EnableAuthenticator> Logger

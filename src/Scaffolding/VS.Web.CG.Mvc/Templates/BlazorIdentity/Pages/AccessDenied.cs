@@ -3,9 +3,9 @@
 
 using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
 
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Shared
+namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages
 {
-    public partial class AccountLayout : ITextTransformation
+    public partial class AccessDenied : ITextTransformation
     {
     }
 }

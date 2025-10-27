@@ -11,7 +11,6 @@
 
 @inject UserManager<<#= Model.UserClassName #>> UserManager
 @inject SignInManager<<#= Model.UserClassName #>> SignInManager
-@inject IdentityUserAccessor UserAccessor
 @inject IUserStore<<#= Model.UserClassName #>> UserStore
 @inject IdentityRedirectManager RedirectManager
 
@@ -71,7 +70,7 @@
 @code {
     public const string LinkLoginCallbackAction = "LinkLoginCallback";
 
-    private <#= Model.UserClassName #> user = default!;
+    private <#= Model.UserClassName #>? user;
     private IList<UserLoginInfo>? currentLogins;
     private IList<AuthenticationScheme>? otherLogins;
     private bool showRemoveButton;
@@ -90,7 +89,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        user = await UserManager.GetUserAsync(HttpContext.User);
         currentLogins = await UserManager.GetLoginsAsync(user);
         otherLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync())
             .Where(auth => currentLogins.All(ul => auth.Name != ul.LoginProvider))

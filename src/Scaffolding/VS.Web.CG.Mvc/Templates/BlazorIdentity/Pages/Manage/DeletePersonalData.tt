@@ -3,7 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@page "/Account/Manage/DeletePersonalData"
+﻿@page "/Account/Manage/DeletePersonalData"
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity

@@ -3,7 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@page "/Account/Manage/Disable2fa"
+﻿@page "/Account/Manage/Disable2fa"
 
 @using Microsoft.AspNetCore.Identity
 @using <#= Model.DbContextNamespace #>
@@ -43,6 +43,11 @@
     protected override async Task OnInitializedAsync()
     {
         user = await UserManager.GetUserAsync(HttpContext.User);
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            return;
+        }
 
         if (HttpMethods.IsGet(HttpContext.Request.Method) && !await UserManager.GetTwoFactorEnabledAsync(user))
         {
@@ -52,6 +57,12 @@
 
     private async Task OnSubmitAsync()
     {
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            return;
+        }
+
         var disable2faResult = await UserManager.SetTwoFactorEnabledAsync(user, false);
         if (!disable2faResult.Succeeded)
         {

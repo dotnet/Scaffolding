@@ -3,5 +3,5 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@layout ManageLayout
+﻿@layout ManageLayout
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]

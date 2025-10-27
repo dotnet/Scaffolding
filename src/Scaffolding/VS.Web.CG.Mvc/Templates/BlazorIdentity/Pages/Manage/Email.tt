@@ -3,7 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@page "/Account/Manage/Email"
+﻿@page "/Account/Manage/Email"
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text
@@ -12,9 +12,10 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using <#= Model.DbContextNamespace #>
 
-@inject UserManager<<#= Model.UserClassName#>> UserManager
-@inject IEmailSender<<#= Model.UserClassName#>> EmailSender
+@inject UserManager<<#= Model.UserClassName #>> UserManager
+@inject IEmailSender<<#= Model.UserClassName #>> EmailSender
 @inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Manage email</PageTitle>
 
@@ -22,7 +23,7 @@
 
 <StatusMessage Message="@message"/>
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-xl-6">
         <form @onsubmit="OnSendEmailVerificationAsync" @formname="send-verification" id="send-verification-form" method="post">
             <AntiforgeryToken />
         </form>
@@ -32,7 +33,7 @@
             @if (isEmailConfirmed)
             {
                 <div class="form-floating mb-3 input-group">
-                    <input type="text" value="@email" class="form-control" placeholder="Please enter your email." disabled />
+                    <input type="text" value="@email" id="email" class="form-control" placeholder="Enter your email" disabled />
                     <div class="input-group-append">
                         <span class="h-100 input-group-text text-success font-weight-bold">✓</span>
                     </div>
@@ -42,7 +43,7 @@
             else
             {
                 <div class="form-floating mb-3">
-                    <input type="text" value="@email" class="form-control" placeholder="Please enter your email." disabled />
+                    <input type="text" value="@email" id="email" class="form-control" placeholder="Enter your email" disabled />
                     <label for="email" class="form-label">Email</label>
                     <button type="submit" class="btn btn-link" form="send-verification-form">Send verification email</button>
                 </div>
@@ -59,7 +60,7 @@
 
 @code {
     private string? message;
-    private <#= Model.UserClassName#>? user;
+    private <#= Model.UserClassName #>? user;
     private string? email;
     private bool isEmailConfirmed;
 

@@ -3,8 +3,13 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@page "/Account/Manage/PersonalData"
+﻿@page "/Account/Manage/PersonalData"
 
+@using Microsoft.AspNetCore.Identity
+@using <#= Model.DbContextNamespace #>
+
+@inject UserManager<<#= Model.UserClassName #>> UserManager
+@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Personal Data</PageTitle>
 
@@ -33,6 +38,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _ = await UserManager.GetUserAsync(HttpContext.User);
+        var user  = await UserManager.GetUserAsync(HttpContext.User);
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+        }
     }
 }

@@ -1,5 +1,5 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
+<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
@@ -8,11 +8,7 @@
 @using System.Text
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
-<#
-if (!string.IsNullOrEmpty(Model.DbContextNamespace))
-{
-#>@using <#= Model.DbContextNamespace #>
-<#} #>
+@using <#= Model.DbContextNamespace #>
 
 @inject UserManager<<#= Model.UserClassName #>> UserManager
 @inject IdentityRedirectManager RedirectManager
@@ -39,6 +35,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
         if (UserId is null || Code is null)
         {
             RedirectManager.RedirectTo("");
+            return;
         }
 
         var user = await UserManager.FindByIdAsync(UserId);

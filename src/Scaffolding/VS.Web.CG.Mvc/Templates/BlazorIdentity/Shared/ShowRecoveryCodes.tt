@@ -3,7 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-﻿<StatusMessage Message="@StatusMessage" />
+<StatusMessage Message="@StatusMessage" />
 <h3>Recovery codes</h3>
 <div class="alert alert-warning" role="alert">
     <p>

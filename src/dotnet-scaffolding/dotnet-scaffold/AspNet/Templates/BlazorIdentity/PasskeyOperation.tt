@@ -3,11 +3,10 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@page "/Account/AccessDenied"
+namespace <#= Model.BlazorIdentityNamespace #>;
 
-<PageTitle>Access denied</PageTitle>
-
-<header>
-    <h1 class="text-danger">Access denied</h1>
-    <p class="text-danger">You do not have access to this resource.</p>
-</header>
+public enum PasskeyOperation
+{
+    Create = 0,
+    Request = 1,
+}

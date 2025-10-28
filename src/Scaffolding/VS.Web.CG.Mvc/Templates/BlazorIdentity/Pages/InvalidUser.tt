@@ -3,7 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-﻿@page "/Account/InvalidUser"
+@page "/Account/InvalidUser"
 
 <PageTitle>Invalid user</PageTitle>
 

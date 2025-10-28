@@ -3,7 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-﻿@page "/Account/Manage/Disable2fa"
+@page "/Account/Manage/Disable2fa"
 
 @using Microsoft.AspNetCore.Identity
 @using <#= Model.DbContextNamespace #>

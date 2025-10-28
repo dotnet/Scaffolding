@@ -1,19 +1,14 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
+<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
 @page "/Account/Manage/Disable2fa"
 
 @using Microsoft.AspNetCore.Identity
-<#
-if (!string.IsNullOrEmpty(Model.DbContextNamespace))
-{
-#>@using <#= Model.DbContextNamespace #>
-<#} #>
+@using <#= Model.DbContextNamespace #>
 
 @inject UserManager<<#= Model.UserClassName #>> UserManager
-@inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<Disable2fa> Logger
 
@@ -40,14 +35,19 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 </div>
 
 @code {
-    private <#= Model.UserClassName #> user = default!;
+    private <#= Model.UserClassName #>? user;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        user = await UserManager.GetUserAsync(HttpContext.User);
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            return;
+        }
 
         if (HttpMethods.IsGet(HttpContext.Request.Method) && !await UserManager.GetTwoFactorEnabledAsync(user))
         {
@@ -57,6 +57,12 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 
     private async Task OnSubmitAsync()
     {
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            return;
+        }
+
         var disable2faResult = await UserManager.SetTwoFactorEnabledAsync(user, false);
         if (!disable2faResult.Succeeded)
         {

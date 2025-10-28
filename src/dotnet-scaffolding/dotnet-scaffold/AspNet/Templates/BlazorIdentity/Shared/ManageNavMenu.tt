@@ -1,16 +1,11 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
+<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@using <#= Model.UserClassNamespace #>
 @using Microsoft.AspNetCore.Identity
-<#
-if (!string.IsNullOrEmpty(Model.DbContextNamespace))
-{
-#>@using <#= Model.DbContextNamespace #>
-<#} #>
-@inject NavigationManager NavigationManager
+@using <#= Model.DbContextNamespace #>
+
 @inject SignInManager<<#= Model.UserClassName #>> SignInManager
 
 <ul class="nav nav-pills flex-column">
@@ -31,6 +26,9 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
     }
     <li class="nav-item">
         <NavLink class="nav-link" href="Account/Manage/TwoFactorAuthentication">Two-factor authentication</NavLink>
+    </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="Account/Manage/Passkeys">Passkeys</NavLink>
     </li>
     <li class="nav-item">
         <NavLink class="nav-link" href="Account/Manage/PersonalData">Personal data</NavLink>

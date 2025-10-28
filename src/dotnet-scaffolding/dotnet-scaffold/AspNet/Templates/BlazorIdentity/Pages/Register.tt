@@ -1,5 +1,5 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
+<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
@@ -10,11 +10,7 @@
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
-<#
-if (!string.IsNullOrEmpty(Model.DbContextNamespace))
-{
-#>@using <#= Model.DbContextNamespace #>
-<#} #>
+@using <#= Model.DbContextNamespace #>
 
 @inject UserManager<<#= Model.UserClassName #>> UserManager
 @inject IUserStore<<#= Model.UserClassName #>> UserStore
@@ -31,7 +27,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 <div class="row">
     <div class="col-lg-6">
         <StatusMessage Message="@Message" />
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
+        <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
             <DataAnnotationsValidator />
             <h2>Create a new account.</h2>
             <hr />
@@ -111,9 +107,11 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                 "Account/RegisterConfirmation",
                 new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
         }
-
-        await SignInManager.SignInAsync(user, isPersistent: false);
-        RedirectManager.RedirectTo(ReturnUrl);
+        else
+        {
+            await SignInManager.SignInAsync(user, isPersistent: false);
+            RedirectManager.RedirectTo(ReturnUrl);
+        }
     }
 
     private <#= Model.UserClassName #> CreateUser()

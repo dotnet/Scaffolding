@@ -1,2 +1,8 @@
-﻿@using BlazorWebCSharp._1.Components.Account.Shared
-@attribute [ExcludeFromInteractiveRouting]
+using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
+
+namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages
+{
+    public partial class _Imports : ITextTransformation
+    {
+    }
+}

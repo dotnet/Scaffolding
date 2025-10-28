@@ -98,7 +98,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Templates\BlazorIdentity\IdentityUserAccessor.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\IdentityRevalidatingAuthenticationStateProvider.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\IdentityRedirectManager.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\IdentityNoOpEmailSender.Interfaces.cs" />
@@ -319,12 +318,6 @@
     <Compile Include="Templates\BlazorIdentity\Shared\RedirectToLogin.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\Shared\StatusMessage.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\Shared\ShowRecoveryCodes.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Shared\AccountLayout.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>AccountLayout.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\BlazorIdentity\Shared\AccountLayout.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\Shared\ExternalLoginPicker.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -441,11 +434,6 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>IdentityRevalidatingAuthenticationStateProvider.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\BlazorIdentity\IdentityUserAccessor.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>IdentityUserAccessor.tt</DependentUpon>
     </Compile>
     <None Update="Templates\BlazorIdentity\IdentityComponentsEndpointRouteBuilderExtensions.cs">
       <DesignTime>True</DesignTime>

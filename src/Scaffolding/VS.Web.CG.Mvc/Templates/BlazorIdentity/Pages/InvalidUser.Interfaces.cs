@@ -1,7 +1,8 @@
-﻿@page "/Account/InvalidUser"
+using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
 
-<PageTitle>Invalid user</PageTitle>
-
-<h3>Invalid user</h3>
-
-<StatusMessage />
+namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages
+{
+    public partial class InvalidUser : ITextTransformation
+    {
+    }
+}

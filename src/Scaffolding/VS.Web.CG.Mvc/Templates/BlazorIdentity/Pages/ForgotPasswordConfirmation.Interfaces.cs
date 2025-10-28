@@ -1,8 +1,8 @@
-﻿@page "/Account/ForgotPasswordConfirmation"
+using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
 
-<PageTitle>Forgot password confirmation</PageTitle>
-
-<h1>Forgot password confirmation</h1>
-<p role="alert">
-    Please check your email to reset your password.
-</p>
+namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages
+{
+    public partial class ForgotPasswordConfirmation : ITextTransformation
+    {
+    }
+}

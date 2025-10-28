@@ -1,8 +1,8 @@
-﻿@page "/Account/InvalidPasswordReset"
+using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
 
-<PageTitle>Invalid password reset</PageTitle>
-
-<h1>Invalid password reset</h1>
-<p role="alert">
-    The password reset link is invalid.
-</p>
+namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages
+{
+    public partial class InvalidPasswordReset : ITextTransformation
+    {
+    }
+}

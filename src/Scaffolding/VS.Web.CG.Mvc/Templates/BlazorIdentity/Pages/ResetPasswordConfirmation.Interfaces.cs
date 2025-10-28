@@ -1,7 +1,8 @@
-﻿@page "/Account/ResetPasswordConfirmation"
-<PageTitle>Reset password confirmation</PageTitle>
+using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
 
-<h1>Reset password confirmation</h1>
-<p role="alert">
-    Your password has been reset. Please <a href="Account/Login">click here to log in</a>.
-</p>
+namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages
+{
+    public partial class ResetPasswordConfirmation : ITextTransformation
+    {
+    }
+}

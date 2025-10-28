@@ -1,29 +1,8 @@
-﻿@if (!string.IsNullOrEmpty(DisplayMessage))
+using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
+
+namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Shared
 {
-    var statusMessageClass = DisplayMessage.StartsWith("Error") ? "danger" : "success";
-    <div class="alert alert-@statusMessageClass" role="alert">
-        @DisplayMessage
-    </div>
-}
-
-@code {
-    private string? messageFromCookie;
-
-    [Parameter]
-    public string? Message { get; set; }
-
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
-
-    private string? DisplayMessage => Message ?? messageFromCookie;
-
-    protected override void OnInitialized()
+    public partial class StatusMessage : ITextTransformation
     {
-        messageFromCookie = HttpContext.Request.Cookies[IdentityRedirectManager.StatusCookieName];
-
-        if (messageFromCookie is not null)
-        {
-            HttpContext.Response.Cookies.Delete(IdentityRedirectManager.StatusCookieName);
-        }
     }
 }

@@ -1,8 +1,8 @@
-﻿@inject NavigationManager NavigationManager
+using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
 
-@code {
-    protected override void OnInitialized()
+namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Shared
+{
+    public partial class RedirectToLogin : ITextTransformation
     {
-        NavigationManager.NavigateTo($"Account/Login?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}", forceLoad: true);
     }
 }

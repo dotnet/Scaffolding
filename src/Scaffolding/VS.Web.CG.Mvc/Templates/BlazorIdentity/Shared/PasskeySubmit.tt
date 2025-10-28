@@ -3,7 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@using Microsoft.AspNetCore.Antiforgery
+﻿@using Microsoft.AspNetCore.Antiforgery
 @inject IServiceProvider Services
 
 <button type="submit" name="__passkeySubmit" @attributes="AdditionalAttributes">@ChildContent</button>

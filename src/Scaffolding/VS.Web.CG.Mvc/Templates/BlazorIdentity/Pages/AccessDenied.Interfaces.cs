@@ -1,4 +1,4 @@
-@page "/Account/AccessDenied"
+﻿@page "/Account/AccessDenied"
 
 <PageTitle>Access denied</PageTitle>
 

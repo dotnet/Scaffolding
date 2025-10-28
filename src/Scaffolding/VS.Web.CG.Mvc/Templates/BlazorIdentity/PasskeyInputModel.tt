@@ -4,6 +4,7 @@
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
 namespace <#= Model.BlazorIdentityNamespace #>;
+
 public class PasskeyInputModel
 {
     public string? CredentialJson { get; set; }

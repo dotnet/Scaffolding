@@ -5,29 +5,19 @@
 <#@  import namespace="System.Linq" #>
 using System.Security.Claims;
 using System.Text.Json;
-<#
-    var sortedUsings = new SortedSet<string>()
-    {
-        Model.UserClassNamespace,
-        Model.DbContextNamespace,
-        $"{Model.BlazorIdentityNamespace}.Pages",
-        $"{Model.BlazorIdentityNamespace}.Pages.Manage",
-        "Microsoft.AspNetCore.Antiforgery",
-        "Microsoft.AspNetCore.Authentication",
-        "Microsoft.AspNetCore.Components.Authorization",
-        "Microsoft.AspNetCore.Http.Extensions",
-        "Microsoft.AspNetCore.Identity",
-        "Microsoft.AspNetCore.Mvc",
-        "Microsoft.Extensions.Primitives",
-    };
-
-    foreach (var usingNamespace in sortedUsings)
-    {#>
-using <#= usingNamespace #>;
-<#  }
-#>
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
+using BlazorWebCSharp._1.Components.Account.Pages;
+using BlazorWebCSharp._1.Components.Account.Pages.Manage;
+using <#= Model.DbContextNamespace #>;
 
 namespace Microsoft.AspNetCore.Routing;
+
 internal static class IdentityComponentsEndpointRouteBuilderExtensions
 {
     // These endpoints are required by the Identity Razor components defined in the /Components/Account/Pages directory of this project.
@@ -58,7 +48,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
         accountGroup.MapPost("/Logout", async (
             ClaimsPrincipal user,
-            SignInManager<<#= Model.UserClassName #>> signInManager,
+            [FromServices] SignInManager<<#= Model.UserClassName #>> signInManager,
             [FromForm] string returnUrl) =>
         {
             await signInManager.SignOutAsync();

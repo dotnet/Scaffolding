@@ -4,6 +4,7 @@
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
 namespace <#= Model.BlazorIdentityNamespace #>;
+
 public enum PasskeyOperation
 {
     Create = 0,

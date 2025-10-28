@@ -1,8 +1,7 @@
-using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
+namespace BlazorWebCSharp._1.Components.Account;
 
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
+public class PasskeyInputModel
 {
-    public partial class PasskeyInputModel : ITextTransformation
-    {
-    }
+    public string? CredentialJson { get; set; }
+    public string? Error { get; set; }
 }

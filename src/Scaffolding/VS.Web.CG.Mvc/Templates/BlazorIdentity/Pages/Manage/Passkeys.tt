@@ -3,7 +3,7 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
-@page "/Account/Manage/Passkeys"
+﻿@page "/Account/Manage/Passkeys"
 
 @using <#= Model.DbContextNamespace #>
 @using Microsoft.AspNetCore.Identity

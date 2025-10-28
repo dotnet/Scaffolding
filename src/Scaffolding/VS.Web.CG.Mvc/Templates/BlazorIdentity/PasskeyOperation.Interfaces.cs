@@ -1,8 +1,7 @@
-using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
+namespace BlazorWebCSharp._1.Components.Account;
 
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
+public enum PasskeyOperation
 {
-    public partial class PasskeyOperation : ITextTransformation
-    {
-    }
+    Create = 0,
+    Request = 1,
 }

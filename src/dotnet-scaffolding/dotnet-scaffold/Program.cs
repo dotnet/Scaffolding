@@ -15,6 +15,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 IScaffoldRunnerBuilder builder = Host.CreateScaffoldBuilder();
 
+using var cts = new CancellationTokenSource();
+Console.CancelKeyPress += (sender, e) => {
+    e.Cancel = true;
+    cts.Cancel();
+};
+
 ConfigureServices(builder.Services);
 ConfigureSharedSteps(builder.Services);
 
@@ -23,11 +29,13 @@ builder.AddOption(nonInteractiveScaffoldOption);
 Option nonInteractiveOption = nonInteractiveScaffoldOption.ToCliOption();
 
 AspireCommandService aspireCommandService = new(builder);
+
+//aspire command adding does not need to be async
 aspireCommandService.AddScaffolderCommands();
 ConfigureCommandSteps(builder.Services, aspireCommandService);
 
 AspNetCommandService aspNetCommandService = new(builder);
-aspNetCommandService.AddScaffolderCommands();
+await aspNetCommandService.AddScaffolderCommandsAsync(cts.Token);
 ConfigureCommandSteps(builder.Services, aspNetCommandService);
 
 IScaffoldRunner runner = builder.Build();

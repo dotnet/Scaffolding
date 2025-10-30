@@ -16,7 +16,7 @@ internal class AzCliRunner
         return new AzCliRunner(commandName);
     }
 
-    public int RunAzCli(string arguments, out string? stdOut, out string? stdErr)
+    public async Task<(int ExitCode, string? StdOut, string? StdErr)> RunAzCliAsync(string arguments, CancellationToken cancellationToken)
     {
         using var outStream = new ProcessOutputStreamReader();
         using var errStream = new ProcessOutputStreamReader();
@@ -42,19 +42,30 @@ internal class AzCliRunner
         }
         catch (Exception ex)
         {
-            stdOut = string.Empty;
-            stdErr = ex.Message;
-            return -1;
+            return (-1, string.Empty, ex.Message);
         }
 
-        var taskOut = outStream.BeginRead(process.StandardOutput);
-        var taskErr = errStream.BeginRead(process.StandardError);
+        Task taskOut = outStream.BeginRead(process.StandardOutput);
+        Task taskErr = errStream.BeginRead(process.StandardError);
 
-        // Wait for process to exit with a timeout (e.g., 30 seconds)
+        // Wait for process to exit with a timeout (e.g., 30 seconds) or cancellation
         const int timeoutMilliseconds = 30000;
-        bool exited = process.WaitForExit(timeoutMilliseconds);
+        Task<bool> waitForExitTask = Task.Run(() => process.WaitForExit(timeoutMilliseconds), cancellationToken);
+        try
+        {
+            await Task.WhenAny(waitForExitTask, Task.Delay(Timeout.Infinite, cancellationToken));
+        }
+        catch (OperationCanceledException)
+        {
+            try
+            {
+                process.Kill(entireProcessTree: true);
+            }
+            catch { }
+            throw;
+        }
 
-        if (!exited)
+        if (!waitForExitTask.Result)
         {
             try
             {
@@ -66,13 +77,12 @@ internal class AzCliRunner
             }
         }
 
-        taskOut.Wait();
-        taskErr.Wait();
+        await Task.WhenAll(taskOut, taskErr);
 
-        stdOut = outStream.CapturedOutput?.Trim();
-        stdErr = errStream.CapturedOutput;
+        string? stdOut = outStream.CapturedOutput?.Trim();
+        string? stdErr = errStream.CapturedOutput;
 
-        return process.ExitCode;
+        return (process.ExitCode, stdOut, stdErr);
     }
 
     internal ProcessStartInfo _psi;

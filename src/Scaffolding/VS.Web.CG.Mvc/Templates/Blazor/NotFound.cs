@@ -25,9 +25,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@page \"/not-found\"\r\n\r\n<PageTitle>Not Found</PageTitle>\r\n\r\n<h1>Not Found</h1>\r\n<p" +
-                    ">Sorry, there\'s nothing at this address.</p>\r\n\r\n<a href=\"/\">Back to Home</a>\r" +
-                    "\n");
+            this.Write("\r\n\r\n@page \"/not-found\"\r\n@layout MainLayout\r\n\r\n\r\n<PageTitle>Not Found</PageTitle>\r" +
+                    "\n\r\n\r\n<h1>Not Found</h1>\r\n<p>Sorry, there\'s nothing at this address.</p>\r\n\r\n\r\n<a " +
+                    "href=\"/\">Back to Home</a>");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -59,6 +59,7 @@ private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel
     }
 }
 
+
 /// <summary>
 /// Initialize the template
 /// </summary>
@@ -86,15 +87,14 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel\' of" +
-                    " the parameter \'Model\' did not match the type of the data passed to the templa" +
-                    "te.");
+            this.Error("The type \'Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel\' of th" +
+                    "e parameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }
 if ((ModelValueAcquired == false))
 {
-    object data = global::Microsoft.DotNet.Scaffolding.Shared.T4Templating.CallContext.LogicalGetData("Model");
+    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
         this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor.BlazorModel)(data));
@@ -107,7 +107,6 @@ if ((ModelValueAcquired == false))
 
 
     }
-    
     #region Base class
     /// <summary>
     /// Base class for this transformation

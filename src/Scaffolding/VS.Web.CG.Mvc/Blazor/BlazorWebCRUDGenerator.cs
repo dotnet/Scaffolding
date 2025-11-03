@@ -285,6 +285,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             var allTypes = await ModelTypesLocator.GetAllTypesAsync();
             var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
             var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(project?.FilePath))
+            {
+                var projectDirectory = Path.GetDirectoryName(project.FilePath);
+                if (!string.IsNullOrEmpty(projectDirectory) && FileSystem.DirectoryExists(projectDirectory))
+                {
+                    blazorAppProperties.HasMainLayout = FileSystem
+                        .EnumerateFiles(projectDirectory, "MainLayout.razor", SearchOption.AllDirectories)
+                        .FirstOrDefault() != null;
+                }
+            }
             var programDocument = project.GetUpdatedDocument(FileSystem, programType);
             var programDocumentDirectory = Path.GetDirectoryName(programDocument.FilePath);
 

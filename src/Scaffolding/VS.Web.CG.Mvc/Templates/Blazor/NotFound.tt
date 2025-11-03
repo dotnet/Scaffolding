@@ -6,7 +6,9 @@
 
 
 @page "/not-found"
+<# if (Model.HasMainLayout) { #>
 @layout MainLayout
+<# } #>
 
 
 <PageTitle>Not Found</PageTitle>

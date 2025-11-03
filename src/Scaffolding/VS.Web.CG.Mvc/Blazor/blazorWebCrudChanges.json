@@ -38,10 +38,30 @@
           "ReplaceSnippet": [
             "app.UseHsts()"
           ]
+        },
+        {
+          "ReplaceSnippet": [ "app.UseHttpsRedirection();" ],
+          "Block": "app.UseStatusCodePagesWithReExecute(\"/not-found\", createScopeForStatusCodePages: true);\n\napp.UseHttpsRedirection();",
+          "CheckBlock": "UseStatusCodePagesWithReExecute"
         }
       ],
       "Usings": [
         "Microsoft.EntityFrameworkCore"
+      ]
+    },
+    {
+      "FileName": "Routes.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "<Router AppAssembly=\"typeof(Program).Assembly\">" ],
+          "Block": "<Router AppAssembly=\"typeof(Program).Assembly\" NotFoundPage=\"typeof(Pages.NotFound)\">",
+          "CheckBlock": "NotFoundPage=\"typeof(Pages.NotFound)\""
+        },
+        {
+          "ReplaceSnippet": [ "<Router AppAssembly=\"typeof(Program).Assembly\" AdditionalAssemblies=\"new[] { typeof(Client._Imports).Assembly }\">" ],
+          "Block": "<Router AppAssembly=\"typeof(Program).Assembly\" AdditionalAssemblies=\"new[] { typeof(Client._Imports).Assembly }\" NotFoundPage=\"typeof(Pages.NotFound)\">",
+          "CheckBlock": "NotFoundPage=\"typeof(Pages.NotFound)\""
+        }
       ]
     }
   ]

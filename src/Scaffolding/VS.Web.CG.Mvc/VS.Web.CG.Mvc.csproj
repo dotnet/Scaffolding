@@ -355,6 +355,12 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Index.tt</DependentUpon>
     </Compile>
+    <Compile Include="Templates\Blazor\NotFound.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>NotFound.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\Blazor\NotFound.Interfaces.cs" />
     <Compile Include="Templates\General\IdentityApplicationUser.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -466,6 +472,15 @@
     <None Update="Templates\Blazor\Index.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>Index.cs</LastGenOutput>
+    </None>
+    <None Update="Templates\Blazor\NotFound.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>NotFound.tt</DependentUpon>
+    </None>
+    <None Update="Templates\Blazor\NotFound.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>NotFound.cs</LastGenOutput>
     </None>
     <None Update="Templates\General\IdentityApplicationUser.cs">
       <DesignTime>True</DesignTime>

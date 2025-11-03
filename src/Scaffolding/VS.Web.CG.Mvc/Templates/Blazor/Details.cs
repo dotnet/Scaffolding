@@ -102,7 +102,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write(");\r\n\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(" is null)\r\n        {\r\n            NavigationManager.NavigateTo(\"notfound\");\r\n    " +
+            this.Write(" is null)\r\n        {\r\n            NavigationManager.NotFound();\r\n    " +
                     "    }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }

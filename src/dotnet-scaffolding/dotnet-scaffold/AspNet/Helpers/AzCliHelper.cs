@@ -140,7 +140,7 @@ internal class AzCliHelper
         {
 
             appIds = [];
-            var exitCode = runner.RunAzCli("ad app list --output json", out string? stdOut, out string? stdErr);
+            var exitCode = runner.RunAzCli("ad app list --output json --all", out string? stdOut, out string? stdErr);
 
             if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
             {

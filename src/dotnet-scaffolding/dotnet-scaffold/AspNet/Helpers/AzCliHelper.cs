@@ -80,8 +80,8 @@ internal class AzCliHelper
     /// <returns>if successful, return true</returns>
     private static bool GetAzureUsernamesAndTenatIds(AzCliRunner runner, string output, out List<string> usernames, out List<string> tenants)
     {
-        usernames = [];
         tenants = [];
+        HashSet<string> uniqueUsernames = new HashSet<string>();
 
         try
         {
@@ -91,7 +91,6 @@ internal class AzCliHelper
 
             if (root.ValueKind == JsonValueKind.Array)
             {
-
                 foreach (JsonElement account in root.EnumerateArray())
                 {
                     if (account.TryGetProperty("user", out JsonElement user) &&
@@ -100,7 +99,7 @@ internal class AzCliHelper
                         string? username = name.GetString();
                         if (!string.IsNullOrEmpty(username))
                         {
-                            usernames.Add(username);
+                            uniqueUsernames.Add(username);
                         }
                     }
 
@@ -114,8 +113,8 @@ internal class AzCliHelper
                         }
                     }
                 }
-
             }
+            usernames = [.. uniqueUsernames];
         }
         catch (Exception ex)
         {

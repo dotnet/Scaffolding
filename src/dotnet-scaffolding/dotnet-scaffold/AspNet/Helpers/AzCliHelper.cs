@@ -4,7 +4,6 @@
 using System.Text.Json;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
-using Spectre.Console;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
@@ -62,10 +61,9 @@ internal class AzCliHelper
             output = stdOut;
             return exitCode == 0 && string.IsNullOrEmpty(stdErr);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             output = null;
-            AnsiConsole.WriteLine($"Error checking Azure login status: {ex.Message}");
             return false;
         }
     }
@@ -116,9 +114,8 @@ internal class AzCliHelper
             }
             usernames = [.. uniqueUsernames];
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            AnsiConsole.WriteLine($"Error parsing Azure accounts JSON: {ex.Message}");
             usernames = [];
             tenants = [];
             return false;
@@ -168,17 +165,11 @@ internal class AzCliHelper
                     return true;
                 }
             }
-
-            if (!string.IsNullOrEmpty(stdErr))
-            {
-                AnsiConsole.WriteLine($"Error executing 'az ad app list': {stdErr}");
-            }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             appIds = [];
             // Handle any exceptions, like az CLI not being installed
-            AnsiConsole.WriteLine($"Error getting Azure apps: {ex.Message}");
         }
         return false;
     }

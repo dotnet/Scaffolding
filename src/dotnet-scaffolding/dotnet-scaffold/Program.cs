@@ -44,8 +44,8 @@ builder.AddHandler(async (context) =>
     }
     else
     {
-        ScaffoldCommandAppBuilder builder = new(runner, [.. context.ParseResult.Tokens.Select(t => t.Value)]);
-        ScaffoldCommandApp app = builder.Build();
+        ScaffoldCommandAppBuilder appBuilder = new(runner, [.. context.ParseResult.Tokens.Select(t => t.Value)]);
+        ScaffoldCommandApp app = appBuilder.Build(aspNetCommandService.AzCliErrors);
         await app.RunAsync();
     }
 });

@@ -15,6 +15,7 @@ internal class CategoryDiscovery
 {
     private readonly IDotNetToolService _dotnetToolService;
     private readonly DotNetToolInfo? _componentPicked;
+    private readonly IStartUpErrorService _startUpErrorService;
     public FlowStepState State { get; private set; }
 
     /// <summary>
@@ -22,10 +23,12 @@ internal class CategoryDiscovery
     /// </summary>
     /// <param name="dotnetToolService">Service for dotnet tool operations.</param>
     /// <param name="componentPicked">The selected component, if any.</param>
-    public CategoryDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked)
+    /// <param name="startUpErrorService">Service for Azure CLI startup errors.</param>
+    public CategoryDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked, IStartUpErrorService startUpErrorService)
     {
         _dotnetToolService = dotnetToolService;
         _componentPicked = componentPicked;
+        _startUpErrorService = startUpErrorService;
     }
 
     /// <summary>
@@ -76,9 +79,15 @@ internal class CategoryDiscovery
         displayCategories?.Remove(ScaffolderConstants.DEFAULT_CATEGORY);
         displayCategories?.Add(ScaffolderConstants.DEFAULT_CATEGORY);
 
-        var prompt = new FlowSelectionPrompt<string>()
-            .Title("[lightseagreen]Pick a scaffolding category: [/]")
-            .Converter(GetCategoryDisplayName)
+        FlowSelectionPrompt<string> prompt = new FlowSelectionPrompt<string>();
+
+        prompt.Title("[lightseagreen]Pick a scaffolding category: [/]");
+
+        if (DisplayEntraIdError(out string errorMessage))
+        {
+            prompt.AddMessage(errorMessage);
+        }
+        prompt.Converter(GetCategoryDisplayName)
             .AddChoices(displayCategories, navigation: context.Navigation);
 
         var result = prompt.Show();
@@ -99,5 +108,18 @@ internal class CategoryDiscovery
         }
 
         return categoryName;
+    }
+
+    private bool DisplayEntraIdError(out string errorMessage)
+    {
+        // Show Azure CLI error if it exists
+        string? failingCommand = _startUpErrorService.GetError();
+        if (!string.IsNullOrWhiteSpace(failingCommand))
+        {
+            errorMessage = $"[red]The \"Entra ID\" category is unavailable due to an authentication or authorization issue. Ensure \"{failingCommand}\" works correctly if you would like to add Entra ID Scaffolding.[/]";
+            return true;
+        }
+        errorMessage = string.Empty;
+        return false;
     }
 }

@@ -196,13 +196,17 @@ internal class AspNetOptions
             CustomPickerValues = AspnetStrings.Options.Application.Values
         };
 
-        _areAzCliCommandsSuccessful = AzCliHelper.GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds);
+        _areAzCliCommandsSuccessful = AzCliHelper.GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds, out string? azCliErrors);
+        AzCliErrors = azCliErrors;
+
         _usernames = usernames;
         _tenants = tenants;
         _appIds = appIds;
     }
 
     public bool AreAzCliCommandsSuccessful() => _areAzCliCommandsSuccessful;
+
+    public string? AzCliErrors { get; }
 
     public ScaffolderOption<string> Username => _username ??=  new()
     {

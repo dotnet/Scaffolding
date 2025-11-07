@@ -25,6 +25,8 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     private readonly IEnvironmentService _environmentService;
     // Sentinel for first-time use notice.
     private readonly IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
+    // Service for Azure CLI startup errors.
+    private readonly IStartUpErrorService _startUpErrorService;
 
     private readonly IScaffoldRunner _scaffoldRunner;
 
@@ -39,6 +41,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     /// <param name="telemetry">The telemetry service.</param>
     /// <param name="firstTimeUseNoticeSentinel">The first-time use notice sentinel.</param>
     /// <param name="scaffoldRunner">The command runner, implemeneted with System.CommandLine</param>
+    /// <param name="startUpErrorService">The startup error service.</param>
     public ScaffoldCommand(
         IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
@@ -47,7 +50,8 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         ILogger<ScaffoldCommand> logger,
         ITelemetryService telemetry,
         IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
-        IScaffoldRunner scaffoldRunner)
+        IScaffoldRunner scaffoldRunner,
+        IStartUpErrorService startUpErrorService)
         : base(flowProvider, telemetry)
     {
         _dotnetToolService = dotnetToolService;
@@ -56,6 +60,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         _logger = logger;
         _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
         _scaffoldRunner = scaffoldRunner;
+        _startUpErrorService = startUpErrorService;
     }
 
     /// <summary>
@@ -95,7 +100,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         IEnumerable<IFlowStep> flowSteps =
         [
             new StartupFlowStep(_dotnetToolService, _environmentService, _fileSystem, _logger, _firstTimeUseNoticeSentinel),
-            new CategoryPickerFlowStep(_logger, _dotnetToolService),
+            new CategoryPickerFlowStep(_logger, _dotnetToolService, _startUpErrorService),
             new CommandPickerFlowStep(_logger, _dotnetToolService, _environmentService, _fileSystem),
             new CommandExecuteFlowStep(TelemetryService, _scaffoldRunner)
         ];

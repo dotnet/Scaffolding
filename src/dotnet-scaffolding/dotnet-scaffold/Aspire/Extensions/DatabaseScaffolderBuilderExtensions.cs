@@ -6,6 +6,7 @@ using Microsoft.DotNet.Tools.Scaffold.Aspire;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Command;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
@@ -39,7 +40,7 @@ internal static class DatabaseScaffolderBuilderExtensions
                 }
 
                 // Set package details for AppHost
-                step.PackageNames = [appHostPackageName];
+                step.Packages = [new Package(appHostPackageName)];
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.Prerelease = commandSettings.Prerelease;
             }
@@ -71,7 +72,7 @@ internal static class DatabaseScaffolderBuilderExtensions
                 }
 
                 // Set package details for the API service project
-                step.PackageNames = [projectPackageName];
+                step.Packages = [new Package(projectPackageName)];
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
             }

@@ -1,5 +1,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.CommandLine;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.Extensions.Logging;
 
@@ -13,7 +14,7 @@ public class AddPackagesStep : ScaffoldStep
     /// <summary>
     /// Gets or sets the list of package names to add.
     /// </summary>
-    public required IList<string> PackageNames { get; set; }
+    public required IList<Package> Packages { get; set; }
 
     /// <summary>
     /// Gets or sets the path to the project file.
@@ -45,12 +46,14 @@ public class AddPackagesStep : ScaffoldStep
     /// <returns>True if the packages were added successfully; otherwise, false.</returns>
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        foreach (var packageName in PackageNames)
+        foreach (Package package in Packages)
         {
+            // add package version here
             DotnetCommands.AddPackage(
-                packageName: packageName,
+                packageName: package.Name,
                 logger: _logger,
                 projectFile: ProjectPath,
+                packageVersion: package.Version,
                 includePrerelease: Prerelease);
         }
 

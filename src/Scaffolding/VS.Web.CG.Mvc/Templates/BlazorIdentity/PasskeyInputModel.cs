@@ -9,6 +9,9 @@
 // ------------------------------------------------------------------------------
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
 {
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Linq;
     using System;
     
     /// <summary>
@@ -24,8 +27,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         {
             this.Write("namespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorIdentityNamespace));
-            this.Write("\r\n{\r\n    public class PasskeyInputModel\r\n    {\r\n        public string? Credential" +
-                    "Json { get; set; }\r\n        public string? Error { get; set; }\r\n    }\r\n}\r\n");
+            this.Write(";\r\n\r\npublic class PasskeyInputModel\r\n{\r\n    public string? CredentialJson { get; " +
+                    "set; }\r\n    public string? Error { get; set; }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

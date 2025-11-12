@@ -9,6 +9,9 @@
 // ------------------------------------------------------------------------------
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
 {
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Linq;
     using System;
     
     /// <summary>
@@ -27,33 +30,31 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorIdentityNamespace));
-            this.Write("\r\n{\r\n    internal sealed class IdentityRedirectManager(NavigationManager navigati" +
-                    "onManager)\r\n    {\r\n        public const string StatusCookieName = \"Identity.Stat" +
-                    "usMessage\";\r\n\r\n        private static readonly CookieBuilder StatusCookieBuilder" +
-                    " = new()\r\n        {\r\n            SameSite = SameSiteMode.Strict,\r\n            Ht" +
-                    "tpOnly = true,\r\n            IsEssential = true,\r\n            MaxAge = TimeSpan.F" +
-                    "romSeconds(5),\r\n        };\r\n\r\n        public void RedirectTo(string? uri)\r\n     " +
-                    "   {\r\n            uri ??= \"\";\r\n\r\n            // Prevent open redirects.\r\n       " +
-                    "     if (!Uri.IsWellFormedUriString(uri, UriKind.Relative))\r\n            {\r\n    " +
-                    "            uri = navigationManager.ToBaseRelativePath(uri);\r\n            }\r\n\r\n " +
-                    "           navigationManager.NavigateTo(uri);\r\n        }\r\n\r\n        public void " +
-                    "RedirectTo(string uri, Dictionary<string, object?> queryParameters)\r\n        {\r\n" +
-                    "            var uriWithoutQuery = navigationManager.ToAbsoluteUri(uri).GetLeftPa" +
-                    "rt(UriPartial.Path);\r\n            var newUri = navigationManager.GetUriWithQuery" +
-                    "Parameters(uriWithoutQuery, queryParameters);\r\n            RedirectTo(newUri);\r\n" +
-                    "        }\r\n\r\n        public void RedirectToWithStatus(string uri, string message" +
-                    ", HttpContext context)\r\n        {\r\n            context.Response.Cookies.Append(S" +
-                    "tatusCookieName, message, StatusCookieBuilder.Build(context));\r\n            Redi" +
-                    "rectTo(uri);\r\n        }\r\n\r\n        private string CurrentPath => navigationManag" +
-                    "er.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);\r\n\r\n       " +
-                    " public void RedirectToCurrentPage() => RedirectTo(CurrentPath);\r\n\r\n        publ" +
-                    "ic void RedirectToCurrentPageWithStatus(string message, HttpContext context)\r\n  " +
-                    "          => RedirectToWithStatus(CurrentPath, message, context);\r\n\r\n        pub" +
-                    "lic void RedirectToInvalidUser(UserManager<");
+            this.Write(";\r\n\r\ninternal sealed class IdentityRedirectManager(NavigationManager navigationMa" +
+                    "nager)\r\n{\r\n    public const string StatusCookieName = \"Identity.StatusMessage\";\r" +
+                    "\n\r\n    private static readonly CookieBuilder StatusCookieBuilder = new()\r\n    {\r" +
+                    "\n        SameSite = SameSiteMode.Strict,\r\n        HttpOnly = true,\r\n        IsEs" +
+                    "sential = true,\r\n        MaxAge = TimeSpan.FromSeconds(5),\r\n    };\r\n\r\n    public" +
+                    " void RedirectTo(string? uri)\r\n    {\r\n        uri ??= \"\";\r\n\r\n        // Prevent " +
+                    "open redirects.\r\n        if (!Uri.IsWellFormedUriString(uri, UriKind.Relative))\r" +
+                    "\n        {\r\n            uri = navigationManager.ToBaseRelativePath(uri);\r\n      " +
+                    "  }\r\n\r\n        navigationManager.NavigateTo(uri);\r\n    }\r\n\r\n    public void Redi" +
+                    "rectTo(string uri, Dictionary<string, object?> queryParameters)\r\n    {\r\n        " +
+                    "var uriWithoutQuery = navigationManager.ToAbsoluteUri(uri).GetLeftPart(UriPartia" +
+                    "l.Path);\r\n        var newUri = navigationManager.GetUriWithQueryParameters(uriWi" +
+                    "thoutQuery, queryParameters);\r\n        RedirectTo(newUri);\r\n    }\r\n\r\n    public " +
+                    "void RedirectToWithStatus(string uri, string message, HttpContext context)\r\n    " +
+                    "{\r\n        context.Response.Cookies.Append(StatusCookieName, message, StatusCook" +
+                    "ieBuilder.Build(context));\r\n        RedirectTo(uri);\r\n    }\r\n\r\n    private strin" +
+                    "g CurrentPath => navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftP" +
+                    "art(UriPartial.Path);\r\n\r\n    public void RedirectToCurrentPage() => RedirectTo(C" +
+                    "urrentPath);\r\n\r\n    public void RedirectToCurrentPageWithStatus(string message, " +
+                    "HttpContext context)\r\n        => RedirectToWithStatus(CurrentPath, message, cont" +
+                    "ext);\r\n\r\n    public void RedirectToInvalidUser(UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> userManager, HttpContext context)\r\n            => RedirectToWithStatus(\"Account" +
-                    "/InvalidUser\", $\"Error: Unable to load user with ID \'{userManager.GetUserId(cont" +
-                    "ext.User)}\'.\", context);\r\n    }\r\n}\r\n");
+            this.Write("> userManager, HttpContext context)\r\n        => RedirectToWithStatus(\"Account/Inv" +
+                    "alidUser\", $\"Error: Unable to load user with ID \'{userManager.GetUserId(context." +
+                    "User)}\'.\", context);\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

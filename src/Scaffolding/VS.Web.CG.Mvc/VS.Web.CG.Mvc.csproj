@@ -31,6 +31,7 @@
     <None Pack="true" Include="ParameterDefinitions\*" PackagePath="Generators\ParameterDefinitions\" />
     <None Pack="true" Include="Templates\Blazor\*.tt" PackagePath="Templates\Blazor\" />
     <None Pack="true" Include="Templates\BlazorIdentity\**\*.tt" PackagePath="Templates\BlazorIdentity\" />
+    <None Pack="true" Include="Templates\BlazorIdentity\Shared\*.js" PackagePath="Templates\BlazorIdentity\Shared\" />
     <None Pack="true" Include="Templates\General\*" PackagePath="Templates\General\" />
     <None Pack="true" Include="Templates\MinimalApi\*" PackagePath="Templates\MinimalApi\" />
     <None Pack="true" Include="Templates\ControllerGenerator\*" PackagePath="Templates\ControllerGenerator\" />
@@ -102,6 +103,11 @@
     <Compile Include="Templates\BlazorIdentity\IdentityRedirectManager.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\IdentityNoOpEmailSender.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\IdentityComponentsEndpointRouteBuilderExtensions.Interfaces.cs" />
+    <Compile Include="Templates\BlazorIdentity\Pages\AccessDenied.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AccessDenied.tt</DependentUpon>
+    </Compile>
     <Compile Include="Templates\BlazorIdentity\Pages\Manage\Passkeys.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\Pages\Manage\Passkeys.cs">
       <DesignTime>True</DesignTime>

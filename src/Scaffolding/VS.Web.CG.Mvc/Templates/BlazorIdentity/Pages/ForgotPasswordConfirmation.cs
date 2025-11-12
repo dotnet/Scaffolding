@@ -26,8 +26,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         public virtual string TransformText()
         {
             this.Write("@page \"/Account/ForgotPasswordConfirmation\"\r\n\r\n<PageTitle>Forgot password confirm" +
-                    "ation</PageTitle>\r\n\r\n<h1>Forgot password confirmation</h1>\r\n<p>\r\n    Please chec" +
-                    "k your email to reset your password.\r\n</p>\r\n");
+                    "ation</PageTitle>\r\n\r\n<h1>Forgot password confirmation</h1>\r\n<p role=\"alert\">\r\n  " +
+                    "  Please check your email to reset your password.\r\n</p>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

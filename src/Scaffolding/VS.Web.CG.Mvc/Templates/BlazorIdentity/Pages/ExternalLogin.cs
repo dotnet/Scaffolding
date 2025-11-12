@@ -79,48 +79,49 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "ask OnLoginCallbackAsync()\r\n    {\r\n        if (externalLoginInfo is null)\r\n     " +
                     "   {\r\n            RedirectManager.RedirectToWithStatus(\"Account/Login\", \"Error l" +
                     "oading external login information.\", HttpContext);\r\n            return;\r\n       " +
-                    " }\r\n        // Sign in the user with this external login provider if the user al" +
-                    "ready has a login.\r\n        var result = await SignInManager.ExternalLoginSignIn" +
-                    "Async(\r\n            externalLoginInfo.LoginProvider,\r\n            externalLoginI" +
-                    "nfo.ProviderKey,\r\n            isPersistent: false,\r\n            bypassTwoFactor:" +
-                    " true);\r\n\r\n        if (result.Succeeded)\r\n        {\r\n            Logger.LogInfor" +
-                    "mation(\r\n                \"{Name} logged in with {LoginProvider} provider.\",\r\n   " +
-                    "             externalLoginInfo.Principal.Identity?.Name,\r\n                extern" +
-                    "alLoginInfo.LoginProvider);\r\n            RedirectManager.RedirectTo(ReturnUrl);\r" +
-                    "\n            return;\r\n        }\r\n        else if (result.IsLockedOut)\r\n        {" +
-                    "\r\n            RedirectManager.RedirectTo(\"Account/Lockout\");\r\n            return" +
-                    ";\r\n        }\r\n\r\n        // If the user does not have an account, then ask the us" +
-                    "er to create an account.\r\n        if (externalLoginInfo.Principal.HasClaim(c => " +
-                    "c.Type == ClaimTypes.Email))\r\n        {\r\n            Input.Email = externalLogin" +
-                    "Info.Principal.FindFirstValue(ClaimTypes.Email) ?? \"\";\r\n        }\r\n    }\r\n\r\n    " +
-                    "private async Task OnValidSubmitAsync()\r\n    {\r\n        if (externalLoginInfo is" +
-                    " null)\r\n        {\r\n            RedirectManager.RedirectToWithStatus(\"Account/Log" +
-                    "in\", \"Error loading external login information during confirmation.\", HttpContex" +
-                    "t);\r\n            return;\r\n        }\r\n\r\n        var emailStore = GetEmailStore();" +
-                    "\r\n        var user = CreateUser();\r\n\r\n        await UserStore.SetUserNameAsync(u" +
-                    "ser, Input.Email, CancellationToken.None);\r\n        await emailStore.SetEmailAsy" +
-                    "nc(user, Input.Email, CancellationToken.None);\r\n\r\n        var result = await Use" +
-                    "rManager.CreateAsync(user);\r\n        if (result.Succeeded)\r\n        {\r\n         " +
-                    "   result = await UserManager.AddLoginAsync(user, externalLoginInfo);\r\n         " +
-                    "   if (result.Succeeded)\r\n            {\r\n                Logger.LogInformation(\"" +
-                    "User created an account using {Name} provider.\", externalLoginInfo.LoginProvider" +
-                    ");\r\n\r\n                var userId = await UserManager.GetUserIdAsync(user);\r\n    " +
-                    "            var code = await UserManager.GenerateEmailConfirmationTokenAsync(use" +
-                    "r);\r\n                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(c" +
-                    "ode));\r\n\r\n                var callbackUrl = NavigationManager.GetUriWithQueryPar" +
-                    "ameters(\r\n                    NavigationManager.ToAbsoluteUri(\"Account/ConfirmEm" +
-                    "ail\").AbsoluteUri,\r\n                    new Dictionary<string, object?> { [\"user" +
-                    "Id\"] = userId, [\"code\"] = code });\r\n                await EmailSender.SendConfir" +
-                    "mationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n" +
-                    "                // If account confirmation is required, we need to show the link" +
-                    " if we don\'t have a real email sender\r\n                if (UserManager.Options.S" +
-                    "ignIn.RequireConfirmedAccount)\r\n                {\r\n                    RedirectM" +
-                    "anager.RedirectTo(\"Account/RegisterConfirmation\", new() { [\"email\"] = Input.Emai" +
-                    "l });\r\n                }\r\n\r\n                await SignInManager.SignInAsync(user" +
-                    ", isPersistent: false, externalLoginInfo.LoginProvider);\r\n                Redire" +
-                    "ctManager.RedirectTo(ReturnUrl);\r\n            }\r\n        }\r\n\r\n        message = " +
-                    "$\"Error: {string.Join(\",\", result.Errors.Select(error => error.Description))}\";\r" +
-                    "\n    }\r\n\r\n    private ");
+                    " }\r\n\r\n        // Sign in the user with this external login provider if the user " +
+                    "already has a login.\r\n        var result = await SignInManager.ExternalLoginSign" +
+                    "InAsync(\r\n            externalLoginInfo.LoginProvider,\r\n            externalLogi" +
+                    "nInfo.ProviderKey,\r\n            isPersistent: false,\r\n            bypassTwoFacto" +
+                    "r: true);\r\n\r\n        if (result.Succeeded)\r\n        {\r\n            Logger.LogInf" +
+                    "ormation(\r\n                \"{Name} logged in with {LoginProvider} provider.\",\r\n " +
+                    "               externalLoginInfo.Principal.Identity?.Name,\r\n                exte" +
+                    "rnalLoginInfo.LoginProvider);\r\n            RedirectManager.RedirectTo(ReturnUrl)" +
+                    ";\r\n            return;\r\n        }\r\n        else if (result.IsLockedOut)\r\n       " +
+                    " {\r\n            RedirectManager.RedirectTo(\"Account/Lockout\");\r\n            retu" +
+                    "rn;\r\n        }\r\n\r\n        // If the user does not have an account, then ask the " +
+                    "user to create an account.\r\n        if (externalLoginInfo.Principal.HasClaim(c =" +
+                    "> c.Type == ClaimTypes.Email))\r\n        {\r\n            Input.Email = externalLog" +
+                    "inInfo.Principal.FindFirstValue(ClaimTypes.Email) ?? \"\";\r\n        }\r\n    }\r\n\r\n  " +
+                    "  private async Task OnValidSubmitAsync()\r\n    {\r\n        if (externalLoginInfo " +
+                    "is null)\r\n        {\r\n            RedirectManager.RedirectToWithStatus(\"Account/L" +
+                    "ogin\", \"Error loading external login information during confirmation.\", HttpCont" +
+                    "ext);\r\n            return;\r\n        }\r\n\r\n        var emailStore = GetEmailStore(" +
+                    ");\r\n        var user = CreateUser();\r\n\r\n        await UserStore.SetUserNameAsync" +
+                    "(user, Input.Email, CancellationToken.None);\r\n        await emailStore.SetEmailA" +
+                    "sync(user, Input.Email, CancellationToken.None);\r\n\r\n        var result = await U" +
+                    "serManager.CreateAsync(user);\r\n        if (result.Succeeded)\r\n        {\r\n       " +
+                    "     result = await UserManager.AddLoginAsync(user, externalLoginInfo);\r\n       " +
+                    "     if (result.Succeeded)\r\n            {\r\n                Logger.LogInformation" +
+                    "(\"User created an account using {Name} provider.\", externalLoginInfo.LoginProvid" +
+                    "er);\r\n\r\n                var userId = await UserManager.GetUserIdAsync(user);\r\n  " +
+                    "              var code = await UserManager.GenerateEmailConfirmationTokenAsync(u" +
+                    "ser);\r\n                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes" +
+                    "(code));\r\n\r\n                var callbackUrl = NavigationManager.GetUriWithQueryP" +
+                    "arameters(\r\n                    NavigationManager.ToAbsoluteUri(\"Account/Confirm" +
+                    "Email\").AbsoluteUri,\r\n                    new Dictionary<string, object?> { [\"us" +
+                    "erId\"] = userId, [\"code\"] = code });\r\n                await EmailSender.SendConf" +
+                    "irmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n" +
+                    "\r\n                // If account confirmation is required, we need to show the li" +
+                    "nk if we don\'t have a real email sender\r\n                if (UserManager.Options" +
+                    ".SignIn.RequireConfirmedAccount)\r\n                {\r\n                    Redirec" +
+                    "tManager.RedirectTo(\"Account/RegisterConfirmation\", new() { [\"email\"] = Input.Em" +
+                    "ail });\r\n                }\r\n                else\r\n                {\r\n           " +
+                    "         await SignInManager.SignInAsync(user, isPersistent: false, externalLogi" +
+                    "nInfo.LoginProvider);\r\n                    RedirectManager.RedirectTo(ReturnUrl)" +
+                    ";\r\n                }\r\n            }\r\n        }\r\n        else\r\n        {\r\n       " +
+                    "     message = $\"Error: {string.Join(\",\", result.Errors.Select(error => error.De" +
+                    "scription))}\";\r\n        }\r\n    }\r\n\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" CreateUser()\r\n    {\r\n        try\r\n        {\r\n            return Activator.Create" +
                     "Instance<");

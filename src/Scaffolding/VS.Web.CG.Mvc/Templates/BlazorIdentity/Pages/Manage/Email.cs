@@ -33,34 +33,35 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject IEmailSender<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> EmailSender\r\n@inject IdentityUserAccessor UserAccessor\r\n@inject NavigationManag" +
-                    "er NavigationManager\r\n\r\n<PageTitle>Manage email</PageTitle>\r\n\r\n<h3>Manage email<" +
-                    "/h3>\r\n\r\n<StatusMessage Message=\"@message\"/>\r\n<div class=\"row\">\r\n    <div class=\"" +
-                    "col-md-6\">\r\n        <form @onsubmit=\"OnSendEmailVerificationAsync\" @formname=\"se" +
-                    "nd-verification\" id=\"send-verification-form\" method=\"post\">\r\n            <Antifo" +
-                    "rgeryToken />\r\n        </form>\r\n        <EditForm Model=\"Input\" FormName=\"change" +
-                    "-email\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n            <DataAnno" +
-                    "tationsValidator />\r\n            <ValidationSummary class=\"text-danger\" role=\"al" +
-                    "ert\" />\r\n            @if (isEmailConfirmed)\r\n            {\r\n                <div" +
-                    " class=\"form-floating mb-3 input-group\">\r\n                    <input type=\"text\"" +
-                    " value=\"@email\" class=\"form-control\" placeholder=\"Please enter your email.\" disa" +
-                    "bled />\r\n                    <div class=\"input-group-append\">\r\n                 " +
-                    "       <span class=\"h-100 input-group-text text-success font-weight-bold\">?</spa" +
-                    "n>\r\n                    </div>\r\n                    <label for=\"email\" class=\"fo" +
-                    "rm-label\">Email</label>\r\n                </div>\r\n            }\r\n            else" +
-                    "\r\n            {\r\n                <div class=\"form-floating mb-3\">\r\n             " +
-                    "       <input type=\"text\" value=\"@email\" class=\"form-control\" placeholder=\"Pleas" +
-                    "e enter your email.\" disabled />\r\n                    <label for=\"email\" class=\"" +
-                    "form-label\">Email</label>\r\n                    <button type=\"submit\" class=\"btn " +
-                    "btn-link\" form=\"send-verification-form\">Send verification email</button>\r\n      " +
-                    "          </div>\r\n            }\r\n            <div class=\"form-floating mb-3\">\r\n " +
-                    "               <InputText @bind-Value=\"Input.NewEmail\" id=\"Input.NewEmail\" class" +
-                    "=\"form-control\" autocomplete=\"email\" aria-required=\"true\" placeholder=\"Enter a n" +
-                    "ew email\" />\r\n                <label for=\"Input.NewEmail\" class=\"form-label\">New" +
-                    " email</label>\r\n                <ValidationMessage For=\"() => Input.NewEmail\" cl" +
-                    "ass=\"text-danger\" />\r\n            </div>\r\n            <button type=\"submit\" clas" +
-                    "s=\"w-100 btn btn-lg btn-primary\">Change email</button>\r\n        </EditForm>\r\n   " +
-                    " </div>\r\n</div>\r\n\r\n@code {\r\n    private string? message;\r\n    private ");
+            this.Write("> EmailSender\r\n@inject NavigationManager NavigationManager\r\n@inject IdentityRedir" +
+                    "ectManager RedirectManager\r\n\r\n<PageTitle>Manage email</PageTitle>\r\n\r\n<h3>Manage " +
+                    "email</h3>\r\n\r\n<StatusMessage Message=\"@message\"/>\r\n<div class=\"row\">\r\n    <div c" +
+                    "lass=\"col-xl-6\">\r\n        <form @onsubmit=\"OnSendEmailVerificationAsync\" @formna" +
+                    "me=\"send-verification\" id=\"send-verification-form\" method=\"post\">\r\n            <" +
+                    "AntiforgeryToken />\r\n        </form>\r\n        <EditForm Model=\"Input\" FormName=\"" +
+                    "change-email\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n            <Da" +
+                    "taAnnotationsValidator />\r\n            <ValidationSummary class=\"text-danger\" ro" +
+                    "le=\"alert\" />\r\n            @if (isEmailConfirmed)\r\n            {\r\n              " +
+                    "  <div class=\"form-floating mb-3 input-group\">\r\n                    <input type=" +
+                    "\"text\" value=\"@email\" id=\"email\" class=\"form-control\" placeholder=\"Enter your em" +
+                    "ail\" disabled />\r\n                    <div class=\"input-group-append\">\r\n        " +
+                    "                <span class=\"h-100 input-group-text text-success font-weight-bol" +
+                    "d\">?</span>\r\n                    </div>\r\n                    <label for=\"email\" " +
+                    "class=\"form-label\">Email</label>\r\n                </div>\r\n            }\r\n       " +
+                    "     else\r\n            {\r\n                <div class=\"form-floating mb-3\">\r\n    " +
+                    "                <input type=\"text\" value=\"@email\" id=\"email\" class=\"form-control" +
+                    "\" placeholder=\"Enter your email\" disabled />\r\n                    <label for=\"em" +
+                    "ail\" class=\"form-label\">Email</label>\r\n                    <button type=\"submit\"" +
+                    " class=\"btn btn-link\" form=\"send-verification-form\">Send verification email</but" +
+                    "ton>\r\n                </div>\r\n            }\r\n            <div class=\"form-floati" +
+                    "ng mb-3\">\r\n                <InputText @bind-Value=\"Input.NewEmail\" id=\"Input.New" +
+                    "Email\" class=\"form-control\" autocomplete=\"email\" aria-required=\"true\" placeholde" +
+                    "r=\"Enter a new email\" />\r\n                <label for=\"Input.NewEmail\" class=\"for" +
+                    "m-label\">New email</label>\r\n                <ValidationMessage For=\"() => Input." +
+                    "NewEmail\" class=\"text-danger\" />\r\n            </div>\r\n            <button type=\"" +
+                    "submit\" class=\"w-100 btn btn-lg btn-primary\">Change email</button>\r\n        </Ed" +
+                    "itForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private string? message;\r\n    privat" +
+                    "e ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("? user;\r\n    private string? email;\r\n    private bool isEmailConfirmed;\r\n\r\n    [C" +
                     "ascadingParameter]\r\n    private HttpContext HttpContext { get; set; } = default!" +

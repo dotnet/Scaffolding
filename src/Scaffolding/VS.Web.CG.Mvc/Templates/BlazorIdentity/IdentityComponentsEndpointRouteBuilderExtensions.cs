@@ -33,8 +33,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         Model.DbContextNamespace,
         $"{Model.BlazorIdentityNamespace}.Pages",
         $"{Model.BlazorIdentityNamespace}.Pages.Manage",
-        "Microsoft.AspNetCore.Antiforgery",
         "Microsoft.AspNetCore.Authentication",
+        "Microsoft.AspNetCore.Antiforgery",
         "Microsoft.AspNetCore.Components.Authorization",
         "Microsoft.AspNetCore.Http.Extensions",
         "Microsoft.AspNetCore.Identity",
@@ -84,7 +84,7 @@ namespace Microsoft.AspNetCore.Routing
 
             accountGroup.MapPost(""/Logout"", async (
                 ClaimsPrincipal user,
-                SignInManager<");
+                [FromServices] SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> signInManager,
                 [FromForm] string returnUrl) =>

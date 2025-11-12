@@ -91,6 +91,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
             return null;
         }
 
+        internal static IDictionary<string, string> GetBlazorIdentityStaticFiles(IFileSystem fileSystem, IEnumerable<string> templateFolders)
+        {
+            var blazorIdentityTemplateFolder = templateFolders.FirstOrDefault(x => x.Contains("BlazorIdentity", StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(blazorIdentityTemplateFolder) && fileSystem.DirectoryExists(blazorIdentityTemplateFolder))
+            {
+                // Get all files that are NOT .tt files
+                var allFiles = fileSystem.EnumerateFiles(blazorIdentityTemplateFolder, "*.*", SearchOption.AllDirectories);
+                var staticFiles = allFiles.Where(f => !f.EndsWith(".tt", StringComparison.OrdinalIgnoreCase));
+                return staticFiles.ToDictionary(x => GetFormattedRelativeIdentityFile(x), x => x);
+            }
+
+            return null;
+        }
+
         internal static CodeSnippet[] ApplyIdentityChanges(CodeSnippet[] filteredChanges, string dbContextClassName, string identityUserClassName, DbProvider databaseProvider)
         {
             foreach (var codeChange in filteredChanges)

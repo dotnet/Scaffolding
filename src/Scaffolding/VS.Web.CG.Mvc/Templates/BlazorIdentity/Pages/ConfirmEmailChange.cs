@@ -42,19 +42,19 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "erride async Task OnInitializedAsync()\r\n    {\r\n        if (UserId is null || Ema" +
                     "il is null || Code is null)\r\n        {\r\n            RedirectManager.RedirectToWi" +
                     "thStatus(\r\n                \"Account/Login\", \"Error: Invalid email change confirm" +
-                    "ation link.\", HttpContext);\r\n        }\r\n\r\n        var user = await UserManager.F" +
-                    "indByIdAsync(UserId);\r\n        if (user is null)\r\n        {\r\n            message" +
-                    " = \"Unable to find user with Id \'{userId}\'\";\r\n            return;\r\n        }\r\n\r\n" +
-                    "        var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));\r\n" +
-                    "        var result = await UserManager.ChangeEmailAsync(user, Email, code);\r\n   " +
-                    "     if (!result.Succeeded)\r\n        {\r\n            message = \"Error changing em" +
-                    "ail.\";\r\n            return;\r\n        }\r\n\r\n        // In our UI email and user na" +
-                    "me are one and the same, so when we update the email\r\n        // we need to upda" +
-                    "te the user name.\r\n        var setUserNameResult = await UserManager.SetUserName" +
-                    "Async(user, Email);\r\n        if (!setUserNameResult.Succeeded)\r\n        {\r\n     " +
-                    "       message = \"Error changing user name.\";\r\n            return;\r\n        }\r\n\r" +
-                    "\n        await SignInManager.RefreshSignInAsync(user);\r\n        message = \"Thank" +
-                    " you for confirming your email change.\";\r\n    }\r\n}\r\n");
+                    "ation link.\", HttpContext);\r\n            return;\r\n        }\r\n\r\n        var user " +
+                    "= await UserManager.FindByIdAsync(UserId);\r\n        if (user is null)\r\n        {" +
+                    "\r\n            message = \"Unable to find user with Id \'{userId}\'\";\r\n            r" +
+                    "eturn;\r\n        }\r\n\r\n        var code = Encoding.UTF8.GetString(WebEncoders.Base" +
+                    "64UrlDecode(Code));\r\n        var result = await UserManager.ChangeEmailAsync(use" +
+                    "r, Email, code);\r\n        if (!result.Succeeded)\r\n        {\r\n            message" +
+                    " = \"Error changing email.\";\r\n            return;\r\n        }\r\n\r\n        // In our" +
+                    " UI email and user name are one and the same, so when we update the email\r\n     " +
+                    "   // we need to update the user name.\r\n        var setUserNameResult = await Us" +
+                    "erManager.SetUserNameAsync(user, Email);\r\n        if (!setUserNameResult.Succeed" +
+                    "ed)\r\n        {\r\n            message = \"Error changing user name.\";\r\n            " +
+                    "return;\r\n        }\r\n\r\n        await SignInManager.RefreshSignInAsync(user);\r\n   " +
+                    "     message = \"Thank you for confirming your email change.\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

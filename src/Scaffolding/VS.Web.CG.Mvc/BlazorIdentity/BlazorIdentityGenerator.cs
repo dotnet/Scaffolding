@@ -104,6 +104,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
+        private IDictionary<string, string> _allBlazorIdentityStaticFiles;
+        private IDictionary<string, string> AllBlazorIdentityStaticFiles
+        {
+            get
+            {
+                if (_allBlazorIdentityStaticFiles is null)
+                {
+                    _allBlazorIdentityStaticFiles = BlazorIdentityHelper.GetBlazorIdentityStaticFiles(FileSystem, TemplateFolders);
+                }
+
+                return _allBlazorIdentityStaticFiles;
+            }
+        }
+
         public BlazorIdentityGenerator(IApplicationInfo applicationInfo,
             IModelTypesLocator modelTypesLocator,
             ILogger logger,
@@ -141,41 +155,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             var blazorTemplateModel = await ValidateAndBuild(model);
             ExecuteTemplates(blazorTemplateModel);
-            CopyStaticPasskeyFiles(blazorTemplateModel);
+            AddStaticFiles(blazorTemplateModel);
             AddReadmeFile(blazorTemplateModel.BaseOutputPath);
             await ModifyFilesAsync(blazorTemplateModel);
-        }
-
-        internal void CopyStaticPasskeyFiles(BlazorIdentityModel templateModel)
-        {
-            // Copy PasskeySubmit.razor.js static file
-            var templateFolderPath = TemplateFolders.FirstOrDefault(x => x.Contains("BlazorIdentity", StringComparison.OrdinalIgnoreCase));
-            if (string.IsNullOrEmpty(templateFolderPath))
-            {
-                return;
-            }
-
-            var jsSourcePath = Path.Combine(templateFolderPath, "Shared", "PasskeySubmit.razor.js");
-            if (!FileSystem.FileExists(jsSourcePath))
-            {
-                return;
-            }
-
-            // Determine target path: Components/Account/Shared/PasskeySubmit.razor.js
-            var targetPath = Path.Combine(templateModel.BaseOutputPath, "Shared", "PasskeySubmit.razor.js");
-            var targetFolder = Path.GetDirectoryName(targetPath);
-
-            if (!FileSystem.DirectoryExists(targetFolder))
-            {
-                FileSystem.CreateDirectory(targetFolder);
-            }
-
-            if (!FileSystem.FileExists(targetPath))
-            {
-                var jsContent = FileSystem.ReadAllText(jsSourcePath);
-                FileSystem.WriteAllText(targetPath, jsContent);
-                Logger.LogMessage($"Added Blazor identity file : {targetPath}");
-            }
         }
 
         internal void AddReadmeFile(string outputPath)
@@ -577,6 +559,49 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 templatedString = StringUtil.NormalizeLineEndings(templatedString);
                 FileSystem.WriteAllText(templatedFilePath, templatedString);
                 Logger.LogMessage($"Added IdentityDbContext class : {templatedFilePath}");
+            }
+        }
+
+        private void AddStaticFiles(BlazorIdentityModel templateModel)
+        {
+            if (AllBlazorIdentityStaticFiles is null || !AllBlazorIdentityStaticFiles.Any())
+            {
+                return;
+            }
+
+            var templateFolderRoot = TemplateFolders.FirstOrDefault(x => x.Contains("BlazorIdentity", StringComparison.OrdinalIgnoreCase));
+            if (string.IsNullOrEmpty(templateFolderRoot))
+            {
+                return;
+            }
+
+            foreach (var staticFile in AllBlazorIdentityStaticFiles)
+            {
+                string sourceFilePath = staticFile.Value;
+                string relativeTemplatePath = BlazorIdentityHelper.GetFormattedRelativeIdentityFile(sourceFilePath);
+                
+                // Build output path matching the same structure as templates
+                string templateNameWithNamespace = $"{templateModel.BlazorIdentityNamespace}.{relativeTemplatePath}";
+                string templatePath = StringUtil.ToPath(templateNameWithNamespace, templateModel.BaseOutputPath, ProjectContext.RootNamespace);
+                
+                // Get the original file extension
+                string extension = Path.GetExtension(sourceFilePath);
+                string outputFilePath = $"{templatePath}{extension}";
+                
+                // Create directory if it doesn't exist
+                var folderName = Path.GetDirectoryName(outputFilePath);
+                if (!FileSystem.DirectoryExists(folderName))
+                {
+                    FileSystem.CreateDirectory(folderName);
+                }
+
+                // Copy the static file if it doesn't already exist
+                if (!FileSystem.FileExists(outputFilePath))
+                {
+                    var fileContents = FileSystem.ReadAllText(sourceFilePath);
+                    FileSystem.WriteAllText(outputFilePath, fileContents);
+                    Logger.LogMessage($"Added Blazor identity static file : {outputFilePath}");
+                }
             }
         }
 

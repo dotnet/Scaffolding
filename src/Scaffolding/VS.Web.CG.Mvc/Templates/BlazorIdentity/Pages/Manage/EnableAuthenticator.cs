@@ -31,46 +31,45 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n\r\n@inject UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> UserManager\r\n@inject IdentityUserAccessor UserAccessor\r\n@inject UrlEncoder UrlE" +
-                    "ncoder\r\n@inject IdentityRedirectManager RedirectManager\r\n@inject ILogger<EnableA" +
-                    "uthenticator> Logger\r\n\r\n<PageTitle>Configure authenticator app</PageTitle>\r\n\r\n@i" +
-                    "f (recoveryCodes is not null)\r\n{\r\n    <ShowRecoveryCodes RecoveryCodes=\"recovery" +
-                    "Codes.ToArray()\" StatusMessage=\"@message\" />\r\n}\r\nelse\r\n{\r\n    <StatusMessage Mes" +
-                    "sage=\"@message\" />\r\n    <h3>Configure authenticator app</h3>\r\n    <div>\r\n       " +
-                    " <p>To use an authenticator app go through the following steps:</p>\r\n        <ol" +
-                    " class=\"list\">\r\n            <li>\r\n                <p>\r\n                    Downl" +
-                    "oad a two-factor authenticator app like Microsoft Authenticator for\r\n           " +
-                    "         <a href=\"https://go.microsoft.com/fwlink/?Linkid=825072\">Android</a> an" +
-                    "d\r\n                    <a href=\"https://go.microsoft.com/fwlink/?Linkid=825073\">" +
-                    "iOS</a> or\r\n                    Google Authenticator for\r\n                    <a" +
-                    " href=\"https://play.google.com/store/apps/details?id=com.google.android.apps.aut" +
-                    "henticator2&amp;hl=en\">Android</a> and\r\n                    <a href=\"https://itu" +
-                    "nes.apple.com/us/app/google-authenticator/id388497605?mt=8\">iOS</a>.\r\n          " +
-                    "      </p>\r\n            </li>\r\n            <li>\r\n                <p>Scan the QR " +
-                    "Code or enter this key <kbd>@sharedKey</kbd> into your two factor authenticator " +
-                    "app. Spaces and casing do not matter.</p>\r\n                <div class=\"alert ale" +
-                    "rt-info\">Learn how to <a href=\"https://go.microsoft.com/fwlink/?Linkid=852423\">e" +
-                    "nable QR code generation</a>.</div>\r\n                <div></div>\r\n              " +
-                    "  <div data-url=\"@authenticatorUri\"></div>\r\n            </li>\r\n            <li>\r" +
-                    "\n                <p>\r\n                    Once you have scanned the QR code or i" +
-                    "nput the key above, your two factor authentication app will provide you\r\n       " +
-                    "             with a unique code. Enter the code in the confirmation box below.\r\n" +
-                    "                </p>\r\n                <div class=\"row\">\r\n                    <di" +
-                    "v class=\"col-md-6\">\r\n                        <EditForm Model=\"Input\" FormName=\"s" +
-                    "end-code\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n                   " +
-                    "         <DataAnnotationsValidator />\r\n                            <div class=\"f" +
-                    "orm-floating mb-3\">\r\n                                <InputText @bind-Value=\"Inp" +
-                    "ut.Code\" id=\"Input.Code\" class=\"form-control\" autocomplete=\"off\" placeholder=\"En" +
-                    "ter the code\" />\r\n                                <label for=\"Input.Code\" class=" +
-                    "\"control-label form-label\">Verification Code</label>\r\n                          " +
-                    "      <ValidationMessage For=\"() => Input.Code\" class=\"text-danger\" />\r\n        " +
-                    "                    </div>\r\n                            <button type=\"submit\" cl" +
-                    "ass=\"w-100 btn btn-lg btn-primary\">Verify</button>\r\n                            " +
-                    "<ValidationSummary class=\"text-danger\" role=\"alert\" />\r\n                        " +
-                    "</EditForm>\r\n                    </div>\r\n                </div>\r\n            </l" +
-                    "i>\r\n        </ol>\r\n    </div>\r\n}\r\n\r\n@code {\r\n    private const string Authentica" +
-                    "torUriFormat = \"otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6\";\r\n\r\n    p" +
-                    "rivate string? message;\r\n    private ");
+            this.Write("> UserManager\r\n@inject UrlEncoder UrlEncoder\r\n@inject IdentityRedirectManager Red" +
+                    "irectManager\r\n@inject ILogger<EnableAuthenticator> Logger\r\n\r\n<PageTitle>Configur" +
+                    "e authenticator app</PageTitle>\r\n\r\n@if (recoveryCodes is not null)\r\n{\r\n    <Show" +
+                    "RecoveryCodes RecoveryCodes=\"recoveryCodes.ToArray()\" StatusMessage=\"@message\" /" +
+                    ">\r\n}\r\nelse\r\n{\r\n    <StatusMessage Message=\"@message\" />\r\n    <h3>Configure authe" +
+                    "nticator app</h3>\r\n    <div>\r\n        <p>To use an authenticator app go through " +
+                    "the following steps:</p>\r\n        <ol class=\"list\">\r\n            <li>\r\n         " +
+                    "       <p>\r\n                    Download a two-factor authenticator app like Mic" +
+                    "rosoft Authenticator for\r\n                    <a href=\"https://go.microsoft.com/" +
+                    "fwlink/?Linkid=825072\">Android</a> and\r\n                    <a href=\"https://go." +
+                    "microsoft.com/fwlink/?Linkid=825073\">iOS</a> or\r\n                    Google Auth" +
+                    "enticator for\r\n                    <a href=\"https://play.google.com/store/apps/d" +
+                    "etails?id=com.google.android.apps.authenticator2&amp;hl=en\">Android</a> and\r\n   " +
+                    "                 <a href=\"https://itunes.apple.com/us/app/google-authenticator/i" +
+                    "d388497605?mt=8\">iOS</a>.\r\n                </p>\r\n            </li>\r\n            " +
+                    "<li>\r\n                <p>Scan the QR Code or enter this key <kbd>@sharedKey</kbd" +
+                    "> into your two factor authenticator app. Spaces and casing do not matter.</p>\r\n" +
+                    "                <div class=\"alert alert-info\">Learn how to <a href=\"https://go.m" +
+                    "icrosoft.com/fwlink/?Linkid=852423\">enable QR code generation</a>.</div>\r\n      " +
+                    "          <div></div>\r\n                <div data-url=\"@authenticatorUri\"></div>\r" +
+                    "\n            </li>\r\n            <li>\r\n                <p>\r\n                    O" +
+                    "nce you have scanned the QR code or input the key above, your two factor authent" +
+                    "ication app will provide you\r\n                    with a unique code. Enter the " +
+                    "code in the confirmation box below.\r\n                </p>\r\n                <div " +
+                    "class=\"row\">\r\n                    <div class=\"col-xl-6\">\r\n                      " +
+                    "  <EditForm Model=\"Input\" FormName=\"send-code\" OnValidSubmit=\"OnValidSubmitAsync" +
+                    "\" method=\"post\">\r\n                            <DataAnnotationsValidator />\r\n    " +
+                    "                        <div class=\"form-floating mb-3\">\r\n                      " +
+                    "          <InputText @bind-Value=\"Input.Code\" id=\"Input.Code\" class=\"form-contro" +
+                    "l\" autocomplete=\"off\" placeholder=\"Enter the code\" />\r\n                         " +
+                    "       <label for=\"Input.Code\" class=\"control-label form-label\">Verification Cod" +
+                    "e</label>\r\n                                <ValidationMessage For=\"() => Input.C" +
+                    "ode\" class=\"text-danger\" />\r\n                            </div>\r\n               " +
+                    "             <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Verify</" +
+                    "button>\r\n                            <ValidationSummary class=\"text-danger\" role" +
+                    "=\"alert\" />\r\n                        </EditForm>\r\n                    </div>\r\n  " +
+                    "              </div>\r\n            </li>\r\n        </ol>\r\n    </div>\r\n}\r\n\r\n@code {" +
+                    "\r\n    private const string AuthenticatorUriFormat = \"otpauth://totp/{0}:{1}?secr" +
+                    "et={2}&issuer={0}&digits=6\";\r\n\r\n    private string? message;\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("? user;\r\n    private string? sharedKey;\r\n    private string? authenticatorUri;\r\n " +
                     "   private IEnumerable<string>? recoveryCodes;\r\n\r\n    [CascadingParameter]\r\n    " +

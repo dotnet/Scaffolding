@@ -17,6 +17,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
     {
         IScaffoldRunnerBuilder _builder = builder;
 
+        public string? AzCliErrors { get; private set; }
+
         public Type[] GetScaffoldSteps()
         {
             return
@@ -47,6 +49,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
         public void AddScaffolderCommands()
         {
             AspNetOptions options = new();
+            AzCliErrors = options.AzCliErrors;
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Blazor.Empty)
                 .WithDisplayName(AspnetStrings.Blazor.EmptyDisplayName)

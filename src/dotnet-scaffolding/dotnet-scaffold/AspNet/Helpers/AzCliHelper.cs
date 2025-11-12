@@ -4,7 +4,6 @@
 using System.Text.Json;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
-using Spectre.Console;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
@@ -16,21 +15,35 @@ internal class AzCliHelper
     /// <param name="usernames">the user IDs</param>
     /// <param name="tenants">the tenant IDs</param>
     /// <param name="appIds">the app IDs</param>
+    /// <param name="azCliErrors">the errors from the Az CLI if there are any</param>
     /// <returns>if successful, return true</returns>
-    public static bool GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds)
+    public static bool GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds, out string? azCliErrors)
     {
         // Create a runner to execute the 'az account list' command with json output format
         var runner = AzCliRunner.Create();
 
-        if (EnsureUserIsLoggedIn(runner, out string? output) && !string.IsNullOrEmpty(output))
+        if (EnsureUserIsLoggedIn(runner, out string? output, out string? loginErrors) && !string.IsNullOrEmpty(output))
         {
-            if (GetAzureUsernamesAndTenatIds(runner, output, out usernames, out tenants))
+            if (GetAzureUsernamesAndTenatIds(output, out usernames, out tenants, out string? usernameTenantError))
             {
-                if (GetAzureAppIds(runner, out appIds))
+                if (GetAzureAppIds(runner, out appIds, out string? appErrors))
                 {
+                    azCliErrors = null;
                     return true;
                 }
+                else
+                {
+                    azCliErrors = appErrors;
+                }
             }
+            else
+            {
+                azCliErrors = usernameTenantError;
+            }
+        }
+        else
+        {
+            azCliErrors = loginErrors;
         }
         usernames = [];
         tenants = [];
@@ -44,8 +57,9 @@ internal class AzCliHelper
     /// </summary>
     /// <param name="runner">the az cli runner</param>
     /// <param name="output">the CLI output if available</param>
+    /// <param name="failingCommand">the login error if any</param>
     /// <returns>if successful, return true</returns>
-    private static bool EnsureUserIsLoggedIn(AzCliRunner runner, out string? output)
+    private static bool EnsureUserIsLoggedIn(AzCliRunner runner, out string? output, out string? failingCommand)
     {
         try
         {
@@ -60,12 +74,13 @@ internal class AzCliHelper
                 }
             }
             output = stdOut;
+            failingCommand = string.IsNullOrEmpty(stdErr) ? null : $"az account list";
             return exitCode == 0 && string.IsNullOrEmpty(stdErr);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             output = null;
-            AnsiConsole.WriteLine($"Error checking Azure login status: {ex.Message}");
+            failingCommand = $"az account list";
             return false;
         }
     }
@@ -73,15 +88,15 @@ internal class AzCliHelper
     /// <summary>
     /// Gets Azure usernames and tenant IDs from the JSON output of 'az account list'.
     /// </summary>
-    /// <param name="runner">the az cli runner</param>
     /// <param name="output">the output from the account list</param>
     /// <param name="usernames">the usernames if available</param>
     /// <param name="tenants">the tenant ids if available</param>
+    /// <param name="usernameTenantError">the error retrieving the username and tenants if any</param>
     /// <returns>if successful, return true</returns>
-    private static bool GetAzureUsernamesAndTenatIds(AzCliRunner runner, string output, out List<string> usernames, out List<string> tenants)
+    private static bool GetAzureUsernamesAndTenatIds(string output, out List<string> usernames, out List<string> tenants, out string? usernameTenantError)
     {
         tenants = [];
-        HashSet<string> uniqueUsernames = new HashSet<string>();
+        HashSet<string> uniqueUsernames = [];
 
         try
         {
@@ -118,12 +133,13 @@ internal class AzCliHelper
         }
         catch (Exception ex)
         {
-            AnsiConsole.WriteLine($"Error parsing Azure accounts JSON: {ex.Message}");
             usernames = [];
             tenants = [];
+            usernameTenantError = $"Error parsing Azure accounts JSON: {ex.Message}";
             return false;
         }
 
+        usernameTenantError = null;
         return true;
     }
 
@@ -132,12 +148,13 @@ internal class AzCliHelper
     /// </summary>
     /// <param name="runner">the az cli runner</param>
     /// <param name="appIds"> the appIds</param>
+    /// <param name="failingCommand">the error retrieving the app IDs if any</param>
     /// <returns>if successful, returns true</returns>
-    private static bool GetAzureAppIds(AzCliRunner runner, out List<string> appIds)
+    private static bool GetAzureAppIds(AzCliRunner runner, out List<string> appIds, out string? failingCommand)
     {
         try
         {
-
+            failingCommand = null;
             appIds = [];
             var exitCode = runner.RunAzCli("ad app list --output json", out string? stdOut, out string? stdErr);
 
@@ -171,15 +188,16 @@ internal class AzCliHelper
 
             if (!string.IsNullOrEmpty(stdErr))
             {
-                AnsiConsole.WriteLine($"Error executing 'az ad app list': {stdErr}");
+                failingCommand = $"az ad app list";
             }
         }
         catch (Exception ex)
         {
             appIds = [];
-            // Handle any exceptions, like az CLI not being installed
-            AnsiConsole.WriteLine($"Error getting Azure apps: {ex.Message}");
+            failingCommand = ex.Message;
         }
+
+        failingCommand ??= "Error getting Azure apps";
         return false;
     }
 }

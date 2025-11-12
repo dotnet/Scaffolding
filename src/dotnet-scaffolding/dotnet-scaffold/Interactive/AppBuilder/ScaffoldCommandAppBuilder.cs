@@ -26,10 +26,10 @@ internal class ScaffoldCommandAppBuilder(IScaffoldRunner runnner, string[] args)
     /// Builds and configures the <see cref="ScaffoldCommandApp"/> with all required services and commands.
     /// </summary>
     /// <returns>A configured <see cref="ScaffoldCommandApp"/> instance.</returns>
-    public ScaffoldCommandApp Build()
+    public ScaffoldCommandApp Build(string? startupErrors = null)
     {
-        var serviceRegistrations = GetDefaultServices();
-        var commandApp = new CommandApp<ScaffoldCommand>(serviceRegistrations);
+        TypeRegistrar? serviceRegistrations = GetDefaultServices(startupErrors);
+        CommandApp<ScaffoldCommand> commandApp = new(serviceRegistrations);
         commandApp.Configure(config =>
         {
             config
@@ -50,10 +50,9 @@ internal class ScaffoldCommandAppBuilder(IScaffoldRunner runnner, string[] args)
     /// Registers the default services required for the scaffold command application.
     /// </summary>
     /// <returns>A <see cref="TypeRegistrar"/> with all required services registered.</returns>
-    private TypeRegistrar? GetDefaultServices()
+    private TypeRegistrar? GetDefaultServices(string? startupErrors = null)
     {
-        var registrar = new TypeRegistrar();
-        // Register core services for dependency injection.
+        TypeRegistrar registrar = new TypeRegistrar();
         registrar.Register(typeof(IFileSystem), typeof(FileSystem));
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));
         registrar.Register(typeof(IFlowProvider), typeof(FlowProvider));
@@ -61,6 +60,15 @@ internal class ScaffoldCommandAppBuilder(IScaffoldRunner runnner, string[] args)
         registrar.Register(typeof(IToolManager), typeof(ToolManager));
         registrar.Register(typeof(IToolManifestService), typeof(ToolManifestService));
         registrar.Register(typeof(IFirstTimeUseNoticeSentinel), typeof(FirstTimeUseNoticeSentinel));
+
+        // Create the instance of StartUpErrorService and set the error if provided
+        StartUpErrorService startUpErrorService = new StartUpErrorService();
+        if (!string.IsNullOrWhiteSpace(startupErrors))
+        {
+            startUpErrorService.SetError(startupErrors);
+        }
+        registrar.RegisterInstance(typeof(IStartUpErrorService), startUpErrorService);
+
         // Register a lazy singleton for the first time use notice sentinel.
         registrar.RegisterLazy(typeof(IFirstTimeUseNoticeSentinel), (serviceProvider) =>
         {

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -253,7 +254,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
                 }
 
                 step.ProjectPath = entraSettings.Project;
-                step.PackageNames = packageList;
+                step.Packages = [.. packageList.Select(p => new Package(p))];
             }
             else
             {
@@ -294,7 +295,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
                             throw new InvalidOperationException("Project path is not set in EntraIdSettings.");
                         }
 
-                        step.PackageNames = packageList;
+                        step.Packages = [.. packageList.Select(p => new Package(p))];
                     }
                 }
                 else

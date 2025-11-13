@@ -1,5 +1,5 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel" name="Model" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
@@ -10,12 +10,16 @@
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
-@using <#= Model.DbContextNamespace #>
+<#
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+#>@using <#= Model.DbContextNamespace #>
+<#} #>
 
-@inject UserManager<<#= Model.UserClassName #>> UserManager
-@inject IEmailSender<<#= Model.UserClassName #>> EmailSender
+@inject UserManager<<#= Model.UserClassName#>> UserManager
+@inject IEmailSender<<#= Model.UserClassName#>> EmailSender
+@inject IdentityUserAccessor UserAccessor
 @inject NavigationManager NavigationManager
-@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Manage email</PageTitle>
 
@@ -60,7 +64,7 @@
 
 @code {
     private string? message;
-    private <#= Model.UserClassName #>? user;
+    private <#= Model.UserClassName#> user = default!;
     private string? email;
     private bool isEmailConfirmed;
 
@@ -68,19 +72,11 @@
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm(FormName = "change-email")]
-    private InputModel Input { get; set; } = default!;
+    private InputModel Input { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        Input ??= new();
-
-        user = await UserManager.GetUserAsync(HttpContext.User);
-        if (user is null)
-        {
-            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
-            return;
-        }
-
+        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         email = await UserManager.GetEmailAsync(user);
         isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);
 
@@ -92,12 +88,6 @@
         if (Input.NewEmail is null || Input.NewEmail == email)
         {
             message = "Your email is unchanged.";
-            return;
-        }
-
-        if (user is null)
-        {
-            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
             return;
         }
 
@@ -117,12 +107,6 @@
     {
         if (email is null)
         {
-            return;
-        }
-
-        if (user is null)
-        {
-            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
             return;
         }
 

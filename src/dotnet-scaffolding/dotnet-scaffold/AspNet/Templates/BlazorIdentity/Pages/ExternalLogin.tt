@@ -1,5 +1,5 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel" name="Model" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
@@ -11,12 +11,16 @@
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
-@using <#= Model.DbContextNamespace #>
+<#
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+#>@using <#= Model.DbContextNamespace #>
+<#} #>
 
-@inject SignInManager<<#= Model.UserClassName #>> SignInManager
-@inject UserManager<<#= Model.UserClassName #>> UserManager
-@inject IUserStore<<#= Model.UserClassName #>> UserStore
-@inject IEmailSender<<#= Model.UserClassName #>> EmailSender
+@inject SignInManager<<#= Model.UserClassName#>> SignInManager
+@inject UserManager<<#= Model.UserClassName#>> UserManager
+@inject IUserStore<<#= Model.UserClassName#>> UserStore
+@inject IEmailSender<<#= Model.UserClassName#>> EmailSender
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<ExternalLogin> Logger
@@ -59,7 +63,7 @@
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = default!;
+    private InputModel Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
     private string? RemoteError { get; set; }
@@ -74,19 +78,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Input ??= new();
-
         if (RemoteError is not null)
         {
             RedirectManager.RedirectToWithStatus("Account/Login", $"Error from external provider: {RemoteError}", HttpContext);
-            return;
         }
 
         var info = await SignInManager.GetExternalLoginInfoAsync();
         if (info is null)
         {
             RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
-            return;
         }
 
         externalLoginInfo = info;
@@ -110,7 +110,6 @@
         if (externalLoginInfo is null)
         {
             RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
-            return;
         }
 
         // Sign in the user with this external login provider if the user already has a login.
@@ -127,12 +126,10 @@
                 externalLoginInfo.Principal.Identity?.Name,
                 externalLoginInfo.LoginProvider);
             RedirectManager.RedirectTo(ReturnUrl);
-            return;
         }
         else if (result.IsLockedOut)
         {
             RedirectManager.RedirectTo("Account/Lockout");
-            return;
         }
 
         // If the user does not have an account, then ask the user to create an account.
@@ -147,7 +144,6 @@
         if (externalLoginInfo is null)
         {
             RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information during confirmation.", HttpContext);
-            return;
         }
 
         var emailStore = GetEmailStore();
@@ -178,39 +174,35 @@
                 {
                     RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
                 }
-                else
-                {
-                    await SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
-                    RedirectManager.RedirectTo(ReturnUrl);
-                }
+
+                await SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
+                RedirectManager.RedirectTo(ReturnUrl);
             }
         }
-        else
-        {
-            message = $"Error: {string.Join(",", result.Errors.Select(error => error.Description))}";
-        }
+
+        message = $"Error: {string.Join(",", result.Errors.Select(error => error.Description))}";
     }
 
-    private <#= Model.UserClassName #> CreateUser()
+    private <#= Model.UserClassName#> CreateUser()
     {
         try
         {
-            return Activator.CreateInstance<<#= Model.UserClassName #>>();
+            return Activator.CreateInstance<<#= Model.UserClassName#>>();
         }
         catch
         {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(<#= Model.UserClassName #>)}'. " +
-                $"Ensure that '{nameof(<#= Model.UserClassName #>)}' is not an abstract class and has a parameterless constructor");
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(<#= Model.UserClassName#>)}'. " +
+                $"Ensure that '{nameof(<#= Model.UserClassName#>)}' is not an abstract class and has a parameterless constructor");
         }
     }
 
-    private IUserEmailStore<<#= Model.UserClassName #>> GetEmailStore()
+    private IUserEmailStore<<#= Model.UserClassName#>> GetEmailStore()
     {
         if (!UserManager.SupportsUserEmail)
         {
             throw new NotSupportedException("The default UI requires a user store with email support.");
         }
-        return (IUserEmailStore<<#= Model.UserClassName #>>)UserStore;
+        return (IUserEmailStore<<#= Model.UserClassName#>>)UserStore;
     }
 
     private sealed class InputModel

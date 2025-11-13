@@ -30,6 +30,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Pack="true" Include="AspNet\Templates\Files\*.cshtml" PackagePath="Templates\Files\" />
+    <None Pack="true" Include="AspNet\Templates\**\*.tt" PackagePath="Templates\" />
     <None Pack="true" Include="README.md" PackagePath="\" />
     <None Pack="true" Include="CodeModificationConfigs\*\*.json" PackagePath="CodeModificationConfigs\" />
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\*.tt" PackagePath="AspNet\Templates\DbContext\" />

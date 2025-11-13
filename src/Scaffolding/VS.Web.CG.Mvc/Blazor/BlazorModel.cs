@@ -34,6 +34,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
         public BlazorWebAppProperties BlazorWebAppProperties { get; set; }
 
+        public bool HasMainLayout => BlazorWebAppProperties?.HasMainLayout ?? false;
+
         //Database type eg. SQL Server, SQLite, Cosmos DB, Postgres and more later.
         public DbProvider DatabaseProvider { get; set; }
 
@@ -153,5 +155,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         public bool InteractiveWebAssemblyRenderModeNeeded { get; set; }
         public bool IsHeadOutletGlobal { get; set; }
         public bool AreRoutesGlobal { get; set; }
+        public bool HasMainLayout { get; set; }
     }
 }

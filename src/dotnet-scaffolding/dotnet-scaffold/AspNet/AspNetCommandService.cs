@@ -17,6 +17,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
     {
         IScaffoldRunnerBuilder _builder = builder;
 
+        public string? AzCliErrors { get; private set; }
+
         public Type[] GetScaffoldSteps()
         {
             return
@@ -46,18 +48,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
 
         public void AddScaffolderCommands()
         {
+            AspNetOptions options = new();
+            AzCliErrors = options.AzCliErrors;
+
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Blazor.Empty)
                 .WithDisplayName(AspnetStrings.Blazor.EmptyDisplayName)
                 .WithCategory(AspnetStrings.Catagories.Blazor)
                 .WithDescription(AspnetStrings.Blazor.EmptyDescription)
-                .WithOption(AspNetOptions.Project)
-                .WithOption(AspNetOptions.FileName)
+                .WithOption(options.Project)
+                .WithOption(options.FileName)
                 .WithStep<DotnetNewScaffolderStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.ProjectPath = context.GetOptionResult(AspNetOptions.Project);
-                    step.FileName = context.GetOptionResult(AspNetOptions.FileName);
+                    step.ProjectPath = context.GetOptionResult(options.Project);
+                    step.FileName = context.GetOptionResult(options.FileName);
                     step.CommandName = Constants.DotnetCommands.RazorComponentCommandName;
                 });
 
@@ -65,14 +70,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.RazorView.EmptyDisplayName)
                 .WithCategory(AspnetStrings.Catagories.MVC)
                 .WithDescription(AspnetStrings.RazorView.EmptyDescription)
-                .WithOption(AspNetOptions.Project)
-                .WithOption(AspNetOptions.FileName)
+                .WithOption(options.Project)
+                .WithOption(options.FileName)
                 .WithStep<DotnetNewScaffolderStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.ProjectPath = context.GetOptionResult(AspNetOptions.Project);
-                    step.FileName = context.GetOptionResult(AspNetOptions.FileName);
+                    step.ProjectPath = context.GetOptionResult(options.Project);
+                    step.FileName = context.GetOptionResult(options.FileName);
                     step.CommandName = Constants.DotnetCommands.ViewCommandName;
                 });
 
@@ -80,15 +85,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.RazorPage.EmptyDisplayName)
                 .WithCategory(AspnetStrings.Catagories.RazorPages)
                 .WithDescription(AspnetStrings.RazorPage.EmptyDescription)
-                .WithOption(AspNetOptions.Project)
-                .WithOption(AspNetOptions.FileName)
+                .WithOption(options.Project)
+                .WithOption(options.FileName)
                 .WithStep<DotnetNewScaffolderStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.ProjectPath = context.GetOptionResult(AspNetOptions.Project);
+                    step.ProjectPath = context.GetOptionResult(options.Project);
                     step.NamespaceName = Path.GetFileNameWithoutExtension(step.ProjectPath);
-                    step.FileName = context.GetOptionResult(AspNetOptions.FileName);
+                    step.FileName = context.GetOptionResult(options.FileName);
                     step.CommandName = Constants.DotnetCommands.RazorPageCommandName;
                 });
 
@@ -96,14 +101,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Api.ApiControllerDisplayName)
                 .WithCategory(AspnetStrings.Catagories.API)
                 .WithDescription(AspnetStrings.Api.ApiControllerDescription)
-                .WithOptions([AspNetOptions.Project, AspNetOptions.FileName, AspNetOptions.Actions])
+                .WithOptions([options.Project, options.FileName, options.Actions])
                 .WithStep<EmptyControllerScaffolderStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.ProjectPath = context.GetOptionResult(AspNetOptions.Project);
-                    step.FileName = context.GetOptionResult(AspNetOptions.FileName);
-                    step.Actions = context.GetOptionResult(AspNetOptions.Actions);
+                    step.ProjectPath = context.GetOptionResult(options.Project);
+                    step.FileName = context.GetOptionResult(options.FileName);
+                    step.Actions = context.GetOptionResult(options.Actions);
                     step.CommandName = AspnetStrings.Api.ApiController;
                 });
 
@@ -111,14 +116,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.MVC.DisplayName)
                 .WithCategory(AspnetStrings.Catagories.MVC)
                 .WithDescription(AspnetStrings.MVC.Description)
-                .WithOptions([AspNetOptions.Project, AspNetOptions.FileName, AspNetOptions.Actions])
+                .WithOptions([options.Project, options.FileName, options.Actions])
                 .WithStep<EmptyControllerScaffolderStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.ProjectPath = context.GetOptionResult(AspNetOptions.Project);
-                    step.FileName = context.GetOptionResult(AspNetOptions.FileName);
-                    step.Actions = context.GetOptionResult(AspNetOptions.Actions);
+                    step.ProjectPath = context.GetOptionResult(options.Project);
+                    step.FileName = context.GetOptionResult(options.FileName);
+                    step.Actions = context.GetOptionResult(options.Actions);
                     step.CommandName = AspnetStrings.MVC.Controller;
                 });
 
@@ -126,18 +131,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Api.ApiControllerCrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.API)
                 .WithDescription(AspnetStrings.Api.ApiControllerCrudDescription)
-                .WithOptions([AspNetOptions.Project, AspNetOptions.ModelName, AspNetOptions.ControllerName, AspNetOptions.DataContextClassRequired, AspNetOptions.DatabaseProviderRequired, AspNetOptions.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.ControllerName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.Prerelease])
                 .WithStep<ValidateEfControllerStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.Project = context.GetOptionResult(AspNetOptions.Project);
-                    step.Model = context.GetOptionResult(AspNetOptions.ModelName);
-                    step.DataContext = context.GetOptionResult(AspNetOptions.DataContextClassRequired);
-                    step.DatabaseProvider = context.GetOptionResult(AspNetOptions.DatabaseProviderRequired);
-                    step.Prerelease = context.GetOptionResult(AspNetOptions.Prerelease);
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.Model = context.GetOptionResult(options.ModelName);
+                    step.DataContext = context.GetOptionResult(options.DataContextClassRequired);
+                    step.DatabaseProvider = context.GetOptionResult(options.DatabaseProviderRequired);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
                     step.ControllerType = AspnetStrings.Catagories.API;
-                    step.ControllerName = context.GetOptionResult(AspNetOptions.ControllerName);
+                    step.ControllerName = context.GetOptionResult(options.ControllerName);
                 })
                 .WithEfControllerAddPackagesStep()
                 .WithDbContextStep()
@@ -149,18 +154,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.MVC.CrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.MVC)
                 .WithDescription(AspnetStrings.MVC.CrudDescription)
-                .WithOptions([AspNetOptions.Project, AspNetOptions.ModelName, AspNetOptions.ControllerName, AspNetOptions.Views, AspNetOptions.DataContextClassRequired, AspNetOptions.DatabaseProviderRequired, AspNetOptions.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.ControllerName, options.Views, options.DataContextClassRequired, options.DatabaseProviderRequired, options.Prerelease])
                 .WithStep<ValidateEfControllerStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.Project = context.GetOptionResult(AspNetOptions.Project);
-                    step.Model = context.GetOptionResult(AspNetOptions.ModelName);
-                    step.DataContext = context.GetOptionResult(AspNetOptions.DataContextClassRequired);
-                    step.DatabaseProvider = context.GetOptionResult(AspNetOptions.DatabaseProviderRequired);
-                    step.Prerelease = context.GetOptionResult(AspNetOptions.Prerelease);
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.Model = context.GetOptionResult(options.ModelName);
+                    step.DataContext = context.GetOptionResult(options.DataContextClassRequired);
+                    step.DatabaseProvider = context.GetOptionResult(options.DatabaseProviderRequired);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
                     step.ControllerType = AspnetStrings.Catagories.MVC;
-                    step.ControllerName = context.GetOptionResult(AspNetOptions.ControllerName);
+                    step.ControllerName = context.GetOptionResult(options.ControllerName);
                 })
                 .WithEfControllerAddPackagesStep()
                 .WithDbContextStep()
@@ -173,17 +178,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Blazor.CrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.Blazor)
                 .WithDescription(AspnetStrings.Blazor.CrudDescription)
-                .WithOptions([AspNetOptions.Project, AspNetOptions.ModelName, AspNetOptions.DataContextClassRequired, AspNetOptions.DatabaseProviderRequired, AspNetOptions.PageType, AspNetOptions.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.PageType, options.Prerelease])
                 .WithStep<ValidateBlazorCrudStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.Project = context.GetOptionResult(AspNetOptions.Project);
-                    step.Model = context.GetOptionResult(AspNetOptions.ModelName);
-                    step.DataContext = context.GetOptionResult(AspNetOptions.DataContextClassRequired);
-                    step.DatabaseProvider = context.GetOptionResult(AspNetOptions.DatabaseProviderRequired);
-                    step.Prerelease = context.GetOptionResult(AspNetOptions.Prerelease);
-                    step.Page = context.GetOptionResult(AspNetOptions.PageType);
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.Model = context.GetOptionResult(options.ModelName);
+                    step.DataContext = context.GetOptionResult(options.DataContextClassRequired);
+                    step.DatabaseProvider = context.GetOptionResult(options.DatabaseProviderRequired);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
+                    step.Page = context.GetOptionResult(options.PageType);
                 })
                 .WithBlazorCrudAddPackagesStep()
                 .WithDbContextStep()
@@ -195,17 +200,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.RazorPage.CrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.RazorPages)
                 .WithDescription(AspnetStrings.RazorPage.CrudDescription)
-                .WithOptions([AspNetOptions.Project, AspNetOptions.ModelName, AspNetOptions.DataContextClassRequired, AspNetOptions.DatabaseProviderRequired, AspNetOptions.PageType, AspNetOptions.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.PageType, options.Prerelease])
                 .WithStep<ValidateRazorPagesStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.Project = context.GetOptionResult(AspNetOptions.Project);
-                    step.Model = context.GetOptionResult(AspNetOptions.ModelName);
-                    step.DataContext = context.GetOptionResult(AspNetOptions.DataContextClassRequired);
-                    step.DatabaseProvider = context.GetOptionResult(AspNetOptions.DatabaseProviderRequired);
-                    step.Prerelease = context.GetOptionResult(AspNetOptions.Prerelease);
-                    step.Page = context.GetOptionResult(AspNetOptions.PageType);
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.Model = context.GetOptionResult(options.ModelName);
+                    step.DataContext = context.GetOptionResult(options.DataContextClassRequired);
+                    step.DatabaseProvider = context.GetOptionResult(options.DatabaseProviderRequired);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
+                    step.Page = context.GetOptionResult(options.PageType);
                 })
                 .WithRazorPagesAddPackagesStep()
                 .WithDbContextStep()
@@ -217,14 +222,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.RazorView.ViewsDisplayName)
                 .WithCategory(AspnetStrings.Catagories.MVC)
                 .WithDescription(AspnetStrings.RazorView.ViewsDescription)
-                .WithOptions([AspNetOptions.Project, AspNetOptions.ModelName, AspNetOptions.PageType])
+                .WithOptions([options.Project, options.ModelName, options.PageType])
                 .WithStep<ValidateViewsStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.Project = context.GetOptionResult(AspNetOptions.Project);
-                    step.Model = context.GetOptionResult(AspNetOptions.ModelName);
-                    step.Page = context.GetOptionResult(AspNetOptions.PageType);
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.Model = context.GetOptionResult(options.ModelName);
+                    step.Page = context.GetOptionResult(options.PageType);
                 })
                 .WithViewsTextTemplatingStep()
                 .WithViewsAddFileStep();
@@ -233,18 +238,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Api.MinimalApiDisplayName)
                 .WithCategory(AspnetStrings.Catagories.API)
                 .WithDescription(AspnetStrings.Api.MinimalApiDescription)
-                .WithOptions([AspNetOptions.Project, AspNetOptions.ModelName, AspNetOptions.EndpointsClass, AspNetOptions.OpenApi, AspNetOptions.DataContextClass, AspNetOptions.DatabaseProvider, AspNetOptions.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.EndpointsClass, options.OpenApi, options.DataContextClass, options.DatabaseProvider, options.Prerelease])
                 .WithStep<ValidateMinimalApiStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.Project = context.GetOptionResult(AspNetOptions.Project);
-                    step.Model = context.GetOptionResult(AspNetOptions.ModelName);
-                    step.DataContext = context.GetOptionResult(AspNetOptions.DataContextClass);
-                    step.DatabaseProvider = context.GetOptionResult(AspNetOptions.DatabaseProvider);
-                    step.Prerelease = context.GetOptionResult(AspNetOptions.Prerelease);
-                    step.OpenApi = context.GetOptionResult(AspNetOptions.OpenApi);
-                    step.Endpoints = context.GetOptionResult(AspNetOptions.EndpointsClass);
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.Model = context.GetOptionResult(options.ModelName);
+                    step.DataContext = context.GetOptionResult(options.DataContextClass);
+                    step.DatabaseProvider = context.GetOptionResult(options.DatabaseProvider);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
+                    step.OpenApi = context.GetOptionResult(options.OpenApi);
+                    step.Endpoints = context.GetOptionResult(options.EndpointsClass);
                 })
                 .WithMinimalApiAddPackagesStep()
                 .WithDbContextStep()
@@ -256,13 +261,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Area.DisplayName)
                 .WithCategory(AspnetStrings.Catagories.MVC)
                 .WithDescription(AspnetStrings.Area.Description)
-                .WithOptions([AspNetOptions.Project, AspNetOptions.AreaName])
+                .WithOptions([options.Project, options.AreaName])
                 .WithStep<AreaScaffolderStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.Project = context.GetOptionResult(AspNetOptions.Project);
-                    step.Name = context.GetOptionResult(AspNetOptions.AreaName);
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.Name = context.GetOptionResult(options.AreaName);
                 });
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Blazor.Identity)
@@ -270,16 +275,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithCategory(AspnetStrings.Catagories.Blazor)
                 .WithCategory(AspnetStrings.Catagories.Identity)
                 .WithDescription(AspnetStrings.Blazor.IdentityDescription)
-                .WithOptions([AspNetOptions.Project, AspNetOptions.DataContextClassRequired, AspNetOptions.IdentityDbProviderRequired, AspNetOptions.Overwrite, AspNetOptions.Prerelease])
+                .WithOptions([options.Project, options.DataContextClassRequired, options.IdentityDbProviderRequired, options.Overwrite, options.Prerelease])
                 .WithStep<ValidateIdentityStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.Project = context.GetOptionResult(AspNetOptions.Project);
-                    step.DataContext = context.GetOptionResult(AspNetOptions.DataContextClassRequired);
-                    step.DatabaseProvider = context.GetOptionResult(AspNetOptions.IdentityDbProviderRequired);
-                    step.Prerelease = context.GetOptionResult(AspNetOptions.Prerelease);
-                    step.Overwrite = context.GetOptionResult(AspNetOptions.Overwrite);
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.DataContext = context.GetOptionResult(options.DataContextClassRequired);
+                    step.DatabaseProvider = context.GetOptionResult(options.IdentityDbProviderRequired);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
+                    step.Overwrite = context.GetOptionResult(options.Overwrite);
                     step.BlazorScenario = true;
                 })
                 .WithBlazorIdentityAddPackagesStep()
@@ -292,16 +297,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Identity.DisplayName)
                 .WithCategory(AspnetStrings.Catagories.Identity)
                 .WithDescription(AspnetStrings.Identity.Description)
-                .WithOptions([AspNetOptions.Project, AspNetOptions.DataContextClassRequired, AspNetOptions.IdentityDbProviderRequired, AspNetOptions.Overwrite, AspNetOptions.Prerelease])
+                .WithOptions([options.Project, options.DataContextClassRequired, options.IdentityDbProviderRequired, options.Overwrite, options.Prerelease])
                 .WithStep<ValidateIdentityStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
-                    step.Project = context.GetOptionResult(AspNetOptions.Project);
-                    step.DataContext = context.GetOptionResult(AspNetOptions.DataContextClassRequired);
-                    step.DatabaseProvider = context.GetOptionResult(AspNetOptions.IdentityDbProviderRequired);
-                    step.Prerelease = context.GetOptionResult(AspNetOptions.Prerelease);
-                    step.Overwrite = context.GetOptionResult(AspNetOptions.Overwrite);
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.DataContext = context.GetOptionResult(options.DataContextClassRequired);
+                    step.DatabaseProvider = context.GetOptionResult(options.IdentityDbProviderRequired);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
+                    step.Overwrite = context.GetOptionResult(options.Overwrite);
                 })
                 .WithIdentityAddPackagesStep()
                 .WithIdentityDbContextStep()
@@ -309,23 +314,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithIdentityTextTemplatingStep()
                 .WithIdentityCodeChangeStep();
 
-            AspNetOptions options = new();
-
             if (options.AreAzCliCommandsSuccessful())
             {
                 _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.EntraId.Name)
                     .WithDisplayName(AspnetStrings.EntraId.DisplayName)
                     .WithCategory(AspnetStrings.Catagories.EntraId)
                     .WithDescription(AspnetStrings.EntraId.Description)
-                    .WithOptions([options.Username, AspNetOptions.Project, options.TenantId, AspNetOptions.Application, options.SelectApplication])
+                    .WithOptions([options.Username, options.Project, options.TenantId, options.Application, options.SelectApplication])
                     .WithStep<ValidateEntraIdStep>(config =>
                     {
                         var step = config.Step;
                         var context = config.Context;
                         step.Username = context.GetOptionResult(options.Username);
-                        step.Project = context.GetOptionResult(AspNetOptions.Project);
+                        step.Project = context.GetOptionResult(options.Project);
                         step.TenantId = context.GetOptionResult(options.TenantId);
-                        step.Application = context.GetOptionResult(AspNetOptions.Application);
+                        step.Application = context.GetOptionResult(options.Application);
                         step.SelectApplication = context.GetOptionResult(options.SelectApplication);
                     })
                     .WithRegisterAppStep()

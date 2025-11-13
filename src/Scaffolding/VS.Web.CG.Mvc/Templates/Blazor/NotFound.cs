@@ -18,102 +18,19 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class Delete : DeleteBase
+    public partial class NotFound : NotFoundBase
     {
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-
-    string modelName = Model.ModelType.Name;
-    string pluralModel = Model.ModelType.PluralName;
-    string modelNameLowerInv = modelName.ToLowerInvariant();
-    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : Model.DbContextNamespace;
-    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.ContextTypeName : $"{dbContextNamespace}.{Model.ContextTypeName}";
-    string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
-    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
-    string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
-    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
-    string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
-    string entitySetName = Model.ModelMetadata.EntitySetName;
-    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
-
-            this.Write("@page \"/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/delete\"\r\n@using Microsoft.EntityFrameworkCore\r\n");
-
-    if (!string.IsNullOrEmpty(modelNamespace))
-    {
-        
-            this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNamespace));
-            this.Write("\r\n");
-  }
-
-            this.Write("@inject ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Delete</PageTitle>\r\n\r" +
-                    "\n<h1>Delete</h1>\r\n\r\n<p>Are you sure you want to delete this?</p>\r\n<div>\r\n    <h2" +
-                    ">");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("</h2>\r\n    <hr />\r\n    @if (");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(" is null)\r\n    {\r\n        <p><em>Loading...</em></p>\r\n    }\r\n    else {\r\n");
-
-        foreach (var property in entityProperties)
-        {
-            string modelPropertyName = property.PropertyName;
-    
-            this.Write("        <dl class=\"row\">\r\n            <dt class=\"col-sm-2\">");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write("</dt>\r\n            <dd class=\"col-sm-10\">@");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(".");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write("</dd>\r\n        </dl>\r\n");
-  } 
-            this.Write("        <EditForm method=\"post\" Model=\"");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write("\" OnValidSubmit=\"Delete");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("\" FormName=\"delete\" Enhance>\r\n            <button type=\"submit\" class=\"btn btn-da" +
-                    "nger\" disabled=\"@(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(" is null)\">Delete</button> |\r\n            <a href=\"/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\">Back to List</a>\r\n        </EditForm>\r\n    }\r\n</div>\r\n\r\n@code {\r\n    private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("? ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(";\r\n\r\n    [SupplyParameterFromQuery]\r\n    private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
-            this.Write(" ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write(" { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r\n    {\r\n" +
-                    "        using var context = DbFactory.CreateDbContext();\r\n        ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(" = await context.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write(".FirstOrDefaultAsync(m => m.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write(" == ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write(");\r\n\r\n        if (");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(" is null)\r\n        {\r\n            NavigationManager.NotFound();\r\n    " +
-                    "    }\r\n    }\r\n\r\n    private async Task Delete");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
-                    "ext.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write(".Remove(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write("!);\r\n        await context.SaveChangesAsync();\r\n        NavigationManager.Navigat" +
-                    "eTo(\"/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\");\r\n    }\r\n}\r\n");
+            this.Write("\r\n\r\n@page \"/not-found\"\r\n");
+ if (Model.HasMainLayout) { 
+            this.Write("@layout MainLayout\r\n");
+ } 
+            this.Write("\r\n\r\n<PageTitle>Not Found</PageTitle>\r\n\r\n\r\n<h1>Not Found</h1>\r\n<p>Sorry, there\'s n" +
+                    "othing at this address.</p>\r\n\r\n\r\n<a href=\"/\">Back to Home</a>");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -198,7 +115,7 @@ if ((ModelValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class DeleteBase
+    public class NotFoundBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

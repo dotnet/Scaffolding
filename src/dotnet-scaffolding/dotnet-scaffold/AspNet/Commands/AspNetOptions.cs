@@ -10,156 +10,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 
 internal class AspNetOptions
 {
-    public static  ScaffolderOption<string> Project => new()
-    {
-        DisplayName = AspnetStrings.Options.Project.DisplayName,
-        CliOption = Constants.CliOptions.ProjectCliOption,
-        Description = AspnetStrings.Options.Project.Description,
-        Required = true,
-        PickerType = InteractivePickerType.ProjectPicker
-    };
-
-    public static ScaffolderOption<bool> Prerelease => new()
-    {
-        DisplayName = AspnetStrings.Options.Prerelease.DisplayName,
-        CliOption = Constants.CliOptions.PrereleaseCliOption,
-        Description = AspnetStrings.Options.Prerelease.Description,
-        Required = false,
-        PickerType = InteractivePickerType.YesNo
-    };
-
-    public static ScaffolderOption<string> FileName => new()
-    {
-        DisplayName = AspnetStrings.Options.FileName.DisplayName,
-        CliOption = Constants.CliOptions.NameOption,
-        Description = AspnetStrings.Options.FileName.Description,
-        Required = true,
-    };
-
-    public static ScaffolderOption<bool> Actions => new()
-    {
-        DisplayName = AspnetStrings.Options.Actions.DisplayName,
-        CliOption = Constants.CliOptions.ActionsOption,
-        Description = AspnetStrings.Options.Actions.Description,
-        Required = true,
-        PickerType = InteractivePickerType.YesNo
-    };
-
-    public static ScaffolderOption<string> AreaName => new()
-    {
-        DisplayName = AspnetStrings.Options.AreaName.DisplayName,
-        CliOption = Constants.CliOptions.NameOption,
-        Description = AspnetStrings.Options.AreaName.Description,
-        Required = true
-    };
-
-    public static ScaffolderOption<string> ModelName => new()
-    {
-        DisplayName = AspnetStrings.Options.ModelName.DisplayName,
-        CliOption = Constants.CliOptions.ModelCliOption,
-        Description = AspnetStrings.Options.ModelName.Description,
-        Required = true,
-        PickerType = InteractivePickerType.ClassPicker
-    };
-
-    public static ScaffolderOption<string> EndpointsClass => new()
-    {
-        DisplayName = AspnetStrings.Options.EndpointClassDisplayName,
-        CliOption = Constants.CliOptions.EndpointsOption,
-        Description = string.Empty,
-        Required = true
-    };
-
-    public static ScaffolderOption<string> DatabaseProvider => new()
-    {
-        DisplayName = AspnetStrings.Options.DbProviderDisplayName,
-        CliOption = Constants.CliOptions.DbProviderOption,
-        Description = string.Empty,
-        Required = false,
-        PickerType = InteractivePickerType.CustomPicker,
-        CustomPickerValues = [.. AspNetDbContextHelper.DbContextTypeDefaults.Keys]
-    };
-
-    public static ScaffolderOption<string> DatabaseProviderRequired => new()
-    {
-        DisplayName = AspnetStrings.Options.DbProviderDisplayName,
-        CliOption = Constants.CliOptions.DbProviderOption,
-        Description = string.Empty,
-        Required = true,
-        PickerType = InteractivePickerType.CustomPicker,
-        CustomPickerValues = [.. AspNetDbContextHelper.DbContextTypeDefaults.Keys]
-    };
-
-    public static ScaffolderOption<string> IdentityDbProviderRequired => new()
-    {
-        DisplayName = AspnetStrings.Options.DbProviderDisplayName,
-        CliOption = Constants.CliOptions.DbProviderOption,
-        Description = string.Empty,
-        Required = true,
-        PickerType = InteractivePickerType.CustomPicker,
-        CustomPickerValues = [.. AspNetDbContextHelper.IdentityDbContextTypeDefaults.Keys]
-    };
-
-    public static ScaffolderOption<string> DataContextClass => new()
-    {
-        DisplayName = AspnetStrings.Options.DataContextClassDisplayName,
-        CliOption = Constants.CliOptions.DataContextOption,
-        Description = string.Empty,
-        Required = false
-    };
-
-    public static ScaffolderOption<string> DataContextClassRequired => new()
-    {
-        DisplayName = AspnetStrings.Options.DataContextClassDisplayName,
-        CliOption = Constants.CliOptions.DataContextOption,
-        Description = string.Empty,
-        Required = true
-    };
-
-    public static ScaffolderOption<bool> OpenApi => new()
-    {
-        DisplayName = AspnetStrings.Options.OpenApiDisplayName,
-        CliOption = Constants.CliOptions.OpenApiOption,
-        Description = string.Empty,
-        Required = false,
-        PickerType = InteractivePickerType.YesNo
-    };
-
-    public static ScaffolderOption<string> PageType => new()
-    {
-        DisplayName = AspnetStrings.Options.PageType.DisplayName,
-        CliOption = Constants.CliOptions.PageTypeOption,
-        Description = AspnetStrings.Options.PageType.Description,
-        Required = true,
-        PickerType = InteractivePickerType.CustomPicker,
-        CustomPickerValues = BlazorCrudHelper.CRUDPages
-    };
-
-    public static ScaffolderOption<string> ControllerName => new()
-    {
-        DisplayName = AspnetStrings.Options.ControllerName.DisplayName,
-        CliOption = Constants.CliOptions.ControllerNameOption,
-        Description = AspnetStrings.Options.ControllerName.Description,
-        Required = true
-    };
-
-    public static ScaffolderOption<bool> Views => new()
-    {
-        DisplayName = AspnetStrings.Options.View.DisplayName,
-        CliOption = Constants.CliOptions.ViewsOption,
-        Description = AspnetStrings.Options.View.Description,
-        Required = true,
-        PickerType = InteractivePickerType.YesNo
-    };
-
-    public static ScaffolderOption<bool> Overwrite => new()
-    {
-        DisplayName = AspnetStrings.Options.Overwrite.DisplayName,
-        CliOption = Constants.CliOptions.OverwriteOption,
-        Description = AspnetStrings.Options.Overwrite.Description,
-        Required = true,
-        PickerType = InteractivePickerType.YesNo
-    };
+    public ScaffolderOption<string> Project { get; }
+    public ScaffolderOption<bool> Prerelease { get; }
+    public ScaffolderOption<string> FileName { get; }
+    public ScaffolderOption<bool> Actions { get; }
+    public ScaffolderOption<string> AreaName { get; }
+    public ScaffolderOption<string> ModelName { get; }
+    public ScaffolderOption<string> EndpointsClass { get; }
+    public ScaffolderOption<string> DatabaseProvider { get; }
+    public ScaffolderOption<string> DatabaseProviderRequired { get; }
+    public ScaffolderOption<string> IdentityDbProviderRequired { get; }
+    public ScaffolderOption<string> DataContextClass { get; }
+    public ScaffolderOption<string> DataContextClassRequired { get; }
+    public ScaffolderOption<bool> OpenApi { get; }
+    public ScaffolderOption<string> PageType { get; }
+    public ScaffolderOption<string> ControllerName { get; }
+    public ScaffolderOption<bool> Views { get; }
+    public ScaffolderOption<bool> Overwrite { get; }
+    public ScaffolderOption<string> Application { get; }
 
     private readonly bool _areAzCliCommandsSuccessful;
     private readonly List<string> _usernames = [];
@@ -171,13 +39,174 @@ internal class AspNetOptions
 
     public AspNetOptions()
     {
-        _areAzCliCommandsSuccessful = AzCliHelper.GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds);
+        Project = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.Project.DisplayName,
+            CliOption = Constants.CliOptions.ProjectCliOption,
+            Description = AspnetStrings.Options.Project.Description,
+            Required = true,
+            PickerType = InteractivePickerType.ProjectPicker
+        };
+
+        Prerelease = new ScaffolderOption<bool>
+        {
+            DisplayName = AspnetStrings.Options.Prerelease.DisplayName,
+            CliOption = Constants.CliOptions.PrereleaseCliOption,
+            Description = AspnetStrings.Options.Prerelease.Description,
+            Required = false,
+            PickerType = InteractivePickerType.YesNo
+        };
+
+        FileName = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.FileName.DisplayName,
+            CliOption = Constants.CliOptions.NameOption,
+            Description = AspnetStrings.Options.FileName.Description,
+            Required = true,
+        };
+
+        Actions = new ScaffolderOption<bool>
+        {
+            DisplayName = AspnetStrings.Options.Actions.DisplayName,
+            CliOption = Constants.CliOptions.ActionsOption,
+            Description = AspnetStrings.Options.Actions.Description,
+            Required = true,
+            PickerType = InteractivePickerType.YesNo
+        };
+        AreaName = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.AreaName.DisplayName,
+            CliOption = Constants.CliOptions.NameOption,
+            Description = AspnetStrings.Options.AreaName.Description,
+            Required = true
+        };
+
+        ModelName = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.ModelName.DisplayName,
+            CliOption = Constants.CliOptions.ModelCliOption,
+            Description = AspnetStrings.Options.ModelName.Description,
+            Required = true,
+            PickerType = InteractivePickerType.ClassPicker
+        };
+
+        EndpointsClass = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.EndpointClassDisplayName,
+            CliOption = Constants.CliOptions.EndpointsOption,
+            Description = string.Empty,
+            Required = true
+        };
+        DatabaseProvider = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.DbProviderDisplayName,
+            CliOption = Constants.CliOptions.DbProviderOption,
+            Description = string.Empty,
+            Required = false,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = [.. AspNetDbContextHelper.DbContextTypeDefaults.Keys]
+        };
+
+        DatabaseProviderRequired = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.DbProviderDisplayName,
+            CliOption = Constants.CliOptions.DbProviderOption,
+            Description = string.Empty,
+            Required = true,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = [.. AspNetDbContextHelper.DbContextTypeDefaults.Keys]
+        };
+
+        IdentityDbProviderRequired = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.DbProviderDisplayName,
+            CliOption = Constants.CliOptions.DbProviderOption,
+            Description = string.Empty,
+            Required = true,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = [.. AspNetDbContextHelper.IdentityDbContextTypeDefaults.Keys]
+        };
+
+        DataContextClass = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.DataContextClassDisplayName,
+            CliOption = Constants.CliOptions.DataContextOption,
+            Description = string.Empty,
+            Required = false
+        };
+        DataContextClassRequired = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.DataContextClassDisplayName,
+            CliOption = Constants.CliOptions.DataContextOption,
+            Description = string.Empty,
+            Required = true
+        };
+
+        OpenApi = new ScaffolderOption<bool>
+        {
+            DisplayName = AspnetStrings.Options.OpenApiDisplayName,
+            CliOption = Constants.CliOptions.OpenApiOption,
+            Description = string.Empty,
+            Required = false,
+            PickerType = InteractivePickerType.YesNo
+        };
+
+        PageType = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.PageType.DisplayName,
+            CliOption = Constants.CliOptions.PageTypeOption,
+            Description = AspnetStrings.Options.PageType.Description,
+            Required = true,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = BlazorCrudHelper.CRUDPages
+        };
+
+        ControllerName = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.ControllerName.DisplayName,
+            CliOption = Constants.CliOptions.ControllerNameOption,
+            Description = AspnetStrings.Options.ControllerName.Description,
+            Required = true
+        };
+
+        Views = new ScaffolderOption<bool>
+        {
+            DisplayName = AspnetStrings.Options.View.DisplayName,
+            CliOption = Constants.CliOptions.ViewsOption,
+            Description = AspnetStrings.Options.View.Description,
+            Required = true,
+            PickerType = InteractivePickerType.YesNo
+        };
+
+        Overwrite = new ScaffolderOption<bool>
+        {
+            DisplayName = AspnetStrings.Options.Overwrite.DisplayName,
+            CliOption = Constants.CliOptions.OverwriteOption,
+            Description = AspnetStrings.Options.Overwrite.Description,
+            Required = true,
+            PickerType = InteractivePickerType.YesNo
+        };
+
+        Application = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.Application.DisplayName,
+            Description = AspnetStrings.Options.Application.Description,
+            Required = true,
+            PickerType = InteractivePickerType.ConditionalPicker,
+            CustomPickerValues = AspnetStrings.Options.Application.Values
+        };
+
+        _areAzCliCommandsSuccessful = AzCliHelper.GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds, out string? azCliErrors);
+        AzCliErrors = azCliErrors;
+
         _usernames = usernames;
         _tenants = tenants;
         _appIds = appIds;
     }
 
     public bool AreAzCliCommandsSuccessful() => _areAzCliCommandsSuccessful;
+
+    public string? AzCliErrors { get; }
 
     public ScaffolderOption<string> Username => _username ??=  new()
     {
@@ -198,15 +227,6 @@ internal class AspNetOptions
         Required = true,
         PickerType = InteractivePickerType.CustomPicker,
         CustomPickerValues = _tenants
-    };
-
-    public static ScaffolderOption<string> Application => new()
-    {
-        DisplayName = AspnetStrings.Options.Application.DisplayName,
-        Description = AspnetStrings.Options.Application.Description,
-        Required = true,
-        PickerType = InteractivePickerType.ConditionalPicker,
-        CustomPickerValues = AspnetStrings.Options.Application.Values
     };
 
     public ScaffolderOption<string> SelectApplication => _applicationId ??= new()

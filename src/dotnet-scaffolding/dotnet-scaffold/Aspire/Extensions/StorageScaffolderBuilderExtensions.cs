@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.Aspire;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
@@ -30,7 +31,7 @@ internal static class StorageScaffolderBuilderExtensions
                 commandSettingsObj is CommandSettings commandSettings)
             {
                 // Set package details for AppHost storage
-                step.PackageNames = [PackageConstants.StoragePackages.AppHostStoragePackageName];
+                step.Packages = [new Package(PackageConstants.StoragePackages.AppHostStoragePackageName)];
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.Prerelease = commandSettings.Prerelease;
             }
@@ -62,7 +63,7 @@ internal static class StorageScaffolderBuilderExtensions
                 }
 
                 // Set package details for the project
-                step.PackageNames = [projectPackageName];
+                step.Packages = [new Package(projectPackageName)];
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
             }

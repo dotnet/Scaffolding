@@ -26,11 +26,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         public virtual string TransformText()
         {
             this.Write(@"@inherits LayoutComponentBase
-@*#if (UseWebAssembly && InteractiveAtRoot)
-@layout BlazorWebCSharp._1.Client.Layout.MainLayout
-##else
-@layout BlazorWebCSharp._1.Components.Layout.MainLayout
-##endif*@
+@layout AccountLayout
 
 <h1>Manage your account</h1>
 

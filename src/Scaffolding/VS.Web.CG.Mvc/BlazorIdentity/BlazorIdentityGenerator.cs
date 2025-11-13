@@ -89,6 +89,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
+        private IReadOnlyList<(string TemplateFolder, string FullPath)> _allBlazorIdentityStaticFiles;
+        private IReadOnlyList<(string TemplateFolder, string FullPath)> AllBlazorIdentityStaticFiles
+        {
+            get => _allBlazorIdentityStaticFiles ??= [.. BlazorIdentityHelper.GetBlazorIdentityStaticFiles(FileSystem, TemplateFolders)];
+        }
+
         private IList<Type> _blazorIdentityTemplateTypes;
         private IList<Type> BlazorIdentityTemplateTypes
         {
@@ -101,20 +107,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 }
 
                 return _blazorIdentityTemplateTypes;
-            }
-        }
-
-        private IDictionary<string, string> _allBlazorIdentityStaticFiles;
-        private IDictionary<string, string> AllBlazorIdentityStaticFiles
-        {
-            get
-            {
-                if (_allBlazorIdentityStaticFiles is null)
-                {
-                    _allBlazorIdentityStaticFiles = BlazorIdentityHelper.GetBlazorIdentityStaticFiles(FileSystem, TemplateFolders);
-                }
-
-                return _allBlazorIdentityStaticFiles;
             }
         }
 
@@ -564,44 +556,26 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
         private void AddStaticFiles(BlazorIdentityModel templateModel)
         {
-            if (AllBlazorIdentityStaticFiles is null || !AllBlazorIdentityStaticFiles.Any())
+            var identityComponentsAccountPath = Path.Combine(templateModel.BaseOutputPath, "Components", "Account");
+            if (!FileSystem.DirectoryExists(identityComponentsAccountPath))
             {
-                return;
+                FileSystem.CreateDirectory(identityComponentsAccountPath);
             }
 
-            var templateFolderRoot = TemplateFolders.FirstOrDefault(x => x.Contains("BlazorIdentity", StringComparison.OrdinalIgnoreCase));
-            if (string.IsNullOrEmpty(templateFolderRoot))
+            foreach (var (templateFolder, sourceFilePath) in AllBlazorIdentityStaticFiles)
             {
-                return;
-            }
+                var relativeFilePath = Path.GetRelativePath(templateFolder, sourceFilePath);
+                var destinationFilePath = Path.Combine(identityComponentsAccountPath, relativeFilePath);
 
-            foreach (var staticFile in AllBlazorIdentityStaticFiles)
-            {
-                string sourceFilePath = staticFile.Value;
-                string relativeTemplatePath = BlazorIdentityHelper.GetFormattedRelativeIdentityFile(sourceFilePath);
-                
-                // Build output path matching the same structure as templates
-                string templateNameWithNamespace = $"{templateModel.BlazorIdentityNamespace}.{relativeTemplatePath}";
-                string templatePath = StringUtil.ToPath(templateNameWithNamespace, templateModel.BaseOutputPath, ProjectContext.RootNamespace);
-                
-                // Get the original file extension
-                string extension = Path.GetExtension(sourceFilePath);
-                string outputFilePath = $"{templatePath}{extension}";
-                
-                // Create directory if it doesn't exist
-                var folderName = Path.GetDirectoryName(outputFilePath);
+                var folderName = Path.GetDirectoryName(destinationFilePath);
                 if (!FileSystem.DirectoryExists(folderName))
                 {
                     FileSystem.CreateDirectory(folderName);
                 }
 
-                // Copy the static file if it doesn't already exist
-                if (!FileSystem.FileExists(outputFilePath))
-                {
-                    var fileContents = FileSystem.ReadAllText(sourceFilePath);
-                    FileSystem.WriteAllText(outputFilePath, fileContents);
-                    Logger.LogMessage($"Added Blazor identity static file : {outputFilePath}");
-                }
+                var fileContent = FileSystem.ReadAllText(sourceFilePath);
+                FileSystem.WriteAllText(destinationFilePath, fileContent);
+                Logger.LogMessage($"Added static file : {destinationFilePath}");
             }
         }
 

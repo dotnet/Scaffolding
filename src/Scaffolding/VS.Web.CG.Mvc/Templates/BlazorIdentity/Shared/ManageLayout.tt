@@ -4,7 +4,7 @@
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
 @inherits LayoutComponentBase
-@layout AccountLayout
+@layout <#= Model.BlazorLayoutNamespace #>
 
 <h1>Manage your account</h1>
 

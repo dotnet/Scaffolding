@@ -25,8 +25,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write(@"@inherits LayoutComponentBase
-@layout AccountLayout
+            this.Write("@inherits LayoutComponentBase\r\n@layout ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorLayoutNamespace));
+            this.Write(@"
 
 <h1>Manage your account</h1>
 

@@ -53,19 +53,20 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "erFromQuery]\r\n    private string? Email { get; set; }\r\n\r\n    [SupplyParameterFro" +
                     "mQuery]\r\n    private string? ReturnUrl { get; set; }\r\n\r\n    protected override a" +
                     "sync Task OnInitializedAsync()\r\n    {\r\n        if (Email is null)\r\n        {\r\n  " +
-                    "          RedirectManager.RedirectTo(\"\");\r\n        }\r\n\r\n        var user = await" +
-                    " UserManager.FindByEmailAsync(Email);\r\n        if (user is null)\r\n        {\r\n   " +
-                    "         HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;\r\n     " +
-                    "       statusMessage = \"Error finding user for unspecified email\";\r\n        }\r\n " +
-                    "       else if (EmailSender is IdentityNoOpEmailSender)\r\n        {\r\n            " +
-                    "// Once you add a real email sender, you should remove this code that lets you c" +
-                    "onfirm the account\r\n            var userId = await UserManager.GetUserIdAsync(us" +
-                    "er);\r\n            var code = await UserManager.GenerateEmailConfirmationTokenAsy" +
-                    "nc(user);\r\n            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes" +
-                    "(code));\r\n            emailConfirmationLink = NavigationManager.GetUriWithQueryP" +
-                    "arameters(\r\n                NavigationManager.ToAbsoluteUri(\"Account/ConfirmEmai" +
-                    "l\").AbsoluteUri,\r\n                new Dictionary<string, object?> { [\"userId\"] =" +
-                    " userId, [\"code\"] = code, [\"returnUrl\"] = ReturnUrl });\r\n        }\r\n    }\r\n}\r\n");
+                    "          RedirectManager.RedirectTo(\"\");\r\n            return;\r\n        }\r\n\r\n   " +
+                    "     var user = await UserManager.FindByEmailAsync(Email);\r\n        if (user is " +
+                    "null)\r\n        {\r\n            HttpContext.Response.StatusCode = StatusCodes.Stat" +
+                    "us404NotFound;\r\n            statusMessage = \"Error finding user for unspecified " +
+                    "email\";\r\n        }\r\n        else if (EmailSender is IdentityNoOpEmailSender)\r\n  " +
+                    "      {\r\n            // Once you add a real email sender, you should remove this" +
+                    " code that lets you confirm the account\r\n            var userId = await UserMana" +
+                    "ger.GetUserIdAsync(user);\r\n            var code = await UserManager.GenerateEmai" +
+                    "lConfirmationTokenAsync(user);\r\n            code = WebEncoders.Base64UrlEncode(E" +
+                    "ncoding.UTF8.GetBytes(code));\r\n            emailConfirmationLink = NavigationMan" +
+                    "ager.GetUriWithQueryParameters(\r\n                NavigationManager.ToAbsoluteUri" +
+                    "(\"Account/ConfirmEmail\").AbsoluteUri,\r\n                new Dictionary<string, ob" +
+                    "ject?> { [\"userId\"] = userId, [\"code\"] = code, [\"returnUrl\"] = ReturnUrl });\r\n  " +
+                    "      }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

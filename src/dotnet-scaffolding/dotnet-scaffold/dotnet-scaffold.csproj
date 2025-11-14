@@ -56,10 +56,6 @@
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
-    <None Update="AspNet\Templates\BlazorIdentity\IdentityUserAccessor.tt">
-      <LastGenOutput>%(Filename).cs</LastGenOutput>
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-    </None>
     <None Update="AspNet\Templates\BlazorIdentity\Pages\ConfirmEmail.tt">
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
@@ -136,7 +132,15 @@
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\Passkeys.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
     <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\PersonalData.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\RenamePasskey.tt">
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
@@ -180,7 +184,11 @@
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
-    <None Update="AspNet\Templates\BlazorIdentity\Shared\AccountLayout.tt">
+    <None Update="AspNet\Templates\BlazorIdentity\PasskeyInputModel.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\PasskeyOperation.tt">
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
@@ -193,6 +201,10 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
     <None Update="AspNet\Templates\BlazorIdentity\Shared\ManageNavMenu.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Shared\PasskeySubmit.tt">
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
@@ -364,11 +376,6 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="AspNet\Templates\BlazorIdentity\IdentityUserAccessor.cs">
-      <DependentUpon>IdentityUserAccessor.tt</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
     <Compile Update="AspNet\Templates\BlazorIdentity\Pages\ConfirmEmail.cs">
       <DependentUpon>ConfirmEmail.tt</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -464,8 +471,18 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\Passkeys.cs">
+      <DependentUpon>Passkeys.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\PersonalData.cs">
       <DependentUpon>PersonalData.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\RenamePasskey.cs">
+      <DependentUpon>RenamePasskey.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
@@ -519,8 +536,13 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="AspNet\Templates\BlazorIdentity\Shared\AccountLayout.cs">
-      <DependentUpon>AccountLayout.tt</DependentUpon>
+    <Compile Update="AspNet\Templates\BlazorIdentity\PasskeyInputModel.cs">
+      <DependentUpon>PasskeyInputModel.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\PasskeyOperation.cs">
+      <DependentUpon>PasskeyOperation.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
@@ -536,6 +558,11 @@
     </Compile>
     <Compile Update="AspNet\Templates\BlazorIdentity\Shared\ManageNavMenu.cs">
       <DependentUpon>ManageNavMenu.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Shared\PasskeySubmit.cs">
+      <DependentUpon>PasskeySubmit.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>

@@ -39,52 +39,54 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> SignInManager\r\n@inject IdentityUserAccessor UserAccessor\r\n@inject IdentityRedir" +
-                    "ectManager RedirectManager\r\n\r\n<PageTitle>Two-factor authentication (2FA)</PageTi" +
-                    "tle>\r\n\r\n<StatusMessage />\r\n<h3>Two-factor authentication (2FA)</h3>\r\n@if (canTra" +
-                    "ck)\r\n{\r\n    if (is2faEnabled)\r\n    {\r\n        if (recoveryCodesLeft == 0)\r\n     " +
-                    "   {\r\n            <div class=\"alert alert-danger\">\r\n                <strong>You " +
-                    "have no recovery codes left.</strong>\r\n                <p>You must <a href=\"Acco" +
-                    "unt/Manage/GenerateRecoveryCodes\">generate a new set of recovery codes</a> befor" +
-                    "e you can log in with a recovery code.</p>\r\n            </div>\r\n        }\r\n     " +
-                    "   else if (recoveryCodesLeft == 1)\r\n        {\r\n            <div class=\"alert al" +
-                    "ert-danger\">\r\n                <strong>You have 1 recovery code left.</strong>\r\n " +
-                    "               <p>You can <a href=\"Account/Manage/GenerateRecoveryCodes\">generat" +
-                    "e a new set of recovery codes</a>.</p>\r\n            </div>\r\n        }\r\n        e" +
-                    "lse if (recoveryCodesLeft <= 3)\r\n        {\r\n            <div class=\"alert alert-" +
-                    "warning\">\r\n                <strong>You have @recoveryCodesLeft recovery codes le" +
-                    "ft.</strong>\r\n                <p>You should <a href=\"Account/Manage/GenerateReco" +
-                    "veryCodes\">generate a new set of recovery codes</a>.</p>\r\n            </div>\r\n  " +
-                    "      }\r\n\r\n        if (isMachineRemembered)\r\n        {\r\n            <form style=" +
-                    "\"display: inline-block\" @formname=\"forget-browser\" @onsubmit=\"OnSubmitForgetBrow" +
-                    "serAsync\" method=\"post\">\r\n                <AntiforgeryToken />\r\n                " +
-                    "<button type=\"submit\" class=\"btn btn-primary\">Forget this browser</button>\r\n    " +
-                    "        </form>\r\n        }\r\n\r\n        <a href=\"Account/Manage/Disable2fa\" class=" +
-                    "\"btn btn-primary\">Disable 2FA</a>\r\n        <a href=\"Account/Manage/GenerateRecov" +
-                    "eryCodes\" class=\"btn btn-primary\">Reset recovery codes</a>\r\n    }\r\n\r\n    <h4>Aut" +
-                    "henticator app</h4>\r\n    @if (!hasAuthenticator)\r\n    {\r\n        <a href=\"Accoun" +
-                    "t/Manage/EnableAuthenticator\" class=\"btn btn-primary\">Add authenticator app</a>\r" +
-                    "\n    }\r\n    else\r\n    {\r\n        <a href=\"Account/Manage/EnableAuthenticator\" cl" +
-                    "ass=\"btn btn-primary\">Set up authenticator app</a>\r\n        <a href=\"Account/Man" +
-                    "age/ResetAuthenticator\" class=\"btn btn-primary\">Reset authenticator app</a>\r\n   " +
-                    " }\r\n}\r\nelse\r\n{\r\n    <div class=\"alert alert-danger\">\r\n        <strong>Privacy an" +
-                    "d cookie policy have not been accepted.</strong>\r\n        <p>You must accept the" +
-                    " policy before you can enable two factor authentication.</p>\r\n    </div>\r\n}\r\n\r\n@" +
-                    "code {\r\n    private bool canTrack;\r\n    private bool hasAuthenticator;\r\n    priv" +
-                    "ate int recoveryCodesLeft;\r\n    private bool is2faEnabled;\r\n    private bool isM" +
-                    "achineRemembered;\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpConte" +
-                    "xt { get; set; } = default!;\r\n\r\n    protected override async Task OnInitializedA" +
-                    "sync()\r\n    {\r\n        var user = await UserAccessor.GetRequiredUserAsync(HttpCo" +
-                    "ntext);\r\n        canTrack = HttpContext.Features.Get<ITrackingConsentFeature>()?" +
-                    ".CanTrack ?? true;\r\n        hasAuthenticator = await UserManager.GetAuthenticato" +
-                    "rKeyAsync(user) is not null;\r\n        is2faEnabled = await UserManager.GetTwoFac" +
-                    "torEnabledAsync(user);\r\n        isMachineRemembered = await SignInManager.IsTwoF" +
-                    "actorClientRememberedAsync(user);\r\n        recoveryCodesLeft = await UserManager" +
-                    ".CountRecoveryCodesAsync(user);\r\n    }\r\n\r\n    private async Task OnSubmitForgetB" +
-                    "rowserAsync()\r\n    {\r\n        await SignInManager.ForgetTwoFactorClientAsync();\r" +
-                    "\n\r\n        RedirectManager.RedirectToCurrentPageWithStatus(\r\n            \"The cu" +
-                    "rrent browser has been forgotten. When you login again from this browser you wil" +
-                    "l be prompted for your 2fa code.\",\r\n            HttpContext);\r\n    }\r\n}\r\n");
+            this.Write("> SignInManager\r\n@inject IdentityRedirectManager RedirectManager\r\n\r\n<PageTitle>Tw" +
+                    "o-factor authentication (2FA)</PageTitle>\r\n\r\n<StatusMessage />\r\n<h3>Two-factor a" +
+                    "uthentication (2FA)</h3>\r\n@if (canTrack)\r\n{\r\n    if (is2faEnabled)\r\n    {\r\n     " +
+                    "   if (recoveryCodesLeft == 0)\r\n        {\r\n            <div class=\"alert alert-d" +
+                    "anger\">\r\n                <strong>You have no recovery codes left.</strong>\r\n    " +
+                    "            <p>You must <a href=\"Account/Manage/GenerateRecoveryCodes\">generate " +
+                    "a new set of recovery codes</a> before you can log in with a recovery code.</p>\r" +
+                    "\n            </div>\r\n        }\r\n        else if (recoveryCodesLeft == 1)\r\n      " +
+                    "  {\r\n            <div class=\"alert alert-danger\">\r\n                <strong>You h" +
+                    "ave 1 recovery code left.</strong>\r\n                <p>You can <a href=\"Account/" +
+                    "Manage/GenerateRecoveryCodes\">generate a new set of recovery codes</a>.</p>\r\n   " +
+                    "         </div>\r\n        }\r\n        else if (recoveryCodesLeft <= 3)\r\n        {\r" +
+                    "\n            <div class=\"alert alert-warning\">\r\n                <strong>You have" +
+                    " @recoveryCodesLeft recovery codes left.</strong>\r\n                <p>You should" +
+                    " <a href=\"Account/Manage/GenerateRecoveryCodes\">generate a new set of recovery c" +
+                    "odes</a>.</p>\r\n            </div>\r\n        }\r\n\r\n        if (isMachineRemembered)" +
+                    "\r\n        {\r\n            <form style=\"display: inline-block\" @formname=\"forget-b" +
+                    "rowser\" @onsubmit=\"OnSubmitForgetBrowserAsync\" method=\"post\">\r\n                <" +
+                    "AntiforgeryToken />\r\n                <button type=\"submit\" class=\"btn btn-primar" +
+                    "y\">Forget this browser</button>\r\n            </form>\r\n        }\r\n\r\n        <a hr" +
+                    "ef=\"Account/Manage/Disable2fa\" class=\"btn btn-primary\">Disable 2FA</a>\r\n        " +
+                    "<a href=\"Account/Manage/GenerateRecoveryCodes\" class=\"btn btn-primary\">Reset rec" +
+                    "overy codes</a>\r\n    }\r\n\r\n    <h4>Authenticator app</h4>\r\n    @if (!hasAuthentic" +
+                    "ator)\r\n    {\r\n        <a href=\"Account/Manage/EnableAuthenticator\" class=\"btn bt" +
+                    "n-primary\">Add authenticator app</a>\r\n    }\r\n    else\r\n    {\r\n        <a href=\"A" +
+                    "ccount/Manage/EnableAuthenticator\" class=\"btn btn-primary\">Set up authenticator " +
+                    "app</a>\r\n        <a href=\"Account/Manage/ResetAuthenticator\" class=\"btn btn-prim" +
+                    "ary\">Reset authenticator app</a>\r\n    }\r\n}\r\nelse\r\n{\r\n    <div class=\"alert alert" +
+                    "-danger\">\r\n        <strong>Privacy and cookie policy have not been accepted.</st" +
+                    "rong>\r\n        <p>You must accept the policy before you can enable two factor au" +
+                    "thentication.</p>\r\n    </div>\r\n}\r\n\r\n@code {\r\n    private bool canTrack;\r\n    pri" +
+                    "vate bool hasAuthenticator;\r\n    private int recoveryCodesLeft;\r\n    private boo" +
+                    "l is2faEnabled;\r\n    private bool isMachineRemembered;\r\n\r\n    [CascadingParamete" +
+                    "r]\r\n    private HttpContext HttpContext { get; set; } = default!;\r\n\r\n    protect" +
+                    "ed override async Task OnInitializedAsync()\r\n    {\r\n        var user = await Use" +
+                    "rManager.GetUserAsync(HttpContext.User);\r\n        if (user is null)\r\n        {\r\n" +
+                    "            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);\r\n  " +
+                    "          return;\r\n        }\r\n\r\n        canTrack = HttpContext.Features.Get<ITra" +
+                    "ckingConsentFeature>()?.CanTrack ?? true;\r\n        hasAuthenticator = await User" +
+                    "Manager.GetAuthenticatorKeyAsync(user) is not null;\r\n        is2faEnabled = awai" +
+                    "t UserManager.GetTwoFactorEnabledAsync(user);\r\n        isMachineRemembered = awa" +
+                    "it SignInManager.IsTwoFactorClientRememberedAsync(user);\r\n        recoveryCodesL" +
+                    "eft = await UserManager.CountRecoveryCodesAsync(user);\r\n    }\r\n\r\n    private asy" +
+                    "nc Task OnSubmitForgetBrowserAsync()\r\n    {\r\n        await SignInManager.ForgetT" +
+                    "woFactorClientAsync();\r\n\r\n        RedirectManager.RedirectToCurrentPageWithStatu" +
+                    "s(\r\n            \"The current browser has been forgotten. When you login again fr" +
+                    "om this browser you will be prompted for your 2fa code.\",\r\n            HttpConte" +
+                    "xt);\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

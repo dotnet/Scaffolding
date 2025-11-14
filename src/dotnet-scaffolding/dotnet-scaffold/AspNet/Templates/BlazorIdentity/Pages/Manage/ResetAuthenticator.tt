@@ -14,7 +14,6 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 
 @inject UserManager<<#= Model.UserClassName #>> UserManager
 @inject SignInManager<<#= Model.UserClassName #>> SignInManager
-@inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<ResetAuthenticator> Logger
 
@@ -45,7 +44,13 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 
     private async Task OnSubmitAsync()
     {
-        var user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        var user = await UserManager.GetUserAsync(HttpContext.User);
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            return;
+        }
+
         await UserManager.SetTwoFactorEnabledAsync(user, false);
         await UserManager.ResetAuthenticatorKeyAsync(user);
         var userId = await UserManager.GetUserIdAsync(user);

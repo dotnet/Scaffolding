@@ -16,10 +16,10 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 #>@using <#= Model.DbContextNamespace #>
 <#} #>
 
-@inject UserManager<<#= Model.UserClassName#>> UserManager
-@inject IEmailSender<<#= Model.UserClassName#>> EmailSender
-@inject IdentityUserAccessor UserAccessor
+@inject UserManager<<#= Model.UserClassName #>> UserManager
+@inject IEmailSender<<#= Model.UserClassName #>> EmailSender
 @inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Manage email</PageTitle>
 
@@ -64,7 +64,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 
 @code {
     private string? message;
-    private <#= Model.UserClassName#> user = default!;
+    private <#= Model.UserClassName #>? user;
     private string? email;
     private bool isEmailConfirmed;
 
@@ -72,11 +72,19 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm(FormName = "change-email")]
-    private InputModel Input { get; set; } = new();
+    private InputModel Input { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        Input ??= new();
+
+        user = await UserManager.GetUserAsync(HttpContext.User);
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            return;
+        }
+
         email = await UserManager.GetEmailAsync(user);
         isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);
 
@@ -88,6 +96,12 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
         if (Input.NewEmail is null || Input.NewEmail == email)
         {
             message = "Your email is unchanged.";
+            return;
+        }
+
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
             return;
         }
 
@@ -107,6 +121,12 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
     {
         if (email is null)
         {
+            return;
+        }
+
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
             return;
         }
 

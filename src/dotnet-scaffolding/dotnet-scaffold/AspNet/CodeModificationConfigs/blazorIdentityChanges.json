@@ -51,8 +51,12 @@
               "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
               "CheckBlock": "builder.Services.AddIdentityCore",
               "MultiLineBlock": [
-                "builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)",
-                "    .AddEntityFrameworkStores<$(DbContextName)>()",
+                "builder.Services.AddIdentityCore<ApplicationUser>(options =>",
+                "    {",
+                "        options.SignIn.RequireConfirmedAccount = true;",
+                "        options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;",
+                "    })",
+                "    .AddEntityFrameworkStores<ApplicationDbContext>()",
                 "    .AddSignInManager()",
                 "    .AddDefaultTokenProviders()"
               ],
@@ -124,11 +128,8 @@
           "CheckBlock": "<NotAuthorized>"
         },
         {
-          "ReplaceSnippet": [ "<Router AppAssembly=\"typeof(Program).Assembly\">" ],
-          "MultiLineBlock": [
-            "@using $(IdentityNamespace).Shared",
-            "<Router AppAssembly= \"typeof(Program).Assembly\">"
-          ],
+          "Block": "@using $(IdentityNamespace).Shared\n",
+          "Prepend": true,
           "CheckBlock": "$(IdentityNamespace).Shared"
         }
       ]
@@ -262,6 +263,21 @@
             "@using Microsoft.AspNetCore.Components.Authorization"
           ],
           "CheckBlock": "Microsoft.AspNetCore.Components.Authorization"
+        }
+      ]
+    },
+    {
+      "FileName": "Components\\App.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "    <script src=\"@Assets[\"_framework/blazor.web.js\"]\"></script>"
+          ],
+          "MultiLineBlock": [
+            "    <script src=\"@Assets[\"_framework/blazor.web.js\"]\"></script>",
+            "    <script src=\"@Assets[\"Components/Account/Shared/PasskeySubmit.razor.js\"]\" type=\"module\"></script>"
+          ],
+          "CheckBlock": "PasskeySubmit.razor.js"
         }
       ]
     }

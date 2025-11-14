@@ -7,49 +7,62 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Shared
 {
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Linq;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class IdentityUserAccessor : IdentityUserAccessorBase
+    public partial class PasskeySubmit : PasskeySubmitBase
     {
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
+            this.Write(@"@using Microsoft.AspNetCore.Antiforgery
+@inject IServiceProvider Services
 
-if (!string.IsNullOrEmpty(Model.DbContextNamespace))
-{
+<button type=""submit"" name=""__passkeySubmit"" @attributes=""AdditionalAttributes"">@ChildContent</button>
+<passkey-submit
+    operation=""@Operation""
+    name=""@Name""
+    email-name=""@EmailName""
+    request-token-name=""@tokens?.HeaderName""
+    request-token-value=""@tokens?.RequestToken"">
+</passkey-submit>
 
-            this.Write("using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
-            this.Write(";\r\n");
-} 
-            this.Write("using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
-            this.Write(";\r\nusing Microsoft.AspNetCore.Identity;\r\n\r\nnamespace ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write("\r\n{\r\n    internal sealed class IdentityUserAccessor(UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> userManager, IdentityRedirectManager redirectManager)\r\n    {\r\n        public as" +
-                    "ync Task<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@"> GetRequiredUserAsync(HttpContext context)
-        {
-            var user = await userManager.GetUserAsync(context.User);
+@code {
+    private AntiforgeryTokenSet? tokens;
 
-            if (user is null)
-            {
-                redirectManager.RedirectToWithStatus(""Account/InvalidUser"", $""Error: Unable to load user with ID '{userManager.GetUserId(context.User)}'."", context);
-            }
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
 
-            return user;
-        }
+    [Parameter]
+    [EditorRequired]
+    public PasskeyOperation Operation { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public string Name { get; set; } = default!;
+
+    [Parameter]
+    public string? EmailName { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        tokens = Services.GetService<IAntiforgery>()?.GetTokens(HttpContext);
     }
 }
 ");
@@ -137,7 +150,7 @@ if ((ModelValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class IdentityUserAccessorBase
+    public class PasskeySubmitBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

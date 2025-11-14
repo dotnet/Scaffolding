@@ -18,16 +18,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Pages.
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class Email : EmailBase
+    public partial class Passkeys : PasskeysBase
     {
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@page \"/Account/Manage/Email\"\r\n\r\n@using System.ComponentModel.DataAnnotations\r\n@u" +
-                    "sing System.Text\r\n@using System.Text.Encodings.Web\r\n@using Microsoft.AspNetCore." +
-                    "Identity\r\n@using Microsoft.AspNetCore.WebUtilities\r\n");
+            this.Write("@page \"/Account/Manage/Passkeys\"\r\n\r\n@using Microsoft.AspNetCore.Identity\r\n@using " +
+                    "System.ComponentModel.DataAnnotations\r\n@using System.Buffers.Text\r\n");
 
 if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
@@ -38,76 +37,85 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 } 
             this.Write("\r\n@inject UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> UserManager\r\n@inject IEmailSender<");
+            this.Write("> UserManager\r\n@inject SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> EmailSender\r\n@inject NavigationManager NavigationManager\r\n@inject IdentityRedir" +
-                    "ectManager RedirectManager\r\n\r\n<PageTitle>Manage email</PageTitle>\r\n\r\n<h3>Manage " +
-                    "email</h3>\r\n\r\n<StatusMessage Message=\"@message\"/>\r\n<div class=\"row\">\r\n    <div c" +
-                    "lass=\"col-xl-6\">\r\n        <form @onsubmit=\"OnSendEmailVerificationAsync\" @formna" +
-                    "me=\"send-verification\" id=\"send-verification-form\" method=\"post\">\r\n            <" +
-                    "AntiforgeryToken />\r\n        </form>\r\n        <EditForm Model=\"Input\" FormName=\"" +
-                    "change-email\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n            <Da" +
-                    "taAnnotationsValidator />\r\n            <ValidationSummary class=\"text-danger\" ro" +
-                    "le=\"alert\" />\r\n            @if (isEmailConfirmed)\r\n            {\r\n              " +
-                    "  <div class=\"form-floating mb-3 input-group\">\r\n                    <input type=" +
-                    "\"text\" value=\"@email\" id=\"email\" class=\"form-control\" placeholder=\"Enter your em" +
-                    "ail\" disabled />\r\n                    <div class=\"input-group-append\">\r\n        " +
-                    "                <span class=\"h-100 input-group-text text-success font-weight-bol" +
-                    "d\">?</span>\r\n                    </div>\r\n                    <label for=\"email\" " +
-                    "class=\"form-label\">Email</label>\r\n                </div>\r\n            }\r\n       " +
-                    "     else\r\n            {\r\n                <div class=\"form-floating mb-3\">\r\n    " +
-                    "                <input type=\"text\" value=\"@email\" id=\"email\" class=\"form-control" +
-                    "\" placeholder=\"Enter your email\" disabled />\r\n                    <label for=\"em" +
-                    "ail\" class=\"form-label\">Email</label>\r\n                    <button type=\"submit\"" +
-                    " class=\"btn btn-link\" form=\"send-verification-form\">Send verification email</but" +
-                    "ton>\r\n                </div>\r\n            }\r\n            <div class=\"form-floati" +
-                    "ng mb-3\">\r\n                <InputText @bind-Value=\"Input.NewEmail\" id=\"Input.New" +
-                    "Email\" class=\"form-control\" autocomplete=\"email\" aria-required=\"true\" placeholde" +
-                    "r=\"Enter a new email\" />\r\n                <label for=\"Input.NewEmail\" class=\"for" +
-                    "m-label\">New email</label>\r\n                <ValidationMessage For=\"() => Input." +
-                    "NewEmail\" class=\"text-danger\" />\r\n            </div>\r\n            <button type=\"" +
-                    "submit\" class=\"w-100 btn btn-lg btn-primary\">Change email</button>\r\n        </Ed" +
-                    "itForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private string? message;\r\n    privat" +
-                    "e ");
+            this.Write("> SignInManager\r\n@inject IdentityRedirectManager RedirectManager\r\n\r\n<PageTitle>Ma" +
+                    "nage your passkeys</PageTitle>\r\n\r\n<h3>Manage your passkeys</h3>\r\n\r\n<StatusMessag" +
+                    "e />\r\n\r\n@if (currentPasskeys is { Count: > 0 })\r\n{\r\n    <table class=\"table\">\r\n " +
+                    "       <tbody>\r\n            @foreach (var passkey in currentPasskeys)\r\n         " +
+                    "   {\r\n                <tr>\r\n                    <td>@(passkey.Name ?? \"Unnamed p" +
+                    "asskey\")</td>\r\n                    <td>\r\n                        @{\r\n           " +
+                    "                 var credentialId = Base64Url.EncodeToString(passkey.CredentialI" +
+                    "d);\r\n                        }\r\n                        <form @formname=\"@($\"upd" +
+                    "ate-passkey-{credentialId}\")\" @onsubmit=\"UpdatePasskey\" method=\"post\">\r\n        " +
+                    "                    <AntiforgeryToken />\r\n                            <div>\r\n   " +
+                    "                             <input type=\"hidden\" name=\"CredentialId\" value=\"@cr" +
+                    "edentialId\" />\r\n                                <button type=\"submit\" name=\"Acti" +
+                    "on\" value=\"rename\" class=\"btn btn-primary\" title=\"Rename this passkey\">Rename</b" +
+                    "utton>\r\n                                <button type=\"submit\" name=\"Action\" valu" +
+                    "e=\"delete\" class=\"btn btn-danger\" title=\"Remove this passkey from your account\">" +
+                    "Delete</button>\r\n                            </div>\r\n                        </f" +
+                    "orm>\r\n                    </td>\r\n                </tr>\r\n            }\r\n        <" +
+                    "/tbody>\r\n    </table>\r\n}\r\nelse\r\n{\r\n    <p>No passkeys are registered.</p>\r\n}\r\n\r\n" +
+                    "<form @formname=\"add-passkey\" @onsubmit=\"AddPasskey\" method=\"post\">\r\n    <Antifo" +
+                    "rgeryToken />\r\n    @if (currentPasskeys is { Count: >= MaxPasskeyCount })\r\n    {" +
+                    "\r\n        <p class=\"text-danger\">You have reached the maximum number of allowed " +
+                    "passkeys. Please delete one before adding a new one.</p>\r\n    }\r\n    else\r\n    {" +
+                    "\r\n        <PasskeySubmit Operation=\"PasskeyOperation.Create\" Name=\"Input\" class=" +
+                    "\"btn btn-primary\">Add a new passkey</PasskeySubmit>\r\n    }\r\n\r\n</form>\r\n\r\n@code {" +
+                    "\r\n    private const int MaxPasskeyCount = 100;\r\n\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("? user;\r\n    private string? email;\r\n    private bool isEmailConfirmed;\r\n\r\n    [C" +
-                    "ascadingParameter]\r\n    private HttpContext HttpContext { get; set; } = default!" +
-                    ";\r\n\r\n    [SupplyParameterFromForm(FormName = \"change-email\")]\r\n    private Input" +
-                    "Model Input { get; set; } = default!;\r\n\r\n    protected override async Task OnIni" +
-                    "tializedAsync()\r\n    {\r\n        Input ??= new();\r\n\r\n        user = await UserMan" +
-                    "ager.GetUserAsync(HttpContext.User);\r\n        if (user is null)\r\n        {\r\n    " +
-                    "        RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);\r\n      " +
-                    "      return;\r\n        }\r\n\r\n        email = await UserManager.GetEmailAsync(user" +
-                    ");\r\n        isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);\r\n\r" +
-                    "\n        Input.NewEmail ??= email;\r\n    }\r\n\r\n    private async Task OnValidSubmi" +
-                    "tAsync()\r\n    {\r\n        if (Input.NewEmail is null || Input.NewEmail == email)\r" +
-                    "\n        {\r\n            message = \"Your email is unchanged.\";\r\n            retur" +
-                    "n;\r\n        }\r\n\r\n        if (user is null)\r\n        {\r\n            RedirectManag" +
-                    "er.RedirectToInvalidUser(UserManager, HttpContext);\r\n            return;\r\n      " +
-                    "  }\r\n\r\n        var userId = await UserManager.GetUserIdAsync(user);\r\n        var" +
-                    " code = await UserManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);\r\n" +
-                    "        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n     " +
-                    "   var callbackUrl = NavigationManager.GetUriWithQueryParameters(\r\n            N" +
-                    "avigationManager.ToAbsoluteUri(\"Account/ConfirmEmailChange\").AbsoluteUri,\r\n     " +
-                    "       new Dictionary<string, object?> { [\"userId\"] = userId, [\"email\"] = Input." +
-                    "NewEmail, [\"code\"] = code });\r\n\r\n        await EmailSender.SendConfirmationLinkA" +
-                    "sync(user, Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n        " +
-                    "message = \"Confirmation link to change email sent. Please check your email.\";\r\n " +
-                    "   }\r\n\r\n    private async Task OnSendEmailVerificationAsync()\r\n    {\r\n        if" +
-                    " (email is null)\r\n        {\r\n            return;\r\n        }\r\n\r\n        if (user " +
-                    "is null)\r\n        {\r\n            RedirectManager.RedirectToInvalidUser(UserManag" +
-                    "er, HttpContext);\r\n            return;\r\n        }\r\n\r\n        var userId = await " +
-                    "UserManager.GetUserIdAsync(user);\r\n        var code = await UserManager.Generate" +
-                    "EmailConfirmationTokenAsync(user);\r\n        code = WebEncoders.Base64UrlEncode(E" +
-                    "ncoding.UTF8.GetBytes(code));\r\n        var callbackUrl = NavigationManager.GetUr" +
-                    "iWithQueryParameters(\r\n            NavigationManager.ToAbsoluteUri(\"Account/Conf" +
-                    "irmEmail\").AbsoluteUri,\r\n            new Dictionary<string, object?> { [\"userId\"" +
-                    "] = userId, [\"code\"] = code });\r\n\r\n        await EmailSender.SendConfirmationLin" +
-                    "kAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n        message" +
-                    " = \"Verification email sent. Please check your email.\";\r\n    }\r\n\r\n    private se" +
-                    "aled class InputModel\r\n    {\r\n        [Required]\r\n        [EmailAddress]\r\n      " +
-                    "  [Display(Name = \"New email\")]\r\n        public string? NewEmail { get; set; }\r\n" +
-                    "    }\r\n}\r\n");
+            this.Write("? user;\r\n    private IList<UserPasskeyInfo>? currentPasskeys;\r\n\r\n    [CascadingPa" +
+                    "rameter]\r\n    private HttpContext HttpContext { get; set; } = default!;\r\n\r\n    [" +
+                    "SupplyParameterFromForm]\r\n    private string? Action { get; set; }\r\n\r\n    [Suppl" +
+                    "yParameterFromForm]\r\n    private string? CredentialId { get; set; }\r\n\r\n    [Supp" +
+                    "lyParameterFromForm(FormName = \"add-passkey\")]\r\n    private PasskeyInputModel In" +
+                    "put { get; set; } = default!;\r\n\r\n    protected override async Task OnInitialized" +
+                    "Async()\r\n    {\r\n        Input ??= new();\r\n\r\n        user = await UserManager.Get" +
+                    "UserAsync(HttpContext.User);\r\n        if (user is null)\r\n        {\r\n            " +
+                    "RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);\r\n            re" +
+                    "turn;\r\n        }\r\n        currentPasskeys = await UserManager.GetPasskeysAsync(u" +
+                    "ser);\r\n    }\r\n\r\n    private async Task AddPasskey()\r\n    {\r\n        if (user is " +
+                    "null)\r\n        {\r\n            RedirectManager.RedirectToInvalidUser(UserManager," +
+                    " HttpContext);\r\n            return;\r\n        }\r\n\r\n        if (!string.IsNullOrEm" +
+                    "pty(Input.Error))\r\n        {\r\n            RedirectManager.RedirectToCurrentPageW" +
+                    "ithStatus($\"Error: {Input.Error}\", HttpContext);\r\n            return;\r\n        }" +
+                    "\r\n\r\n        if (string.IsNullOrEmpty(Input.CredentialJson))\r\n        {\r\n        " +
+                    "    RedirectManager.RedirectToCurrentPageWithStatus(\"Error: The browser did not " +
+                    "provide a passkey.\", HttpContext);\r\n            return;\r\n        }\r\n\r\n        if" +
+                    " (currentPasskeys!.Count >= MaxPasskeyCount)\r\n        {\r\n            RedirectMan" +
+                    "ager.RedirectToCurrentPageWithStatus($\"Error: You have reached the maximum numbe" +
+                    "r of allowed passkeys.\", HttpContext);\r\n            return;\r\n        }\r\n\r\n      " +
+                    "  var attestationResult = await SignInManager.PerformPasskeyAttestationAsync(Inp" +
+                    "ut.CredentialJson);\r\n        if (!attestationResult.Succeeded)\r\n        {\r\n     " +
+                    "       RedirectManager.RedirectToCurrentPageWithStatus($\"Error: Could not add th" +
+                    "e passkey: {attestationResult.Failure.Message}\", HttpContext);\r\n            retu" +
+                    "rn;\r\n        }\r\n\r\n        var addPasskeyResult = await UserManager.AddOrUpdatePa" +
+                    "sskeyAsync(user, attestationResult.Passkey);\r\n        if (!addPasskeyResult.Succ" +
+                    "eeded)\r\n        {\r\n            RedirectManager.RedirectToCurrentPageWithStatus(\"" +
+                    "Error: The passkey could not be added to your account.\", HttpContext);\r\n        " +
+                    "    return;\r\n        }\r\n\r\n        // Immediately prompt the user to enter a name" +
+                    " for the credential\r\n        var credentialIdBase64Url = Base64Url.EncodeToStrin" +
+                    "g(attestationResult.Passkey.CredentialId);\r\n        RedirectManager.RedirectTo($" +
+                    "\"Account/Manage/RenamePasskey/{credentialIdBase64Url}\");\r\n    }\r\n\r\n    private a" +
+                    "sync Task UpdatePasskey()\r\n    {\r\n        switch (Action)\r\n        {\r\n          " +
+                    "  case \"rename\":\r\n                RedirectManager.RedirectTo($\"Account/Manage/Re" +
+                    "namePasskey/{CredentialId}\");\r\n                break;\r\n            case \"delete\"" +
+                    ":\r\n                await DeletePasskey();\r\n                break;\r\n            d" +
+                    "efault:\r\n                RedirectManager.RedirectToCurrentPageWithStatus($\"Error" +
+                    ": Unknown action \'{Action}\'.\", HttpContext);\r\n                break;\r\n        }\r" +
+                    "\n    }\r\n\r\n    private async Task DeletePasskey()\r\n    {\r\n        if (user is nul" +
+                    "l)\r\n        {\r\n            RedirectManager.RedirectToInvalidUser(UserManager, Ht" +
+                    "tpContext);\r\n            return;\r\n        }\r\n\r\n        byte[] credentialId;\r\n   " +
+                    "     try\r\n        {\r\n            credentialId = Base64Url.DecodeFromChars(Creden" +
+                    "tialId);\r\n        }\r\n        catch (FormatException)\r\n        {\r\n            Red" +
+                    "irectManager.RedirectToCurrentPageWithStatus(\"Error: The specified passkey ID ha" +
+                    "d an invalid format.\", HttpContext);\r\n            return;\r\n        }\r\n\r\n        " +
+                    "var result = await UserManager.RemovePasskeyAsync(user, credentialId);\r\n        " +
+                    "if (!result.Succeeded)\r\n        {\r\n            RedirectManager.RedirectToCurrent" +
+                    "PageWithStatus(\"Error: The passkey could not be deleted.\", HttpContext);\r\n      " +
+                    "      return;\r\n        }\r\n\r\n        RedirectManager.RedirectToCurrentPageWithSta" +
+                    "tus(\"Passkey deleted successfully.\", HttpContext);\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -192,7 +200,7 @@ if ((ModelValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class EmailBase
+    public class PasskeysBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

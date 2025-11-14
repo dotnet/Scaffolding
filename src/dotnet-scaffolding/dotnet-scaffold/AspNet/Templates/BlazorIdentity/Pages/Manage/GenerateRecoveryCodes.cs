@@ -38,7 +38,6 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             this.Write("\r\n@inject UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> UserManager
-@inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<GenerateRecoveryCodes> Logger
 
@@ -76,7 +75,7 @@ else
     private string? message;
     private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@" user = default!;
+            this.Write(@"? user;
     private IEnumerable<string>? recoveryCodes;
 
     [CascadingParameter]
@@ -84,7 +83,12 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        user = await UserManager.GetUserAsync(HttpContext.User);
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            return;
+        }
 
         var isTwoFactorEnabled = await UserManager.GetTwoFactorEnabledAsync(user);
         if (!isTwoFactorEnabled)
@@ -95,6 +99,12 @@ else
 
     private async Task OnSubmitAsync()
     {
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            return;
+        }
+
         var userId = await UserManager.GetUserIdAsync(user);
         recoveryCodes = await UserManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
         message = ""You have generated new recovery codes."";

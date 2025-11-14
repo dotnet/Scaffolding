@@ -64,29 +64,30 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "tton type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Reset</button>\r\n        " +
                     "</EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private IEnumerable<IdentityErro" +
                     "r>? identityErrors;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Inp" +
-                    "ut { get; set; } = new();\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string?" +
-                    " Code { get; set; }\r\n\r\n    private string? Message => identityErrors is null ? n" +
-                    "ull : $\"Error: {string.Join(\", \", identityErrors.Select(error => error.Descripti" +
-                    "on))}\";\r\n\r\n    protected override void OnInitialized()\r\n    {\r\n        if (Code " +
-                    "is null)\r\n        {\r\n            RedirectManager.RedirectTo(\"Account/InvalidPass" +
-                    "wordReset\");\r\n        }\r\n\r\n        Input.Code = Encoding.UTF8.GetString(WebEncod" +
-                    "ers.Base64UrlDecode(Code));\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync(" +
-                    ")\r\n    {\r\n        var user = await UserManager.FindByEmailAsync(Input.Email);\r\n " +
-                    "       if (user is null)\r\n        {\r\n            // Don\'t reveal that the user d" +
-                    "oes not exist\r\n            RedirectManager.RedirectTo(\"Account/ResetPasswordConf" +
-                    "irmation\");\r\n        }\r\n\r\n        var result = await UserManager.ResetPasswordAs" +
-                    "ync(user, Input.Code, Input.Password);\r\n        if (result.Succeeded)\r\n        {" +
-                    "\r\n            RedirectManager.RedirectTo(\"Account/ResetPasswordConfirmation\");\r\n" +
-                    "        }\r\n\r\n        identityErrors = result.Errors;\r\n    }\r\n\r\n    private seale" +
-                    "d class InputModel\r\n    {\r\n        [Required]\r\n        [EmailAddress]\r\n        p" +
-                    "ublic string Email { get; set; } = \"\";\r\n\r\n        [Required]\r\n        [StringLen" +
-                    "gth(100, ErrorMessage = \"The {0} must be at least {2} and at max {1} characters " +
-                    "long.\", MinimumLength = 6)]\r\n        [DataType(DataType.Password)]\r\n        publ" +
-                    "ic string Password { get; set; } = \"\";\r\n\r\n        [DataType(DataType.Password)]\r" +
-                    "\n        [Display(Name = \"Confirm password\")]\r\n        [Compare(\"Password\", Erro" +
-                    "rMessage = \"The password and confirmation password do not match.\")]\r\n        pub" +
-                    "lic string ConfirmPassword { get; set; } = \"\";\r\n\r\n        [Required]\r\n        pu" +
-                    "blic string Code { get; set; } = \"\";\r\n    }\r\n}\r\n");
+                    "ut { get; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    private stri" +
+                    "ng? Code { get; set; }\r\n\r\n    private string? Message => identityErrors is null " +
+                    "? null : $\"Error: {string.Join(\", \", identityErrors.Select(error => error.Descri" +
+                    "ption))}\";\r\n\r\n    protected override void OnInitialized()\r\n    {\r\n        Input " +
+                    "??= new();\r\n\r\n        if (Code is null)\r\n        {\r\n            RedirectManager." +
+                    "RedirectTo(\"Account/InvalidPasswordReset\");\r\n            return;\r\n        }\r\n\r\n " +
+                    "       Input.Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));\r" +
+                    "\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n    {\r\n        var user =" +
+                    " await UserManager.FindByEmailAsync(Input.Email);\r\n        if (user is null)\r\n  " +
+                    "      {\r\n            // Don\'t reveal that the user does not exist\r\n            R" +
+                    "edirectManager.RedirectTo(\"Account/ResetPasswordConfirmation\");\r\n            ret" +
+                    "urn;\r\n        }\r\n\r\n        var result = await UserManager.ResetPasswordAsync(use" +
+                    "r, Input.Code, Input.Password);\r\n        if (result.Succeeded)\r\n        {\r\n     " +
+                    "       RedirectManager.RedirectTo(\"Account/ResetPasswordConfirmation\");\r\n       " +
+                    "     return;\r\n        }\r\n\r\n        identityErrors = result.Errors;\r\n    }\r\n\r\n   " +
+                    " private sealed class InputModel\r\n    {\r\n        [Required]\r\n        [EmailAddre" +
+                    "ss]\r\n        public string Email { get; set; } = \"\";\r\n\r\n        [Required]\r\n    " +
+                    "    [StringLength(100, ErrorMessage = \"The {0} must be at least {2} and at max {" +
+                    "1} characters long.\", MinimumLength = 6)]\r\n        [DataType(DataType.Password)]" +
+                    "\r\n        public string Password { get; set; } = \"\";\r\n\r\n        [DataType(DataTy" +
+                    "pe.Password)]\r\n        [Display(Name = \"Confirm password\")]\r\n        [Compare(\"P" +
+                    "assword\", ErrorMessage = \"The password and confirmation password do not match.\")" +
+                    "]\r\n        public string ConfirmPassword { get; set; } = \"\";\r\n\r\n        [Require" +
+                    "d]\r\n        public string Code { get; set; } = \"\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

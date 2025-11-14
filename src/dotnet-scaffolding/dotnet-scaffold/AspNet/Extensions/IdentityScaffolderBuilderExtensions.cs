@@ -28,7 +28,7 @@ internal static class IdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<string> packageList = [
+            List<string> packageNames = [
                 PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackageName,
                 PackageConstants.AspNetCorePackages.AspNetCoreIdentityUiPackageName,
                 PackageConstants.EfConstants.EfCoreToolsPackageName
@@ -42,10 +42,10 @@ internal static class IdentityScaffolderBuilderExtensions
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
                     PackageConstants.EfConstants.IdentityEfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? dbProviderPackageName))
                 {
-                    packageList.Add(dbProviderPackageName);
+                    packageNames.Add(dbProviderPackageName);
                 }
 
-                step.Packages = [.. packageList.Select(p => new Package(p))];
+                step.Packages = [.. packageNames.Select(p => new Package(p))];
             }
             else
             {

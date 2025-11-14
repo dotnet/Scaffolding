@@ -107,7 +107,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<string> packageList = [
+            List<string> packageNames = [
                 PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackageName,
                 PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackageName,
                 PackageConstants.EfConstants.EfCoreToolsPackageName
@@ -121,10 +121,10 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
                     PackageConstants.EfConstants.IdentityEfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
                 {
-                    packageList.Add(projectPackageName);
+                    packageNames.Add(projectPackageName);
                 }
 
-                step.Packages = packageList.Select(p => new Package(p)).ToList();
+                step.Packages = packageNames.Select(p => new Package(p)).ToList();
             }
             else
             {

@@ -271,11 +271,11 @@
       "Replacements": [
         {
           "ReplaceSnippet": [
-            "    <script src=\"@Assets[\"_framework/blazor.web.js\"]\"></script>"
+            "</body>"
           ],
           "MultiLineBlock": [
-            "    <script src=\"@Assets[\"_framework/blazor.web.js\"]\"></script>",
-            "    <script src=\"@Assets[\"Components/Account/Shared/PasskeySubmit.razor.js\"]\" type=\"module\"></script>"
+            "    <script src=\"@Assets[\"Components/Account/Shared/PasskeySubmit.razor.js\"]\" type=\"module\"></script>",
+            "</body>"
           ],
           "CheckBlock": "PasskeySubmit.razor.js"
         }

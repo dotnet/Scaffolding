@@ -155,9 +155,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("!.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write("))\r\n            {\r\n                NavigationManager.NotFound();\r\n   " +
-                    "         }\r\n            else\r\n            {\r\n                throw;\r\n           " +
-                    " }\r\n        }\r\n\r\n        NavigationManager.NavigateTo(\"/");
+            this.Write("))\r\n            {\r\n                NavigationManager.NotFound();\r\n            }\r\n" +
+                    "            else\r\n            {\r\n                throw;\r\n            }\r\n        " +
+                    "}\r\n\r\n        NavigationManager.NavigateTo(\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
             this.Write("\");\r\n    }\r\n\r\n    private bool ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));

@@ -4,6 +4,6 @@ using Microsoft.DotNet.Scaffolding.TextTemplating;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Pages;
 
-public partial class ExternalLogin : ITextTransformation  
+public partial class ExternalLogin : ITextTransformation
 {
 }

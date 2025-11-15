@@ -25,9 +25,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write(@"@page ""/Account/Manage/PersonalData""
-
-@inject IdentityUserAccessor UserAccessor
+            this.Write("@page \"/Account/Manage/PersonalData\"\r\n\r\n@using Microsoft.AspNetCore.Identity\r\n@us" +
+                    "ing ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
+            this.Write("\r\n\r\n@inject UserManager<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write(@"> UserManager
+@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Personal Data</PageTitle>
 
@@ -56,7 +60,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
 
     protected override async Task OnInitializedAsync()
     {
-        _ = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        var user  = await UserManager.GetUserAsync(HttpContext.User);
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+        }
     }
 }
 ");

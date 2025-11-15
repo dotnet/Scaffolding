@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Shared;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Pages.Manage;
 
-public partial class AccountLayout : ITextTransformation
+public partial class Passkeys : ITextTransformation
 {
 }

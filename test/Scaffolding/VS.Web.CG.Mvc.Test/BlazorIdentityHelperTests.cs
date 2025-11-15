@@ -29,6 +29,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                     new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\file.tt", "file" },
                     new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Pages\\file.tt", "Pages.file" },
                     new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Pages\\Manage\\file.tt", "Pages.Manage.file" },
+                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Pages\\Manage\\Passkeys.tt", "Pages.Manage.Passkeys" },
+                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Pages\\Manage\\RenamePasskey.tt", "Pages.Manage.RenamePasskey" },
+                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Shared\\PasskeySubmit.tt", "Shared.PasskeySubmit" },
+                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\PasskeyInputModel.tt", "PasskeyInputModel" },
+                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\PasskeyOperation.tt", "PasskeyOperation" },
                     new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Thing\\file.tt", "Thing.file" },
                     new object[] { "C:\\Some\\Path\\Templates\\Thing\\file.tt", "" },
                 };

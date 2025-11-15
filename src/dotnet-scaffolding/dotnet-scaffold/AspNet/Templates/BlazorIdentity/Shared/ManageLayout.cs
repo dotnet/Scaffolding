@@ -27,9 +27,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Shared
         {
             this.Write("@using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
+            this.Write("\r\n@inherits LayoutComponentBase\r\n@layout ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityLayoutNamespace));
             this.Write(@"
-@inherits LayoutComponentBase
-@layout AccountLayout
 
 <h1>Manage your account</h1>
 

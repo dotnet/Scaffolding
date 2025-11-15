@@ -48,54 +48,55 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "tionManager\r\n@inject IdentityRedirectManager RedirectManager\r\n\r\n<PageTitle>Regis" +
                     "ter</PageTitle>\r\n\r\n<h1>Register</h1>\r\n\r\n<div class=\"row\">\r\n    <div class=\"col-l" +
                     "g-6\">\r\n        <StatusMessage Message=\"@Message\" />\r\n        <EditForm Model=\"In" +
-                    "put\" asp-route-returnUrl=\"@ReturnUrl\" method=\"post\" OnValidSubmit=\"RegisterUser\"" +
-                    " FormName=\"register\">\r\n            <DataAnnotationsValidator />\r\n            <h2" +
-                    ">Create a new account.</h2>\r\n            <hr />\r\n            <ValidationSummary " +
-                    "class=\"text-danger\" role=\"alert\" />\r\n            <div class=\"form-floating mb-3\"" +
-                    ">\r\n                <InputText @bind-Value=\"Input.Email\" id=\"Input.Email\" class=\"" +
-                    "form-control\" autocomplete=\"username\" aria-required=\"true\" placeholder=\"name@exa" +
-                    "mple.com\" />\r\n                <label for=\"Input.Email\">Email</label>\r\n          " +
-                    "      <ValidationMessage For=\"() => Input.Email\" class=\"text-danger\" />\r\n       " +
-                    "     </div>\r\n            <div class=\"form-floating mb-3\">\r\n                <Inpu" +
-                    "tText type=\"password\" @bind-Value=\"Input.Password\" id=\"Input.Password\" class=\"fo" +
-                    "rm-control\" autocomplete=\"new-password\" aria-required=\"true\" placeholder=\"passwo" +
-                    "rd\" />\r\n                <label for=\"Input.Password\">Password</label>\r\n          " +
-                    "      <ValidationMessage For=\"() => Input.Password\" class=\"text-danger\" />\r\n    " +
-                    "        </div>\r\n            <div class=\"form-floating mb-3\">\r\n                <I" +
-                    "nputText type=\"password\" @bind-Value=\"Input.ConfirmPassword\" id=\"Input.ConfirmPa" +
-                    "ssword\" class=\"form-control\" autocomplete=\"new-password\" aria-required=\"true\" pl" +
-                    "aceholder=\"password\" />\r\n                <label for=\"Input.ConfirmPassword\">Conf" +
-                    "irm Password</label>\r\n                <ValidationMessage For=\"() => Input.Confir" +
-                    "mPassword\" class=\"text-danger\" />\r\n            </div>\r\n            <button type=" +
-                    "\"submit\" class=\"w-100 btn btn-lg btn-primary\">Register</button>\r\n        </EditF" +
-                    "orm>\r\n    </div>\r\n    <div class=\"col-lg-4 col-lg-offset-2\">\r\n        <section>\r" +
-                    "\n            <h3>Use another service to register.</h3>\r\n            <hr />\r\n    " +
-                    "        <ExternalLoginPicker />\r\n        </section>\r\n    </div>\r\n</div>\r\n\r\n@code" +
-                    " {\r\n    private IEnumerable<IdentityError>? identityErrors;\r\n\r\n    [SupplyParame" +
-                    "terFromForm]\r\n    private InputModel Input { get; set; } = new();\r\n\r\n    [Supply" +
-                    "ParameterFromQuery]\r\n    private string? ReturnUrl { get; set; }\r\n\r\n    private " +
-                    "string? Message => identityErrors is null ? null : $\"Error: {string.Join(\", \", i" +
-                    "dentityErrors.Select(error => error.Description))}\";\r\n\r\n    public async Task Re" +
-                    "gisterUser(EditContext editContext)\r\n    {\r\n        var user = CreateUser();\r\n\r\n" +
-                    "        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.No" +
-                    "ne);\r\n        var emailStore = GetEmailStore();\r\n        await emailStore.SetEma" +
-                    "ilAsync(user, Input.Email, CancellationToken.None);\r\n        var result = await " +
-                    "UserManager.CreateAsync(user, Input.Password);\r\n\r\n        if (!result.Succeeded)" +
-                    "\r\n        {\r\n            identityErrors = result.Errors;\r\n            return;\r\n " +
-                    "       }\r\n\r\n        Logger.LogInformation(\"User created a new account with passw" +
-                    "ord.\");\r\n\r\n        var userId = await UserManager.GetUserIdAsync(user);\r\n       " +
-                    " var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);\r\n      " +
-                    "  code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        var" +
-                    " callbackUrl = NavigationManager.GetUriWithQueryParameters(\r\n            Navigat" +
-                    "ionManager.ToAbsoluteUri(\"Account/ConfirmEmail\").AbsoluteUri,\r\n            new D" +
-                    "ictionary<string, object?> { [\"userId\"] = userId, [\"code\"] = code, [\"returnUrl\"]" +
-                    " = ReturnUrl });\r\n\r\n        await EmailSender.SendConfirmationLinkAsync(user, In" +
-                    "put.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n        if (UserManager." +
-                    "Options.SignIn.RequireConfirmedAccount)\r\n        {\r\n            RedirectManager." +
-                    "RedirectTo(\r\n                \"Account/RegisterConfirmation\",\r\n                ne" +
-                    "w() { [\"email\"] = Input.Email, [\"returnUrl\"] = ReturnUrl });\r\n        }\r\n\r\n     " +
-                    "   await SignInManager.SignInAsync(user, isPersistent: false);\r\n        Redirect" +
-                    "Manager.RedirectTo(ReturnUrl);\r\n    }\r\n\r\n    private ");
+                    "put\" method=\"post\" OnValidSubmit=\"RegisterUser\" FormName=\"register\">\r\n          " +
+                    "  <DataAnnotationsValidator />\r\n            <h2>Create a new account.</h2>\r\n    " +
+                    "        <hr />\r\n            <ValidationSummary class=\"text-danger\" role=\"alert\" " +
+                    "/>\r\n            <div class=\"form-floating mb-3\">\r\n                <InputText @bi" +
+                    "nd-Value=\"Input.Email\" id=\"Input.Email\" class=\"form-control\" autocomplete=\"usern" +
+                    "ame\" aria-required=\"true\" placeholder=\"name@example.com\" />\r\n                <la" +
+                    "bel for=\"Input.Email\">Email</label>\r\n                <ValidationMessage For=\"() " +
+                    "=> Input.Email\" class=\"text-danger\" />\r\n            </div>\r\n            <div cla" +
+                    "ss=\"form-floating mb-3\">\r\n                <InputText type=\"password\" @bind-Value" +
+                    "=\"Input.Password\" id=\"Input.Password\" class=\"form-control\" autocomplete=\"new-pas" +
+                    "sword\" aria-required=\"true\" placeholder=\"password\" />\r\n                <label fo" +
+                    "r=\"Input.Password\">Password</label>\r\n                <ValidationMessage For=\"() " +
+                    "=> Input.Password\" class=\"text-danger\" />\r\n            </div>\r\n            <div " +
+                    "class=\"form-floating mb-3\">\r\n                <InputText type=\"password\" @bind-Va" +
+                    "lue=\"Input.ConfirmPassword\" id=\"Input.ConfirmPassword\" class=\"form-control\" auto" +
+                    "complete=\"new-password\" aria-required=\"true\" placeholder=\"password\" />\r\n        " +
+                    "        <label for=\"Input.ConfirmPassword\">Confirm Password</label>\r\n           " +
+                    "     <ValidationMessage For=\"() => Input.ConfirmPassword\" class=\"text-danger\" />" +
+                    "\r\n            </div>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg " +
+                    "btn-primary\">Register</button>\r\n        </EditForm>\r\n    </div>\r\n    <div class=" +
+                    "\"col-lg-4 col-lg-offset-2\">\r\n        <section>\r\n            <h3>Use another serv" +
+                    "ice to register.</h3>\r\n            <hr />\r\n            <ExternalLoginPicker />\r\n" +
+                    "        </section>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private IEnumerable<Ident" +
+                    "ityError>? identityErrors;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputMo" +
+                    "del Input { get; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    priva" +
+                    "te string? ReturnUrl { get; set; }\r\n\r\n    private string? Message => identityErr" +
+                    "ors is null ? null : $\"Error: {string.Join(\", \", identityErrors.Select(error => " +
+                    "error.Description))}\";\r\n\r\n    protected override void OnInitialized()\r\n    {\r\n  " +
+                    "      Input ??= new();\r\n    }\r\n\r\n    public async Task RegisterUser(EditContext " +
+                    "editContext)\r\n    {\r\n        var user = CreateUser();\r\n\r\n        await UserStore" +
+                    ".SetUserNameAsync(user, Input.Email, CancellationToken.None);\r\n        var email" +
+                    "Store = GetEmailStore();\r\n        await emailStore.SetEmailAsync(user, Input.Ema" +
+                    "il, CancellationToken.None);\r\n        var result = await UserManager.CreateAsync" +
+                    "(user, Input.Password);\r\n\r\n        if (!result.Succeeded)\r\n        {\r\n          " +
+                    "  identityErrors = result.Errors;\r\n            return;\r\n        }\r\n\r\n        Log" +
+                    "ger.LogInformation(\"User created a new account with password.\");\r\n\r\n        var " +
+                    "userId = await UserManager.GetUserIdAsync(user);\r\n        var code = await UserM" +
+                    "anager.GenerateEmailConfirmationTokenAsync(user);\r\n        code = WebEncoders.Ba" +
+                    "se64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        var callbackUrl = Navigati" +
+                    "onManager.GetUriWithQueryParameters(\r\n            NavigationManager.ToAbsoluteUr" +
+                    "i(\"Account/ConfirmEmail\").AbsoluteUri,\r\n            new Dictionary<string, objec" +
+                    "t?> { [\"userId\"] = userId, [\"code\"] = code, [\"returnUrl\"] = ReturnUrl });\r\n\r\n   " +
+                    "     await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder." +
+                    "Default.Encode(callbackUrl));\r\n\r\n        if (UserManager.Options.SignIn.RequireC" +
+                    "onfirmedAccount)\r\n        {\r\n            RedirectManager.RedirectTo(\r\n          " +
+                    "      \"Account/RegisterConfirmation\",\r\n                new() { [\"email\"] = Input" +
+                    ".Email, [\"returnUrl\"] = ReturnUrl });\r\n        }\r\n        else\r\n        {\r\n     " +
+                    "       await SignInManager.SignInAsync(user, isPersistent: false);\r\n            " +
+                    "RedirectManager.RedirectTo(ReturnUrl);\r\n        }\r\n    }\r\n\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" CreateUser()\r\n    {\r\n        try\r\n        {\r\n            return Activator.Create" +
                     "Instance<");

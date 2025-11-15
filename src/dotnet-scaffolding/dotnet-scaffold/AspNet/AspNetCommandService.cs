@@ -291,6 +291,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithIdentityDbContextStep()
                 .WithAspNetConnectionStringStep()
                 .WithBlazorIdentityTextTemplatingStep()
+                .WithBlazorIdentityStaticFilesStep()
                 .WithBlazorIdentityCodeChangeStep();
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Identity.Name)

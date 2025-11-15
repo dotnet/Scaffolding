@@ -36,7 +36,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 } 
-            this.Write("@inject NavigationManager NavigationManager\r\n@inject SignInManager<");
+            this.Write("@inject SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> SignInManager
 
@@ -58,6 +58,9 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
     }
     <li class=""nav-item"">
         <NavLink class=""nav-link"" href=""Account/Manage/TwoFactorAuthentication"">Two-factor authentication</NavLink>
+    </li>
+    <li class=""nav-item"">
+        <NavLink class=""nav-link"" href=""Account/Manage/Passkeys"">Passkeys</NavLink>
     </li>
     <li class=""nav-item"">
         <NavLink class=""nav-link"" href=""Account/Manage/PersonalData"">Personal data</NavLink>
@@ -132,8 +135,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

@@ -5,7 +5,7 @@
 <#@  import namespace="System.Linq" #>
 @using <#= Model.UserClassNamespace #>
 @inherits LayoutComponentBase
-@layout AccountLayout
+@layout <#= Model.IdentityLayoutNamespace #>
 
 <h1>Manage your account</h1>
 

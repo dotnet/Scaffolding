@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Shared
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Pages.Manage
 {
     using System.Collections.Generic;
     using System.Text;
@@ -18,43 +18,78 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class AccountLayout : AccountLayoutBase
+    public partial class RenamePasskey : RenamePasskeyBase
     {
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@inherits LayoutComponentBase\r\n@layout ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorLayoutNamespace));
-            this.Write(@"
-@inject NavigationManager NavigationManager
+            this.Write("@page \"/Account/Manage/RenamePasskey/{Id}\"\r\n\r\n@using System.ComponentModel.DataAn" +
+                    "notations\r\n@using Microsoft.AspNetCore.Identity\r\n@using System.Buffers.Text\r\n");
 
-@if (HttpContext is null)
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
-    <p>Loading...</p>
-}
-else
-{
-    @Body
-}
+
+            this.Write("@using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
+            this.Write("\r\n");
+} 
+            this.Write("\r\n@inject UserManager<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write(@"> UserManager
+@inject IdentityRedirectManager RedirectManager
+
+<EditForm Model=""Input"" OnValidSubmit=""Rename"" FormName=""rename-passkey"" method=""post"">
+    <DataAnnotationsValidator />
+    @if (passkey?.Name is { } name)
+    {
+        <h4>Enter a new name for your ""@name"" passkey</h4>
+    }
+    else
+    {
+        <h4>Enter a name for your passkey</h4>
+    }
+    <hr />
+    <ValidationSummary class=""text-danger"" role=""alert"" />
+    <div class=""form-floating mb-3"">
+        <InputText @bind-Value=""Input.Name"" id=""Input.Name"" class=""form-control"" aria-required=""true"" placeholder=""My passkey"" />
+        <label for=""Input.Name"" class=""form-label"">Passkey name</label>
+        <ValidationMessage For=""() => Input.Name"" class=""text-danger"" />
+    </div>
+    <div>
+        <button type=""submit"" class=""w-100 btn btn-lg btn-primary"">Continue</button>
+    </div>
+</EditForm>
 
 @code {
-    [CascadingParameter]
-    private HttpContext? HttpContext { get; set; }
-
-    protected override void OnParametersSet()
-    {
-        if (HttpContext is null)
-        {
-            // If this code runs, we're currently rendering in interactive mode, so there is no HttpContext.
-            // The identity pages need to set cookies, so they require an HttpContext. To achieve this we
-            // must transition back from interactive mode to a server-rendered page.
-            NavigationManager.Refresh(forceReload: true);
-        }
-    }
-}
-");
+    private ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("? user;\r\n    private UserPasskeyInfo? passkey;\r\n\r\n    [CascadingParameter]\r\n    p" +
+                    "rivate HttpContext HttpContext { get; set; } = default!;\r\n\r\n    [Parameter]\r\n   " +
+                    " public string? Id { get; set; }\r\n\r\n    [SupplyParameterFromForm]\r\n    private I" +
+                    "nputModel Input { get; set; } = default!;\r\n\r\n    protected override async Task O" +
+                    "nInitializedAsync()\r\n    {\r\n        Input ??= new();\r\n\r\n        user = (await Us" +
+                    "erManager.GetUserAsync(HttpContext.User))!;\r\n        if (user is null)\r\n        " +
+                    "{\r\n            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);\r" +
+                    "\n            return;\r\n        }\r\n\r\n        byte[] credentialId;\r\n        try\r\n  " +
+                    "      {\r\n            credentialId = Base64Url.DecodeFromChars(Id);\r\n        }\r\n " +
+                    "       catch (FormatException)\r\n        {\r\n            RedirectManager.RedirectT" +
+                    "oWithStatus(\"Account/Manage/Passkeys\", \"Error: The specified passkey ID had an i" +
+                    "nvalid format.\", HttpContext);\r\n            return;\r\n        }\r\n\r\n        passke" +
+                    "y = await UserManager.GetPasskeyAsync(user, credentialId);\r\n        if (passkey " +
+                    "is null)\r\n        {\r\n            RedirectManager.RedirectToWithStatus(\"Account/M" +
+                    "anage/Passkeys\", \"Error: The specified passkey could not be found.\", HttpContext" +
+                    ");\r\n            return;\r\n        }\r\n    }\r\n\r\n    private async Task Rename()\r\n  " +
+                    "  {\r\n        passkey!.Name = Input.Name;\r\n        var result = await UserManager" +
+                    ".AddOrUpdatePasskeyAsync(user!, passkey);\r\n        if (!result.Succeeded)\r\n     " +
+                    "   {\r\n            RedirectManager.RedirectToWithStatus(\"Account/Manage/Passkeys\"" +
+                    ", \"Error: The passkey could not be updated.\", HttpContext);\r\n            return;" +
+                    "\r\n        }\r\n\r\n        RedirectManager.RedirectToWithStatus(\"Account/Manage/Pass" +
+                    "keys\", \"Passkey updated successfully.\", HttpContext);\r\n    }\r\n\r\n    private seal" +
+                    "ed class InputModel\r\n    {\r\n        [Required]\r\n        [StringLength(200, Error" +
+                    "Message = \"Passkey names must be no longer than {1} characters.\")]\r\n        publ" +
+                    "ic string Name { get; set; } = \"\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -73,12 +108,12 @@ else
             }
         }
 
-private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel _ModelField;
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel _ModelField;
 
 /// <summary>
 /// Access the Model parameter of the template.
 /// </summary>
-private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel Model
+private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel Model
 {
     get
     {
@@ -97,7 +132,7 @@ public virtual void Initialize()
 bool ModelValueAcquired = false;
 if (this.Session.ContainsKey("Model"))
 {
-    this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel)(this.Session["Model"]));
+    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel)(this.Session["Model"]));
     ModelValueAcquired = true;
 }
 if ((ModelValueAcquired == false))
@@ -105,27 +140,26 @@ if ((ModelValueAcquired == false))
     string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
     if ((string.IsNullOrEmpty(parameterValue) == false))
     {
-        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel));
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel));
         if (((tc != null) 
                     && tc.CanConvertFrom(typeof(string))))
         {
-            this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel)(tc.ConvertFrom(parameterValue)));
+            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel)(tc.ConvertFrom(parameterValue)));
             ModelValueAcquired = true;
         }
         else
         {
-            this.Error("The type \'Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIden" +
-                    "tityModel\' of the parameter \'Model\' did not match the type of the data passed to" +
-                    " the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }
 if ((ModelValueAcquired == false))
 {
-    object data = global::Microsoft.DotNet.Scaffolding.Shared.T4Templating.CallContext.LogicalGetData("Model");
+    object data = global::Microsoft.DotNet.Scaffolding.TextTemplating.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
-        this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel)(data));
+        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel)(data));
     }
 }
 
@@ -140,7 +174,7 @@ if ((ModelValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class AccountLayoutBase
+    public class RenamePasskeyBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

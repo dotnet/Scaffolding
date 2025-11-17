@@ -42,46 +42,46 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "\r\n            <input type=\"hidden\" name=\"RememberMe\" value=\"@RememberMe\" />\r\n   " +
                     "         <DataAnnotationsValidator />\r\n            <ValidationSummary class=\"tex" +
                     "t-danger\" role=\"alert\" />\r\n            <div class=\"form-floating mb-3\">\r\n       " +
-                    "         <InputText @bind-Value=\"Input.TwoFactorCode\" class=\"form-control\" autoc" +
-                    "omplete=\"off\" />\r\n                <label for=\"two-factor-code\" class=\"form-label" +
-                    "\">Authenticator code</label>\r\n                <ValidationMessage For=\"() => Inpu" +
-                    "t.TwoFactorCode\" class=\"text-danger\" />\r\n            </div>\r\n            <div cl" +
-                    "ass=\"checkbox mb-3\">\r\n                <label for=\"remember-machine\" class=\"form-" +
-                    "label\">\r\n                    <InputCheckbox @bind-Value=\"Input.RememberMachine\" " +
-                    "/>\r\n                    Remember this machine\r\n                </label>\r\n       " +
-                    "     </div>\r\n            <div>\r\n                <button type=\"submit\" class=\"w-1" +
-                    "00 btn btn-lg btn-primary\">Log in</button>\r\n            </div>\r\n        </EditFo" +
-                    "rm>\r\n    </div>\r\n</div>\r\n<p>\r\n    Don\'t have access to your authenticator device" +
-                    "? You can\r\n    <a href=\"Account/LoginWithRecoveryCode?ReturnUrl=@ReturnUrl\">log " +
-                    "in with a recovery code</a>.\r\n</p>\r\n\r\n@code {\r\n    private string? message;\r\n   " +
-                    " private ");
+                    "         <InputText @bind-Value=\"Input.TwoFactorCode\" id=\"Input.TwoFactorCode\" c" +
+                    "lass=\"form-control\" autocomplete=\"off\" />\r\n                <label for=\"Input.Two" +
+                    "FactorCode\" class=\"form-label\">Authenticator code</label>\r\n                <Vali" +
+                    "dationMessage For=\"() => Input.TwoFactorCode\" class=\"text-danger\" />\r\n          " +
+                    "  </div>\r\n            <div class=\"checkbox mb-3\">\r\n                <label for=\"r" +
+                    "emember-machine\" class=\"form-label\">\r\n                    <InputCheckbox @bind-V" +
+                    "alue=\"Input.RememberMachine\" />\r\n                    Remember this machine\r\n    " +
+                    "            </label>\r\n            </div>\r\n            <div>\r\n                <bu" +
+                    "tton type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Log in</button>\r\n       " +
+                    "     </div>\r\n        </EditForm>\r\n    </div>\r\n</div>\r\n<p>\r\n    Don\'t have access" +
+                    " to your authenticator device? You can\r\n    <a href=\"Account/LoginWithRecoveryCo" +
+                    "de?ReturnUrl=@ReturnUrl\">log in with a recovery code</a>.\r\n</p>\r\n\r\n@code {\r\n    " +
+                    "private string? message;\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user = default!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Input " +
-                    "{ get; set; } = new();\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? Re" +
-                    "turnUrl { get; set; }\r\n\r\n    [SupplyParameterFromQuery]\r\n    private bool Rememb" +
-                    "erMe { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r\n  " +
-                    "  {\r\n        // Ensure the user has gone through the username & password screen " +
-                    "first\r\n        user = await SignInManager.GetTwoFactorAuthenticationUserAsync() " +
-                    "??\r\n            throw new InvalidOperationException(\"Unable to load two-factor a" +
-                    "uthentication user.\");\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n  " +
-                    "  {\r\n        var authenticatorCode = Input.TwoFactorCode!.Replace(\" \", string.Em" +
-                    "pty).Replace(\"-\", string.Empty);\r\n        var result = await SignInManager.TwoFa" +
-                    "ctorAuthenticatorSignInAsync(authenticatorCode, RememberMe, Input.RememberMachin" +
-                    "e);\r\n        var userId = await UserManager.GetUserIdAsync(user);\r\n\r\n        if " +
-                    "(result.Succeeded)\r\n        {\r\n            Logger.LogInformation(\"User with ID \'" +
-                    "{UserId}\' logged in with 2fa.\", userId);\r\n            RedirectManager.RedirectTo" +
-                    "(ReturnUrl);\r\n        }\r\n        else if (result.IsLockedOut)\r\n        {\r\n      " +
-                    "      Logger.LogWarning(\"User with ID \'{UserId}\' account locked out.\", userId);\r" +
-                    "\n            RedirectManager.RedirectTo(\"Account/Lockout\");\r\n        }\r\n        " +
-                    "else\r\n        {\r\n            Logger.LogWarning(\"Invalid authenticator code enter" +
-                    "ed for user with ID \'{UserId}\'.\", userId);\r\n            message = \"Error: Invali" +
-                    "d authenticator code.\";\r\n        }\r\n    }\r\n\r\n    private sealed class InputModel" +
-                    "\r\n    {\r\n        [Required]\r\n        [StringLength(7, ErrorMessage = \"The {0} mu" +
-                    "st be at least {2} and at max {1} characters long.\", MinimumLength = 6)]\r\n      " +
-                    "  [DataType(DataType.Text)]\r\n        [Display(Name = \"Authenticator code\")]\r\n   " +
-                    "     public string? TwoFactorCode { get; set; }\r\n\r\n        [Display(Name = \"Reme" +
-                    "mber this machine\")]\r\n        public bool RememberMachine { get; set; }\r\n    }\r\n" +
-                    "}\r\n");
+                    "{ get; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string?" +
+                    " ReturnUrl { get; set; }\r\n\r\n    [SupplyParameterFromQuery]\r\n    private bool Rem" +
+                    "emberMe { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r" +
+                    "\n    {\r\n        Input ??= new();\r\n\r\n        // Ensure the user has gone through " +
+                    "the username & password screen first\r\n        user = await SignInManager.GetTwoF" +
+                    "actorAuthenticationUserAsync() ??\r\n            throw new InvalidOperationExcepti" +
+                    "on(\"Unable to load two-factor authentication user.\");\r\n    }\r\n\r\n    private asyn" +
+                    "c Task OnValidSubmitAsync()\r\n    {\r\n        var authenticatorCode = Input.TwoFac" +
+                    "torCode!.Replace(\" \", string.Empty).Replace(\"-\", string.Empty);\r\n        var res" +
+                    "ult = await SignInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, R" +
+                    "ememberMe, Input.RememberMachine);\r\n        var userId = await UserManager.GetUs" +
+                    "erIdAsync(user);\r\n\r\n        if (result.Succeeded)\r\n        {\r\n            Logger" +
+                    ".LogInformation(\"User with ID \'{UserId}\' logged in with 2fa.\", userId);\r\n       " +
+                    "     RedirectManager.RedirectTo(ReturnUrl);\r\n        }\r\n        else if (result." +
+                    "IsLockedOut)\r\n        {\r\n            Logger.LogWarning(\"User with ID \'{UserId}\' " +
+                    "account locked out.\", userId);\r\n            RedirectManager.RedirectTo(\"Account/" +
+                    "Lockout\");\r\n        }\r\n        else\r\n        {\r\n            Logger.LogWarning(\"I" +
+                    "nvalid authenticator code entered for user with ID \'{UserId}\'.\", userId);\r\n     " +
+                    "       message = \"Error: Invalid authenticator code.\";\r\n        }\r\n    }\r\n\r\n    " +
+                    "private sealed class InputModel\r\n    {\r\n        [Required]\r\n        [StringLengt" +
+                    "h(7, ErrorMessage = \"The {0} must be at least {2} and at max {1} characters long" +
+                    ".\", MinimumLength = 6)]\r\n        [DataType(DataType.Text)]\r\n        [Display(Nam" +
+                    "e = \"Authenticator code\")]\r\n        public string? TwoFactorCode { get; set; }\r\n" +
+                    "\r\n        [Display(Name = \"Remember this machine\")]\r\n        public bool Remembe" +
+                    "rMachine { get; set; }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

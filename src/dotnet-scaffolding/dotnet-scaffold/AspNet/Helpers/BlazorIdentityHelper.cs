@@ -35,7 +35,9 @@ internal static class BlazorIdentityHelper
 
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {
-                string extension = templateFullName.StartsWith("identity", StringComparison.OrdinalIgnoreCase) ? ".cs" : ".razor";
+                // Files in Pages and Shared folders are Razor components, others are C# files
+                string extension = templateFullName.StartsWith("Pages", StringComparison.OrdinalIgnoreCase) ||
+                                   templateFullName.StartsWith("Shared", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
                 string templateNameWithNamespace = $"{blazorIdentityModel.IdentityNamespace}.{templateFullName}";
                 string outputFileName = $"{StringUtil.ToPath(templateNameWithNamespace, blazorIdentityModel.BaseOutputPath, projectName)}{extension}";
                 textTemplatingProperties.Add(new()

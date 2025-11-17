@@ -39,7 +39,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> SignInManager\r\n@inject IdentityUserAccessor UserAccessor\r\n@inject IUserStore<");
+            this.Write("> SignInManager\r\n@inject IUserStore<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserStore\r\n@inject IdentityRedirectManager RedirectManager\r\n\r\n<PageTitle>Manage" +
                     " your external logins</PageTitle>\r\n\r\n<StatusMessage />\r\n@if (currentLogins?.Coun" +
@@ -70,7 +70,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "code {\r\n    public const string LinkLoginCallbackAction = \"LinkLoginCallback\";\r\n" +
                     "\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@" user = default!;
+            this.Write(@"? user;
     private IList<UserLoginInfo>? currentLogins;
     private IList<AuthenticationScheme>? otherLogins;
     private bool showRemoveButton;
@@ -89,7 +89,13 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 
     protected override async Task OnInitializedAsync()
     {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        user = await UserManager.GetUserAsync(HttpContext.User);
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            return;
+        }
+
         currentLogins = await UserManager.GetLoginsAsync(user);
         otherLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync())
             .Where(auth => currentLogins.All(ul => auth.Name != ul.LoginProvider))
@@ -103,25 +109,30 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     " showRemoveButton = passwordHash is not null || currentLogins.Count > 1;\r\n\r\n    " +
                     "    if (HttpMethods.IsGet(HttpContext.Request.Method) && Action == LinkLoginCall" +
                     "backAction)\r\n        {\r\n            await OnGetLinkLoginCallbackAsync();\r\n      " +
-                    "  }\r\n    }\r\n\r\n    private async Task OnSubmitAsync()\r\n    {\r\n        var result " +
-                    "= await UserManager.RemoveLoginAsync(user, LoginProvider!, ProviderKey!);\r\n     " +
-                    "   if (!result.Succeeded)\r\n        {\r\n            RedirectManager.RedirectToCurr" +
-                    "entPageWithStatus(\"Error: The external login was not removed.\", HttpContext);\r\n " +
-                    "       }\r\n\r\n        await SignInManager.RefreshSignInAsync(user);\r\n        Redir" +
-                    "ectManager.RedirectToCurrentPageWithStatus(\"The external login was removed.\", Ht" +
-                    "tpContext);\r\n    }\r\n\r\n    private async Task OnGetLinkLoginCallbackAsync()\r\n    " +
-                    "{\r\n        var userId = await UserManager.GetUserIdAsync(user);\r\n        var inf" +
-                    "o = await SignInManager.GetExternalLoginInfoAsync(userId);\r\n        if (info is " +
-                    "null)\r\n        {\r\n            RedirectManager.RedirectToCurrentPageWithStatus(\"E" +
-                    "rror: Could not load external login info.\", HttpContext);\r\n        }\r\n\r\n        " +
-                    "var result = await UserManager.AddLoginAsync(user, info);\r\n        if (!result.S" +
-                    "ucceeded)\r\n        {\r\n            RedirectManager.RedirectToCurrentPageWithStatu" +
-                    "s(\"Error: The external login was not added. External logins can only be associat" +
-                    "ed with one account.\", HttpContext);\r\n        }\r\n\r\n        // Clear the existing" +
-                    " external cookie to ensure a clean login process\r\n        await HttpContext.Sign" +
-                    "OutAsync(IdentityConstants.ExternalScheme);\r\n\r\n        RedirectManager.RedirectT" +
-                    "oCurrentPageWithStatus(\"The external login was added.\", HttpContext);\r\n    }\r\n}\r" +
-                    "\n");
+                    "  }\r\n    }\r\n\r\n    private async Task OnSubmitAsync()\r\n    {\r\n        if (user is" +
+                    " null)\r\n        {\r\n            RedirectManager.RedirectToInvalidUser(UserManager" +
+                    ", HttpContext);\r\n            return;\r\n        }\r\n\r\n        var result = await Us" +
+                    "erManager.RemoveLoginAsync(user, LoginProvider!, ProviderKey!);\r\n        if (!re" +
+                    "sult.Succeeded)\r\n        {\r\n            RedirectManager.RedirectToCurrentPageWit" +
+                    "hStatus(\"Error: The external login was not removed.\", HttpContext);\r\n        }\r\n" +
+                    "        else\r\n        {\r\n            await SignInManager.RefreshSignInAsync(user" +
+                    ");\r\n            RedirectManager.RedirectToCurrentPageWithStatus(\"The external lo" +
+                    "gin was removed.\", HttpContext);\r\n        }\r\n    }\r\n\r\n    private async Task OnG" +
+                    "etLinkLoginCallbackAsync()\r\n    {\r\n        if (user is null)\r\n        {\r\n       " +
+                    "     RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);\r\n         " +
+                    "   return;\r\n        }\r\n\r\n        var userId = await UserManager.GetUserIdAsync(u" +
+                    "ser);\r\n        var info = await SignInManager.GetExternalLoginInfoAsync(userId);" +
+                    "\r\n        if (info is null)\r\n        {\r\n            RedirectManager.RedirectToCu" +
+                    "rrentPageWithStatus(\"Error: Could not load external login info.\", HttpContext);\r" +
+                    "\n            return;\r\n        }\r\n\r\n        var result = await UserManager.AddLog" +
+                    "inAsync(user, info);\r\n        if (result.Succeeded)\r\n        {\r\n            // C" +
+                    "lear the existing external cookie to ensure a clean login process\r\n            a" +
+                    "wait HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);\r\n\r\n            " +
+                    "RedirectManager.RedirectToCurrentPageWithStatus(\"The external login was added.\"," +
+                    " HttpContext);\r\n        }\r\n        else\r\n        {\r\n            RedirectManager." +
+                    "RedirectToCurrentPageWithStatus(\"Error: The external login was not added. Extern" +
+                    "al logins can only be associated with one account.\", HttpContext);\r\n        }\r\n " +
+                    "   }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -181,8 +192,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }

@@ -89,6 +89,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
+        private IReadOnlyList<(string TemplateFolder, string FullPath)> _allBlazorIdentityStaticFiles;
+        private IReadOnlyList<(string TemplateFolder, string FullPath)> AllBlazorIdentityStaticFiles
+        {
+            get => _allBlazorIdentityStaticFiles ??= [.. BlazorIdentityHelper.GetBlazorIdentityStaticFiles(FileSystem, TemplateFolders)];
+        }
+
         private IList<Type> _blazorIdentityTemplateTypes;
         private IList<Type> BlazorIdentityTemplateTypes
         {
@@ -141,6 +147,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             var blazorTemplateModel = await ValidateAndBuild(model);
             ExecuteTemplates(blazorTemplateModel);
+            AddStaticFiles(blazorTemplateModel);
             AddReadmeFile(blazorTemplateModel.BaseOutputPath);
             await ModifyFilesAsync(blazorTemplateModel);
         }
@@ -463,8 +470,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 var templatedString = templateInvoker.InvokeTemplate(contextTemplate, dictParams);
                 if (!string.IsNullOrEmpty(templatedString))
                 {
-                    //currently only Identity...cs files are of CSharp type, rest are razor
-                    string extension = templateName.StartsWith("identity", StringComparison.OrdinalIgnoreCase) ? ".cs" : ".razor";
+                    // Files in Pages and Shared folders are Razor components, others are C# files
+                    string extension = templateName.StartsWith("Pages", StringComparison.OrdinalIgnoreCase) ||
+                                       templateName.StartsWith("Shared", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
                     string templateNameWithNamespace = $"{templateModel.BlazorIdentityNamespace}.{templateName}";
                     string templatePath = StringUtil.ToPath(templateNameWithNamespace, templateModel.BaseOutputPath, ProjectContext.RootNamespace);
                     string templatedFilePath = $"{templatePath}{extension}";
@@ -543,6 +551,31 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 templatedString = StringUtil.NormalizeLineEndings(templatedString);
                 FileSystem.WriteAllText(templatedFilePath, templatedString);
                 Logger.LogMessage($"Added IdentityDbContext class : {templatedFilePath}");
+            }
+        }
+
+        private void AddStaticFiles(BlazorIdentityModel templateModel)
+        {
+            var identityComponentsAccountPath = Path.Combine(templateModel.BaseOutputPath, "Components", "Account");
+            if (!FileSystem.DirectoryExists(identityComponentsAccountPath))
+            {
+                FileSystem.CreateDirectory(identityComponentsAccountPath);
+            }
+
+            foreach (var (templateFolder, sourceFilePath) in AllBlazorIdentityStaticFiles)
+            {
+                var relativeFilePath = Path.GetRelativePath(templateFolder, sourceFilePath);
+                var destinationFilePath = Path.Combine(identityComponentsAccountPath, relativeFilePath);
+
+                var folderName = Path.GetDirectoryName(destinationFilePath);
+                if (!FileSystem.DirectoryExists(folderName))
+                {
+                    FileSystem.CreateDirectory(folderName);
+                }
+
+                var fileContent = FileSystem.ReadAllText(sourceFilePath);
+                FileSystem.WriteAllText(destinationFilePath, fileContent);
+                Logger.LogMessage($"Added static file : {destinationFilePath}");
             }
         }
 

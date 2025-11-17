@@ -4,4 +4,4 @@
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
 @using <#= Model.BlazorIdentityNamespace #>.Shared
-@layout AccountLayout
+@attribute [ExcludeFromInteractiveRouting]

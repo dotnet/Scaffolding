@@ -32,29 +32,30 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> SignInManager\r\n@inject IdentityUserAccessor UserAccessor\r\n@inject IdentityRedir" +
-                    "ectManager RedirectManager\r\n@inject ILogger<ResetAuthenticator> Logger\r\n\r\n<PageT" +
-                    "itle>Reset authenticator key</PageTitle>\r\n\r\n<StatusMessage />\r\n<h3>Reset authent" +
-                    "icator key</h3>\r\n<div class=\"alert alert-warning\" role=\"alert\">\r\n    <p>\r\n      " +
-                    "  <span class=\"glyphicon glyphicon-warning-sign\"></span>\r\n        <strong>If you" +
-                    " reset your authenticator key your authenticator app will not work until you rec" +
-                    "onfigure it.</strong>\r\n    </p>\r\n    <p>\r\n        This process disables 2FA unti" +
-                    "l you verify your authenticator app.\r\n        If you do not complete your authen" +
-                    "ticator app configuration you may lose access to your account.\r\n    </p>\r\n</div>" +
-                    "\r\n<div>\r\n    <form @formname=\"reset-authenticator\" @onsubmit=\"OnSubmitAsync\" met" +
-                    "hod=\"post\">\r\n        <AntiforgeryToken />\r\n        <button class=\"btn btn-danger" +
-                    "\" type=\"submit\">Reset authenticator key</button>\r\n    </form>\r\n</div>\r\n\r\n@code {" +
-                    "\r\n    [CascadingParameter]\r\n    private HttpContext HttpContext { get; set; } = " +
-                    "default!;\r\n\r\n    private async Task OnSubmitAsync()\r\n    {\r\n        var user = a" +
-                    "wait UserAccessor.GetRequiredUserAsync(HttpContext);\r\n        await UserManager." +
-                    "SetTwoFactorEnabledAsync(user, false);\r\n        await UserManager.ResetAuthentic" +
-                    "atorKeyAsync(user);\r\n        var userId = await UserManager.GetUserIdAsync(user)" +
-                    ";\r\n        Logger.LogInformation(\"User with ID \'{UserId}\' has reset their authen" +
-                    "tication app key.\", userId);\r\n\r\n        await SignInManager.RefreshSignInAsync(u" +
-                    "ser);\r\n\r\n        RedirectManager.RedirectToWithStatus(\r\n            \"Account/Man" +
-                    "age/EnableAuthenticator\",\r\n            \"Your authenticator app key has been rese" +
-                    "t, you will need to configure your authenticator app using the new key.\",\r\n     " +
-                    "       HttpContext);\r\n    }\r\n}\r\n");
+            this.Write("> SignInManager\r\n@inject IdentityRedirectManager RedirectManager\r\n@inject ILogger" +
+                    "<ResetAuthenticator> Logger\r\n\r\n<PageTitle>Reset authenticator key</PageTitle>\r\n\r" +
+                    "\n<StatusMessage />\r\n<h3>Reset authenticator key</h3>\r\n<div class=\"alert alert-wa" +
+                    "rning\" role=\"alert\">\r\n    <p>\r\n        <span class=\"glyphicon glyphicon-warning-" +
+                    "sign\"></span>\r\n        <strong>If you reset your authenticator key your authenti" +
+                    "cator app will not work until you reconfigure it.</strong>\r\n    </p>\r\n    <p>\r\n " +
+                    "       This process disables 2FA until you verify your authenticator app.\r\n     " +
+                    "   If you do not complete your authenticator app configuration you may lose acce" +
+                    "ss to your account.\r\n    </p>\r\n</div>\r\n<div>\r\n    <form @formname=\"reset-authent" +
+                    "icator\" @onsubmit=\"OnSubmitAsync\" method=\"post\">\r\n        <AntiforgeryToken />\r\n" +
+                    "        <button class=\"btn btn-danger\" type=\"submit\">Reset authenticator key</bu" +
+                    "tton>\r\n    </form>\r\n</div>\r\n\r\n@code {\r\n    [CascadingParameter]\r\n    private Htt" +
+                    "pContext HttpContext { get; set; } = default!;\r\n\r\n    private async Task OnSubmi" +
+                    "tAsync()\r\n    {\r\n        var user = await UserManager.GetUserAsync(HttpContext.U" +
+                    "ser);\r\n        if (user is null)\r\n        {\r\n            RedirectManager.Redirec" +
+                    "tToInvalidUser(UserManager, HttpContext);\r\n            return;\r\n        }\r\n\r\n   " +
+                    "     await UserManager.SetTwoFactorEnabledAsync(user, false);\r\n        await Use" +
+                    "rManager.ResetAuthenticatorKeyAsync(user);\r\n        var userId = await UserManag" +
+                    "er.GetUserIdAsync(user);\r\n        Logger.LogInformation(\"User with ID \'{UserId}\'" +
+                    " has reset their authentication app key.\", userId);\r\n\r\n        await SignInManag" +
+                    "er.RefreshSignInAsync(user);\r\n\r\n        RedirectManager.RedirectToWithStatus(\r\n " +
+                    "           \"Account/Manage/EnableAuthenticator\",\r\n            \"Your authenticato" +
+                    "r app key has been reset, you will need to configure your authenticator app usin" +
+                    "g the new key.\",\r\n            HttpContext);\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

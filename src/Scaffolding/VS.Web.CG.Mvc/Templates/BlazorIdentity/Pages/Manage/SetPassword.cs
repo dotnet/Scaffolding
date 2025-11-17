@@ -32,49 +32,53 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> SignInManager\r\n@inject IdentityUserAccessor UserAccessor\r\n@inject IdentityRedir" +
-                    "ectManager RedirectManager\r\n\r\n<PageTitle>Set password</PageTitle>\r\n\r\n<h3>Set you" +
-                    "r password</h3>\r\n<StatusMessage Message=\"@message\" />\r\n<p class=\"text-info\">\r\n  " +
-                    "  You do not have a local username/password for this site. Add a local\r\n    acco" +
-                    "unt so you can log in without an external login.\r\n</p>\r\n<div class=\"row\">\r\n    <" +
-                    "div class=\"col-md-6\">\r\n        <EditForm Model=\"Input\" FormName=\"set-password\" O" +
-                    "nValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n            <DataAnnotationsVa" +
-                    "lidator />\r\n            <ValidationSummary class=\"text-danger\" role=\"alert\" />\r\n" +
-                    "            <div class=\"form-floating mb-3\">\r\n                <InputText type=\"p" +
-                    "assword\" @bind-Value=\"Input.NewPassword\" class=\"form-control\" autocomplete=\"new-" +
-                    "password\" placeholder=\"Please enter your new password.\" />\r\n                <lab" +
-                    "el for=\"new-password\" class=\"form-label\">New password</label>\r\n                <" +
-                    "ValidationMessage For=\"() => Input.NewPassword\" class=\"text-danger\" />\r\n        " +
-                    "    </div>\r\n            <div class=\"form-floating mb-3\">\r\n                <Input" +
-                    "Text type=\"password\" @bind-Value=\"Input.ConfirmPassword\" class=\"form-control\" au" +
-                    "tocomplete=\"new-password\" placeholder=\"Please confirm your new password.\" />\r\n  " +
-                    "              <label for=\"confirm-password\" class=\"form-label\">Confirm password<" +
-                    "/label>\r\n                <ValidationMessage For=\"() => Input.ConfirmPassword\" cl" +
-                    "ass=\"text-danger\" />\r\n            </div>\r\n            <button type=\"submit\" clas" +
-                    "s=\"w-100 btn btn-lg btn-primary\">Set password</button>\r\n        </EditForm>\r\n   " +
-                    "  </div>\r\n</div>\r\n\r\n@code {\r\n    private string? message;\r\n    private ");
+            this.Write("> SignInManager\r\n@inject IdentityRedirectManager RedirectManager\r\n\r\n<PageTitle>Se" +
+                    "t password</PageTitle>\r\n\r\n<h3>Set your password</h3>\r\n<StatusMessage Message=\"@m" +
+                    "essage\" />\r\n<p class=\"text-info\">\r\n    You do not have a local username/password" +
+                    " for this site. Add a local\r\n    account so you can log in without an external l" +
+                    "ogin.\r\n</p>\r\n<div class=\"row\">\r\n    <div class=\"col-xl-6\">\r\n        <EditForm Mo" +
+                    "del=\"Input\" FormName=\"set-password\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"p" +
+                    "ost\">\r\n            <DataAnnotationsValidator />\r\n            <ValidationSummary " +
+                    "class=\"text-danger\" role=\"alert\" />\r\n            <div class=\"form-floating mb-3\"" +
+                    ">\r\n                <InputText type=\"password\" @bind-Value=\"Input.NewPassword\" id" +
+                    "=\"Input.NewPassword\" class=\"form-control\" autocomplete=\"new-password\" placeholde" +
+                    "r=\"Enter the new password\" />\r\n                <label for=\"Input.NewPassword\" cl" +
+                    "ass=\"form-label\">New password</label>\r\n                <ValidationMessage For=\"(" +
+                    ") => Input.NewPassword\" class=\"text-danger\" />\r\n            </div>\r\n            " +
+                    "<div class=\"form-floating mb-3\">\r\n                <InputText type=\"password\" @bi" +
+                    "nd-Value=\"Input.ConfirmPassword\" id=\"Input.ConfirmPassword\" class=\"form-control\"" +
+                    " autocomplete=\"new-password\" placeholder=\"Enter the new password\" />\r\n          " +
+                    "      <label for=\"Input.ConfirmPassword\" class=\"form-label\">Confirm password</la" +
+                    "bel>\r\n                <ValidationMessage For=\"() => Input.ConfirmPassword\" class" +
+                    "=\"text-danger\" />\r\n            </div>\r\n            <button type=\"submit\" class=\"" +
+                    "w-100 btn btn-lg btn-primary\">Set password</button>\r\n        </EditForm>\r\n     <" +
+                    "/div>\r\n</div>\r\n\r\n@code {\r\n    private string? message;\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(" user = default!;\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpContex" +
-                    "t { get; set; } = default!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputM" +
-                    "odel Input { get; set; } = new();\r\n\r\n    protected override async Task OnInitial" +
-                    "izedAsync()\r\n    {\r\n        user = await UserAccessor.GetRequiredUserAsync(HttpC" +
-                    "ontext);\r\n\r\n        var hasPassword = await UserManager.HasPasswordAsync(user);\r" +
-                    "\n        if (hasPassword)\r\n        {\r\n            RedirectManager.RedirectTo(\"Ac" +
-                    "count/Manage/ChangePassword\");\r\n        }\r\n    }\r\n\r\n    private async Task OnVal" +
-                    "idSubmitAsync()\r\n    {\r\n        var addPasswordResult = await UserManager.AddPas" +
-                    "swordAsync(user, Input.NewPassword!);\r\n        if (!addPasswordResult.Succeeded)" +
-                    "\r\n        {\r\n            message = $\"Error: {string.Join(\",\", addPasswordResult." +
-                    "Errors.Select(error => error.Description))}\";\r\n            return;\r\n        }\r\n\r" +
-                    "\n        await SignInManager.RefreshSignInAsync(user);\r\n        RedirectManager." +
-                    "RedirectToCurrentPageWithStatus(\"Your password has been set.\", HttpContext);\r\n  " +
-                    "  }\r\n\r\n    private sealed class InputModel\r\n    {\r\n        [Required]\r\n        [" +
-                    "StringLength(100, ErrorMessage = \"The {0} must be at least {2} and at max {1} ch" +
-                    "aracters long.\", MinimumLength = 6)]\r\n        [DataType(DataType.Password)]\r\n   " +
-                    "     [Display(Name = \"New password\")]\r\n        public string? NewPassword { get;" +
-                    " set; }\r\n\r\n        [DataType(DataType.Password)]\r\n        [Display(Name = \"Confi" +
-                    "rm new password\")]\r\n        [Compare(\"NewPassword\", ErrorMessage = \"The new pass" +
-                    "word and confirmation password do not match.\")]\r\n        public string? ConfirmP" +
-                    "assword { get; set; }\r\n    }\r\n}\r\n");
+            this.Write("? user;\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpContext { get; s" +
+                    "et; } = default!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Input" +
+                    " { get; set; } = default!;\r\n\r\n    protected override async Task OnInitializedAsy" +
+                    "nc()\r\n    {\r\n        Input ??= new();\r\n\r\n        user = await UserManager.GetUse" +
+                    "rAsync(HttpContext.User);\r\n        if (user is null)\r\n        {\r\n            Red" +
+                    "irectManager.RedirectToInvalidUser(UserManager, HttpContext);\r\n            retur" +
+                    "n;\r\n        }\r\n\r\n        var hasPassword = await UserManager.HasPasswordAsync(us" +
+                    "er);\r\n        if (hasPassword)\r\n        {\r\n            RedirectManager.RedirectT" +
+                    "o(\"Account/Manage/ChangePassword\");\r\n        }\r\n    }\r\n\r\n    private async Task " +
+                    "OnValidSubmitAsync()\r\n    {\r\n        if (user is null)\r\n        {\r\n            R" +
+                    "edirectManager.RedirectToInvalidUser(UserManager, HttpContext);\r\n            ret" +
+                    "urn;\r\n        }\r\n\r\n        var addPasswordResult = await UserManager.AddPassword" +
+                    "Async(user, Input.NewPassword!);\r\n        if (!addPasswordResult.Succeeded)\r\n   " +
+                    "     {\r\n            message = $\"Error: {string.Join(\",\", addPasswordResult.Error" +
+                    "s.Select(error => error.Description))}\";\r\n            return;\r\n        }\r\n\r\n    " +
+                    "    await SignInManager.RefreshSignInAsync(user);\r\n        RedirectManager.Redir" +
+                    "ectToCurrentPageWithStatus(\"Your password has been set.\", HttpContext);\r\n    }\r\n" +
+                    "\r\n    private sealed class InputModel\r\n    {\r\n        [Required]\r\n        [Strin" +
+                    "gLength(100, ErrorMessage = \"The {0} must be at least {2} and at max {1} charact" +
+                    "ers long.\", MinimumLength = 6)]\r\n        [DataType(DataType.Password)]\r\n        " +
+                    "[Display(Name = \"New password\")]\r\n        public string? NewPassword { get; set;" +
+                    " }\r\n\r\n        [DataType(DataType.Password)]\r\n        [Display(Name = \"Confirm ne" +
+                    "w password\")]\r\n        [Compare(\"NewPassword\", ErrorMessage = \"The new password " +
+                    "and confirmation password do not match.\")]\r\n        public string? ConfirmPasswo" +
+                    "rd { get; set; }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

@@ -7,52 +7,28 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity
+namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
 {
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Linq;
     using System;
     
     /// <summary>
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class IdentityUserAccessor : IdentityUserAccessorBase
+    public partial class PasskeyInputModel : PasskeyInputModelBase
     {
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-
-if (!string.IsNullOrEmpty(Model.DbContextNamespace))
-{
-
-            this.Write("using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
-            this.Write(";\r\n");
-} 
-            this.Write("using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
-            this.Write(";\r\nusing Microsoft.AspNetCore.Identity;\r\n\r\nnamespace ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write("\r\n{\r\n    internal sealed class IdentityUserAccessor(UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> userManager, IdentityRedirectManager redirectManager)\r\n    {\r\n        public as" +
-                    "ync Task<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@"> GetRequiredUserAsync(HttpContext context)
-        {
-            var user = await userManager.GetUserAsync(context.User);
-
-            if (user is null)
-            {
-                redirectManager.RedirectToWithStatus(""Account/InvalidUser"", $""Error: Unable to load user with ID '{userManager.GetUserId(context.User)}'."", context);
-            }
-
-            return user;
-        }
-    }
-}
-");
+            this.Write("namespace ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorIdentityNamespace));
+            this.Write(";\r\n\r\npublic class PasskeyInputModel\r\n{\r\n    public string? CredentialJson { get; " +
+                    "set; }\r\n    public string? Error { get; set; }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -71,12 +47,12 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             }
         }
 
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel _ModelField;
+private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel _ModelField;
 
 /// <summary>
 /// Access the Model parameter of the template.
 /// </summary>
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel Model
+private global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel Model
 {
     get
     {
@@ -95,7 +71,7 @@ public virtual void Initialize()
 bool ModelValueAcquired = false;
 if (this.Session.ContainsKey("Model"))
 {
-    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel)(this.Session["Model"]));
+    this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel)(this.Session["Model"]));
     ModelValueAcquired = true;
 }
 if ((ModelValueAcquired == false))
@@ -103,26 +79,27 @@ if ((ModelValueAcquired == false))
     string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
     if ((string.IsNullOrEmpty(parameterValue) == false))
     {
-        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel));
+        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel));
         if (((tc != null) 
                     && tc.CanConvertFrom(typeof(string))))
         {
-            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel)(tc.ConvertFrom(parameterValue)));
+            this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel)(tc.ConvertFrom(parameterValue)));
             ModelValueAcquired = true;
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorIdentityModel\' of t" +
-                    "he parameter \'Model\' did not match the type of the data passed to the template.");
+            this.Error("The type \'Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIden" +
+                    "tityModel\' of the parameter \'Model\' did not match the type of the data passed to" +
+                    " the template.");
         }
     }
 }
 if ((ModelValueAcquired == false))
 {
-    object data = global::Microsoft.DotNet.Scaffolding.TextTemplating.CallContext.LogicalGetData("Model");
+    object data = global::Microsoft.DotNet.Scaffolding.Shared.T4Templating.CallContext.LogicalGetData("Model");
     if ((data != null))
     {
-        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel)(data));
+        this._ModelField = ((global::Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity.BlazorIdentityModel)(data));
     }
 }
 
@@ -137,7 +114,7 @@ if ((ModelValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class IdentityUserAccessorBase
+    public class PasskeyInputModelBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

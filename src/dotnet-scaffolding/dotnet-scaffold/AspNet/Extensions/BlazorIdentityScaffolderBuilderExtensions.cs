@@ -99,6 +99,33 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
     }
 
     /// <summary>
+    /// Adds a step to add static files required for Blazor Identity scaffolding.
+    /// </summary>
+    public static IScaffoldBuilder WithBlazorIdentityStaticFilesStep(this IScaffoldBuilder builder)
+    {
+        builder = builder.WithStep<AddFileStep>(config =>
+        {
+            var step = config.Step;
+            var context = config.Context;
+
+            if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) && commandSettingsObj is IdentitySettings commandSettings)
+            {
+                var projectDirectory = Path.GetDirectoryName(commandSettings.Project);
+                if (Directory.Exists(projectDirectory))
+                {
+                    step.BaseOutputDirectory = Path.Combine(projectDirectory, "Components", "Account", "Shared");
+                    step.FileName = "PasskeySubmit.razor.js";
+                    return;
+                }
+            }
+
+            step.SkipStep = true;
+        });
+
+        return builder;
+    }
+
+    /// <summary>
     /// Adds a step to add NuGet packages required for Blazor Identity scaffolding.
     /// </summary>
     public static IScaffoldBuilder WithBlazorIdentityAddPackagesStep(this IScaffoldBuilder builder)

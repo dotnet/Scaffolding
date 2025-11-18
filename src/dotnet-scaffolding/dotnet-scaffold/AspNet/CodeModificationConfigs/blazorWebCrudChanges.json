@@ -78,7 +78,7 @@
       "Replacements": [
         {
           "ReplaceSnippet": [ "<Router AppAssembly=\"@typeof(App).Assembly\">" ],
-          "Block": "<Router AppAssembly=\"@typeof(App).Assembly\" NotFoundPage=\"typeof(Pages.NotFound)\">",
+          "Block": "<Router AppAssembly=\"@typeof(App).Assembly\" NotFoundPage=\"typeof(Components.Pages.NotFound)\">",
           "CheckBlock": "NotFoundPage=\"typeof(Pages.NotFound)\""
         }
       ]

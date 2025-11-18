@@ -46,7 +46,7 @@ internal static class BlazorCrudScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            var packageList = new List<string>()
+            var packageNames = new List<string>()
             {
                 PackageConstants.AspNetCorePackages.QuickGridEfAdapterPackageName,
                 PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackageName,
@@ -61,10 +61,10 @@ internal static class BlazorCrudScaffolderBuilderExtensions
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
                     PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
                 {
-                    packageList.Add(projectPackageName);
+                    packageNames.Add(projectPackageName);
                 }
 
-                step.Packages = [.. packageList.Select(p => new Package(p))];
+                step.Packages = [.. packageNames.Select(p => new Package(p))];
             }
             else
             {

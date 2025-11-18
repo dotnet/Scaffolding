@@ -45,7 +45,7 @@ internal static class EfControllerScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<string> packageList = [PackageConstants.EfConstants.EfCoreToolsPackageName];
+            List<string> packageNames = [PackageConstants.EfConstants.EfCoreToolsPackageName];
             if (context.Properties.TryGetValue(nameof(EfControllerSettings), out var commandSettingsObj) &&
                 commandSettingsObj is EfControllerSettings commandSettings)
             {
@@ -54,10 +54,10 @@ internal static class EfControllerScaffolderBuilderExtensions
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
                     PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
                 {
-                    packageList.Add(projectPackageName);
+                    packageNames.Add(projectPackageName);
                 }
 
-                step.Packages = [.. packageList.Select(p => new Package(p))];
+                step.Packages = [.. packageNames.Select(p => new Package(p))];
             }
             else
             {

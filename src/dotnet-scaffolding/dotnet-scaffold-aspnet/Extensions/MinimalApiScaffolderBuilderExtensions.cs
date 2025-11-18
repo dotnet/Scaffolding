@@ -61,7 +61,7 @@ internal static class MinimalApiScaffolderBuilderExtensions
             var step = config.Step;
             var context = config.Context;
             //this scaffolder has a non-EF scenario, only add EF packages if DataContext is provided.
-            List<string> packageList = [];
+            List<string> packageNames = [];
             if (context.Properties.TryGetValue(nameof(MinimalApiSettings), out var commandSettingsObj) &&
                 commandSettingsObj is MinimalApiSettings commandSettings)
             {
@@ -71,16 +71,16 @@ internal static class MinimalApiScaffolderBuilderExtensions
                     !string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
                     PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
                 {
-                    packageList.Add(PackageConstants.EfConstants.EfCoreToolsPackageName);
-                    packageList.Add(projectPackageName);
+                    packageNames.Add(PackageConstants.EfConstants.EfCoreToolsPackageName);
+                    packageNames.Add(projectPackageName);
                 }
 
                 if (commandSettings.OpenApi)
                 {
-                    packageList.Add(PackageConstants.AspNetCorePackages.OpenApiPackageName);
+                    packageNames.Add(PackageConstants.AspNetCorePackages.OpenApiPackageName);
                 }
 
-                step.Packages = [.. packageList.Select(p => new Package(p))];
+                step.Packages = [.. packageNames.Select(p => new Package(p))];
             }
             else
             {

@@ -35,7 +35,8 @@ public class ScaffolderOption<T> : ScaffolderOption
             Description = Description,
             Type = Parameter.GetCliType<T>(),
             PickerType = PickerType,
-            CustomPickerValues = CustomPickerValues
+            CustomPickerValues = CustomPickerValues,
+            InteractivePromptMessage = InteractivePromptMessage
         };
     }
 

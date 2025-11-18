@@ -5,6 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.Command;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 
@@ -28,6 +29,7 @@ internal class AspNetOptions
     public ScaffolderOption<bool> Views { get; }
     public ScaffolderOption<bool> Overwrite { get; }
     public ScaffolderOption<string> Application { get; }
+    public ScaffolderOption<string> TargetFramework { get; }
 
     private readonly bool _areAzCliCommandsSuccessful;
     private readonly List<string> _usernames = [];
@@ -194,6 +196,15 @@ internal class AspNetOptions
             Required = true,
             PickerType = InteractivePickerType.ConditionalPicker,
             CustomPickerValues = AspnetStrings.Options.Application.Values
+        };
+
+        TargetFramework = new ScaffolderOption<string>
+        {
+            DisplayName = CliStrings.TargetFrameworkDisplayName,
+            CliOption = CliStrings.TargetFrameworkCliOption,
+            Description = CliStrings.TargetFrameworkDescription,
+            Required = false,
+            InteractivePromptMessage = CliStrings.TargetFrameworkInteractivePromptMessage
         };
 
         _areAzCliCommandsSuccessful = AzCliHelper.GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds, out string? azCliErrors);

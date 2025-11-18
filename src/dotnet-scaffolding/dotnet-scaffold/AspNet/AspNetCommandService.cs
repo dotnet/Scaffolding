@@ -10,6 +10,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.DotNet.Tools.Scaffold.Command;
+using Microsoft.DotNet.Tools.Scaffold.ScaffoldingSteps;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet
 {
@@ -57,6 +58,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDescription(AspnetStrings.Blazor.EmptyDescription)
                 .WithOption(options.Project)
                 .WithOption(options.FileName)
+                .WithOption(options.TargetFramework)
                 .WithStep<DotnetNewScaffolderStep>(config =>
                 {
                     var step = config.Step;
@@ -72,6 +74,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDescription(AspnetStrings.RazorView.EmptyDescription)
                 .WithOption(options.Project)
                 .WithOption(options.FileName)
+                .WithOption(options.TargetFramework)
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<DotnetNewScaffolderStep>(config =>
                 {
                     var step = config.Step;
@@ -87,6 +96,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDescription(AspnetStrings.RazorPage.EmptyDescription)
                 .WithOption(options.Project)
                 .WithOption(options.FileName)
+                .WithOption(options.TargetFramework)
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<DotnetNewScaffolderStep>(config =>
                 {
                     var step = config.Step;
@@ -101,7 +117,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Api.ApiControllerDisplayName)
                 .WithCategory(AspnetStrings.Catagories.API)
                 .WithDescription(AspnetStrings.Api.ApiControllerDescription)
-                .WithOptions([options.Project, options.FileName, options.Actions])
+                .WithOptions([options.Project, options.FileName, options.Actions, options.TargetFramework])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<EmptyControllerScaffolderStep>(config =>
                 {
                     var step = config.Step;
@@ -116,7 +138,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.MVC.DisplayName)
                 .WithCategory(AspnetStrings.Catagories.MVC)
                 .WithDescription(AspnetStrings.MVC.Description)
-                .WithOptions([options.Project, options.FileName, options.Actions])
+                .WithOptions([options.Project, options.FileName, options.Actions, options.TargetFramework])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<EmptyControllerScaffolderStep>(config =>
                 {
                     var step = config.Step;
@@ -131,7 +159,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Api.ApiControllerCrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.API)
                 .WithDescription(AspnetStrings.Api.ApiControllerCrudDescription)
-                .WithOptions([options.Project, options.ModelName, options.ControllerName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.ControllerName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.Prerelease, options.TargetFramework])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateEfControllerStep>(config =>
                 {
                     var step = config.Step;
@@ -154,7 +188,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.MVC.CrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.MVC)
                 .WithDescription(AspnetStrings.MVC.CrudDescription)
-                .WithOptions([options.Project, options.ModelName, options.ControllerName, options.Views, options.DataContextClassRequired, options.DatabaseProviderRequired, options.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.ControllerName, options.Views, options.DataContextClassRequired, options.DatabaseProviderRequired, options.Prerelease, options.TargetFramework])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateEfControllerStep>(config =>
                 {
                     var step = config.Step;
@@ -178,7 +224,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Blazor.CrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.Blazor)
                 .WithDescription(AspnetStrings.Blazor.CrudDescription)
-                .WithOptions([options.Project, options.ModelName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.PageType, options.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.PageType, options.Prerelease, options.TargetFramework])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateBlazorCrudStep>(config =>
                 {
                     var step = config.Step;
@@ -200,7 +252,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.RazorPage.CrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.RazorPages)
                 .WithDescription(AspnetStrings.RazorPage.CrudDescription)
-                .WithOptions([options.Project, options.ModelName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.PageType, options.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.PageType, options.Prerelease, options.TargetFramework])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateRazorPagesStep>(config =>
                 {
                     var step = config.Step;
@@ -222,7 +280,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.RazorView.ViewsDisplayName)
                 .WithCategory(AspnetStrings.Catagories.MVC)
                 .WithDescription(AspnetStrings.RazorView.ViewsDescription)
-                .WithOptions([options.Project, options.ModelName, options.PageType])
+                .WithOptions([options.Project, options.ModelName, options.PageType, options.TargetFramework])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateViewsStep>(config =>
                 {
                     var step = config.Step;
@@ -238,7 +302,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Api.MinimalApiDisplayName)
                 .WithCategory(AspnetStrings.Catagories.API)
                 .WithDescription(AspnetStrings.Api.MinimalApiDescription)
-                .WithOptions([options.Project, options.ModelName, options.EndpointsClass, options.OpenApi, options.DataContextClass, options.DatabaseProvider, options.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.EndpointsClass, options.OpenApi, options.DataContextClass, options.DatabaseProvider, options.Prerelease, options.TargetFramework])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateMinimalApiStep>(config =>
                 {
                     var step = config.Step;
@@ -261,7 +331,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Area.DisplayName)
                 .WithCategory(AspnetStrings.Catagories.MVC)
                 .WithDescription(AspnetStrings.Area.Description)
-                .WithOptions([options.Project, options.AreaName])
+                .WithOptions([options.Project, options.AreaName, options.TargetFramework])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<AreaScaffolderStep>(config =>
                 {
                     var step = config.Step;
@@ -275,7 +351,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithCategory(AspnetStrings.Catagories.Blazor)
                 .WithCategory(AspnetStrings.Catagories.Identity)
                 .WithDescription(AspnetStrings.Blazor.IdentityDescription)
-                .WithOptions([options.Project, options.DataContextClassRequired, options.IdentityDbProviderRequired, options.Overwrite, options.Prerelease])
+                .WithOptions([options.Project, options.DataContextClassRequired, options.IdentityDbProviderRequired, options.Overwrite, options.Prerelease, options.TargetFramework])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateIdentityStep>(config =>
                 {
                     var step = config.Step;
@@ -298,7 +380,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Identity.DisplayName)
                 .WithCategory(AspnetStrings.Catagories.Identity)
                 .WithDescription(AspnetStrings.Identity.Description)
-                .WithOptions([options.Project, options.DataContextClassRequired, options.IdentityDbProviderRequired, options.Overwrite, options.Prerelease])
+                .WithOptions([options.Project, options.DataContextClassRequired, options.IdentityDbProviderRequired, options.Overwrite, options.Prerelease, options.TargetFramework])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateIdentityStep>(config =>
                 {
                     var step = config.Step;
@@ -321,7 +409,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     .WithDisplayName(AspnetStrings.EntraId.DisplayName)
                     .WithCategory(AspnetStrings.Catagories.EntraId)
                     .WithDescription(AspnetStrings.EntraId.Description)
-                    .WithOptions([options.Username, options.Project, options.TenantId, options.Application, options.SelectApplication])
+                    .WithOptions([options.Username, options.Project, options.TenantId, options.Application, options.SelectApplication, options.TargetFramework])
+                    .WithStep<ValidateTargetFrameworkStep>(config =>
+                    {
+                        var step = config.Step;
+                        var context = config.Context;
+                        step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                    })
                     .WithStep<ValidateEntraIdStep>(config =>
                     {
                         var step = config.Step;

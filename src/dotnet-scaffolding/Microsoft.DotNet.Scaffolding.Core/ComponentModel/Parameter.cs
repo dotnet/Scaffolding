@@ -45,6 +45,11 @@ internal class Parameter
     public IEnumerable<string>? CustomPickerValues { get; set; }
 
     /// <summary>
+    /// Gets or sets the message displayed to the user during an interactive prompt.
+    /// </summary>
+    public string? InteractivePromptMessage { get; set; }
+
+    /// <summary>
     /// Mapping from <see cref="CliTypes"/> to corresponding .NET <see cref="Type"/>.
     /// </summary>
     private static readonly ReadOnlyDictionary<CliTypes, Type> s_baseTypeToTypeMapping = new(

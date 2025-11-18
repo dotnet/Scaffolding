@@ -8,6 +8,8 @@ using Microsoft.DotNet.Tools.Scaffold.Aspire.Command;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.Command;
+using Microsoft.DotNet.Tools.Scaffold.ScaffoldingSteps;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire;
 
@@ -22,7 +24,8 @@ internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandSe
             typeof(AddAspireCodeChangeStep),
             typeof(AddAspireConnectionStringStep),
             typeof(ValidateOptionsStep),
-            typeof(WrappedAddPackagesStep),
+            typeof(ValidateTargetFrameworkStep),
+            typeof(WrappedAddPackagesStep)
         ];
     }
 
@@ -37,12 +40,19 @@ internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandSe
               .WithOption(AspireOptions.AppHostProject)
               .WithOption(AspireOptions.Project)
               .WithOption(AspireOptions.Prerelease)
-               .WithStep<ValidateOptionsStep>(config =>
-               {
-                   config.Step.ValidateMethod = ValidationHelper.ValidateCachingSettings;
-               })
-               .WithCachingAddPackageSteps()
-               .WithCachingCodeModificationSteps();
+              .WithOption(AspireOptions.TargetFramework)
+              .WithStep<ValidateTargetFrameworkStep>(config =>
+              {
+                  var step = config.Step;
+                  var context = config.Context;
+                  step.TargetFramework = context.GetOptionResult(AspireOptions.TargetFramework);
+              })
+              .WithStep<ValidateOptionsStep>(config =>
+              {
+                config.Step.ValidateMethod = ValidationHelper.ValidateCachingSettings;
+              })
+              .WithCachingAddPackageSteps()
+              .WithCachingCodeModificationSteps();
 
         IScaffoldBuilder database = _builder.AddScaffolder(ScaffolderCatagory.Aspire, AspireCliStrings.Database.DatabaseTitle);
         database.WithCategory(AspireCliStrings.AspireCategory)
@@ -51,6 +61,13 @@ internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandSe
                 .WithOption(AspireOptions.AppHostProject)
                 .WithOption(AspireOptions.Project)
                 .WithOption(AspireOptions.Prerelease)
+                .WithOption(AspireOptions.TargetFramework)
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(AspireOptions.TargetFramework);
+                })
                 .WithStep<ValidateOptionsStep>(config =>
                 {
                     config.Step.ValidateMethod = ValidationHelper.ValidateDatabaseSettings;
@@ -67,6 +84,13 @@ internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandSe
                .WithOption(AspireOptions.AppHostProject)
                .WithOption(AspireOptions.Project)
                .WithOption(AspireOptions.Prerelease)
+               .WithOption(AspireOptions.TargetFramework)
+               .WithStep<ValidateTargetFrameworkStep>(config =>
+               {
+                   var step = config.Step;
+                   var context = config.Context;
+                   step.TargetFramework = context.GetOptionResult(AspireOptions.TargetFramework);
+               })
                .WithStep<ValidateOptionsStep>(config =>
                {
                    config.Step.ValidateMethod = ValidationHelper.ValidateStorageSettings;

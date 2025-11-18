@@ -26,8 +26,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         public virtual string TransformText()
         {
             this.Write("@page \"/Account/InvalidPasswordReset\"\r\n\r\n<PageTitle>Invalid password reset</PageT" +
-                    "itle>\r\n\r\n<h1>Invalid password reset</h1>\r\n<p>\r\n    The password reset link is in" +
-                    "valid.\r\n</p>\r\n");
+                    "itle>\r\n\r\n<h1>Invalid password reset</h1>\r\n<p role=\"alert\">\r\n    The password res" +
+                    "et link is invalid.\r\n</p>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

@@ -55,6 +55,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         if (UserId is null || Code is null)
         {
             RedirectManager.RedirectTo("""");
+            return;
         }
 
         var user = await UserManager.FindByIdAsync(UserId);

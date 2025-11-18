@@ -2,7 +2,7 @@
   <Import Project="..\Directory.Build.props" />
 
   <PropertyGroup>
-    <DeveloperBuildTestTfms>net9.0</DeveloperBuildTestTfms>
+    <DeveloperBuildTestTfms>net10.0</DeveloperBuildTestTfms>
     <StandardTestTfms>$(DeveloperBuildTestTfms)</StandardTestTfms>
     <RollForward>Major</RollForward>
   </PropertyGroup>
@@ -11,7 +11,6 @@
     <PackageReference Include="Moq" />
     <PackageReference Include="xunit.skippablefact" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
-    <PackageReference Include="System.Net.Http" />
     <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,23 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+@using <#= Model.UserClassNamespace #>
+@inherits LayoutComponentBase
+@layout <#= Model.IdentityLayoutNamespace #>
+
+<h1>Manage your account</h1>
+
+<div>
+    <h2>Change your account settings</h2>
+    <hr />
+    <div class="row">
+        <div class="col-lg-3">
+            <ManageNavMenu />
+        </div>
+        <div class="col-lg-9">
+            @Body
+        </div>
+    </div>
+</div>

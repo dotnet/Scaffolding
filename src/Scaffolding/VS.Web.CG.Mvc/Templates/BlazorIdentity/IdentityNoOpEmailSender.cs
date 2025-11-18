@@ -25,30 +25,30 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("using ");
+            this.Write("using Microsoft.AspNetCore.Identity;\r\nusing Microsoft.AspNetCore.Identity.UI.Serv" +
+                    "ices;\r\nusing ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
-            this.Write(";\r\nusing Microsoft.AspNetCore.Identity;\r\nusing Microsoft.AspNetCore.Identity.UI.S" +
-                    "ervices;\r\n\r\nnamespace ");
+            this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorIdentityNamespace));
-            this.Write("\r\n{\r\n    // Remove the \"else if (EmailSender is IdentityNoOpEmailSender)\" block f" +
-                    "rom RegisterConfirmation.razor after updating with a real implementation.\r\n    i" +
-                    "nternal sealed class IdentityNoOpEmailSender : IEmailSender<");
+            this.Write(";\r\n\r\n// Remove the \"else if (EmailSender is IdentityNoOpEmailSender)\" block from " +
+                    "RegisterConfirmation.razor after updating with a real implementation.\r\ninternal " +
+                    "sealed class IdentityNoOpEmailSender : IEmailSender<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(">\r\n    {\r\n        private readonly IEmailSender emailSender = new NoOpEmailSender" +
-                    "();\r\n\r\n        public Task SendConfirmationLinkAsync(");
+            this.Write(">\r\n{\r\n    private readonly IEmailSender emailSender = new NoOpEmailSender();\r\n\r\n " +
+                    "   public Task SendConfirmationLinkAsync(");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(" user, string email, string confirmationLink) =>\r\n            emailSender.SendEma" +
-                    "ilAsync(email, \"Confirm your email\", $\"Please confirm your account by <a href=\'{" +
-                    "confirmationLink}\'>clicking here</a>.\");\r\n\r\n        public Task SendPasswordRese" +
-                    "tLinkAsync(");
+            this.Write(" user, string email, string confirmationLink) =>\r\n        emailSender.SendEmailAs" +
+                    "ync(email, \"Confirm your email\", $\"Please confirm your account by <a href=\'{conf" +
+                    "irmationLink}\'>clicking here</a>.\");\r\n\r\n    public Task SendPasswordResetLinkAsy" +
+                    "nc(");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(" user, string email, string resetLink) =>\r\n            emailSender.SendEmailAsync" +
-                    "(email, \"Reset your password\", $\"Please reset your password by <a href=\'{resetLi" +
-                    "nk}\'>clicking here</a>.\");\r\n\r\n        public Task SendPasswordResetCodeAsync(");
+            this.Write(" user, string email, string resetLink) =>\r\n        emailSender.SendEmailAsync(ema" +
+                    "il, \"Reset your password\", $\"Please reset your password by <a href=\'{resetLink}\'" +
+                    ">clicking here</a>.\");\r\n\r\n    public Task SendPasswordResetCodeAsync(");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(" user, string email, string resetCode) =>\r\n            emailSender.SendEmailAsync" +
-                    "(email, \"Reset your password\", $\"Please reset your password using the following " +
-                    "code: {resetCode}\");\r\n    }\r\n}\r\n");
+            this.Write(" user, string email, string resetCode) =>\r\n        emailSender.SendEmailAsync(ema" +
+                    "il, \"Reset your password\", $\"Please reset your password using the following code" +
+                    ": {resetCode}\");\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

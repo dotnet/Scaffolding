@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Contains the CodeGenCommand that finds the appropriate code generator and invokes it from project dependencies.</Description>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>$(BuildTfm)</TargetFramework>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

@@ -51,8 +51,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
             <DataAnnotationsValidator />
             <ValidationSummary class=""text-danger"" role=""alert"" />
             <div class=""form-floating mb-3"">
-                <InputText @bind-Value=""Input.RecoveryCode"" class=""form-control"" autocomplete=""off"" placeholder=""RecoveryCode"" />
-                <label for=""recovery-code"" class=""form-label"">Recovery Code</label>
+                <InputText @bind-Value=""Input.RecoveryCode"" id=""Input.RecoveryCode"" class=""form-control"" autocomplete=""off"" placeholder=""RecoveryCode"" />
+                <label for=""Input.RecoveryCode"" class=""form-label"">Recovery Code</label>
                 <ValidationMessage For=""() => Input.RecoveryCode"" class=""text-danger"" />
             </div>
             <button type=""submit"" class=""w-100 btn btn-lg btn-primary"">Log in</button>
@@ -65,26 +65,26 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
     private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user = default!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Input " +
-                    "{ get; set; } = new();\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? Re" +
-                    "turnUrl { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r" +
-                    "\n    {\r\n        // Ensure the user has gone through the username & password scre" +
-                    "en first\r\n        user = await SignInManager.GetTwoFactorAuthenticationUserAsync" +
-                    "() ??\r\n            throw new InvalidOperationException(\"Unable to load two-facto" +
-                    "r authentication user.\");\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r" +
-                    "\n    {\r\n        var recoveryCode = Input.RecoveryCode.Replace(\" \", string.Empty)" +
-                    ";\r\n\r\n        var result = await SignInManager.TwoFactorRecoveryCodeSignInAsync(r" +
-                    "ecoveryCode);\r\n\r\n        var userId = await UserManager.GetUserIdAsync(user);\r\n\r" +
-                    "\n        if (result.Succeeded)\r\n        {\r\n            Logger.LogInformation(\"Us" +
-                    "er with ID \'{UserId}\' logged in with a recovery code.\", userId);\r\n            Re" +
-                    "directManager.RedirectTo(ReturnUrl);\r\n        }\r\n        else if (result.IsLocke" +
-                    "dOut)\r\n        {\r\n            Logger.LogWarning(\"User account locked out.\");\r\n  " +
-                    "          RedirectManager.RedirectTo(\"Account/Lockout\");\r\n        }\r\n        els" +
-                    "e\r\n        {\r\n            Logger.LogWarning(\"Invalid recovery code entered for u" +
-                    "ser with ID \'{UserId}\' \", userId);\r\n            message = \"Error: Invalid recove" +
-                    "ry code entered.\";\r\n        }\r\n    }\r\n\r\n    private sealed class InputModel\r\n   " +
-                    " {\r\n        [Required]\r\n        [DataType(DataType.Text)]\r\n        [Display(Name" +
-                    " = \"Recovery Code\")]\r\n        public string RecoveryCode { get; set; } = \"\";\r\n  " +
-                    "  }\r\n}\r\n");
+                    "{ get; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string?" +
+                    " ReturnUrl { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync" +
+                    "()\r\n    {\r\n        Input ??= new();\r\n\r\n        // Ensure the user has gone throu" +
+                    "gh the username & password screen first\r\n        user = await SignInManager.GetT" +
+                    "woFactorAuthenticationUserAsync() ??\r\n            throw new InvalidOperationExce" +
+                    "ption(\"Unable to load two-factor authentication user.\");\r\n    }\r\n\r\n    private a" +
+                    "sync Task OnValidSubmitAsync()\r\n    {\r\n        var recoveryCode = Input.Recovery" +
+                    "Code.Replace(\" \", string.Empty);\r\n\r\n        var result = await SignInManager.Two" +
+                    "FactorRecoveryCodeSignInAsync(recoveryCode);\r\n\r\n        var userId = await UserM" +
+                    "anager.GetUserIdAsync(user);\r\n\r\n        if (result.Succeeded)\r\n        {\r\n      " +
+                    "      Logger.LogInformation(\"User with ID \'{UserId}\' logged in with a recovery c" +
+                    "ode.\", userId);\r\n            RedirectManager.RedirectTo(ReturnUrl);\r\n        }\r\n" +
+                    "        else if (result.IsLockedOut)\r\n        {\r\n            Logger.LogWarning(\"" +
+                    "User account locked out.\");\r\n            RedirectManager.RedirectTo(\"Account/Loc" +
+                    "kout\");\r\n        }\r\n        else\r\n        {\r\n            Logger.LogWarning(\"Inva" +
+                    "lid recovery code entered for user with ID \'{UserId}\' \", userId);\r\n            m" +
+                    "essage = \"Error: Invalid recovery code entered.\";\r\n        }\r\n    }\r\n\r\n    priva" +
+                    "te sealed class InputModel\r\n    {\r\n        [Required]\r\n        [DataType(DataTyp" +
+                    "e.Text)]\r\n        [Display(Name = \"Recovery Code\")]\r\n        public string Recov" +
+                    "eryCode { get; set; } = \"\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

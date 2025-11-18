@@ -11,6 +11,7 @@
     <PackageVersion Include="Microsoft.Build.Locator" Version="$(MicrosoftBuildLocatorPackageVersion)" />
     <PackageVersion Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageVersion Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
+    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildTasksCorePackageVersion)" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Razor.Language" Version="$(MicrosoftAspNetCoreRazorLanguagePackageVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisVersion)" />
@@ -33,7 +34,6 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
     <PackageVersion Include="Microsoft.Extensions.FileProviders.Embedded" Version="$(MicrosoftExtensionsFileProvidersEmbeddedPackageVersion)" />
     <PackageVersion Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.Identity.Stores" Version="$(MicrosoftExtensionsIdentityStoresPackageVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsolePackageVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="$(MicrosoftExtensionsLoggingDebugPackageVersion)" />
     <PackageVersion Include="Microsoft.Graph" Version="$(MicrosoftGraphVersion)" />
@@ -47,9 +47,7 @@
     <PackageVersion Include="Spectre.Console" Version="$(SpectreConsoleVersion)" />
     <PackageVersion Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />
     <PackageVersion Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
-    <PackageVersion Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataVersion)" />
-    <PackageVersion Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
     <PackageVersion Include="xunit.skippablefact" Version="$(XunitSkippableFactPackageVersion)" />
   </ItemGroup>
 

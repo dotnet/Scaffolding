@@ -1,1 +1,0 @@
-ASP.NET scaffolders for dotnet-scaffold

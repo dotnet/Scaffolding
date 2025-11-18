@@ -1,0 +1,9 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
+namespace <#= Model.IdentityNamespace #>;
+
+public class PasskeyInputModel
+{
+    public string? CredentialJson { get; set; }
+    public string? Error { get; set; }
+}

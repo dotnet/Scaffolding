@@ -6,7 +6,7 @@
 
   <Import Project="Shared.props" />
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>$(BuildTfm)</TargetFramework>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
     <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -22,7 +22,7 @@
                       $(OutputPath)$(AssemblyName).xml;"
              Condition=" '$(DotNetBuildFromSource)' != 'true' ">
       <Pack>true</Pack>
-      <PackagePath>lib\net9.0\</PackagePath>
+      <PackagePath>lib\$(BuildTfm)\</PackagePath>
     </Content>
     <None Include="$(RepoRoot)src\Scaffolding\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>

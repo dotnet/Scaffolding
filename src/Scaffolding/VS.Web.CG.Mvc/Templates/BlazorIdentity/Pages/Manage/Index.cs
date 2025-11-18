@@ -33,7 +33,6 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
             this.Write("> UserManager\r\n@inject SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> SignInManager
-@inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Profile</PageTitle>
@@ -42,17 +41,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
 <StatusMessage />
 
 <div class=""row"">
-    <div class=""col-md-6"">
+    <div class=""col-xl-6"">
         <EditForm Model=""Input"" FormName=""profile"" OnValidSubmit=""OnValidSubmitAsync"" method=""post"">
             <DataAnnotationsValidator />
             <ValidationSummary class=""text-danger"" role=""alert"" />
             <div class=""form-floating mb-3"">
-                <input type=""text"" value=""@username"" class=""form-control"" placeholder=""Please choose your username."" disabled />
+                <input type=""text"" value=""@username"" id=""username"" class=""form-control"" placeholder=""Choose your username."" disabled />
                 <label for=""username"" class=""form-label"">Username</label>
             </div>
             <div class=""form-floating mb-3"">
-                <InputText @bind-Value=""Input.PhoneNumber"" class=""form-control"" placeholder=""Please enter your phone number."" />
-                <label for=""phone-number"" class=""form-label"">Phone number</label>
+                <InputText @bind-Value=""Input.PhoneNumber"" id=""Input.PhoneNumber"" class=""form-control"" placeholder=""Enter your phone number"" />
+                <label for=""Input.PhoneNumber"" class=""form-label"">Phone number</label>
                 <ValidationMessage For=""() => Input.PhoneNumber"" class=""text-danger"" />
             </div>
             <button type=""submit"" class=""w-100 btn btn-lg btn-primary"">Save</button>
@@ -63,48 +62,27 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
 @code {
     private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@" user = default!;
-    private string? username;
-    private string? phoneNumber;
-
-    [CascadingParameter]
-    private HttpContext HttpContext { get; set; } = default!;
-
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        username = await UserManager.GetUserNameAsync(user);
-        phoneNumber = await UserManager.GetPhoneNumberAsync(user);
-
-        Input.PhoneNumber ??= phoneNumber;
-    }
-
-    private async Task OnValidSubmitAsync()
-    {
-        if (Input.PhoneNumber != phoneNumber)
-        {
-            var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-            if (!setPhoneResult.Succeeded)
-            {
-                RedirectManager.RedirectToCurrentPageWithStatus(""Error: Failed to set phone number."", HttpContext);
-            }
-        }
-
-        await SignInManager.RefreshSignInAsync(user);
-        RedirectManager.RedirectToCurrentPageWithStatus(""Your profile has been updated"", HttpContext);
-    }
-
-    private sealed class InputModel
-    {
-        [Phone]
-        [Display(Name = ""Phone number"")]
-        public string? PhoneNumber { get; set; }
-    }
-}
-");
+            this.Write("? user;\r\n    private string? username;\r\n    private string? phoneNumber;\r\n\r\n    [" +
+                    "CascadingParameter]\r\n    private HttpContext HttpContext { get; set; } = default" +
+                    "!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Input { get; set; } " +
+                    "= default!;\r\n\r\n    protected override async Task OnInitializedAsync()\r\n    {\r\n  " +
+                    "      Input ??= new();\r\n\r\n        user = await UserManager.GetUserAsync(HttpCont" +
+                    "ext.User);\r\n        if (user is null)\r\n        {\r\n            RedirectManager.Re" +
+                    "directToInvalidUser(UserManager, HttpContext);\r\n            return;\r\n        }\r\n" +
+                    "\r\n        username = await UserManager.GetUserNameAsync(user);\r\n        phoneNum" +
+                    "ber = await UserManager.GetPhoneNumberAsync(user);\r\n\r\n        Input.PhoneNumber " +
+                    "??= phoneNumber;\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n    {\r\n " +
+                    "       if (user is null)\r\n        {\r\n            RedirectManager.RedirectToInval" +
+                    "idUser(UserManager, HttpContext);\r\n            return;\r\n        }\r\n\r\n        if " +
+                    "(Input.PhoneNumber != phoneNumber)\r\n        {\r\n            var setPhoneResult = " +
+                    "await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);\r\n            if " +
+                    "(!setPhoneResult.Succeeded)\r\n            {\r\n                RedirectManager.Redi" +
+                    "rectToCurrentPageWithStatus(\"Error: Failed to set phone number.\", HttpContext);\r" +
+                    "\n                return;\r\n            }\r\n        }\r\n\r\n        await SignInManage" +
+                    "r.RefreshSignInAsync(user);\r\n        RedirectManager.RedirectToCurrentPageWithSt" +
+                    "atus(\"Your profile has been updated\", HttpContext);\r\n    }\r\n\r\n    private sealed" +
+                    " class InputModel\r\n    {\r\n        [Phone]\r\n        [Display(Name = \"Phone number" +
+                    "\")]\r\n        public string? PhoneNumber { get; set; }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

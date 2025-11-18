@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>MSBuild task (EvaluateProjectInfoForCodeGeneration) used by Microsoft.VisualStudio.Web.CodeGeneration.Tools</Description>
-    <TargetFrameworks>net9.0</TargetFrameworks>
+    <TargetFrameworks>$(BuildTfm)</TargetFrameworks>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Msbuild</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Msbuild</RootNamespace>
     <IsPackable>false</IsPackable>

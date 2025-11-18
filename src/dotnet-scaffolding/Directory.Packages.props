@@ -10,6 +10,8 @@
     <PackageVersion Include="Microsoft.ApplicationInsights.WorkerService" Version="$(MicrosoftApplicationInsightsWorkerServicePackageVersion)" />
     <PackageVersion Include="Microsoft.Build.Locator" Version="$(MicrosoftBuildLocatorPackageVersion)" />
     <PackageVersion Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
+    <!-- pinning this directly here, as this version needs to be different -->
+    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="17.11.31" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysisPreviewVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisPreviewVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(MicrosoftCodeAnalysisPreviewVersion)" />
@@ -31,9 +33,9 @@
     <PackageVersion Include="System.CommandLine.NamingConventionBinder" Version="$(SystemCommandLinePackageVersion)" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- Pins for Component Governance Alerts -->
+  <!-- <ItemGroup>
+     Pins for Component Governance Alerts 
     <PackageVersion Include="System.Formats.Asn1" Version="9.0.0" />
     <PackageVersion Include="System.Text.Json" Version="9.0.0" />
-  </ItemGroup>
+  </ItemGroup> -->
 </Project>

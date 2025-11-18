@@ -6,6 +6,7 @@ namespace Microsoft.DotNet.Scaffolding.TextTemplating;
 
 /// <summary>
 ///     This is currently an internal API that supports scaffolding. Use with caution.
+///     Represents a text transformation for T4 templates.
 /// </summary>
 internal interface ITextTransformation
 {
@@ -19,7 +20,14 @@ internal interface ITextTransformation
     /// </summary>
     CompilerErrorCollection Errors { get; }
 
+    /// <summary>
+    /// Initializes the text transformation.
+    /// </summary>
     void Initialize();
 
+    /// <summary>
+    /// Performs the text transformation and returns the generated text.
+    /// </summary>
+    /// <returns>The generated text output.</returns>
     string TransformText();
 }

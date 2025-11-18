@@ -42,7 +42,7 @@ public class MSBuildProjectServiceHelperTests
     {
         // Arrange
         var csprojContent = @"
-                <Project Sdk=""Microsoft.NET.Sdk"">
+                <Project>
                     <PropertyGroup>
                         <TargetFramework>net9.0</TargetFramework>
                     </PropertyGroup>
@@ -67,7 +67,7 @@ public class MSBuildProjectServiceHelperTests
     {
         // Arrange
         var csprojContent = @"
-                <Project Sdk=""Microsoft.NET.Sdk"">
+                <Project>
                     <PropertyGroup>
                         <TargetFramework>net9.0</TargetFramework>
                     </PropertyGroup>

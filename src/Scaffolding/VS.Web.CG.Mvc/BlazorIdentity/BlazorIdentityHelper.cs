@@ -19,6 +19,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
         internal const string GetConnectionString = nameof(GetConnectionString);
         internal const string UseSqlite = nameof(UseSqlite);
         internal const string UseSqlServer = nameof(UseSqlServer);
+
+        private static readonly HashSet<string> _staticFileExtensions = [".js"];
+
         internal static string GetFormattedRelativeIdentityFile(string fullFileName)
         {
             string identifier = "BlazorIdentity\\";
@@ -56,8 +59,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
             }
             if (stringToModify.Contains(GetConnectionString))
             {
-                modifiedString = modifiedString.Replace("GetConnectionString(\"{0}\")", $"GetConnectionString(\"{dbContextClassName}Connection\")");
-                modifiedString = modifiedString.Replace("Connection string '{0}'", $"Connection string '{dbContextClassName}Connection'");
+                modifiedString = modifiedString.Replace("GetConnectionString(\"{0}\")", $"GetConnectionString(\"{dbContextClassName}\")");
+                modifiedString = modifiedString.Replace("Connection string '{0}'", $"Connection string '{dbContextClassName}'");
             }
 
             return modifiedString;
@@ -69,6 +72,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
             if (!string.IsNullOrEmpty(generalTemplateFolder) && fileSystem.DirectoryExists(generalTemplateFolder))
             {
                 return fileSystem.EnumerateFiles(generalTemplateFolder, "*.tt", SearchOption.AllDirectories);
+            }
+
+            return null;
+        }
+
+        internal static IEnumerable<(string TemplateFolder, string FullPath)> GetBlazorIdentityStaticFiles(IFileSystem fileSystem, IEnumerable<string> templateFolders)
+        {
+            var blazorIdentityTemplateFolder = templateFolders.FirstOrDefault(x => x.Contains("BlazorIdentity", StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(blazorIdentityTemplateFolder) && fileSystem.DirectoryExists(blazorIdentityTemplateFolder))
+            {
+                var allFiles = fileSystem.EnumerateFiles(blazorIdentityTemplateFolder, "*.*", SearchOption.AllDirectories);
+                return allFiles
+                    .Where(f => _staticFileExtensions.Contains(Path.GetExtension(f)))
+                    .Select(f => (blazorIdentityTemplateFolder, f));
             }
 
             return null;

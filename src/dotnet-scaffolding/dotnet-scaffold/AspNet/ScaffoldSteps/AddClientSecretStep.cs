@@ -7,7 +7,7 @@ using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using System.Text.Json;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// </summary>
         public string? TenantId { get; set; }
 
-        private readonly ILogger _logger;
+        private readonly IScaffolderLogger _logger;
         private readonly IFileSystem _fileSystem;
         private readonly IEnvironmentService _environmentService;
 
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// Initializes a new instance of the <see cref="AddClientSecretStep"/> class.
         /// </summary>
         public AddClientSecretStep(
-            ILogger<AddClientSecretStep> logger,
+            IScaffolderLogger logger,
             IFileSystem fileSystem,
             IEnvironmentService environmentService)
         {

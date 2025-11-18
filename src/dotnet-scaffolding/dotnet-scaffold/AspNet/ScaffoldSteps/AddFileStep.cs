@@ -4,7 +4,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -22,13 +22,14 @@ internal class AddFileStep : ScaffoldStep
     /// Gets or sets the base output directory where the file will be added.
     /// </summary>
     public required string BaseOutputDirectory { get; set; }
-    private readonly ILogger _logger;
-    private readonly IFileSystem _fileSystem;
+    private readonly IScaffolderLogger _logger;
 
+    private readonly IFileSystem _fileSystem;
+    
     /// <summary>
     /// Initializes a new instance of the <see cref="AddFileStep"/> class.
     /// </summary>
-    public AddFileStep(ILogger<AddFileStep> logger, IFileSystem fileSystem)
+    public AddFileStep(IScaffolderLogger logger, IFileSystem fileSystem)
     {
         _logger = logger;
         _fileSystem = fileSystem;

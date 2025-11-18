@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 
@@ -13,7 +14,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Services;
 internal class ToolManager(
     ILogger<ToolManager> logger,
     IToolManifestService toolManifestService,
-    IDotNetToolService dotnetToolService) : IToolManager
+    IDotNetToolService dotnetToolService,
+    IScaffolderLogger scaffolderLogger) : IToolManager
 {
     // Logger for recording informational and error messages.
     private readonly ILogger _logger = logger;
@@ -21,6 +23,8 @@ internal class ToolManager(
     private readonly IToolManifestService _toolManifestService = toolManifestService;
     // Service for installing and uninstalling dotnet tools.
     private readonly IDotNetToolService _dotnetToolService = dotnetToolService;
+    // Logger for displaying formatted console output.
+    private readonly IScaffolderLogger _scaffolderLogger = scaffolderLogger;
 
     /// <summary>
     /// Installs a scaffold tool and adds it to the manifest.
@@ -34,23 +38,23 @@ internal class ToolManager(
     /// <returns>True if the tool was installed and added to the manifest; otherwise, false.</returns>
     public bool AddTool(string packageName, string[] addSources, string? configFile, bool prerelease, string? version, bool global)
     {
-        _logger.LogInformation("Installing {packageName}...", packageName);
+        _scaffolderLogger.LogInformation($"Installing {packageName}...\n");
 
         if (_dotnetToolService.GetDotNetTool(packageName) is not null || _dotnetToolService.InstallDotNetTool(packageName, version, global: global, prerelease, addSources, configFile))
         {
             if (_toolManifestService.AddTool(packageName))
             {
-                _logger.LogInformation("Tool {packageName} installed successfully", packageName);
+                _scaffolderLogger.LogInformation($"Tool {packageName} installed successfully.\n");
                 return true;
             }
             else
             {
-                _logger.LogError("Failed to add tool {packageName} to manifest", packageName);
+                _scaffolderLogger.LogError($"Failed to add tool {packageName} to manifest.\n");
             }
         }
         else
         {
-            _logger.LogError("Failed to install tool {packageName}", packageName);
+            _scaffolderLogger.LogError($"Failed to install tool {packageName}.\n");
         }
 
         return false;
@@ -64,23 +68,23 @@ internal class ToolManager(
     /// <returns>True if the tool was removed and uninstalled; otherwise, false.</returns>
     public bool RemoveTool(string packageName, bool global)
     {
-        _logger.LogInformation("Uninstalling {packageName}...", packageName);
+        _scaffolderLogger.LogInformation($"Uninstalling {packageName}...\n");
 
         if (_toolManifestService.RemoveTool(packageName))
         {
             if (_dotnetToolService.UninstallDotNetTool(packageName, global))
             {
-                _logger.LogInformation("Tool {packageName} removed successfully", packageName);
+                _scaffolderLogger.LogInformation($"Tool {packageName} removed successfully.\n");
                 return true;
             }
             else
             {
-                _logger.LogError("Failed to uninstall tool {packageName}", packageName);
+                _scaffolderLogger.LogError($"Failed to uninstall tool {packageName}.\n");
             }
         }
         else
         {
-            _logger.LogError("Failed to remove tool {packageName} from manifest", packageName);
+            _scaffolderLogger.LogError($"Failed to remove tool {packageName} from manifest.\n");
         }
 
         return false;

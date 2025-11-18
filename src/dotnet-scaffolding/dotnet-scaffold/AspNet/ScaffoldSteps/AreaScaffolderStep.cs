@@ -4,7 +4,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -21,13 +21,13 @@ internal class AreaScaffolderStep : ScaffoldStep
     /// Gets or sets the name of the area to scaffold.
     /// </summary>
     public string? Name { get; set; }
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly IEnvironmentService _environmentService;
     /// <summary>
     /// Initializes a new instance of the <see cref="AreaScaffolderStep"/> class.
     /// </summary>
-    public AreaScaffolderStep(IFileSystem fileSystem, ILogger<AreaScaffolderStep> logger, IEnvironmentService environmentService)
+    public AreaScaffolderStep(IFileSystem fileSystem, IScaffolderLogger logger, IEnvironmentService environmentService)
     {
         _environmentService = environmentService;
         _fileSystem = fileSystem;
@@ -47,7 +47,7 @@ internal class AreaScaffolderStep : ScaffoldStep
 
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
-            _logger.LogInformation("Missing/Invalid --project option.");
+            _logger.LogError("Missing/Invalid --project option.");
             return null;
         }
 

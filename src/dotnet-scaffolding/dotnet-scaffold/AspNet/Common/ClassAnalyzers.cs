@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
@@ -153,7 +154,7 @@ internal static class ClassAnalyzers
     /// <param name="modelInfo">The model information to validate.</param>
     /// <param name="logger">The logger to use for error messages.</param>
     /// <returns>True if the model is valid for CRUD scaffolders; otherwise, false.</returns>
-    internal static bool ValidateModelForCrudScaffolders(ModelInfo modelInfo, ILogger logger)
+    internal static bool ValidateModelForCrudScaffolders(ModelInfo modelInfo, IScaffolderLogger logger)
     {
         if (modelInfo is null || string.IsNullOrEmpty(modelInfo.ModelTypeName))
         {

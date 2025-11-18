@@ -5,14 +5,14 @@ using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Scaffolding.Roslyn.Extensions;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 
 namespace Microsoft.DotNet.Scaffolding.CodeModification;
 
 internal class ProjectModifier
 {
-    private readonly ILogger _consoleLogger;
+    private readonly IScaffolderLogger _consoleLogger;
     private readonly ICodeService _codeService;
     private const string Main = nameof(Main);
     private readonly StringBuilder _output;
@@ -23,7 +23,7 @@ internal class ProjectModifier
     public ProjectModifier(
         string projectPath,
         ICodeService codeService,
-        ILogger consoleLogger,
+        IScaffolderLogger consoleLogger,
         CodeModifierConfig codeModifierConfig,
         IList<string> codeChangeOptions)
     {

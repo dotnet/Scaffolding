@@ -7,7 +7,7 @@ using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 
@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 /// </summary>
 internal class AddAspireCodeChangeStep : CodeModificationStep
 {
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
     private readonly ITelemetryService _telemetryService;
 
     /// <summary>
@@ -24,7 +24,7 @@ internal class AddAspireCodeChangeStep : CodeModificationStep
     /// </summary>
     /// <param name="logger">The logger instance.</param>
     /// <param name="telemetryService">The telemetry service instance.</param>
-    public AddAspireCodeChangeStep(ILogger<CodeModificationStep> logger, ITelemetryService telemetryService) : base(logger)
+    public AddAspireCodeChangeStep(IScaffolderLogger logger, ITelemetryService telemetryService) : base(logger)
     {
         _logger = logger;
         _telemetryService = telemetryService;

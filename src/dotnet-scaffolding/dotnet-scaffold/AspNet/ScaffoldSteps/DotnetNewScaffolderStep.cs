@@ -9,7 +9,7 @@ using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -34,14 +34,14 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
     /// Gets or sets the file name for the new file.
     /// </summary>
     public string? FileName { get; set; }
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly ITelemetryService _telemetryService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DotnetNewScaffolderStep"/> class.
     /// </summary>
-    public DotnetNewScaffolderStep(ILogger<DotnetNewScaffolderStep> logger, IFileSystem fileSystem, ITelemetryService telemetryService)
+    public DotnetNewScaffolderStep(IScaffolderLogger logger, IFileSystem fileSystem, ITelemetryService telemetryService)
     {
         _logger = logger;
         _fileSystem = fileSystem;
@@ -86,7 +86,6 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
             _fileSystem.CreateDirectoryIfNotExists(outputDirectory);
         }
 
-        var projectName = Path.GetFileNameWithoutExtension(stepSettings.Project);
         if (!string.IsNullOrEmpty(outputDirectory) &&
             _fileSystem.DirectoryExists(outputDirectory))
         {
@@ -121,13 +120,13 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
     {
         if (string.IsNullOrEmpty(ProjectPath) || !_fileSystem.FileExists(ProjectPath))
         {
-            _logger.LogInformation("Missing/Invalid --project option.");
+            _logger.LogError("Missing/Invalid --project option.");
             return null;
         }
 
         if (string.IsNullOrEmpty(FileName))
         {
-            _logger.LogInformation("Missing/Invalid --name option.");
+            _logger.LogError("Missing/Invalid --name option.");
             return null;
         }
         else

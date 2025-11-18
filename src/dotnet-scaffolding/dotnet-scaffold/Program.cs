@@ -4,6 +4,7 @@ using System.CommandLine;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
@@ -63,6 +64,7 @@ static void ConfigureServices(IServiceCollection services)
     services.AddTelemetry("dotnetScaffoldAspire");
     services.AddTelemetry("dotnetScaffoldAspnet");
     services.AddSingleton<IFirstPartyToolTelemetryWrapper, FirstPartyToolTelemetryWrapper>();
+    services.AddSingleton<IScaffolderLogger, ScaffolderLogger>();
 }
 
 static void ConfigureSharedSteps(IServiceCollection services)

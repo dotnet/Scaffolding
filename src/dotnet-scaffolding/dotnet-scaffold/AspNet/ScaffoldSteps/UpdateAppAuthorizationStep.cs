@@ -5,7 +5,7 @@
     using Microsoft.DotNet.Scaffolding.Core.Steps;
     using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
     using Microsoft.DotNet.Scaffolding.Internal.Services;
-    using Microsoft.Extensions.Logging;
+    using Microsoft.DotNet.Scaffolding.Core.Logging;
 
     namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
     {
@@ -17,11 +17,11 @@
             public string[]? SpaRedirectUris { get; set; }
             public bool AutoConfigureLocalUrls { get; set; } = true;
 
-            private readonly ILogger _logger;
+            private readonly IScaffolderLogger _logger;
             private readonly IFileSystem _fileSystem;
             private readonly ITelemetryService _telemetryService;
 
-            public UpdateAppAuthorizationStep(ILogger<UpdateAppAuthorizationStep> logger, IFileSystem fileSystem, ITelemetryService telemetryService)
+            public UpdateAppAuthorizationStep(IScaffolderLogger logger, IFileSystem fileSystem, ITelemetryService telemetryService)
             {
                 _logger = logger;
                 _fileSystem = fileSystem;
@@ -115,7 +115,7 @@
                                         }
                                         catch
                                         {
-                                            _logger.LogError("An error occurred while processing the URL: {0}", url);
+                                            _logger.LogError($"An error occurred while processing the URL: {url}");
                                         }
                                     }
                                 }

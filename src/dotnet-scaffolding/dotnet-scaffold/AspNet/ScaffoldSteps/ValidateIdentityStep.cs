@@ -11,7 +11,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 internal class ValidateIdentityStep : ScaffoldStep
 {
     private readonly IFileSystem _fileSystem;
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
     private readonly ITelemetryService _telemetryService;
 
     /// <summary>
@@ -60,7 +60,7 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// <param name="telemetryService">Telemetry service.</param>
     public ValidateIdentityStep(
         IFileSystem fileSystem,
-        ILogger<ValidateIdentityStep> logger,
+        IScaffolderLogger logger,
         ITelemetryService telemetryService)
     {
         _fileSystem = fileSystem;

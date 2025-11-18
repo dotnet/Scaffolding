@@ -5,7 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 /// </summary>
 internal class WrappedAddPackagesStep : AddPackagesStep
 {
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
     private readonly ITelemetryService _telemetryService;
     /// <summary>
     /// Constructor for WrappedAddPackagesStep.
@@ -22,7 +22,7 @@ internal class WrappedAddPackagesStep : AddPackagesStep
     /// <param name="logger">Logger instance.</param>
     /// <param name="telemetryService">Telemetry service instance.</param>
     public WrappedAddPackagesStep(
-        ILogger<WrappedAddPackagesStep> logger,
+        IScaffolderLogger logger,
         ITelemetryService telemetryService) : base(logger)
     {
         _logger = logger;

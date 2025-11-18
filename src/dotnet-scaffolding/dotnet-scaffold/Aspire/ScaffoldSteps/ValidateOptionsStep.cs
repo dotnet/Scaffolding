@@ -5,7 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
 
@@ -18,8 +18,8 @@ internal class ValidateOptionsStep : ScaffoldStep
     /// <summary>
     /// The validation method to execute for this step.
     /// </summary>
-    public required Func<ScaffolderContext, ILogger, bool> ValidateMethod { get; set; }
-    private readonly ILogger _logger;
+    public required Func<ScaffolderContext, IScaffolderLogger, bool> ValidateMethod { get; set; }
+    private readonly IScaffolderLogger _logger;
     private readonly ITelemetryService _telemetryService;
 
     /// <summary>
@@ -27,7 +27,7 @@ internal class ValidateOptionsStep : ScaffoldStep
     /// </summary>
     /// <param name="logger">The logger instance.</param>
     /// <param name="telemetryService">The telemetry service instance.</param>
-    public ValidateOptionsStep(ILogger<ValidateOptionsStep> logger, ITelemetryService telemetryService)
+    public ValidateOptionsStep(IScaffolderLogger logger, ITelemetryService telemetryService)
     {
         _logger = logger;
         _telemetryService = telemetryService;

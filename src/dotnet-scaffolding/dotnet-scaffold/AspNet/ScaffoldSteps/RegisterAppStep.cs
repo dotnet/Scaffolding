@@ -5,8 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
-using Microsoft.Extensions.Logging;
-using System.IO;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
@@ -34,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// </summary>
         public string? ClientId { get; set; }
 
-        private readonly ILogger _logger;
+        private readonly IScaffolderLogger _logger;
         private readonly IFileSystem _fileSystem;
         private readonly ITelemetryService _telemetryService;
 
@@ -42,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// Initializes a new instance of the <see cref="RegisterAppStep"/> class.
         /// </summary>
         public RegisterAppStep(
-            ILogger<AddClientSecretStep> logger,
+            IScaffolderLogger logger,
             IFileSystem fileSystem,
             ITelemetryService telemetryService)
         {
@@ -71,6 +70,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     _logger.LogError("Failed to Update App.");
                     return Task.FromResult(false);
                 }
+                
                 _logger.LogInformation("Successfully Updated App.");
                 return Task.FromResult(true);
             }
@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     }
                     else
                     {
-                        _logger.LogWarning("Could not extract client ID from output");
+                        _logger.LogInformation("Could not extract client ID from output.");
                     }
                 }
                 return true;
@@ -170,7 +170,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     }
                     else
                     {
-                        _logger.LogWarning("Could not extract client ID from output");
+                        _logger.LogInformation("Could not extract client ID from output.");
                     }
                 }
                 return true;

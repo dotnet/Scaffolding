@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Core.CommandLine;
 
@@ -20,7 +20,7 @@ internal static class DotnetCommands
     /// <param name="tfm">The target framework (optional).</param>
     /// <param name="includePrerelease">Whether to include prerelease versions.</param>
     /// <returns>True if the package was added successfully; otherwise, false.</returns>
-    public static bool AddPackage(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
+    public static bool AddPackage(string packageName, IScaffolderLogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
     {
         if (!string.IsNullOrEmpty(packageName))
         {
@@ -51,14 +51,14 @@ internal static class DotnetCommands
             {
                 if (!string.IsNullOrWhiteSpace(stdOut))
                 {
-                    logger.LogInformation($"\n{stdOut}");
+                    logger.LogError($"\n{stdOut}");
                 }
                 if (!string.IsNullOrWhiteSpace(stdErr))
                 {
-                    logger.LogInformation($"\n{stdErr}");
+                    logger.LogError($"\n{stdErr}");
                 }
 
-                logger.LogInformation("Failed.");
+                logger.LogError("Failed.");
             }
             else
             {

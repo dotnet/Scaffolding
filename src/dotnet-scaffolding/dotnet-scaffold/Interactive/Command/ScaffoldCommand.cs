@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.Services;
@@ -29,6 +30,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     private readonly IStartUpErrorService _startUpErrorService;
 
     private readonly IScaffoldRunner _scaffoldRunner;
+    private readonly IScaffolderLogger _scaffolderLogger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ScaffoldCommand"/> class.
@@ -42,6 +44,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     /// <param name="firstTimeUseNoticeSentinel">The first-time use notice sentinel.</param>
     /// <param name="scaffoldRunner">The command runner, implemeneted with System.CommandLine</param>
     /// <param name="startUpErrorService">The startup error service.</param>
+    /// <param name="scaffolderLogger">Scaffolder logger for console output.</param>
     public ScaffoldCommand(
         IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
@@ -51,7 +54,8 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         ITelemetryService telemetry,
         IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
         IScaffoldRunner scaffoldRunner,
-        IStartUpErrorService startUpErrorService)
+        IStartUpErrorService startUpErrorService,
+        IScaffolderLogger scaffolderLogger)
         : base(flowProvider, telemetry)
     {
         _dotnetToolService = dotnetToolService;
@@ -61,6 +65,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
         _scaffoldRunner = scaffoldRunner;
         _startUpErrorService = startUpErrorService;
+        _scaffolderLogger = scaffolderLogger;
     }
 
     /// <summary>
@@ -102,7 +107,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
             new StartupFlowStep(_dotnetToolService, _environmentService, _fileSystem, _logger, _firstTimeUseNoticeSentinel),
             new CategoryPickerFlowStep(_logger, _dotnetToolService, _startUpErrorService),
             new CommandPickerFlowStep(_logger, _dotnetToolService, _environmentService, _fileSystem),
-            new CommandExecuteFlowStep(TelemetryService, _scaffoldRunner)
+            new CommandExecuteFlowStep(TelemetryService, _scaffoldRunner, _scaffolderLogger)
         ];
 
         // Run the flow and wait for telemetry to flush before returning.

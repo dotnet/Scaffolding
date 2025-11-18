@@ -4,7 +4,7 @@ using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.CodeModification;
 
@@ -22,9 +22,9 @@ public class CodeModificationStep : ScaffoldStep
     public required string ProjectPath { get; set; }
     //properties to be injected into the CodeModifierConfig.CodeFile.Method.CodeSnippet's Blocks/Parents/CheckBlock
     public IDictionary<string, string> CodeModifierProperties { get; } 
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
 
-    public CodeModificationStep(ILogger<CodeModificationStep> logger)
+    public CodeModificationStep(IScaffolderLogger logger)
     {
         _logger = logger;
         CodeModifierProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

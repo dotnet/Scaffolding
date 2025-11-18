@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.TextTemplating;
 
@@ -26,13 +26,13 @@ public class TextTemplatingStep : ScaffoldStep
     /// </summary>
     public bool Overwrite { get; set; }
 
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TextTemplatingStep"/> class.
     /// </summary>
     /// <param name="logger">Logger for diagnostic output.</param>
-    public TextTemplatingStep(ILogger<TextTemplatingStep> logger)
+    public TextTemplatingStep(IScaffolderLogger logger)
     {
         _logger = logger;
     }

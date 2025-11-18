@@ -2,7 +2,7 @@
 using Microsoft.DotNet.Scaffolding.Core.CommandLine;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Steps;
 
@@ -26,13 +26,13 @@ public class AddPackagesStep : ScaffoldStep
     /// </summary>
     public bool Prerelease { get; set; } = false;
 
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AddPackagesStep"/> class.
     /// </summary>
     /// <param name="logger">The logger to use for output.</param>
-    public AddPackagesStep(ILogger<AddPackagesStep> logger)
+    public AddPackagesStep(IScaffolderLogger logger)
     {
         _logger = logger;
         ContinueOnError = true;

@@ -6,8 +6,7 @@ using System.Text.Json.Nodes;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
-using Microsoft.Extensions.Logging;
-using Spectre.Console;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 {
@@ -50,7 +49,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// </summary>
         public string? ClientSecret { get; set; }
 
-        private readonly ILogger _logger;
+        private readonly IScaffolderLogger _logger;
         private readonly IFileSystem _fileSystem;
         private readonly ITelemetryService _telemetryService;
 
@@ -61,7 +60,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// <param name="fileSystem">File system helper.</param>
         /// <param name="telemetryService">Telemetry service for logging events.</param>
         public UpdateAppSettingsStep(
-            ILogger<UpdateAppSettingsStep> logger,
+            IScaffolderLogger logger,
             IFileSystem fileSystem,
             ITelemetryService telemetryService)
         {
@@ -220,7 +219,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             }
             catch (Exception e)
             {
-                AnsiConsole.WriteLine(e.ToString());
+                _logger.LogError(e.ToString());
             }
 
             return Task.FromResult(false);
@@ -266,7 +265,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning($"Failed to update appsettings.Development.json: {ex.Message}");
+                    _logger.LogError($"Failed to update appsettings.Development.json: {ex.Message}");
                     // Continue execution even if this fails
                 }
             }

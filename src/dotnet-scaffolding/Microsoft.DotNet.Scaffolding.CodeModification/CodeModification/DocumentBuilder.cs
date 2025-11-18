@@ -8,14 +8,14 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.CodeModification;
 
 internal class DocumentBuilder
 {
     private readonly CodeFile _codeFile;
-    private readonly ILogger _consoleLogger;
+    private readonly IScaffolderLogger _consoleLogger;
     private readonly Document _document;
     private readonly IList<string> _options;
 
@@ -23,7 +23,7 @@ internal class DocumentBuilder
         Document document,
         CodeFile codeFile,
         IList<string> options,
-        ILogger consoleLogger)
+        IScaffolderLogger consoleLogger)
     {
         _document = document ?? throw new ArgumentNullException(nameof(document));
         _codeFile = codeFile ?? throw new ArgumentNullException(nameof(codeFile));

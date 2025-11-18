@@ -7,7 +7,7 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 {
@@ -21,14 +21,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// Gets or sets the project file path to inspect.
         /// </summary>
         public string? ProjectPath { get; set; }
-        private readonly ILogger _logger;
+        private readonly IScaffolderLogger _logger;
         private readonly IFileSystem _fileSystem;
         private readonly ITelemetryService _telemetryService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DetectBlazorWasmStep"/> class.
         /// </summary>
-        public DetectBlazorWasmStep(ILogger<DetectBlazorWasmStep> logger, IFileSystem fileSystem, ITelemetryService telemetryService)
+        public DetectBlazorWasmStep(IScaffolderLogger logger, IFileSystem fileSystem, ITelemetryService telemetryService)
         {
             _logger = logger;
             _fileSystem = fileSystem;

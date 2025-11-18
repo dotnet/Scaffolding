@@ -8,7 +8,7 @@ using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -18,11 +18,12 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
     public required string CommandName { get; set; }
     public string? FileName { get; set; }
     public bool Actions { get; set; }
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly ITelemetryService _telemetryService;
+    
     public EmptyControllerScaffolderStep(
-        ILogger<EmptyControllerScaffolderStep> logger,
+        IScaffolderLogger logger,
         IFileSystem fileSystem,
         ITelemetryService telemetryService)
     {
@@ -103,13 +104,13 @@ internal class EmptyControllerScaffolderStep : ScaffoldStep
     {
         if (string.IsNullOrEmpty(ProjectPath) || !_fileSystem.FileExists(ProjectPath))
         {
-            _logger.LogInformation("Missing/Invalid --project option.");
+            _logger.LogError("Missing/Invalid --project option.");
             return null;
         }
 
         if (string.IsNullOrEmpty(FileName))
         {
-            _logger.LogInformation("Missing/Invalid --name option.");
+            _logger.LogError("Missing/Invalid --name option.");
             return null;
         }
         else

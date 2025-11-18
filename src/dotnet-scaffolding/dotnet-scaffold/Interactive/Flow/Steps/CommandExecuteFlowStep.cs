@@ -3,6 +3,7 @@
 using System.CommandLine;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
@@ -19,17 +20,20 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
     internal class CommandExecuteFlowStep : IFlowStep
     {
         private readonly ITelemetryService _telemetryService;
-        private readonly IScaffoldRunner _scaffoldRunnner;
+        private readonly IScaffoldRunner _scaffoldRunner;
+        private readonly IScaffolderLogger _scaffolderLogger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandExecuteFlowStep"/> class.
         /// </summary>
         /// <param name="telemetryService">The telemetry service to use for tracking events.</param>
         /// <param name="scaffoldRunner">The command runner</param>
-        public CommandExecuteFlowStep(ITelemetryService telemetryService, IScaffoldRunner scaffoldRunner)
+        /// <param name="scaffolderLogger">Scaffolder logger for console output.</param>
+        public CommandExecuteFlowStep(ITelemetryService telemetryService, IScaffoldRunner scaffoldRunner, IScaffolderLogger scaffolderLogger)
         {
             _telemetryService = telemetryService;
-            _scaffoldRunnner = scaffoldRunner;
+            _scaffoldRunner = scaffoldRunner;
+            _scaffolderLogger = scaffolderLogger;
         }
 
         /// <inheritdoc/>
@@ -65,24 +69,28 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             string? chosenCategory = context.GetChosenCategory();
             if (!string.IsNullOrEmpty(dotnetToolInfo.Command) && parameterValues.Count != 0 && !string.IsNullOrEmpty(commandInfo.Name))
             {
-                // TODO when the aspnet is folded into dotnet scaffold, this will be refactored
                 if (commandInfo.IsCommandAnAspireCommand())
                 {
                     // Build the argument list for System.CommandLine
                     parameterValues.Insert(0, "aspire");
 
-                    if (_scaffoldRunnner is null || _scaffoldRunnner is not ScaffoldRunner runner || runner.RootCommand is null)
+                    if (_scaffoldRunner is null || _scaffoldRunner is not ScaffoldRunner runner || runner.RootCommand is null)
                     {
                         return FlowStepResult.Failure("Aspire command infrastructure not available.");
                     }
 
                     // Invoke the command directly (async)
-                    int aspireExitCode = await runner.RootCommand.InvokeAsync([.. parameterValues], cancellationToken: cancellationToken);
+                    int aspireExitCode = await AnsiConsole.Status()
+                        .WithSpinner()
+                        .StartAsync($"[yellow]Scaffolding...[/]", async context =>
+                        {
+                            return await runner.RootCommand.InvokeAsync([.. parameterValues], cancellationToken: cancellationToken);
+                        });
 
                     _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandInfo, aspireExitCode, chosenCategory));
                     if (aspireExitCode != 0)
                     {
-                        AnsiConsole.Console.WriteLine($"\nAspire command exit code: {aspireExitCode}");
+                        _scaffolderLogger.LogInformation($"\nAspire command exit code: {aspireExitCode}");
                     }
                     return FlowStepResult.Success;
                 }
@@ -91,16 +99,23 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 {
                     // Build the argument list for System.CommandLine
                     parameterValues.Insert(0, "aspnet");
-                    if (_scaffoldRunnner is null || _scaffoldRunnner is not ScaffoldRunner runner || runner.RootCommand is null)
+                    if (_scaffoldRunner is null || _scaffoldRunner is not ScaffoldRunner runner || runner.RootCommand is null)
                     {
                         return FlowStepResult.Failure("AspNet command infrastructure not available.");
                     }
                     // Invoke the command directly (async)
-                    int aspnetExitCode = await runner.RootCommand.InvokeAsync([.. parameterValues], cancellationToken: cancellationToken);
+                    int aspnetExitCode = await AnsiConsole.Status()
+                        .WithSpinner()
+                        .StartAsync($"[yellow]Scaffolding...[/]", async context =>
+                        {
+                            await Task.Delay(1000);
+                            return await runner.RootCommand.InvokeAsync([.. parameterValues], cancellationToken: cancellationToken);
+                        });
+                    
                     _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandInfo, aspnetExitCode, chosenCategory));
                     if (aspnetExitCode != 0)
                     {
-                        AnsiConsole.Console.WriteLine($"\nAspNet command exit code: {aspnetExitCode}");
+                        _scaffolderLogger.LogInformation($"\nAspNet command exit code: {aspnetExitCode}");
                     }
                     return FlowStepResult.Success;
                 }
@@ -108,7 +123,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 else
                 {
                     string command = dotnetToolInfo.Command;
-                    string componentExecutionString = $"{command} {string.Join(" ", parameterValues)}";
                     int exitCode = AnsiConsole.Status()
                         .Start($"Executing '{command}'", statusContext =>
                         {
@@ -123,7 +137,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                     _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandInfo, exitCode, chosenCategory));
                     if (exitCode != 0)
                     {
-                        AnsiConsole.Console.WriteLine($"\nCommand exit code: {exitCode}");
+                        _scaffolderLogger.LogInformation($"\nCommand exit code: {exitCode}");
                     }
 
                     return FlowStepResult.Success;

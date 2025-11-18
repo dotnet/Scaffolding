@@ -11,7 +11,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
@@ -48,7 +48,7 @@ internal class ValidateRazorPagesStep : ScaffoldStep
     public string? Page { get; set; }
 
     private readonly IFileSystem _fileSystem;
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
     private readonly ITelemetryService _telemetryService;
 
     /// <summary>
@@ -59,7 +59,7 @@ internal class ValidateRazorPagesStep : ScaffoldStep
     /// <param name="telemetryService">The telemetry service.</param>
     public ValidateRazorPagesStep(
         IFileSystem fileSystem,
-        ILogger<ValidateRazorPagesStep> logger,
+        IScaffolderLogger logger,
         ITelemetryService telemetryService)
     {
         _fileSystem = fileSystem;

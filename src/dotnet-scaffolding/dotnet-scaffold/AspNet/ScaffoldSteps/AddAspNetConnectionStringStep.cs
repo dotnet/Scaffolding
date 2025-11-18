@@ -6,8 +6,9 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using TelemetryConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry.TelemetryConstants;
+
 namespace Microsoft.DotNet.Scaffolding.Core.Steps;
 
 /// <summary>
@@ -28,14 +29,14 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
     /// Gets or sets the connection string value.
     /// </summary>
     public required string ConnectionString { get; set; }
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly ITelemetryService _telemetryService;
     /// <summary>
     /// Initializes a new instance of the <see cref="AddAspNetConnectionStringStep"/> class.
     /// </summary>
     public AddAspNetConnectionStringStep(
-        ILogger<AddAspNetConnectionStringStep> logger,
+        IScaffolderLogger logger,
         IFileSystem fileSystem,
         ITelemetryService telemetryService)
     {

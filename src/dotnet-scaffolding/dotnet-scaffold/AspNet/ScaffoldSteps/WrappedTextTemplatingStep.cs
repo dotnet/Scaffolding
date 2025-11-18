@@ -5,7 +5,7 @@ using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 /// </summary>
 internal class WrappedTextTemplatingStep : TextTemplatingStep
 {
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
     private readonly ITelemetryService _telemetryService;
     /// <summary>
     /// Constructor for WrappedTextTemplatingStep.
@@ -22,7 +22,7 @@ internal class WrappedTextTemplatingStep : TextTemplatingStep
     /// <param name="logger">The logger instance.</param>
     /// <param name="telemetryService">The telemetry service instance.</param>
     public WrappedTextTemplatingStep(
-        ILogger<WrappedTextTemplatingStep> logger,
+        IScaffolderLogger logger,
         ITelemetryService telemetryService) : base(logger)
     {
         _logger = logger;

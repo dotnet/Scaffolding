@@ -7,7 +7,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry;
-using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using TelemetryConstants = Microsoft.DotNet.Tools.Scaffold.Aspire.Telemetry.TelemetryConstants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
@@ -20,18 +20,19 @@ internal class AddAspireConnectionStringStep : ScaffoldStep
     public required string BaseProjectPath { get; set; }
     public required string ConnectionStringName { get; set; }
     public required string ConnectionString { get; set; }
-    private readonly ILogger _logger;
+    private readonly IScaffolderLogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly ITelemetryService _telemetryService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AddAspireConnectionStringStep"/> class.
     /// </summary>
-    /// <param name="logger">The logger instance.</param>
+    /// <param name="logger">The scaffolder logger instance.</param>
     /// <param name="fileSystem">The file system abstraction.</param>
     /// <param name="telemetryService">The telemetry service instance.</param>
+    
     public AddAspireConnectionStringStep(
-        ILogger<AddAspireConnectionStringStep> logger,
+        IScaffolderLogger logger,
         IFileSystem fileSystem,
         ITelemetryService telemetryService)
     {

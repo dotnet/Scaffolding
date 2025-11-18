@@ -25,7 +25,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@page \"/not-found\"\r\n\r\n<PageTitle>Not Found</PageTitle>\r\n\r\n<h1>Not Found</h1>\r\n<p>Sorry, there\'s nothing at this address.</p>\r\n\r\n<a href=\"/\">Back to Home</a>\r\n");
+            this.Write("\r\n\r\n@page \"/not-found\"\r\n");
+ if (Model.HasMainLayout) { 
+            this.Write("@layout MainLayout\r\n");
+ } 
+            this.Write("\r\n\r\n<PageTitle>Not Found</PageTitle>\r\n\r\n\r\n<h1>Not Found</h1>\r\n<p>Sorry, there\'s n" +
+                    "othing at this address.</p>\r\n\r\n\r\n<a href=\"/\">Back to Home</a>");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

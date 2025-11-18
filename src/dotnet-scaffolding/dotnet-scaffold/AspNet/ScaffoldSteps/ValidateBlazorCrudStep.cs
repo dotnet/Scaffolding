@@ -1,5 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.IO;
+using System.Linq;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
@@ -205,6 +207,16 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
             return null;
         }
 
+        bool hasMainLayout = false;
+        if (!string.IsNullOrEmpty(settings.Project))
+        {
+            var projectDirectory = Path.GetDirectoryName(settings.Project);
+            if (!string.IsNullOrEmpty(projectDirectory) && _fileSystem.DirectoryExists(projectDirectory))
+            {
+                hasMainLayout = _fileSystem.EnumerateFiles(projectDirectory, "MainLayout.razor", SearchOption.AllDirectories).Any();
+            }
+        }
+
         //find and set --model class properties
         ModelInfo? modelInfo = null;
         var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync();
@@ -242,7 +254,8 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
             PageType = settings.Page,
             ProjectInfo = projectInfo,
             ModelInfo = modelInfo,
-            DbContextInfo = dbContextInfo
+            DbContextInfo = dbContextInfo,
+            HasMainLayout = hasMainLayout
         };
 
         if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)

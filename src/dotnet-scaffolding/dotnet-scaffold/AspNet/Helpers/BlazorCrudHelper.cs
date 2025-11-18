@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Roslyn;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
@@ -387,10 +388,19 @@ internal static class BlazorCrudHelper
                     break;
                 }
 
-                string baseOutputPath = GetBaseOutputPath(
-                    blazorCrudModel.ModelInfo.ModelTypeName,
-                    blazorCrudModel.ProjectInfo.ProjectPath);
-                string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.BlazorExtension}");
+                string outputFileName;
+                if (string.Equals(templateName, "NotFound", StringComparison.OrdinalIgnoreCase))
+                {
+                    string projectBasePath = Path.GetDirectoryName(blazorCrudModel.ProjectInfo.ProjectPath) ?? Directory.GetCurrentDirectory();
+                    outputFileName = Path.Combine(projectBasePath, "Components", "Pages", $"{templateName}{Common.Constants.BlazorExtension}");
+                }
+                else
+                {
+                    string baseOutputPath = GetBaseOutputPath(
+                        blazorCrudModel.ModelInfo.ModelTypeName,
+                        blazorCrudModel.ProjectInfo.ProjectPath);
+                    outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.BlazorExtension}");
+                }
 
                 textTemplatingProperties.Add(new()
                 {

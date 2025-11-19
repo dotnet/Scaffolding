@@ -71,7 +71,7 @@
 
         if (<#= modelNameLowerInv #> is null)
         {
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NotFound();
         }
     }
 }

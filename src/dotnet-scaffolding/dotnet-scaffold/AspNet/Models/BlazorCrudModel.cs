@@ -8,6 +8,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 /// </summary>
 internal class BlazorCrudModel : CrudModel
 {
+    /// <summary>
+    /// Indicates whether the host project contains a MainLayout component.
+    /// Used to emit the @layout directive for generated pages.
+    /// </summary>
+    public bool HasMainLayout { get; set; }
+
     //used to get correct Input tag to add to BlazorCrud\Create.tt and BlazorCrud\Edit.tt template
     /// <summary>
     /// Gets the correct Blazor input component type for a given .NET type name.

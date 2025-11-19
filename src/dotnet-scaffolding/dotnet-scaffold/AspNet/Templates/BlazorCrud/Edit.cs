@@ -138,7 +138,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(@" is null)
         {
-            NavigationManager.NavigateTo(""notfound"");
+            NavigationManager.NotFound();
         }
     }
 
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("!.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write("))\r\n            {\r\n                NavigationManager.NavigateTo(\"notfound\");\r\n   " +
+            this.Write("))\r\n            {\r\n                NavigationManager.NotFound();\r\n   " +
                     "         }\r\n            else\r\n            {\r\n                throw;\r\n           " +
                     " }\r\n        }\r\n\r\n        NavigationManager.NavigateTo(\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));

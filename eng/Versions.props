@@ -77,10 +77,10 @@
     <!-- Microsoft.AspNetCore.Razor.Language -->
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.24</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.Build-->
-    <MicrosoftBuildPackageVersion>18.0.2</MicrosoftBuildPackageVersion>
-    <MicrosoftBuildTasksCorePackageVersion>18.0.2</MicrosoftBuildTasksCorePackageVersion>
+    <MicrosoftBuildPackageVersion>17.11.31</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildTasksCorePackageVersion>17.14.28</MicrosoftBuildTasksCorePackageVersion>
     <!-- Microsoft.Build.Utilities-->
-    <MicrosoftBuildUtilitiesCorePackageVersion>18.0.2</MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>17.14.28</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftBuildLocatorPackageVersion>1.9.1</MicrosoftBuildLocatorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
     <MicrosoftCodeAnalysisCSharpPackageVersion>$(MicrosoftCodeAnalysisVersion)</MicrosoftCodeAnalysisCSharpPackageVersion>
@@ -104,7 +104,7 @@
     <!-- Microsoft.AspNetCore -->
     <!-- this is from aspnetcore-dev (test project only) -->
     <MicrosoftAspNetCorePackageVersion>6.0.0</MicrosoftAspNetCorePackageVersion>
-    <MicrosoftBuildRuntimePackageVersion>18.0.2</MicrosoftBuildRuntimePackageVersion>
+    <MicrosoftBuildRuntimePackageVersion>17.9.5</MicrosoftBuildRuntimePackageVersion>
     <!-- Microsoft.AspNetCore.Mvc -->
     <!-- this is from aspnetcore-dev (test only) -->
     <MicrosoftAspNetCoreMvcPackageVersion>6.0.0</MicrosoftAspNetCoreMvcPackageVersion>

@@ -67,18 +67,8 @@
           "CheckBlock": "NotFoundPage=\"typeof(Pages.NotFound)\""
         },
         {
-          "ReplaceSnippet": [ "<Router AppAssembly=\"typeof(Program).Assembly\" AdditionalAssemblies=\"new[] { typeof($(AutoGenProjectName).Client._Imports).Assembly }\">" ],
-          "Block": "<Router AppAssembly=\"typeof(Program).Assembly\" AdditionalAssemblies=\"new[] { typeof($(AutoGenProjectName).Client._Imports).Assembly }\" NotFoundPage=\"typeof(Pages.NotFound)\">",
-          "CheckBlock": "NotFoundPage=\"typeof(Pages.NotFound)\""
-        }
-      ]
-    },
-    {
-      "FileName": "App.razor",
-      "Replacements": [
-        {
-          "ReplaceSnippet": [ "<Router AppAssembly=\"@typeof(App).Assembly\">" ],
-          "Block": "<Router AppAssembly=\"@typeof(App).Assembly\" NotFoundPage=\"typeof(Components.Pages.NotFound)\">",
+          "ReplaceSnippet": [ "<Router AppAssembly=\"typeof(Program).Assembly\" AdditionalAssemblies=\"new[] { typeof(Client._Imports).Assembly }\">" ],
+          "Block": "<Router AppAssembly=\"typeof(Program).Assembly\" AdditionalAssemblies=\"new[] { typeof(Client._Imports).Assembly }\" NotFoundPage=\"typeof(Pages.NotFound)\">",
           "CheckBlock": "NotFoundPage=\"typeof(Pages.NotFound)\""
         }
       ]

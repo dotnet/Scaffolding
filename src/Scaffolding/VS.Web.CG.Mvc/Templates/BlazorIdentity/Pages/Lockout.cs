@@ -26,8 +26,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         public virtual string TransformText()
         {
             this.Write("@page \"/Account/Lockout\"\r\n\r\n<PageTitle>Locked out</PageTitle>\r\n\r\n<header>\r\n    <h" +
-                    "1 class=\"text-danger\">Locked out</h1>\r\n    <p class=\"text-danger\">This account h" +
-                    "as been locked out, please try again later.</p>\r\n</header>\r\n");
+                    "1 class=\"text-danger\">Locked out</h1>\r\n    <p class=\"text-danger\" role=\"alert\">T" +
+                    "his account has been locked out, please try again later.</p>\r\n</header>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

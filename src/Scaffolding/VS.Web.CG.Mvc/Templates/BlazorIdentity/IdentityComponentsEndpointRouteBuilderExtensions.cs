@@ -34,6 +34,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         $"{Model.BlazorIdentityNamespace}.Pages",
         $"{Model.BlazorIdentityNamespace}.Pages.Manage",
         "Microsoft.AspNetCore.Authentication",
+        "Microsoft.AspNetCore.Antiforgery",
         "Microsoft.AspNetCore.Components.Authorization",
         "Microsoft.AspNetCore.Http.Extensions",
         "Microsoft.AspNetCore.Identity",
@@ -83,13 +84,58 @@ namespace Microsoft.AspNetCore.Routing
 
             accountGroup.MapPost(""/Logout"", async (
                 ClaimsPrincipal user,
-                SignInManager<");
+                [FromServices] SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> signInManager,
                 [FromForm] string returnUrl) =>
             {
                 await signInManager.SignOutAsync();
                 return TypedResults.LocalRedirect($""~/{returnUrl}"");
+            });
+
+            accountGroup.MapPost(""/PasskeyCreationOptions"", async (
+                HttpContext context,
+                [FromServices] UserManager<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> userManager,\r\n                [FromServices] SignInManager<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write(@"> signInManager,
+                [FromServices] IAntiforgery antiforgery) =>
+            {
+                await antiforgery.ValidateRequestAsync(context);
+
+                var user = await userManager.GetUserAsync(context.User);
+                if (user is null)
+                {
+                    return Results.NotFound($""Unable to load user with ID '{userManager.GetUserId(context.User)}'."");
+                }
+
+                var userId = await userManager.GetUserIdAsync(user);
+                var userName = await userManager.GetUserNameAsync(user) ?? ""User"";
+                var optionsJson = await signInManager.MakePasskeyCreationOptionsAsync(new()
+                {
+                    Id = userId,
+                    Name = userName,
+                    DisplayName = userName
+                });
+                return TypedResults.Content(optionsJson, contentType: ""application/json"");
+            });
+
+            accountGroup.MapPost(""/PasskeyRequestOptions"", async (
+                HttpContext context,
+                [FromServices] UserManager<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> userManager,\r\n                [FromServices] SignInManager<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write(@"> signInManager,
+                [FromServices] IAntiforgery antiforgery,
+                [FromQuery] string? username) =>
+            {
+                await antiforgery.ValidateRequestAsync(context);
+
+                var user = string.IsNullOrEmpty(username) ? null : await userManager.FindByNameAsync(username);
+                var optionsJson = await signInManager.MakePasskeyRequestOptionsAsync(user);
+                return TypedResults.Content(optionsJson, contentType: ""application/json"");
             });
 
             var manageGroup = accountGroup.MapGroup(""/Manage"").RequireAuthorization();

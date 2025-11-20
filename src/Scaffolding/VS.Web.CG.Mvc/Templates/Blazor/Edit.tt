@@ -89,7 +89,7 @@ else
 
         if (<#= modelName #> is null)
         {
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NotFound();
         }
     }
 
@@ -108,7 +108,7 @@ else
         {
             if (!<#= modelName #>Exists(<#= modelName #>!.<#= primaryKeyName #>))
             {
-                NavigationManager.NavigateTo("notfound");
+                NavigationManager.NotFound();
             }
             else
             {

@@ -51,6 +51,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         <NavLink class=""nav-link"" href=""Account/Manage/TwoFactorAuthentication"">Two-factor authentication</NavLink>
     </li>
     <li class=""nav-item"">
+        <NavLink class=""nav-link"" href=""Account/Manage/Passkeys"">Passkeys</NavLink>
+    </li>
+    <li class=""nav-item"">
         <NavLink class=""nav-link"" href=""Account/Manage/PersonalData"">Personal data</NavLink>
     </li>
 </ul>

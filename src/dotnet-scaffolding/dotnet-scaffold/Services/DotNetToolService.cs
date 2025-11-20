@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -10,11 +11,21 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Services;
 
+/// <summary>
+/// Service for managing .NET tools, including installation, uninstallation, and command discovery.
+/// </summary>
 internal class DotNetToolService : IDotNetToolService
 {
     private readonly ILogger _logger;
     private readonly IEnvironmentService _environmentService;
     private readonly IFileSystem _fileSystem;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DotNetToolService"/> class.
+    /// </summary>
+    /// <param name="logger">Logger instance for logging operations.</param>
+    /// <param name="environmentService">Service for environment operations.</param>
+    /// <param name="fileSystem">File system abstraction.</param>
     public DotNetToolService(ILogger<DotNetToolService> logger, IEnvironmentService environmentService, IFileSystem fileSystem)
     {
         _logger = logger;
@@ -23,7 +34,15 @@ internal class DotNetToolService : IDotNetToolService
         _dotNetTools = [];
     }
 
+    // Cached list of discovered .NET tools.
     private IList<DotNetToolInfo> _dotNetTools;
+
+    /// <summary>
+    /// Gets the list of commands provided by a specific .NET tool.
+    /// </summary>
+    /// <param name="dotnetTool">The .NET tool information.</param>
+    /// <param name="envVars">Optional environment variables.</param>
+    /// <returns>List of <see cref="CommandInfo"/> objects, or an empty list if none found.</returns>
     public List<CommandInfo> GetCommands(DotNetToolInfo dotnetTool, IDictionary<string, string>? envVars = null)
     {
         List<CommandInfo>? commands = null;
@@ -41,13 +60,19 @@ internal class DotNetToolService : IDotNetToolService
             }
             catch (Exception)
             {
-
+                // Ignore deserialization errors
             }
         }
 
         return commands ?? [];
     }
 
+    /// <summary>
+    /// Gets a specific .NET tool by component name and optional version.
+    /// </summary>
+    /// <param name="componentName">The name of the component/tool.</param>
+    /// <param name="version">Optional version string.</param>
+    /// <returns>The matching <see cref="DotNetToolInfo"/>, or null if not found.</returns>
     public DotNetToolInfo? GetDotNetTool(string? componentName, string? version = null)
     {
         if (string.IsNullOrEmpty(componentName))
@@ -69,6 +94,12 @@ internal class DotNetToolService : IDotNetToolService
         }
     }
 
+    /// <summary>
+    /// Gets all commands from all .NET tools in parallel.
+    /// </summary>
+    /// <param name="components">Optional list of components to query. If null, all tools are queried.</param>
+    /// <param name="envVars">Optional environment variables.</param>
+    /// <returns>List of key-value pairs of tool command and <see cref="CommandInfo"/>.</returns>
     public IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null)
     {
         if (components is null || components.Count == 0)
@@ -106,6 +137,16 @@ internal class DotNetToolService : IDotNetToolService
         return commands.ToList();
     }
 
+    /// <summary>
+    /// Installs a .NET tool using the dotnet CLI.
+    /// </summary>
+    /// <param name="toolName">The name of the tool to install.</param>
+    /// <param name="version">Optional version to install.</param>
+    /// <param name="global">Whether to install the tool globally.</param>
+    /// <param name="prerelease">Whether to allow prerelease versions.</param>
+    /// <param name="addSources">Optional additional NuGet sources.</param>
+    /// <param name="configFile">Optional NuGet config file path.</param>
+    /// <returns>True if installation succeeded, otherwise false.</returns>
     public bool InstallDotNetTool(string toolName, string? version = null, bool global = false, bool prerelease = false, string[]? addSources = null, string? configFile = null)
     {
         if (string.IsNullOrEmpty(toolName))
@@ -154,6 +195,12 @@ internal class DotNetToolService : IDotNetToolService
         return exitCode == 0;
     }
 
+    /// <summary>
+    /// Uninstalls a .NET tool using the dotnet CLI.
+    /// </summary>
+    /// <param name="toolName">The name of the tool to uninstall.</param>
+    /// <param name="global">Whether to uninstall the tool globally.</param>
+    /// <returns>True if uninstallation succeeded, otherwise false.</returns>
     public bool UninstallDotNetTool(string toolName, bool global = false)
     {
         if (string.IsNullOrEmpty(toolName))
@@ -172,6 +219,12 @@ internal class DotNetToolService : IDotNetToolService
         return exitCode == 0;
     }
 
+    /// <summary>
+    /// Gets the list of installed .NET tools, optionally refreshing the cache.
+    /// </summary>
+    /// <param name="refresh">Whether to refresh the tool list.</param>
+    /// <param name="envVars">Optional environment variables.</param>
+    /// <returns>List of <see cref="DotNetToolInfo"/> objects.</returns>
     public IList<DotNetToolInfo> GetDotNetTools(bool refresh = false, IDictionary<string, string> ? envVars = null)
     {
         if (refresh || _dotNetTools.Count == 0)
@@ -182,7 +235,7 @@ internal class DotNetToolService : IDotNetToolService
             var localRunner = DotnetCliRunner.CreateDotNet("tool", ["list"], envVars);
             var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
             var localExitCode = localRunner.ExecuteAndCaptureOutput(out var localStdOut, out var localStdErr);
-            //parse through local dotnet tools first. 
+            // Parse through local dotnet tools first.
             if (localExitCode == 0 && !string.IsNullOrEmpty(localStdOut))
             {
                 var localDtdOutByLine = localStdOut.Split(Environment.NewLine);
@@ -199,7 +252,7 @@ internal class DotNetToolService : IDotNetToolService
                 _dotNetTools = [.. dotnetToolList];
             }
 
-            //parse through global tools
+            // Parse through global tools
             if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
             {
                 var stdOutByLine = stdOut.Split(Environment.NewLine);
@@ -220,6 +273,11 @@ internal class DotNetToolService : IDotNetToolService
         return _dotNetTools;
     }
 
+    /// <summary>
+    /// Parses a line of tool info output into a <see cref="DotNetToolInfo"/> object.
+    /// </summary>
+    /// <param name="line">The line to parse.</param>
+    /// <returns>A <see cref="DotNetToolInfo"/> object if parsing is successful; otherwise, null.</returns>
     private static DotNetToolInfo? ParseToolInfo(string line)
     {
         var match = Regex.Match(line, @"^(\S+)\s+(\S+)\s+(\S+)");
@@ -236,10 +294,17 @@ internal class DotNetToolService : IDotNetToolService
         return null;
     }
 
+    /// <summary>
+    /// Determines if a <see cref="DotNetToolInfo"/> object represents a valid .NET tool.
+    /// </summary>
+    /// <param name="dotnetToolInfo">The tool info to validate.</param>
+    /// <returns>True if valid; otherwise, false.</returns>
     private static bool IsValidDotNetTool(DotNetToolInfo dotnetToolInfo)
     {
-        return
-            !dotnetToolInfo.Command.Equals("dotnet-scaffold", StringComparison.OrdinalIgnoreCase) &&
-            !dotnetToolInfo.PackageName.Equals("package", StringComparison.OrdinalIgnoreCase);
+        // ignore dotnet-scaffold-aspire if the has a previous version on their machine.
+        // it is no longer relevant since aspire has been folded into dotnet-scaffold
+        return !dotnetToolInfo.Command.Equals("dotnet-scaffold-aspire", StringComparison.OrdinalIgnoreCase) &&
+            !dotnetToolInfo.Command.Equals("dotnet-scaffold-aspnet", StringComparison.OrdinalIgnoreCase) &&
+        !dotnetToolInfo.PackageName.Equals("package", StringComparison.OrdinalIgnoreCase);
     }
 }

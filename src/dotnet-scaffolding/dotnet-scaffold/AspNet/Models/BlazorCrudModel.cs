@@ -1,0 +1,76 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
+
+/// <summary>
+/// Represents a model for Blazor CRUD scaffolding, providing helpers for input types and classes in templates.
+/// </summary>
+internal class BlazorCrudModel : CrudModel
+{
+    /// <summary>
+    /// Indicates whether the host project contains a MainLayout component.
+    /// Used to emit the @layout directive for generated pages.
+    /// </summary>
+    public bool HasMainLayout { get; set; }
+
+    //used to get correct Input tag to add to BlazorCrud\Create.tt and BlazorCrud\Edit.tt template
+    /// <summary>
+    /// Gets the correct Blazor input component type for a given .NET type name.
+    /// Used in BlazorCrud Create/Edit templates.
+    /// </summary>
+    /// <param name="inputType">The .NET type name (e.g., "string", "int").</param>
+    /// <returns>The Blazor input component type (e.g., "InputText").</returns>
+    public string GetInputType(string inputType)
+    {
+        if (string.IsNullOrEmpty(inputType))
+        {
+            return "InputText";
+        }
+
+        switch (inputType)
+        {
+            case "string":
+                return "InputText";
+            case "DateTime":
+            case "DateTimeOffset":
+            case "DateOnly":
+            case "TimeOnly":
+            case "System.DateTime":
+            case "System.DateTimeOffset":
+            case "System.DateOnly":
+            case "System.TimeOnly":
+                return "InputDate";
+            case "int":
+            case "long":
+            case "short":
+            case "float":
+            case "decimal":
+            case "double":
+                return "InputNumber";
+            case "bool":
+                return "InputCheckbox";
+            case "enum":
+            case "enum[]":
+                return "InputSelect";
+            default:
+                return "InputText";
+        }
+    }
+
+    //used to get correct form class to add to BlazorCrud\Create.tt and BlazorCrud\Edit.tt template
+    /// <summary>
+    /// Gets the correct CSS class for a Blazor input component based on the .NET type name.
+    /// </summary>
+    /// <param name="inputType">The .NET type name.</param>
+    /// <returns>The CSS class for the input component.</returns>
+    public string GetInputClassType(string inputType)
+    {
+        if (string.Equals(inputType, "bool", StringComparison.OrdinalIgnoreCase))
+        {
+            return "form-check-input";
+        }
+
+        return "form-control";
+    }
+}

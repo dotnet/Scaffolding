@@ -4,52 +4,117 @@
 using System.Text.Json;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
+using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
-internal class AzCliHelper
+internal static class AzCliHelper
 {
-    /// <summary>
-    /// Gets Azure usernames, tenant IDs, and application IDs using the Azure CLI.
-    /// </summary>
-    /// <param name="usernames">the user IDs</param>
-    /// <param name="tenants">the tenant IDs</param>
-    /// <param name="appIds">the app IDs</param>
-    /// <param name="azCliErrors">the errors from the Az CLI if there are any</param>
-    /// <returns>if successful, return true</returns>
-    public static bool GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds, out string? azCliErrors)
-    {
-        // Create a runner to execute the 'az account list' command with json output format
-        var runner = AzCliRunner.Create();
+    private const string usernamesPropertyKey = "entraIdUsernames";
+    private const string tenantsPropertyKey = "entraIdTenants";
+    private const string appIdsPropertyKey = "entraIdAppIds";
+    private const string azCliErrorsPropertyKey = "entraIdAzCliErrors";
 
-        if (EnsureUserIsLoggedIn(runner, out string? output, out string? loginErrors) && !string.IsNullOrEmpty(output))
+    /// <summary>
+    /// Get the usernames from Azure AD dynamically
+    /// </summary>
+    public static List<string> GetUsernameParameterValuesDynamically(IFlowContext context)
+    {
+        return GetParameterValue(context, usernamesPropertyKey);
+    }
+
+    /// <summary>
+    ///  Get the tenant IDs from Azure AD dynamically
+    /// </summary>
+    public static List<string> GetTenantParameterValuesDynamically(IFlowContext context)
+    {
+        return GetParameterValue(context, tenantsPropertyKey);
+    }
+
+    /// <summary>
+    /// Get the application IDs from Azure AD dynamically
+    /// </summary>
+    public static List<string> GetAppIdParameterValuesDynamically(IFlowContext context)
+    {
+        return GetParameterValue(context, appIdsPropertyKey);
+    }
+
+    /// <summary>
+    /// Get the errors from the Az CLI if any
+    /// </summary>
+    public static string? GetAzCliErrors(IFlowContext context)
+    {
+        return context.GetValue<string>(azCliErrorsPropertyKey) ?? null;
+    }
+
+    private static List<string> GetParameterValue(IFlowContext context, string propertyKey)
+    {
+        List<string>? values = context.GetValue<List<string>>(propertyKey);
+        if (values is not null)
         {
-            if (GetAzureUsernamesAndTenatIds(output, out usernames, out tenants, out string? usernameTenantError))
+            return values;
+        }
+        // Trigger retrieval if not already done
+        SetAzureProperties(context);
+
+        values = context.GetValue<List<string>>(propertyKey) ?? [];
+
+        return values;
+    }
+
+    /// <summary>
+    /// Sets Azure-related properties in the specified flow context, including usernames, tenant IDs, application IDs,
+    /// and any Azure CLI error messages.
+    /// </summary>
+    /// <remarks>This method updates the context with information retrieved from Azure, making these
+    /// properties available for subsequent operations within the flow. If Azure CLI errors are encountered, the error
+    /// message is also set in the context.</remarks>
+    /// <param name="context">The flow context in which the Azure properties will be set. Cannot be null.</param>
+    private static void SetAzureProperties(IFlowContext context)
+    {
+        GetAzureInformation(out List<string> usernamesResult, out List<string> tenantsResult, out List<string> appIdsResult, out string? azCliErrors);
+
+        if (!string.IsNullOrEmpty(azCliErrors))
+        {
+            context.Set(azCliErrorsPropertyKey, azCliErrors);
+        }
+
+        context.Set(usernamesPropertyKey, usernamesResult);
+        context.Set(tenantsPropertyKey, tenantsResult);
+        context.Set(appIdsPropertyKey, appIdsResult);
+
+        static void GetAzureInformation(out List<string> usernames, out List<string> tenants, out List<string> appIds, out string? azCliErrors)
+        {
+            // Create a runner to execute the 'az account list' command with json output format
+            var runner = AzCliRunner.Create();
+
+            if (EnsureUserIsLoggedIn(runner, out string? output, out string? loginErrors) && !string.IsNullOrEmpty(output))
             {
-                if (GetAzureAppIds(runner, out appIds, out string? appErrors))
+                if (GetAzureUsernamesAndTenatIds(output, out usernames, out tenants, out string? usernameTenantError))
                 {
-                    azCliErrors = null;
-                    return true;
+                    if (GetAzureAppIds(runner, out appIds, out string? appErrors))
+                    {
+                        azCliErrors = null;
+                        return;
+                    }
+                    else
+                    {
+                        azCliErrors = appErrors;
+                    }
                 }
                 else
                 {
-                    azCliErrors = appErrors;
+                    azCliErrors = usernameTenantError;
                 }
             }
             else
             {
-                azCliErrors = usernameTenantError;
+                azCliErrors = loginErrors;
             }
+            usernames = [];
+            tenants = [];
+            appIds = [];
         }
-        else
-        {
-            azCliErrors = loginErrors;
-        }
-        usernames = [];
-        tenants = [];
-        appIds = [];
-
-        return false;
     }
 
     /// <summary>

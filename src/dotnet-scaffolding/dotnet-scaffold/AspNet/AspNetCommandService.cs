@@ -17,8 +17,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
     {
         IScaffoldRunnerBuilder _builder = builder;
 
-        public string? AzCliErrors { get; private set; }
-
         public Type[] GetScaffoldSteps()
         {
             return
@@ -49,7 +47,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
         public void AddScaffolderCommands()
         {
             AspNetOptions options = new();
-            AzCliErrors = options.AzCliErrors;
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Blazor.Empty)
                 .WithDisplayName(AspnetStrings.Blazor.EmptyDisplayName)
@@ -315,9 +312,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithIdentityTextTemplatingStep()
                 .WithIdentityCodeChangeStep();
 
-            if (options.AreAzCliCommandsSuccessful())
-            {
-                _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.EntraId.Name)
+            _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.EntraId.Name)
                     .WithDisplayName(AspnetStrings.EntraId.DisplayName)
                     .WithCategory(AspnetStrings.Catagories.EntraId)
                     .WithDescription(AspnetStrings.EntraId.Description)
@@ -342,7 +337,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     .WithEntraIdCodeChangeStep()
                     .WithEntraIdBlazorWasmCodeChangeStep()
                     .WithEntraIdTextTemplatingStep();
-            }
         }
     }
 }

@@ -77,7 +77,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                     }
 
                     // Invoke the command directly (async)
-                    int aspireExitCode = await runner.RootCommand.InvokeAsync([.. parameterValues], cancellationToken: cancellationToken);
+                    ParseResult aspireParseResult = runner.RootCommand.Parse([.. parameterValues]);
+                    int aspireExitCode = await aspireParseResult.InvokeAsync();
 
                     _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandInfo, aspireExitCode, chosenCategory));
                     if (aspireExitCode != 0)
@@ -96,7 +97,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                         return FlowStepResult.Failure("AspNet command infrastructure not available.");
                     }
                     // Invoke the command directly (async)
-                    int aspnetExitCode = await runner.RootCommand.InvokeAsync([.. parameterValues], cancellationToken: cancellationToken);
+                    ParseResult aspnetParseResult = runner.RootCommand.Parse([.. parameterValues]);
+                    int aspnetExitCode = await aspnetParseResult.InvokeAsync();
                     _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandInfo, aspnetExitCode, chosenCategory));
                     if (aspnetExitCode != 0)
                     {

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
@@ -20,6 +21,15 @@ public class ScaffolderOption<T> : ScaffolderOption
     {
         _cliOption ??= new Option<T>(FixedName);
         return _cliOption;
+    }
+
+    /// <summary>
+    /// Gets the parsed value from a ParseResult.
+    /// </summary>
+    internal override object? GetValue(ParseResult parseResult)
+    {
+        var option = (Option<T>)ToCliOption();
+        return parseResult.GetValue(option);
     }
 
     /// <summary>

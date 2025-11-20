@@ -99,23 +99,7 @@ internal static class CommandLineExtensions
 
         foreach (var option in context.Scaffolder.Options)
         {
-            var cliOption = option.ToCliOption();
-            // Use reflection to call GetValue with the correct type parameter
-            var getValueMethod = typeof(ParseResult).GetMethods()
-                .FirstOrDefault(m => m.Name == nameof(ParseResult.GetValue) && 
-                                   m.IsGenericMethod && 
-                                   m.GetParameters().Length == 1);
-            
-            if (getValueMethod != null)
-            {
-                var optionType = cliOption.GetType();
-                if (optionType.IsGenericType && optionType.GetGenericTypeDefinition() == typeof(Option<>))
-                {
-                    var valueType = optionType.GetGenericArguments()[0];
-                    var genericMethod = getValueMethod.MakeGenericMethod(valueType);
-                    context.OptionResults[option] = genericMethod.Invoke(parseResult, new object[] { cliOption });
-                }
-            }
+            context.OptionResults[option] = option.GetValue(parseResult);
         }
 
         return context;

@@ -50,8 +50,6 @@ builder.AddHandler(async (parseResult, cancellationToken) =>
     }
 });
 
-
-
 var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
 telemetryWrapper?.ConfigureFirstTimeTelemetry();
 await runner.RunAsync(args);

@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
@@ -43,4 +44,8 @@ public abstract class ScaffolderOption
     /// Converts the option to a parameter for interactive UI.
     /// </summary>
     internal abstract Parameter ToParameter();
+    /// <summary>
+    /// Gets the parsed value from a ParseResult.
+    /// </summary>
+    internal abstract object? GetValue(ParseResult parseResult);
 }

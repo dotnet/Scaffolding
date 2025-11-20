@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.CommandLine;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.Extensions.Logging;
-using System.CommandLine.Invocation;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -37,21 +37,22 @@ internal class ScaffoldRunner(ILogger<ScaffoldRunner> logger) : IScaffoldRunner
             throw new InvalidOperationException("RootCommand is not set.");
         }
 
-        // Invokes the root command with the provided arguments
-        await RootCommand.InvokeAsync(args);
+        // Parse and invoke the root command with the provided arguments
+        ParseResult parseResult = RootCommand.Parse(args);
+        await parseResult.InvokeAsync();
     }
 
     /// <summary>
-    /// Adds a handler to the RootCommand doing the action passed in the handle parameter.
+    /// Adds an action to the RootCommand doing the action passed in the handle parameter.
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    public void AddHandler(Func<InvocationContext, Task> handle)
+    public void AddHandler(Func<ParseResult, CancellationToken, Task> handle)
     {
         if (RootCommand is null)
         {
             throw new InvalidOperationException("RootCommand is not set.");
         }
 
-        RootCommand.SetHandler(handle);
+        RootCommand.SetAction(handle);
     }
 }

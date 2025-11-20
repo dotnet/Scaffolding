@@ -1,7 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.CommandLine;
-using System.CommandLine.NamingConventionBinder;
+using System.CommandLine.Parsing;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
@@ -31,17 +31,17 @@ internal static class CommandLineExtensions
             Command categoryCommand = GetCategoryCommand(categoryWithScaffolder.Key);
             foreach (var scaffolder in categoryWithScaffolder.Value)
             {
-                categoryCommand.AddCommand(scaffolder.ToCommand());
+                categoryCommand.Subcommands.Add(scaffolder.ToCommand());
                 commandInfo.Add(scaffolder.ToCommandInfo());
             }
-            rootCommand.AddCommand(categoryCommand);
+            rootCommand.Subcommands.Add(categoryCommand);
         }
 
         if (scaffoldRunner.Options is not null)
         {
             foreach (ScaffolderOption option in scaffoldRunner.Options)
             {
-                rootCommand.AddOption(option.ToCliOption());
+                rootCommand.Options.Add(option.ToCliOption());
             }
         }
 
@@ -74,13 +74,14 @@ internal static class CommandLineExtensions
 
         foreach (var option in scaffolder.Options)
         {
-            command.AddOption(option.ToCliOption());
+            command.Options.Add(option.ToCliOption());
         }
 
-        command.Handler = CommandHandler.Create(async (ParseResult parseResult) =>
+        command.SetAction(async (ParseResult parseResult, CancellationToken cancellationToken) =>
         {
             var context = scaffolder.CreateContext(parseResult);
             await scaffolder.ExecuteAsync(context);
+            return 0;
         });
 
         return command;
@@ -98,7 +99,23 @@ internal static class CommandLineExtensions
 
         foreach (var option in context.Scaffolder.Options)
         {
-            context.OptionResults[option] = parseResult.GetValue(option.ToCliOption());
+            var cliOption = option.ToCliOption();
+            // Use reflection to call GetValue with the correct type parameter
+            var getValueMethod = typeof(ParseResult).GetMethods()
+                .FirstOrDefault(m => m.Name == nameof(ParseResult.GetValue) && 
+                                   m.IsGenericMethod && 
+                                   m.GetParameters().Length == 1);
+            
+            if (getValueMethod != null)
+            {
+                var optionType = cliOption.GetType();
+                if (optionType.IsGenericType && optionType.GetGenericTypeDefinition() == typeof(Option<>))
+                {
+                    var valueType = optionType.GetGenericArguments()[0];
+                    var genericMethod = getValueMethod.MakeGenericMethod(valueType);
+                    context.OptionResults[option] = genericMethod.Invoke(parseResult, new object[] { cliOption });
+                }
+            }
         }
 
         return context;
@@ -131,14 +148,15 @@ internal static class CommandLineExtensions
     private static void AddGetCommandsCommand(this RootCommand rootCommand, List<CommandInfo> commandInfo)
     {
         Command getCommandsCommand = new("get-commands");
-        getCommandsCommand.SetHandler(() =>
+        getCommandsCommand.SetAction((ParseResult parseResult, CancellationToken cancellationToken) =>
         {
             var json = System.Text.Json.JsonSerializer.Serialize(commandInfo);
 
             // This probably shouldn't be a direct Console.WriteLine call in the long run.
             Console.WriteLine(json);
+            return Task.FromResult(0);
         });
 
-        rootCommand.AddCommand(getCommandsCommand);
+        rootCommand.Subcommands.Add(getCommandsCommand);
     }
 }

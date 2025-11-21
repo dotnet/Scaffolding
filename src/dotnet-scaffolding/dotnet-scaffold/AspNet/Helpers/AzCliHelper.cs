@@ -160,8 +160,8 @@ internal static class AzCliHelper
     /// <returns>if successful, return true</returns>
     private static bool GetAzureUsernamesAndTenatIds(string output, out List<string> usernames, out List<string> tenants, out string? usernameTenantError)
     {
-        tenants = [];
         HashSet<string> uniqueUsernames = [];
+        HashSet<string> uniqueTenants = [];
 
         try
         {
@@ -189,12 +189,13 @@ internal static class AzCliHelper
                         string? id = tenant.GetString();
                         if (!string.IsNullOrEmpty(id))
                         {
-                            tenants.Add(id);
+                            uniqueTenants.Add(id);
                         }
                     }
                 }
             }
             usernames = [.. uniqueUsernames];
+            tenants = [.. uniqueTenants];
         }
         catch (Exception ex)
         {

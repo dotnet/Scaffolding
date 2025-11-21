@@ -17,6 +17,13 @@
                     },
                     {
                       "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+                      "Block": "builder.Services.AddCascadingAuthenticationState();",
+                      "LeadingTrivia": {
+                        "Newline": true
+                      }
+                    },
+                    {
+                      "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
                       "MultiLineBlock": [
                         "builder.Services.AddAuthorization(options =>",
                         "{",

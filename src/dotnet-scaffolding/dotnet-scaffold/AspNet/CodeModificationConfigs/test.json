@@ -11,6 +11,7 @@
                 "builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
                 "    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));",
                 "",
+                "builder.Services.AddCascadingAuthenticationState();",
                 "builder.Services.AddAuthorization(options =>",
                 "{",
                 "    // By default, all incoming requests will be authorized according to the default policy.",

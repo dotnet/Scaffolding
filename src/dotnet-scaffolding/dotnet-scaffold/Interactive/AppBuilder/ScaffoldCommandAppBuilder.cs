@@ -26,9 +26,9 @@ internal class ScaffoldCommandAppBuilder(IScaffoldRunner runnner, string[] args)
     /// Builds and configures the <see cref="ScaffoldCommandApp"/> with all required services and commands.
     /// </summary>
     /// <returns>A configured <see cref="ScaffoldCommandApp"/> instance.</returns>
-    public ScaffoldCommandApp Build(string? startupErrors = null)
+    public ScaffoldCommandApp Build()
     {
-        TypeRegistrar? serviceRegistrations = GetDefaultServices(startupErrors);
+        TypeRegistrar? serviceRegistrations = GetDefaultServices();
         CommandApp<ScaffoldCommand> commandApp = new(serviceRegistrations);
         commandApp.Configure(config =>
         {
@@ -50,7 +50,7 @@ internal class ScaffoldCommandAppBuilder(IScaffoldRunner runnner, string[] args)
     /// Registers the default services required for the scaffold command application.
     /// </summary>
     /// <returns>A <see cref="TypeRegistrar"/> with all required services registered.</returns>
-    private TypeRegistrar? GetDefaultServices(string? startupErrors = null)
+    private TypeRegistrar? GetDefaultServices()
     {
         TypeRegistrar registrar = new TypeRegistrar();
         registrar.Register(typeof(IFileSystem), typeof(FileSystem));
@@ -60,14 +60,6 @@ internal class ScaffoldCommandAppBuilder(IScaffoldRunner runnner, string[] args)
         registrar.Register(typeof(IToolManager), typeof(ToolManager));
         registrar.Register(typeof(IToolManifestService), typeof(ToolManifestService));
         registrar.Register(typeof(IFirstTimeUseNoticeSentinel), typeof(FirstTimeUseNoticeSentinel));
-
-        // Create the instance of StartUpErrorService and set the error if provided
-        StartUpErrorService startUpErrorService = new StartUpErrorService();
-        if (!string.IsNullOrWhiteSpace(startupErrors))
-        {
-            startUpErrorService.SetError(startupErrors);
-        }
-        registrar.RegisterInstance(typeof(IStartUpErrorService), startUpErrorService);
 
         // Register a lazy singleton for the first time use notice sentinel.
         registrar.RegisterLazy(typeof(IFirstTimeUseNoticeSentinel), (serviceProvider) =>

@@ -45,7 +45,7 @@ builder.AddHandler(async (parseResult, cancellationToken) =>
     else
     {
         ScaffoldCommandAppBuilder appBuilder = new(runner, [.. parseResult.Tokens.Select(t => t.Value)]);
-        ScaffoldCommandApp app = appBuilder.Build(aspNetCommandService.AzCliErrors);
+        ScaffoldCommandApp app = appBuilder.Build();
         await app.RunAsync();
     }
 });

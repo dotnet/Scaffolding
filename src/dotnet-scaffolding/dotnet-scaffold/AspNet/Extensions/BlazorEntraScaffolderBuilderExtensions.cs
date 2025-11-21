@@ -240,9 +240,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             var step = config.Step;
             var context = config.Context;
             List<string> packageNames = [
-                PackageConstants.AspNetCorePackages.AspNetCoreAuthenticationJwtBearerPackageName,
-                PackageConstants.AspNetCorePackages.AspNetCoreAuthenticationOpenIdConnectPackageName,
-                PackageConstants.AspNetCorePackages.MicrosoftIdentityWebPackageName,
+                PackageConstants.AspNetCorePackages.MicrosoftIdentityWebPackageName
             ];
 
             if (context.Properties.TryGetValue(nameof(EntraIdSettings), out var entraIdSettings) &&

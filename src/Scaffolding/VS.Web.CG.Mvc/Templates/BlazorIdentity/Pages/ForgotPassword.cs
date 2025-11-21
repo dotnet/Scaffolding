@@ -40,29 +40,31 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "t-password\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n            <Data" +
                     "AnnotationsValidator />\r\n            <ValidationSummary class=\"text-danger\" role" +
                     "=\"alert\" />\r\n\r\n            <div class=\"form-floating mb-3\">\r\n                <In" +
-                    "putText @bind-Value=\"Input.Email\" class=\"form-control\" autocomplete=\"username\" a" +
-                    "ria-required=\"true\" placeholder=\"name@example.com\" />\r\n                <label fo" +
-                    "r=\"email\" class=\"form-label\">Email</label>\r\n                <ValidationMessage F" +
-                    "or=\"() => Input.Email\" class=\"text-danger\" />\r\n            </div>\r\n            <" +
-                    "button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Reset password</button" +
-                    ">\r\n        </EditForm>\r\n     </div>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParameterFrom" +
-                    "Form]\r\n    private InputModel Input { get; set; } = new();\r\n\r\n    private async " +
-                    "Task OnValidSubmitAsync()\r\n    {\r\n        var user = await UserManager.FindByEma" +
-                    "ilAsync(Input.Email);\r\n        if (user is null || !(await UserManager.IsEmailCo" +
-                    "nfirmedAsync(user)))\r\n        {\r\n            // Don\'t reveal that the user does " +
-                    "not exist or is not confirmed\r\n            RedirectManager.RedirectTo(\"Account/F" +
-                    "orgotPasswordConfirmation\");\r\n        }\r\n\r\n        // For more information on ho" +
-                    "w to enable account confirmation and password reset please\r\n        // visit htt" +
-                    "ps://go.microsoft.com/fwlink/?LinkID=532713\r\n        var code = await UserManage" +
-                    "r.GeneratePasswordResetTokenAsync(user);\r\n        code = WebEncoders.Base64UrlEn" +
-                    "code(Encoding.UTF8.GetBytes(code));\r\n        var callbackUrl = NavigationManager" +
-                    ".GetUriWithQueryParameters(\r\n            NavigationManager.ToAbsoluteUri(\"Accoun" +
-                    "t/ResetPassword\").AbsoluteUri,\r\n            new Dictionary<string, object?> { [\"" +
-                    "code\"] = code });\r\n\r\n        await EmailSender.SendPasswordResetLinkAsync(user, " +
-                    "Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n        RedirectManage" +
-                    "r.RedirectTo(\"Account/ForgotPasswordConfirmation\");\r\n    }\r\n\r\n    private sealed" +
-                    " class InputModel\r\n    {\r\n        [Required]\r\n        [EmailAddress]\r\n        pu" +
-                    "blic string Email { get; set; } = \"\";\r\n    }\r\n}\r\n");
+                    "putText @bind-Value=\"Input.Email\" id=\"Input.Email\" class=\"form-control\" autocomp" +
+                    "lete=\"username\" aria-required=\"true\" placeholder=\"name@example.com\" />\r\n        " +
+                    "        <label for=\"Input.Email\" class=\"form-label\">Email</label>\r\n             " +
+                    "   <ValidationMessage For=\"() => Input.Email\" class=\"text-danger\" />\r\n          " +
+                    "  </div>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\"" +
+                    ">Reset password</button>\r\n        </EditForm>\r\n     </div>\r\n</div>\r\n\r\n@code {\r\n " +
+                    "   [SupplyParameterFromForm]\r\n    private InputModel Input { get; set; } = defau" +
+                    "lt!;\r\n\r\n    protected override void OnInitialized()\r\n    {\r\n        Input ??= ne" +
+                    "w();\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n    {\r\n        var u" +
+                    "ser = await UserManager.FindByEmailAsync(Input.Email);\r\n        if (user is null" +
+                    " || !(await UserManager.IsEmailConfirmedAsync(user)))\r\n        {\r\n            //" +
+                    " Don\'t reveal that the user does not exist or is not confirmed\r\n            Redi" +
+                    "rectManager.RedirectTo(\"Account/ForgotPasswordConfirmation\");\r\n            retur" +
+                    "n;\r\n        }\r\n\r\n        // For more information on how to enable account confir" +
+                    "mation and password reset please\r\n        // visit https://go.microsoft.com/fwli" +
+                    "nk/?LinkID=532713\r\n        var code = await UserManager.GeneratePasswordResetTok" +
+                    "enAsync(user);\r\n        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetByte" +
+                    "s(code));\r\n        var callbackUrl = NavigationManager.GetUriWithQueryParameters" +
+                    "(\r\n            NavigationManager.ToAbsoluteUri(\"Account/ResetPassword\").Absolute" +
+                    "Uri,\r\n            new Dictionary<string, object?> { [\"code\"] = code });\r\n\r\n     " +
+                    "   await EmailSender.SendPasswordResetLinkAsync(user, Input.Email, HtmlEncoder.D" +
+                    "efault.Encode(callbackUrl));\r\n\r\n        RedirectManager.RedirectTo(\"Account/Forg" +
+                    "otPasswordConfirmation\");\r\n    }\r\n\r\n    private sealed class InputModel\r\n    {\r\n" +
+                    "        [Required]\r\n        [EmailAddress]\r\n        public string Email { get; s" +
+                    "et; } = \"\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

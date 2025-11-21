@@ -41,11 +41,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 Assert.Equal(@"AppPath\Components\Pages\testModelPages\Create.razor", blazorGenerator.ValidateAndGetOutputPath("testModel", "Create"));
                 Assert.Equal(@"AppPath\SpecialPages\BlazorComponents\testModelPages\Create.razor", blazorGenerator.ValidateAndGetOutputPath("testModel", "Create", relativeFolderPath));
+
+                Assert.Equal(@"AppPath\Components\Pages\NotFound.razor", blazorGenerator.ValidateAndGetOutputPath("testModel", "NotFound"));
+                Assert.Equal(@"AppPath\SpecialPages\BlazorComponents\NotFound.razor", blazorGenerator.ValidateAndGetOutputPath("testModel", "NotFound", relativeFolderPath));
             }
             else
             {
                 Assert.Equal(@"AppPath/Components/Pages/testModelPages/Create.razor", blazorGenerator.ValidateAndGetOutputPath("testModel", "Create"));
                 Assert.Equal(@"AppPath/SpecialPages/BlazorComponents/testModelPages/Create.razor", blazorGenerator.ValidateAndGetOutputPath("testModel", "Create", relativeFolderPath));
+
+                Assert.Equal(@"AppPath/Components/Pages/NotFound.razor", blazorGenerator.ValidateAndGetOutputPath("testModel", "NotFound"));
+                Assert.Equal(@"AppPath/SpecialPages/BlazorComponents/NotFound.razor", blazorGenerator.ValidateAndGetOutputPath("testModel", "NotFound", relativeFolderPath));
             }
         }
 

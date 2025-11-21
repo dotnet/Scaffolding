@@ -25,8 +25,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write(@"@inherits LayoutComponentBase
-@layout AccountLayout
+            this.Write("@inherits LayoutComponentBase\r\n@layout ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorLayoutNamespace));
+            this.Write(@"
 
 <h1>Manage your account</h1>
 
@@ -34,10 +35,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
     <h2>Change your account settings</h2>
     <hr />
     <div class=""row"">
-        <div class=""col-md-3"">
+        <div class=""col-lg-3"">
             <ManageNavMenu />
         </div>
-        <div class=""col-md-9"">
+        <div class=""col-lg-9"">
             @Body
         </div>
     </div>

@@ -9,52 +9,6 @@ namespace Microsoft.DotNet.Scaffolding.Internal.Extensions;
 
 internal static class StringExtensions
 {
-    public static bool IsCSharpProject(this string projectFilePath)
-    {
-        return projectFilePath?.EndsWith(".csproj", StringComparison.OrdinalIgnoreCase) == true;
-    }
-
-    public static bool IsBinary(this string filePath)
-    {
-        return
-            filePath?.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) == true ||
-            filePath?.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) == true;
-    }
-
-    public static bool IsSolutionFile(this string filePath)
-    {
-        return
-            filePath?.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) == true;
-    }
-
-    /// <summary>
-    /// since netstandard2.0 does not have a Contains that allows StringOrdinal param, using lower invariant comparison.
-    /// </summary>
-    /// <returns>true if lower invariants are equal, false otherwise. false for any null scenario.</returns>
-    public static bool ContainsIgnoreCase(this string input, string value)
-    {
-        if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(value))
-        {
-            return false;
-        }
-
-        return (input?.ToLowerInvariant().Contains(value.ToLowerInvariant())).GetValueOrDefault();
-    }
-
-    public static string ToLowerInvariantFirstChar(this string input)
-    {
-        if (input == null)
-        {
-            throw new ArgumentNullException(nameof(input));
-        }
-
-        if (input != string.Empty)
-        {
-            return input.Substring(0, length: 1).ToLowerInvariant() + input.Substring(1);
-        }
-        return input;
-    }
-
     /// <summary>
     /// Helper to make relative paths from physical paths. ie. calculates the relative path from 
     /// basePath to fullPath. Note that if either path is null, fullPath will be returned.

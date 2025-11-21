@@ -6,4 +6,3 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
     {
     }
 }
-

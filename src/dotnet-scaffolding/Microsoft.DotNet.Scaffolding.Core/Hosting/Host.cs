@@ -5,6 +5,9 @@ using Microsoft.DotNet.Scaffolding.Core.Builder;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
+/// <summary>
+/// Provides the entry point for creating a scaffolder host and configuring scaffold runners.
+/// </summary>
 public static class Host
 {
     /// <summary>

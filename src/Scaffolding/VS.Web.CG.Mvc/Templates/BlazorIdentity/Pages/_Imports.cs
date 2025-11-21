@@ -27,7 +27,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
         {
             this.Write("@using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.BlazorIdentityNamespace));
-            this.Write(".Shared\r\n@layout AccountLayout\r\n");
+            this.Write(".Shared\r\n@attribute [ExcludeFromInteractiveRouting]\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

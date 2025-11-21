@@ -11,18 +11,6 @@
     <RootNamespace>Microsoft.DotNet.Tools.Scaffold</RootNamespace>
     <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
-  <ItemGroup>
-    <!--
-      TODO: Find a better place for these files to live that is shared between .Core and dotnet-scaffold. Linking them like this is temporary
-      to get around the fact that dotnet-scaffold doesn't (and likely won't) have a dependency on .Core.
-    -->
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Logging\CleanConsoleFormatter.cs" Link="Logging\CleanConsoleFormatter.cs" />
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Logging\CleanConsoleFormatterOptions.cs" Link="Logging\CleanConsoleFormatterOptions.cs" />
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Logging\ConsoleLoggerExtensions.cs" Link="Logging\ConsoleLoggerExtensions.cs" />
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\ComponentModel\*.cs">
-      <Link>ComponentModel\%(Filename)%(Extension)</Link>
-    </Compile>
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Spectre.Console.Flow" />
@@ -30,14 +18,677 @@
     <PackageReference Include="Spectre.Console.Cli" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+    <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Internal\Microsoft.DotNet.Scaffolding.Internal.csproj" />
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Roslyn\Microsoft.DotNet.Scaffolding.Roslyn.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Microsoft.DotNet.Scaffolding.Core.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\Microsoft.DotNet.Scaffolding.TextTemplating.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.CodeModification\Microsoft.DotNet.Scaffolding.CodeModification.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\*.tt" PackagePath="Templates\DbContext\" />
+    <None Pack="true" Include="AspNet\Templates\Files\*.cshtml" PackagePath="Templates\Files\" />
+    <None Pack="true" Include="AspNet\Templates\Files\*.js" PackagePath="Templates\Files\" />
+    <None Pack="true" Include="AspNet\Templates\**\*.tt" PackagePath="Templates\" />
     <None Pack="true" Include="README.md" PackagePath="\" />
+    <None Pack="true" Include="**\CodeModificationConfigs\**\*.json" PackagePath="CodeModificationConfigs\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Blazor identity templates-->
+    <None Update="AspNet\Templates\BlazorIdentity\IdentityComponentsEndpointRouteBuilderExtensions.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\IdentityNoOpEmailSender.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\IdentityRedirectManager.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\IdentityRevalidatingAuthenticationStateProvider.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\ConfirmEmail.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\ConfirmEmailChange.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\ExternalLogin.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\ForgotPassword.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\ForgotPasswordConfirmation.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\InvalidPasswordReset.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\InvalidUser.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Lockout.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Login.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\LoginWith2fa.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\LoginWithRecoveryCode.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\ChangePassword.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\DeletePersonalData.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\Disable2fa.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\Email.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\EnableAuthenticator.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\ExternalLogins.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\GenerateRecoveryCodes.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\Index.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\Passkeys.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\PersonalData.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\RenamePasskey.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\ResetAuthenticator.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\SetPassword.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\TwoFactorAuthentication.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Manage\_Imports.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\Register.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\RegisterConfirmation.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\ResendEmailConfirmation.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\ResetPassword.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\ResetPasswordConfirmation.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Pages\_Imports.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\PasskeyInputModel.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\PasskeyOperation.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Shared\ExternalLoginPicker.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Shared\ManageLayout.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Shared\ManageNavMenu.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Shared\PasskeySubmit.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Shared\RedirectToLogin.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Shared\ShowRecoveryCodes.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorIdentity\Shared\StatusMessage.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\Files\ApplicationUser.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ApplicationUser.cs</LastGenOutput>
+    </None>
+    <!-- EfController templates -->
+    <None Update="AspNet\Templates\EfController\ApiEfController.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ApiEfController.cs</LastGenOutput>
+    </None>
+    <None Update="AspNet\Templates\EfController\MvcEfController.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MvcEfController.cs</LastGenOutput>
+    </None>
+    <!-- Blazor CRUD templates -->
+    <None Update="AspNet\Templates\BlazorCrud\Create.tt">
+      <LastGenOutput>Create.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorCrud\Delete.tt">
+      <LastGenOutput>Delete.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorCrud\Details.tt">
+      <LastGenOutput>Details.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorCrud\Edit.tt">
+      <LastGenOutput>Edit.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\BlazorCrud\Index.tt">
+      <LastGenOutput>Index.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <!-- MinimalApi templates -->
+    <None Update="AspNet\Templates\MinimalApi\MinimalApi.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MinimalApi.cs</LastGenOutput>
+    </None>
+    <None Update="AspNet\Templates\MinimalApi\MinimalApiEf.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MinimalApiEf.cs</LastGenOutput>
+    </None>
+    <!-- Razor page templates -->
+    <None Update="AspNet\Templates\RazorPages\CreateModel.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>CreateModel.cs</LastGenOutput>
+    </None>
+    <None Update="AspNet\Templates\RazorPages\DetailsModel.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>DetailsModel.cs</LastGenOutput>
+    </None>
+    <None Update="AspNet\Templates\RazorPages\EditModel.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>EditModel.cs</LastGenOutput>
+    </None>
+    <!-- Razor page templates -->
+    <None Update="AspNet\Templates\RazorPages\Create.tt">
+      <LastGenOutput>Create.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\RazorPages\Delete.tt">
+      <LastGenOutput>Delete.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\RazorPages\DeleteModel.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>DeleteModel.cs</LastGenOutput>
+    </None>
+    <None Update="AspNet\Templates\RazorPages\Details.tt">
+      <LastGenOutput>Details.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\RazorPages\Edit.tt">
+      <LastGenOutput>Edit.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\RazorPages\Index.tt">
+      <LastGenOutput>Index.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\RazorPages\IndexModel.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>IndexModel.cs</LastGenOutput>
+    </None>
+    <!-- Views templates -->
+    <None Update="AspNet\Templates\Views\Create.tt">
+      <LastGenOutput>Create.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\Views\Delete.tt">
+      <LastGenOutput>Delete.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\Views\Details.tt">
+      <LastGenOutput>Details.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\Views\Edit.tt">
+      <LastGenOutput>Edit.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\Views\Index.tt">
+      <LastGenOutput>Index.cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Blazor CRUD templates -->
+    <Compile Update="AspNet\Templates\BlazorCrud\Create.cs">
+      <DependentUpon>Create.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorCrud\Delete.cs">
+      <DependentUpon>Delete.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorCrud\Details.cs">
+      <DependentUpon>Details.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorCrud\Edit.cs">
+      <DependentUpon>Edit.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorCrud\Index.cs">
+      <DependentUpon>Index.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <!-- Blazor identity templates-->
+    <Compile Update="AspNet\Templates\BlazorIdentity\IdentityComponentsEndpointRouteBuilderExtensions.cs">
+      <DependentUpon>IdentityComponentsEndpointRouteBuilderExtensions.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\IdentityNoOpEmailSender.cs">
+      <DependentUpon>IdentityNoOpEmailSender.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\IdentityRedirectManager.cs">
+      <DependentUpon>IdentityRedirectManager.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\IdentityRevalidatingAuthenticationStateProvider.cs">
+      <DependentUpon>IdentityRevalidatingAuthenticationStateProvider.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\ConfirmEmail.cs">
+      <DependentUpon>ConfirmEmail.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\ConfirmEmailChange.cs">
+      <DependentUpon>ConfirmEmailChange.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\ExternalLogin.cs">
+      <DependentUpon>ExternalLogin.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\ForgotPassword.cs">
+      <DependentUpon>ForgotPassword.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\ForgotPasswordConfirmation.cs">
+      <DependentUpon>ForgotPasswordConfirmation.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\InvalidPasswordReset.cs">
+      <DependentUpon>InvalidPasswordReset.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\InvalidUser.cs">
+      <DependentUpon>InvalidUser.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Lockout.cs">
+      <DependentUpon>Lockout.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Login.cs">
+      <DependentUpon>Login.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\LoginWith2fa.cs">
+      <DependentUpon>LoginWith2fa.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\LoginWithRecoveryCode.cs">
+      <DependentUpon>LoginWithRecoveryCode.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\ChangePassword.cs">
+      <DependentUpon>ChangePassword.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\DeletePersonalData.cs">
+      <DependentUpon>DeletePersonalData.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\Disable2fa.cs">
+      <DependentUpon>Disable2fa.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\Email.cs">
+      <DependentUpon>Email.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\EnableAuthenticator.cs">
+      <DependentUpon>EnableAuthenticator.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\ExternalLogins.cs">
+      <DependentUpon>ExternalLogins.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\GenerateRecoveryCodes.cs">
+      <DependentUpon>GenerateRecoveryCodes.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\Index.cs">
+      <DependentUpon>Index.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\Passkeys.cs">
+      <DependentUpon>Passkeys.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\PersonalData.cs">
+      <DependentUpon>PersonalData.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\RenamePasskey.cs">
+      <DependentUpon>RenamePasskey.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\ResetAuthenticator.cs">
+      <DependentUpon>ResetAuthenticator.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\SetPassword.cs">
+      <DependentUpon>SetPassword.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\TwoFactorAuthentication.cs">
+      <DependentUpon>TwoFactorAuthentication.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Manage\_Imports.cs">
+      <DependentUpon>_Imports.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\Register.cs">
+      <DependentUpon>Register.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\RegisterConfirmation.cs">
+      <DependentUpon>RegisterConfirmation.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\ResendEmailConfirmation.cs">
+      <DependentUpon>ResendEmailConfirmation.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\ResetPassword.cs">
+      <DependentUpon>ResetPassword.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\ResetPasswordConfirmation.cs">
+      <DependentUpon>ResetPasswordConfirmation.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Pages\_Imports.cs">
+      <DependentUpon>_Imports.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\PasskeyInputModel.cs">
+      <DependentUpon>PasskeyInputModel.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\PasskeyOperation.cs">
+      <DependentUpon>PasskeyOperation.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Shared\ExternalLoginPicker.cs">
+      <DependentUpon>ExternalLoginPicker.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Shared\ManageLayout.cs">
+      <DependentUpon>ManageLayout.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Shared\ManageNavMenu.cs">
+      <DependentUpon>ManageNavMenu.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Shared\PasskeySubmit.cs">
+      <DependentUpon>PasskeySubmit.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Shared\RedirectToLogin.cs">
+      <DependentUpon>RedirectToLogin.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Shared\ShowRecoveryCodes.cs">
+      <DependentUpon>ShowRecoveryCodes.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\BlazorIdentity\Shared\StatusMessage.cs">
+      <DependentUpon>StatusMessage.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\Files\ApplicationUser.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ApplicationUser.tt</DependentUpon>
+    </Compile>
+    <!-- MinimalApi templates -->
+    <Compile Update="AspNet\Templates\MinimalApi\MinimalApi.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MinimalApi.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AspNet\Templates\MinimalApi\MinimalApiEf.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MinimalApiEf.tt</DependentUpon>
+    </Compile>
+    <!-- EfController templates -->
+    <Compile Update="AspNet\Templates\EfController\MvcEfController.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MvcEfController.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AspNet\Templates\EfController\ApiEfController.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ApiEfController.tt</DependentUpon>
+    </Compile>
+    <!-- RazorPages templates-->
+    <Compile Update="AspNet\Templates\RazorPages\Create.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Create.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AspNet\Templates\RazorPages\CreateModel.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CreateModel.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AspNet\Templates\RazorPages\Delete.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Delete.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AspNet\Templates\RazorPages\DeleteModel.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DeleteModel.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AspNet\Templates\RazorPages\Details.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Details.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AspNet\Templates\RazorPages\DetailsModel.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DetailsModel.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AspNet\Templates\RazorPages\Edit.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Edit.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AspNet\Templates\RazorPages\EditModel.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>EditModel.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AspNet\Templates\RazorPages\Index.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Index.tt</DependentUpon>
+    </Compile>
+    <Compile Update="AspNet\Templates\RazorPages\IndexModel.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>IndexModel.tt</DependentUpon>
+    </Compile>
+    <!-- Views templates -->
+    <Compile Update="AspNet\Templates\Views\Create.cs">
+      <DependentUpon>Create.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\Views\Delete.cs">
+      <DependentUpon>Delete.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\Views\Details.cs">
+      <DependentUpon>Details.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\Views\Edit.cs">
+      <DependentUpon>Edit.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\Views\Index.cs">
+      <DependentUpon>Index.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- VS T4 templating service -->
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 </Project>

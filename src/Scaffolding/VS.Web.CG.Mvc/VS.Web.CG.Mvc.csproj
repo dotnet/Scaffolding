@@ -31,6 +31,7 @@
     <None Pack="true" Include="ParameterDefinitions\*" PackagePath="Generators\ParameterDefinitions\" />
     <None Pack="true" Include="Templates\Blazor\*.tt" PackagePath="Templates\Blazor\" />
     <None Pack="true" Include="Templates\BlazorIdentity\**\*.tt" PackagePath="Templates\BlazorIdentity\" />
+    <None Pack="true" Include="Templates\BlazorIdentity\Shared\*.js" PackagePath="Templates\BlazorIdentity\Shared\" />
     <None Pack="true" Include="Templates\General\*" PackagePath="Templates\General\" />
     <None Pack="true" Include="Templates\MinimalApi\*" PackagePath="Templates\MinimalApi\" />
     <None Pack="true" Include="Templates\ControllerGenerator\*" PackagePath="Templates\ControllerGenerator\" />
@@ -98,11 +99,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Templates\BlazorIdentity\IdentityUserAccessor.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\IdentityRevalidatingAuthenticationStateProvider.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\IdentityRedirectManager.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\IdentityNoOpEmailSender.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\IdentityComponentsEndpointRouteBuilderExtensions.Interfaces.cs" />
+    <Compile Include="Templates\BlazorIdentity\Pages\AccessDenied.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AccessDenied.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\BlazorIdentity\Pages\Manage\Passkeys.Interfaces.cs" />
+    <Compile Include="Templates\BlazorIdentity\Pages\Manage\Passkeys.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Passkeys.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\BlazorIdentity\Pages\Manage\RenamePasskey.Interfaces.cs" />
+    <Compile Include="Templates\BlazorIdentity\Pages\Manage\RenamePasskey.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>RenamePasskey.tt</DependentUpon>
+    </Compile>
     <Compile Include="Templates\BlazorIdentity\Pages\_Imports.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\Pages\Register.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\Pages\RegisterConfirmation.Interfaces.cs" />
@@ -283,18 +300,30 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>_Imports.tt</DependentUpon>
     </Compile>
+    <Compile Include="Templates\BlazorIdentity\PasskeyInputModel.Interfaces.cs" />
+    <Compile Include="Templates\BlazorIdentity\PasskeyInputModel.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>PasskeyInputModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\BlazorIdentity\PasskeyOperation.Interfaces.cs" />
+    <Compile Include="Templates\BlazorIdentity\PasskeyOperation.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>PasskeyOperation.tt</DependentUpon>
+    </Compile>
     <Compile Include="Templates\BlazorIdentity\Shared\ManageLayout.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\Shared\ExternalLoginPicker.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\Shared\ManageNavMenu.Interfaces.cs" />
+    <Compile Include="Templates\BlazorIdentity\Shared\PasskeySubmit.Interfaces.cs" />
+    <Compile Include="Templates\BlazorIdentity\Shared\PasskeySubmit.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>PasskeySubmit.tt</DependentUpon>
+    </Compile>
     <Compile Include="Templates\BlazorIdentity\Shared\RedirectToLogin.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\Shared\StatusMessage.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\Shared\ShowRecoveryCodes.Interfaces.cs" />
-    <Compile Include="Templates\BlazorIdentity\Shared\AccountLayout.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>AccountLayout.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\BlazorIdentity\Shared\AccountLayout.Interfaces.cs" />
     <Compile Include="Templates\BlazorIdentity\Shared\ExternalLoginPicker.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -355,6 +384,12 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Index.tt</DependentUpon>
     </Compile>
+    <Compile Include="Templates\Blazor\NotFound.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>NotFound.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Templates\Blazor\NotFound.Interfaces.cs" />
     <Compile Include="Templates\General\IdentityApplicationUser.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -412,11 +447,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>IdentityRevalidatingAuthenticationStateProvider.tt</DependentUpon>
     </Compile>
-    <Compile Include="Templates\BlazorIdentity\IdentityUserAccessor.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>IdentityUserAccessor.tt</DependentUpon>
-    </Compile>
     <None Update="Templates\BlazorIdentity\IdentityComponentsEndpointRouteBuilderExtensions.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -467,6 +497,15 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>Index.cs</LastGenOutput>
     </None>
+    <None Update="Templates\Blazor\NotFound.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>NotFound.tt</DependentUpon>
+    </None>
+    <None Update="Templates\Blazor\NotFound.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>NotFound.cs</LastGenOutput>
+    </None>
     <None Update="Templates\General\IdentityApplicationUser.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -491,6 +530,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- VS T4 templating service -->
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 

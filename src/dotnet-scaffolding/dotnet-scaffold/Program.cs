@@ -12,6 +12,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet;
 using Microsoft.DotNet.Tools.Scaffold.Command;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.AppBuilder;
 using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console;
 
 IScaffoldRunnerBuilder builder = Host.CreateScaffoldBuilder();
 
@@ -34,17 +35,16 @@ IScaffoldRunner runner = builder.Build();
 
 // add handler for routing the interactive tool through the Spectre.Console experience, all others
 // are routed through System.CommandLine experience
-builder.AddHandler(async (context) =>
+builder.AddHandler(async (parseResult, cancellationToken) =>
 {
-    var nonInteractive = context.ParseResult.GetValue(nonInteractiveOption);
+    var nonInteractive = parseResult.GetValue((Option<bool>)nonInteractiveOption);
     if (nonInteractive is true)
     {
-        context.Console.WriteLine("Non-Interactive mode is not yet implemented. Use \"dotnet scaffold\" for the interactive experience.");
-        context.ExitCode = 1;
+        AnsiConsole.WriteLine("Non-Interactive mode is not yet implemented. Use \"dotnet scaffold\" for the interactive experience.");
     }
     else
     {
-        ScaffoldCommandAppBuilder appBuilder = new(runner, [.. context.ParseResult.Tokens.Select(t => t.Value)]);
+        ScaffoldCommandAppBuilder appBuilder = new(runner, [.. parseResult.Tokens.Select(t => t.Value)]);
         ScaffoldCommandApp app = appBuilder.Build();
         await app.RunAsync();
     }

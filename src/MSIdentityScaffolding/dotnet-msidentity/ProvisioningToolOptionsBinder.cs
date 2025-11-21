@@ -3,7 +3,8 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Binding;
+using System.CommandLine.Parsing;
+using Microsoft.DotNet.MSIdentity.Shared;
 
 namespace Microsoft.DotNet.MSIdentity.Tool
 {
@@ -11,7 +12,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
     /// ProvisioningToolOptionsBinder to setup handlers for dotnet-msidentity commnds.
     /// Used in Microsoft.DotNet.MSIdentity.Tool.Program in SetHandler calls.
     /// </summary>
-    internal class ProvisioningToolOptionsBinder : BinderBase<ProvisioningToolOptions>
+    internal class ProvisioningToolOptionsBinder
     {
         private readonly Option<bool> _jsonOption;
         private readonly Option<bool> _enableIdTokenOption;
@@ -90,36 +91,36 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             _calledApiUrlOption = calledApiUrlOption;
         }
 
-        protected override ProvisioningToolOptions GetBoundValue(BindingContext bindingContext)
+        public ProvisioningToolOptions GetBoundValue(ParseResult parseResult)
         {
-            IList<string> redirectUriList = bindingContext.ParseResult.GetValue(_redirectUriOption) ?? new List<string>();
+            IList<string> redirectUriList = parseResult.GetValue(_redirectUriOption) ?? new List<string>();
             return new ProvisioningToolOptions
             {
-                HostedApiScopes = bindingContext.ParseResult.GetValue(_hostedAppIdUriOption),
-                CallsDownstreamApi = bindingContext.ParseResult.GetValue(_callsDownstreamApiOption),
-                UpdateUserSecrets = bindingContext.ParseResult.GetValue(_updateUserSecretsOption),
-                CallsGraph = bindingContext.ParseResult.GetValue(_callsGraphOption),
-                ClientId = bindingContext.ParseResult.GetValue(_clientIdOption),
-                ClientSecret = bindingContext.ParseResult.GetValue(_clientSecretOption),
-                ProjectType = bindingContext.ParseResult.GetValue(_projectTypeOption),
-                SusiPolicyId = bindingContext.ParseResult.GetValue(_susiPolicyIdOption),
-                TenantId = bindingContext.ParseResult.GetValue(_tenantOption),
-                Username = bindingContext.ParseResult.GetValue(_usernameOption),
-                ProjectFilePath = bindingContext.ParseResult.GetValue(_projectFilePathOption),
-                WebApiClientId = bindingContext.ParseResult.GetValue(_apiClientIdOption),
-                HostedAppIdUri = bindingContext.ParseResult.GetValue(_hostedAppIdUriOption),
-                Json = bindingContext.ParseResult.GetValue(_jsonOption),
-                AppDisplayName = bindingContext.ParseResult.GetValue(_appDisplayName),
+                HostedApiScopes = parseResult.GetValue(_hostedAppIdUriOption),
+                CallsDownstreamApi = parseResult.GetValue(_callsDownstreamApiOption),
+                UpdateUserSecrets = parseResult.GetValue(_updateUserSecretsOption),
+                CallsGraph = parseResult.GetValue(_callsGraphOption),
+                ClientId = parseResult.GetValue(_clientIdOption),
+                ClientSecret = parseResult.GetValue(_clientSecretOption),
+                ProjectType = parseResult.GetValue(_projectTypeOption),
+                SusiPolicyId = parseResult.GetValue(_susiPolicyIdOption),
+                TenantId = parseResult.GetValue(_tenantOption),
+                Username = parseResult.GetValue(_usernameOption),
+                ProjectFilePath = parseResult.GetValue(_projectFilePathOption),
+                WebApiClientId = parseResult.GetValue(_apiClientIdOption),
+                HostedAppIdUri = parseResult.GetValue(_hostedAppIdUriOption),
+                Json = parseResult.GetValue(_jsonOption),
+                AppDisplayName = parseResult.GetValue(_appDisplayName),
                 RedirectUris = redirectUriList,
-                EnableIdToken = bindingContext.ParseResult.GetValue(_enableIdTokenOption),
-                EnableAccessToken = bindingContext.ParseResult.GetValue(_enableAccessToken),
-                ConfigUpdate = bindingContext.ParseResult.GetValue(_configUpdateOption),
-                CodeUpdate = bindingContext.ParseResult.GetValue(_codeUpdateOption),
-                PackagesUpdate = bindingContext.ParseResult.GetValue(_packagesUpdateOption),
-                ApiScopes = bindingContext.ParseResult.GetValue(_apiScopesOption),
-                ClientProject = bindingContext.ParseResult.GetValue(_clientProjectOption),
-                Instance = bindingContext.ParseResult.GetValue(_instanceOption),
-                CalledApiUrl = bindingContext.ParseResult.GetValue(_calledApiUrlOption)
+                EnableIdToken = parseResult.GetValue(_enableIdTokenOption),
+                EnableAccessToken = parseResult.GetValue(_enableAccessToken),
+                ConfigUpdate = parseResult.GetValue(_configUpdateOption),
+                CodeUpdate = parseResult.GetValue(_codeUpdateOption),
+                PackagesUpdate = parseResult.GetValue(_packagesUpdateOption),
+                ApiScopes = parseResult.GetValue(_apiScopesOption),
+                ClientProject = parseResult.GetValue(_clientProjectOption),
+                Instance = parseResult.GetValue(_instanceOption),
+                CalledApiUrl = parseResult.GetValue(_calledApiUrlOption)
             };
         }
     }

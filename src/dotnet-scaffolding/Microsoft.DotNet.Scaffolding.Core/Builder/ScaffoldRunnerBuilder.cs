@@ -1,11 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.CommandLine;
 using Microsoft.DotNet.Scaffolding.Core.CommandLine;
 using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.CommandLine.Invocation;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
@@ -119,9 +119,9 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     }
 
     /// <summary>
-    /// Adds a handler to the RootCommand doing the action passed in the handle parameter.
+    /// Adds an action to the RootCommand doing the action passed in the handle parameter.
     /// </summary>
-    public void AddHandler(Func<InvocationContext, Task> handle)
+    public void AddHandler(Func<ParseResult, CancellationToken, Task> handle)
     {
         if (_appServices is null)
         {

@@ -63,8 +63,8 @@
               }
             },
             {
-              "CheckBlock": "if (!app.Environment.IsDevelopment())",
-              "Block": "if (app.Environment.IsDevelopment())\r\n{\r\n   app.MapOpenApi();\r\n}",
+              "CheckBlock": "app.MapOpenApi()",
+              "Block": "if (app.Environment.IsDevelopment())\r\n{\r\n    app.MapOpenApi();\r\n}",
               "Options": [ "OpenApi" ],
               "InsertAfter": "var app = WebApplication.CreateBuilder.Build();",
               "InsertBefore": [ "app.UseHttpsRedirection();" ],

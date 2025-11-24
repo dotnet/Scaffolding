@@ -26,7 +26,6 @@ public static class <#= Model.EndpointsClassName #>
             string group = Model.OpenAPI
             ? $"var group = routes.MapGroup(\"{routePrefix}\").WithTags(nameof({Model.ModelInfo.ModelTypeName}));"
             : $"var group = routes.MapGroup(\"{routePrefix}\");";
-        string withOpenApiStatement = "        .WithOpenApi()";
         #>
 <#= group #>
 
@@ -35,10 +34,6 @@ public static class <#= Model.EndpointsClassName #>
             return new[] { new <#= modelConstructor #> };
         })<#
         string builderExtensions = $".WithName(\"{getAllModels}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n{withOpenApiStatement}";
-        }
         if(!Model.UseTypedResults)
         {
             builderExtensions += $"\r\n.Produces<{modelArray}>(StatusCodes.Status200OK)";
@@ -52,10 +47,6 @@ public static class <#= Model.EndpointsClassName #>
             //return new <#= Model.ModelInfo.ModelTypeName #> { ID = id };
         })<#
         builderExtensions = $".WithName(\"{getModelById}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n{withOpenApiStatement}";
-        }
         if(!Model.UseTypedResults)
         {
             builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
@@ -69,10 +60,6 @@ public static class <#= Model.EndpointsClassName #>
             return <#= resultsExtension #>;
         })<#
         builderExtensions = $".WithName(\"{updateModel}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n{withOpenApiStatement}";
-        }
         if (!Model.UseTypedResults)
         {
             builderExtensions += $"\r\n.Produces(StatusCodes.Status204NoContent)";
@@ -98,10 +85,6 @@ public static class <#= Model.EndpointsClassName #>
 })
         <#
         builderExtensions = $".WithName(\"{createModel}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions+= $"\r\n{withOpenApiStatement}";
-        }
         if (!Model.UseTypedResults)
         {
             builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status201Created)";
@@ -125,10 +108,6 @@ public static class <#= Model.EndpointsClassName #>
         #>
 })<#
         builderExtensions = $".WithName(\"{deleteModel}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n{withOpenApiStatement}";
-        }
         if (!Model.UseTypedResults)
         {
             builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";

@@ -49,7 +49,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             string group = Model.OpenAPI
             ? $"var group = routes.MapGroup(\"{routePrefix}\").WithTags(nameof({Model.ModelInfo.ModelTypeName}));"
             : $"var group = routes.MapGroup(\"{routePrefix}\");";
-        string withOpenApiStatement = "        .WithOpenApi()";
         
             this.Write(this.ToStringHelper.ToStringWithCulture(group));
             this.Write("\r\n\r\n        group.MapGet(\"/\", () =>\r\n        {\r\n            return new[] { new ");
@@ -57,10 +56,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(" };\r\n        })");
 
         string builderExtensions = $".WithName(\"{getAllModels}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n{withOpenApiStatement}";
-        }
         if(!Model.UseTypedResults)
         {
             builderExtensions += $"\r\n.Produces<{modelArray}>(StatusCodes.Status200OK)";
@@ -74,10 +69,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(" { ID = id };\r\n        })");
 
         builderExtensions = $".WithName(\"{getModelById}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n{withOpenApiStatement}";
-        }
         if(!Model.UseTypedResults)
         {
             builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
@@ -92,10 +83,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write(";\r\n        })");
 
         builderExtensions = $".WithName(\"{updateModel}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n{withOpenApiStatement}";
-        }
         if (!Model.UseTypedResults)
         {
             builderExtensions += $"\r\n.Produces(StatusCodes.Status204NoContent)";
@@ -125,10 +112,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write("})\r\n        ");
 
         builderExtensions = $".WithName(\"{createModel}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions+= $"\r\n{withOpenApiStatement}";
-        }
         if (!Model.UseTypedResults)
         {
             builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status201Created)";
@@ -157,10 +140,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
             this.Write("})");
 
         builderExtensions = $".WithName(\"{deleteModel}\")";
-        if(Model.OpenAPI)
-        {
-            builderExtensions += $"\r\n{withOpenApiStatement}";
-        }
         if (!Model.UseTypedResults)
         {
             builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";

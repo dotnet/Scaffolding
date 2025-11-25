@@ -52,7 +52,7 @@
     <!-- Mono.TextTemplating-->
     <MonoTextTemplatingVersion>2.3.1</MonoTextTemplatingVersion>
     <!-- System.Formats.Asn1-->
-    <SystemFormatsAsn1Version>8.0.1</SystemFormatsAsn1Version>
+    <SystemFormatsAsn1Version>8.0.2</SystemFormatsAsn1Version>
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>8.0.8</VersionPrefix>

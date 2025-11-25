@@ -79,7 +79,7 @@ stages:
         - job: OSX
           timeoutInMinutes: 180
           pool:
-            vmImage: macOS-13
+            vmImage: macOS-latest
           strategy:
             matrix:
               release_configuration:

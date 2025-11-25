@@ -24,7 +24,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorEntraId
         {
 			this.Write("\n");
 			this.Write(@"
-@using Microsoft.AspNetCore.Components.Authorization
 @implements IDisposable
 @inject NavigationManager Navigation
 

@@ -56,3 +56,20 @@ I recommend cloning it under your user profile directory.
 - `.config` folders in the root of either the scaffolding project or the project you're scaffolding.
 - **Missing or overlapping SDK versions**:
   - I encountered issues with two .NET 10.0 preview versions and had to delete the newer one.
+
+# How to Install the most recent packages
+
+0) generate a personal access token (PAT).
+   a. go to Azure DevOps
+   b. click the User settings next to your picture in the top right
+   c. click on Personal Access Token toward the bottom of the menu
+   d. click "+ New Token" and copy it. You will need this token to run the following scripts
+
+1) Log in to az CLI with your Microsoft account with `az login`
+
+2) set your PAT environment variable with running `$env:PAT = [your PAT]`
+
+2) run `scripts\download-artifacts.ps1`
+optionally, specify the branch for example: `powershell.exe -File c:\Scaffolding\scripts\download-artifacts.ps1 -Branch release/10.0`, branch defaults to main
+
+3) Ensure that the correct versions are installed. The installed packages should be Microsoft.dotnet-msidenity, dotnet-aspnet-codegenerator, and Microsoft.dotnet-scaffold. 

@@ -32,6 +32,40 @@
       "Usings": [
         "Microsoft.AspNetCore.Components.Authorization"
       ]
+    },
+    {
+      "FileName": "_Imports.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "@using Microsoft.AspNetCore.Components.Forms"
+          ],
+          "MultiLineBlock": [
+            "@using Microsoft.AspNetCore.Components.Forms",
+            "@using Microsoft.AspNetCore.Components.Authorization"
+          ],
+          "CheckBlock": "Microsoft.AspNetCore.Components.Authorization"
+        }
+      ]
+    },
+    {
+      "FileName": "Layout\\MainLayout.razor",
+      "Replacements": [
+        {
+          "CheckBlock": "<AuthorizeView>",
+          "ReplaceSnippet": [
+            "<div class=\"top-row px-4\">"
+          ],
+          "MultiLineBlock": [
+            "<div class=\"top-row px-4 auth\">",
+            "            <AuthorizeView>",
+            "                <Authorized>",
+            "                    @context.User.Identity?.Name",
+            "                </Authorized>",
+            "            </AuthorizeView>"
+          ]
+        }
+      ]
     }
   ]
 }

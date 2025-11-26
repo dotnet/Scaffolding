@@ -122,9 +122,6 @@
   <PropertyGroup>
     <AzureIdentityVersion>1.13.1</AzureIdentityVersion>
     <CodeAnalysisVersion>$(MicrosoftCodeAnalysisVersion)</CodeAnalysisVersion>
-    <MicrosoftExtensionsConfigurationVersion>9.0.11</MicrosoftExtensionsConfigurationVersion>
-    <MicrosoftExtensionsConfigurationBinderVersion>9.0.11</MicrosoftExtensionsConfigurationBinderVersion>
-    <MicrosoftExtensionsConfigurationCommandLineVersion>9.0.11</MicrosoftExtensionsConfigurationCommandLineVersion>
     <MicrosoftGraphVersion>5.66.0</MicrosoftGraphVersion>
     <MicrosoftIdentityClientExtensionsMsalVersion>4.66.2</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>6.12.1</NuGetProjectModelVersion>

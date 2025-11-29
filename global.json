@@ -8,7 +8,7 @@
     "dotnet": "10.0.100-rc.2.25502.107"
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "11.0.0-beta.25575.1",
+    "Microsoft.DotNet.Arcade.Sdk": "11.0.0-beta.25578.1",
     "Microsoft.DotNet.Helix.Sdk": "9.0.0-beta.23607.2"
   }
 }

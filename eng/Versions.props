@@ -53,6 +53,8 @@
     <MonoTextTemplatingVersion>2.3.1</MonoTextTemplatingVersion>
     <!-- System.Formats.Asn1-->
     <SystemFormatsAsn1Version>8.0.2</SystemFormatsAsn1Version>
+    <!-- System.Text.Json -->
+    <SystemTextJsonPackageVersion>8.0.6</SystemTextJsonPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>8.0.22</VersionPrefix>

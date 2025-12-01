@@ -44,19 +44,29 @@ public class AddPackagesStep : ScaffoldStep
     /// <param name="context">The scaffolder context for the current operation.</param>
     /// <param name="cancellationToken">A cancellation token for the operation.</param>
     /// <returns>True if the packages were added successfully; otherwise, false.</returns>
-    public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
+        // Try to get the target framework from the contextcls
+        string? targetFramework = context.GetSpecifiedTargetFramework();
+
         foreach (Package package in Packages)
         {
-            // add package version here
+            // Resolve the package version based on the target framework if needed
+            Package resolvedPackage = package;
+            if (package.IsVersionRequired && !string.IsNullOrEmpty(targetFramework))
+            {
+                resolvedPackage = await package.WithResolvedVersionAsync(targetFramework);
+            }
+
+            // Add the package to the project
             DotnetCommands.AddPackage(
-                packageName: package.Name,
+                packageName: resolvedPackage.Name,
                 logger: _logger,
                 projectFile: ProjectPath,
-                packageVersion: package.Version,
+                packageVersion: resolvedPackage.PackageVersion,
                 includePrerelease: Prerelease);
         }
 
-        return Task.FromResult(true);
+        return true;
     }
 }

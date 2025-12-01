@@ -197,10 +197,11 @@ internal class AspNetOptions
         TargetFramework = new ScaffolderOption<string>
         {
             DisplayName = CliStrings.TargetFrameworkDisplayName,
-            CliOption = CliStrings.TargetFrameworkCliOption,
+            CliOption = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkCliOption,
             Description = CliStrings.TargetFrameworkDescription,
             Required = false,
-            InteractivePromptMessage = CliStrings.TargetFrameworkInteractivePromptMessage
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = Scaffolding.Core.Model.TargetFrameworkConstants.SupportedTargetFrameworks
         };
     }
 

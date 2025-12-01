@@ -49,10 +49,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         public async Task<string> DiscoverAsync(IFlowContext context)
         {
             var optionParameterAddition = _parameter.Required ? "(" : "([purple]empty to skip[/],";
-            if (_parameter.InteractivePromptMessage is not null)
-            {
-                return await PromptAsync(context, $"{_parameter.InteractivePromptMessage} {optionParameterAddition} [sandybrown]<[/] to go back) : ");
-            }
 
             return await PromptAsync(context, $"Enter a new value for '{_parameter.DisplayName}' {optionParameterAddition}[sandybrown]<[/] to go back) : ");
         }

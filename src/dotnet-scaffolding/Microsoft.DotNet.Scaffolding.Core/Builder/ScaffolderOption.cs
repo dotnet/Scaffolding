@@ -42,11 +42,6 @@ public abstract class ScaffolderOption
     public IEnumerable<string>? CustomPickerValues { get; init; } = null;
 
     /// <summary>
-    /// Gets or sets the message displayed to the user during an interactive prompt.
-    /// </summary>
-    public string? InteractivePromptMessage { get; init; } = null;
-
-    /// <summary>
     /// Converts the option to a CLI option.
     /// </summary>
     internal abstract Option ToCliOption();

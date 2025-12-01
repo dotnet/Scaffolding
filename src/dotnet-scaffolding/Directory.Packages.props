@@ -4,7 +4,6 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
     <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageVersion Include="Humanizer" Version="$(HumanizerPackageVersion)" />
     <PackageVersion Include="Microsoft.ApplicationInsights.WorkerService" Version="$(MicrosoftApplicationInsightsWorkerServicePackageVersion)" />
@@ -26,12 +25,14 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsolePackageVersion)" />
     <PackageVersion Include="Mono.TextTemplating" Version="$(MonoTextTemplatingVersion)" />
     <PackageVersion Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageVersion Include="NuGet.Configuration" Version="7.0.1" />
+    <PackageVersion Include="NuGet.Protocol" Version="7.0.1" />
+    <PackageVersion Include="NuGet.Versioning" Version="7.0.1" />
     <PackageVersion Include="Spectre.Console.Flow" Version="$(SpectreConsoleFlowVersion)" />
     <PackageVersion Include="Spectre.Console" Version="$(SpectreConsoleVersion)" />
     <PackageVersion Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />
     <PackageVersion Include="System.CommandLine" Version="$(SystemCommandLinePackageVersion)" />
   </ItemGroup>
-
   <!-- <ItemGroup>
      Pins for Component Governance Alerts 
     <PackageVersion Include="System.Formats.Asn1" Version="9.0.0" />

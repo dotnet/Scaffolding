@@ -17,10 +17,9 @@ internal static class DotnetCommands
     /// <param name="logger">The logger for output.</param>
     /// <param name="projectFile">The project file to add the package to (optional).</param>
     /// <param name="packageVersion">The version of the package to add (optional).</param>
-    /// <param name="tfm">The target framework (optional).</param>
     /// <param name="includePrerelease">Whether to include prerelease versions.</param>
     /// <returns>True if the package was added successfully; otherwise, false.</returns>
-    public static bool AddPackage(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
+    public static bool AddPackage(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, bool includePrerelease = false)
     {
         if (!string.IsNullOrEmpty(packageName))
         {
@@ -31,12 +30,13 @@ internal static class DotnetCommands
             }
 
             arguments.AddRange(["package", packageName]);
+
             if (!string.IsNullOrEmpty(packageVersion))
             {
                 arguments.AddRange(["-v", packageVersion]);
             }
-
-            if (includePrerelease)
+            // cannot specify both version and prerelease
+            else if (includePrerelease)
             {
                 arguments.Add("--prerelease");
             }

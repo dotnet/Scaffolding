@@ -3,7 +3,6 @@
 
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
-using Microsoft.DotNet.Tools.Scaffold.Command;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Aspire.Command;
 
@@ -64,14 +63,5 @@ internal static class AspireOptions
         Description = AspireCliStrings.PrereleaseDescription,
         Required = false,
         PickerType = InteractivePickerType.YesNo
-    };
-
-    public static ScaffolderOption<string> TargetFramework => new()
-    {
-        DisplayName = CliStrings.TargetFrameworkDisplayName,
-        CliOption = CliStrings.TargetFrameworkCliOption,
-        Description = CliStrings.TargetFrameworkDescription,
-        Required = false,
-        InteractivePromptMessage = CliStrings.TargetFrameworkInteractivePromptMessage
     };
 }

@@ -239,8 +239,8 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<string> packageNames = [
-                PackageConstants.AspNetCorePackages.MicrosoftIdentityWebPackageName
+            List<Package> packages = [
+                PackageConstants.AspNetCorePackages.MicrosoftIdentityWebPackage
             ];
 
             if (context.Properties.TryGetValue(nameof(EntraIdSettings), out var entraIdSettings) &&
@@ -252,7 +252,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
                 }
 
                 step.ProjectPath = entraSettings.Project;
-                step.Packages = [.. packageNames.Select(p => new Package(p))];
+                step.Packages = packages;
             }
             else
             {
@@ -281,10 +281,10 @@ internal static class BlazorEntraScaffolderBuilderExtensions
                 {
                     step.ProjectPath = projectPath;
 
-                    List<string> packageNames = new List<string>
-                {
-                    PackageConstants.AspNetCorePackages.AspNetCoreComponentsWebAssemblyAuthenticationPackageName
-                };
+                    List<Package> packages = new List<Package>
+                    {
+                        PackageConstants.AspNetCorePackages.AspNetCoreComponentsWebAssemblyAuthenticationPackage
+                    };
                     if (context.Properties.TryGetValue(nameof(EntraIdSettings), out var entraIdSettings) &&
                         entraIdSettings is EntraIdSettings entraSettings)
                     {
@@ -293,7 +293,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
                             throw new InvalidOperationException("Project path is not set in EntraIdSettings.");
                         }
 
-                        step.Packages = [.. packageNames.Select(p => new Package(p))];
+                        step.Packages = packages;
                     }
                 }
                 else

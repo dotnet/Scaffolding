@@ -15,16 +15,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
     {
         private readonly ILogger _logger;
         private readonly IDotNetToolService _dotnetToolService;
-        private readonly IStartUpErrorService _startUpErrorService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CategoryPickerFlowStep"/> class.
         /// </summary>
-        public CategoryPickerFlowStep(ILogger logger, IDotNetToolService dotnetToolService, IStartUpErrorService startUpErrorService)
+        public CategoryPickerFlowStep(ILogger logger, IDotNetToolService dotnetToolService)
         {
             _logger = logger;
             _dotnetToolService = dotnetToolService;
-            _startUpErrorService = startUpErrorService;
         }
 
         /// <inheritdoc/>
@@ -54,7 +52,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             var dotnetTools = _dotnetToolService.GetDotNetTools();
             var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
 
-            CategoryDiscovery categoryDiscovery = new(_dotnetToolService, dotnetToolComponent, _startUpErrorService);
+            CategoryDiscovery categoryDiscovery = new(_dotnetToolService, dotnetToolComponent);
             displayCategory = categoryDiscovery.Discover(context);
             if (categoryDiscovery.State.IsNavigation())
             {

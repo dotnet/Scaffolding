@@ -14,7 +14,7 @@ public class AddPackagesStep : ScaffoldStep
     /// <summary>
     /// Gets or sets the list of package names to add.
     /// </summary>
-    public required IList<Package> Packages { get; set; }
+    public required IReadOnlyList<Package> Packages { get; set; }
 
     /// <summary>
     /// Gets or sets the path to the project file.

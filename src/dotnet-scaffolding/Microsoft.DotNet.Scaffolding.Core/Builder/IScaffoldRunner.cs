@@ -2,7 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
-using System.CommandLine.Invocation;
+using System.CommandLine;
+using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -27,7 +28,7 @@ public interface IScaffoldRunner
     Task RunAsync(string[] args);
 
     /// <summary>
-    /// Adds Handler to the RootCommand doing the action passed in the handle parameter
+    /// Adds Action to the RootCommand doing the action passed in the handle parameter
     /// </summary>
-    void AddHandler(Func<InvocationContext, Task> handle);
+    void AddHandler(Func<ParseResult, CancellationToken, Task> handle);
 }

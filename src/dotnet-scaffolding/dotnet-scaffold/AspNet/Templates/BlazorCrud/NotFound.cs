@@ -18,93 +18,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class Details : DetailsBase
+    public partial class NotFound : NotFoundBase
     {
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-
-    string modelName = Model.ModelInfo.ModelTypeName;
-    string pluralModel = Model.ModelInfo.ModelTypePluralName;
-    string modelNameLowerInv = modelName.ToLowerInvariant();
-    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
-    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.DbContextInfo.DbContextClassName : $"{dbContextNamespace}.{Model.DbContextInfo.DbContextClassName}";
-    string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
-    string modelNamespace = Model.ModelInfo.ModelNamespace;
-    var entityProperties =  Model.ModelInfo.ModelProperties
-        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
-    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
-    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
-    string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;
-    string entitySetName = Model.DbContextInfo.EntitySetVariableName;
-
-            this.Write("@page \"/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/details\"\r\n@using Microsoft.EntityFrameworkCore\r\n");
-
-    if (!string.IsNullOrEmpty(modelNamespace))
-    {
-        
-            this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNamespace));
-            this.Write("\r\n");
-  }
-
-            this.Write("@inject ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Details</PageTitle>\r\n" +
-                    "\r\n<h1>Details</h1>\r\n\r\n<div>\r\n    <h2>");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("</h2>\r\n    <hr />\r\n    @if (");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(" is null)\r\n    {\r\n        <p><em>Loading...</em></p>\r\n    }\r\n    else {\r\n        " +
-                    "<dl class=\"row\">\r\n");
-  foreach (var property in entityProperties)
-    {
-        string modelPropertyName = property.Name;
-
-            this.Write("            <dt class=\"col-sm-2\">");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write("</dt>\r\n            <dd class=\"col-sm-10\">@");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(".");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write("</dd>\r\n");
-  } 
-            this.Write("        </dl>\r\n        <div>\r\n            <a href=\"@($\"/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/edit?");
-            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
-            this.Write("={");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(".");
-            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write("}\")\">Edit</a> |\r\n            <a href=\"@($\"/");
-            this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\")\">Back to List</a>\r\n        </div>\r\n    }\r\n</div>\r\n\r\n@code {\r\n    private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write("? ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(";\r\n\r\n    [SupplyParameterFromQuery]\r\n    private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyShortTypeName));
-            this.Write(" ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write(" { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r\n    {\r\n" +
-                    "        using var context = DbFactory.CreateDbContext();\r\n        ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(" = await context.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
-            this.Write(".FirstOrDefaultAsync(m => m.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write(" == ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write(");\r\n\r\n        if (");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(" is null)\r\n        {\r\n            NavigationManager.NotFound();\r\n    " +
-                    "    }\r\n    }\r\n}\r\n");
+            this.Write("\r\n\r\n@page \"/not-found\"\r\n");
+ if (Model.HasMainLayout) { 
+            this.Write("@layout MainLayout\r\n");
+ } 
+            this.Write("\r\n\r\n<PageTitle>Not Found</PageTitle>\r\n\r\n\r\n<h1>Not Found</h1>\r\n<p>Sorry, there\'s n" +
+                    "othing at this address.</p>\r\n\r\n\r\n<a href=\"/\">Back to Home</a>");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -122,74 +48,73 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
                 this.hostValue = value;
             }
         }
+        
+        /// <summary>
+        /// Access the Model parameter of the template.
+        /// </summary>
+        private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel _ModelField;
 
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel _ModelField;
-
-/// <summary>
-/// Access the Model parameter of the template.
-/// </summary>
-private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel Model
-{
-    get
-    {
-        return this._ModelField;
-    }
-}
-
-
-/// <summary>
-/// Initialize the template
-/// </summary>
-public virtual void Initialize()
-{
-    if ((this.Errors.HasErrors == false))
-    {
-bool ModelValueAcquired = false;
-if (this.Session.ContainsKey("Model"))
-{
-    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel)(this.Session["Model"]));
-    ModelValueAcquired = true;
-}
-if ((ModelValueAcquired == false))
-{
-    string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
-    if ((string.IsNullOrEmpty(parameterValue) == false))
-    {
-        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel));
-        if (((tc != null) 
-                    && tc.CanConvertFrom(typeof(string))))
+        /// <summary>
+        /// Access the Model parameter of the template.
+        /// </summary>
+        private global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel Model
         {
-            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel)(tc.ConvertFrom(parameterValue)));
-            ModelValueAcquired = true;
+            get
+            {
+                return this._ModelField;
+            }
         }
-        else
+
+        /// <summary>
+        /// Initialize the template
+        /// </summary>
+        public virtual void Initialize()
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel\' of the p" +
-                    "arameter \'Model\' did not match the type of the data passed to the template.");
+            if ((this.Errors.HasErrors == false))
+            {
+                bool ModelValueAcquired = false;
+                if (this.Session.ContainsKey("Model"))
+                {
+                    this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel)(this.Session["Model"]));
+                    ModelValueAcquired = true;
+                }
+                if ((ModelValueAcquired == false))
+                {
+                    string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
+                    if ((string.IsNullOrEmpty(parameterValue) == false))
+                    {
+                        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel));
+                        if (((tc != null) 
+                                    && tc.CanConvertFrom(typeof(string))))
+                        {
+                            this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel)(tc.ConvertFrom(parameterValue)));
+                            ModelValueAcquired = true;
+                        }
+                        else
+                        {
+                            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel\' of the p" +
+                                    "arameter \'Model\' did not match the type of the data passed to the template.");
+                        }
+                    }
+                }
+                if ((ModelValueAcquired == false))
+                {
+                    object data = global::Microsoft.DotNet.Scaffolding.TextTemplating.CallContext.LogicalGetData("Model");
+                    if ((data != null))
+                    {
+                        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel)(data));
+                    }
+                }
+            }
         }
     }
-}
-if ((ModelValueAcquired == false))
-{
-    object data = global::Microsoft.DotNet.Scaffolding.TextTemplating.CallContext.LogicalGetData("Model");
-    if ((data != null))
-    {
-        this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel)(data));
-    }
-}
-
-
-    }
-}
-
-
-    }
+    
     #region Base class
     /// <summary>
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class DetailsBase
+    public class NotFoundBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;
@@ -199,6 +124,7 @@ if ((ModelValueAcquired == false))
         private bool endsWithNewline;
         private global::System.Collections.Generic.IDictionary<string, object> sessionField;
         #endregion
+        
         #region Properties
         /// <summary>
         /// The string builder that generation-time code is using to assemble generated output
@@ -218,6 +144,7 @@ if ((ModelValueAcquired == false))
                 this.generationEnvironmentField = value;
             }
         }
+        
         /// <summary>
         /// The error collection for the generation process
         /// </summary>
@@ -232,6 +159,7 @@ if ((ModelValueAcquired == false))
                 return this.errorsField;
             }
         }
+        
         /// <summary>
         /// A list of the lengths of each indent that was added with PushIndent
         /// </summary>
@@ -246,6 +174,7 @@ if ((ModelValueAcquired == false))
                 return this.indentLengthsField;
             }
         }
+        
         /// <summary>
         /// Gets the current indent we use when adding lines to the output
         /// </summary>
@@ -256,6 +185,7 @@ if ((ModelValueAcquired == false))
                 return this.currentIndentField;
             }
         }
+        
         /// <summary>
         /// Current transformation session
         /// </summary>
@@ -271,6 +201,7 @@ if ((ModelValueAcquired == false))
             }
         }
         #endregion
+        
         #region Transform-time helpers
         /// <summary>
         /// Write text directly into the generated output
@@ -314,6 +245,7 @@ if ((ModelValueAcquired == false))
                 this.GenerationEnvironment.Append(textToAppend);
             }
         }
+        
         /// <summary>
         /// Write text directly into the generated output
         /// </summary>
@@ -323,6 +255,7 @@ if ((ModelValueAcquired == false))
             this.GenerationEnvironment.AppendLine();
             this.endsWithNewline = true;
         }
+        
         /// <summary>
         /// Write formatted text directly into the generated output
         /// </summary>
@@ -330,6 +263,7 @@ if ((ModelValueAcquired == false))
         {
             this.Write(string.Format(global::System.Globalization.CultureInfo.CurrentCulture, format, args));
         }
+        
         /// <summary>
         /// Write formatted text directly into the generated output
         /// </summary>
@@ -337,6 +271,7 @@ if ((ModelValueAcquired == false))
         {
             this.WriteLine(string.Format(global::System.Globalization.CultureInfo.CurrentCulture, format, args));
         }
+        
         /// <summary>
         /// Raise an error
         /// </summary>
@@ -346,6 +281,7 @@ if ((ModelValueAcquired == false))
             error.ErrorText = message;
             this.Errors.Add(error);
         }
+        
         /// <summary>
         /// Raise a warning
         /// </summary>
@@ -356,6 +292,7 @@ if ((ModelValueAcquired == false))
             error.IsWarning = true;
             this.Errors.Add(error);
         }
+        
         /// <summary>
         /// Increase the indent
         /// </summary>
@@ -368,6 +305,7 @@ if ((ModelValueAcquired == false))
             this.currentIndentField = (this.currentIndentField + indent);
             this.indentLengths.Add(indent.Length);
         }
+        
         /// <summary>
         /// Remove the last indent that was added with PushIndent
         /// </summary>
@@ -386,6 +324,7 @@ if ((ModelValueAcquired == false))
             }
             return returnValue;
         }
+        
         /// <summary>
         /// Remove any indentation
         /// </summary>
@@ -395,6 +334,7 @@ if ((ModelValueAcquired == false))
             this.currentIndentField = "";
         }
         #endregion
+        
         #region ToString Helpers
         /// <summary>
         /// Utility class to produce culture-oriented representation of an object as a string.
@@ -402,6 +342,7 @@ if ((ModelValueAcquired == false))
         public class ToStringInstanceHelper
         {
             private System.IFormatProvider formatProviderField  = global::System.Globalization.CultureInfo.InvariantCulture;
+            
             /// <summary>
             /// Gets or sets format provider to be used by ToStringWithCulture method.
             /// </summary>
@@ -419,6 +360,7 @@ if ((ModelValueAcquired == false))
                     }
                 }
             }
+            
             /// <summary>
             /// This is called from the compile/run appdomain to convert objects within an expression block to a string
             /// </summary>
@@ -442,7 +384,9 @@ if ((ModelValueAcquired == false))
                 }
             }
         }
+        
         private ToStringInstanceHelper toStringHelperField = new ToStringInstanceHelper();
+        
         /// <summary>
         /// Helper to produce culture-oriented representation of an object as a string
         /// </summary>

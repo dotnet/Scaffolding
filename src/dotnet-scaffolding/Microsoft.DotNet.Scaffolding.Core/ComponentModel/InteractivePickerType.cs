@@ -13,5 +13,6 @@ public enum InteractivePickerType
     ProjectPicker,
     CustomPicker,
     YesNo,
-    ConditionalPicker
+    ConditionalPicker,
+    DynamicPicker
 }

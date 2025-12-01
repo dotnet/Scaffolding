@@ -17,6 +17,13 @@
                     },
                     {
                       "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+                      "Block": "builder.Services.AddCascadingAuthenticationState();",
+                      "LeadingTrivia": {
+                        "Newline": true
+                      }
+                    },
+                    {
+                      "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
                       "MultiLineBlock": [
                         "builder.Services.AddAuthorization(options =>",
                         "{",
@@ -41,6 +48,40 @@
             "Usings": [
                 "Microsoft.AspNetCore.Authentication.OpenIdConnect",
                 "Microsoft.Identity.Web"
+            ]
+        },
+        {
+            "FileName": "Components\\_Imports.razor",
+            "Replacements": [
+                {
+                    "ReplaceSnippet": [
+                        "@using Microsoft.AspNetCore.Components.Forms"
+                    ],
+                    "MultiLineBlock": [
+                        "@using Microsoft.AspNetCore.Components.Forms",
+                        "@using Microsoft.AspNetCore.Components.Authorization"
+                    ],
+                    "CheckBlock": "Microsoft.AspNetCore.Components.Authorization"
+                }
+            ]
+        },
+        {
+            "FileName": "Components\\Layout\\MainLayout.razor",
+            "Replacements": [
+                {
+                    "CheckBlock": "<AuthorizeView>",
+                    "ReplaceSnippet": [
+                        "<div class=\"top-row px-4\">"
+                    ],
+                    "MultiLineBlock": [
+                        "<div class=\"top-row px-4 auth\">",
+                        "            <AuthorizeView>",
+                        "                <Authorized>",
+                        "                    @context.User.Identity?.Name",
+                        "                </Authorized>",
+                        "            </AuthorizeView>"
+                    ]
+                }
             ]
         }
     ]

@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Roslyn;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
@@ -17,15 +18,7 @@ internal static class BlazorCrudHelper
     /// The CRUD page type.
     /// </summary>
     internal static string CrudPageType = "CRUD";
-
-    /// <summary>
-    /// List of CRUD pages.
-    /// </summary>
-    internal static List<string> CRUDPages = [CrudPageType, "Create", "Delete", "Details", "Edit", "Index"];
-
-    /// <summary>
-    /// The file name of the create Blazor template.
-    /// </summary>
+    internal static List<string> CRUDPages = [CrudPageType, "Create", "Delete", "Details", "Edit", "Index", "NotFound"];
     internal const string CreateBlazorTemplate = "Create.tt";
 
     /// <summary>
@@ -47,10 +40,7 @@ internal static class BlazorCrudHelper
     /// The file name of the index Blazor template.
     /// </summary>
     internal const string IndexBlazorTemplate = "Index.tt";
-
-    /// <summary>
-    /// The type name for IEndpointRouteBuilder, used in routing for Blazor components.
-    /// </summary>
+    internal const string NotFoundBlazorTemplate = "NotFound.tt";
     internal const string IEndpointRouteBuilderContainingType = "Microsoft.AspNetCore.Routing.IEndpointRouteBuilder";
 
     /// <summary>
@@ -248,6 +238,9 @@ internal static class BlazorCrudHelper
             case DetailsBlazorTemplate:
                 templateType = typeof(Details);
                 break;
+            case NotFoundBlazorTemplate:
+                templateType = typeof(NotFound);
+                break;
         }
 
         return templateType;
@@ -395,10 +388,19 @@ internal static class BlazorCrudHelper
                     break;
                 }
 
-                string baseOutputPath = GetBaseOutputPath(
-                    blazorCrudModel.ModelInfo.ModelTypeName,
-                    blazorCrudModel.ProjectInfo.ProjectPath);
-                string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.BlazorExtension}");
+                string outputFileName;
+                if (string.Equals(templateName, "NotFound", StringComparison.OrdinalIgnoreCase))
+                {
+                    string projectBasePath = Path.GetDirectoryName(blazorCrudModel.ProjectInfo.ProjectPath) ?? Directory.GetCurrentDirectory();
+                    outputFileName = Path.Combine(projectBasePath, "Components", "Pages", $"{templateName}{Common.Constants.BlazorExtension}");
+                }
+                else
+                {
+                    string baseOutputPath = GetBaseOutputPath(
+                        blazorCrudModel.ModelInfo.ModelTypeName,
+                        blazorCrudModel.ProjectInfo.ProjectPath);
+                    outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.BlazorExtension}");
+                }
 
                 textTemplatingProperties.Add(new()
                 {

@@ -15,7 +15,6 @@ internal class CategoryDiscovery
 {
     private readonly IDotNetToolService _dotnetToolService;
     private readonly DotNetToolInfo? _componentPicked;
-    private readonly IStartUpErrorService _startUpErrorService;
     public FlowStepState State { get; private set; }
 
     /// <summary>
@@ -23,12 +22,10 @@ internal class CategoryDiscovery
     /// </summary>
     /// <param name="dotnetToolService">Service for dotnet tool operations.</param>
     /// <param name="componentPicked">The selected component, if any.</param>
-    /// <param name="startUpErrorService">Service for Azure CLI startup errors.</param>
-    public CategoryDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked, IStartUpErrorService startUpErrorService)
+    public CategoryDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked)
     {
         _dotnetToolService = dotnetToolService;
         _componentPicked = componentPicked;
-        _startUpErrorService = startUpErrorService;
     }
 
     /// <summary>
@@ -83,10 +80,6 @@ internal class CategoryDiscovery
 
         prompt.Title("[lightseagreen]Pick a scaffolding category: [/]");
 
-        if (DisplayEntraIdError(out string errorMessage))
-        {
-            prompt.AddMessage(errorMessage);
-        }
         prompt.Converter(GetCategoryDisplayName)
             .AddChoices(displayCategories, navigation: context.Navigation);
 
@@ -108,18 +101,5 @@ internal class CategoryDiscovery
         }
 
         return categoryName;
-    }
-
-    private bool DisplayEntraIdError(out string errorMessage)
-    {
-        // Show Azure CLI error if it exists
-        string? failingCommand = _startUpErrorService.GetError();
-        if (!string.IsNullOrWhiteSpace(failingCommand))
-        {
-            errorMessage = $"[red]The \"Entra ID\" category is unavailable due to an authentication or authorization issue. Ensure \"{failingCommand}\" works correctly if you would like to add Entra ID Scaffolding.[/]";
-            return true;
-        }
-        errorMessage = string.Empty;
-        return false;
     }
 }

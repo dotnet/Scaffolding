@@ -7,6 +7,8 @@ using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.Internal.Extensions;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Spectre.Console;
 using Spectre.Console.Flow;
 
@@ -132,6 +134,20 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 case InteractivePickerType.CustomPicker:
                     stepOptions = GetCustomValues(_parameter.CustomPickerValues);
                     break;
+                case InteractivePickerType.DynamicPicker:
+                    stepOptions = GetDynamicValues(context, _parameter);
+
+                    if (AzCliHelper.GetAzCliErrors(context) is string azCliError && !string.IsNullOrEmpty(azCliError))
+                    {
+                        AnsiConsole.MarkupLine($"[red]Error with EntraID scaffolding in az cli environment: {azCliError}[/]");
+                        State = FlowStepState.Exit;
+                        return null;
+                    }
+                    else if (stepOptions.Count == 0)
+                    {
+                        throw new InvalidOperationException("Missing values from az CLI!.");
+                    }
+                    break;
                 case InteractivePickerType.ConditionalPicker:
                     var affirmative = _parameter.CustomPickerValues?.FirstOrDefault("");
                     var negative = _parameter.CustomPickerValues?.LastOrDefault("");
@@ -166,6 +182,26 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             return pickerType is not InteractivePickerType.YesNo && // Don't add it for Yes/No
                    !_parameter.Required && // Only add it if its not required
                    stepOptions.Any(x => x.Name.Equals("None")); // Don't add it if its already in the list
+        }
+
+        private static List<StepOption> GetDynamicValues(IFlowContext context, Parameter parameter)
+        {
+            List<string> values = [];
+
+            // dynamically calculate the parameter values for Entra ID for performance reasons
+            if (string.Equals(parameter.DisplayName, AspnetStrings.Options.Username.DisplayName, StringComparison.Ordinal))
+            {
+                values = AzCliHelper.GetUsernameParameterValuesDynamically(context);
+            }
+            else if (string.Equals(parameter.DisplayName, AspnetStrings.Options.TenantId.DisplayName, StringComparison.Ordinal))
+            {
+                values = AzCliHelper.GetTenantParameterValuesDynamically(context);
+            }
+            else if (string.Equals(parameter.DisplayName, AspnetStrings.Options.SelectApplication.DisplayName, StringComparison.Ordinal))
+            {
+                values = AzCliHelper.GetAppIdParameterValuesDynamically(context);
+            }
+            return [.. values.Select(x => new StepOption() { Name = x, Value = x })];
         }
 
         /// <summary>

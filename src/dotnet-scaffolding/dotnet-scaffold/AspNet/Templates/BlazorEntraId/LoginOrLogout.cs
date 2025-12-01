@@ -22,8 +22,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorEntraId
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("\n");
-            this.Write(@"
+			this.Write("\n");
+			this.Write(@"
 @implements IDisposable
 @inject NavigationManager Navigation
 

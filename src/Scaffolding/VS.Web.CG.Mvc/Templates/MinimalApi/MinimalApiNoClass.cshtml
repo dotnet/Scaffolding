@@ -36,10 +36,6 @@
         })
 @{
     string builderExtensions = $".WithName(\"{@getAllModels}\")";
-    if(Model.OpenAPI)
-    {
-        builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
-    }
     if(!Model.UseTypedResults)
     {
         builderExtensions += $"\r\n{builderExtensionSpaces}.Produces<{@modelArray}>(StatusCodes.Status200OK)";
@@ -53,10 +49,6 @@
         })
 @{
     builderExtensions = $".WithName(\"{@getModelById}\")";
-    if(Model.OpenAPI)
-    {
-        builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
-    }
     if(!Model.UseTypedResults)
     {
         builderExtensions += $"\r\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)";
@@ -70,10 +62,6 @@
         })
 @{
     builderExtensions = $".WithName(\"{@updateModel}\")";
-    if(Model.OpenAPI)
-    {
-    builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
-    }
     if (!Model.UseTypedResults)
     {
     builderExtensions += $"\r\n{builderExtensionSpaces}.Produces(StatusCodes.Status204NoContent)";
@@ -96,10 +84,6 @@
         })
 @{
     builderExtensions = $".WithName(\"{@createModel}\")";
-    if(Model.OpenAPI)
-    {
-    builderExtensions+= $"\r\n{builderExtensionSpaces}.WithOpenApi()";
-    }
     if (!Model.UseTypedResults)
     {
     builderExtensions += $"\r\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status201Created)";
@@ -122,10 +106,6 @@
         })
 @{
     builderExtensions = $".WithName(\"{@deleteModel}\")";
-    if(Model.OpenAPI)
-    {
-        builderExtensions += $"\r\n{builderExtensionSpaces}.WithOpenApi()";
-    }
     if (!Model.UseTypedResults)
     {
         builderExtensions += $"\r\n{builderExtensionSpaces}.Produces<{@modelName}>(StatusCodes.Status200OK)";

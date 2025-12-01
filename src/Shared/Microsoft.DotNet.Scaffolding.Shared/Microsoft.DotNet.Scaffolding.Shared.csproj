@@ -26,11 +26,6 @@
     <PackageReference Include="System.Formats.Asn1" Version="$(SystemFormatsAsn1Version)" />
   </ItemGroup>
 
-  <!-- Pin for System.Text.Json-->
-  <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonPackageVersion)" />
-  </ItemGroup>
-
   <ItemGroup>
     <Compile Update="MessageStrings.Designer.cs">
       <DesignTime>True</DesignTime>

@@ -83,5 +83,9 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>d99efda1c881042862d68d2910ff77fe479000e5</Sha>
     </Dependency>
+    <Dependency Name="System.Text.Json" Version="8.0.6">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>3b8b000a0e115700b18265d8ec8c6307056dc94d</Sha>
+    </Dependency>
   </ProductDependencies>
 </Dependencies>

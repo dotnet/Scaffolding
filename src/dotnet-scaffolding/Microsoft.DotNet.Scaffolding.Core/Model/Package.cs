@@ -67,15 +67,15 @@ public static class PackageExtensions
 
         if (targetFramework.Equals(TargetFrameworkConstants.Net8, StringComparison.OrdinalIgnoreCase))
         {
-            return NuGetVersionHelper.GetLatestNet8VersionAsync(package.Name);
+            return NuGetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 8);
         }
         else if (targetFramework.Equals(TargetFrameworkConstants.Net9, StringComparison.OrdinalIgnoreCase))
         {
-            return NuGetVersionHelper.GetLatestNet9VersionAsync(package.Name);
+            return NuGetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 9);
         }
         else if (targetFramework.Equals(TargetFrameworkConstants.Net10, StringComparison.OrdinalIgnoreCase))
         {
-            return NuGetVersionHelper.GetLatestNet10VersionAsync(package.Name);
+            return NuGetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 10);
         }
         else
         {

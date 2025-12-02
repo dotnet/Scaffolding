@@ -63,7 +63,7 @@ public class AddPackagesStep : ScaffoldStep
                 packageName: resolvedPackage.Name,
                 logger: _logger,
                 projectFile: ProjectPath,
-                packageVersion: resolvedPackage.PackageVersion,
+                packageVersion: Prerelease ? null : resolvedPackage.PackageVersion,
                 includePrerelease: Prerelease);
         }
 

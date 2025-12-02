@@ -35,8 +35,8 @@ internal static class DotnetCommands
             {
                 arguments.AddRange(["-v", packageVersion]);
             }
-            // cannot specify both version and prerelease
-            else if (includePrerelease)
+
+            if (includePrerelease)
             {
                 arguments.Add("--prerelease");
             }

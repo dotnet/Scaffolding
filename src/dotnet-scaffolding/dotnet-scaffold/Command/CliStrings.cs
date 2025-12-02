@@ -9,7 +9,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Command
         internal const string NonInteractiveCliOption = "--non-interactive";
 
         //target framework option
-        internal const string TargetFrameworkDisplayName = "Target Framework";
         internal const string TargetFrameworkDescription = "Specifies the target framework for the scaffolded project.";
     }
 }

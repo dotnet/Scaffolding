@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.Extensions.Logging;
@@ -78,6 +79,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             // Skip the next step if this is a conditional picker and the value is 'false'
             if (Parameter.PickerType is InteractivePickerType.ConditionalPicker && string.Equals(parameterValue, "false"))
             {
+                NextStep = NextStep?.NextStep;
+            }
+            else if (ParameterHelpers.IsTargetFrameworkOption(Parameter) && !string.Equals(parameterValue, TargetFrameworkConstants.Net10, StringComparison.OrdinalIgnoreCase))
+            {
+                // Skip the prerelease step if the target framework is not net10, prerelease only applies to net10
+                //TODO update for the next major release of .NET
                 NextStep = NextStep?.NextStep;
             }
 

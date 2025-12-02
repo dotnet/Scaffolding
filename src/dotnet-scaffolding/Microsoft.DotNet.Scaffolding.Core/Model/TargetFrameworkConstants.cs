@@ -3,9 +3,11 @@
 
 namespace Microsoft.DotNet.Scaffolding.Core.Model;
 
-public class TargetFrameworkConstants
+internal class TargetFrameworkConstants
 {
     public const string TargetFrameworkCliOption = "--framework";
+    public const string TargetFrameworkDisplayName = "Target Framework";
+
     public const string Net8 = "net8.0";
     public const string Net9 = "net9.0";
     public const string Net10 = "net10.0";

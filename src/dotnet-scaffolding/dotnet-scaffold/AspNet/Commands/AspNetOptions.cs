@@ -196,7 +196,7 @@ internal class AspNetOptions
 
         TargetFramework = new ScaffolderOption<string>
         {
-            DisplayName = CliStrings.TargetFrameworkDisplayName,
+            DisplayName = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkDisplayName,
             CliOption = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkCliOption,
             Description = CliStrings.TargetFrameworkDescription,
             Required = false,

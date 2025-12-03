@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             }
 
             // If required or in interactive mode, fail if not found
-            if (Parameter.Required || (commandSettings != null && !commandSettings.NonInteractive))
+            if (Parameter.Required || commandSettings != null)
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"No value found for option '{Parameter.Name}'"));
             }

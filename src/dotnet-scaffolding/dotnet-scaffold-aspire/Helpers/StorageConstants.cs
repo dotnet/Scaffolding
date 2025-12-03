@@ -10,9 +10,9 @@ internal static class StorageConstants
     public const string AddQueuesMethodName = "AddQueues";
     public const string AddBlobsMethodName = "AddBlobs";
     public const string AddTablesMethodName = "AddTables";
-    public const string BlobsClientMethodName = "AddAzureBlobClient";
-    public const string TablesClientMethodName = "AddAzureTableClient";
-    public const string QueuesClientMethodName = "AddAzureQueueClient";
+    public const string BlobsClientMethodName = "AddAzureBlobServiceClient";
+    public const string TablesClientMethodName = "AddAzureTableServiceClient";
+    public const string QueuesClientMethodName = "AddAzureQueueServiceClient";
     public static StorageProperties TableProperties = new()
     {
         VariableName = TablesVariableName,

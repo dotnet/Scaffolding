@@ -19,10 +19,6 @@ IScaffoldRunnerBuilder builder = Host.CreateScaffoldBuilder();
 ConfigureServices(builder.Services);
 ConfigureSharedSteps(builder.Services);
 
-ScaffolderOption<bool> nonInteractiveScaffoldOption = GetNonInteractiveOption();
-builder.AddOption(nonInteractiveScaffoldOption);
-Option nonInteractiveOption = nonInteractiveScaffoldOption.ToCliOption();
-
 AspireCommandService aspireCommandService = new(builder);
 aspireCommandService.AddScaffolderCommands();
 ConfigureCommandSteps(builder.Services, aspireCommandService);
@@ -37,17 +33,9 @@ IScaffoldRunner runner = builder.Build();
 // are routed through System.CommandLine experience
 builder.AddHandler(async (parseResult, cancellationToken) =>
 {
-    var nonInteractive = parseResult.GetValue((Option<bool>)nonInteractiveOption);
-    if (nonInteractive is true)
-    {
-        AnsiConsole.WriteLine("Non-Interactive mode is not yet implemented. Use \"dotnet scaffold\" for the interactive experience.");
-    }
-    else
-    {
-        ScaffoldCommandAppBuilder appBuilder = new(runner, [.. parseResult.Tokens.Select(t => t.Value)]);
-        ScaffoldCommandApp app = appBuilder.Build();
-        await app.RunAsync();
-    }
+    ScaffoldCommandAppBuilder appBuilder = new(runner, [.. parseResult.Tokens.Select(t => t.Value)]);
+    ScaffoldCommandApp app = appBuilder.Build();
+    await app.RunAsync();
 });
 
 var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
@@ -82,14 +70,4 @@ static void ConfigureCommandSteps(IServiceCollection services, ICommandService c
             services.AddTransient(stepType);
         }
     }
-}
-
-static ScaffolderOption<bool> GetNonInteractiveOption()
-{
-    return new ScaffolderOption<bool>
-    {
-        DisplayName = "Run scaffolder in non-Interactive mode",
-        CliOption = CliStrings.NonInteractiveCliOption,
-        Required = false
-    };
 }

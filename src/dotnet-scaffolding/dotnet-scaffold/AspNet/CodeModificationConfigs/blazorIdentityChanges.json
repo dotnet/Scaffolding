@@ -56,7 +56,7 @@
                 "        options.SignIn.RequireConfirmedAccount = true;",
                 "        options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;",
                 "    })",
-                "    .AddEntityFrameworkStores<ApplicationDbContext>()",
+                "    .AddEntityFrameworkStores<$(DbContextName)>()",
                 "    .AddSignInManager()",
                 "    .AddDefaultTokenProviders()"
               ],

@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind(""ID,Title,ReleaseDate,Genre,Price"")] ");
+    public async Task<IActionResult> Create([Bind(""Title,ReleaseDate,Genre,Price"")] ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" movie)\r\n    {\r\n        if (ModelState.IsValid)\r\n        {\r\n            _context." +
                     "Add(");
@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.EfController
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyTypeName));
             this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
-            this.Write(", [Bind(\"ID,Title,ReleaseDate,Genre,Price\")] ");
+            this.Write(", [Bind(\"Id,Title,ReleaseDate,Genre,Price\")] ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" movie)\r\n    {\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));

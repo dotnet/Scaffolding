@@ -75,12 +75,6 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         /// </summary>
         [CommandArgument(1, "[COMMAND NAME]")]
         public string? CommandName { get; set; }
-
-        /// <summary>
-        /// Gets a value indicating whether to run in non-interactive mode.
-        /// </summary>
-        [CommandOption("--non-interactive")]
-        public bool NonInteractive { get; init; }
     }
 
     /// <summary>
@@ -101,7 +95,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         ];
 
         // Run the flow and wait for telemetry to flush before returning.
-        var flowResult = await RunFlowAsync(flowSteps, settings, context.Remaining, settings.NonInteractive, showSelectedOptions: false);
+        var flowResult = await RunFlowAsync(flowSteps, settings, context.Remaining, showSelectedOptions: false);
         TelemetryService.Flush();
         return flowResult;
     }

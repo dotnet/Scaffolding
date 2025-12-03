@@ -165,16 +165,17 @@ public class CodeService : ICodeService, IDisposable
             }
         }
 
-        var compilationClassSymbols = _compilation?.SyntaxTrees.SelectMany(tree =>
+        List<ISymbol?>? compilationClassSymbols = _compilation?.SyntaxTrees.SelectMany(tree =>
         {
             var model = _compilation.GetSemanticModel(tree);
-            var allNodes = tree.GetRoot().DescendantNodes();
-            return tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>().Select(classSyntax =>
-            {
-                var classSymbol = model.GetDeclaredSymbol(classSyntax);
-                return classSymbol;
-            });
-        }).Append(_compilation.GetEntryPoint(CancellationToken.None)?.ContainingType).ToList();
+            return tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
+                .Select(classSyntax => model.GetDeclaredSymbol(classSyntax))
+                .Where(classSymbol => classSymbol is not null &&
+                                     !classSymbol.MetadataName.StartsWith("<"));    //if the metadata name starts with < it is a compiler generated class
+        })
+        .Append(_compilation.GetEntryPoint(CancellationToken.None)?.ContainingType)
+        .Distinct(SymbolEqualityComparer.Default)
+        .ToList();
 
         compilationClassSymbols?.ForEach(x =>
         {

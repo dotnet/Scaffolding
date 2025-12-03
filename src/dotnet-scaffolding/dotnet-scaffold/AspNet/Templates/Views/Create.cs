@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Views
             this.Write("\r\n\r\n@{\r\n    ViewData[\"Title\"] = \"Create\";\r\n}\r\n\r\n<h1>Create</h1>\r\n\r\n<h4>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h4>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <form asp-a" +
-                    "ction=\"View\">\r\n            <div asp-validation-summary=\"ModelOnly\" class=\"text-d" +
+                    "ction=\"Create\">\r\n            <div asp-validation-summary=\"ModelOnly\" class=\"text-d" +
                     "anger\"></div>\r\n");
 
 foreach (var property in entityProperties)

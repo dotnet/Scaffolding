@@ -26,6 +26,7 @@
     <PackageVersion Include="Mono.TextTemplating" Version="$(MonoTextTemplatingVersion)" />
     <PackageVersion Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
     <PackageVersion Include="NuGet.Configuration" Version="$(NugetProtocolVersion)" />
+    <PackageVersion Include="NuGet.Credentials" Version="$(NugetProtocolVersion)" />
     <PackageVersion Include="NuGet.Protocol" Version="$(NugetProtocolVersion)" />
     <PackageVersion Include="NuGet.Versioning" Version="$(NugetProtocolVersion)" />
     <PackageVersion Include="Spectre.Console.Flow" Version="$(SpectreConsoleFlowVersion)" />

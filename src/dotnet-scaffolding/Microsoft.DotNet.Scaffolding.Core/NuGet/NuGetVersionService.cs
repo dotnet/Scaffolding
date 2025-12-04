@@ -5,6 +5,7 @@ using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using NuGet.Configuration;
 using NuGet.Protocol;
+using NuGet.Credentials;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Model;
 
@@ -19,6 +20,10 @@ internal class NuGetVersionService
     public NuGetVersionService(IEnvironmentService environmentService)
     {
         _environmentService = environmentService;
+
+        DefaultCredentialServiceUtility.SetupDefaultCredentialService(
+            NuGet.Common.NullLogger.Instance,
+            nonInteractive: false);
 
         string settingsPath = _environmentService.CurrentDirectory;
         _settings = Settings.LoadDefaultSettings(settingsPath);

@@ -104,9 +104,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud
             this.Write("\">Back to List</a>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParameterFromForm]\r\n    private" +
                     " ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" ");
+            this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" { get; set; } = new();\r\n\r\n    // To protect from overposting attacks, see https:" +
+            this.Write(" { get; set; }\r\n\r\n    protected override void OnInitialized() => ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(" ??= new();\r\n\r\n    // To protect from overposting attacks, see https:" +
                     "//learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.\r\n " +
                     "   private async Task Add");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));

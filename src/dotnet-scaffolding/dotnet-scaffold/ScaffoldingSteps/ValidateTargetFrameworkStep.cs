@@ -19,11 +19,6 @@ public class ValidateTargetFrameworkStep : ScaffoldStep
     /// "netstandard2.1". This property is typically used to determine compatibility and runtime behavior.</remarks>
     public string? TargetFramework { get; set; }
 
-    private static readonly HashSet<string> ValidTargetFrameworks =
-    [
-        "net8.0", "net9.0", "net10.0"
-    ];
-
     public ValidateTargetFrameworkStep(ILogger<ValidateTargetFrameworkStep> logger)
     {
         _logger = logger;
@@ -46,10 +41,10 @@ public class ValidateTargetFrameworkStep : ScaffoldStep
             return true;
         }
 
-        var normalizedValue = value.Trim().ToLowerInvariant();
+        string normalizedValue = value.Trim().ToLowerInvariant();
 
         // Check if it's a valid supported framework
-        if (!ValidTargetFrameworks.Contains(normalizedValue))
+        if (!TargetFrameworkConstants.SupportedTargetFrameworks.Contains(normalizedValue))
         {
             logger.LogError($"Invalid {TargetFrameworkConstants.TargetFrameworkCliOption} option: '{value}'. Must be a valid .NET SDK version, net8.0, net9.0 or net10.0.");
             return false;

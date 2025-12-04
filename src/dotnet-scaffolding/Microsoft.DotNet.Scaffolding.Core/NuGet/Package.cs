@@ -13,7 +13,7 @@ internal sealed record Package(string Name, bool IsVersionRequired = false)
     /// <summary>
     /// Gets or sets the package version.
     /// </summary>
-    public string? PackageVersion { get; set; } = null;
+    public string? PackageVersion { get; init; }
 }
 
 internal static class PackageExtensions

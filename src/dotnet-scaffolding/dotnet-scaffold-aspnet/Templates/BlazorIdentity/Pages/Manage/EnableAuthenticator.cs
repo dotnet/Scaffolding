@@ -82,8 +82,9 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             this.Write(" user = default!;\r\n    private string? sharedKey;\r\n    private string? authentica" +
                     "torUri;\r\n    private IEnumerable<string>? recoveryCodes;\r\n\r\n    [CascadingParame" +
                     "ter]\r\n    private HttpContext HttpContext { get; set; } = default!;\r\n\r\n    [Supp" +
-                    "lyParameterFromForm]\r\n    private InputModel Input { get; set; } = new();\r\n\r\n   " +
-                    " protected override async Task OnInitializedAsync()\r\n    {\r\n        user = await" +
+                    "lyParameterFromForm]\r\n    private InputModel Input { get; set; } = default!;" +
+                    "\r\n\r\n    protected override async Task OnInitializedAsync()\r\n    {\r\n        Input ??= " +
+                    "new();\r\n\r\n        user = await" +
                     " UserAccessor.GetRequiredUserAsync(HttpContext);\r\n\r\n        await LoadSharedKeyA" +
                     "ndQrCodeUriAsync(user);\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n " +
                     "   {\r\n        // Strip spaces and hyphens\r\n        var verificationCode = Input." +

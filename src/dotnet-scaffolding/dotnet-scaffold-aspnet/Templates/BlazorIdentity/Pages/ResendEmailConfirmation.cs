@@ -54,7 +54,9 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "s=\"text-danger\" />\r\n            </div>\r\n            <button type=\"submit\" class=" +
                     "\"w-100 btn btn-lg btn-primary\">Resend</button>\r\n        </EditForm>\r\n    </div>\r" +
                     "\n</div>\r\n\r\n@code {\r\n    private string? message;\r\n\r\n    [SupplyParameterFromForm" +
-                    "]\r\n    private InputModel Input { get; set; } = new();\r\n\r\n    private async Task" +
+                    "]\r\n    private InputModel Input { get; set; } = default!;\r\n\r\n    protected ove" +
+                    "rride void OnInitialized()\r\n    {\r\n        Input ??= new();\r\n    }\r\n\r\n    privat" +
+                    "e async Task" +
                     " OnValidSubmitAsync()\r\n    {\r\n        var user = await UserManager.FindByEmailAs" +
                     "ync(Input.Email!);\r\n        if (user is null)\r\n        {\r\n            message = " +
                     "\"Verification email sent. Please check your email.\";\r\n            return;\r\n     " +

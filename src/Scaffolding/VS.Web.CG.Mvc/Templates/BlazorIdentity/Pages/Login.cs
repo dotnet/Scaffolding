@@ -67,12 +67,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "       <ExternalLoginPicker />\r\n        </section>\r\n    </div>\r\n</div>\r\n\r\n@code " +
                     "{\r\n    private string? errorMessage;\r\n\r\n    [CascadingParameter]\r\n    private Ht" +
                     "tpContext HttpContext { get; set; } = default!;\r\n\r\n    [SupplyParameterFromForm]" +
-                    "\r\n    private InputModel Input { get; set; } = new();\r\n\r\n    [SupplyParameterFro" +
+                    "\r\n    private InputModel Input { get; set; } = default!;\r\n\r\n    [SupplyParameterFro" +
                     "mQuery]\r\n    private string? ReturnUrl { get; set; }\r\n\r\n    protected override a" +
-                    "sync Task OnInitializedAsync()\r\n    {\r\n        if (HttpMethods.IsGet(HttpContext" +
-                    ".Request.Method))\r\n        {\r\n            // Clear the existing external cookie " +
-                    "to ensure a clean login process\r\n            await HttpContext.SignOutAsync(Iden" +
-                    "tityConstants.ExternalScheme);\r\n        }\r\n    }\r\n\r\n    public async Task LoginU" +
+                    "sync Task OnInitializedAsync()\r\n    {\r\n        Input ??= new();\r\n\r\n        if (" +
+                    "HttpMethods.IsGet(HttpContext.Request.Method))\r\n        {\r\n            // Clea" +
+                    "r the existing external cookie to ensure a clean login process\r\n            aw" +
+                    "ait HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);\r\n        }\r\n    }" +
+                    "\r\n\r\n    public async Task LoginU" +
                     "ser()\r\n    {\r\n        // This doesn\'t count login failures towards account locko" +
                     "ut\r\n        // To enable password failures to trigger account lockout, set locko" +
                     "utOnFailure: true\r\n        var result = await SignInManager.PasswordSignInAsync(" +

@@ -58,12 +58,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "ate string? message;\r\n    private ExternalLoginInfo externalLoginInfo = default!" +
                     ";\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpContext { get; set; }" +
                     " = default!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Input { ge" +
-                    "t; set; } = new();\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? Remote" +
+                    "t; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? Remote" +
                     "Error { get; set; }\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? Retur" +
                     "nUrl { get; set; }\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? Action" +
                     " { get; set; }\r\n\r\n    private string? ProviderDisplayName => externalLoginInfo.P" +
                     "roviderDisplayName;\r\n\r\n    protected override async Task OnInitializedAsync()\r\n " +
-                    "   {\r\n        if (RemoteError is not null)\r\n        {\r\n            RedirectManag" +
+                    "   {\r\n        Input ??= new();\r\n\r\n        if (RemoteError is not null)\r\n        {" +
+                    "\r\n            RedirectManag" +
                     "er.RedirectToWithStatus(\"Account/Login\", $\"Error from external provider: {Remote" +
                     "Error}\", HttpContext);\r\n        }\r\n\r\n        var info = await SignInManager.GetE" +
                     "xternalLoginInfoAsync();\r\n        if (info is null)\r\n        {\r\n            Redi" +

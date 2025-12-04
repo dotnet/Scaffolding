@@ -56,8 +56,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user = default!;\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpContex" +
                     "t { get; set; } = default!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputM" +
-                    "odel Input { get; set; } = new();\r\n\r\n    protected override async Task OnInitial" +
-                    "izedAsync()\r\n    {\r\n        user = await UserAccessor.GetRequiredUserAsync(HttpC" +
+                    "odel Input { get; set; } = default!;\r\n\r\n    protected override async Task OnInitial" +
+                    "izedAsync()\r\n    {\r\n        Input ??= new();\r\n\r\n        user = await UserAccess" +
+                    "or.GetRequiredUserAsync(HttpC" +
                     "ontext);\r\n\r\n        var hasPassword = await UserManager.HasPasswordAsync(user);\r" +
                     "\n        if (hasPassword)\r\n        {\r\n            RedirectManager.RedirectTo(\"Ac" +
                     "count/Manage/ChangePassword\");\r\n        }\r\n    }\r\n\r\n    private async Task OnVal" +

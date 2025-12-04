@@ -3,6 +3,7 @@
 
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
@@ -29,6 +30,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(DetectBlazorWasmStep),
                 typeof(DotnetNewScaffolderStep),
                 typeof(EmptyControllerScaffolderStep),
+                typeof(NuGetVersionService),
                 typeof(RegisterAppStep),
                 typeof(UpdateAppAuthorizationStep),
                 typeof(UpdateAppSettingsStep),

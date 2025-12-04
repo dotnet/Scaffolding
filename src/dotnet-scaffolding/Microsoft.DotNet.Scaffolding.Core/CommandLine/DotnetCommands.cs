@@ -31,9 +31,12 @@ internal static class DotnetCommands
 
             arguments.AddRange(["package", packageName]);
 
+            string packageDisplayName = packageName;
+
             if (!string.IsNullOrEmpty(packageVersion))
             {
                 arguments.AddRange(["-v", packageVersion]);
+                packageDisplayName = $"{packageName} (v{packageVersion})";
             }
 
             if (includePrerelease)
@@ -41,7 +44,7 @@ internal static class DotnetCommands
                 arguments.Add("--prerelease");
             }
 
-            logger.LogInformation(string.Format("\nAdding package '{0}'...", packageName));
+            logger.LogInformation($"\nAdding package '{packageDisplayName}'...");
             var runner = DotnetCliRunner.CreateDotNet("add", arguments);
 
             // Buffer the output here because we'll only display it in the failure scenario

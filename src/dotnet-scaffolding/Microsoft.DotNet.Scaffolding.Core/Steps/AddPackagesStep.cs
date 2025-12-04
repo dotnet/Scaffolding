@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Steps;
 /// <summary>
 /// A scaffold step that adds NuGet packages to a project.
 /// </summary>
-public class AddPackagesStep : ScaffoldStep
+internal class AddPackagesStep : ScaffoldStep
 {
     /// <summary>
     /// Gets or sets the list of package names to add.
@@ -27,14 +27,17 @@ public class AddPackagesStep : ScaffoldStep
     public bool Prerelease { get; set; } = false;
 
     private readonly ILogger _logger;
+    private readonly NuGetVersionService _nugetVersionHelper;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AddPackagesStep"/> class.
     /// </summary>
     /// <param name="logger">The logger to use for output.</param>
-    public AddPackagesStep(ILogger<AddPackagesStep> logger)
+    /// <param name="nugetVersionHelper">The NuGet version helper for package version resolution.</param>
+    public AddPackagesStep(ILogger<AddPackagesStep> logger, NuGetVersionService nugetVersionHelper)
     {
         _logger = logger;
+        _nugetVersionHelper = nugetVersionHelper;
         ContinueOnError = true;
     }
 
@@ -51,11 +54,12 @@ public class AddPackagesStep : ScaffoldStep
 
         foreach (Package package in Packages)
         {
-            // Resolve the package version based on the target framework if needed
+            string? packageVersion = null;
             Package resolvedPackage = package;
-            if (package.IsVersionRequired && !string.IsNullOrEmpty(targetFramework))
+            if (package.IsVersionRequired && !string.IsNullOrEmpty(targetFramework) && !Prerelease)
             {
-                resolvedPackage = await package.WithResolvedVersionAsync(targetFramework);
+                resolvedPackage = await package.WithResolvedVersionAsync(targetFramework, _nugetVersionHelper);
+                packageVersion = resolvedPackage.PackageVersion;
             }
 
             // Add the package to the project
@@ -63,7 +67,7 @@ public class AddPackagesStep : ScaffoldStep
                 packageName: resolvedPackage.Name,
                 logger: _logger,
                 projectFile: ProjectPath,
-                packageVersion: Prerelease ? null : resolvedPackage.PackageVersion,
+                packageVersion: packageVersion,
                 includePrerelease: Prerelease);
         }
 

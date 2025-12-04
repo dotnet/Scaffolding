@@ -65,7 +65,9 @@
 
 @code {
     [SupplyParameterFromForm]
-    private <#= modelName #> <#= modelName #> { get; set; } = new();
+    private <#= modelName #>? <#= modelName #> { get; set; }
+
+    protected override void OnInitialized() => <#= modelName #> ??= new();
 
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task Add<#= modelName #>()

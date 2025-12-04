@@ -65,8 +65,6 @@ internal static class PackageExtensions
             return Task.FromResult<NuGetVersion?>(null);
         }
 
-        //if target framework is net8.0 return what GetLatestNet8VersionAsync calls for net8.0
-
         if (targetFramework.Equals(TargetFrameworkConstants.Net8, StringComparison.OrdinalIgnoreCase))
         {
             return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 8);

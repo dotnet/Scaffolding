@@ -15,8 +15,11 @@ internal class NuGetVersionService
     public NuGetVersionService(IEnvironmentService environmentService) => _environmentService = environmentService;
 
     /// <summary>
-    /// Gets the latest version of a NuGet package for the .NET major version specified (e.g., 8 for .NET 8).
+    /// Gets the latest NuGet package version compatible with the specified .NET major version.
     /// </summary>
+    /// <param name="packageId">the ID of the NuGet package</param>
+    /// <param name="MajorVersion">the .NET major version</param>
+    /// <returns></returns>
     public async Task<NuGetVersion?> GetLatestPackageForNetVersionAsync(string packageId, int MajorVersion)
     {
         IEnumerable<NuGetVersion> versions = await GetVersionsForPackageAsync(packageId);

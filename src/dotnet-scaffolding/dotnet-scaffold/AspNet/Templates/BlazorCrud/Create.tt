@@ -67,7 +67,7 @@
 
 @code {
     [SupplyParameterFromForm]
-    private <#= modelName #>? <#= modelName #> { get; set; }
+    private <#= modelName #> <#= modelName #> { get; set; } = default!;
 
     protected override void OnInitialized() => <#= modelName #> ??= new();
 

@@ -53,8 +53,9 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "   <ValidationMessage For=\"() => Input.Email\" class=\"text-danger\" />\r\n          " +
                     "  </div>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\"" +
                     ">Reset password</button>\r\n        </EditForm>\r\n     </div>\r\n</div>\r\n\r\n@code {\r\n " +
-                    "   [SupplyParameterFromForm]\r\n    private InputModel Input { get; set; } = new()" +
-                    ";\r\n\r\n    private async Task OnValidSubmitAsync()\r\n    {\r\n        var user = awai" +
+                    "   [SupplyParameterFromForm]\r\n    private InputModel Input { get; set; } = default!" +
+                    ";\r\n\r\n    protected override void OnInitialized()\r\n    {\r\n        Input ??= new();\r\n" +
+                    "    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n    {\r\n        var user = awai" +
                     "t UserManager.FindByEmailAsync(Input.Email);\r\n        if (user is null || !(awai" +
                     "t UserManager.IsEmailConfirmedAsync(user)))\r\n        {\r\n            // Don\'t rev" +
                     "eal that the user does not exist or is not confirmed\r\n            RedirectManage" +

@@ -72,10 +72,12 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "\n            <h3>Use another service to register.</h3>\r\n            <hr />\r\n    " +
                     "        <ExternalLoginPicker />\r\n        </section>\r\n    </div>\r\n</div>\r\n\r\n@code" +
                     " {\r\n    private IEnumerable<IdentityError>? identityErrors;\r\n\r\n    [SupplyParame" +
-                    "terFromForm]\r\n    private InputModel Input { get; set; } = new();\r\n\r\n    [Supply" +
-                    "ParameterFromQuery]\r\n    private string? ReturnUrl { get; set; }\r\n\r\n    private " +
-                    "string? Message => identityErrors is null ? null : $\"Error: {string.Join(\", \", i" +
-                    "dentityErrors.Select(error => error.Description))}\";\r\n\r\n    public async Task Re" +
+                    "terFromForm]\r\n    private InputModel Input { get; set; } = default!;\r\n\r\n    [S" +
+                    "upplyParameterFromQuery]\r\n    private string? ReturnUrl { get; set; }\r\n\r\n    pr" +
+                    "ivate string? Message => identityErrors is null ? null : $\"Error: {string.Join" +
+                    "(\", \", identityErrors.Select(error => error.Description))}\";\r\n\r\n    protecte" +
+                    "d override void OnInitialized()\r\n    {\r\n        Input ??= new();\r\n    }\r\n\r\n  " +
+                    "  public async Task Re" +
                     "gisterUser(EditContext editContext)\r\n    {\r\n        var user = CreateUser();\r\n\r\n" +
                     "        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.No" +
                     "ne);\r\n        var emailStore = GetEmailStore();\r\n        await emailStore.SetEma" +

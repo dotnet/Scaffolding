@@ -47,7 +47,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "         </div>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg btn-p" +
                     "rimary\">Resend</button>\r\n        </EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n   " +
                     " private string? message;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputMod" +
-                    "el Input { get; set; } = new();\r\n\r\n    private async Task OnValidSubmitAsync()\r\n" +
+                    "el Input { get; set; } = default!;\r\n\r\n    protected override void OnInitialized()\r\n    {\r\n" +
+                    "        Input ??= new();\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n" +
                     "    {\r\n        var user = await UserManager.FindByEmailAsync(Input.Email!);\r\n   " +
                     "     if (user is null)\r\n        {\r\n            message = \"Verification email sen" +
                     "t. Please check your email.\";\r\n            return;\r\n        }\r\n\r\n        var use" +

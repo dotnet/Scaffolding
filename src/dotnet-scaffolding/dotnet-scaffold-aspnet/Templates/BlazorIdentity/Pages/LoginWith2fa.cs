@@ -64,11 +64,12 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "private string? message;\r\n    private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user = default!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Input " +
-                    "{ get; set; } = new();\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? Re" +
-                    "turnUrl { get; set; }\r\n\r\n    [SupplyParameterFromQuery]\r\n    private bool Rememb" +
-                    "erMe { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r\n  " +
-                    "  {\r\n        // Ensure the user has gone through the username & password screen " +
-                    "first\r\n        user = await SignInManager.GetTwoFactorAuthenticationUserAsync() " +
+                    "{ get; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    private strin" +
+                    "g? ReturnUrl { get; set; }\r\n\r\n    [SupplyParameterFromQuery]\r\n    private bool" +
+                    " RememberMe { get; set; }\r\n\r\n    protected override async Task OnInitializedAs" +
+                    "ync()\r\n    {\r\n        Input ??= new();\r\n\r\n        // Ensure the user has gon" +
+                    "e through the username & password screen first\r\n        user = await SignInMan" +
+                    "ager.GetTwoFactorAuthenticationUserAsync() " +
                     "??\r\n            throw new InvalidOperationException(\"Unable to load two-factor a" +
                     "uthentication user.\");\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n  " +
                     "  {\r\n        var authenticatorCode = Input.TwoFactorCode!.Replace(\" \", string.Em" +

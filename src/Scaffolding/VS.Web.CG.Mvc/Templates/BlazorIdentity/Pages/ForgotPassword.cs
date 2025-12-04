@@ -46,7 +46,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "or=\"() => Input.Email\" class=\"text-danger\" />\r\n            </div>\r\n            <" +
                     "button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Reset password</button" +
                     ">\r\n        </EditForm>\r\n     </div>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParameterFrom" +
-                    "Form]\r\n    private InputModel Input { get; set; } = new();\r\n\r\n    private async " +
+                    "Form]\r\n    private InputModel Input { get; set; } = default!;\r\n\r\n    protected override void" +
+                    " OnInitialized()\r\n    {\r\n        Input ??= new();\r\n    }\r\n\r\n    private async " +
                     "Task OnValidSubmitAsync()\r\n    {\r\n        var user = await UserManager.FindByEma" +
                     "ilAsync(Input.Email);\r\n        if (user is null || !(await UserManager.IsEmailCo" +
                     "nfirmedAsync(user)))\r\n        {\r\n            // Don\'t reveal that the user does " +

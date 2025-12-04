@@ -61,8 +61,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user = default!;\r\n    private bool hasPassword;\r\n\r\n    [CascadingParameter]\r\n   " +
                     " private HttpContext HttpContext { get; set; } = default!;\r\n\r\n    [SupplyParamet" +
-                    "erFromForm]\r\n    private InputModel Input { get; set; } = new();\r\n\r\n    protecte" +
-                    "d override async Task OnInitializedAsync()\r\n    {\r\n        user = await UserAcce" +
+                    "erFromForm]\r\n    private InputModel Input { get; set; } = default!;\r\n\r\n    protecte" +
+                    "d override async Task OnInitializedAsync()\r\n    {\r\n        Input ??= new();\r\n\r\n" +
+                    "        user = await UserAcce" +
                     "ssor.GetRequiredUserAsync(HttpContext);\r\n        hasPassword = await UserManager" +
                     ".HasPasswordAsync(user);\r\n        if (!hasPassword)\r\n        {\r\n            Redi" +
                     "rectManager.RedirectTo(\"Account/Manage/SetPassword\");\r\n        }\r\n    }\r\n\r\n    p" +

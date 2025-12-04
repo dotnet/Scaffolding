@@ -11,8 +11,21 @@ namespace Microsoft.DotNet.Scaffolding.Core.Model;
 internal class NuGetVersionService
 {
     private readonly IEnvironmentService _environmentService;
+    private readonly ISettings _settings;
+    private readonly PackageSourceProvider _sourceProvider;
+    private readonly CachingSourceProvider _cachingProvider;
+    private readonly PackageSourceMapping? _sourceMapping;
 
-    public NuGetVersionService(IEnvironmentService environmentService) => _environmentService = environmentService;
+    public NuGetVersionService(IEnvironmentService environmentService)
+    {
+        _environmentService = environmentService;
+
+        string settingsPath = _environmentService.CurrentDirectory;
+        _settings = Settings.LoadDefaultSettings(settingsPath);
+        _sourceProvider = new PackageSourceProvider(_settings);
+        _cachingProvider = new CachingSourceProvider(_sourceProvider);
+        _sourceMapping = PackageSourceMapping.GetPackageSourceMapping(_settings);
+    }
 
     /// <summary>
     /// Gets the latest NuGet package version compatible with the specified .NET major version.
@@ -31,29 +44,21 @@ internal class NuGetVersionService
 
     private async Task<IEnumerable<NuGetVersion>> GetVersionsForPackageAsync(string packageId)
     {
-        // Load NuGet settings from the current directory
-        string settingsPath = _environmentService.CurrentDirectory;
-        ISettings settings = Settings.LoadDefaultSettings(settingsPath);
-
         // Load package sources and filter enabled ones
-        PackageSourceProvider sourceProvider = new(settings);
-        IEnumerable<PackageSource> packageSources = sourceProvider.LoadPackageSources().Where(s => s.IsEnabled);
+        IEnumerable<PackageSource> packageSources = _sourceProvider.LoadPackageSources().Where(s => s.IsEnabled);
 
         // Check if package source mapping is enabled
-        PackageSourceMapping? sourceMapping = PackageSourceMapping.GetPackageSourceMapping(settings);
-        if (sourceMapping?.IsEnabled == true)
+        if (_sourceMapping?.IsEnabled == true)
         {
-            IReadOnlyList<string> configuredSources = sourceMapping.GetConfiguredPackageSources(packageId);
+            IReadOnlyList<string> configuredSources = _sourceMapping.GetConfiguredPackageSources(packageId);
             if (configuredSources.Any())
             {
                 packageSources = packageSources.Where(s => configuredSources.Contains(s.Name));
             }
         }
 
-        // Use CachingSourceProvider to cache SourceRepository instances
-        CachingSourceProvider cachingProvider = new(sourceProvider);
         List<SourceRepository> repositories = [.. packageSources
-            .Select(source => cachingProvider.CreateRepository(source))];
+            .Select(source => _cachingProvider.CreateRepository(source))];
 
         if (repositories.Count == 0)
         {

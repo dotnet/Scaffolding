@@ -7,6 +7,7 @@ internal class TargetFrameworkConstants
 {
     public const string TargetFrameworkCliOption = "--framework";
     public const string TargetFrameworkDisplayName = "Target Framework";
+    public const string TargetFrameworkDescription = "Specifies the target framework for the scaffolded project.";
 
     public const string Net8 = "net8.0";
     public const string Net9 = "net9.0";

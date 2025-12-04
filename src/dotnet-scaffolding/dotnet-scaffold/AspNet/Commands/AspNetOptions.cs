@@ -198,7 +198,7 @@ internal class AspNetOptions
         {
             DisplayName = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkDisplayName,
             CliOption = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkCliOption,
-            Description = CliStrings.TargetFrameworkDescription,
+            Description = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkDescription,
             Required = false,
             PickerType = InteractivePickerType.CustomPicker,
             CustomPickerValues = Scaffolding.Core.Model.TargetFrameworkConstants.SupportedTargetFrameworks

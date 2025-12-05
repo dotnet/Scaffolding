@@ -31,7 +31,7 @@ internal static class CachingScaffolderBuilderExtensions
                 commandSettingsObj is CommandSettings commandSettings)
             {
                 // Set package details for AppHost Redis
-                step.Packages = [new Package(PackageConstants.CachingPackages.AppHostRedisPackageName)];
+                step.Packages = [PackageConstants.CachingPackages.AppHostRedisPackage];
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.Prerelease = commandSettings.Prerelease;
             }
@@ -53,8 +53,8 @@ internal static class CachingScaffolderBuilderExtensions
                 commandSettingsObj is CommandSettings commandSettings)
             {
                 // Get the package name for the project type
-                if (!PackageConstants.CachingPackages.CachingPackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName) ||
-                    string.IsNullOrEmpty(projectPackageName))
+                if (!PackageConstants.CachingPackages.CachingPackagesDict.TryGetValue(commandSettings.Type, out Package? projectPackage) ||
+                    projectPackage is null || string.IsNullOrEmpty(projectPackage.Name))
                 {
                     // Skip if no package found for type
                     step.SkipStep = true;
@@ -63,7 +63,7 @@ internal static class CachingScaffolderBuilderExtensions
                 }
 
                 // Set package details for the project
-                step.Packages = [new Package(projectPackageName)];
+                step.Packages = [projectPackage];
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
             }

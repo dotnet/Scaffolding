@@ -31,7 +31,7 @@ internal static class StorageScaffolderBuilderExtensions
                 commandSettingsObj is CommandSettings commandSettings)
             {
                 // Set package details for AppHost storage
-                step.Packages = [new Package(PackageConstants.StoragePackages.AppHostStoragePackageName)];
+                step.Packages = [PackageConstants.StoragePackages.AppHostStoragePackage];
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.Prerelease = commandSettings.Prerelease;
             }
@@ -53,8 +53,8 @@ internal static class StorageScaffolderBuilderExtensions
                 commandSettingsObj is CommandSettings commandSettings)
             {
                 // Get the package name for the project type
-                if (!PackageConstants.StoragePackages.StoragePackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName) ||
-                    string.IsNullOrEmpty(projectPackageName))
+                if (!PackageConstants.StoragePackages.StoragePackagesDict.TryGetValue(commandSettings.Type, out Package? projectPackage) ||
+                    projectPackage is null || string.IsNullOrEmpty(projectPackage.Name))
                 {
                     // Skip if no package found for type
                     step.SkipStep = true;
@@ -63,7 +63,7 @@ internal static class StorageScaffolderBuilderExtensions
                 }
 
                 // Set package details for the project
-                step.Packages = [new Package(projectPackageName)];
+                step.Packages = [projectPackage];
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
             }

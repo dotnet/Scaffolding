@@ -102,19 +102,19 @@ internal static class RazorPagesScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<string> packageNames = [PackageConstants.EfConstants.EfCoreToolsPackageName];
+            List<Package> packages = [PackageConstants.EfConstants.EfCoreToolsPackage];
             if (context.Properties.TryGetValue(nameof(CrudSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CrudSettings commandSettings)
             {
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
-                    PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
+                    PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out Package? projectPackage))
                 {
-                    packageNames.Add(projectPackageName);
+                    packages.Add(projectPackage);
                 }
 
-                step.Packages = [.. packageNames.Select(p => new Package(p))];
+                step.Packages = packages;
             }
             else
             {

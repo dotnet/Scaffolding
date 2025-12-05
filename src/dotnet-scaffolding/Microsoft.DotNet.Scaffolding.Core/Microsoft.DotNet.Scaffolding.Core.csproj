@@ -8,6 +8,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="NuGet.Configuration" />
+    <PackageReference Include="NuGet.Credentials" />
+    <PackageReference Include="NuGet.Protocol" />
+    <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 
@@ -16,6 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Pack="true" Include="README.md"  PackagePath="\"/>
+    <None Pack="true" Include="README.md" PackagePath="\" />
   </ItemGroup>
 </Project>

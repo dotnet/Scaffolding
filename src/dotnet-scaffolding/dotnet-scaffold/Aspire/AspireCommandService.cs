@@ -22,7 +22,7 @@ internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandSe
             typeof(AddAspireCodeChangeStep),
             typeof(AddAspireConnectionStringStep),
             typeof(ValidateOptionsStep),
-            typeof(WrappedAddPackagesStep),
+            typeof(WrappedAddPackagesStep)
         ];
     }
 
@@ -37,12 +37,12 @@ internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandSe
               .WithOption(AspireOptions.AppHostProject)
               .WithOption(AspireOptions.Project)
               .WithOption(AspireOptions.Prerelease)
-               .WithStep<ValidateOptionsStep>(config =>
-               {
-                   config.Step.ValidateMethod = ValidationHelper.ValidateCachingSettings;
-               })
-               .WithCachingAddPackageSteps()
-               .WithCachingCodeModificationSteps();
+              .WithStep<ValidateOptionsStep>(config =>
+              {
+                config.Step.ValidateMethod = ValidationHelper.ValidateCachingSettings;
+              })
+              .WithCachingAddPackageSteps()
+              .WithCachingCodeModificationSteps();
 
         IScaffoldBuilder database = _builder.AddScaffolder(ScaffolderCatagory.Aspire, AspireCliStrings.Database.DatabaseTitle);
         database.WithCategory(AspireCliStrings.AspireCategory)

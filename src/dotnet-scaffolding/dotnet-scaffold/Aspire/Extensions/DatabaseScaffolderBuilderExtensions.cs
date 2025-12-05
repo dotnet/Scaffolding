@@ -32,7 +32,8 @@ internal static class DatabaseScaffolderBuilderExtensions
                 commandSettingsObj is CommandSettings commandSettings)
             {
                 // Get the AppHost package name for the database type
-                if (!PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out string? appHostPackageName))
+                if (!PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out Package? appHostPackage) ||
+                    appHostPackage is null || string.IsNullOrEmpty(appHostPackage.Name))
                 {
                     // Skip if no package found for type
                     step.SkipStep = true;
@@ -40,7 +41,7 @@ internal static class DatabaseScaffolderBuilderExtensions
                 }
 
                 // Set package details for AppHost
-                step.Packages = [new Package(appHostPackageName)];
+                step.Packages = [appHostPackage];
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.Prerelease = commandSettings.Prerelease;
             }
@@ -62,8 +63,8 @@ internal static class DatabaseScaffolderBuilderExtensions
                 commandSettingsObj is CommandSettings commandSettings)
             {
                 // Get the API service package name for the database type
-                if (!PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? projectPackageName) ||
-                    string.IsNullOrEmpty(projectPackageName))
+                if (!PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out Package? projectPackage) ||
+                    projectPackage is null ||string.IsNullOrEmpty(projectPackage.Name))
                 {
                     // Skip if no package found for type
                     step.SkipStep = true;
@@ -72,7 +73,7 @@ internal static class DatabaseScaffolderBuilderExtensions
                 }
 
                 // Set package details for the API service project
-                step.Packages = [new Package(projectPackageName)];
+                step.Packages = [projectPackage];
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
             }

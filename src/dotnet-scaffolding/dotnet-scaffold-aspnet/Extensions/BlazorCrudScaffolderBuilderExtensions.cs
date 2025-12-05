@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -45,7 +46,7 @@ internal static class BlazorCrudScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            var packageList = new List<string>()
+            var packageNames = new List<string>()
             {
                 PackageConstants.AspNetCorePackages.QuickGridEfAdapterPackageName,
                 PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackageName,
@@ -60,10 +61,10 @@ internal static class BlazorCrudScaffolderBuilderExtensions
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
                     PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
                 {
-                    packageList.Add(projectPackageName);
+                    packageNames.Add(projectPackageName);
                 }
 
-                step.PackageNames = packageList;
+                step.Packages = [.. packageNames.Select(p => new Package(p))];
             }
             else
             {

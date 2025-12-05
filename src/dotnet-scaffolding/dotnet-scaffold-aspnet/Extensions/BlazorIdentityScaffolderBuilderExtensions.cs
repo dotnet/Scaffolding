@@ -3,6 +3,7 @@
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -96,7 +97,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<string> packageList = [
+            List<string> packageNames = [
                 PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackageName,
                 PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackageName,
                 PackageConstants.EfConstants.EfCoreToolsPackageName
@@ -110,10 +111,10 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
                     PackageConstants.EfConstants.IdentityEfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
                 {
-                    packageList.Add(projectPackageName);
+                    packageNames.Add(projectPackageName);
                 }
 
-                step.PackageNames = packageList;
+                step.Packages = packageNames.Select(p => new Package(p)).ToList();
             }
             else
             {

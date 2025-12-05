@@ -9,6 +9,8 @@ using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Spectre.Console;
 using Spectre.Console.Flow;
+using InteractivePickerType = Microsoft.DotNet.Scaffolding.Core.ComponentModel.InteractivePickerType;
+using Parameter = Microsoft.DotNet.Scaffolding.Core.ComponentModel.Parameter;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {

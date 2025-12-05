@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -95,7 +96,7 @@ internal static class RazorPagesScaffolderBuilderExtensions
                     packageList.Add(projectPackageName);
                 }
 
-                step.PackageNames = packageList;
+                step.Packages = [.. packageList.Select(p => new Package(p))];
             }
             else
             {

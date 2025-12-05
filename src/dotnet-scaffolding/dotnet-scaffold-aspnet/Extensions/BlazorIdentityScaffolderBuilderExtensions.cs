@@ -3,6 +3,7 @@
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -113,7 +114,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
                     packageList.Add(projectPackageName);
                 }
 
-                step.PackageNames = packageList;
+                step.Packages = packageList.Select(p => new Package(p)).ToList();
             }
             else
             {

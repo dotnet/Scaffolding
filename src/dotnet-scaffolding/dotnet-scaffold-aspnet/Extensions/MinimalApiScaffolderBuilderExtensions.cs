@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -60,7 +61,7 @@ internal static class MinimalApiScaffolderBuilderExtensions
             var step = config.Step;
             var context = config.Context;
             //this scaffolder has a non-EF scenario, only add EF packages if DataContext is provided.
-            List<string> packageList = [];
+            List<string> packageNames = [];
             if (context.Properties.TryGetValue(nameof(MinimalApiSettings), out var commandSettingsObj) &&
                 commandSettingsObj is MinimalApiSettings commandSettings)
             {
@@ -70,16 +71,16 @@ internal static class MinimalApiScaffolderBuilderExtensions
                     !string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
                     PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
                 {
-                    packageList.Add(PackageConstants.EfConstants.EfCoreToolsPackageName);
-                    packageList.Add(projectPackageName);
+                    packageNames.Add(PackageConstants.EfConstants.EfCoreToolsPackageName);
+                    packageNames.Add(projectPackageName);
                 }
 
                 if (commandSettings.OpenApi)
                 {
-                    packageList.Add(PackageConstants.AspNetCorePackages.OpenApiPackageName);
+                    packageNames.Add(PackageConstants.AspNetCorePackages.OpenApiPackageName);
                 }
 
-                step.PackageNames = packageList;
+                step.Packages = [.. packageNames.Select(p => new Package(p))];
             }
             else
             {

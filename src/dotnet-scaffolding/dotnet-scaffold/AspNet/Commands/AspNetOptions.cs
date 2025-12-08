@@ -5,6 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.Command;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 
@@ -28,6 +29,7 @@ internal class AspNetOptions
     public ScaffolderOption<bool> Views { get; }
     public ScaffolderOption<bool> Overwrite { get; }
     public ScaffolderOption<string> Application { get; }
+    public ScaffolderOption<string> TargetFramework { get; }
 
     private ScaffolderOption<string>? _username = null;
     private ScaffolderOption<string>? _tenantId = null;
@@ -190,6 +192,16 @@ internal class AspNetOptions
             Required = true,
             PickerType = InteractivePickerType.ConditionalPicker,
             CustomPickerValues = AspnetStrings.Options.Application.Values
+        };
+
+        TargetFramework = new ScaffolderOption<string>
+        {
+            DisplayName = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkDisplayName,
+            CliOption = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkCliOption,
+            Description = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkDescription,
+            Required = false,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = Scaffolding.Core.Model.TargetFrameworkConstants.SupportedTargetFrameworks
         };
     }
 

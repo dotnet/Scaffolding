@@ -3,6 +3,7 @@
 
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
@@ -10,6 +11,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.DotNet.Tools.Scaffold.Command;
+using Microsoft.DotNet.Tools.Scaffold.ScaffoldingSteps;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet
 {
@@ -28,6 +30,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(DetectBlazorWasmStep),
                 typeof(DotnetNewScaffolderStep),
                 typeof(EmptyControllerScaffolderStep),
+                typeof(NuGetVersionService),
                 typeof(RegisterAppStep),
                 typeof(UpdateAppAuthorizationStep),
                 typeof(UpdateAppSettingsStep),
@@ -37,6 +40,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(ValidateIdentityStep),
                 typeof(ValidateMinimalApiStep),
                 typeof(ValidateRazorPagesStep),
+                typeof(ValidateTargetFrameworkStep),
                 typeof(ValidateViewsStep),
                 typeof(WrappedAddPackagesStep),
                 typeof(WrappedCodeModificationStep),
@@ -128,7 +132,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Api.ApiControllerCrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.API)
                 .WithDescription(AspnetStrings.Api.ApiControllerCrudDescription)
-                .WithOptions([options.Project, options.ModelName, options.ControllerName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.ControllerName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.TargetFramework, options.Prerelease])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateEfControllerStep>(config =>
                 {
                     var step = config.Step;
@@ -151,7 +161,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.MVC.CrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.MVC)
                 .WithDescription(AspnetStrings.MVC.CrudDescription)
-                .WithOptions([options.Project, options.ModelName, options.ControllerName, options.Views, options.DataContextClassRequired, options.DatabaseProviderRequired, options.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.ControllerName, options.Views, options.DataContextClassRequired, options.DatabaseProviderRequired, options.TargetFramework, options.Prerelease])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateEfControllerStep>(config =>
                 {
                     var step = config.Step;
@@ -175,7 +191,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Blazor.CrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.Blazor)
                 .WithDescription(AspnetStrings.Blazor.CrudDescription)
-                .WithOptions([options.Project, options.ModelName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.PageType, options.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.PageType, options.TargetFramework, options.Prerelease])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateBlazorCrudStep>(config =>
                 {
                     var step = config.Step;
@@ -197,7 +219,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.RazorPage.CrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.RazorPages)
                 .WithDescription(AspnetStrings.RazorPage.CrudDescription)
-                .WithOptions([options.Project, options.ModelName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.PageType, options.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.DataContextClassRequired, options.DatabaseProviderRequired, options.PageType, options.TargetFramework, options.Prerelease])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateRazorPagesStep>(config =>
                 {
                     var step = config.Step;
@@ -235,7 +263,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Api.MinimalApiDisplayName)
                 .WithCategory(AspnetStrings.Catagories.API)
                 .WithDescription(AspnetStrings.Api.MinimalApiDescription)
-                .WithOptions([options.Project, options.ModelName, options.EndpointsClass, options.OpenApi, options.DataContextClass, options.DatabaseProvider, options.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.EndpointsClass, options.OpenApi, options.DataContextClass, options.DatabaseProvider, options.TargetFramework, options.Prerelease])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateMinimalApiStep>(config =>
                 {
                     var step = config.Step;
@@ -272,7 +306,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithCategory(AspnetStrings.Catagories.Blazor)
                 .WithCategory(AspnetStrings.Catagories.Identity)
                 .WithDescription(AspnetStrings.Blazor.IdentityDescription)
-                .WithOptions([options.Project, options.DataContextClassRequired, options.IdentityDbProviderRequired, options.Overwrite, options.Prerelease])
+                .WithOptions([options.Project, options.DataContextClassRequired, options.IdentityDbProviderRequired, options.Overwrite, options.TargetFramework, options.Prerelease])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateIdentityStep>(config =>
                 {
                     var step = config.Step;
@@ -295,7 +335,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Identity.DisplayName)
                 .WithCategory(AspnetStrings.Catagories.Identity)
                 .WithDescription(AspnetStrings.Identity.Description)
-                .WithOptions([options.Project, options.DataContextClassRequired, options.IdentityDbProviderRequired, options.Overwrite, options.Prerelease])
+                .WithOptions([options.Project, options.DataContextClassRequired, options.IdentityDbProviderRequired, options.Overwrite, options.TargetFramework, options.Prerelease])
+                .WithStep<ValidateTargetFrameworkStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.TargetFramework = context.GetOptionResult(options.TargetFramework);
+                })
                 .WithStep<ValidateIdentityStep>(config =>
                 {
                     var step = config.Step;

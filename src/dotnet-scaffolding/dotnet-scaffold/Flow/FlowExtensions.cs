@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow
         {
             return status
                 .AutoRefresh(true)
-                .Spinner(Spinner.Known.Aesthetic)
+                .Spinner(Spinner.Known.Dots)
                 .SpinnerStyle(Styles.Highlight);
         }
 

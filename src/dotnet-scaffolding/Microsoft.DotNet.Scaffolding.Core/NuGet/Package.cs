@@ -73,10 +73,6 @@ internal static class PackageExtensions
         {
             return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 9);
         }
-        else if (targetFramework.Equals(TargetFrameworkConstants.Net10, StringComparison.OrdinalIgnoreCase))
-        {
-            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 10);
-        }
         else
         {
             throw new NotSupportedException($"Target framework '{targetFramework}' is not supported.");

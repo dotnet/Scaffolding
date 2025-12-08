@@ -4,7 +4,6 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
     <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageVersion Include="Humanizer" Version="$(HumanizerPackageVersion)" />
     <PackageVersion Include="Microsoft.ApplicationInsights.WorkerService" Version="$(MicrosoftApplicationInsightsWorkerServicePackageVersion)" />
@@ -24,6 +23,10 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsolePackageVersion)" />
     <PackageVersion Include="Mono.TextTemplating" Version="$(MonoTextTemplatingVersion)" />
     <PackageVersion Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageVersion Include="NuGet.Configuration" Version="$(NuGetPackagingVersion)" />
+    <PackageVersion Include="NuGet.Credentials" Version="$(NuGetPackagingVersion)" />
+    <PackageVersion Include="NuGet.Protocol" Version="$(NuGetPackagingVersion)" />
+    <PackageVersion Include="NuGet.Versioning" Version="$(NuGetPackagingVersion)" />
     <PackageVersion Include="Spectre.Console.Flow" Version="$(SpectreConsoleFlowVersion)" />
     <PackageVersion Include="Spectre.Console" Version="$(SpectreConsoleVersion)" />
     <PackageVersion Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />

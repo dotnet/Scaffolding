@@ -27,4 +27,9 @@ internal static class ParameterHelpers
             return false;
         }
     }
+
+    public static bool IsTargetFrameworkOption(Parameter parameter)
+    {
+        return string.Equals(parameter.DisplayName, Model.TargetFrameworkConstants.TargetFrameworkDisplayName, StringComparison.Ordinal);
+    }
 }

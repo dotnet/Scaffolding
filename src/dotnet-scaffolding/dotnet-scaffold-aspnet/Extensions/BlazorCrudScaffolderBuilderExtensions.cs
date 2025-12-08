@@ -46,11 +46,11 @@ internal static class BlazorCrudScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            var packageNames = new List<string>()
+            var packages = new List<Package>()
             {
-                PackageConstants.AspNetCorePackages.QuickGridEfAdapterPackageName,
-                PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackageName,
-                PackageConstants.EfConstants.EfCoreToolsPackageName
+                PackageConstants.AspNetCorePackages.QuickGridEfAdapterPackage,
+                PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackage,
+                PackageConstants.EfConstants.EfCoreToolsPackage
             };
 
             if (context.Properties.TryGetValue(nameof(CrudSettings), out var commandSettingsObj) &&
@@ -59,12 +59,12 @@ internal static class BlazorCrudScaffolderBuilderExtensions
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
-                    PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
+                    PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out Package? projectPackage))
                 {
-                    packageNames.Add(projectPackageName);
+                    packages.Add(projectPackage);
                 }
 
-                step.Packages = [.. packageNames.Select(p => new Package(p))];
+                step.Packages = packages;
             }
             else
             {

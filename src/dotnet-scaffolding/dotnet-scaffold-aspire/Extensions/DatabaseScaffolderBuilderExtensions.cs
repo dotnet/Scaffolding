@@ -20,14 +20,16 @@ internal static class DatabaseScaffolderBuilderExtensions
             if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
-                if (!PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out string? appHostPackageName))
+                // Get the AppHost package name for the database type
+                if (!PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out Package? appHostPackage) ||
+                    appHostPackage is null || string.IsNullOrEmpty(appHostPackage.Name))
                 {
                     step.SkipStep = true;
                     return;
                 }
 
                 // Set package details for AppHost
-                step.Packages = [new Package(appHostPackageName)];
+                step.Packages = [appHostPackage];
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.Prerelease = commandSettings.Prerelease;
             }
@@ -45,8 +47,10 @@ internal static class DatabaseScaffolderBuilderExtensions
             if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
-                if (!PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? projectPackageName) ||
-                    string.IsNullOrEmpty(projectPackageName))
+
+                // Get the API service package name for the database type
+                if (!PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out Package? projectPackage) ||
+                    projectPackage is null ||string.IsNullOrEmpty(projectPackage.Name))
                 {
                     step.SkipStep = true;
                     return;
@@ -54,7 +58,7 @@ internal static class DatabaseScaffolderBuilderExtensions
                 }
 
                 // Set package details for the API service project
-                step.Packages = [new Package(projectPackageName)];
+                step.Packages = [projectPackage];
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
             }

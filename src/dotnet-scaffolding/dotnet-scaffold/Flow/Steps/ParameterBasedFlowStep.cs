@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.Extensions.Logging;
@@ -54,6 +55,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
             else
             {
                 SelectParameter(context, parameterValue ?? string.Empty);
+            }
+
+            // Skip the next step if this is a conditional picker and the value is 'false'
+            if (Parameter.PickerType is InteractivePickerType.YesNo && string.Equals(parameterValue, "false"))
+            {
+                NextStep = NextStep?.NextStep;
             }
 
             if (NextStep != null)

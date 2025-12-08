@@ -32,7 +32,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public async Task<string> DiscoverAsync(IFlowContext context)
         {
-            var optionParameterAddition = _parameter.Required ? "(" : "(empty to skip, ";
+            var optionParameterAddition = _parameter.Required ? "(" : "([purple]empty to skip[/],";
+
             return await PromptAsync(context, $"Enter a new value for '{_parameter.DisplayName}' {optionParameterAddition}[sandybrown]<[/] to go back) : ");
         }
 

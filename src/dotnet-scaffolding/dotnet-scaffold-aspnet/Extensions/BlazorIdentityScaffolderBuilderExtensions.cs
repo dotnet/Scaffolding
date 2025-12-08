@@ -97,10 +97,10 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<string> packageNames = [
-                PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackageName,
-                PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackageName,
-                PackageConstants.EfConstants.EfCoreToolsPackageName
+            List<Package> packages = [
+                PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackage,
+                PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackage,
+                PackageConstants.EfConstants.EfCoreToolsPackage
             ];
 
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) &&
@@ -109,12 +109,12 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
-                    PackageConstants.EfConstants.IdentityEfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
+                    PackageConstants.EfConstants.IdentityEfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out Package? projectPackage))
                 {
-                    packageNames.Add(projectPackageName);
+                    packages.Add(projectPackage);
                 }
 
-                step.Packages = packageNames.Select(p => new Package(p)).ToList();
+                step.Packages = packages;
             }
             else
             {

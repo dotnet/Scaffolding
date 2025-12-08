@@ -5,6 +5,7 @@ using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
@@ -22,10 +23,10 @@ public static class Program
         ConfigureServices(builder.Services);
         ConfigureSteps(builder.Services);
         CreateOptions(
-            out var projectOption, out var prereleaseOption, out var fileNameOption, out var actionsOption,
+            out var projectOption, out var fileNameOption, out var actionsOption,
             out var areaNameOption, out var modelNameOption, out var endpointsClassOption, out var databaseProviderOption,
             out var databaseProviderRequiredOption, out var identityDbProviderRequiredOption, out var dataContextClassOption, out var dataContextClassRequiredOption,
-            out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption, out var overwriteOption);
+            out var openApiOption, out var pageTypeOption, out var controllerNameOption, out var viewsOption, out var overwriteOption, out var targetFrameworkOption);
 
         builder.AddScaffolder("blazor-empty")
             .WithDisplayName("Razor Component")
@@ -107,7 +108,13 @@ public static class Program
             .WithDisplayName("API Controller with actions, using Entity Framework (CRUD)")
             .WithCategory("API")
             .WithDescription("Create an API controller with REST actions to create, read, update, delete, and list entities")
-            .WithOptions([projectOption, modelNameOption, controllerNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, prereleaseOption])
+            .WithOptions([projectOption, modelNameOption, controllerNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, targetFrameworkOption])
+            .WithStep<ValidateTargetFrameworkStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.TargetFramework = context.GetOptionResult(targetFrameworkOption);
+            })
             .WithStep<ValidateEfControllerStep>(config =>
             {
                 var step = config.Step;
@@ -116,7 +123,6 @@ public static class Program
                 step.Model = context.GetOptionResult(modelNameOption);
                 step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderRequiredOption);
-                step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.ControllerType = "API";
                 step.ControllerName = context.GetOptionResult(controllerNameOption);
             })
@@ -130,7 +136,13 @@ public static class Program
             .WithDisplayName("MVC Controller with views, using Entity Framework (CRUD)")
             .WithCategory("MVC")
             .WithDescription("Create a MVC controller with read/write actions and views using Entity Framework")
-            .WithOptions([projectOption, modelNameOption, controllerNameOption, viewsOption, dataContextClassRequiredOption, databaseProviderRequiredOption, prereleaseOption])
+            .WithOptions([projectOption, modelNameOption, controllerNameOption, viewsOption, dataContextClassRequiredOption, databaseProviderRequiredOption, targetFrameworkOption])
+            .WithStep<ValidateTargetFrameworkStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.TargetFramework = context.GetOptionResult(targetFrameworkOption);
+            })
             .WithStep<ValidateEfControllerStep>(config =>
             {
                 var step = config.Step;
@@ -139,7 +151,6 @@ public static class Program
                 step.Model = context.GetOptionResult(modelNameOption);
                 step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderRequiredOption);
-                step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.ControllerType = "MVC";
                 step.ControllerName = context.GetOptionResult(controllerNameOption);
             })
@@ -154,7 +165,13 @@ public static class Program
             .WithDisplayName("Razor Components with EntityFrameworkCore (CRUD)")
             .WithCategory("Blazor")
             .WithDescription("Generates Razor Components using Entity Framework for Create, Delete, Details, Edit and List operations for the given model")
-            .WithOptions([projectOption, modelNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, pageTypeOption, prereleaseOption])
+            .WithOptions([projectOption, modelNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, pageTypeOption, targetFrameworkOption])
+            .WithStep<ValidateTargetFrameworkStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.TargetFramework = context.GetOptionResult(targetFrameworkOption);
+            })
             .WithStep<ValidateBlazorCrudStep>(config =>
             {
                 var step = config.Step;
@@ -163,7 +180,6 @@ public static class Program
                 step.Model = context.GetOptionResult(modelNameOption);
                 step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderRequiredOption);
-                step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.Page = context.GetOptionResult(pageTypeOption);
             })
             .WithBlazorCrudAddPackagesStep()
@@ -176,7 +192,13 @@ public static class Program
             .WithDisplayName("Razor Pages with Entity Framework (CRUD)")
             .WithCategory("Razor Pages")
             .WithDescription("Generates Razor pages using Entity Framework for Create, Delete, Details, Edit and List operations for the given model")
-            .WithOptions([projectOption, modelNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, pageTypeOption, prereleaseOption])
+            .WithOptions([projectOption, modelNameOption, dataContextClassRequiredOption, databaseProviderRequiredOption, pageTypeOption, targetFrameworkOption])
+            .WithStep<ValidateTargetFrameworkStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.TargetFramework = context.GetOptionResult(targetFrameworkOption);
+            })
             .WithStep<ValidateRazorPagesStep>(config =>
             {
                 var step = config.Step;
@@ -185,7 +207,6 @@ public static class Program
                 step.Model = context.GetOptionResult(modelNameOption);
                 step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderRequiredOption);
-                step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.Page = context.GetOptionResult(pageTypeOption);
             })
             .WithRazorPagesAddPackagesStep()
@@ -214,7 +235,13 @@ public static class Program
             .WithDisplayName("Minimal API")
             .WithCategory("API")
             .WithDescription("Generates an endpoints file (with CRUD API endpoints) given a model and optional DbContext.")
-            .WithOptions([projectOption, modelNameOption, endpointsClassOption, openApiOption, dataContextClassOption, databaseProviderOption, prereleaseOption])
+            .WithOptions([projectOption, modelNameOption, endpointsClassOption, openApiOption, dataContextClassOption, databaseProviderOption, targetFrameworkOption])
+            .WithStep<ValidateTargetFrameworkStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.TargetFramework = context.GetOptionResult(targetFrameworkOption);
+            })
             .WithStep<ValidateMinimalApiStep>(config =>
             {
                 var step = config.Step;
@@ -223,7 +250,6 @@ public static class Program
                 step.Model = context.GetOptionResult(modelNameOption);
                 step.DataContext = context.GetOptionResult(dataContextClassOption);
                 step.DatabaseProvider = context.GetOptionResult(databaseProviderOption);
-                step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.OpenApi = context.GetOptionResult(openApiOption);
                 step.Endpoints = context.GetOptionResult(endpointsClassOption);
             })
@@ -251,7 +277,13 @@ public static class Program
             .WithCategory("Blazor")
             .WithCategory("Identity")
             .WithDescription("Add blazor identity to a project.")
-            .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, prereleaseOption])
+            .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, targetFrameworkOption])
+            .WithStep<ValidateTargetFrameworkStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.TargetFramework = context.GetOptionResult(targetFrameworkOption);
+            })
             .WithStep<ValidateIdentityStep>(config =>
             {
                 var step = config.Step;
@@ -259,7 +291,6 @@ public static class Program
                 step.Project = context.GetOptionResult(projectOption);
                 step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
                 step.DatabaseProvider = context.GetOptionResult(identityDbProviderRequiredOption);
-                step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.Overwrite = context.GetOptionResult(overwriteOption);
                 step.BlazorScenario = true;
             })
@@ -273,7 +304,13 @@ public static class Program
             .WithDisplayName("ASP.NET Core Identity")
             .WithCategory("Identity")
             .WithDescription("Add ASP.NET Core identity to a project.")
-            .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, prereleaseOption])
+            .WithOptions([projectOption, dataContextClassRequiredOption, identityDbProviderRequiredOption, overwriteOption, targetFrameworkOption])
+            .WithStep<ValidateTargetFrameworkStep>(config =>
+            {
+                var step = config.Step;
+                var context = config.Context;
+                step.TargetFramework = context.GetOptionResult(targetFrameworkOption);
+            })
             .WithStep<ValidateIdentityStep>(config =>
             {
                 var step = config.Step;
@@ -281,7 +318,6 @@ public static class Program
                 step.Project = context.GetOptionResult(projectOption);
                 step.DataContext = context.GetOptionResult(dataContextClassRequiredOption);
                 step.DatabaseProvider = context.GetOptionResult(identityDbProviderRequiredOption);
-                step.Prerelease = context.GetOptionResult(prereleaseOption);
                 step.Overwrite = context.GetOptionResult(overwriteOption);
             })
             .WithIdentityAddPackagesStep()
@@ -314,6 +350,9 @@ public static class Program
             services.AddTransient(type);
         }
 
+        services.AddTransient<NuGetVersionService>();
+        services.AddTransient<ValidateTargetFrameworkStep>();
+
         //ScaffoldSteps from other assemblies/projects
         services.AddTransient<CodeModificationStep>();
         services.AddTransient<AddPackagesStep>();
@@ -323,7 +362,6 @@ public static class Program
 
     static void CreateOptions(
         out ScaffolderOption<string> projectOption,
-        out ScaffolderOption<bool> prereleaseOption,
         out ScaffolderOption<string> fileNameOption,
         out ScaffolderOption<bool> actionsOption,
         out ScaffolderOption<string> areaNameOption,
@@ -338,7 +376,8 @@ public static class Program
         out ScaffolderOption<string> pageTypeOption,
         out ScaffolderOption<string> controllerNameOption,
         out ScaffolderOption<bool> viewsOption,
-        out ScaffolderOption<bool> overwriteOption)
+        out ScaffolderOption<bool> overwriteOption,
+        out ScaffolderOption<string> targetFrameworkOption)
     {
         projectOption = new ScaffolderOption<string>
         {
@@ -347,15 +386,6 @@ public static class Program
             Description = ".NET project to be used for scaffolding (.csproj file)",
             Required = true,
             PickerType = InteractivePickerType.ProjectPicker
-        };
-
-        prereleaseOption = new ScaffolderOption<bool>
-        {
-            DisplayName = "Include Prerelease packages?",
-            CliOption = Constants.CliOptions.PrereleaseCliOption,
-            Description = "Include prerelease package versions when installing latest Aspire components",
-            Required = false,
-            PickerType = InteractivePickerType.YesNo
         };
 
         fileNameOption = new ScaffolderOption<string>
@@ -489,6 +519,16 @@ public static class Program
             Description = "Option to enable overwriting existing files",
             Required = true,
             PickerType = InteractivePickerType.YesNo
+        };
+
+        targetFrameworkOption = new ScaffolderOption<string>
+        {
+            DisplayName = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkDisplayName,
+            CliOption = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkCliOption,
+            Description = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkDescription,
+            Required = false,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = Scaffolding.Core.Model.TargetFrameworkConstants.SupportedTargetFrameworks
         };
     }
 }

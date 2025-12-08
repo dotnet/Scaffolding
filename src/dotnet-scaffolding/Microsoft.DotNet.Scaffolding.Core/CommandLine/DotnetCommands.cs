@@ -7,7 +7,16 @@ namespace Microsoft.DotNet.Scaffolding.Core.CommandLine;
 
 internal static class DotnetCommands
 {
-    public static bool AddPackage(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, string? tfm = null, bool includePrerelease = false)
+    /// <summary>
+    /// Adds a NuGet package to a project using the dotnet CLI.
+    /// </summary>
+    /// <param name="packageName">The name of the package to add.</param>
+    /// <param name="logger">The logger for output.</param>
+    /// <param name="projectFile">The project file to add the package to (optional).</param>
+    /// <param name="packageVersion">The version of the package to add (optional).</param>
+    /// <param name="includePrerelease">Whether to include prerelease versions.</param>
+    /// <returns>True if the package was added successfully; otherwise, false.</returns>
+    public static bool AddPackage(string packageName, ILogger logger, string? projectFile = null, string? packageVersion = null, bool includePrerelease = false)
     {
         if (!string.IsNullOrEmpty(packageName))
         {
@@ -18,9 +27,13 @@ internal static class DotnetCommands
             }
 
             arguments.AddRange(["package", packageName]);
+
+            string packageDisplayName = packageName;
+
             if (!string.IsNullOrEmpty(packageVersion))
             {
                 arguments.AddRange(["-v", packageVersion]);
+                packageDisplayName = $"{packageName} (v{packageVersion})";
             }
 
             if (includePrerelease)
@@ -28,7 +41,7 @@ internal static class DotnetCommands
                 arguments.Add("--prerelease");
             }
 
-            logger.LogInformation(string.Format("\nAdding package '{0}'...", packageName));
+            logger.LogInformation($"\nAdding package '{packageDisplayName}'...");
             var runner = DotnetCliRunner.CreateDotNet("add", arguments);
 
             // Buffer the output here because we'll only display it in the failure scenario

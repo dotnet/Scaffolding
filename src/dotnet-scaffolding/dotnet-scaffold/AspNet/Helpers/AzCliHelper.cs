@@ -222,30 +222,28 @@ internal static class AzCliHelper
         {
             failingCommand = null;
             appIds = [];
-            var exitCode = runner.RunAzCli("ad app list --output json", out string? stdOut, out string? stdErr);
+            // Use Microsoft Graph API via az rest
+            var exitCode = runner.RunAzCli("rest --method GET --url https://graph.microsoft.com/v1.0/applications?$select=appId,displayName", out string? stdOut, out string? stdErr);
 
             if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
             {
-                // Parse the JSON output
                 using JsonDocument doc = JsonDocument.Parse(stdOut);
                 JsonElement root = doc.RootElement;
-
-                if (root.ValueKind == JsonValueKind.Array)
+                if (root.TryGetProperty("value", out JsonElement valueArray) && valueArray.ValueKind == JsonValueKind.Array)
                 {
-
-                    foreach (JsonElement app in root.EnumerateArray())
+                    foreach (JsonElement app in valueArray.EnumerateArray())
                     {
-                        if (app.TryGetProperty("appId", out JsonElement appId))
+                        string? id = app.TryGetProperty("appId", out JsonElement appId) ? appId.GetString() : null;
+                        string? displayName = app.TryGetProperty("displayName", out JsonElement name) ? name.GetString() : "Unknown App";
+                        if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(displayName))
                         {
-                            string? id = appId.GetString();
-                            string? displayName = app.TryGetProperty("displayName", out JsonElement name) ?
-                                                 name.GetString() : "Unknown App";
-
-                            if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(displayName))
+                            // the tool will throw if displayName contains []
+                            if (displayName.Contains('[') || displayName.Contains(']'))
                             {
-                                // Format as "DisplayName (AppId)" for better user experience
-                                appIds.Add($"{displayName} {id}");
+                                displayName = displayName.Replace("[", "(").Replace("]", ")");
                             }
+                            
+                            appIds.Add($"{displayName} {id}");
                         }
                     }
                     return true;
@@ -254,7 +252,7 @@ internal static class AzCliHelper
 
             if (!string.IsNullOrEmpty(stdErr))
             {
-                failingCommand = $"az ad app list";
+                failingCommand = "az rest";
             }
         }
         catch (Exception ex)

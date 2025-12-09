@@ -66,7 +66,6 @@
     <SystemCommandLineNamingConventionBinderPackageVersion>2.0.0-beta4.22613.1</SystemCommandLineNamingConventionBinderPackageVersion>
     <MicrosoftApplicationInsightsWorkerServicePackageVersion>2.22.0</MicrosoftApplicationInsightsWorkerServicePackageVersion>
     <MicrosoftDotNetPlatformAbstractionsVersion>3.1.6</MicrosoftDotNetPlatformAbstractionsVersion>
-    <MicrosoftExtensionsConfigurationPackageVersion>9.0.12</MicrosoftExtensionsConfigurationPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>9.0.11</VersionPrefix>

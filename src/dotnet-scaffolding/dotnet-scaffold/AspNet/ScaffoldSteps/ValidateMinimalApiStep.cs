@@ -94,7 +94,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
 
         //initialize MinimalApiModel
         _logger.LogInformation("Initializing scaffolding model...");
-        var minimalApiModel = await GetMinimalApiModelAsync(minimalApiSettings);
+        var minimalApiModel = await GetMinimalApiModelAsync(context, minimalApiSettings);
         if (minimalApiModel is null)
         {
             _logger.LogError("An error occurred.");
@@ -188,11 +188,13 @@ internal class ValidateMinimalApiStep : ScaffoldStep
     /// <summary>
     /// Initializes and returns the MinimalApiModel for scaffolding.
     /// </summary>
+    /// <param name="context">ScaffolderContext object containing the context for the scaffolding.</param>
     /// <param name="settings">MinimalApiSettings object containing the settings for the scaffolding.</param>
     /// <returns>Task containing the MinimalApiModel or null if initialization fails.</returns>
-    private async Task<MinimalApiModel?> GetMinimalApiModelAsync(MinimalApiSettings settings)
+    private async Task<MinimalApiModel?> GetMinimalApiModelAsync(ScaffolderContext context, MinimalApiSettings settings)
     {
-        var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        context.SetSpecifiedTargetFramework(projectInfo.LowestTargetFramework);
         if (projectInfo is null || projectInfo.CodeService is null)
         {
             return null;

@@ -91,7 +91,7 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
 
         //initialize MinimalApiModel
         _logger.LogInformation("Initializing scaffolding model...");
-        var blazorCrudModel = await GetBlazorCrudModelAsync(blazorCrudSettings);
+        var blazorCrudModel = await GetBlazorCrudModelAsync(context, blazorCrudSettings);
         if (blazorCrudModel is null)
         {
             _logger.LogError("An error occurred.");
@@ -197,11 +197,13 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
     /// <summary>
     /// Initializes and returns the BlazorCrudModel for scaffolding.
     /// </summary>
+    /// <param name="context">The scaffolder context.</param>
     /// <param name="settings">The CRUD settings containing user input.</param>
     /// <returns>A task representing the asynchronous operation, with a result containing the BlazorCrudModel, or null if initialization fails.</returns>
-    private async Task<BlazorCrudModel?> GetBlazorCrudModelAsync(CrudSettings settings)
+    private async Task<BlazorCrudModel?> GetBlazorCrudModelAsync(ScaffolderContext context, CrudSettings settings)
     {
-        var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        context.SetSpecifiedTargetFramework(projectInfo.LowestTargetFramework);
         if (projectInfo is null || projectInfo.CodeService is null)
         {
             return null;

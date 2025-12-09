@@ -81,12 +81,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             {
                 NextStep = NextStep?.NextStep;
             }
-            else if (ParameterHelpers.IsTargetFrameworkOption(Parameter) && !string.Equals(parameterValue, TargetFrameworkConstants.Net10, StringComparison.OrdinalIgnoreCase))
-            {
-                // Skip the prerelease step if the target framework is not net10, prerelease only applies to net10
-                //TODO update for the next major release of .NET
-                NextStep = NextStep?.NextStep;
-            }
+            // if the next step is prerelease option and the target framework is not net 10, skip the prerelease option
+            //TODO update with each major release
+            // Need to know target framework before here
+            
 
             if (NextStep != null)
             {

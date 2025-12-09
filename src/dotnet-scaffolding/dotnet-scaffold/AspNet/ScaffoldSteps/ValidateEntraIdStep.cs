@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             }
 
             _logger.LogInformation("Initializing Entra ID scaffolding model...");
-            var entraIdModel = await GetEntraIdModelAsync(entraIdSettings);
+            var entraIdModel = await GetEntraIdModelAsync(context, entraIdSettings);
 
             if (entraIdModel is null)
             {
@@ -157,7 +157,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// <summary>
         /// Initializes and returns the EntraIdModel for scaffolding.
         /// </summary>
-        private async Task<EntraIdModel?> GetEntraIdModelAsync(EntraIdSettings settings)
+        private async Task<EntraIdModel?> GetEntraIdModelAsync(ScaffolderContext context, EntraIdSettings settings)
         {
             if (string.IsNullOrEmpty(settings.Project))
             {
@@ -165,7 +165,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return null;
             }
 
-            var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+            ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+            context.SetSpecifiedTargetFramework(projectInfo.LowestTargetFramework);
             var projectDirectory = Path.GetDirectoryName(projectInfo?.ProjectPath);
 
             if (projectInfo is null || projectInfo.CodeService is null || string.IsNullOrEmpty(projectDirectory))

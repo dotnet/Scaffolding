@@ -187,15 +187,12 @@ internal static class ClassAnalyzers
          * unlike ICodeService, also no chance for a wasted op because at this point in the scaffolder,
          * we will definitely to have MSBuild initialized.*/
         new MsBuildInitializer(logger).Initialize();
-        var codeService = new CodeService(logger, projectPath);
-        var msBuildProject = new MSBuildProjectService(projectPath);
-        var lowestTFM = msBuildProject.GetLowestTargetFramework();
-        var capabilities = msBuildProject.GetProjectCapabilities().ToList();
-        var projectInfo = new ProjectInfo()
+        CodeService codeService = new(logger, projectPath);
+        MSBuildProjectService msBuildProject = new(projectPath);
+        List<string> capabilities = msBuildProject.GetProjectCapabilities().ToList();
+        ProjectInfo projectInfo = new(projectPath)
         {
             CodeService = codeService,
-            ProjectPath = projectPath,
-            LowestTargetFramework = lowestTFM,
             Capabilities = capabilities
         };
 

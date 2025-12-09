@@ -52,6 +52,12 @@
     <MicrosoftAspNetCoreIdentityUIPackageVersion>9.0.12</MicrosoftAspNetCoreIdentityUIPackageVersion>
     <!-- Mono.TextTemplating-->
     <MonoTextTemplatingVersion>3.0.0</MonoTextTemplatingVersion>
+    <!-- Microsoft.Extensions.Configuration -->
+    <MicrosoftExtensionsConfigurationPackageVersion>9.0.12</MicrosoftExtensionsConfigurationPackageVersion>
+    <!-- Microsoft.Extensions.Configuration.Binder-->
+    <MicrosoftExtensionsConfigurationBinderPackageVersion>9.0.12</MicrosoftExtensionsConfigurationBinderPackageVersion>
+    <!-- Microsoft.Extensions.Configuration.CommandLine -->
+    <MicrosoftExtensionsConfigurationCommandLinePackageVersion>9.0.12</MicrosoftExtensionsConfigurationCommandLinePackageVersion>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
     <MicrosoftCodeAnalysisPreviewVersion>4.12.0</MicrosoftCodeAnalysisPreviewVersion>
@@ -60,6 +66,7 @@
     <SystemCommandLineNamingConventionBinderPackageVersion>2.0.0-beta4.22613.1</SystemCommandLineNamingConventionBinderPackageVersion>
     <MicrosoftApplicationInsightsWorkerServicePackageVersion>2.22.0</MicrosoftApplicationInsightsWorkerServicePackageVersion>
     <MicrosoftDotNetPlatformAbstractionsVersion>3.1.6</MicrosoftDotNetPlatformAbstractionsVersion>
+    <MicrosoftExtensionsConfigurationPackageVersion>9.0.12</MicrosoftExtensionsConfigurationPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>9.0.11</VersionPrefix>

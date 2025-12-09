@@ -78,7 +78,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+    private InputModel Input { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {

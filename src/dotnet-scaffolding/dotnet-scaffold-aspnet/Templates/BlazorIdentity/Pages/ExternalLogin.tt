@@ -63,7 +63,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+    private InputModel? Input { get; set; } = default!;
 
     [SupplyParameterFromQuery]
     private string? RemoteError { get; set; }
@@ -78,6 +78,8 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 
     protected override async Task OnInitializedAsync()
     {
+        Input ??= new();
+
         if (RemoteError is not null)
         {
             RedirectManager.RedirectToWithStatus("Account/Login", $"Error from external provider: {RemoteError}", HttpContext);

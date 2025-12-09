@@ -8,17 +8,19 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="NuGet.Configuration" />
+    <PackageReference Include="NuGet.Credentials" />
+    <PackageReference Include="NuGet.Protocol" />
+    <PackageReference Include="NuGet.Versioning" />
     <PackageReference Include="System.CommandLine" />
     <PackageReference Include="System.CommandLine.NamingConventionBinder" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Internal\CliHelpers\*.cs">
-      <Link>CliHelpers\%(Filename)%(Extension)</Link>
-    </Compile>
+    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Internal\Microsoft.DotNet.Scaffolding.Internal.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Pack="true" Include="README.md"  PackagePath="\"/>
+    <None Pack="true" Include="README.md" PackagePath="\" />
   </ItemGroup>
 </Project>

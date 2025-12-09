@@ -64,13 +64,14 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "  </div>\r\n</div>\r\n\r\n@code {\r\n    public const string LoginCallbackAction = \"Logi" +
                     "nCallback\";\r\n\r\n    private string? message;\r\n    private ExternalLoginInfo? exte" +
                     "rnalLoginInfo;\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpContext " +
-                    "{ get; set; } = default!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputMod" +
-                    "el Input { get; set; } = new();\r\n\r\n    [SupplyParameterFromQuery]\r\n    private s" +
+                    " { get; set; } = default!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputMod" +
+                    "el Input { get; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    private s" +
                     "tring? RemoteError { get; set; }\r\n\r\n    [SupplyParameterFromQuery]\r\n    private " +
                     "string? ReturnUrl { get; set; }\r\n\r\n    [SupplyParameterFromQuery]\r\n    private s" +
                     "tring? Action { get; set; }\r\n\r\n    private string? ProviderDisplayName => extern" +
                     "alLoginInfo?.ProviderDisplayName;\r\n\r\n    protected override async Task OnInitial" +
-                    "izedAsync()\r\n    {\r\n        if (RemoteError is not null)\r\n        {\r\n           " +
+                    "izedAsync()\r\n    {\r\n        Input ??= new();\r\n\r\n        if (RemoteError is not null)" +
+                    "\r\n        {\r\n           " +
                     " RedirectManager.RedirectToWithStatus(\"Account/Login\", $\"Error from external pro" +
                     "vider: {RemoteError}\", HttpContext);\r\n        }\r\n\r\n        var info = await Sign" +
                     "InManager.GetExternalLoginInfoAsync();\r\n        if (info is null)\r\n        {\r\n  " +

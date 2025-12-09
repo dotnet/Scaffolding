@@ -1,5 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.CodeAnalysis.Elfie.Serialization;
+using Microsoft.DotNet.Scaffolding.Core.Model;
+
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 
 internal class PackageConstants
@@ -10,25 +13,32 @@ internal class PackageConstants
         public const string SQLite = "sqlite-efcore";
         public const string CosmosDb = "cosmos-efcore";
         public const string Postgres = "npgsql-efcore";
-        public const string EfCorePackageName = "Microsoft.EntityFrameworkCore";
-        public const string EfCoreToolsPackageName = "Microsoft.EntityFrameworkCore.Tools";
-        public const string SqlServerPackageName = "Microsoft.EntityFrameworkCore.SqlServer";
-        public const string SqlitePackageName = "Microsoft.EntityFrameworkCore.Sqlite";
-        public const string CosmosPakcageName = "Microsoft.EntityFrameworkCore.Cosmos";
-        public const string PostgresPackageName = "Npgsql.EntityFrameworkCore.PostgreSQL";
+        public static readonly Package EfCorePackage = new("Microsoft.EntityFrameworkCore", IsVersionRequired: true);
+        public static readonly Package EfCoreToolsPackage = new("Microsoft.EntityFrameworkCore.Tools", IsVersionRequired: true);
+        public static readonly Package SqlServerPackage = new("Microsoft.EntityFrameworkCore.SqlServer", IsVersionRequired: true);
+        public static readonly Package SqlitePackage = new("Microsoft.EntityFrameworkCore.Sqlite", IsVersionRequired: true);
+        public static readonly Package CosmosPackage = new("Microsoft.EntityFrameworkCore.Cosmos", IsVersionRequired: true);
+        public static readonly Package PostgresPackage = new("Npgsql.EntityFrameworkCore.PostgreSQL", IsVersionRequired: true);
         public const string ConnectionStringVariableName = "connectionString";
-        public static readonly IDictionary<string, string> EfPackagesDict = new Dictionary<string, string>
+
+        /// <summary>
+        /// Maps provider keys to their corresponding NuGet package names.
+        /// </summary>
+        public static readonly IDictionary<string, Package> EfPackagesDict = new Dictionary<string, Package>
         {
-            { SqlServer, SqlServerPackageName },
-            { SQLite, SqlitePackageName },
-            { CosmosDb, CosmosPakcageName },
-            { Postgres, PostgresPackageName }
+            { SqlServer, SqlServerPackage },
+            { SQLite, SqlitePackage },
+            { CosmosDb, CosmosPackage },
+            { Postgres, PostgresPackage }
         };
 
-        public static readonly IDictionary<string, string> IdentityEfPackagesDict = new Dictionary<string, string>
+        /// <summary>
+        /// Maps provider keys to their corresponding Identity EF package names.
+        /// </summary>
+        public static readonly IDictionary<string, Package> IdentityEfPackagesDict = new Dictionary<string, Package>
         {
-            { SqlServer, SqlServerPackageName },
-            { SQLite, SqlitePackageName },
+            { SqlServer, SqlServerPackage },
+            { SQLite, SqlitePackage },
         };
 
         internal static Dictionary<string, string> UseDatabaseMethods = new()
@@ -42,10 +52,10 @@ internal class PackageConstants
 
     public static class AspNetCorePackages
     {
-        public const string QuickGridEfAdapterPackageName = "Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter";
-        public const string AspNetCoreDiagnosticsEfCorePackageName = "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore";
-        public const string OpenApiPackageName = "Microsoft.AspNetCore.OpenApi";
-        public const string AspNetCoreIdentityEfPackageName = "Microsoft.AspNetCore.Identity.EntityFrameworkCore";
-        public const string AspNetCoreIdentityUiPackageName = "Microsoft.AspNetCore.Identity.UI";
+        public static readonly Package QuickGridEfAdapterPackage = new("Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter", IsVersionRequired: true);
+        public static readonly Package AspNetCoreDiagnosticsEfCorePackage = new("Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore", IsVersionRequired: true);
+        public static readonly Package OpenApiPackage = new("Microsoft.AspNetCore.OpenApi", IsVersionRequired: true);
+        public static readonly Package AspNetCoreIdentityEfPackage = new("Microsoft.AspNetCore.Identity.EntityFrameworkCore", IsVersionRequired: true);
+        public static readonly Package AspNetCoreIdentityUiPackage = new("Microsoft.AspNetCore.Identity.UI", IsVersionRequired: true);
     }
 }

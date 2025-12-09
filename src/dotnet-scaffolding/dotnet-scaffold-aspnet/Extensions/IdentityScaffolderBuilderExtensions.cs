@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -19,10 +20,10 @@ internal static class IdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<string> packageList = [
-                PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackageName,
-                PackageConstants.AspNetCorePackages.AspNetCoreIdentityUiPackageName,
-                PackageConstants.EfConstants.EfCoreToolsPackageName
+            List<Package> packages = [
+                PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackage,
+                PackageConstants.AspNetCorePackages.AspNetCoreIdentityUiPackage,
+                PackageConstants.EfConstants.EfCoreToolsPackage
             ];
 
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) &&
@@ -31,12 +32,12 @@ internal static class IdentityScaffolderBuilderExtensions
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
-                    PackageConstants.EfConstants.IdentityEfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? dbProviderPackageName))
+                    PackageConstants.EfConstants.IdentityEfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out Package? dbProviderPackage))
                 {
-                    packageList.Add(dbProviderPackageName);
+                    packages.Add(dbProviderPackage);
                 }
 
-                step.PackageNames = packageList;
+                step.Packages = packages;
             }
             else
             {

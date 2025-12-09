@@ -72,11 +72,12 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
     private ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user = default!;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Input " +
-                    "{ get; set; } = new();\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? Re" +
-                    "turnUrl { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r" +
-                    "\n    {\r\n        // Ensure the user has gone through the username & password scre" +
-                    "en first\r\n        user = await SignInManager.GetTwoFactorAuthenticationUserAsync" +
-                    "() ??\r\n            throw new InvalidOperationException(\"Unable to load two-facto" +
+                    "{ get; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    private strin" +
+                    "g? ReturnUrl { get; set; }\r\n\r\n    protected override async Task OnInitializedAs" +
+                    "ync()\r\n    {\r\n        Input ??= new();\r\n        // Ensure the user has gone thr" +
+                    "ough the username & password screen first\r\n        user = await SignInManager." +
+                    "GetTwoFactorAuthenticationUserAsync() ??\r\n            throw new InvalidOperatio" +
+                    "nException(\"Unable to load two-facto" +
                     "r authentication user.\");\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r" +
                     "\n    {\r\n        var recoveryCode = Input.RecoveryCode.Replace(\" \", string.Empty)" +
                     ";\r\n\r\n        var result = await SignInManager.TwoFactorRecoveryCodeSignInAsync(r" +

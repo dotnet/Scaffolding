@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -44,19 +45,19 @@ internal static class EfControllerScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<string> packageList = [PackageConstants.EfConstants.EfCoreToolsPackageName];
+            List<Package> packages = [PackageConstants.EfConstants.EfCoreToolsPackage];
             if (context.Properties.TryGetValue(nameof(EfControllerSettings), out var commandSettingsObj) &&
                 commandSettingsObj is EfControllerSettings commandSettings)
             {
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
-                    PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
+                    PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out Package? projectPackage))
                 {
-                    packageList.Add(projectPackageName);
+                    packages.Add(projectPackage);
                 }
 
-                step.PackageNames = packageList;
+                step.Packages = packages;
             }
             else
             {

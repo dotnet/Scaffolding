@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.Aspire;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
@@ -19,7 +20,8 @@ internal static class CachingScaffolderBuilderExtensions
             if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
-                step.PackageNames = [PackageConstants.CachingPackages.AppHostRedisPackageName];
+                // Set package details for AppHost Redis
+                step.Packages = [PackageConstants.CachingPackages.AppHostRedisPackage];
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.Prerelease = commandSettings.Prerelease;
             }
@@ -37,15 +39,17 @@ internal static class CachingScaffolderBuilderExtensions
             if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
-                if (!PackageConstants.CachingPackages.CachingPackagesDict.TryGetValue(commandSettings.Type, out string? projectPackageName) ||
-                    string.IsNullOrEmpty(projectPackageName))
+
+                // Get the package name for the project type
+                if (!PackageConstants.CachingPackages.CachingPackagesDict.TryGetValue(commandSettings.Type, out Package? projectPackage) ||
+                    projectPackage is null || string.IsNullOrEmpty(projectPackage.Name))
                 {
                     step.SkipStep = true;
                     return;
 
                 }
-
-                step.PackageNames = [projectPackageName];
+                // Set package details for the project
+                step.Packages = [projectPackage];
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
             }

@@ -64,10 +64,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "            <h3>Use another service to register.</h3>\r\n            <hr />\r\n     " +
                     "       <ExternalLoginPicker />\r\n        </section>\r\n    </div>\r\n</div>\r\n\r\n@code " +
                     "{\r\n    private IEnumerable<IdentityError>? identityErrors;\r\n\r\n    [SupplyParamet" +
-                    "erFromForm]\r\n    private InputModel Input { get; set; } = new();\r\n\r\n    [SupplyP" +
+                    "erFromForm]\r\n    private InputModel Input { get; set; } = default!;\r\n\r\n    [SupplyP" +
                     "arameterFromQuery]\r\n    private string? ReturnUrl { get; set; }\r\n\r\n    private s" +
                     "tring? Message => identityErrors is null ? null : $\"Error: {string.Join(\", \", id" +
-                    "entityErrors.Select(error => error.Description))}\";\r\n\r\n    public async Task Reg" +
+                    "entityErrors.Select(error => error.Description))}\";\r\n\r\n    protected override vo" +
+                    "id OnInitialized()\r\n    {\r\n        Input ??= new();\r\n    }\r\n\r\n    public async Task Reg" +
                     "isterUser(EditContext editContext)\r\n    {\r\n        var user = CreateUser();\r\n\r\n " +
                     "       await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.Non" +
                     "e);\r\n        var emailStore = GetEmailStore();\r\n        await emailStore.SetEmai" +

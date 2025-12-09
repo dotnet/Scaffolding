@@ -64,10 +64,11 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "tton type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Reset</button>\r\n        " +
                     "</EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private IEnumerable<IdentityErro" +
                     "r>? identityErrors;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Inp" +
-                    "ut { get; set; } = new();\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string?" +
-                    " Code { get; set; }\r\n\r\n    private string? Message => identityErrors is null ? n" +
-                    "ull : $\"Error: {string.Join(\", \", identityErrors.Select(error => error.Descripti" +
-                    "on))}\";\r\n\r\n    protected override void OnInitialized()\r\n    {\r\n        if (Code " +
+                    "ut { get; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    private str" +
+                    "ing? Code { get; set; }\r\n\r\n    private string? Message => identityErrors is null" +
+                    " ? null : $\"Error: {string.Join(\", \", identityErrors.Select(error => error.De" +
+                    "scription))}\";\r\n\r\n    protected override void OnInitialized()\r\n    {\r\n        In" +
+                    "put ??= new();\r\n        if (Code " +
                     "is null)\r\n        {\r\n            RedirectManager.RedirectTo(\"Account/InvalidPass" +
                     "wordReset\");\r\n        }\r\n\r\n        Input.Code = Encoding.UTF8.GetString(WebEncod" +
                     "ers.Base64UrlDecode(Code));\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync(" +

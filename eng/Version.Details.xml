@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.24515.3">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="9.0.0-beta.25562.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>31624193093a13f765ab5382509e693911264509</Sha>
+      <Sha>6e2d8e204cebac7d3989c1996f96e5a9ed63fa80</Sha>
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="8.0.0-rtm.23469.11">
+    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="9.0.12">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>ec270ab5198f861a971646f00598f0589cd69e75</Sha>
+      <Sha>0e1e0e71cd0dad4f0186d20bdba31cb34abc4e8e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.EntityFrameworkCore" Version="8.0.0-rtm.23469.11">
+    <Dependency Name="Microsoft.EntityFrameworkCore" Version="9.0.12">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>ec270ab5198f861a971646f00598f0589cd69e75</Sha>
+      <Sha>0e1e0e71cd0dad4f0186d20bdba31cb34abc4e8e</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0-rtm.23469.11">
+    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.12">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>ec270ab5198f861a971646f00598f0589cd69e75</Sha>
+      <Sha>0e1e0e71cd0dad4f0186d20bdba31cb34abc4e8e</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="9.0.12">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -27,9 +27,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>2b2a06c8a4d45ec0781266ffa3f3852a052f0fbb</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Identity.Stores" Version="8.0.0-rtm.23524.15">
+    <Dependency Name="Microsoft.Extensions.Identity.Stores" Version="9.0.12">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>815eb281ecad13eb69cf50516ac7f534b947f2b0</Sha>
+      <Sha>553d4e88078b9ca3bf60fee596e171782eb1b957</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.12">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -51,9 +51,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>2b2a06c8a4d45ec0781266ffa3f3852a052f0fbb</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.0-rtm.23524.15">
+    <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.12">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>815eb281ecad13eb69cf50516ac7f534b947f2b0</Sha>
+      <Sha>553d4e88078b9ca3bf60fee596e171782eb1b957</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.Logging.Console" Version="9.0.12">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -71,17 +71,17 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>2b2a06c8a4d45ec0781266ffa3f3852a052f0fbb</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.0-rtm.23524.15">
+    <Dependency Name="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.12">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>815eb281ecad13eb69cf50516ac7f534b947f2b0</Sha>
+      <Sha>553d4e88078b9ca3bf60fee596e171782eb1b957</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0-rtm.23524.15">
+    <Dependency Name="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.12">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>815eb281ecad13eb69cf50516ac7f534b947f2b0</Sha>
+      <Sha>553d4e88078b9ca3bf60fee596e171782eb1b957</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Identity.UI" Version="8.0.0-rtm.23524.15">
+    <Dependency Name="Microsoft.AspNetCore.Identity.UI" Version="9.0.12">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>815eb281ecad13eb69cf50516ac7f534b947f2b0</Sha>
+      <Sha>553d4e88078b9ca3bf60fee596e171782eb1b957</Sha>
     </Dependency>
   </ProductDependencies>
 </Dependencies>

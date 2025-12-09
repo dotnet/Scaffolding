@@ -72,8 +72,9 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             this.Write(" user = default!;\r\n    private string? email;\r\n    private bool isEmailConfirmed;" +
                     "\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpContext { get; set; } " +
                     "= default!;\r\n\r\n    [SupplyParameterFromForm(FormName = \"change-email\")]\r\n    pri" +
-                    "vate InputModel Input { get; set; } = new();\r\n\r\n    protected override async Tas" +
-                    "k OnInitializedAsync()\r\n    {\r\n        user = await UserAccessor.GetRequiredUser" +
+                    "vate InputModel Input { get; set; } = default!;\r\n\r\n    protected override async Tas" +
+                    "k OnInitializedAsync()\r\n    {\r\n        Input ??= new();\r\n\r\n        user = await " +
+                    "UserAccessor.GetRequiredUser" +
                     "Async(HttpContext);\r\n        email = await UserManager.GetEmailAsync(user);\r\n   " +
                     "     isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);\r\n\r\n      " +
                     "  Input.NewEmail ??= email;\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync(" +

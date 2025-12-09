@@ -5,6 +5,7 @@ using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.Aspire;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.ScaffoldSteps;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
@@ -19,13 +20,16 @@ internal static class DatabaseScaffolderBuilderExtensions
             if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
-                if (!PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out string? appHostPackageName))
+                // Get the AppHost package name for the database type
+                if (!PackageConstants.DatabasePackages.DatabasePackagesAppHostDict.TryGetValue(commandSettings.Type, out Package? appHostPackage) ||
+                    appHostPackage is null || string.IsNullOrEmpty(appHostPackage.Name))
                 {
                     step.SkipStep = true;
                     return;
                 }
 
-                step.PackageNames = [appHostPackageName];
+                // Set package details for AppHost
+                step.Packages = [appHostPackage];
                 step.ProjectPath = commandSettings.AppHostProject;
                 step.Prerelease = commandSettings.Prerelease;
             }
@@ -43,15 +47,18 @@ internal static class DatabaseScaffolderBuilderExtensions
             if (properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
-                if (!PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out string? projectPackageName) ||
-                    string.IsNullOrEmpty(projectPackageName))
+
+                // Get the API service package name for the database type
+                if (!PackageConstants.DatabasePackages.DatabasePackagesApiServiceDict.TryGetValue(commandSettings.Type, out Package? projectPackage) ||
+                    projectPackage is null ||string.IsNullOrEmpty(projectPackage.Name))
                 {
                     step.SkipStep = true;
                     return;
 
                 }
 
-                step.PackageNames = [projectPackageName];
+                // Set package details for the API service project
+                step.Packages = [projectPackage];
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
             }

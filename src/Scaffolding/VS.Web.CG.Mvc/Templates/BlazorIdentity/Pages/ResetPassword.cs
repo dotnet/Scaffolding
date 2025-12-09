@@ -56,10 +56,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "ton type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Reset</button>\r\n        <" +
                     "/EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private IEnumerable<IdentityError" +
                     ">? identityErrors;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Inpu" +
-                    "t { get; set; } = new();\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? " +
+                    "t { get; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? " +
                     "Code { get; set; }\r\n\r\n    private string? Message => identityErrors is null ? nu" +
                     "ll : $\"Error: {string.Join(\", \", identityErrors.Select(error => error.Descriptio" +
-                    "n))}\";\r\n\r\n    protected override void OnInitialized()\r\n    {\r\n        if (Code i" +
+                    "n))}\";\r\n\r\n    protected override void OnInitialized()\r\n    {\r\n        Input ??= new();" +
+                    "\r\n\r\n        if (Code i" +
                     "s null)\r\n        {\r\n            RedirectManager.RedirectTo(\"Account/InvalidPassw" +
                     "ordReset\");\r\n        }\r\n\r\n        Input.Code = Encoding.UTF8.GetString(WebEncode" +
                     "rs.Base64UrlDecode(Code));\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()" +

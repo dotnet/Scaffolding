@@ -9,6 +9,8 @@ using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Spectre.Console;
 using Spectre.Console.Flow;
+using InteractivePickerType = Microsoft.DotNet.Scaffolding.Core.ComponentModel.InteractivePickerType;
+using Parameter = Microsoft.DotNet.Scaffolding.Core.ComponentModel.Parameter;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 {
@@ -30,7 +32,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Flow.Steps
 
         public async Task<string> DiscoverAsync(IFlowContext context)
         {
-            var optionParameterAddition = _parameter.Required ? "(" : "(empty to skip, ";
+            var optionParameterAddition = _parameter.Required ? "(" : "([purple]empty to skip[/],";
+
             return await PromptAsync(context, $"Enter a new value for '{_parameter.DisplayName}' {optionParameterAddition}[sandybrown]<[/] to go back) : ");
         }
 

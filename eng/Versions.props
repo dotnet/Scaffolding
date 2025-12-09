@@ -57,7 +57,7 @@
     <SystemTextJsonPackageVersion>8.0.6</SystemTextJsonPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>8.0.22</VersionPrefix>
+    <VersionPrefix>8.0.23</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>

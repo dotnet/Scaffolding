@@ -1,4 +1,4 @@
-set VERSION=8.0.6
+set VERSION=8.0.23
 set DEFAULT_NUPKG_PATH=C:\Nuget
 set SRC_DIR=%cd%
 set NUPKG=artifacts/packages/Debug/Shipping/

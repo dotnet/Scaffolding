@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -60,7 +61,7 @@ internal static class MinimalApiScaffolderBuilderExtensions
             var step = config.Step;
             var context = config.Context;
             //this scaffolder has a non-EF scenario, only add EF packages if DataContext is provided.
-            List<string> packageList = [];
+            List<Package> packages = [];
             if (context.Properties.TryGetValue(nameof(MinimalApiSettings), out var commandSettingsObj) &&
                 commandSettingsObj is MinimalApiSettings commandSettings)
             {
@@ -68,18 +69,18 @@ internal static class MinimalApiScaffolderBuilderExtensions
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DataContext) &&
                     !string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
-                    PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out string? projectPackageName))
+                    PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out Package? projectPackage))
                 {
-                    packageList.Add(PackageConstants.EfConstants.EfCoreToolsPackageName);
-                    packageList.Add(projectPackageName);
+                    packages.Add(PackageConstants.EfConstants.EfCoreToolsPackage);
+                    packages.Add(projectPackage);
                 }
 
                 if (commandSettings.OpenApi)
                 {
-                    packageList.Add(PackageConstants.AspNetCorePackages.OpenApiPackageName);
+                    packages.Add(PackageConstants.AspNetCorePackages.OpenApiPackage);
                 }
 
-                step.PackageNames = packageList;
+                step.Packages = packages;
             }
             else
             {

@@ -1,87 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.25555.6">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.1-beta.25555.6">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>987d1a73ea67d323c0fc7537bce8ec65d87eb43f</Sha>
     </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
+    <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>12b8d44bf691d2e6933a6d1003647cce4f13c3d3</Sha>
+      <Sha>a6217e3438ca1fb430079f2626056c1a11581927</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.EntityFrameworkCore" Version="10.0.0">
+    <Dependency Name="Microsoft.EntityFrameworkCore" Version="10.0.1">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>12b8d44bf691d2e6933a6d1003647cce4f13c3d3</Sha>
+      <Sha>a6217e3438ca1fb430079f2626056c1a11581927</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0">
+    <Dependency Name="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.1">
       <Uri>https://github.com/dotnet/efcore</Uri>
-      <Sha>12b8d44bf691d2e6933a6d1003647cce4f13c3d3</Sha>
+      <Sha>a6217e3438ca1fb430079f2626056c1a11581927</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.DependencyInjection" Version="10.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>60629d14374c56f1cb51819049ad1fa529307f8d</Sha>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.FileProviders.Physical" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.FileProviders.Physical" Version="10.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>60629d14374c56f1cb51819049ad1fa529307f8d</Sha>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Identity.Stores" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.Identity.Stores" Version="10.0.1">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7387de91234d3ef751fa50b3d1bfede4130213ff</Sha>
+      <Sha>373d4826c58ac2f1c8d49fdaf31bc9eddf9e7437</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>60629d14374c56f1cb51819049ad1fa529307f8d</Sha>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>60629d14374c56f1cb51819049ad1fa529307f8d</Sha>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.Json" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.Configuration.Json" Version="10.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>60629d14374c56f1cb51819049ad1fa529307f8d</Sha>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>60629d14374c56f1cb51819049ad1fa529307f8d</Sha>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="10.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>60629d14374c56f1cb51819049ad1fa529307f8d</Sha>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.1">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7387de91234d3ef751fa50b3d1bfede4130213ff</Sha>
+      <Sha>373d4826c58ac2f1c8d49fdaf31bc9eddf9e7437</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging.Console" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.Logging.Console" Version="10.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>60629d14374c56f1cb51819049ad1fa529307f8d</Sha>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging.Debug" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.Logging.Debug" Version="10.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>60629d14374c56f1cb51819049ad1fa529307f8d</Sha>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Logging" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.Logging" Version="10.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>60629d14374c56f1cb51819049ad1fa529307f8d</Sha>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0">
+    <Dependency Name="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>60629d14374c56f1cb51819049ad1fa529307f8d</Sha>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0">
+    <Dependency Name="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.1">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7387de91234d3ef751fa50b3d1bfede4130213ff</Sha>
+      <Sha>373d4826c58ac2f1c8d49fdaf31bc9eddf9e7437</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0">
+    <Dependency Name="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.1">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7387de91234d3ef751fa50b3d1bfede4130213ff</Sha>
+      <Sha>373d4826c58ac2f1c8d49fdaf31bc9eddf9e7437</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.AspNetCore.Identity.UI" Version="10.0.0">
+    <Dependency Name="Microsoft.AspNetCore.Identity.UI" Version="10.0.1">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
-      <Sha>7387de91234d3ef751fa50b3d1bfede4130213ff</Sha>
+      <Sha>373d4826c58ac2f1c8d49fdaf31bc9eddf9e7437</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.Extensions.Configuration.Binder" Version="10.0.1">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Configuration.CommandLine" Version="10.0.1">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Configuration" Version="10.0.1">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>138d5fe8f32e954a3a834be6360a834688130d4f</Sha>
+    </Dependency>    
   </ProductDependencies>
 </Dependencies>

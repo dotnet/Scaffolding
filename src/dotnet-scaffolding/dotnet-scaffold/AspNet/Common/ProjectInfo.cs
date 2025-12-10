@@ -43,10 +43,8 @@ internal class ProjectInfo
     /// </summary>
     /// <param name="projectPath">The path to the project file.</param>
     /// <returns>The lowest target framework moniker (TFM) as a string, or null if not found.</returns>
-    private static string? GetLowestTargetFrameworkFromCli(string projectPath)
+    internal static string? GetLowestTargetFrameworkFromCli(string projectPath)
     {
-        //Should I only care about net 8 and above???? 
-
         var runner = DotnetCliRunner.CreateDotNet("msbuild", new[] { "-getProperty:TargetFramework;TargetFrameworks", projectPath });
         int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
 

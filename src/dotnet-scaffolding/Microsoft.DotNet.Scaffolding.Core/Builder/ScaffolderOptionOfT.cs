@@ -52,5 +52,5 @@ public class ScaffolderOption<T> : ScaffolderOption
     /// <summary>
     /// Gets the normalized CLI option name.
     /// </summary>
-    private string FixedName => CliOption ?? $"--{DisplayName.ToLowerInvariant().Replace(" ", "-")}";
+    private string FixedName => Parameter.GetParameterName(CliOption, DisplayName);
 }

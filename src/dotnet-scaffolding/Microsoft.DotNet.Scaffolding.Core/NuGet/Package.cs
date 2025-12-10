@@ -51,7 +51,7 @@ internal static class PackageExtensions
     /// langword="null"/>. For supported target frameworks, the latest available version is retrieved
     /// asynchronously.</remarks>
     /// <param name="package">The package for which to obtain the version information. Must not be null.</param>
-    /// <param name="targetFramework">The target framework identifier (for example, "net8.0", "net9.0", or "net10.0") for which the package version is
+    /// <param name="targetFramework">The target framework identifier (for example, "net8.0", "net9.0", "net10.0", or "net11.0") for which the package version is
     /// requested. Case-insensitive.</param>
     /// <param name="nugetVersionHelper">The NuGet version helper to use for version resolution.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the corresponding NuGet package
@@ -76,6 +76,10 @@ internal static class PackageExtensions
         else if (targetFramework.Equals(TargetFrameworkConstants.Net10, StringComparison.OrdinalIgnoreCase))
         {
             return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 10);
+        }
+        else if (targetFramework.Equals(TargetFrameworkConstants.Net11, StringComparison.OrdinalIgnoreCase))
+        {
+            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 11);
         }
         else
         {

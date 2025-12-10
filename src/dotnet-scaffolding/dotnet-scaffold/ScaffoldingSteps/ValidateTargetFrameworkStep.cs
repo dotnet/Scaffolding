@@ -46,7 +46,7 @@ public class ValidateTargetFrameworkStep : ScaffoldStep
         // Check if it's a valid supported framework
         if (!TargetFrameworkConstants.SupportedTargetFrameworks.Contains(normalizedValue))
         {
-            logger.LogError($"Invalid {TargetFrameworkConstants.TargetFrameworkCliOption} option: '{value}'. Must be a valid .NET SDK version, net8.0, net9.0 or net10.0.");
+            logger.LogError($"Invalid {TargetFrameworkConstants.TargetFrameworkCliOption} option: '{value}'. Must be a valid .NET SDK version, net8.0, net9.0, net10.0 or net11.0.");
             return false;
         }
 

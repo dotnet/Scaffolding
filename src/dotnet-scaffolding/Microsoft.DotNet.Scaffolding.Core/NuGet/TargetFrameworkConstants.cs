@@ -14,6 +14,7 @@ internal static class TargetFrameworkConstants
     public const string Net8 = "net8.0";
     public const string Net9 = "net9.0";
     public const string Net10 = "net10.0";
+    public const string Net11 = "net11.0";
 
-    public static readonly ImmutableArray<string> SupportedTargetFrameworks = [ Net8, Net9, Net10];
+    public static readonly ImmutableArray<string> SupportedTargetFrameworks = [ Net8, Net9, Net10, Net11];
 }

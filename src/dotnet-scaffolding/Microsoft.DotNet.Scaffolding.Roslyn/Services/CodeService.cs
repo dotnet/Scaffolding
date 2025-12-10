@@ -82,7 +82,7 @@ public class CodeService : ICodeService, IDisposable
         }
 
         var workspace = MSBuildWorkspace.Create();
-        workspace.WorkspaceFailed += OnWorkspaceFailed;
+        workspace.RegisterWorkspaceFailedHandler(OnWorkspaceFailed);
         workspace.LoadMetadataForReferencedProjects = true;
         await workspace.OpenProjectAsync(_projectPath);
         _workspace = workspace;
@@ -126,7 +126,6 @@ public class CodeService : ICodeService, IDisposable
         _compilation = null;
         if (workspace is not null)
         {
-            workspace.WorkspaceFailed -= OnWorkspaceFailed;
             workspace.CloseSolution();
             workspace.Dispose();
         }
@@ -141,7 +140,7 @@ public class CodeService : ICodeService, IDisposable
     }
 
     //TODO add a debug option to logging.
-    private void OnWorkspaceFailed(object? sender, WorkspaceDiagnosticEventArgs e)
+    private void OnWorkspaceFailed(WorkspaceDiagnosticEventArgs e)
     {
         var diagnostic = e.Diagnostic!;
     }

@@ -80,7 +80,7 @@ internal static class PackageExtensions
         }
         else
         {
-            logger?.LogError("Target framework '{TargetFramework}' is not supported. Installing recent release of '{PackageName}'. Consider upgrading your target framework to install a compatible package version.", targetFramework, package.Name);
+            logger?.LogError("Target framework '{TargetFramework}' is not supported. Installing latest stable version of '{PackageName}'. Consider upgrading your target framework to install a compatible package version.", targetFramework, package.Name);
             return Task.FromResult<NuGetVersion?>(null);
         }
     }

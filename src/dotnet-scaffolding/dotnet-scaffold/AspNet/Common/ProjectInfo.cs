@@ -45,24 +45,15 @@ internal class ProjectInfo
     /// <returns>The lowest target framework moniker (TFM) as a string, or null if not found.</returns>
     internal static string? GetLowestTargetFrameworkFromCli(string projectPath)
     {
-        var runner = DotnetCliRunner.CreateDotNet("msbuild", new[] { "-getProperty:TargetFramework;TargetFrameworks", projectPath });
-        int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
-
-        if (exitCode != 0 || string.IsNullOrEmpty(stdOut))
-        {
-            return null;
-        }
-
-        // Parse the JSON output
         try
         {
-            var msbuildOutput = JsonSerializer.Deserialize<MsBuildPropertiesOutput>(stdOut);
-            if (msbuildOutput?.Properties == null)
+            MsBuildPropertiesOutput? msbuildOutput = MsBuildCliRunner.RunMSBuildCommandAndDeserialize<MsBuildPropertiesOutput>(["-getProperty:TargetFramework;TargetFrameworks"], projectPath);
+            if (msbuildOutput?.Properties is null)
             {
                 return null;
             }
 
-            // If single TargetFramework is set, return it
+            // If a single TargetFramework is set, return it
             if (!string.IsNullOrEmpty(msbuildOutput.Properties.TargetFramework))
             {
                 return msbuildOutput.Properties.TargetFramework;
@@ -71,13 +62,10 @@ internal class ProjectInfo
             // If multiple TargetFrameworks are set, find the lowest version
             if (!string.IsNullOrEmpty(msbuildOutput.Properties.TargetFrameworks))
             {
-                var frameworks = msbuildOutput.Properties.TargetFrameworks
-                    .Split(';')
-                    .Where(x => x.StartsWith("net") || x.StartsWith("netstandard"))
-                    .OrderBy(ParseFrameworkVersion)
-                    .ToList();
+                string[] frameworks = msbuildOutput.Properties.TargetFrameworks.Split(';');
+                string? lowestFramework = GetLowestFromFrameworks(frameworks, projectPath);
 
-                return frameworks.FirstOrDefault();
+                return lowestFramework;
             }
 
             return null;
@@ -87,15 +75,41 @@ internal class ProjectInfo
             return null;
         }
 
-        static Version ParseFrameworkVersion(string tfm)
+        static string? GetLowestFromFrameworks(string[] frameworks, string projectPath)
         {
-            // Remove "net" or "netstandard" prefix to parse the version
-            string versionPart = tfm.StartsWith("netstandard") ?
-                tfm.Replace("netstandard", "") :
-                tfm.Replace("net", "");
+            List<(string tfm, Version version)> targetFrameworks = [];
+            foreach (string tfm in frameworks)
+            {
+                try
+                {
+                    MsBuildFrameworkOutput? frameworkOutput = MsBuildCliRunner.RunMSBuildCommandAndDeserialize<MsBuildFrameworkOutput>([$"-p:TargetFramework=\"{tfm}\"",
+                        "-getProperty:TargetFrameworkIdentifier;TargetFrameworkVersion"],
+                        projectPath);
 
-            // Parse to Version; assume "0.0" for invalid formats
-            return Version.TryParse(versionPart, out var version) ? version : new Version(0, 0);
+                    if (frameworkOutput?.Properties?.TargetFrameworkVersion is not null)
+                    {
+                        string version = frameworkOutput.Properties.TargetFrameworkVersion.TrimStart('v');
+                        if (Version.TryParse(version, out var tfmVersion))
+                        {
+                            targetFrameworks.Add((tfm, tfmVersion));
+                        }
+                    }
+                }
+                catch (JsonException)
+                {
+                    continue;
+                }
+            }
+
+            if (targetFrameworks.Count == 0)
+            {
+                return null;
+            }
+
+            return targetFrameworks
+                .OrderBy(f => f.version)
+                .Select(f => f.tfm)
+                .FirstOrDefault();
         }
     }
 
@@ -116,5 +130,20 @@ internal class ProjectInfo
         public string? TargetFrameworks { get; set; }
     }
 
-    
+    /// <summary>
+    /// Represents the output from dotnet msbuild -getProperty command for framework identifiers.
+    /// </summary>
+    private class MsBuildFrameworkOutput
+    {
+        public MsBuildFrameworkProperties? Properties { get; set; }
+    }
+
+    /// <summary>
+    /// Represents the framework properties returned from dotnet msbuild -getProperty command.
+    /// </summary>
+    private class MsBuildFrameworkProperties
+    {
+        public string? TargetFrameworkIdentifier { get; set; }
+        public string? TargetFrameworkVersion { get; set; }
+    }
 }

@@ -20,19 +20,35 @@ internal class MsBuildCliRunner
     {
         try
         {
-            var runner = DotnetCliRunner.CreateDotNet(MsbuildCommandName, args.Append(projectPath));
-            int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
-
-            if (exitCode != 0 || string.IsNullOrEmpty(stdOut))
+            if (RunMsBuildCommand(args, projectPath) is string stdOut)
             {
-                return null;
+                return JsonSerializer.Deserialize<T>(stdOut);
             }
 
-            return JsonSerializer.Deserialize<T>(stdOut);
+            return null;
         }
         catch (JsonException)
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// Runs an MSBuild command with the specified arguments and project path, and returns the output as a string.
+    /// </summary>
+    /// <param name="args">The collection of command-line arguments to pass to MSBuild. Each string represents a single argument.</param>
+    /// <param name="projectPath">The full path to the project file to build. Cannot be null or empty.</param>
+    /// <returns>A string containing the output from the MSBuild command, or null if the command fails or produces no output.</returns>
+    public static string? RunMSBuildCommandAndGetOutput(IEnumerable<string> args, string projectPath)
+    {
+        return RunMsBuildCommand(args, projectPath);
+    }
+
+    private static string? RunMsBuildCommand(IEnumerable<string> args, string projectPath)
+    {
+        DotnetCliRunner runner = DotnetCliRunner.CreateDotNet(MsbuildCommandName, args.Append(projectPath));
+        int exitCode = runner.ExecuteAndCaptureOutput(out string? stdOut, out string? stdErr);
+
+        return exitCode != 0 || string.IsNullOrEmpty(stdOut) || !string.IsNullOrEmpty(stdErr) ? null : stdOut;
     }
 }

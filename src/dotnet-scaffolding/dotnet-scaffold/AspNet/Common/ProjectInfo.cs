@@ -82,13 +82,11 @@ internal class ProjectInfo
             {
                 try
                 {
-                    MsBuildFrameworkOutput? frameworkOutput = MsBuildCliRunner.RunMSBuildCommandAndDeserialize<MsBuildFrameworkOutput>([$"-p:TargetFramework=\"{tfm}\"",
-                        "-getProperty:TargetFrameworkIdentifier;TargetFrameworkVersion"],
-                        projectPath);
-
-                    if (frameworkOutput?.Properties?.TargetFrameworkVersion is not null)
+                    if (MsBuildCliRunner.RunMSBuildCommandAndGetOutput([$"-p:TargetFramework=\"{tfm}\"",
+                        "-getProperty:TargetFrameworkVersion"],
+                        projectPath) is string frameworkOutput)
                     {
-                        string version = frameworkOutput.Properties.TargetFrameworkVersion.TrimStart('v');
+                        string version = frameworkOutput.TrimStart('v');
                         if (Version.TryParse(version, out var tfmVersion))
                         {
                             targetFrameworks.Add((tfm, tfmVersion));
@@ -128,22 +126,5 @@ internal class ProjectInfo
     {
         public string? TargetFramework { get; set; }
         public string? TargetFrameworks { get; set; }
-    }
-
-    /// <summary>
-    /// Represents the output from dotnet msbuild -getProperty command for framework identifiers.
-    /// </summary>
-    private class MsBuildFrameworkOutput
-    {
-        public MsBuildFrameworkProperties? Properties { get; set; }
-    }
-
-    /// <summary>
-    /// Represents the framework properties returned from dotnet msbuild -getProperty command.
-    /// </summary>
-    private class MsBuildFrameworkProperties
-    {
-        public string? TargetFrameworkIdentifier { get; set; }
-        public string? TargetFrameworkVersion { get; set; }
     }
 }

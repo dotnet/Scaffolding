@@ -55,14 +55,24 @@ internal class AddAspireConnectionStringStep : ScaffoldStep
         if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
         {
             // Create a new appsettings.json if it doesn't exist
+            appSettingsFile = Path.Combine(BaseProjectPath, "appsettings.json");
             content = new JsonObject();
             writeContent = true;
         }
         else
         {
             // Parse the existing appsettings.json
-            var jsonString = _fileSystem.ReadAllText(appSettingsFile);
-            content = JsonNode.Parse(jsonString);
+            try
+            {
+                var jsonString = _fileSystem.ReadAllText(appSettingsFile);
+                content = JsonNode.Parse(jsonString);
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, $"Failed to parse appsettings.json file at {appSettingsFile}");
+                _telemetryService.TrackEvent(new AddAspireConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json"));
+                return Task.FromResult(false);
+            }
         }
 
         if (content is null)

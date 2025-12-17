@@ -16,11 +16,18 @@ public static class ScaffolderContextExtensions
     /// <returns>The target framework name if present; otherwise, null.</returns>
     public static string? GetSpecifiedTargetFramework(this ScaffolderContext context)
     {
-        if (context.GetOptionResult<string>(Model.TargetFrameworkConstants.TargetFrameworkCliOption) is string tfm)
+        string? targetFramework = null;
+        if (context.Properties.TryGetValue(TargetFrameworkConstants.TargetFrameworkPropertyName, out object? tfm))
         {
-            return tfm;
+            targetFramework = tfm as string;
         }
 
-        return null;
+        return targetFramework;
+    }
+
+    public static string? SetSpecifiedTargetFramework(this ScaffolderContext context, string? targetFramework)
+    {
+        context.Properties[TargetFrameworkConstants.TargetFrameworkPropertyName] = targetFramework;
+        return targetFramework;
     }
 }

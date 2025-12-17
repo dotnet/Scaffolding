@@ -57,4 +57,6 @@ internal static class FlowContextProperties
     public const string ChosenCategory = nameof(ChosenCategory);
     /// <summary>Key for telemetry environment variables dictionary.</summary>
     public const string TelemetryEnvironmentVariables = nameof(TelemetryEnvironmentVariables);
+
+    public const string ProjectFileParameterResult = nameof(ProjectFileParameterResult);
 }

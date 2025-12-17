@@ -5,6 +5,8 @@ using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.Extensions.Logging;
 using Spectre.Console.Flow;
 
@@ -81,10 +83,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             {
                 NextStep = NextStep?.NextStep;
             }
-            else if (ParameterHelpers.IsTargetFrameworkOption(Parameter) && !string.Equals(parameterValue, TargetFrameworkConstants.Net10, StringComparison.OrdinalIgnoreCase))
+
+            if (NextStep is not null && NextStep.Parameter.DisplayName.Equals(AspnetStrings.Options.Prerelease.DisplayName, StringComparison.Ordinal) && ShouldSkipPrereleaseOption(context))
             {
-                // Skip the prerelease step if the target framework is not net10, prerelease only applies to net10
-                //TODO update for the next major release of .NET
                 NextStep = NextStep?.NextStep;
             }
 
@@ -166,6 +167,30 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                     FlowContextProperties.CodeService,
                     codeService));
             }
+        }
+
+        /// <summary>
+        /// Determines whether the prerelease option should be skipped based on the target framework of the current
+        /// project.
+        /// </summary>
+        /// <remarks>The prerelease option is skipped for projects targeting frameworks other than .NET
+        /// 10. If the project file or target framework cannot be determined, the prerelease option is not
+        /// skipped.</remarks>
+        /// <param name="context">The flow context containing project information and properties. Must not be null.</param>
+        /// <returns>true if the prerelease option should be skipped for the current project; otherwise, false.</returns>
+        private static bool ShouldSkipPrereleaseOption(IFlowContext context)
+        {
+            //TODO update with each major release of .NET
+
+            string projectParameterKey = Parameter.GetParameterName(Constants.CliOptions.ProjectCliOption, AspnetStrings.Options.Project.DisplayName);
+
+            if (context.Properties.Get(projectParameterKey) is FlowProperty projectFileProperty &&
+                projectFileProperty.Value is string projectFilePath && !string.IsNullOrEmpty(projectFilePath))
+            {
+                string? targetFramework = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectFilePath);
+                return targetFramework is null || !targetFramework.Equals(TargetFrameworkConstants.Net10, StringComparison.OrdinalIgnoreCase);
+            }
+            return false;
         }
     }
 }

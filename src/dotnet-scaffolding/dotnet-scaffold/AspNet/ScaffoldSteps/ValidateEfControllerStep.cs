@@ -93,7 +93,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
 
         //initialize CrudControllerModel
         _logger.LogInformation("Initializing scaffolding model...");
-        var efControllerModel = await GetEfControllerModelAsync(efControllerSettings);
+        var efControllerModel = await GetEfControllerModelAsync(context, efControllerSettings);
         if (efControllerModel is null)
         {
             _logger.LogError("An error occurred.");
@@ -206,10 +206,12 @@ internal class ValidateEfControllerStep : ScaffoldStep
     /// Initializes and returns the EfControllerModel for scaffolding.
     /// </summary>
     /// <param name="settings">EF Controller settings.</param>
+    /// <param name="context">Scaffolder context.</param>
     /// <returns>Initialized EfControllerModel.</returns>
-    private async Task<EfControllerModel?> GetEfControllerModelAsync(EfControllerSettings settings)
+    private async Task<EfControllerModel?> GetEfControllerModelAsync(ScaffolderContext context, EfControllerSettings settings)
     {
-        var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
         if (projectInfo is null || projectInfo.CodeService is null || string.IsNullOrEmpty(projectDirectory))
         {

@@ -29,7 +29,6 @@ internal class AspNetOptions
     public ScaffolderOption<bool> Views { get; }
     public ScaffolderOption<bool> Overwrite { get; }
     public ScaffolderOption<string> Application { get; }
-    public ScaffolderOption<string> TargetFramework { get; }
 
     private ScaffolderOption<string>? _username = null;
     private ScaffolderOption<string>? _tenantId = null;
@@ -192,16 +191,6 @@ internal class AspNetOptions
             Required = true,
             PickerType = InteractivePickerType.ConditionalPicker,
             CustomPickerValues = AspnetStrings.Options.Application.Values
-        };
-
-        TargetFramework = new ScaffolderOption<string>
-        {
-            DisplayName = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkDisplayName,
-            CliOption = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkCliOption,
-            Description = Scaffolding.Core.Model.TargetFrameworkConstants.TargetFrameworkDescription,
-            Required = false,
-            PickerType = InteractivePickerType.CustomPicker,
-            CustomPickerValues = Scaffolding.Core.Model.TargetFrameworkConstants.SupportedTargetFrameworks
         };
     }
 

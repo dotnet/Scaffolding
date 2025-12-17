@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using System;
 using System.Diagnostics;
-using System.Text;
 
 namespace Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 
@@ -11,9 +9,11 @@ namespace Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 /// </summary>
 internal class DotnetCliRunner
 {
+    private const string DotnetCommandName = "dotnet";
+
     public static DotnetCliRunner CreateDotNet(string commandName, IEnumerable<string> args, IDictionary<string, string>? environmentVariables = null)
     {
-        return Create("dotnet", new[] { commandName }.Concat(args), environmentVariables);
+        return Create(DotnetCommandName, new[] { commandName }.Concat(args), environmentVariables);
     }
 
     public static DotnetCliRunner Create(string commandName, IEnumerable<string> args, IDictionary<string, string>? environmentVariables = null)

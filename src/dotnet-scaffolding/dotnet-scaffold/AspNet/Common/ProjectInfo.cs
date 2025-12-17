@@ -9,10 +9,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 /// </summary>
 internal class ProjectInfo
 {
+    public ProjectInfo(string? projectPath)
+    {
+        ProjectPath = projectPath;
+        LowestSupportedTargetFramework = projectPath is not null ? TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath) : null;
+    }
+
     /// <summary>
     /// Gets or sets the path to the project file.
     /// </summary>
-    public string? ProjectPath { get; set; }
+    public string? ProjectPath { get; }
     /// <summary>
     /// Gets or sets the code service for the project.
     /// </summary>
@@ -22,11 +28,14 @@ internal class ProjectInfo
     /// </summary>
     public IList<string>? CodeChangeOptions { get; set; }
     /// <summary>
-    /// Gets or sets the lowest target framework for the project (if multiple are found).
+    /// Null if the project contains an unsupported target framework; otherwise, the supported target framework moniker (TFM).
     /// </summary>
-    public string? LowestTargetFramework { get; set; }
+    public string? LowestSupportedTargetFramework { get; }
     /// <summary>
     /// Gets or sets the list of project capabilities.
     /// </summary>
     public IList<string>? Capabilities { get; set; }
+
+
+
 }

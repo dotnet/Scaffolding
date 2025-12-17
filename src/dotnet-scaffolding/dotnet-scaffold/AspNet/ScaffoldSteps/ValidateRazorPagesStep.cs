@@ -89,7 +89,7 @@ internal class ValidateRazorPagesStep : ScaffoldStep
 
         //initialize RazorPageModel
         _logger.LogInformation("Initializing scaffolding model...");
-        var razorPageModel = await GetRazorPageModelAsync(razorPagesSettings);
+        var razorPageModel = await GetRazorPageModelAsync(context, razorPagesSettings);
         if (razorPageModel is null)
         {
             _logger.LogError("An error occurred.");
@@ -187,11 +187,13 @@ internal class ValidateRazorPagesStep : ScaffoldStep
     /// <summary>
     /// Initializes and returns the RazorPageModel for scaffolding.
     /// </summary>
+    /// <param name="context">The scaffolder context.</param>
     /// <param name="settings">The validated CRUD settings.</param>
     /// <returns>A task that represents the asynchronous operation, with the RazorPageModel as the result.</returns>
-    private async Task<RazorPageModel?> GetRazorPageModelAsync(CrudSettings settings)
+    private async Task<RazorPageModel?> GetRazorPageModelAsync(ScaffolderContext context, CrudSettings settings)
     {
-        var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
         if (projectInfo is null || projectInfo.CodeService is null || string.IsNullOrEmpty(projectDirectory))
         {

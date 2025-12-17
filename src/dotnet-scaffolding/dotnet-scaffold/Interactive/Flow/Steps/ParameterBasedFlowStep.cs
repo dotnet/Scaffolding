@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// skipped.</remarks>
         /// <param name="context">The flow context containing project information and properties. Must not be null.</param>
         /// <returns>true if the prerelease option should be skipped for the current project; otherwise, false.</returns>
-        private bool ShouldSkipPrereleaseOption(IFlowContext context)
+        private static bool ShouldSkipPrereleaseOption(IFlowContext context)
         {
             //TODO update with each major release of .NET
 
@@ -187,12 +187,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             if (context.Properties.Get(projectParameterKey) is FlowProperty projectFileProperty &&
                 projectFileProperty.Value is string projectFilePath && !string.IsNullOrEmpty(projectFilePath))
             {
-                string? targetFramework = ProjectInfo.GetLowestTargetFrameworkFromCli(projectFilePath);
-                if (!string.IsNullOrEmpty(targetFramework) && !targetFramework.Equals(TargetFrameworkConstants.Net10, StringComparison.OrdinalIgnoreCase))
-                {
-                    // skip the prerelease step for non-net10 projects
-                    return true;
-                }
+                string? targetFramework = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectFilePath);
+                return targetFramework is null || !targetFramework.Equals(TargetFrameworkConstants.Net10, StringComparison.OrdinalIgnoreCase);
             }
             return false;
         }

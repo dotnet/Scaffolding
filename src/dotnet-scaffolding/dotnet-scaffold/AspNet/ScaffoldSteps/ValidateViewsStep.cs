@@ -134,7 +134,7 @@ internal class ValidateViewsStep : ScaffoldStep
     private async Task<ViewModel?> GetViewModelAsync(ScaffolderContext context, CrudSettings settings)
     {
         ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
-        context.SetSpecifiedTargetFramework(projectInfo.LowestTargetFramework);
+        context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
         if (projectInfo is null || projectInfo.CodeService is null)
         {
             return null;

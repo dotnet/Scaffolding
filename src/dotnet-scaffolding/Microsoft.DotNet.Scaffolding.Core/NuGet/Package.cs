@@ -32,7 +32,7 @@ internal static class PackageExtensions
     /// <param name="logger">The logger to use for logging messages.</param>
     /// <returns>A package instance with the version property set to the resolved version for the specified target framework, or
     /// the original package if the version is already set or cannot be resolved.</returns>
-    public static async Task<Package> WithResolvedVersionAsync(this Package package, string targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null)
+    public static async Task<Package> WithResolvedVersionAsync(this Package package, string? targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null)
     {
         if (package.PackageVersion is not null)
         {
@@ -59,10 +59,16 @@ internal static class PackageExtensions
     /// <param name="logger">The logger to use for logging messages.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the corresponding NuGet package
     /// version if available; otherwise, <see langword="null"/> if the package does not require a version or target framework is not supported.</returns>
-    private static Task<NuGetVersion?> GetVersionForTargetFrameworkAsync(this Package package, string targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null)
+    private static Task<NuGetVersion?> GetVersionForTargetFrameworkAsync(this Package package, string? targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null)
     {
         if (!package.IsVersionRequired)
         {
+            return Task.FromResult<NuGetVersion?>(null);
+        }
+
+        if (targetFramework is null)
+        {
+            logger?.LogError("Project contains a Target Framework that is not supported. Supported Target Frameworks are .NET8, .NET9, .NET10. Installing latest stable version of '{PackageName}'. Consider upgrading your Target Framework to install a compatible package version.", package.Name);
             return Task.FromResult<NuGetVersion?>(null);
         }
 
@@ -80,7 +86,7 @@ internal static class PackageExtensions
         }
         else
         {
-            logger?.LogError("Target framework '{TargetFramework}' is not supported. Installing latest stable version of '{PackageName}'. Consider upgrading your target framework to install a compatible package version.", targetFramework, package.Name);
+            logger?.LogError("Target Framework '{TargetFramework}' is not supported. Supported Target Frameworks are .NET8, .NET9, .NET10. Installing latest stable version of '{PackageName}'. Consider upgrading your Target Framework to install a compatible package version.", targetFramework, package.Name);
             return Task.FromResult<NuGetVersion?>(null);
         }
     }

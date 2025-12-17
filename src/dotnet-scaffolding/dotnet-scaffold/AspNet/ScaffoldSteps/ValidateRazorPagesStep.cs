@@ -193,7 +193,7 @@ internal class ValidateRazorPagesStep : ScaffoldStep
     private async Task<RazorPageModel?> GetRazorPageModelAsync(ScaffolderContext context, CrudSettings settings)
     {
         ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
-        context.SetSpecifiedTargetFramework(projectInfo.LowestTargetFramework);
+        context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
         if (projectInfo is null || projectInfo.CodeService is null || string.IsNullOrEmpty(projectDirectory))
         {

@@ -194,7 +194,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
     private async Task<MinimalApiModel?> GetMinimalApiModelAsync(ScaffolderContext context, MinimalApiSettings settings)
     {
         ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
-        context.SetSpecifiedTargetFramework(projectInfo.LowestTargetFramework);
+        context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
         if (projectInfo is null || projectInfo.CodeService is null)
         {
             return null;

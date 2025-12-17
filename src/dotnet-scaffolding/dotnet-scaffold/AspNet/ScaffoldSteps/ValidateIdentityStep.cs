@@ -187,7 +187,7 @@ internal class ValidateIdentityStep : ScaffoldStep
     private async Task<IdentityModel?> GetIdentityModelAsync(ScaffolderContext context, IdentitySettings settings)
     {
         ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
-        context.SetSpecifiedTargetFramework(projectInfo.LowestTargetFramework);
+        context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
         if (projectInfo is null || projectInfo.CodeService is null || string.IsNullOrEmpty(projectDirectory))
         {

@@ -211,7 +211,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
     private async Task<EfControllerModel?> GetEfControllerModelAsync(ScaffolderContext context, EfControllerSettings settings)
     {
         ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
-        context.SetSpecifiedTargetFramework(projectInfo.LowestTargetFramework);
+        context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
         if (projectInfo is null || projectInfo.CodeService is null || string.IsNullOrEmpty(projectDirectory))
         {

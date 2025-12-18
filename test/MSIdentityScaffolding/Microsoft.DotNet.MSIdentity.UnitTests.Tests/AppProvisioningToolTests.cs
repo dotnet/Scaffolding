@@ -602,6 +602,17 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             Assert.Equal(update?.ToString(), expected);
         }
 
+        /// <summary>
+        /// Helper method to get the ValidateProjectPath method using reflection
+        /// </summary>
+        private static System.Reflection.MethodInfo GetValidateProjectPathMethod()
+        {
+            var methodInfo = typeof(AppProvisioningTool).GetMethod("ValidateProjectPath",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            Assert.NotNull(methodInfo); // Ensure the method exists
+            return methodInfo;
+        }
+
         [Fact]
         public void ValidateProjectPath_NullProjectFilePath_NoErrorThrown()
         {
@@ -612,17 +623,11 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 ProjectFilePath = null
             };
 
-            // Create a mock console logger
-            var mockLogger = new Mock<IConsoleLogger>();
-
-            // We need to test ValidateProjectPath indirectly
-            // Since it's called in Run(), we'll use reflection to test the private method
             var tool = new AppProvisioningTool("test-command", options, silent: true);
-            var methodInfo = typeof(AppProvisioningTool).GetMethod("ValidateProjectPath", 
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var methodInfo = GetValidateProjectPathMethod();
 
             // Act - invoke the private method
-            methodInfo?.Invoke(tool, null);
+            methodInfo.Invoke(tool, null);
 
             // Assert - ProjectPath should remain unchanged
             Assert.Equal("/test/path", options.ProjectPath);
@@ -639,11 +644,10 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             };
 
             var tool = new AppProvisioningTool("test-command", options, silent: true);
-            var methodInfo = typeof(AppProvisioningTool).GetMethod("ValidateProjectPath", 
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var methodInfo = GetValidateProjectPathMethod();
 
             // Act - invoke the private method
-            methodInfo?.Invoke(tool, null);
+            methodInfo.Invoke(tool, null);
 
             // Assert - ProjectPath should remain unchanged
             Assert.Equal("/test/path", options.ProjectPath);
@@ -667,11 +671,10 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 };
 
                 var tool = new AppProvisioningTool("test-command", options, silent: true);
-                var methodInfo = typeof(AppProvisioningTool).GetMethod("ValidateProjectPath", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var methodInfo = GetValidateProjectPathMethod();
 
                 // Act
-                methodInfo?.Invoke(tool, null);
+                methodInfo.Invoke(tool, null);
 
                 // Assert - ProjectPath should be updated to the directory of the file
                 Assert.Equal(tempDir, options.ProjectPath);
@@ -704,11 +707,10 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
                 };
 
                 var tool = new AppProvisioningTool("test-command", options, silent: true);
-                var methodInfo = typeof(AppProvisioningTool).GetMethod("ValidateProjectPath", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var methodInfo = GetValidateProjectPathMethod();
 
                 // Act
-                methodInfo?.Invoke(tool, null);
+                methodInfo.Invoke(tool, null);
 
                 // Assert - ProjectPath should remain the same
                 Assert.Equal(tempDir, options.ProjectPath);
@@ -736,8 +738,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             };
 
             var tool = new AppProvisioningTool("test-command", options, silent: true);
-            var methodInfo = typeof(AppProvisioningTool).GetMethod("ValidateProjectPath", 
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var methodInfo = GetValidateProjectPathMethod();
 
             // Act & Assert - expect the method to call LogFailureAndExit which will throw
             // Since LogFailureAndExit terminates the process, we can't directly test it
@@ -745,7 +746,7 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             // when the file doesn't exist
             Assert.Throws<System.Reflection.TargetInvocationException>(() => 
             {
-                methodInfo?.Invoke(tool, null);
+                methodInfo.Invoke(tool, null);
             });
         }
     }

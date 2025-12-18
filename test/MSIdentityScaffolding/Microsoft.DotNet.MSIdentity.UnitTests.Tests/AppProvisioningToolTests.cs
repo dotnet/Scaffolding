@@ -725,29 +725,8 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             }
         }
 
-        [Fact]
-        public void ValidateProjectPath_InvalidProjectFilePath_CallsLogFailureAndExit()
-        {
-            // Arrange - use a non-existent file path
-            var nonExistentFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "nonexistent.csproj");
-            
-            var options = new ProvisioningToolOptions
-            {
-                ProjectPath = "/test/path",
-                ProjectFilePath = nonExistentFile
-            };
-
-            var tool = new AppProvisioningTool("test-command", options, silent: true);
-            var methodInfo = GetValidateProjectPathMethod();
-
-            // Act & Assert - expect the method to call LogFailureAndExit which will throw
-            // Since LogFailureAndExit terminates the process, we can't directly test it
-            // However, we can verify the behavior by checking if the method throws an exception
-            // when the file doesn't exist
-            Assert.Throws<System.Reflection.TargetInvocationException>(() => 
-            {
-                methodInfo.Invoke(tool, null);
-            });
-        }
+        // Note: Cannot add a test for invalid ProjectFilePath that calls LogFailureAndExit
+        // because LogFailureAndExit calls Environment.Exit(1), which would terminate
+        // the test runner process. This behavior is tested through integration tests instead.
     }
 }

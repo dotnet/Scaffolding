@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
-using Microsoft.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration

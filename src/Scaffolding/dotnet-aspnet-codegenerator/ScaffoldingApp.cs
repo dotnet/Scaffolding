@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
-using Microsoft.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils;
 using Newtonsoft.Json;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools

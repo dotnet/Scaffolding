@@ -1,8 +1,13 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.IO;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
+using Microsoft.DotNet.MSIdentity.Shared;
+using Microsoft.DotNet.MSIdentity.Tool;
+using Moq;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -595,6 +600,153 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
         {
             (bool needsUpdate, JToken update) = AppSettingsModifier.GetUpdatedValue(propertyName, existingValue, newValue);
             Assert.Equal(update?.ToString(), expected);
+        }
+
+        [Fact]
+        public void ValidateProjectPath_NullProjectFilePath_NoErrorThrown()
+        {
+            // Arrange
+            var options = new ProvisioningToolOptions
+            {
+                ProjectPath = "/test/path",
+                ProjectFilePath = null
+            };
+
+            // Create a mock console logger
+            var mockLogger = new Mock<IConsoleLogger>();
+
+            // We need to test ValidateProjectPath indirectly
+            // Since it's called in Run(), we'll use reflection to test the private method
+            var tool = new AppProvisioningTool("test-command", options, silent: true);
+            var methodInfo = typeof(AppProvisioningTool).GetMethod("ValidateProjectPath", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            // Act - invoke the private method
+            methodInfo?.Invoke(tool, null);
+
+            // Assert - ProjectPath should remain unchanged
+            Assert.Equal("/test/path", options.ProjectPath);
+        }
+
+        [Fact]
+        public void ValidateProjectPath_EmptyProjectFilePath_NoErrorThrown()
+        {
+            // Arrange
+            var options = new ProvisioningToolOptions
+            {
+                ProjectPath = "/test/path",
+                ProjectFilePath = string.Empty
+            };
+
+            var tool = new AppProvisioningTool("test-command", options, silent: true);
+            var methodInfo = typeof(AppProvisioningTool).GetMethod("ValidateProjectPath", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            // Act - invoke the private method
+            methodInfo?.Invoke(tool, null);
+
+            // Assert - ProjectPath should remain unchanged
+            Assert.Equal("/test/path", options.ProjectPath);
+        }
+
+        [Fact]
+        public void ValidateProjectPath_ValidProjectFilePath_UpdatesProjectPath()
+        {
+            // Arrange - create a temporary test file
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            var tempFile = Path.Combine(tempDir, "test.csproj");
+            File.WriteAllText(tempFile, "<Project></Project>");
+
+            try
+            {
+                var options = new ProvisioningToolOptions
+                {
+                    ProjectPath = "/some/other/path",
+                    ProjectFilePath = tempFile
+                };
+
+                var tool = new AppProvisioningTool("test-command", options, silent: true);
+                var methodInfo = typeof(AppProvisioningTool).GetMethod("ValidateProjectPath", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                // Act
+                methodInfo?.Invoke(tool, null);
+
+                // Assert - ProjectPath should be updated to the directory of the file
+                Assert.Equal(tempDir, options.ProjectPath);
+            }
+            finally
+            {
+                // Cleanup
+                if (Directory.Exists(tempDir))
+                {
+                    Directory.Delete(tempDir, true);
+                }
+            }
+        }
+
+        [Fact]
+        public void ValidateProjectPath_ValidProjectFilePathMatchingProjectPath_NoUpdate()
+        {
+            // Arrange - create a temporary test file
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            var tempFile = Path.Combine(tempDir, "test.csproj");
+            File.WriteAllText(tempFile, "<Project></Project>");
+
+            try
+            {
+                var options = new ProvisioningToolOptions
+                {
+                    ProjectPath = tempDir,
+                    ProjectFilePath = tempFile
+                };
+
+                var tool = new AppProvisioningTool("test-command", options, silent: true);
+                var methodInfo = typeof(AppProvisioningTool).GetMethod("ValidateProjectPath", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                // Act
+                methodInfo?.Invoke(tool, null);
+
+                // Assert - ProjectPath should remain the same
+                Assert.Equal(tempDir, options.ProjectPath);
+            }
+            finally
+            {
+                // Cleanup
+                if (Directory.Exists(tempDir))
+                {
+                    Directory.Delete(tempDir, true);
+                }
+            }
+        }
+
+        [Fact]
+        public void ValidateProjectPath_InvalidProjectFilePath_CallsLogFailureAndExit()
+        {
+            // Arrange - use a non-existent file path
+            var nonExistentFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "nonexistent.csproj");
+            
+            var options = new ProvisioningToolOptions
+            {
+                ProjectPath = "/test/path",
+                ProjectFilePath = nonExistentFile
+            };
+
+            var tool = new AppProvisioningTool("test-command", options, silent: true);
+            var methodInfo = typeof(AppProvisioningTool).GetMethod("ValidateProjectPath", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            // Act & Assert - expect the method to call LogFailureAndExit which will throw
+            // Since LogFailureAndExit terminates the process, we can't directly test it
+            // However, we can verify the behavior by checking if the method throws an exception
+            // when the file doesn't exist
+            Assert.Throws<System.Reflection.TargetInvocationException>(() => 
+            {
+                methodInfo?.Invoke(tool, null);
+            });
         }
     }
 }

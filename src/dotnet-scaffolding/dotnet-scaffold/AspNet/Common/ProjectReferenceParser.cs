@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common
         /// <returns>A list of project reference strings.</returns>
         public static List<string> ParseProjectReferences(string referencesOutput)
         {
-            var references = new List<string>();
+            List<string> references = new List<string>();
             bool inProjectReferencesSection = false;
 
             using var sr = new StringReader(referencesOutput);

@@ -740,6 +740,73 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.Empty(nullResult);
         }
 
+        [Fact]
+        public async Task UpdateDocumentTests()
+        {
+            var tempFilePath = Path.Combine(Path.GetTempPath(), $"test_{Guid.NewGuid()}.cs");
+            try
+            {
+                var document = CreateDocument("namespace Test { public class MyClass { } }");
+                document = document.WithName(tempFilePath);
+
+                var fileSystem = new Mock<IFileSystem>();
+                fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+                    .Callback<string, string>((path, content) => 
+                    {
+                        File.WriteAllText(path, content);
+                    });
+
+                await ProjectModifierHelper.UpdateDocument(document, fileSystem.Object);
+
+                // Verify WriteAllText was called with the document content
+                fileSystem.Verify(fs => fs.WriteAllText(
+                    It.Is<string>(s => s == tempFilePath),
+                    It.IsAny<string>()), 
+                    Times.Once);
+            }
+            finally
+            {
+                if (File.Exists(tempFilePath))
+                {
+                    File.Delete(tempFilePath);
+                }
+            }
+        }
+
+        [Fact]
+        public void FilterCodeBlocksWithNullOptionsTests()
+        {
+            var codeBlocks = new[]
+            {
+                new CodeBlock { Block = "Property1", Options = null },
+                new CodeBlock { Block = "Property2", Options = new[] { "MicrosoftGraph" } }
+            };
+
+            var options = new CodeChangeOptions { MicrosoftGraph = false };
+            var filtered = ProjectModifierHelper.FilterCodeBlocks(codeBlocks, options);
+
+            // Only blocks with null options should be included when option is false
+            Assert.Single(filtered);
+            Assert.Equal("Property1", filtered[0].Block);
+        }
+
+        [Fact]
+        public void FilterCodeSnippetsWithNullOptionsTests()
+        {
+            var codeSnippets = new[]
+            {
+                new CodeSnippet { Block = "Statement1", Options = null },
+                new CodeSnippet { Block = "Statement2", Options = new[] { "DownstreamApi" } }
+            };
+
+            var options = new CodeChangeOptions { DownstreamApi = false };
+            var filtered = ProjectModifierHelper.FilterCodeSnippets(codeSnippets, options);
+
+            // Only snippets with null options should be included when option is false
+            Assert.Single(filtered);
+            Assert.Equal("Statement1", filtered[0].Block);
+        }
+
         private static readonly ModelType startupModel = new ModelType
         {
             Name = "Startup",

@@ -52,7 +52,7 @@ internal class AddAspireConnectionStringStep : ScaffoldStep
         var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
         JsonNode? content;
         bool writeContent = false;
-        if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
+        if (string.IsNullOrEmpty(appSettingsFile))
         {
             // Create a new appsettings.json if it doesn't exist
             appSettingsFile = Path.Combine(BaseProjectPath, "appsettings.json");

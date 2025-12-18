@@ -350,5 +350,328 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.True(formattedCodeSnippets[3].LeadingTrivia.NumberOfSpaces == 4 + whitespaceBeingAdded);
         }
 
+        [Fact]
+        public async Task GetUniqueUsingsTests()
+        {
+            // Test adding unique usings
+            var existingUsings = new[] { "System", "System.Linq" };
+            var newUsings = new[] { "System.Collections.Generic", "System.Linq", "System.Text" };
+            
+            var existingUsingDirectives = DocumentBuilder.CreateUsings(existingUsings);
+            var newUsingDirectives = DocumentBuilder.CreateUsings(newUsings);
+            
+            var uniqueUsings = DocumentBuilder.GetUniqueUsings(existingUsingDirectives, newUsingDirectives);
+            
+            // Should only add System.Collections.Generic and System.Text (not System.Linq as it already exists)
+            Assert.Equal(2, uniqueUsings.Count);
+            Assert.Contains(uniqueUsings, u => u.Name.ToString().Equals("System.Collections.Generic"));
+            Assert.Contains(uniqueUsings, u => u.Name.ToString().Equals("System.Text"));
+            Assert.DoesNotContain(uniqueUsings, u => u.Name.ToString().Equals("System.Linq"));
+        }
+
+        [Fact]
+        public async Task FilterUsingsWithOptionsTests()
+        {
+            var codeFile = new CodeFile
+            {
+                UsingsWithOptions = new[]
+                {
+                    new CodeBlock { Block = "Microsoft.Graph", Options = new[] { "MicrosoftGraph" } },
+                    new CodeBlock { Block = "System.Net.Http", Options = new[] { "DownstreamApi" } },
+                    new CodeBlock { Block = "System.Text.Json", Options = null }
+                }
+            };
+
+            var optionsWithGraph = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = false };
+            var optionsWithApi = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = true };
+            var optionsWithNeither = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = false };
+
+            var filteredWithGraph = DocumentBuilder.FilterUsingsWithOptions(codeFile, optionsWithGraph);
+            var filteredWithApi = DocumentBuilder.FilterUsingsWithOptions(codeFile, optionsWithApi);
+            var filteredWithNeither = DocumentBuilder.FilterUsingsWithOptions(codeFile, optionsWithNeither);
+
+            Assert.Contains("Microsoft.Graph", filteredWithGraph);
+            Assert.Contains("System.Text.Json", filteredWithGraph);
+            Assert.Equal(2, filteredWithGraph.Count);
+
+            Assert.Contains("System.Net.Http", filteredWithApi);
+            Assert.Contains("System.Text.Json", filteredWithApi);
+            Assert.Equal(2, filteredWithApi.Count);
+
+            Assert.Contains("System.Text.Json", filteredWithNeither);
+            Assert.Single(filteredWithNeither);
+        }
+
+        [Fact]
+        public async Task GetSpecifiedNodeTests()
+        {
+            var root = await CreateDocument(MinimalProgramCsFile).GetSyntaxRootAsync() as CompilationUnitSyntax;
+            var descendants = DocumentBuilder.GetDescendantNodes(root);
+
+            // Test finding a node that exists
+            var foundNode = DocumentBuilder.GetSpecifiedNode("builder.Build()", descendants);
+            Assert.NotNull(foundNode);
+            Assert.Contains("builder.Build()", foundNode.ToString());
+
+            // Test finding a node that doesn't exist
+            var notFoundNode = DocumentBuilder.GetSpecifiedNode("NonExistentCode()", descendants);
+            Assert.Null(notFoundNode);
+
+            // Test with null or empty specifier
+            var nullResult = DocumentBuilder.GetSpecifiedNode(null, descendants);
+            Assert.Null(nullResult);
+
+            var emptyResult = DocumentBuilder.GetSpecifiedNode("", descendants);
+            Assert.Null(emptyResult);
+        }
+
+        [Fact]
+        public async Task GetDescendantNodesTests()
+        {
+            // Test with BlockSyntax
+            var blockStatement = SyntaxFactory.ParseStatement("{ app.UseRouting(); }");
+            var blockSyntax = SyntaxFactory.Block(blockStatement);
+            var blockDescendants = DocumentBuilder.GetDescendantNodes(blockSyntax);
+            Assert.NotNull(blockDescendants);
+            Assert.NotEmpty(blockDescendants);
+
+            // Test with CompilationUnitSyntax
+            var root = await CreateDocument(MinimalProgramCsFile).GetSyntaxRootAsync() as CompilationUnitSyntax;
+            var compilationDescendants = DocumentBuilder.GetDescendantNodes(root);
+            Assert.NotNull(compilationDescendants);
+            Assert.NotEmpty(compilationDescendants);
+
+            // Test with other SyntaxNode types
+            var statement = SyntaxFactory.ParseStatement("var x = 10;");
+            var otherDescendants = DocumentBuilder.GetDescendantNodes(statement);
+            Assert.NotNull(otherDescendants);
+        }
+
+        [Fact]
+        public async Task GetModifiedMethodTests()
+        {
+            var editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
+            var classSyntax = await CreateClassSyntax(editor);
+            var methodNode = classSyntax.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault();
+            Assert.NotNull(methodNode);
+
+            var methodChanges = new Method
+            {
+                CodeChanges = new[]
+                {
+                    new CodeSnippet { Block = "Console.WriteLine(\"Test\");" }
+                },
+                Attributes = new[]
+                {
+                    new CodeBlock { Block = "HttpPost" }
+                }
+            };
+
+            var options = new CodeChangeOptions();
+            var output = new StringBuilder();
+
+            var modifiedMethod = DocumentBuilder.GetModifiedMethod("Test.cs", methodNode, methodChanges, options, output);
+
+            Assert.NotNull(modifiedMethod);
+            Assert.Contains(modifiedMethod.AttributeLists, al => 
+                al.Attributes.Any(attr => attr.ToString().Equals("HttpPost", StringComparison.OrdinalIgnoreCase)));
+        }
+
+        [Fact]
+        public async Task EditMethodReturnTypeTests()
+        {
+            var editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
+            var classSyntax = await CreateClassSyntax(editor);
+            var methodNode = classSyntax.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault();
+            Assert.NotNull(methodNode);
+
+            // Test changing return type
+            var methodChanges = new Method
+            {
+                EditType = new CodeBlock { Block = "Task" }
+            };
+
+            var options = new CodeChangeOptions();
+            var modifiedMethod = DocumentBuilder.EditMethodReturnType(methodNode, methodChanges, options);
+
+            Assert.NotNull(modifiedMethod);
+            Assert.IsType<MethodDeclarationSyntax>(modifiedMethod);
+            var modifiedMethodSyntax = (MethodDeclarationSyntax)modifiedMethod;
+            Assert.Contains("Task", modifiedMethodSyntax.ReturnType.ToString());
+
+            // Test with null methodChanges
+            var unchangedMethod = DocumentBuilder.EditMethodReturnType(methodNode, null, options);
+            Assert.Equal(methodNode, unchangedMethod);
+        }
+
+        [Fact]
+        public async Task AddParametersTests()
+        {
+            var editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
+            var classSyntax = await CreateClassSyntax(editor);
+            var methodNode = classSyntax.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault();
+            Assert.NotNull(methodNode);
+
+            var addParameters = new[]
+            {
+                new CodeBlock { Block = "string name" },
+                new CodeBlock { Block = "int id" }
+            };
+
+            var options = new CodeChangeOptions();
+            var modifiedMethod = DocumentBuilder.AddParameters(methodNode, addParameters, options);
+
+            Assert.NotNull(modifiedMethod);
+            Assert.Equal(2, modifiedMethod.ParameterList.Parameters.Count);
+        }
+
+        [Fact]
+        public async Task ModifyMethodTests()
+        {
+            var statement = SyntaxFactory.ParseStatement("{ }");
+            var blockSyntax = SyntaxFactory.Block(statement);
+            
+            var codeChange = new CodeSnippet
+            {
+                Block = "Console.WriteLine(\"Hello\");",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 },
+                TrailingTrivia = new Formatting { Newline = true }
+            };
+
+            var output = new StringBuilder();
+            var modifiedMethod = DocumentBuilder.ModifyMethod(blockSyntax, codeChange, output);
+
+            Assert.NotNull(modifiedMethod);
+            Assert.Contains("Console.WriteLine", modifiedMethod.ToString());
+        }
+
+        [Fact]
+        public async Task UpdateMethodTests()
+        {
+            var blockStatement = SyntaxFactory.ParseStatement("{ app.UseRouting(); }");
+            var blockSyntax = SyntaxFactory.Block(blockStatement);
+
+            var codeChange = new CodeSnippet
+            {
+                Block = "app.UseAuthentication();",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 },
+                TrailingTrivia = new Formatting { Newline = true }
+            };
+
+            var updatedMethod = DocumentBuilder.UpdateMethod(blockSyntax, codeChange);
+
+            Assert.NotNull(updatedMethod);
+            Assert.Contains("app.UseAuthentication", updatedMethod.ToString());
+            Assert.Contains("app.UseRouting", updatedMethod.ToString());
+        }
+
+        [Fact]
+        public async Task GetNodeWithUpdatedLambdaTests()
+        {
+            // Create a simple lambda expression for testing
+            var lambdaExpression = SyntaxFactory.SimpleLambdaExpression(
+                SyntaxFactory.Parameter(SyntaxFactory.Identifier("x")),
+                SyntaxFactory.Block()
+            );
+
+            var parentNode = SyntaxFactory.ExpressionStatement(
+                SyntaxFactory.InvocationExpression(
+                    SyntaxFactory.IdentifierName("Action"),
+                    SyntaxFactory.ArgumentList(
+                        SyntaxFactory.SingletonSeparatedList(
+                            SyntaxFactory.Argument(lambdaExpression)
+                        )
+                    )
+                )
+            );
+
+            var codeChange = new CodeSnippet
+            {
+                Block = "Console.WriteLine(x);",
+                Parameter = "y",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 }
+            };
+
+            var updatedParent = DocumentBuilder.GetNodeWithUpdatedLambda(lambdaExpression, codeChange, parentNode);
+
+            Assert.NotNull(updatedParent);
+            // The lambda should be updated within the parent
+            Assert.Contains("Console.WriteLine", updatedParent.ToString());
+        }
+
+        [Fact]
+        public async Task AddExpressionToParentTests()
+        {
+            var root = await CreateDocument(MinimalProgramCsFile).GetSyntaxRootAsync() as CompilationUnitSyntax;
+            
+            var codeChange = new CodeSnippet
+            {
+                Block = "UseHttpsRedirection()",
+                Parent = "app",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 0 }
+            };
+
+            var modifiedRoot = DocumentBuilder.AddExpressionToParent(root, codeChange);
+
+            Assert.NotNull(modifiedRoot);
+        }
+
+        [Fact]
+        public void AddMethodParametersTests()
+        {
+            var method = SyntaxFactory.MethodDeclaration(
+                SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
+                "TestMethod"
+            ).WithParameterList(SyntaxFactory.ParameterList());
+
+            var methodChanges = new Method
+            {
+                AddParameters = new[]
+                {
+                    new CodeBlock { Block = "string name" },
+                    new CodeBlock { Block = "int age" }
+                }
+            };
+
+            var options = new CodeChangeOptions();
+            var modifiedMethod = DocumentBuilder.AddMethodParameters(method, methodChanges, options);
+
+            Assert.NotNull(modifiedMethod);
+            Assert.Equal(2, modifiedMethod.ParameterList.Parameters.Count);
+
+            // Test with null or empty parameters
+            var unchangedMethod = DocumentBuilder.AddMethodParameters(method, null, options);
+            Assert.Equal(method, unchangedMethod);
+        }
+
+        [Fact]
+        public void AddCodeSnippetsToMethodTests()
+        {
+            var method = SyntaxFactory.MethodDeclaration(
+                SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
+                "TestMethod"
+            ).WithBody(SyntaxFactory.Block());
+
+            var methodChanges = new Method
+            {
+                CodeChanges = new[]
+                {
+                    new CodeSnippet
+                    {
+                        Block = "Console.WriteLine(\"Hello\");",
+                        LeadingTrivia = new Formatting { NumberOfSpaces = 4 }
+                    }
+                }
+            };
+
+            var options = new CodeChangeOptions();
+            var output = new StringBuilder();
+
+            var modifiedMethod = DocumentBuilder.AddCodeSnippetsToMethod("Test.cs", method, methodChanges, options, output);
+
+            Assert.NotNull(modifiedMethod);
+            Assert.Contains("Console.WriteLine", modifiedMethod.ToString());
+        }
+
     }
 }

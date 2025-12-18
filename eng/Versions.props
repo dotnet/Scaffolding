@@ -54,8 +54,8 @@
     <MonoTextTemplatingVersion>3.0.0</MonoTextTemplatingVersion>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
-    <MicrosoftCodeAnalysisPreviewVersion>5.0.0</MicrosoftCodeAnalysisPreviewVersion>
-    <MicrosoftCodeAnalysisVersion>5.0.0</MicrosoftCodeAnalysisVersion>
+    <MicrosoftCodeAnalysisPreviewVersion>4.14.0</MicrosoftCodeAnalysisPreviewVersion>
+    <MicrosoftCodeAnalysisVersion>4.14.0</MicrosoftCodeAnalysisVersion>
     <SystemCommandLinePackageVersion>2.0.0</SystemCommandLinePackageVersion>
     <MicrosoftApplicationInsightsWorkerServicePackageVersion>2.22.0</MicrosoftApplicationInsightsWorkerServicePackageVersion>
     <MicrosoftDotNetPlatformAbstractionsVersion>3.1.6</MicrosoftDotNetPlatformAbstractionsVersion>

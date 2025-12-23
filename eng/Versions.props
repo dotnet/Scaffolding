@@ -89,8 +89,8 @@
     <MicrosoftCodeAnalysisRazorPackageVersion>6.0.24</MicrosoftCodeAnalysisRazorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>$(MicrosoftCodeAnalysisVersion)</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
-    <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
-    <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.3.21166.3</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
+    <!-- McMaster.Extensions.CommandLineUtils -->
+    <McMasterExtensionsCommandLineUtilsPackageVersion>4.1.1</McMasterExtensionsCommandLineUtilsPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.3</NewtonsoftJsonPackageVersion>
     <NuGetPackagingVersion>6.12.1</NuGetPackagingVersion>
     <HumanizerPackageVersion>2.14.1</HumanizerPackageVersion>

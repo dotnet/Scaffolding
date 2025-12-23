@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
-using Microsoft.Extensions.CommandLineUtils;
+using McMaster.Extensions.CommandLineUtils;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 {

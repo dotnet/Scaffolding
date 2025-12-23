@@ -48,8 +48,8 @@ internal class AddAspireConnectionStringStep : ScaffoldStep
     /// <returns>True if the connection string was added or already present; otherwise, false.</returns>
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        var appSettingsFileSearch = _fileSystem.EnumerateFiles(BaseProjectPath, "appsettings.json", SearchOption.AllDirectories);
-        var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
+        IEnumerable<string> appSettingsFileSearch = _fileSystem.EnumerateFiles(BaseProjectPath, "appsettings.json", SearchOption.AllDirectories);
+        string? appSettingsFile = appSettingsFileSearch.FirstOrDefault();
         JsonNode? content;
         bool writeContent = false;
         if (string.IsNullOrEmpty(appSettingsFile))
@@ -104,7 +104,7 @@ internal class AddAspireConnectionStringStep : ScaffoldStep
         if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
         {
             // Write the updated content to appsettings.json
-            var options = new JsonSerializerOptions { WriteIndented = true };
+            JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
             _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
             _telemetryService.TrackEvent(new AddAspireConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));

@@ -813,13 +813,6 @@
         "OutputPath": "wwwroot/lib/jquery-validation-unobtrusive/LICENSE.txt",
         "IsTemplate": false,
         "ShowInListFiles": false
-      },
-      {
-        "Name": "favicon.ico",
-        "SourcePath": "wwwroot/favicon.ico",
-        "OutputPath": "wwwroot/favicon.ico",
-        "IsTemplate": false,
-        "ShowInListFiles": false
       }
     ]
   }

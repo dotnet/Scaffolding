@@ -85,6 +85,7 @@
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.24</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.Build-->
     <MicrosoftBuildPackageVersion>17.11.48</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildFrameworkPackageVersion>17.11.48</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildTasksCorePackageVersion>17.14.28</MicrosoftBuildTasksCorePackageVersion>
     <!-- Microsoft.Build.Utilities-->
     <MicrosoftBuildUtilitiesCorePackageVersion>17.14.28</MicrosoftBuildUtilitiesCorePackageVersion>

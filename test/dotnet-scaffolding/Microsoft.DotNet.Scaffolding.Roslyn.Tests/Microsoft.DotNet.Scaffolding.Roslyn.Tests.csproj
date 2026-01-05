@@ -8,5 +8,11 @@
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Roslyn\Microsoft.DotNet.Scaffolding.Roslyn.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Exclude MSBuild runtime assemblies - MSBuildLocator will resolve them from the SDK -->
+    <PackageReference Include="Microsoft.Build" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Framework" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" ExcludeAssets="runtime" />
+  </ItemGroup>
 
 </Project>

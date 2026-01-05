@@ -53,11 +53,11 @@
     <!-- Mono.TextTemplating-->
     <MonoTextTemplatingVersion>3.0.0</MonoTextTemplatingVersion>
     <!-- Microsoft.Extensions.Configuration -->
-    <MicrosoftExtensionsConfigurationPackageVersion>10.0.1</MicrosoftExtensionsConfigurationPackageVersion>
+    <MicrosoftExtensionsConfigurationPackageVersion>10.0.2</MicrosoftExtensionsConfigurationPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Binder -->
-    <MicrosoftExtensionsConfigurationBinderPackageVersion>10.0.1</MicrosoftExtensionsConfigurationBinderPackageVersion>
+    <MicrosoftExtensionsConfigurationBinderPackageVersion>10.0.2</MicrosoftExtensionsConfigurationBinderPackageVersion>
     <!-- Microsoft.Extensions.Configuration.CommandLine -->
-    <MicrosoftExtensionsConfigurationCommandLinePackageVersion>10.0.1</MicrosoftExtensionsConfigurationCommandLinePackageVersion>
+    <MicrosoftExtensionsConfigurationCommandLinePackageVersion>10.0.2</MicrosoftExtensionsConfigurationCommandLinePackageVersion>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
     <MicrosoftCodeAnalysisPreviewVersion>5.0.0</MicrosoftCodeAnalysisPreviewVersion>

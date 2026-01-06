@@ -1,7 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Extensions.Logging;
 using NuGet.Versioning;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Model;
 
@@ -30,13 +32,14 @@ internal static class PackageExtensions
     /// <param name="nugetVersionHelper">The NuGet version helper to use for version resolution.</param>
     /// <returns>A package instance with the version property set to the resolved version for the specified target framework, or
     /// the original package if the version is already set or cannot be resolved.</returns>
-    public static async Task<Package> WithResolvedVersionAsync(this Package package, string targetFramework, NuGetVersionService nugetVersionHelper)
+    public static async Task<Package> WithResolvedVersionAsync(this Package package, string? targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null)
     {
         if (package.PackageVersion is not null)
         {
             return package;
         }
-        NuGetVersion? resolvedVersion = await package.GetVersionForTargetFrameworkAsync(targetFramework, nugetVersionHelper);
+
+        NuGetVersion? resolvedVersion = await package.GetVersionForTargetFrameworkAsync(targetFramework, nugetVersionHelper, logger);
         if (resolvedVersion is null)
         {
             return package;
@@ -58,10 +61,16 @@ internal static class PackageExtensions
     /// version if available; otherwise, <see langword="null"/> if the package does not require a version.</returns>
     /// <exception cref="NotSupportedException">Thrown if <paramref name="targetFramework"/> is not one of the supported frameworks ("net8.0", "net9.0", or
     /// "net10.0").</exception>
-    private static Task<NuGetVersion?> GetVersionForTargetFrameworkAsync(this Package package, string targetFramework, NuGetVersionService nugetVersionHelper)
+    private static Task<NuGetVersion?> GetVersionForTargetFrameworkAsync(this Package package, string? targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null)
     {
         if (!package.IsVersionRequired)
         {
+            return Task.FromResult<NuGetVersion?>(null);
+        }
+
+        if (targetFramework is null)
+        {
+            logger?.LogError("Project contains a Target Framework that is not supported. Supported Target Frameworks are .NET8, .NET9. Installing latest stable version of '{PackageName}'. Consider upgrading your Target Framework to install a compatible package version.", package.Name);
             return Task.FromResult<NuGetVersion?>(null);
         }
 
@@ -75,7 +84,8 @@ internal static class PackageExtensions
         }
         else
         {
-            throw new NotSupportedException($"Target framework '{targetFramework}' is not supported.");
+            logger?.LogError("Target Framework '{TargetFramework}' is not supported. Supported Target Frameworks are .NET8, .NET9. Installing latest stable version of '{PackageName}'. Consider upgrading your Target Framework to install a compatible package version.", targetFramework, package.Name);
+            return Task.FromResult<NuGetVersion?>(null);
         }
     }
 }

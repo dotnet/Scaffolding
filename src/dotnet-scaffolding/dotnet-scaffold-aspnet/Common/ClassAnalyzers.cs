@@ -158,11 +158,9 @@ internal static class ClassAnalyzers
         new MsBuildInitializer(logger).Initialize();
         var codeService = new CodeService(logger, projectPath);
         var msBuildProject = new MSBuildProjectService(projectPath);
-        var projectInfo = new ProjectInfo()
+        var projectInfo = new ProjectInfo(projectPath)
         {
             CodeService = codeService,
-            ProjectPath = projectPath,
-            LowestTargetFramework = msBuildProject.GetLowestTargetFramework(),
             Capabilities = msBuildProject.GetProjectCapabilities().ToList()
         };
 

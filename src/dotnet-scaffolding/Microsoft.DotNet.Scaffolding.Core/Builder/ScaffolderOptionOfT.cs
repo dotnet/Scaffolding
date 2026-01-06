@@ -31,5 +31,5 @@ public class ScaffolderOption<T> : ScaffolderOption
         };
     }
 
-    private string FixedName => CliOption ?? $"--{DisplayName.ToLowerInvariant().Replace(" ", "-")}";
+    private string FixedName => Parameter.GetParameterName(CliOption, DisplayName);
 }

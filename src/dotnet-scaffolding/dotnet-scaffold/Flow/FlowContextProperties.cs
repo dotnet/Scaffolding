@@ -31,4 +31,5 @@ internal static class FlowContextProperties
     public const string ScaffoldingCategories = nameof(ScaffoldingCategories);
     public const string ChosenCategory = nameof(ChosenCategory);
     public const string TelemetryEnvironmentVariables = nameof(TelemetryEnvironmentVariables);
+    public const string ProjectFileParameterResult = nameof(ProjectFileParameterResult);
 }

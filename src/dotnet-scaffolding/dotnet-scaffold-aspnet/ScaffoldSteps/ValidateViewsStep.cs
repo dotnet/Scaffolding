@@ -47,7 +47,16 @@ internal class ValidateViewsStep : ScaffoldStep
             context.Properties.Add(nameof(CrudSettings), viewSettings);
         }
 
-        var viewModel = await GetViewModelAsync(viewSettings);
+        // Set the specified target framework in the context
+        var projectInfo = ClassAnalyzers.GetProjectInfo(viewSettings.Project, _logger);
+        if (!string.IsNullOrEmpty(projectInfo?.LowestSupportedTargetFramework))
+        {
+            context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
+        }
+
+        //initialize ViewModel
+        _logger.LogInformation("Initializing scaffolding model...");
+        var viewModel = await GetViewModelAsync(context, viewSettings);
         if (viewModel is null)
         {
             _logger.LogError("An error occurred: 'ViewModel' instance could not be obtained");
@@ -96,7 +105,13 @@ internal class ValidateViewsStep : ScaffoldStep
         };
     }
 
-    private async Task<ViewModel?> GetViewModelAsync(CrudSettings settings)
+    /// <summary>
+    /// Initializes and returns the ViewModel for scaffolding.
+    /// </summary>
+    /// <param name="context">Scaffolder context.</param>
+    /// <param name="settings">CrudSettings object containing the settings for scaffolding.</param>
+    /// <returns>Task that represents the asynchronous operation, with a ViewModel result if successful, null otherwise.</returns>
+    private async Task<ViewModel?> GetViewModelAsync(ScaffolderContext context, CrudSettings settings)
     {
         var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
         if (projectInfo is null || projectInfo.CodeService is null)

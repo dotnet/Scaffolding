@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=9.0.12-dev
+VERSION=9.0.12
 DEFAULT_NUPKG_PATH=~/.nuget/packages
 SRC_DIR=$(pwd)
 echo $SRC_DIR

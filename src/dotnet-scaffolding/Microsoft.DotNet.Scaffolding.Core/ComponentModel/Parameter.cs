@@ -40,4 +40,17 @@ internal class Parameter
 
     public static CliTypes GetCliType<T>()
         => GetCliType(typeof(T));
+    
+    /// <summary>
+    /// Generates the command-line parameter name based on the specified option or display name.
+    /// </summary>
+    /// <param name="cliOption">The explicit command-line option name to use. If not specified, the parameter name is generated from <paramref
+    /// name="displayName"/>.</param>
+    /// <param name="displayName">The display name used to generate the command-line parameter name if <paramref name="cliOption"/> is null.</param>
+    /// <returns>A string containing the command-line parameter name. If <paramref name="cliOption"/> is not null, its value is
+    /// returned; otherwise, a name is generated from <paramref name="displayName"/>.</returns>
+    internal static string GetParameterName(string? cliOption, string displayName)
+    {
+        return cliOption ?? $"--{displayName.ToLowerInvariant().Replace(" ", "-")}";
+    }
 }

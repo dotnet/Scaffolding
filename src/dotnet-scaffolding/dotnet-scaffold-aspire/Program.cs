@@ -2,6 +2,7 @@ using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
@@ -14,7 +15,7 @@ ConfigureServices(builder.Services);
 ConfigureSteps(builder.Services);
 
 CreateOptions(out var cachingTypeOption, out var databaseTypeOption, out var storageTypeOption,
-              out var appHostProjectOption, out var projectOption, out var prereleaseOption);
+              out var appHostProjectOption, out var projectOption);
 
 var caching = builder.AddScaffolder("caching");
 caching.WithCategory("Aspire")
@@ -22,7 +23,6 @@ caching.WithCategory("Aspire")
        .WithOption(cachingTypeOption)
        .WithOption(appHostProjectOption)
        .WithOption(projectOption)
-       .WithOption(prereleaseOption)
        .WithStep<ValidateOptionsStep>(config =>
        {
            config.Step.ValidateMethod = ValidationHelper.ValidateCachingSettings;
@@ -36,7 +36,6 @@ database.WithCategory("Aspire")
         .WithOption(databaseTypeOption)
         .WithOption(appHostProjectOption)
         .WithOption(projectOption)
-        .WithOption(prereleaseOption)
         .WithStep<ValidateOptionsStep>(config =>
         {
             config.Step.ValidateMethod = ValidationHelper.ValidateDatabaseSettings;
@@ -51,8 +50,6 @@ storage.WithCategory("Aspire")
        .WithDescription("Modifies Aspire project to make it storage ready.")
        .WithOption(storageTypeOption)
        .WithOption(appHostProjectOption)
-       .WithOption(projectOption)
-       .WithOption(prereleaseOption)
        .WithStep<ValidateOptionsStep>(config =>
        {
            config.Step.ValidateMethod = ValidationHelper.ValidateStorageSettings;
@@ -83,10 +80,11 @@ static void ConfigureSteps(IServiceCollection services)
     services.AddTransient<WrappedAddPackagesStep>();
     services.AddTransient<TextTemplatingStep>();
     services.AddTransient<AddConnectionStringStep>();
+    services.AddTransient<NuGetVersionService>();
 }
 
 static void CreateOptions(out ScaffolderOption<string> cachingTypeOption, out ScaffolderOption<string> databaseTypeOption, out ScaffolderOption<string> storageTypeOption,
-                          out ScaffolderOption<string> appHostProjectOption, out ScaffolderOption<string> projectOption, out ScaffolderOption<bool> prereleaseOption)
+                          out ScaffolderOption<string> appHostProjectOption, out ScaffolderOption<string> projectOption)
 {
     cachingTypeOption = new ScaffolderOption<string>
     {
@@ -134,14 +132,5 @@ static void CreateOptions(out ScaffolderOption<string> cachingTypeOption, out Sc
         Description = "Web or worker project associated with the Aspire App host",
         Required = true,
         PickerType = InteractivePickerType.ProjectPicker
-    };
-
-    prereleaseOption = new ScaffolderOption<bool>
-    {
-        DisplayName = "Include Prerelease packages?",
-        CliOption = AspireCommandHelpers.PrereleaseCliOption,
-        Description = "Include prerelease package versions when installing latest Aspire components",
-        Required = false,
-        PickerType = InteractivePickerType.YesNo
     };
 }

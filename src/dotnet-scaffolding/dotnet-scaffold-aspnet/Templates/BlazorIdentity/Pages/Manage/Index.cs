@@ -82,6 +82,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 
     protected override async Task OnInitializedAsync()
     {
+        Input ??= new();
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         username = await UserManager.GetUserNameAsync(user);
         phoneNumber = await UserManager.GetPhoneNumberAsync(user);

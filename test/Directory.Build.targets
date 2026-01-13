@@ -36,6 +36,7 @@
         MicrosoftAspNetCoreStaticFilesPackageVersion=$(MicrosoftAspNetCoreStaticFilesPackageVersion);
         MicrosoftEntityFrameworkCoreDesignPackageVersion=$(MicrosoftEntityFrameworkCoreDesignPackageVersion);
         MicrosoftEntityFrameworkCoreSqlServerPackageVersion=$(MicrosoftEntityFrameworkCoreSqlServerPackageVersion);
+        MicrosoftExtensionsCachingMemoryPackageVersion=$(MicrosoftExtensionsCachingMemoryPackageVersion);
         MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion=$(MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion);
         MicrosoftExtensionsConfigurationJsonPackageVersion=$(MicrosoftExtensionsConfigurationJsonPackageVersion);
         MicrosoftExtensionsConfigurationUserSecretsPackageVersion=$(MicrosoftExtensionsConfigurationUserSecretsPackageVersion);

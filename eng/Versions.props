@@ -22,6 +22,8 @@
     <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>9.0.12</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <!-- Microsoft.Extensions.Identity.Stores -->
     <MicrosoftExtensionsIdentityStoresPackageVersion>9.0.12</MicrosoftExtensionsIdentityStoresPackageVersion>
+    <!-- Microsoft.Extensions.Caching.Memory -->
+    <MicrosoftExtensionsCachingMemoryPackageVersion>9.0.12</MicrosoftExtensionsCachingMemoryPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Abstractions -->
     <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>9.0.12</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->

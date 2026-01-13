@@ -15,7 +15,6 @@ internal class Constants
     public class CliOptions
     {
         public const string ProjectCliOption = "--project";
-        public const string PrereleaseCliOption = "--prerelease";
         public const string NameOption = "--name";
         public const string OverwriteOption = "--overwrite";
         //model with ef options

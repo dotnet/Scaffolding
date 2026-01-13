@@ -36,11 +36,6 @@ internal static class DotnetCommands
                 packageDisplayName = $"{packageName} (v{packageVersion})";
             }
 
-            if (includePrerelease)
-            {
-                arguments.Add("--prerelease");
-            }
-
             logger.LogInformation($"\nAdding package '{packageDisplayName}'...");
             var runner = DotnetCliRunner.CreateDotNet("add", arguments);
 

@@ -138,6 +138,6 @@
   </PropertyGroup>
   <!-- Package versions for transitive pinning for Component Governance alerts -->
   <PropertyGroup>
-    <SystemFormatsAsn1Version>9.0.11</SystemFormatsAsn1Version>
+    <SystemFormatsAsn1Version>9.0.12</SystemFormatsAsn1Version>
   </PropertyGroup>
 </Project>

@@ -187,15 +187,33 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             // dynamically calculate the parameter values for Entra ID for performance reasons
             if (string.Equals(parameter.DisplayName, AspnetStrings.Options.Username.DisplayName, StringComparison.Ordinal))
             {
-                values = AzCliHelper.GetUsernameParameterValuesDynamically(context);
+                values = AnsiConsole
+                    .Status()
+                    .WithSpinner()
+                    .Start("Retrieving Azure CLI usernames...", statusContext =>
+                    {
+                        return AzCliHelper.GetUsernameParameterValuesDynamically(context);
+                    });
             }
             else if (string.Equals(parameter.DisplayName, AspnetStrings.Options.TenantId.DisplayName, StringComparison.Ordinal))
             {
-                values = AzCliHelper.GetTenantParameterValuesDynamically(context);
+                values = AnsiConsole
+                    .Status()
+                    .WithSpinner()
+                    .Start("Retrieving Azure CLI tenant IDs...", statusContext =>
+                    {
+                        return AzCliHelper.GetTenantParameterValuesDynamically(context);
+                    });
             }
             else if (string.Equals(parameter.DisplayName, AspnetStrings.Options.SelectApplication.DisplayName, StringComparison.Ordinal))
             {
-                values = AzCliHelper.GetAppIdParameterValuesDynamically(context);
+                values = AnsiConsole
+                    .Status()
+                    .WithSpinner()
+                    .Start("Retrieving Azure CLI app IDs...", statusContext =>
+                    {
+                        return AzCliHelper.GetAppIdParameterValuesDynamically(context);
+                    });
             }
             return [.. values.Select(x => new StepOption() { Name = x, Value = x })];
         }

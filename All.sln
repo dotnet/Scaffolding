@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.0.11022.115
-MinimumVisualStudioVersion = 15.0.26730.03
+MinimumVisualStudioVersion = 15.0.26730.3
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A4057ACF-27F0-4724-963B-44548B6BC4E9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{81B64EBF-613D-43AE-82DA-B375FB751921}"
@@ -128,6 +128,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet-scaffolding", "dotnet-scaffolding", "{0E27E3F4-C93F-4DF1-8F4D-1E62A6641C75}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Scaffolding.Roslyn.Tests", "test\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Roslyn.Tests\Microsoft.DotNet.Scaffolding.Roslyn.Tests.csproj", "{83AFCAC3-4AED-49A4-A7C1-61EC051562E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-scaffold.Tests", "test\dotnet-scaffolding\dotnet-scaffold.Tests\dotnet-scaffold.Tests.csproj", "{992AB1BF-23A3-40DB-A3A5-06C80C760973}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -808,6 +810,24 @@ Global
 		{83AFCAC3-4AED-49A4-A7C1-61EC051562E4}.Release|x64.Build.0 = Release|Any CPU
 		{83AFCAC3-4AED-49A4-A7C1-61EC051562E4}.Release|x86.ActiveCfg = Release|Any CPU
 		{83AFCAC3-4AED-49A4-A7C1-61EC051562E4}.Release|x86.Build.0 = Release|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.debug_x86|Any CPU.ActiveCfg = Debug|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.debug_x86|Any CPU.Build.0 = Debug|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.debug_x86|x64.ActiveCfg = Debug|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.debug_x86|x64.Build.0 = Debug|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.debug_x86|x86.ActiveCfg = Debug|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.debug_x86|x86.Build.0 = Debug|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.Debug|x64.Build.0 = Debug|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.Debug|x86.Build.0 = Debug|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.Release|Any CPU.Build.0 = Release|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.Release|x64.ActiveCfg = Release|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.Release|x64.Build.0 = Release|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.Release|x86.ActiveCfg = Release|Any CPU
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -859,6 +879,7 @@ Global
 		{2180D82F-38EE-4FD6-927F-03BEE22B789E} = {73FF6F8B-3D15-41F1-9358-A497DAE4AD8B}
 		{0E27E3F4-C93F-4DF1-8F4D-1E62A6641C75} = {81B64EBF-613D-43AE-82DA-B375FB751921}
 		{83AFCAC3-4AED-49A4-A7C1-61EC051562E4} = {0E27E3F4-C93F-4DF1-8F4D-1E62A6641C75}
+		{992AB1BF-23A3-40DB-A3A5-06C80C760973} = {0E27E3F4-C93F-4DF1-8F4D-1E62A6641C75}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {26BCDDB3-5505-4903-9D87-C942ED0D03E6}

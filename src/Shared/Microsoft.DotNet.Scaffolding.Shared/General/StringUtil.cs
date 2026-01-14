@@ -158,5 +158,43 @@ namespace Microsoft.DotNet.Scaffolding.Shared
             //change all line endings to "\n" and then replace them with the appropriate ending
             return text.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", Environment.NewLine);
         }
+
+        /// <summary>
+        /// Normalizes source, snippet, and block strings for consistent cross-platform matching.
+        /// Issue: Line endings differ between Linux (\n) and Windows (\r\n), which causes
+        /// string matching to fail when the pattern was built on one OS but file uses the other.
+        /// </summary>
+        internal static (string normalizedSource, string normalizedSnippet, string normalizedBlock) NormalizeTextForMatching(
+            string source,
+            string snippet,
+            string block)
+        {
+            return (
+                NormalizeLineEndings(source),
+                NormalizeLineEndings(snippet),
+                NormalizeLineEndings(block)
+            );
+        }
+
+        /// <summary>
+        /// Checks if a checkBlock string exists within a limited range after the snippet location in the source.
+        /// Used to determine if a code block has already been inserted after a replace snippet.
+        /// </summary>
+        /// <param name="source">The source text to search in</param>
+        /// <param name="snippet">The snippet to find the position of</param>
+        /// <param name="checkBlock">The block to look for after the snippet</param>
+        /// <param name="searchLength">Maximum characters to search after the snippet (default 500)</param>
+        /// <returns>True if checkBlock exists within searchLength characters after the snippet</returns>
+        internal static bool DoesCheckBlockExistAfterSnippet(string source, string snippet, string checkBlock, int searchLength = 500)
+        {
+            int replaceIndex = source.IndexOf(snippet, StringComparison.OrdinalIgnoreCase);
+            if (replaceIndex >= 0)
+            {
+                int afterReplace = replaceIndex + snippet.Length;
+                string searchAfter = source.Substring(afterReplace, Math.Min(searchLength, source.Length - afterReplace));
+                return searchAfter.ContainsIgnoreCase(checkBlock);
+            }
+            return false;
+        }
     }
 }

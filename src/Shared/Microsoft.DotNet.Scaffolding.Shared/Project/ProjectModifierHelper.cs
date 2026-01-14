@@ -533,30 +533,44 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 return null;
             }
 
-            var sourceText = await fileDoc.GetTextAsync();
-            var sourceFileString = sourceText?.ToString() ?? null;
+            SourceText sourceText = await fileDoc.GetTextAsync();
+            string sourceFileString = sourceText?.ToString() ?? null;
             if (sourceFileString is null)
             {
                 return null;
             }
 
-            var trimmedSourceFile = TrimStatement(sourceFileString);
-            var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(TrimStatement(c.Block)));
+            string trimmedSourceFile = TrimStatement(sourceFileString);
+            IEnumerable<CodeSnippet> applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(TrimStatement(c.Block)));
             if (!applicableCodeChanges.Any())
             {
                 return null;
             }
 
-            foreach (var change in applicableCodeChanges)
+            foreach (CodeSnippet change in applicableCodeChanges)
             {
                 // If doing a code replacement, replace ReplaceSnippet in source with Block
                 if (change.ReplaceSnippet != null)
                 {
-                    var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                    if (!sourceFileString.ContainsIgnoreCase(change.CheckBlock) && 
-                        sourceFileString.ContainsIgnoreCase(replaceSnippet))
+                    string replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
+                    
+                    // Normalize line endings to handle cross-platform differences
+                    // Issue: Line endings differ between Linux (\n) and Windows (\r\n), which causes
+                    // string matching to fail when the pattern was built on one OS but file uses the other.
+                    // Normalizing ensures consistent matching regardless of the source OS.
+                    (string normalizedSource, string normalizedSnippet, string normalizedBlock) =
+                        StringUtil.NormalizeTextForMatching(sourceFileString, replaceSnippet, change.Block);
+                    
+                    bool shouldReplace = normalizedSource.ContainsIgnoreCase(normalizedSnippet);
+                    if (shouldReplace && !string.IsNullOrEmpty(change.CheckBlock))
                     {
-                        sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
+                        // Don't replace if CheckBlock already appears right after the ReplaceSnippet
+                        shouldReplace = !StringUtil.DoesCheckBlockExistAfterSnippet(normalizedSource, normalizedSnippet, change.CheckBlock);
+                    }
+                    
+                    if (shouldReplace)
+                    {
+                        sourceFileString = normalizedSource.Replace(normalizedSnippet, normalizedBlock);
                     }
                     else
                     {
@@ -569,7 +583,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Project
                 }
             }
 
-            var updatedSourceText = SourceText.From(sourceFileString);
+            SourceText updatedSourceText = SourceText.From(sourceFileString);
             return fileDoc.WithText(updatedSourceText);
         }
 

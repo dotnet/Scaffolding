@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
+using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 
 namespace Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
@@ -480,12 +481,26 @@ internal static class ProjectModifierHelper
             // If doing a code replacement, replace ReplaceSnippet in source with Block
             if (change.ReplaceSnippet != null)
             {
-                var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
-                    (string.IsNullOrEmpty(change.CheckBlock) ||
-                     !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)))
+                string replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
+                string block = change.Block;
+                
+                // Normalize line endings to handle cross-platform differences
+                // Issue: Line endings differ between Linux (\n) and Windows (\r\n), which causes
+                // string matching to fail when the pattern was built on one OS but file uses the other.
+                // Normalizing ensures consistent matching regardless of the source OS.
+                (string normalizedSource, string normalizedSnippet, string normalizedBlock) = 
+                    StringUtil.NormalizeTextForMatching(sourceFileString, replaceSnippet, block);
+                
+                bool shouldReplace = normalizedSource.Contains(normalizedSnippet, StringComparison.OrdinalIgnoreCase);
+                if (shouldReplace && !string.IsNullOrEmpty(change.CheckBlock))
                 {
-                    sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
+                    // Don't replace if CheckBlock already appears right after the ReplaceSnippet
+                    shouldReplace = !StringUtil.DoesCheckBlockExistAfterSnippet(normalizedSource, normalizedSnippet, change.CheckBlock);
+                }
+                
+                if (shouldReplace)
+                {
+                    sourceFileString = normalizedSource.Replace(normalizedSnippet, normalizedBlock);
                     sourceChanged = true;
                 }
 
@@ -517,31 +532,46 @@ internal static class ProjectModifierHelper
             return null;
         }
 
-        var sourceText = await fileDoc.GetTextAsync();
-        var sourceFileString = sourceText?.ToString() ?? null;
+        SourceText? sourceText = await fileDoc.GetTextAsync();
+        string? sourceFileString = sourceText?.ToString() ?? null;
         if (sourceFileString is null)
         {
             return null;
         }
 
-        var trimmedSourceFile = TrimStatement(sourceFileString);
-        var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(TrimStatement(c.Block)));
+        string trimmedSourceFile = TrimStatement(sourceFileString);
+        IEnumerable<CodeSnippet> applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(TrimStatement(c.Block)));
         if (!applicableCodeChanges.Any())
         {
             return null;
         }
 
-        foreach (var change in applicableCodeChanges)
+        foreach (CodeSnippet change in applicableCodeChanges)
         {
             // If doing a code replacement, replace ReplaceSnippet in source with Block
             if (change.ReplaceSnippet != null)
             {
-                var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
-                    (string.IsNullOrEmpty(change.CheckBlock) ||
-                     !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)))
+                string replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
+                string block = change.Block;
+                
+                // Normalize line endings to handle cross-platform differences
+                // Issue: Line endings differ between Linux (\n) and Windows (\r\n), which causes
+                // string matching to fail when the pattern was built on one OS but file uses the other.
+                // Normalizing ensures consistent matching regardless of the source OS.
+                // On template engine prior to Net 10 it does not normailize line endings to the OS so we have to
+                (string normalizedSource, string normalizedSnippet, string normalizedBlock) = 
+                    StringUtil.NormalizeTextForMatching(sourceFileString, replaceSnippet, block);
+                
+                bool shouldReplace = normalizedSource.Contains(normalizedSnippet, StringComparison.OrdinalIgnoreCase);
+                if (shouldReplace && !string.IsNullOrEmpty(change.CheckBlock))
                 {
-                    sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
+                    // Don't replace if CheckBlock already appears right after the ReplaceSnippet
+                    shouldReplace = !StringUtil.DoesCheckBlockExistAfterSnippet(normalizedSource, normalizedSnippet, change.CheckBlock);
+                }
+                
+                if (shouldReplace)
+                {
+                    sourceFileString = normalizedSource.Replace(normalizedSnippet, normalizedBlock);
                 }
 
             }
@@ -551,7 +581,7 @@ internal static class ProjectModifierHelper
             }
         }
 
-        var updatedSourceText = SourceText.From(sourceFileString);
+        SourceText updatedSourceText = SourceText.From(sourceFileString);
         //check for Document class first as its a subclass of TextDocument
         //use Document.WithText extension to return an updated Document
         if (fileDoc is Document document)

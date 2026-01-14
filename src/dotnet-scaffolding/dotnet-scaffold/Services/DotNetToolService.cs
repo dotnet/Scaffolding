@@ -129,11 +129,6 @@ internal class DotNetToolService : IDotNetToolService
             installParams.Add(version);
         }
 
-        if (prerelease)
-        {
-            installParams.Add("--prerelease");
-        }
-
         if (addSources is not null)
         {
             foreach (var source in addSources)

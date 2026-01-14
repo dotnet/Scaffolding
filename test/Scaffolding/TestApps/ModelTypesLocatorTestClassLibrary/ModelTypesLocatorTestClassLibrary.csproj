@@ -8,5 +8,10 @@
     <ProjectReference Include="..\ClassLibrary1\ClassLibrary1.csproj" />
     <ProjectReference Include="$(RepoRoot)src\Scaffolding\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Pin transitive dependencies to resolve NU1605 -->
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+  </ItemGroup>
 
 </Project>

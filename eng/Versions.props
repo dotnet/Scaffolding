@@ -70,7 +70,7 @@
     <MicrosoftDotNetPlatformAbstractionsVersion>3.1.6</MicrosoftDotNetPlatformAbstractionsVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>9.0.12</VersionPrefix>
+    <VersionPrefix>9.0.13</VersionPrefix>
     <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
     <IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>

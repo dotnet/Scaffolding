@@ -4,7 +4,6 @@ using System;
 using Microsoft.Build.Evaluation;
 using System.IO;
 using System.Xml;
-using Microsoft.Build.Locator;
 using Microsoft.DotNet.Scaffolding.Roslyn.Helpers;
 using Xunit;
 
@@ -12,15 +11,6 @@ namespace Microsoft.DotNet.Scaffolding.Roslyn.Tests;
 
 public class MSBuildProjectServiceHelperTests
 {
-    public MSBuildProjectServiceHelperTests()
-    {
-        // Register the MSBuild assemblies
-        if (!MSBuildLocator.IsRegistered)
-        {
-            MSBuildLocator.RegisterDefaults();
-        }
-    }
-
     [Theory]
     [InlineData("net5.0", "5.0")]
     [InlineData("net6.0", "6.0")]

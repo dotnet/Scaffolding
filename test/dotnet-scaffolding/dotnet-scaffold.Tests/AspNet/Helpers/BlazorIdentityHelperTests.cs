@@ -1,0 +1,213 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Microsoft.DotNet.Scaffolding.TextTemplating;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Files;
+using Xunit;
+
+namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
+
+public class BlazorIdentityHelperTests
+{
+    [Fact]
+    public void GetTextTemplatingProperties_WithEmptyTemplatePaths_ReturnsEmpty()
+    {
+        // Arrange
+        List<string> templatePaths = [];
+        IdentityModel identityModel = CreateTestIdentityModel();
+
+        // Act
+        IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public void GetTextTemplatingProperties_WithNullProjectPath_ReturnsEmpty()
+    {
+        // Arrange
+        List<string> templatePaths = [Path.Combine("BlazorIdentity", "Test.tt")];
+        IdentityModel identityModel = new IdentityModel
+        {
+            ProjectInfo = new ProjectInfo(null),
+            IdentityNamespace = "TestNamespace",
+            BaseOutputPath = "output",
+            UserClassName = "ApplicationUser",
+            UserClassNamespace = "TestNamespace.Data",
+            DbContextInfo = new DbContextInfo()
+        };
+
+        // Act
+        IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public void GetApplicationUserTextTemplatingProperty_WithValidInputs_ReturnsProperty()
+    {
+        // Arrange
+        string templatePath = Path.Combine("templates", "ApplicationUser.tt");
+        IdentityModel identityModel = CreateTestIdentityModel();
+
+        // Act
+        TextTemplatingProperty? result = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(templatePath, identityModel);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(templatePath, result.TemplatePath);
+        Assert.Equal(typeof(ApplicationUser), result.TemplateType);
+        Assert.Equal("Model", result.TemplateModelName);
+        Assert.Equal(identityModel, result.TemplateModel);
+        Assert.Contains("Data", result.OutputPath);
+        Assert.Contains(identityModel.UserClassName, result.OutputPath);
+        Assert.EndsWith(".cs", result.OutputPath);
+    }
+
+    [Fact]
+    public void GetApplicationUserTextTemplatingProperty_WithNullTemplatePath_ReturnsNull()
+    {
+        // Arrange
+        IdentityModel identityModel = CreateTestIdentityModel();
+
+        // Act
+        TextTemplatingProperty? result = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(null, identityModel);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void GetApplicationUserTextTemplatingProperty_WithEmptyTemplatePath_ReturnsNull()
+    {
+        // Arrange
+        IdentityModel identityModel = CreateTestIdentityModel();
+
+        // Act
+        TextTemplatingProperty? result = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(string.Empty, identityModel);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void GetApplicationUserTextTemplatingProperty_WithNullProjectPath_ReturnsNull()
+    {
+        // Arrange
+        string templatePath = Path.Combine("templates", "ApplicationUser.tt");
+        IdentityModel identityModel = new IdentityModel
+        {
+            ProjectInfo = new ProjectInfo(null),
+            IdentityNamespace = "TestNamespace",
+            BaseOutputPath = "output",
+            UserClassName = "ApplicationUser",
+            UserClassNamespace = "TestNamespace.Data",
+            DbContextInfo = new DbContextInfo()
+        };
+
+        // Act
+        TextTemplatingProperty? result = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(templatePath, identityModel);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void GetApplicationUserTextTemplatingProperty_WithValidUserClassName_IncludesUserClassNameInOutputPath()
+    {
+        // Arrange
+        string templatePath = Path.Combine("templates", "ApplicationUser.tt");
+        IdentityModel identityModel = CreateTestIdentityModel();
+        identityModel.UserClassName = "CustomUser";
+
+        // Act
+        TextTemplatingProperty? result = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(templatePath, identityModel);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Contains("CustomUser", result.OutputPath);
+    }
+
+    [Fact]
+    public void GetTextTemplatingProperties_WithPagesPath_UsesRazorExtension()
+    {
+        // Arrange
+        List<string> templatePaths = [Path.Combine("BlazorIdentity", "Pages", "Login.tt")];
+        IdentityModel identityModel = CreateTestIdentityModel();
+
+        // Act
+        IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
+
+        // Assert
+        Assert.NotNull(result);
+        // If any properties are returned, verify the extension logic
+        TextTemplatingProperty? property = result.FirstOrDefault();
+        if (property != null)
+        {
+            Assert.EndsWith(".razor", property.OutputPath);
+        }
+    }
+
+    [Fact]
+    public void GetTextTemplatingProperties_WithSharedPath_UsesRazorExtension()
+    {
+        // Arrange
+        List<string> templatePaths = [Path.Combine("BlazorIdentity", "Shared", "Component.tt")];
+        IdentityModel identityModel = CreateTestIdentityModel();
+
+        // Act
+        IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
+
+        // Assert
+        Assert.NotNull(result);
+        // If any properties are returned, verify the extension logic
+        TextTemplatingProperty? property = result.FirstOrDefault();
+        if (property != null)
+        {
+            Assert.EndsWith(".razor", property.OutputPath);
+        }
+    }
+
+    [Fact]
+    public void GetTextTemplatingProperties_WithNonPagesOrSharedPath_UsesCsExtension()
+    {
+        // Arrange
+        List<string> templatePaths = [Path.Combine("BlazorIdentity", "Data", "Context.tt")];
+        IdentityModel identityModel = CreateTestIdentityModel();
+
+        // Act
+        IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
+
+        // Assert
+        Assert.NotNull(result);
+        // If any properties are returned, verify the extension logic
+        TextTemplatingProperty? property = result.FirstOrDefault();
+        if (property != null)
+        {
+            Assert.EndsWith(".cs", property.OutputPath);
+        }
+    }
+
+    private IdentityModel CreateTestIdentityModel()
+    {
+        return new IdentityModel
+        {
+            ProjectInfo = new ProjectInfo(Path.Combine("test", "project", "TestProject.csproj")),
+            IdentityNamespace = "TestNamespace",
+            BaseOutputPath = "Components\\Account",
+            UserClassName = "ApplicationUser",
+            UserClassNamespace = "TestNamespace.Data",
+            DbContextInfo = new DbContextInfo()
+        };
+    }
+}

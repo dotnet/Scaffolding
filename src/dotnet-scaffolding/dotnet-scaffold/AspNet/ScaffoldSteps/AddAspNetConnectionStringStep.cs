@@ -58,8 +58,17 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
         }
         else
         {
-            var jsonString = _fileSystem.ReadAllText(appSettingsFile);
-            content = JsonNode.Parse(jsonString);
+            try
+            {
+                var jsonString = _fileSystem.ReadAllText(appSettingsFile);
+                content = JsonNode.Parse(jsonString);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to parse appsettings.json file at {appSettingsFile}: {ex.Message}");
+                _telemetryService.TrackEvent(new AddAspNetConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json"));
+                return Task.FromResult(false);
+            }
         }
 
         if (content is null)

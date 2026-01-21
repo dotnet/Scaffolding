@@ -48,21 +48,31 @@ internal class AddAspireConnectionStringStep : ScaffoldStep
     /// <returns>True if the connection string was added or already present; otherwise, false.</returns>
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        var appSettingsFileSearch = _fileSystem.EnumerateFiles(BaseProjectPath, "appsettings.json", SearchOption.AllDirectories);
-        var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
+        IEnumerable<string> appSettingsFileSearch = _fileSystem.EnumerateFiles(BaseProjectPath, "appsettings.json", SearchOption.AllDirectories);
+        string? appSettingsFile = appSettingsFileSearch.FirstOrDefault();
         JsonNode? content;
         bool writeContent = false;
-        if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
+        if (string.IsNullOrEmpty(appSettingsFile))
         {
             // Create a new appsettings.json if it doesn't exist
+            appSettingsFile = Path.Combine(BaseProjectPath, "appsettings.json");
             content = new JsonObject();
             writeContent = true;
         }
         else
         {
             // Parse the existing appsettings.json
-            var jsonString = _fileSystem.ReadAllText(appSettingsFile);
-            content = JsonNode.Parse(jsonString);
+            try
+            {
+                var jsonString = _fileSystem.ReadAllText(appSettingsFile);
+                content = JsonNode.Parse(jsonString);
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, $"Failed to parse appsettings.json file at {appSettingsFile}");
+                _telemetryService.TrackEvent(new AddAspireConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json"));
+                return Task.FromResult(false);
+            }
         }
 
         if (content is null)
@@ -94,7 +104,7 @@ internal class AddAspireConnectionStringStep : ScaffoldStep
         if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
         {
             // Write the updated content to appsettings.json
-            var options = new JsonSerializerOptions { WriteIndented = true };
+            JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
             _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
             _telemetryService.TrackEvent(new AddAspireConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));

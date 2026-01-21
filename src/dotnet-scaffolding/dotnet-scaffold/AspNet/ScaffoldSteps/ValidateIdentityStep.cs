@@ -90,7 +90,7 @@ internal class ValidateIdentityStep : ScaffoldStep
 
         //initialize IdentityModel
         _logger.LogInformation("Initializing scaffolding model...");
-        var identityModel = await GetIdentityModelAsync(identitySettings);
+        var identityModel = await GetIdentityModelAsync(context, identitySettings);
         if (identityModel is null)
         {
             _logger.LogError("An error occurred.");
@@ -181,11 +181,13 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// <summary>
     /// Initializes and returns the IdentityModel for scaffolding.
     /// </summary>
+    /// <param name="context">The ScaffolderContext for the current operation.</param>
     /// <param name="settings">The IdentitySettings used to initialize the model.</param>
     /// <returns>A task that represents the asynchronous operation, with a result of the IdentityModel.</returns>
-    private async Task<IdentityModel?> GetIdentityModelAsync(IdentitySettings settings)
+    private async Task<IdentityModel?> GetIdentityModelAsync(ScaffolderContext context, IdentitySettings settings)
     {
-        var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
         if (projectInfo is null || projectInfo.CodeService is null || string.IsNullOrEmpty(projectDirectory))
         {

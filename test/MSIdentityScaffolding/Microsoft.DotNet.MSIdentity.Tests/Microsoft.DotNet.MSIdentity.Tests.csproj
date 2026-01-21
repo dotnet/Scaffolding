@@ -1,10 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Disabled: MSIdentity not shipping from this branch -->
-  <PropertyGroup>
-    <ExcludeFromBuild>true</ExcludeFromBuild>
-  </PropertyGroup>
-
   <PropertyGroup>
     <TargetFramework>$(StandardTestTfms)</TargetFramework>
     <IsPackable>false</IsPackable>

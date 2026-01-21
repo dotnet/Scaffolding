@@ -7,8 +7,7 @@
 
   <ItemGroup>
     <PackageVersion Include="Azure.Identity" Version="$(AzureIdentityVersion)" />
-    <PackageVersion Include="Humanizer" Version="$(HumanizerPackageVersion)" />
-    <PackageVersion Include="Humanizer.Core" Version="$(HumanizerPackageVersion)" />
+    <PackageVersion Include="Humanizer.Core" Version="$(HumanizerCorePackageVersion)" />
     <PackageVersion Include="Microsoft.Build.Locator" Version="$(MicrosoftBuildLocatorPackageVersion)" />
     <PackageVersion Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageVersion Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />

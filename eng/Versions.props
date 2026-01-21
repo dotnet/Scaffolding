@@ -35,7 +35,7 @@
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
     <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>11.0.0-preview.1.26067.103</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <!-- Microsoft.Extensions.Hosting -->
-    <MicrosoftExtensionsHostingPackageVersion>10.0.0</MicrosoftExtensionsHostingPackageVersion>
+    <MicrosoftExtensionsHostingPackageVersion>11.0.0-preview.1.26067.103</MicrosoftExtensionsHostingPackageVersion>
     <!-- Microsoft.Extensions.Logging.Console -->
     <MicrosoftExtensionsLoggingConsolePackageVersion>11.0.0-preview.1.26067.103</MicrosoftExtensionsLoggingConsolePackageVersion>
     <!-- Microsoft.Extensions.Logging.Debug -->
@@ -52,6 +52,14 @@
     <MicrosoftAspNetCoreIdentityUIPackageVersion>11.0.0-preview.1.26067.103</MicrosoftAspNetCoreIdentityUIPackageVersion>
     <!-- Mono.TextTemplating-->
     <MonoTextTemplatingVersion>3.0.0</MonoTextTemplatingVersion>
+    <!-- Microsoft.Extensions.Configuration -->
+    <MicrosoftExtensionsConfigurationPackageVersion>11.0.0-preview.1.26067.103</MicrosoftExtensionsConfigurationPackageVersion>
+    <!-- Microsoft.Extensions.Configuration.Binder -->
+    <MicrosoftExtensionsConfigurationBinderPackageVersion>11.0.0-preview.1.26067.103</MicrosoftExtensionsConfigurationBinderPackageVersion>
+    <!-- Microsoft.Extensions.Configuration.CommandLine -->
+    <MicrosoftExtensionsConfigurationCommandLinePackageVersion>11.0.0-preview.1.26067.103</MicrosoftExtensionsConfigurationCommandLinePackageVersion>
+    <!-- System.Text.Json -->
+    <SystemTextJsonPackageVersion>11.0.0-preview.1.26067.103</SystemTextJsonPackageVersion>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
     <MicrosoftCodeAnalysisPreviewVersion>4.14.0</MicrosoftCodeAnalysisPreviewVersion>
@@ -62,10 +70,9 @@
     <NugetProtocolVersion>7.0.1</NugetProtocolVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>10.0.0</VersionPrefix>
-    <PreReleaseVersionLabel>rtm</PreReleaseVersionLabel>
-    <PreReleaseVersionIteration>
-    </PreReleaseVersionIteration>
+    <VersionPrefix>11.0.0</VersionPrefix>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <PreReleaseVersionIteration>1</PreReleaseVersionIteration>
     <IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>
     <IsServicingBuild Condition="'$(PreReleaseVersionLabel)' == 'servicing'">true</IsServicingBuild>
     <!--
@@ -120,15 +127,11 @@
   </PropertyGroup>
   <PropertyGroup>
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
-    <SystemTextJsonVersion>10.0.0</SystemTextJsonVersion>
   </PropertyGroup>
   <!-- Package versions for MSIdentity projects-->
   <PropertyGroup>
     <AzureIdentityVersion>1.14.2</AzureIdentityVersion>
     <CodeAnalysisVersion>$(MicrosoftCodeAnalysisVersion)</CodeAnalysisVersion>
-    <MicrosoftExtensionsConfigurationVersion>10.0.0</MicrosoftExtensionsConfigurationVersion>
-    <MicrosoftExtensionsConfigurationBinderVersion>10.0.0</MicrosoftExtensionsConfigurationBinderVersion>
-    <MicrosoftExtensionsConfigurationCommandLineVersion>10.0.0</MicrosoftExtensionsConfigurationCommandLineVersion>
     <MicrosoftGraphVersion>5.66.0</MicrosoftGraphVersion>
     <MicrosoftIdentityClientExtensionsMsalVersion>4.73.1</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>6.12.1</NuGetProjectModelVersion>

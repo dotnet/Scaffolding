@@ -31,7 +31,19 @@
       <Uri>https://github.com/dotnet/dotnet</Uri>
       <Sha>bfa3455fa1a80fb012f9e3f3fd07fbc6435b585c</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.Extensions.Configuration" Version="11.0.0-preview.1.26067.103">
+      <Uri>https://github.com/dotnet/dotnet</Uri>
+      <Sha>bfa3455fa1a80fb012f9e3f3fd07fbc6435b585c</Sha>
+    </Dependency>    
     <Dependency Name="Microsoft.Extensions.Configuration.Abstractions" Version="11.0.0-preview.1.26067.103">
+      <Uri>https://github.com/dotnet/dotnet</Uri>
+      <Sha>bfa3455fa1a80fb012f9e3f3fd07fbc6435b585c</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Configuration.Binder" Version="11.0.0-preview.1.26067.103">
+      <Uri>https://github.com/dotnet/dotnet</Uri>
+      <Sha>bfa3455fa1a80fb012f9e3f3fd07fbc6435b585c</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.Extensions.Configuration.CommandLine" Version="11.0.0-preview.1.26067.103">
       <Uri>https://github.com/dotnet/dotnet</Uri>
       <Sha>bfa3455fa1a80fb012f9e3f3fd07fbc6435b585c</Sha>
     </Dependency>
@@ -83,5 +95,9 @@
       <Uri>https://github.com/dotnet/dotnet</Uri>
       <Sha>bfa3455fa1a80fb012f9e3f3fd07fbc6435b585c</Sha>
     </Dependency>
+    <Dependency Name="System.Text.Json" Version="11.0.0-preview.1.26067.103">
+      <Uri>https://github.com/dotnet/dotnet</Uri>
+      <Sha>bfa3455fa1a80fb012f9e3f3fd07fbc6435b585c</Sha>
+    </Dependency>    
   </ProductDependencies>
 </Dependencies>

@@ -85,10 +85,10 @@
     <!-- Microsoft.AspNetCore.Razor.Language -->
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.24</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.Build-->
-    <MicrosoftBuildPackageVersion>17.11.48</MicrosoftBuildPackageVersion>
-    <MicrosoftBuildTasksCorePackageVersion>17.14.28</MicrosoftBuildTasksCorePackageVersion>
+    <MicrosoftBuildPackageVersion>18.0.2</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildTasksCorePackageVersion>18.0.2</MicrosoftBuildTasksCorePackageVersion>
     <!-- Microsoft.Build.Utilities-->
-    <MicrosoftBuildUtilitiesCorePackageVersion>17.14.28</MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>18.0.2</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftBuildLocatorPackageVersion>1.9.1</MicrosoftBuildLocatorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
     <MicrosoftCodeAnalysisCSharpPackageVersion>$(MicrosoftCodeAnalysisVersion)</MicrosoftCodeAnalysisCSharpPackageVersion>

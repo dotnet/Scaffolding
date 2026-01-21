@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net10.0</TargetFrameworks>
+    <TargetFrameworks>net11.0</TargetFrameworks>
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <Import Project="$(RepoRoot)test\Scaffolding\TestPackage.props" />

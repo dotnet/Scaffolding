@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.FileProviders;
 
@@ -10,8 +11,43 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
     internal class TemporaryFileProvider : PhysicalFileProvider
     {
+        private static readonly string TmpFilesRoot = Path.Combine(Path.GetTempPath(), "tmpfiles");
+
+        static TemporaryFileProvider()
+        {
+            // Ensure the tmpfiles directory exists and has a NuGet.config
+            // This is needed for CFS (Centralized Feed Service) policy compliance
+            // since tests run in temp folders that don't have access to nuget.org directly
+            Directory.CreateDirectory(TmpFilesRoot);
+            CopyNuGetConfigIfNeeded();
+        }
+
+        private static void CopyNuGetConfigIfNeeded()
+        {
+            var targetNuGetConfig = Path.Combine(TmpFilesRoot, "NuGet.config");
+            if (File.Exists(targetNuGetConfig))
+            {
+                return;
+            }
+
+            // Find the NuGet.config from the repository root by walking up from the assembly location
+            var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+            var directory = Path.GetDirectoryName(assemblyLocation);
+
+            while (directory != null)
+            {
+                var nugetConfigPath = Path.Combine(directory, "NuGet.config");
+                if (File.Exists(nugetConfigPath))
+                {
+                    File.Copy(nugetConfigPath, targetNuGetConfig);
+                    return;
+                }
+                directory = Path.GetDirectoryName(directory);
+            }
+        }
+
         public TemporaryFileProvider()
-            : base(Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "tmpfiles", Guid.NewGuid().ToString())).FullName)
+            : base(Directory.CreateDirectory(Path.Combine(TmpFilesRoot, Guid.NewGuid().ToString())).FullName)
         {
         }
 

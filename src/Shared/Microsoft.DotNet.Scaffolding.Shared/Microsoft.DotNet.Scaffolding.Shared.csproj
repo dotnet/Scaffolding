@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net9.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <AssemblyName>Microsoft.DotNet.Scaffolding.Shared</AssemblyName>
     <RootNamespace>Microsoft.DotNet.Scaffolding.Shared</RootNamespace>
     <Description>Contains interfaces for Project Model and messaging for scaffolding.</Description>
@@ -17,7 +17,7 @@
   <!-- Packages for CodeAnalysis code changes-->
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" />
-    <PackageReference Include="Humanizer" />
+    <PackageReference Include="Humanizer.Core" />
     <PackageReference Include="NuGet.ProjectModel" />
     <PackageReference Include="Mono.TextTemplating" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />

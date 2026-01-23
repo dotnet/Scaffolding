@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Microsoft.DotNet.MSIdentity</RootNamespace>
     <OutputType>Library</OutputType>
     <SignAssembly>true</SignAssembly>
@@ -21,11 +21,6 @@
   </PropertyGroup>
 
   <Import Project="$(RepoRoot)eng\Versions.MSIdentity.props" />
-
-  <!-- Pin this to 8.0.5, since that is what is used by Microsoft.Graph and Microsoft.Identity.Client.Extensions.Msal -->
-  <ItemGroup>
-    <PackageVersion Update="System.Text.Json" Version="8.0.5" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Azure.Identity" />

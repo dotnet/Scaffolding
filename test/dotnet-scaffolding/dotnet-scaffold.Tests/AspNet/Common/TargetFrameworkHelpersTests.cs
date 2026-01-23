@@ -123,6 +123,34 @@ public class TargetFrameworkHelpersTests : IDisposable
     }
 
     [Fact]
+    public void GetLowestCompatibleTargetFramework_Net11Project_ReturnsNet11()
+    {
+        // Arrange
+        string projectPath = CreateTestProject("TestNet11.csproj", "net11.0");
+
+        // Act
+        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("net11.0", result);
+    }
+
+    [Fact]
+    public void GetLowestCompatibleTargetFramework_MultiTargetNet10AndNet11_ReturnsNet10()
+    {
+        // Arrange
+        string projectPath = CreateTestProject("TestMultiTarget4.csproj", "net10.0;net11.0", isMultiTarget: true);
+
+        // Act
+        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("net10.0", result);
+    }
+
+    [Fact]
     public void GetLowestCompatibleTargetFramework_Net7Project_ReturnsNull()
     {
         // Arrange

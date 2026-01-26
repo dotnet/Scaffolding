@@ -86,6 +86,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
 
             if (NextStep is not null && NextStep.Parameter.DisplayName.Equals(AspnetStrings.Options.Prerelease.DisplayName, StringComparison.Ordinal) && ShouldSkipPrereleaseOption(context))
             {
+                // Skip the prerelease step if the target framework is not net11, prerelease only applies to net11
+                //TODO update for the next major release of .NET
                 NextStep = NextStep?.NextStep;
             }
 
@@ -174,7 +176,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// project.
         /// </summary>
         /// <remarks>The prerelease option is skipped for projects targeting frameworks other than .NET
-        /// 10. If the project file or target framework cannot be determined, the prerelease option is not
+        /// 11. If the project file or target framework cannot be determined, the prerelease option is not
         /// skipped.</remarks>
         /// <param name="context">The flow context containing project information and properties. Must not be null.</param>
         /// <returns>true if the prerelease option should be skipped for the current project; otherwise, false.</returns>
@@ -188,7 +190,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 projectFileProperty.Value is string projectFilePath && !string.IsNullOrEmpty(projectFilePath))
             {
                 string? targetFramework = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectFilePath);
-                return targetFramework is null || !targetFramework.Equals(TargetFrameworkConstants.Net10, StringComparison.OrdinalIgnoreCase);
+                return targetFramework is null || !targetFramework.Equals(TargetFrameworkConstants.Net11, StringComparison.OrdinalIgnoreCase);
             }
             return false;
         }

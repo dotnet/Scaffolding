@@ -53,7 +53,7 @@ internal static class PackageExtensions
     /// langword="null"/>. For supported target frameworks, the latest available version is retrieved
     /// asynchronously.</remarks>
     /// <param name="package">The package for which to obtain the version information. Must not be null.</param>
-    /// <param name="targetFramework">The target framework identifier (for example, "net8.0", "net9.0", or "net10.0") for which the package version is
+    /// <param name="targetFramework">The target framework identifier (for example, "net8.0", "net9.0", "net10.0" or "net11.0") for which the package version is
     /// requested. Case-insensitive.</param>
     /// <param name="nugetVersionHelper">The NuGet version helper to use for version resolution.</param>
     /// <param name="logger">The logger to use for logging messages.</param>
@@ -68,7 +68,7 @@ internal static class PackageExtensions
 
         if (targetFramework is null)
         {
-            logger?.LogError("Project contains a Target Framework that is not supported. Supported Target Frameworks are .NET8, .NET9, .NET10. Installing latest stable version of '{PackageName}'. Consider upgrading your Target Framework to install a compatible package version.", package.Name);
+            logger?.LogError("Project contains a Target Framework that is not supported. Supported Target Frameworks are .NET8, .NET9, .NET10, .NET11. Installing latest stable version of '{PackageName}'. Consider upgrading your Target Framework to install a compatible package version.", package.Name);
             return Task.FromResult<NuGetVersion?>(null);
         }
 
@@ -84,9 +84,13 @@ internal static class PackageExtensions
         {
             return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 10);
         }
+        else if (targetFramework.Equals(TargetFrameworkConstants.Net11, StringComparison.OrdinalIgnoreCase))
+        {
+            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 11);
+        }
         else
         {
-            logger?.LogError("Target Framework '{TargetFramework}' is not supported. Supported Target Frameworks are .NET8, .NET9, .NET10. Installing latest stable version of '{PackageName}'. Consider upgrading your Target Framework to install a compatible package version.", targetFramework, package.Name);
+            logger?.LogError("Target Framework '{TargetFramework}' is not supported. Supported Target Frameworks are .NET8, .NET9, .NET10, .NET11. Installing latest stable version of '{PackageName}'. Consider upgrading your Target Framework to install a compatible package version.", targetFramework, package.Name);
             return Task.FromResult<NuGetVersion?>(null);
         }
     }

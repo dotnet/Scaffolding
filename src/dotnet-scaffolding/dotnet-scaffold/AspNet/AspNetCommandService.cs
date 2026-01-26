@@ -20,8 +20,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
 
         public Type[] GetScaffoldSteps()
         {
-            return
-            [
+            return new[]
+            {
                 typeof(AddClientSecretStep),
                 typeof(AddAspNetConnectionStringStep),
                 typeof(AddFileStep),
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(WrappedAddPackagesStep),
                 typeof(WrappedCodeModificationStep),
                 typeof(WrappedTextTemplatingStep)
-            ];
+            };
         }
 
         public void AddScaffolderCommands()

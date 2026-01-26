@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             ParameterBasedFlowStep? firstParameterStep = null;
             if (commandInfo.Parameters != null && commandInfo.Parameters.Length != 0)
             {
-                firstParameterStep = BuildParameterFlowSteps([.. commandInfo.Parameters]);
+                firstParameterStep = BuildParameterFlowSteps(commandInfo.Parameters.ToList());
             }
 
             return firstParameterStep;

@@ -37,7 +37,7 @@ public class WrappedCodeModificationStepTests
             NullLogger<WrappedCodeModificationStep>.Instance,
             mockTelemetryService.Object)
         {
-            CodeChangeOptions = [],
+            CodeChangeOptions = Array.Empty<CodeChangeOptions>(),
             ProjectPath = string.Empty
         };
 
@@ -74,7 +74,7 @@ public class WrappedCodeModificationStepTests
             NullLogger<WrappedCodeModificationStep>.Instance,
             mockTelemetryService.Object)
         {
-            CodeChangeOptions = [],
+            CodeChangeOptions = Array.Empty<CodeChangeOptions>(),
             ProjectPath = string.Empty
         };
 

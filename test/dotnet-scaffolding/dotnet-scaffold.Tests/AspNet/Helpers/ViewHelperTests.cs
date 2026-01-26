@@ -120,7 +120,7 @@ public class ViewHelperTests
     {
         // Arrange
         string projectPath = Path.Combine("test", "project", "TestProject.csproj");
-        List<string> templatePaths = [];
+        List<string> templatePaths = new List<string>();
         
         ViewModel viewModel = new ViewModel
         {

@@ -62,12 +62,12 @@ internal class NuGetVersionService
             }
         }
 
-        List<SourceRepository> repositories = [.. packageSources
-            .Select(source => _cachingProvider.CreateRepository(source))];
+        List<SourceRepository> repositories = packageSources
+            .Select(source => _cachingProvider.CreateRepository(source)).ToList();
 
         if (repositories.Count == 0)
         {
-            return [];
+            return Enumerable.Empty<NuGetVersion>();
         }
 
         // Query all sources in parallel to get package metadata

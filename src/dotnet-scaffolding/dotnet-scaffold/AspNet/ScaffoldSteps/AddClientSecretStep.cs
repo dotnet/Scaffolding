@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     args.Add("--prerelease");
                 }
 
-                DotnetCliRunner runner = DotnetCliRunner.CreateDotNet(commandName, [.. args], GetCliEnvVars());
+                DotnetCliRunner runner = DotnetCliRunner.CreateDotNet(commandName, args.ToArray(), GetCliEnvVars());
                 int exitCode = runner.ExecuteAndCaptureOutput(out string? stdOut, out string? stdErr);
                 if (exitCode == 0)
                 {

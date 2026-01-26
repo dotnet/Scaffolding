@@ -33,7 +33,7 @@ IScaffoldRunner runner = builder.Build();
 // are routed through System.CommandLine experience
 builder.AddHandler(async (parseResult, cancellationToken) =>
 {
-    ScaffoldCommandAppBuilder appBuilder = new(runner, [.. parseResult.Tokens.Select(t => t.Value)]);
+    ScaffoldCommandAppBuilder appBuilder = new(runner, parseResult.Tokens.Select(t => t.Value).ToArray());
     ScaffoldCommandApp app = appBuilder.Build();
     await app.RunAsync();
 });

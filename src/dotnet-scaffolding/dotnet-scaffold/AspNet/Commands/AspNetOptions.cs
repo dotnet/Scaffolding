@@ -101,7 +101,7 @@ internal class AspNetOptions
             Description = string.Empty,
             Required = false,
             PickerType = InteractivePickerType.CustomPicker,
-            CustomPickerValues = [.. AspNetDbContextHelper.DbContextTypeDefaults.Keys]
+            CustomPickerValues = AspNetDbContextHelper.DbContextTypeDefaults.Keys.ToList()
         };
 
         DatabaseProviderRequired = new ScaffolderOption<string>
@@ -111,7 +111,7 @@ internal class AspNetOptions
             Description = string.Empty,
             Required = true,
             PickerType = InteractivePickerType.CustomPicker,
-            CustomPickerValues = [.. AspNetDbContextHelper.DbContextTypeDefaults.Keys]
+            CustomPickerValues = AspNetDbContextHelper.DbContextTypeDefaults.Keys.ToList()
         };
 
         IdentityDbProviderRequired = new ScaffolderOption<string>
@@ -121,7 +121,7 @@ internal class AspNetOptions
             Description = string.Empty,
             Required = true,
             PickerType = InteractivePickerType.CustomPicker,
-            CustomPickerValues = [.. AspNetDbContextHelper.IdentityDbContextTypeDefaults.Keys]
+            CustomPickerValues = AspNetDbContextHelper.IdentityDbContextTypeDefaults.Keys.ToList()
         };
 
         DataContextClass = new ScaffolderOption<string>

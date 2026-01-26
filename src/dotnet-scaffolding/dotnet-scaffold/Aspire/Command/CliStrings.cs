@@ -56,7 +56,7 @@ internal class AspireCliStrings
                 { "sqlserver-efcore", DbContextHelper.SqlServerDefaults }
             };
 
-        internal static List<string> DatabaseTypeCustomValues = [.. DatabaseTypeDefaults.Keys];
+        internal static List<string> DatabaseTypeCustomValues = DatabaseTypeDefaults.Keys.ToList();
     }
 
     // aspire storage

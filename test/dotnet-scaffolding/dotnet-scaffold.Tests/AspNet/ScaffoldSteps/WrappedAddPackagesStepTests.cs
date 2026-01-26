@@ -41,7 +41,7 @@ public class WrappedAddPackagesStepTests
             mockTelemetryService.Object,
             nugetVersionService)
         {
-            Packages = [],
+            Packages = Array.Empty<string>(),
             ProjectPath = string.Empty
         };
 
@@ -66,7 +66,7 @@ public class WrappedAddPackagesStepTests
             mockTelemetryService.Object,
             nugetVersionService)
         {
-            Packages = [],
+            Packages = Array.Empty<string>(),
             ProjectPath = string.Empty
         };
 
@@ -95,7 +95,7 @@ public class WrappedAddPackagesStepTests
             mockTelemetryService.Object,
             nugetVersionService)
         {
-            Packages = [],
+            Packages = Array.Empty<string>(),
             ProjectPath = string.Empty
         };
 

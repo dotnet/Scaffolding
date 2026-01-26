@@ -19,7 +19,7 @@ public class IdentityHelperTests
     public void GetTextTemplatingProperties_WithEmptyFilePaths_ReturnsEmpty()
     {
         // Arrange
-        List<string> filePaths = [];
+        List<string> filePaths = new List<string>();
         IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act

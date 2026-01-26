@@ -111,9 +111,9 @@ internal static class AzCliHelper
             {
                 azCliErrors = loginErrors;
             }
-            usernames = [];
-            tenants = [];
-            appIds = [];
+            usernames = new List<string>();
+            tenants = new List<string>();
+            appIds = new List<string>();
         }
     }
 
@@ -194,13 +194,13 @@ internal static class AzCliHelper
                     }
                 }
             }
-            usernames = [.. uniqueUsernames];
-            tenants = [.. uniqueTenants];
+            usernames = uniqueUsernames.ToList();
+            tenants = uniqueTenants.ToList();
         }
         catch (Exception ex)
         {
-            usernames = [];
-            tenants = [];
+            usernames = new List<string>();
+            tenants = new List<string>();
             usernameTenantError = $"Error parsing Azure accounts JSON: {ex.Message}";
             return false;
         }
@@ -221,7 +221,7 @@ internal static class AzCliHelper
         try
         {
             failingCommand = null;
-            appIds = [];
+            appIds = new List<string>();
             // Use Microsoft Graph API via az rest
             var exitCode = runner.RunAzCli("rest --method GET --url https://graph.microsoft.com/v1.0/applications?$select=appId,displayName", out string? stdOut, out string? stdErr);
 
@@ -257,7 +257,7 @@ internal static class AzCliHelper
         }
         catch (Exception ex)
         {
-            appIds = [];
+            appIds = new List<string>();
             failingCommand = ex.Message;
         }
 

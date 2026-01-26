@@ -31,7 +31,7 @@ internal class DotNetToolService : IDotNetToolService
         _logger = logger;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
-        _dotNetTools = [];
+        _dotNetTools = new List<DotNetToolInfo>();
     }
 
     // Cached list of discovered .NET tools.
@@ -249,7 +249,7 @@ internal class DotNetToolService : IDotNetToolService
                     }
                 }
 
-                _dotNetTools = [.. dotnetToolList];
+                _dotNetTools = dotnetToolList.ToList();
             }
 
             // Parse through global tools

@@ -92,7 +92,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private IReadOnlyList<(string TemplateFolder, string FullPath)> _allBlazorIdentityStaticFiles;
         private IReadOnlyList<(string TemplateFolder, string FullPath)> AllBlazorIdentityStaticFiles
         {
-            get => _allBlazorIdentityStaticFiles ??= [.. BlazorIdentityHelper.GetBlazorIdentityStaticFiles(FileSystem, TemplateFolders)];
+            get => _allBlazorIdentityStaticFiles ??= BlazorIdentityHelper.GetBlazorIdentityStaticFiles(FileSystem, TemplateFolders).ToList();
         }
 
         private IList<Type> _blazorIdentityTemplateTypes;

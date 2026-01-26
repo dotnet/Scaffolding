@@ -18,7 +18,7 @@ public class EntraIdHelperTests
     public void GetTextTemplatingProperties_WithEmptyTemplatePaths_ReturnsEmpty()
     {
         // Arrange
-        List<string> templatePaths = [];
+        List<string> templatePaths = new List<string>();
         EntraIdModel entraIdModel = CreateTestEntraIdModel();
 
         // Act

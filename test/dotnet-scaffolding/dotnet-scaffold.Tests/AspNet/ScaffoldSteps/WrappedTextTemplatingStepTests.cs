@@ -35,7 +35,7 @@ public class WrappedTextTemplatingStepTests
             NullLogger<WrappedTextTemplatingStep>.Instance,
             mockTelemetryService.Object)
         {
-            TextTemplatingProperties = []
+            TextTemplatingProperties = Array.Empty<TextTemplatingProperty>()
         };
 
         // Act
@@ -54,7 +54,7 @@ public class WrappedTextTemplatingStepTests
             NullLogger<WrappedTextTemplatingStep>.Instance,
             mockTelemetryService.Object)
         {
-            TextTemplatingProperties = []
+            TextTemplatingProperties = Array.Empty<TextTemplatingProperty>()
         };
 
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -78,7 +78,7 @@ public class WrappedTextTemplatingStepTests
             NullLogger<WrappedTextTemplatingStep>.Instance,
             mockTelemetryService.Object)
         {
-            TextTemplatingProperties = []
+            TextTemplatingProperties = Array.Empty<TextTemplatingProperty>()
         };
 
         // Assert
@@ -94,7 +94,7 @@ public class WrappedTextTemplatingStepTests
             NullLogger<WrappedTextTemplatingStep>.Instance,
             mockTelemetryService.Object)
         {
-            TextTemplatingProperties = []
+            TextTemplatingProperties = Array.Empty<TextTemplatingProperty>()
         };
 
         ScaffolderContext testContext = new ScaffolderContext(_mockScaffolder.Object);

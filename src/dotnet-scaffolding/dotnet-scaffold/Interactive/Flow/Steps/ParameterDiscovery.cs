@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// </summary>
         private async Task<string?> PromptInteractivePicker(IFlowContext context, InteractivePickerType? pickerType)
         {
-            List<StepOption> stepOptions = [];
+            List<StepOption> stepOptions = new List<StepOption>();
             var codeService = context.GetCodeService();
             var converter = GetDisplayName;
             switch (pickerType)
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                     // ICodeService might be null if no InteractivePickerType.ProjectPicker was passed.
                     if (codeService is null)
                     {
-                        stepOptions = [];
+                        stepOptions = new List<StepOption>();
                     }
                     else
                     {
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 case InteractivePickerType.FilePicker:
                     if (codeService is null)
                     {
-                        stepOptions = [];
+                        stepOptions = new List<StepOption>();
                     }
                     else
                     {
@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                     converter = GetDisplayNameForProjects;
                     break;
                 case InteractivePickerType.YesNo:
-                    stepOptions = [new() { Name = "Yes", Value = "true" }, new() { Name = "No", Value = "false" }];
+                    stepOptions = new List<StepOption> { new() { Name = "Yes", Value = "true" }, new() { Name = "No", Value = "false" } };
                     converter = GetDisplayNameForYesNo;
                     break;
                 case InteractivePickerType.CustomPicker:
@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                         return AzCliHelper.GetAppIdParameterValuesDynamically(context);
                     });
             }
-            return [.. values.Select(x => new StepOption() { Name = x, Value = x })];
+            return values.Select(x => new StepOption() { Name = x, Value = x }).ToList();
         }
 
         /// <summary>
@@ -284,13 +284,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 {
                     if (codeService is null)
                     {
-                        return [];
+                        return new List<INamedTypeSymbol>();
                     }
 
                     return await codeService.GetAllClassSymbolsAsync();
                 });
 
-            List<StepOption> classNames = [];
+            List<StepOption> classNames = new List<StepOption>();
             if (allClassSymbols != null && allClassSymbols.Count != 0)
             {
                 allClassSymbols.ForEach(
@@ -311,7 +311,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// </summary>
         internal static List<StepOption> GetDocumentNames(List<Document> documents)
         {
-            List<StepOption> classNames = [];
+            List<StepOption> classNames = new List<StepOption>();
             if (documents != null && documents.Count != 0)
             {
                 documents.ForEach(
@@ -427,13 +427,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         {
             get
             {
-                _dbProviders ??=
-                [
+                _dbProviders ??= new List<StepOption>
+                {
                     new() { Name = "SQL Server", Value = "sqlserver" },
                     new() { Name = "SQLite", Value = "sqlite" },
                     new() { Name = "PostgreSQL", Value = "postgres" },
                     new() { Name = "Cosmos DB", Value = "cosmos" }
-                ];
+                };
 
                 return _dbProviders;
             }

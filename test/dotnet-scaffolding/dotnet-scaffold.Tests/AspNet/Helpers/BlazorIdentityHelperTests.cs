@@ -19,7 +19,7 @@ public class BlazorIdentityHelperTests
     public void GetTextTemplatingProperties_WithEmptyTemplatePaths_ReturnsEmpty()
     {
         // Arrange
-        List<string> templatePaths = [];
+        List<string> templatePaths = new List<string>();
         IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act

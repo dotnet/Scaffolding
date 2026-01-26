@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel.Tests
                 DisplayName = "Command 1",
                 DisplayCategory = "General",
                 Description = "Description 1",
-                Parameters = [ValidParameter]
+                Parameters = new[] { ValidParameter }
             };
 
             PartialCommandInfo = new()
@@ -56,10 +56,10 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel.Tests
                 Name = "command2",
                 DisplayName = "Command 2",
                 DisplayCategory = "General",
-                Parameters =
-                [
+                Parameters = new[]
+                {
                     ValidParameter, PartialParameter
-                ]
+                }
             };
 
             PartialCommandInfo2 = new()
@@ -68,16 +68,16 @@ namespace Microsoft.DotNet.Scaffolding.ComponentModel.Tests
                 DisplayName = "Command 3",
                 DisplayCategory = "General",
                 Description = null,
-                Parameters =
-                [
+                Parameters = new[]
+                {
                     ValidParameter, PartialParameter, PartialParameter2
-                ]
+                }
             };
 
-            CommandInfos =
-            [
+            CommandInfos = new[]
+            {
                 ValidCommandInfo, PartialCommandInfo, PartialCommandInfo2
-            ];
+            };
         }
     
         [Fact]

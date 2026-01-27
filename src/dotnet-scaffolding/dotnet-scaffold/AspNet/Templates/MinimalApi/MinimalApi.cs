@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         string builderExtensions = $".WithName(\"{getAllModels}\")";
         if(!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces<{modelArray}>(StatusCodes.Status200OK)";
+            builderExtensions += $"\r\n        .Produces<{modelArray}>(StatusCodes.Status200OK)";
         }
         
             this.Write("\r\n        ");
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         builderExtensions = $".WithName(\"{getModelById}\")";
         if(!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
+            builderExtensions += $"\r\n        .Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
         }
         
             this.Write("\r\n        ");
@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         builderExtensions = $".WithName(\"{updateModel}\")";
         if (!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces(StatusCodes.Status204NoContent)";
+            builderExtensions += $"\r\n        .Produces(StatusCodes.Status204NoContent)";
         }
         
             this.Write("\r\n        ");
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         builderExtensions = $".WithName(\"{createModel}\")";
         if (!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status201Created)";
+            builderExtensions += $"\r\n        .Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status201Created)";
         }
         
             this.Write(this.ToStringHelper.ToStringWithCulture(builderExtensions));
@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi
         builderExtensions = $".WithName(\"{deleteModel}\")";
         if (!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
+            builderExtensions += $"\r\n        .Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
         }
         
             this.Write("\r\n        ");

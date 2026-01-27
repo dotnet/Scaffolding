@@ -40,6 +40,10 @@ internal class ValidateMinimalApiStep : ScaffoldStep
     /// </summary>
     public bool OpenApi { get; set; } = true;
     /// <summary>
+    /// Indicates if TypedResults should be used.
+    /// </summary>
+    public bool TypedResults { get; set; } = true;
+    /// <summary>
     /// Database provider for the DbContext.
     /// </summary>
     public string? DatabaseProvider { get; set; }
@@ -178,6 +182,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
             Prerelease = Prerelease,
             Endpoints = Endpoints,
             OpenApi = OpenApi,
+            TypedResults = TypedResults,
             DataContext = DataContext,
             DatabaseProvider = DatabaseProvider,
         };
@@ -263,6 +268,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
         }
 
         scaffoldingModel.OpenAPI = settings.OpenApi;
+        scaffoldingModel.UseTypedResults = settings.TypedResults;
         if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)
         {
             scaffoldingModel.ProjectInfo.CodeChangeOptions =

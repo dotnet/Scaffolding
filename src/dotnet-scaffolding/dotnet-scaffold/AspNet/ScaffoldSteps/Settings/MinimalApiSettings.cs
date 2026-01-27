@@ -15,4 +15,8 @@ internal class MinimalApiSettings : EfWithModelStepSettings
     /// Indicates if OpenAPI should be enabled for the minimal API.
     /// </summary>
     public bool OpenApi { get; set; } = true;
+    /// <summary>
+    /// Indicates if TypedResults should be used for the minimal API.
+    /// </summary>
+    public bool TypedResults { get; set; } = true;
 }

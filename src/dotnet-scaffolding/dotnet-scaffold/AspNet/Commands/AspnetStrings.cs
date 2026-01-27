@@ -151,6 +151,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
 
             internal const string DbProviderDisplayName = "Database Provider";
 
+            internal static class TypedResults
+            {
+                internal const string DisplayName = "Use Typed Results?";
+                internal const string Description = "Use TypedResults for minimal API endpoints";
+            }
+
             internal static class PageType
             {
                 internal const string DisplayName = "Page Type";

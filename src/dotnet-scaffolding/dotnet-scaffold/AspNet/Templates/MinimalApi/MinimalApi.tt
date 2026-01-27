@@ -36,7 +36,7 @@ public static class <#= Model.EndpointsClassName #>
         string builderExtensions = $".WithName(\"{getAllModels}\")";
         if(!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces<{modelArray}>(StatusCodes.Status200OK)";
+            builderExtensions += $"\r\n        .Produces<{modelArray}>(StatusCodes.Status200OK)";
         }
         #>
 
@@ -49,7 +49,7 @@ public static class <#= Model.EndpointsClassName #>
         builderExtensions = $".WithName(\"{getModelById}\")";
         if(!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
+            builderExtensions += $"\r\n        .Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
         }
         #>
 
@@ -62,7 +62,7 @@ public static class <#= Model.EndpointsClassName #>
         builderExtensions = $".WithName(\"{updateModel}\")";
         if (!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces(StatusCodes.Status204NoContent)";
+            builderExtensions += $"\r\n        .Produces(StatusCodes.Status204NoContent)";
         }
         #>
 
@@ -87,7 +87,7 @@ public static class <#= Model.EndpointsClassName #>
         builderExtensions = $".WithName(\"{createModel}\")";
         if (!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status201Created)";
+            builderExtensions += $"\r\n        .Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status201Created)";
         }
         #>
 <#= builderExtensions #>;
@@ -110,7 +110,7 @@ public static class <#= Model.EndpointsClassName #>
         builderExtensions = $".WithName(\"{deleteModel}\")";
         if (!Model.UseTypedResults)
         {
-            builderExtensions += $"\r\n.Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
+            builderExtensions += $"\r\n        .Produces<{Model.ModelInfo.ModelTypeName}>(StatusCodes.Status200OK)";
         }
         #>
 

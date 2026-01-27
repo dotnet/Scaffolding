@@ -24,6 +24,7 @@ internal class AspNetOptions
     public ScaffolderOption<string> DataContextClass { get; }
     public ScaffolderOption<string> DataContextClassRequired { get; }
     public ScaffolderOption<bool> OpenApi { get; }
+    public ScaffolderOption<bool> TypedResults { get; }
     public ScaffolderOption<string> PageType { get; }
     public ScaffolderOption<string> ControllerName { get; }
     public ScaffolderOption<bool> Views { get; }
@@ -144,6 +145,15 @@ internal class AspNetOptions
             DisplayName = AspnetStrings.Options.OpenApiDisplayName,
             CliOption = Constants.CliOptions.OpenApiOption,
             Description = string.Empty,
+            Required = false,
+            PickerType = InteractivePickerType.YesNo
+        };
+
+        TypedResults = new ScaffolderOption<bool>
+        {
+            DisplayName = AspnetStrings.Options.TypedResults.DisplayName,
+            CliOption = Constants.CliOptions.TypedResultsOption,
+            Description = AspnetStrings.Options.TypedResults.Description,
             Required = false,
             PickerType = InteractivePickerType.YesNo
         };

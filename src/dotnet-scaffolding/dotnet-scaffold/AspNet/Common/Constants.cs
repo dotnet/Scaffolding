@@ -37,6 +37,7 @@ internal class Constants
         //minimal api options
         public const string OpenApiOption = "--open";
         public const string EndpointsOption = "--endpoints";
+        public const string TypedResultsOption = "--typedResults";
         //controller options
         public const string ActionsOption = "--actions";
         public const string ControllerNameOption = "--controller";

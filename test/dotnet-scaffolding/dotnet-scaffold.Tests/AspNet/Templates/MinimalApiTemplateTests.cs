@@ -235,4 +235,366 @@ public class MinimalApiTemplateTests
     }
 
     #endregion
+
+    #region OpenAPI Configuration Tests
+
+    [Fact]
+    public void MinimalApi_WithOpenAPI_GeneratesWithTagsExtension()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: false, useTypedResults: true);
+        model.OpenAPI = true;
+        var template = CreateMinimalApiTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains(".WithTags(nameof(Product))", result);
+    }
+
+    [Fact]
+    public void MinimalApi_WithoutOpenAPI_DoesNotGenerateWithTagsExtension()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: false, useTypedResults: true);
+        model.OpenAPI = false;
+        var template = CreateMinimalApiTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.DoesNotContain(".WithTags(", result);
+        Assert.Contains("var group = routes.MapGroup(\"/api/Product\");", result);
+    }
+
+    [Fact]
+    public void MinimalApiEf_WithOpenAPI_GeneratesWithTagsExtension()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        model.OpenAPI = true;
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains(".WithTags(nameof(Product))", result);
+    }
+
+    [Fact]
+    public void MinimalApiEf_WithoutOpenAPI_DoesNotGenerateWithTagsExtension()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        model.OpenAPI = false;
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.DoesNotContain(".WithTags(", result);
+    }
+
+    #endregion
+
+    #region Model Namespace Tests
+
+    [Fact]
+    public void MinimalApi_WithModelNamespace_GeneratesUsingStatement()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: false, useTypedResults: true);
+        model.ModelInfo.ModelNamespace = "TestProject.Models";
+        var template = CreateMinimalApiTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("using TestProject.Models;", result);
+    }
+
+    [Fact]
+    public void MinimalApi_WithoutModelNamespace_DoesNotGenerateUsingStatement()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: false, useTypedResults: true);
+        model.ModelInfo.ModelNamespace = null;
+        var template = CreateMinimalApiTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.DoesNotContain("using ;", result);
+    }
+
+    [Fact]
+    public void MinimalApiEf_WithModelAndDbContextNamespaces_GeneratesBothUsingStatements()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        model.ModelInfo.ModelNamespace = "TestProject.Models";
+        model.DbContextInfo.DbContextNamespace = "TestProject.Data";
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("using TestProject.Models;", result);
+        Assert.Contains("using TestProject.Data;", result);
+    }
+
+    #endregion
+
+    #region Endpoint Naming Tests
+
+    [Fact]
+    public void MinimalApi_GeneratesCorrectEndpointMethodNames()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: false, useTypedResults: true);
+        var template = CreateMinimalApiTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains(".WithName(\"GetAllProducts\")", result);
+        Assert.Contains(".WithName(\"GetProductById\")", result);
+        Assert.Contains(".WithName(\"CreateProduct\")", result);
+        Assert.Contains(".WithName(\"UpdateProduct\")", result);
+        Assert.Contains(".WithName(\"DeleteProduct\")", result);
+    }
+
+    [Fact]
+    public void MinimalApi_GeneratesCorrectClassAndMethodNames()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: false, useTypedResults: true);
+        var template = CreateMinimalApiTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("public static class ProductEndpoints", result);
+        Assert.Contains("public static void MapProductEndpoints(this IEndpointRouteBuilder routes)", result);
+    }
+
+    [Fact]
+    public void MinimalApiEf_GeneratesCorrectEndpointMethodNames()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains(".WithName(\"GetAllProducts\")", result);
+        Assert.Contains(".WithName(\"GetProductById\")", result);
+        Assert.Contains(".WithName(\"CreateProduct\")", result);
+        Assert.Contains(".WithName(\"UpdateProduct\")", result);
+        Assert.Contains(".WithName(\"DeleteProduct\")", result);
+    }
+
+    #endregion
+
+    #region Route Prefix Tests
+
+    [Fact]
+    public void MinimalApi_GeneratesCorrectRoutePrefix()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: false, useTypedResults: true);
+        var template = CreateMinimalApiTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("routes.MapGroup(\"/api/Product\")", result);
+    }
+
+    [Fact]
+    public void MinimalApiEf_GeneratesCorrectRoutePrefix()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("routes.MapGroup(\"/api/Product\")", result);
+    }
+
+    #endregion
+
+    #region EF DbContext Tests
+
+    [Fact]
+    public void MinimalApiEf_GeneratesDbContextParameter()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("ApplicationDbContext db", result);
+    }
+
+    [Fact]
+    public void MinimalApiEf_GeneratesEntityFrameworkCoreUsing()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("using Microsoft.EntityFrameworkCore;", result);
+    }
+
+    [Fact]
+    public void MinimalApiEf_GeneratesAsyncAwaitPattern()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("async", result);
+        Assert.Contains("await", result);
+        Assert.Contains("ToListAsync()", result);
+    }
+
+    [Fact]
+    public void MinimalApiEf_GeneratesAsNoTrackingForGetById()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("AsNoTracking()", result);
+        Assert.Contains("FirstOrDefaultAsync(", result);
+    }
+
+    [Fact]
+    public void MinimalApiEf_GeneratesCorrectPrimaryKeyHandling()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("int id", result);
+        Assert.Contains("model.Id == id", result);
+    }
+
+    #endregion
+
+    #region Custom Model Name Tests
+
+    [Fact]
+    public void MinimalApi_WithCustomModelName_GeneratesCorrectOutput()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: false, useTypedResults: true);
+        model.ModelInfo.ModelTypeName = "Customer";
+        model.EndpointsClassName = "CustomerEndpoints";
+        model.EndpointsMethodName = "MapCustomerEndpoints";
+        var template = CreateMinimalApiTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("public static class CustomerEndpoints", result);
+        Assert.Contains("public static void MapCustomerEndpoints(this IEndpointRouteBuilder routes)", result);
+        Assert.Contains("routes.MapGroup(\"/api/Customer\")", result);
+        Assert.Contains(".WithName(\"GetAllCustomers\")", result);
+        Assert.Contains("new Customer()", result);
+    }
+
+    [Fact]
+    public void MinimalApiEf_WithCustomEntitySetName_UsesCorrectEntitySet()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        model.DbContextInfo.EntitySetVariableName = "MyProducts";
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("MyProducts.ToListAsync()", result);
+        Assert.Contains("MyProducts.AsNoTracking()", result);
+    }
+
+    #endregion
+
+    #region HTTP Methods Tests
+
+    [Fact]
+    public void MinimalApi_GeneratesAllHttpMethods()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: false, useTypedResults: true);
+        var template = CreateMinimalApiTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("group.MapGet(\"/\"", result);
+        Assert.Contains("group.MapGet(\"/{id}\"", result);
+        Assert.Contains("group.MapPost(\"/\"", result);
+        Assert.Contains("group.MapPut(\"/{id}\"", result);
+        Assert.Contains("group.MapDelete(\"/{id}\"", result);
+    }
+
+    [Fact]
+    public void MinimalApiEf_GeneratesAllHttpMethods()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert
+        Assert.Contains("group.MapGet(\"/\"", result);
+        Assert.Contains("group.MapGet(\"/{id}\"", result);
+        Assert.Contains("group.MapPost(\"/\"", result);
+        Assert.Contains("group.MapPut(\"/{id}\"", result);
+        Assert.Contains("group.MapDelete(\"/{id}\"", result);
+    }
+
+    #endregion
 }

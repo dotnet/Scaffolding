@@ -237,7 +237,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.Api.MinimalApiDisplayName)
                 .WithCategory(AspnetStrings.Catagories.API)
                 .WithDescription(AspnetStrings.Api.MinimalApiDescription)
-                .WithOptions([options.Project, options.ModelName, options.EndpointsClass, options.OpenApi, options.DataContextClass, options.DatabaseProvider, options.Prerelease])
+                .WithOptions([options.Project, options.ModelName, options.EndpointsClass, options.OpenApi, options.TypedResults, options.DataContextClass, options.DatabaseProvider, options.Prerelease])
                 .WithStep<ValidateMinimalApiStep>(config =>
                 {
                     var step = config.Step;
@@ -248,6 +248,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.DatabaseProvider = context.GetOptionResult(options.DatabaseProvider);
                     step.Prerelease = context.GetOptionResult(options.Prerelease);
                     step.OpenApi = context.GetOptionResult(options.OpenApi);
+                    step.TypedResults = context.GetOptionResult(options.TypedResults);
                     step.Endpoints = context.GetOptionResult(options.EndpointsClass);
                 })
                 .WithMinimalApiAddPackagesStep()

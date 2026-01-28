@@ -27,6 +27,13 @@ public interface IScaffoldBuilder
     IScaffoldBuilder WithDescription(string description);
 
     /// <summary>
+    /// Adds an example usage for this scaffolder. Examples are displayed in the --help output.
+    /// </summary>
+    /// <param name="example">The example command line usage.</param>
+    /// <param name="description">Optional description of what the example does.</param>
+    IScaffoldBuilder WithExample(string example, string? description = null);
+
+    /// <summary>
     /// Adds an option to be used with this scaffolder. This adds the configured option to both the command line and
     /// to the dotnet-scaffold interactive UI.
     /// </summary>

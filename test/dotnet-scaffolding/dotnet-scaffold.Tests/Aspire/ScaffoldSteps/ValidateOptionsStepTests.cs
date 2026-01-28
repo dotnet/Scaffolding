@@ -220,6 +220,7 @@ public class ValidateOptionsStepTests
         public string? Description => "Test Scaffolder";
         public IEnumerable<string> Categories => new[] { "Test" };
         public IEnumerable<ScaffolderOption> Options => Enumerable.Empty<ScaffolderOption>();
+        public IEnumerable<(string Example, string? Description)> Examples => Enumerable.Empty<(string, string?)>();
 
         public Task ExecuteAsync(ScaffolderContext context)
         {

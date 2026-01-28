@@ -71,9 +71,9 @@ internal static class IdentityScaffolderBuilderExtensions
                 throw new InvalidOperationException("missing 'IdentityModel' in 'ScaffolderContext.Properties'");
             var templateFolderUtilities = new TemplateFoldersUtilities();
             //all the .cshtml and their model class (.cshtml.cs) templates
-            var allIdentityPageFiles = templateFolderUtilities.GetAllT4Templates(["Identity"]);
+            var allIdentityPageFiles = templateFolderUtilities.GetAllT4Templates(["net10.0\\Identity"]);
             //ApplicationUser.tt template
-            var applicationUserFile = templateFolderUtilities.GetAllT4Templates(["Files"])
+            var applicationUserFile = templateFolderUtilities.GetAllT4Templates(["net10.0\\Files"])
                 .FirstOrDefault(x => x.EndsWith("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
             var identityFileProperties = IdentityHelper.GetTextTemplatingProperties(allIdentityPageFiles, identityModel);
             var applicationUserProperty = IdentityHelper.GetApplicationUserTextTemplatingProperty(applicationUserFile, identityModel);

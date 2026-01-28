@@ -20,7 +20,7 @@ public class BlazorCrudHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud.Create), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud.Create), result);
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class BlazorCrudHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud.Index), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud.Index), result);
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class BlazorCrudHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud.Delete), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud.Delete), result);
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class BlazorCrudHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud.Edit), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud.Edit), result);
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public class BlazorCrudHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud.Details), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud.Details), result);
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class BlazorCrudHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud.NotFound), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud.NotFound), result);
     }
 
     [Fact]

@@ -37,34 +37,34 @@ internal static class RazorPagesHelper
         switch (Path.GetFileName(templatePath))
         {
             case CreateTemplate:
-                templateType = typeof(Templates.RazorPages.Create);
+                templateType = typeof(Templates.net10.RazorPages.Create);
                 break;
             case CreateModelTemplate:
-                templateType = typeof(Templates.RazorPages.CreateModel);
+                templateType = typeof(Templates.net10.RazorPages.CreateModel);
                 break;
             case IndexTemplate:
-                templateType = typeof(Templates.RazorPages.Index);
+                templateType = typeof(Templates.net10.RazorPages.Index);
                 break;
             case IndexModelTemplate:
-                templateType = typeof(Templates.RazorPages.IndexModel);
+                templateType = typeof(Templates.net10.RazorPages.IndexModel);
                 break;
             case DeleteTemplate:
-                templateType = typeof(Templates.RazorPages.Delete);
+                templateType = typeof(Templates.net10.RazorPages.Delete);
                 break;
             case DeleteModelTemplate:
-                templateType = typeof(Templates.RazorPages.DeleteModel);
+                templateType = typeof(Templates.net10.RazorPages.DeleteModel);
                 break;
             case EditTemplate:
-                templateType = typeof(Templates.RazorPages.Edit);
+                templateType = typeof(Templates.net10.RazorPages.Edit);
                 break;
             case EditModelTemplate:
-                templateType = typeof(Templates.RazorPages.EditModel);
+                templateType = typeof(Templates.net10.RazorPages.EditModel);
                 break;
             case DetailsTemplate:
-                templateType = typeof(Templates.RazorPages.Details);
+                templateType = typeof(Templates.net10.RazorPages.Details);
                 break;
             case DetailsModelTemplate:
-                templateType = typeof(Templates.RazorPages.DetailsModel);
+                templateType = typeof(Templates.net10.RazorPages.DetailsModel);
                 break;
         }
 

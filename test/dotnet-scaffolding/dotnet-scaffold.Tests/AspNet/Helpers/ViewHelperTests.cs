@@ -8,7 +8,7 @@ using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Views;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
@@ -73,7 +73,7 @@ public class ViewHelperTests
         Assert.NotNull(result);
         TextTemplatingProperty? property = result.FirstOrDefault();
         Assert.NotNull(property);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Views.Index), property.TemplateType);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views.Index), property.TemplateType);
     }
 
     [Fact]
@@ -192,7 +192,7 @@ public class ViewHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Views.Index), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views.Index), result);
     }
 
     [Fact]

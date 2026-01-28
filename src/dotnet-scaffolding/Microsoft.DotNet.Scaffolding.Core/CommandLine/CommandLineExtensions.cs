@@ -45,6 +45,9 @@ internal static class CommandLineExtensions
             }
         }
 
+        // Add --full-help option
+        rootCommand.AddFullHelpOption(scaffoldRunner.Scaffolders);
+
         rootCommand.AddGetCommandsCommand(commandInfo);
 
         ((ScaffoldRunner)scaffoldRunner).RootCommand = rootCommand;
@@ -53,12 +56,11 @@ internal static class CommandLineExtensions
         {
             if (catagory == ScaffolderCatagory.Aspire)
             {
-                //TODO put strings in CliOptions when this is folded into  dotnet-scaffold
-                return new Command("aspire", "Commands related to Aspire project scaffolding");
+                return new Command(FullHelpStrings.AspireCategoryName, FullHelpStrings.AspireCategoryDescription);
             }
             else
             {
-                return new Command ("aspnet", "Commands related to ASP.NET project scaffolding");
+                return new Command(FullHelpStrings.AspNetCategoryName, FullHelpStrings.AspNetCategoryDescription);
             }
         }
     }
@@ -122,6 +124,23 @@ internal static class CommandLineExtensions
         };
 
         return commandInfo;
+    }
+
+    /// <summary>
+    /// Adds a '--full-help' option to the root command for displaying comprehensive help for all commands.
+    /// </summary>
+    /// <param name="rootCommand">The root command.</param>
+    /// <param name="scaffolders">The scaffolders dictionary.</param>
+    private static void AddFullHelpOption(this RootCommand rootCommand, IReadOnlyDictionary<ScaffolderCatagory, IEnumerable<IScaffolder>> scaffolders)
+    {
+        Command fullHelpCommand = new(FullHelpStrings.FullHelpCommandName, FullHelpStrings.FullHelpCommandDescription);
+        fullHelpCommand.SetAction((ParseResult parseResult, CancellationToken cancellationToken) =>
+        {
+            FullHelpPrinter.PrintFullHelp(scaffolders);
+            return Task.FromResult(0);
+        });
+
+        rootCommand.Subcommands.Add(fullHelpCommand);
     }
 
     /// <summary>

@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\dotnet-scaffold\dotnet-scaffold.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Microsoft.DotNet.Scaffolding.Core.csproj" />
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Internal\Microsoft.DotNet.Scaffolding.Internal.csproj" />
   </ItemGroup>
 

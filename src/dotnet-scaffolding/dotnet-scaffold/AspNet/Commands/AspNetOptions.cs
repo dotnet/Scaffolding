@@ -90,16 +90,16 @@ internal class AspNetOptions
 
         EndpointsClass = new ScaffolderOption<string>
         {
-            DisplayName = AspnetStrings.Options.EndpointClassDisplayName,
+            DisplayName = AspnetStrings.Options.EndpointsClass.DisplayName,
             CliOption = Constants.CliOptions.EndpointsOption,
-            Description = string.Empty,
+            Description = AspnetStrings.Options.EndpointsClass.Description,
             Required = true
         };
         DatabaseProvider = new ScaffolderOption<string>
         {
-            DisplayName = AspnetStrings.Options.DbProviderDisplayName,
+            DisplayName = AspnetStrings.Options.DatabaseProvider.DisplayName,
             CliOption = Constants.CliOptions.DbProviderOption,
-            Description = string.Empty,
+            Description = AspnetStrings.Options.DatabaseProvider.Description,
             Required = false,
             PickerType = InteractivePickerType.CustomPicker,
             CustomPickerValues = [.. AspNetDbContextHelper.DbContextTypeDefaults.Keys]
@@ -107,9 +107,9 @@ internal class AspNetOptions
 
         DatabaseProviderRequired = new ScaffolderOption<string>
         {
-            DisplayName = AspnetStrings.Options.DbProviderDisplayName,
+            DisplayName = AspnetStrings.Options.DatabaseProvider.DisplayName,
             CliOption = Constants.CliOptions.DbProviderOption,
-            Description = string.Empty,
+            Description = AspnetStrings.Options.DatabaseProvider.Description,
             Required = true,
             PickerType = InteractivePickerType.CustomPicker,
             CustomPickerValues = [.. AspNetDbContextHelper.DbContextTypeDefaults.Keys]
@@ -117,9 +117,9 @@ internal class AspNetOptions
 
         IdentityDbProviderRequired = new ScaffolderOption<string>
         {
-            DisplayName = AspnetStrings.Options.DbProviderDisplayName,
+            DisplayName = AspnetStrings.Options.DatabaseProvider.DisplayName,
             CliOption = Constants.CliOptions.DbProviderOption,
-            Description = string.Empty,
+            Description = AspnetStrings.Options.DatabaseProvider.Description,
             Required = true,
             PickerType = InteractivePickerType.CustomPicker,
             CustomPickerValues = [.. AspNetDbContextHelper.IdentityDbContextTypeDefaults.Keys]
@@ -127,24 +127,24 @@ internal class AspNetOptions
 
         DataContextClass = new ScaffolderOption<string>
         {
-            DisplayName = AspnetStrings.Options.DataContextClassDisplayName,
+            DisplayName = AspnetStrings.Options.DataContextClass.DisplayName,
             CliOption = Constants.CliOptions.DataContextOption,
-            Description = string.Empty,
+            Description = AspnetStrings.Options.DataContextClass.Description,
             Required = false
         };
         DataContextClassRequired = new ScaffolderOption<string>
         {
-            DisplayName = AspnetStrings.Options.DataContextClassDisplayName,
+            DisplayName = AspnetStrings.Options.DataContextClass.DisplayName,
             CliOption = Constants.CliOptions.DataContextOption,
-            Description = string.Empty,
+            Description = AspnetStrings.Options.DataContextClass.Description,
             Required = true
         };
 
         OpenApi = new ScaffolderOption<bool>
         {
-            DisplayName = AspnetStrings.Options.OpenApiDisplayName,
+            DisplayName = AspnetStrings.Options.OpenApi.DisplayName,
             CliOption = Constants.CliOptions.OpenApiOption,
-            Description = string.Empty,
+            Description = AspnetStrings.Options.OpenApi.Description,
             Required = false,
             PickerType = InteractivePickerType.YesNo
         };
@@ -190,7 +190,7 @@ internal class AspNetOptions
             DisplayName = AspnetStrings.Options.Overwrite.DisplayName,
             CliOption = Constants.CliOptions.OverwriteOption,
             Description = AspnetStrings.Options.Overwrite.Description,
-            Required = true,
+            Required = false,
             PickerType = InteractivePickerType.YesNo
         };
 

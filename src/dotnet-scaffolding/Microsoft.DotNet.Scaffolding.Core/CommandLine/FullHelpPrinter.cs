@@ -138,6 +138,21 @@ internal static class FullHelpPrinter
             }
             sb.AppendLine();
         }
+
+        var examples = scaffolder.Examples.ToList();
+        if (examples.Count > 0)
+        {
+            sb.AppendLine("Examples:");
+            foreach (var (example, description) in examples)
+            {
+                if (!string.IsNullOrEmpty(description))
+                {
+                    sb.AppendLine($"  {description}");
+                }
+                sb.AppendLine($"    {example}");
+                sb.AppendLine();
+            }
+        }
     }
 
     private static void PrintToolCommandsHelp(StringBuilder sb)

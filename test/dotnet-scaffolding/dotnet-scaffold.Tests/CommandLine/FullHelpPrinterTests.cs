@@ -401,6 +401,84 @@ public class FullHelpPrinterTests
 
     #endregion
 
+    #region Example Tests
+
+    [Fact]
+    public void GenerateFullHelpText_WithExamples_ContainsExamplesSection()
+    {
+        // Arrange
+        var examples = new List<(string Example, string? Description)>
+        {
+            ("dotnet scaffold aspnet test-cmd --project C:/MyApp/MyApp.csproj", "Basic example:"),
+            ("dotnet scaffold aspnet test-cmd --project C:/MyApp/MyApp.csproj --name MyFile", "Example with name:")
+        };
+        var scaffolders = new Dictionary<ScaffolderCatagory, IEnumerable<IScaffolder>>
+        {
+            { ScaffolderCatagory.AspNet, new List<IScaffolder> { CreateTestScaffolderWithExamples("test-cmd", "Test", examples) } }
+        };
+
+        // Act
+        var helpText = FullHelpPrinter.GenerateFullHelpText(scaffolders);
+
+        // Assert
+        Assert.Contains("Examples:", helpText);
+        Assert.Contains("Basic example:", helpText);
+        Assert.Contains("dotnet scaffold aspnet test-cmd --project C:/MyApp/MyApp.csproj", helpText);
+        Assert.Contains("Example with name:", helpText);
+        Assert.Contains("--name MyFile", helpText);
+    }
+
+    [Fact]
+    public void GenerateFullHelpText_WithExamplesNoDescription_ContainsExampleWithoutDescription()
+    {
+        // Arrange
+        var examples = new List<(string Example, string? Description)>
+        {
+            ("dotnet scaffold aspire caching --type redis", null)
+        };
+        var scaffolders = new Dictionary<ScaffolderCatagory, IEnumerable<IScaffolder>>
+        {
+            { ScaffolderCatagory.Aspire, new List<IScaffolder> { CreateTestScaffolderWithExamples("caching", "Caching", examples) } }
+        };
+
+        // Act
+        var helpText = FullHelpPrinter.GenerateFullHelpText(scaffolders);
+
+        // Assert
+        Assert.Contains("Examples:", helpText);
+        Assert.Contains("dotnet scaffold aspire caching --type redis", helpText);
+    }
+
+    [Fact]
+    public void GenerateFullHelpText_WithNoExamples_DoesNotShowExamplesSection()
+    {
+        // Arrange
+        var scaffolders = new Dictionary<ScaffolderCatagory, IEnumerable<IScaffolder>>
+        {
+            { ScaffolderCatagory.AspNet, new List<IScaffolder> { CreateTestScaffolder("area", "Area", "Creates an MVC Area") } }
+        };
+
+        // Act
+        var helpText = FullHelpPrinter.GenerateFullHelpText(scaffolders);
+
+        // Assert - Find the area command section
+        var areaMarker = "dotnet scaffold aspnet area";
+        var areaIndex = helpText.IndexOf(areaMarker);
+        Assert.True(areaIndex >= 0, "Area section should be present");
+
+        // Get the section for this specific command
+        var areaSection = helpText.Substring(areaIndex);
+        var nextSectionIndex = areaSection.IndexOf("====");
+        if (nextSectionIndex > 0)
+        {
+            var areaSectionOnly = areaSection.Substring(0, nextSectionIndex);
+            // The area section should not contain "Examples:"
+            Assert.DoesNotContain("Examples:", areaSectionOnly);
+        }
+    }
+
+    #endregion
+
     #region Tool Commands Tests
 
     [Fact]
@@ -644,6 +722,11 @@ public class FullHelpPrinterTests
         return new TestScaffolder(name, displayName, description, options);
     }
 
+    private static IScaffolder CreateTestScaffolderWithExamples(string name, string displayName, IEnumerable<(string Example, string? Description)> examples, string? description = null)
+    {
+        return new TestScaffolder(name, displayName, description, null, examples);
+    }
+
     private static ScaffolderOption CreateTestOption(string displayName, string cliOption, string description, bool required)
     {
         return new TestScaffolderOption
@@ -662,13 +745,15 @@ public class FullHelpPrinterTests
     private class TestScaffolder : IScaffolder
     {
         private readonly IEnumerable<ScaffolderOption> _options;
+        private readonly IEnumerable<(string Example, string? Description)> _examples;
 
-        public TestScaffolder(string name, string displayName, string? description = null, IEnumerable<ScaffolderOption>? options = null)
+        public TestScaffolder(string name, string displayName, string? description = null, IEnumerable<ScaffolderOption>? options = null, IEnumerable<(string Example, string? Description)>? examples = null)
         {
             Name = name;
             DisplayName = displayName;
             Description = description ?? $"Test scaffolder for {displayName}";
             _options = options ?? Enumerable.Empty<ScaffolderOption>();
+            _examples = examples ?? Enumerable.Empty<(string, string?)>();
         }
 
         public string Name { get; }
@@ -676,6 +761,7 @@ public class FullHelpPrinterTests
         public string? Description { get; }
         public IEnumerable<string> Categories => new[] { "Test" };
         public IEnumerable<ScaffolderOption> Options => _options;
+        public IEnumerable<(string Example, string? Description)> Examples => _examples;
 
         public Task ExecuteAsync(ScaffolderContext context)
         {

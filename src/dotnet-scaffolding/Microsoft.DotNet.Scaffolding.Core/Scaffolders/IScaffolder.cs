@@ -36,6 +36,11 @@ public interface IScaffolder
     IEnumerable<ScaffolderOption> Options { get; }
 
     /// <summary>
+    /// Gets example usages for this scaffolder to display in help output.
+    /// </summary>
+    IEnumerable<(string Example, string? Description)> Examples { get; }
+
+    /// <summary>
     /// Executes the scaffolder based on the current context. Generally this will be called by the <see cref="IScaffoldRunner"/> and does not need to be called directly.
     /// </summary>
     /// <param name="context">The context for the scaffolder execution.</param>

@@ -33,6 +33,8 @@ internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandSe
         IScaffoldBuilder caching = _builder.AddScaffolder(ScaffolderCatagory.Aspire, AspireCliStrings.CachingTitle);
         caching.WithCategory(AspireCliStrings.AspireCategory)
                .WithDescription(AspireCliStrings.CachingDescription)
+               .WithExample(AspireCliStrings.CachingExample1, AspireCliStrings.CachingExample1Description)
+               .WithExample(AspireCliStrings.CachingExample2, AspireCliStrings.CachingExample2Description)
               .WithOption(AspireOptions.CachingType)
               .WithOption(AspireOptions.AppHostProject)
               .WithOption(AspireOptions.Project)
@@ -47,6 +49,8 @@ internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandSe
         IScaffoldBuilder database = _builder.AddScaffolder(ScaffolderCatagory.Aspire, AspireCliStrings.Database.DatabaseTitle);
         database.WithCategory(AspireCliStrings.AspireCategory)
                 .WithDescription(AspireCliStrings.Database.DatabaseDescription)
+                .WithExample(AspireCliStrings.Database.DatabaseExample1, AspireCliStrings.Database.DatabaseExample1Description)
+                .WithExample(AspireCliStrings.Database.DatabaseExample2, AspireCliStrings.Database.DatabaseExample2Description)
                 .WithOption(AspireOptions.DatabaseType)
                 .WithOption(AspireOptions.AppHostProject)
                 .WithOption(AspireOptions.Project)
@@ -63,6 +67,8 @@ internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandSe
         IScaffoldBuilder storage = _builder.AddScaffolder(ScaffolderCatagory.Aspire, AspireCliStrings.StorageTitle);
         storage.WithCategory(AspireCliStrings.AspireCategory)
                .WithDescription(AspireCliStrings.StorageDescription)
+               .WithExample(AspireCliStrings.StorageExample1, AspireCliStrings.StorageExample1Description)
+               .WithExample(AspireCliStrings.StorageExample2, AspireCliStrings.StorageExample2Description)
                .WithOption(AspireOptions.StorageType)
                .WithOption(AspireOptions.AppHostProject)
                .WithOption(AspireOptions.Project)

@@ -19,7 +19,20 @@ public class ScaffolderOption<T> : ScaffolderOption
     /// </summary>
     internal override Option ToCliOption()
     {
-        _cliOption ??= new Option<T>(FixedName);
+        if (_cliOption is null)
+        {
+            _cliOption = new Option<T>(FixedName)
+            {
+                Description = Description ?? DisplayName,
+                Required = Required
+            };
+
+            // Add accepted values hint for custom picker options
+            if (CustomPickerValues is not null && CustomPickerValues.Any())
+            {
+                _cliOption.AcceptOnlyFromAmong([.. CustomPickerValues]);
+            }
+        }
         return _cliOption;
     }
 

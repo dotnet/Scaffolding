@@ -26,7 +26,7 @@ internal static class TargetFrameworkConstants
     }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
 }
 
-internal enum TargetFramework
+public enum TargetFramework
 {
     Net8,
     Net9,

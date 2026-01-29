@@ -4,9 +4,9 @@
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+namespace Microsoft.DotNet.Scaffolding.Core.Helpers;
 
-internal class TargetFrameworkHelpers
+public class TargetFrameworkHelpers
 {   
     /// <summary>
     /// Gets the target framework enum for the specified project file. Returns null if no compatible target
@@ -15,7 +15,7 @@ internal class TargetFrameworkHelpers
     /// <param name="projectPath">The full path to the project file to evaluate. Cannot be null or empty.</param>
     /// <returns>The target framework enum representing the lowest compatible framework, or null if no compatible
     /// framework is found.</returns>
-    internal static TargetFramework? GetTargetFrameworkForProject(string projectPath)
+    public static TargetFramework? GetTargetFrameworkForProject(string projectPath)
     {
         string? lowestCompatibleTfm = GetLowestCompatibleTargetFramework(projectPath);
         if (lowestCompatibleTfm is not null)

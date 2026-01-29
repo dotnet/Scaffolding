@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
+using Microsoft.DotNet.Scaffolding.Core.Helpers;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 

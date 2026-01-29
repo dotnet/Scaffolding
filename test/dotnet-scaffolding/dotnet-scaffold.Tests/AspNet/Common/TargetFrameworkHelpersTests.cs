@@ -5,11 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Scaffolding.Core.Model;
-using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Scaffolding.Core.Helpers;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Common;
+namespace Microsoft.DotNet.Scaffolding.Core.Tests.Helpers;
 
 public class TargetFrameworkHelpersTests : IDisposable
 {
@@ -46,11 +45,11 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestNet8.csproj", "net8.0");
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net8, result);
+        Assert.Equal(TargetFramework.Net8, result);
     }
 
     [Fact]
@@ -60,11 +59,11 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestNet9.csproj", "net9.0");
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net9, result);
+        Assert.Equal(TargetFramework.Net9, result);
     }
 
     [Fact]
@@ -74,11 +73,11 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestNet10.csproj", "net10.0");
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10, result);
+        Assert.Equal(TargetFramework.Net10, result);
     }
 
     [Fact]
@@ -88,11 +87,11 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestMultiTarget.csproj", "net8.0;net9.0", isMultiTarget: true);
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net8, result);
+        Assert.Equal(TargetFramework.Net8, result);
     }
 
     [Fact]
@@ -102,11 +101,11 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestMultiTarget2.csproj", "net9.0;net10.0", isMultiTarget: true);
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net9, result);
+        Assert.Equal(TargetFramework.Net9, result);
     }
 
     [Fact]
@@ -116,11 +115,11 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestMultiTarget3.csproj", "net8.0;net9.0;net10.0", isMultiTarget: true);
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net8, result);
+        Assert.Equal(TargetFramework.Net8, result);
     }
 
     [Fact]
@@ -130,11 +129,11 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestNet11.csproj", "net11.0");
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net11, result);
+        Assert.Equal(TargetFramework.Net11, result);
     }
 
     [Fact]
@@ -144,11 +143,11 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestMultiTarget4.csproj", "net10.0;net11.0", isMultiTarget: true);
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10, result);
+        Assert.Equal(TargetFramework.Net10, result);
     }
 
     [Fact]
@@ -158,7 +157,7 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestNet7.csproj", "net7.0");
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result);
@@ -171,7 +170,7 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestNet6.csproj", "net6.0");
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result);
@@ -184,7 +183,7 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestNetStandard.csproj", "netstandard2.0");
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result);
@@ -197,7 +196,7 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestMonoAndroid.csproj", "monoandroid13.0");
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result);
@@ -210,7 +209,7 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestMixedTarget.csproj", "net7.0;net8.0", isMultiTarget: true);
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result); // Should return null because net7.0 is incompatible
@@ -223,7 +222,7 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestMixedTarget2.csproj", "net9.0;monoandroid13.0", isMultiTarget: true);
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result); // Should return null because monoandroid13.0 is incompatible
@@ -236,7 +235,7 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestNet8Android.csproj", "net8.0-android");
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result); // net8.0-android doesn't have an enum mapping
@@ -249,7 +248,7 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestNet9iOS.csproj", "net9.0-ios");
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result); // net9.0-ios doesn't have an enum mapping
@@ -262,7 +261,7 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = CreateTestProject("TestMultiPlatform.csproj", "net8.0-android;net9.0", isMultiTarget: true);
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result); // net8.0-android doesn't have an enum mapping
@@ -275,14 +274,14 @@ public class TargetFrameworkHelpersTests : IDisposable
         string projectPath = Path.Combine(_testProjectsDirectory, "NonExistent.csproj");
 
         // Act
-        Enum? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void GetTargetFrameworkForProject_EmptyProject_ReturnsNullEnum()
+    public void GetTargetFrameworkForProject_EmptyProject_ReturnsNull()
     {
         // Arrange
         string projectPath = CreateEmptyProject("EmptyProject.csproj");
@@ -323,128 +322,5 @@ public class TargetFrameworkHelpersTests : IDisposable
         File.WriteAllText(projectPath, projectContent);
         _createdProjects.Add(projectPath);
         return projectPath;
-    }
-
-    [Fact]
-    public void GetTargetFrameworkForProject_Net8Project_ReturnsNet8Enum()
-    {
-        // Arrange
-        string projectPath = CreateTestProject("TestNet8Enum.csproj", "net8.0");
-
-        // Act
-        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net8, result);
-    }
-
-    [Fact]
-    public void GetTargetFrameworkForProject_Net9Project_ReturnsNet9Enum()
-    {
-        // Arrange
-        string projectPath = CreateTestProject("TestNet9Enum.csproj", "net9.0");
-
-        // Act
-        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net9, result);
-    }
-
-    [Fact]
-    public void GetTargetFrameworkForProject_Net10Project_ReturnsNet10Enum()
-    {
-        // Arrange
-        string projectPath = CreateTestProject("TestNet10Enum.csproj", "net10.0");
-
-        // Act
-        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10, result);
-    }
-
-    [Fact]
-    public void GetTargetFrameworkForProject_Net11Project_ReturnsNet11Enum()
-    {
-        // Arrange
-        string projectPath = CreateTestProject("TestNet11Enum.csproj", "net11.0");
-
-        // Act
-        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net11, result);
-    }
-
-    [Fact]
-    public void GetTargetFrameworkForProject_MultiTargetNet8AndNet9_ReturnsNet8Enum()
-    {
-        // Arrange
-        string projectPath = CreateTestProject("TestMultiTargetEnum.csproj", "net8.0;net9.0", isMultiTarget: true);
-
-        // Act
-        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net8, result);
-    }
-
-    [Fact]
-    public void GetTargetFrameworkForProject_MultiTargetNet10AndNet11_ReturnsNet10Enum()
-    {
-        // Arrange
-        string projectPath = CreateTestProject("TestMultiTargetEnum2.csproj", "net10.0;net11.0", isMultiTarget: true);
-
-        // Act
-        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10, result);
-    }
-
-    [Fact]
-    public void GetTargetFrameworkForProject_IncompatibleFramework_ReturnsNull()
-    {
-        // Arrange
-        string projectPath = CreateTestProject("TestNet7Enum.csproj", "net7.0");
-
-        // Act
-        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
-
-        // Assert
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void GetTargetFrameworkForProject_NonExistentProject_ReturnsNull()
-    {
-        // Arrange
-        string projectPath = Path.Combine(_testProjectsDirectory, "NonExistentEnum.csproj");
-
-        // Act
-        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
-
-        // Assert
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public void GetTargetFrameworkForProject_EmptyProject_ReturnsNull()
-    {
-        // Arrange
-        string projectPath = CreateEmptyProject("EmptyProjectEnum.csproj");
-
-        // Act
-        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
-
-        // Assert
-        Assert.Null(result);
     }
 }

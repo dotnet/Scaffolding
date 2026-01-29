@@ -77,6 +77,25 @@ internal static class CommandLineExtensions
             command.Options.Add(option.ToCliOption());
         }
 
+        // Add examples to the command description if any exist
+        if (scaffolder.Examples.Any())
+        {
+            var examplesText = new System.Text.StringBuilder();
+            examplesText.AppendLine(scaffolder.Description ?? string.Empty);
+            examplesText.AppendLine();
+            examplesText.AppendLine("Examples:");
+            foreach (var (example, description) in scaffolder.Examples)
+            {
+                if (!string.IsNullOrEmpty(description))
+                {
+                    examplesText.AppendLine($"  {description}");
+                }
+                examplesText.AppendLine($"    {example}");
+                examplesText.AppendLine();
+            }
+            command.Description = examplesText.ToString();
+        }
+
         command.SetAction(async (ParseResult parseResult, CancellationToken cancellationToken) =>
         {
             var context = scaffolder.CreateContext(parseResult);

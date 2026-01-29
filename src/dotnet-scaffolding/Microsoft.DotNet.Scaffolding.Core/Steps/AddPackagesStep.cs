@@ -49,8 +49,8 @@ internal class AddPackagesStep : ScaffoldStep
     /// <returns>True if the packages were added successfully; otherwise, false.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        // Try to get the target framework from the contextcls
-        string? targetFramework = context.GetSpecifiedTargetFramework();
+        // Try to get the target framework from the context
+        TargetFramework? targetFramework = context.GetSpecifiedTargetFramework();
 
         foreach (Package package in Packages)
         {

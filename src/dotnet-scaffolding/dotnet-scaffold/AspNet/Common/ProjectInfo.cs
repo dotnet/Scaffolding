@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -12,7 +13,7 @@ internal class ProjectInfo
     public ProjectInfo(string? projectPath)
     {
         ProjectPath = projectPath;
-        LowestSupportedTargetFramework = projectPath is not null ? TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath) : null;
+        LowestSupportedTargetFramework = projectPath is not null ? TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath) : null;
     }
 
     /// <summary>
@@ -30,7 +31,7 @@ internal class ProjectInfo
     /// <summary>
     /// Null if the project contains an unsupported target framework; otherwise, the supported target framework moniker (TFM).
     /// </summary>
-    public string? LowestSupportedTargetFramework { get; }
+    public TargetFramework? LowestSupportedTargetFramework { get; }
     /// <summary>
     /// Gets or sets the list of project capabilities.
     /// </summary>

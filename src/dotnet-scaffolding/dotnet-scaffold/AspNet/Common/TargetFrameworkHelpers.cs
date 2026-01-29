@@ -7,7 +7,24 @@ using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 
 internal class TargetFrameworkHelpers
-{
+{   
+    /// <summary>
+    /// Gets the target framework enum for the specified project file. Returns null if no compatible target
+    /// framework is found.
+    /// </summary>
+    /// <param name="projectPath">The full path to the project file to evaluate. Cannot be null or empty.</param>
+    /// <returns>The target framework enum representing the lowest compatible framework, or null if no compatible
+    /// framework is found.</returns>
+    internal static TargetFramework? GetTargetFrameworkForProject(string projectPath)
+    {
+        string? lowestCompatibleTfm = GetLowestCompatibleTargetFramework(projectPath);
+        if (lowestCompatibleTfm is not null)
+        {
+            return GetTargetFrameworkEnum(lowestCompatibleTfm);
+        }
+        return null;
+    }
+
     /// <summary>
     /// Determines the lowest compatible target framework for the specified project file. Returns null if there are any incompatible target frameworks.
     /// </summary>
@@ -17,7 +34,7 @@ internal class TargetFrameworkHelpers
     /// <param name="projectPath">The full path to the project file to evaluate. Cannot be null or empty.</param>
     /// <returns>The target framework moniker (TFM) string representing the lowest compatible framework, or null if no compatible
     /// framework is found.</returns>
-    internal static string? GetLowestCompatibleTargetFramework(string projectPath)
+    private static string? GetLowestCompatibleTargetFramework(string projectPath)
     {
         MsBuildPropertiesOutput? msbuildOutput = MsBuildCliRunner.RunMSBuildCommandAndDeserialize<MsBuildPropertiesOutput>(["-getProperty:TargetFramework;TargetFrameworks"], projectPath);
         if (msbuildOutput?.Properties is null)
@@ -134,6 +151,20 @@ internal class TargetFrameworkHelpers
             .OrderBy(f => f.version)
             .Select(f => f.tfm)
             .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Maps a target framework moniker (TFM) string to its corresponding TargetFramework enum value.
+    /// </summary>
+    /// <param name="tfm">The target framework moniker string to map, such as "net8.0".</param>
+    /// <returns>The corresponding TargetFramework enum value if the mapping exists; otherwise, null.</returns>
+    private static TargetFramework? GetTargetFrameworkEnum(string tfm)
+    {
+        if (TargetFrameworkConstants.TargetFrameworkMapping.TryGetValue(tfm, out TargetFramework framework))
+        {
+            return framework;
+        }
+        return null;
     }
 
     /// <summary>

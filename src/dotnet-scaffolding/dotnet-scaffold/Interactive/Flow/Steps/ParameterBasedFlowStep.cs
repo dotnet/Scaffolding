@@ -189,8 +189,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             if (context.Properties.Get(projectParameterKey) is FlowProperty projectFileProperty &&
                 projectFileProperty.Value is string projectFilePath && !string.IsNullOrEmpty(projectFilePath))
             {
-                string? targetFramework = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectFilePath);
-                return targetFramework is null || !targetFramework.Equals(TargetFrameworkConstants.Net11, StringComparison.OrdinalIgnoreCase);
+                TargetFramework? targetFramework = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectFilePath);
+                return targetFramework is null || targetFramework != TargetFramework.Net11;
             }
             return false;
         }

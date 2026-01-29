@@ -14,18 +14,18 @@ public static class ScaffolderContextExtensions
     /// </summary>
     /// <param name="context">The scaffolder context.</param>
     /// <returns>The target framework name if present; otherwise, null.</returns>
-    public static string? GetSpecifiedTargetFramework(this ScaffolderContext context)
+    internal static TargetFramework? GetSpecifiedTargetFramework(this ScaffolderContext context)
     {
-        string? targetFramework = null;
-        if (context.Properties.TryGetValue(TargetFrameworkConstants.TargetFrameworkPropertyName, out object? tfm))
+        TargetFramework? targetFramework = null;
+        if (context.Properties.TryGetValue(TargetFrameworkConstants.TargetFrameworkPropertyName, out object? tfm) && tfm is TargetFramework targetFrameworkValue)
         {
-            targetFramework = tfm as string;
+            targetFramework = targetFrameworkValue;
         }
 
         return targetFramework;
     }
 
-    public static string? SetSpecifiedTargetFramework(this ScaffolderContext context, string? targetFramework)
+    internal static TargetFramework? SetSpecifiedTargetFramework(this ScaffolderContext context, TargetFramework? targetFramework)
     {
         context.Properties[TargetFrameworkConstants.TargetFrameworkPropertyName] = targetFramework;
         return targetFramework;

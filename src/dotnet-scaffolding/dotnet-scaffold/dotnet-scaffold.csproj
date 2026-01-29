@@ -13,6 +13,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Exclude net9.0 folder .cs files from compilation to avoid duplicate definitions -->
+    <Compile Remove="AspNet\Templates\net9.0\**\*.cs" />
+    <None Include="AspNet\Templates\net9.0\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Spectre.Console.Flow" />
     <PackageReference Include="Spectre.Console" />
     <PackageReference Include="Spectre.Console.Cli" />
@@ -36,6 +42,11 @@
     <None Pack="true" Include="AspNet\Templates\**\*.tt" PackagePath="Templates\" />
     <None Pack="true" Include="README.md" PackagePath="\" />
     <None Pack="true" Include="**\CodeModificationConfigs\**\*.json" PackagePath="CodeModificationConfigs\" />
+    <!-- Include net9.0 templates in build output -->
+    <Content Include="AspNet\Templates\net9.0\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net9.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

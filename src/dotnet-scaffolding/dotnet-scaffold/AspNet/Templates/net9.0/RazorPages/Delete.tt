@@ -1,0 +1,50 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string modelNameCapitalized = Model.ModelInfo.ModelTypeNameCapitalized;
+    string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string pageModelFullName = string.IsNullOrEmpty(Model.RazorPageNamespace) ? "DeleteModel" : $"{Model.RazorPageNamespace}.DeleteModel";
+#>
+@page
+@model <#= pageModelFullName #>
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4><#= modelFullName #></h4>
+    <hr />
+    <dl class="row">
+<#
+foreach (var property in entityProperties)
+{
+    string modelPropertyName = property.Name;
+#>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.<#= modelName #>.<#= modelPropertyName #>)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.<#= modelName #>.<#= modelPropertyName #>)
+        </dd>
+<#
+}
+#>
+    </dl>
+    <form method="post">
+        <input type="hidden" asp-for="<#= modelNameCapitalized #>.<#= primaryKeyName #>" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-page="./Index">Back to List</a>
+    </form>
+</div>

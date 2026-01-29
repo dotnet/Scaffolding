@@ -1,0 +1,65 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.RazorPageModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string modelNameCapitalized = Model.ModelInfo.ModelTypeNameCapitalized;
+    string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string pageModelFullName = string.IsNullOrEmpty(Model.RazorPageNamespace) ? "IndexModel" : $"{Model.RazorPageNamespace}.IndexModel";
+#>
+@page
+@model <#= pageModelFullName #>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+<#
+foreach (var property in entityProperties)
+{
+#>
+            <th>
+                @Html.DisplayNameFor(model => model.<#= modelNameCapitalized #>[0].<#= property.Name #>)
+            </th>
+<#
+}
+#>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.<#= modelNameCapitalized #>) {
+        <tr>
+<#
+foreach (var property in entityProperties)
+{
+#>
+            <td>
+                @Html.DisplayFor(model => item.<#= property.Name #>)
+            </td>
+<#
+}
+#>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.<#= primaryKeyName #>">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.<#= primaryKeyName #>">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.<#= primaryKeyName #>">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

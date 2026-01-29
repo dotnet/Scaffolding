@@ -1,0 +1,77 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName;
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
+    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.DbContextInfo.DbContextClassName : $"{dbContextNamespace}.{Model.DbContextInfo.DbContextClassName}";
+    string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;
+    string entitySetName = Model.DbContextInfo.EntitySetVariableName;
+#>
+@page "/<#= pluralModelLowerInv #>/details"
+@using Microsoft.EntityFrameworkCore
+<#
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
+        #>@using <#= modelNamespace#>
+<#  }
+#>
+@inject <#=dbContextFactory #>
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2><#= modelName #></h2>
+    <hr />
+    @if (<#= modelNameLowerInv #> is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+<#  foreach (var property in entityProperties)
+    {
+        string modelPropertyName = property.Name;
+#>
+            <dt class="col-sm-2"><#= modelPropertyName #></dt>
+            <dd class="col-sm-10">@<#= modelNameLowerInv #>.<#= modelPropertyName #></dd>
+<#  } #>
+        </dl>
+        <div>
+            <a href="@($"/<#= pluralModelLowerInv #>/edit?<#= primaryKeyNameLowerInv #>={<#= modelNameLowerInv #>.<#= primaryKeyName #>}")">Edit</a> |
+            <a href="@($"/<#= pluralModelLowerInv #>")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private <#= modelName #>? <#= modelNameLowerInv #>;
+
+    [SupplyParameterFromQuery]
+    private <#= primaryKeyShortTypeName #> <#= primaryKeyName #> { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        <#= modelNameLowerInv #> = await context.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
+
+        if (<#= modelNameLowerInv #> is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

@@ -1,0 +1,12 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@@using Microsoft.AspNetCore.Identity
+@@using @(Model.Namespace).Areas.Identity
+@{
+    if (Model.IsGenerateCustomUser)
+    {
+        @:@@using @(Model.UserClassNamespace)
+    }
+}
+
+@@namespace @(Model.Namespace).Pages
+@@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

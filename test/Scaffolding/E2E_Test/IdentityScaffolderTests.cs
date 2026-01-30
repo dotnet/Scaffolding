@@ -17,11 +17,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         {
         }
 
-        [SkippableFact]
+        [Fact]
         public void TestIdentityGenerator()
         {
-            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
-            Skip.If(string.IsNullOrEmpty(runSkippableTests));
 
             using (var fileProvider = new TemporaryFileProvider())
             {
@@ -52,11 +50,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [SkippableFact]
+        [Fact]
         public void TestIdentityGenerator_WithExistingUser()
         {
-            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
-            Skip.If(string.IsNullOrEmpty(runSkippableTests));
 
             using (var fileProvider = new TemporaryFileProvider())
             {
@@ -91,11 +87,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [SkippableFact]
+        [Fact]
         public void TestIdentityGenerator_IndividualFiles()
         {
-            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
-            Skip.If(string.IsNullOrEmpty(runSkippableTests));
 
             using (var fileProvider = new TemporaryFileProvider())
             {
@@ -128,11 +122,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [SkippableFact]
+        [Fact]
         public void TestIdentityGenerator_IndividualFiles_ViewImports()
         {
-            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
-            Skip.If(string.IsNullOrEmpty(runSkippableTests));
 
             using (var fileProvider = new TemporaryFileProvider())
             {
@@ -171,11 +163,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [SkippableTheory, MemberData(nameof(TestData))]
+        [Theory, MemberData(nameof(TestData))]
         public void TestIdentityGenerator_IndividualFiles_AllFilesBuild(string fileName)
         {
-            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
-            Skip.If(string.IsNullOrEmpty(runSkippableTests));
 
             using (var fileProvider = new TemporaryFileProvider())
             {

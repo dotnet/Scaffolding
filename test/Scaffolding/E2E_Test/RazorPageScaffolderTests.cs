@@ -93,11 +93,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [SkippableTheory, MemberData(nameof(TestData))]
+        [Theory, MemberData(nameof(TestData))]
         public void TestViewGenerator(string[] baselineFiles, string[] generatedFilePaths, string[] args)
         {
-            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
-            Skip.If(string.IsNullOrEmpty(runSkippableTests));
 
             using (var fileProvider = new TemporaryFileProvider())
             {
@@ -116,11 +114,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [SkippableFact]
+        [Fact]
         public void TestRazorPagesWithDbContextInDependency()
         {
-            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
-            Skip.If(string.IsNullOrEmpty(runSkippableTests));
 
             using (var fileProvider = new TemporaryFileProvider())
             {

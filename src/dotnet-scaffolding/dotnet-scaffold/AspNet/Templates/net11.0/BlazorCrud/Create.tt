@@ -1,0 +1,82 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#@  import namespace="Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions" #>
+<#
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName;
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
+    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.DbContextInfo.DbContextClassName : $"{dbContextNamespace}.{Model.DbContextInfo.DbContextClassName}";
+    string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+#>
+@page "/<#= pluralModelLowerInv #>/create"
+@using Microsoft.EntityFrameworkCore
+<#
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
+        #>@using <#= modelNamespace#>
+<#  }
+#>
+@inject <#=dbContextFactory #>
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2><#= modelName #></h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="<#= modelName #>" OnValidSubmit="Add<#= modelName #>" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <#
+                foreach (var property in entityProperties)
+                {
+                    string modelPropertyName = property.Name;
+                    string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
+                    string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
+                    var inputTypeName = Model.GetInputType(propertyShortTypeName);
+                    var inputClass = Model.GetInputClassType(propertyShortTypeName);
+                    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
+                    var divWhitespace = new string(' ', 16);
+                    var requiredSpanAttributeHtml = property.HasRequiredAttribute() ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
+            #>
+<div class="mb-3"><#= requiredSpanAttributeHtml #>
+                <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label> 
+                <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" <#= ariaRequiredAttributeHtml #>/> 
+                <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" /> 
+            </div>        
+            <#  } #>
+<button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/<#= pluralModelLowerInv #>">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private <#= modelName #> <#= modelName #> { get; set; } = default!;
+
+    protected override void OnInitialized() => <#= modelName #> ??= new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task Add<#= modelName #>()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.<#= Model.DbContextInfo.EntitySetVariableName #>.Add(<#= modelName #>);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
+    }
+}

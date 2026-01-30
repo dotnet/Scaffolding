@@ -431,7 +431,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             EntraIdModel entraIdModel = entraIdModelObj as EntraIdModel ??
                 throw new InvalidOperationException("missing 'EntraIdModel' in 'ScaffolderContext.Properties'");
             var templateFolderUtilities = new TemplateFoldersUtilities();
-            var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4Templates(["net10.0\\BlazorEntraId"]);
+            var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4Templates(["net11.0\\BlazorEntraId"]);
             var blazorEntraIdProperties = EntraIdHelper.GetTextTemplatingProperties(allBlazorIdentityFiles, entraIdModel);
 
             if (blazorEntraIdProperties is not null && blazorEntraIdProperties.Any())

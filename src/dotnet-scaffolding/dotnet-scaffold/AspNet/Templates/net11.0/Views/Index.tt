@@ -1,0 +1,62 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.ViewModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+#>
+@model IEnumerable<<#= modelFullName #>>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+<#
+foreach (var property in entityProperties)
+{
+#>
+            <th>
+                @Html.DisplayNameFor(model => model.<#= property.Name #>)
+            </th>
+<#
+}
+#>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+<#
+foreach (var property in entityProperties)
+{
+#>
+            <td>
+                @Html.DisplayFor(model => item.<#= property.Name #>)
+            </td>
+<#
+}
+#>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.<#= primaryKeyName #>">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.<#= primaryKeyName #>">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.<#= primaryKeyName #>">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

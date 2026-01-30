@@ -5,6 +5,7 @@
     <OutputType>exe</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackAsTool>true</PackAsTool>
+    <ToolCommandName>dotnet-scaffold</ToolCommandName>
     <PackageTags>dotnet;scaffold</PackageTags>
     <PackageId>Microsoft.dotnet-scaffold</PackageId>
     <PackageReadmeFile>README.md</PackageReadmeFile>

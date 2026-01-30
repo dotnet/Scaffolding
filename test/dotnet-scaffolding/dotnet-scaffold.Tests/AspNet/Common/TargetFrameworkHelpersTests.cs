@@ -4,11 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Scaffolding.Core.Model;
+using Microsoft.DotNet.Scaffolding.Core.Helpers;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Common;
+namespace Microsoft.DotNet.Scaffolding.Core.Tests.Helpers;
 
 public class TargetFrameworkHelpersTests : IDisposable
 {
@@ -39,258 +39,255 @@ public class TargetFrameworkHelpersTests : IDisposable
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_Net8Project_ReturnsNet8()
+    public void GetTargetFrameworkForProject_Net8Project_ReturnsNet8()
     {
         // Arrange
         string projectPath = CreateTestProject("TestNet8.csproj", "net8.0");
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("net8.0", result);
+        Assert.Equal(TargetFramework.Net8, result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_Net9Project_ReturnsNet9()
+    public void GetTargetFrameworkForProject_Net9Project_ReturnsNet9()
     {
         // Arrange
         string projectPath = CreateTestProject("TestNet9.csproj", "net9.0");
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("net9.0", result);
+        Assert.Equal(TargetFramework.Net9, result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_Net10Project_ReturnsNet10()
+    public void GetTargetFrameworkForProject_Net10Project_ReturnsNet10()
     {
         // Arrange
         string projectPath = CreateTestProject("TestNet10.csproj", "net10.0");
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("net10.0", result);
+        Assert.Equal(TargetFramework.Net10, result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_MultiTargetNet8AndNet9_ReturnsNet8()
+    public void GetTargetFrameworkForProject_MultiTargetNet8AndNet9_ReturnsNet8()
     {
         // Arrange
         string projectPath = CreateTestProject("TestMultiTarget.csproj", "net8.0;net9.0", isMultiTarget: true);
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("net8.0", result);
+        Assert.Equal(TargetFramework.Net8, result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_MultiTargetNet9AndNet10_ReturnsNet9()
+    public void GetTargetFrameworkForProject_MultiTargetNet9AndNet10_ReturnsNet9()
     {
         // Arrange
         string projectPath = CreateTestProject("TestMultiTarget2.csproj", "net9.0;net10.0", isMultiTarget: true);
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("net9.0", result);
+        Assert.Equal(TargetFramework.Net9, result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_MultiTargetNet8Net9Net10_ReturnsNet8()
+    public void GetTargetFrameworkForProject_MultiTargetNet8Net9Net10_ReturnsNet8()
     {
         // Arrange
         string projectPath = CreateTestProject("TestMultiTarget3.csproj", "net8.0;net9.0;net10.0", isMultiTarget: true);
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("net8.0", result);
+        Assert.Equal(TargetFramework.Net8, result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_Net11Project_ReturnsNet11()
+    public void GetTargetFrameworkForProject_Net11Project_ReturnsNet11()
     {
         // Arrange
         string projectPath = CreateTestProject("TestNet11.csproj", "net11.0");
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("net11.0", result);
+        Assert.Equal(TargetFramework.Net11, result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_MultiTargetNet10AndNet11_ReturnsNet10()
+    public void GetTargetFrameworkForProject_MultiTargetNet10AndNet11_ReturnsNet10()
     {
         // Arrange
         string projectPath = CreateTestProject("TestMultiTarget4.csproj", "net10.0;net11.0", isMultiTarget: true);
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("net10.0", result);
+        Assert.Equal(TargetFramework.Net10, result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_Net7Project_ReturnsNull()
+    public void GetTargetFrameworkForProject_Net7Project_ReturnsNull()
     {
         // Arrange
         string projectPath = CreateTestProject("TestNet7.csproj", "net7.0");
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_Net6Project_ReturnsNull()
+    public void GetTargetFrameworkForProject_Net6Project_ReturnsNull()
     {
         // Arrange
         string projectPath = CreateTestProject("TestNet6.csproj", "net6.0");
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_NetStandard20Project_ReturnsNull()
+    public void GetTargetFrameworkForProject_NetStandard20Project_ReturnsNull()
     {
         // Arrange
         string projectPath = CreateTestProject("TestNetStandard.csproj", "netstandard2.0");
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_MonoAndroidProject_ReturnsNull()
+    public void GetTargetFrameworkForProject_MonoAndroidProject_ReturnsNull()
     {
         // Arrange
         string projectPath = CreateTestProject("TestMonoAndroid.csproj", "monoandroid13.0");
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_MultiTargetWithIncompatible_ReturnsNull()
+    public void GetTargetFrameworkForProject_MultiTargetWithIncompatible_ReturnsNull()
     {
         // Arrange - Mix of compatible (net8.0) and incompatible (net7.0) frameworks
         string projectPath = CreateTestProject("TestMixedTarget.csproj", "net7.0;net8.0", isMultiTarget: true);
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result); // Should return null because net7.0 is incompatible
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_MultiTargetWithMonoAndroid_ReturnsNull()
+    public void GetTargetFrameworkForProject_MultiTargetWithMonoAndroid_ReturnsNull()
     {
         // Arrange - Mix of compatible (net9.0) and incompatible (monoandroid13.0) frameworks
         string projectPath = CreateTestProject("TestMixedTarget2.csproj", "net9.0;monoandroid13.0", isMultiTarget: true);
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result); // Should return null because monoandroid13.0 is incompatible
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_Net8Android_ReturnsNet8Android()
+    public void GetTargetFrameworkForProject_Net8Android_ReturnsNull()
     {
         // Arrange
         string projectPath = CreateTestProject("TestNet8Android.csproj", "net8.0-android");
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Equal("net8.0-android", result);
+        Assert.Null(result); // net8.0-android doesn't have an enum mapping
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_Net9iOS_ReturnsNet9iOS()
+    public void GetTargetFrameworkForProject_Net9iOS_ReturnsNull()
     {
         // Arrange
         string projectPath = CreateTestProject("TestNet9iOS.csproj", "net9.0-ios");
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Equal("net9.0-ios", result);
+        Assert.Null(result); // net9.0-ios doesn't have an enum mapping
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_MultiTargetNet8AndroidAndNet9_ReturnsNet8Android()
+    public void GetTargetFrameworkForProject_MultiTargetNet8AndroidAndNet9_ReturnsNull()
     {
         // Arrange
         string projectPath = CreateTestProject("TestMultiPlatform.csproj", "net8.0-android;net9.0", isMultiTarget: true);
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Equal("net8.0-android", result);
+        Assert.Null(result); // net8.0-android doesn't have an enum mapping
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_InvalidProjectPath_ReturnsNull()
+    public void GetTargetFrameworkForProject_InvalidProjectPath_ReturnsNull()
     {
         // Arrange
         string projectPath = Path.Combine(_testProjectsDirectory, "NonExistent.csproj");
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result);
     }
 
     [Fact]
-    public void GetLowestCompatibleTargetFramework_EmptyProject_ReturnsNull()
+    public void GetTargetFrameworkForProject_EmptyProject_ReturnsNull()
     {
         // Arrange
         string projectPath = CreateEmptyProject("EmptyProject.csproj");
 
         // Act
-        string? result = TargetFrameworkHelpers.GetLowestCompatibleTargetFramework(projectPath);
+        TargetFramework? result = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         // Assert
         Assert.Null(result);

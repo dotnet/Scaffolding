@@ -16,4 +16,20 @@ internal static class TargetFrameworkConstants
     public const string NetCoreApp = ".NETCoreApp";
 
     public static readonly ImmutableArray<string> SupportedTargetFrameworks = [Net8, Net9, Net10, Net11];
+
+    public static readonly ImmutableDictionary<string, TargetFramework> TargetFrameworkMapping = new Dictionary<string, TargetFramework>(StringComparer.OrdinalIgnoreCase)
+    {
+        [Net8] = TargetFramework.Net8,
+        [Net9] = TargetFramework.Net9,
+        [Net10] = TargetFramework.Net10,
+        [Net11] = TargetFramework.Net11
+    }.ToImmutableDictionary(StringComparer.OrdinalIgnoreCase);
+}
+
+public enum TargetFramework
+{
+    Net8,
+    Net9,
+    Net10,
+    Net11
 }

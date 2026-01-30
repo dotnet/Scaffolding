@@ -6,6 +6,11 @@ using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;
 
+/// <summary>
+/// Tests to verify all required template files exist in the net8.0 folder structure.
+/// Note: Net8.0 only has .tt files for BlazorCrud, BlazorIdentity (non-Passkey), and Files templates.
+/// Other templates (EfController, MinimalApi, RazorPages, Views, Identity) use .cshtml format in net8.0.
+/// </summary>
 public class Net8TemplateExistenceTests
 {
     private static string GetTemplateBasePath()
@@ -22,7 +27,7 @@ public class Net8TemplateExistenceTests
         }
         
         Assert.NotNull(testDir);
-        return Path.Combine(testDir!, "src", "dotnet-scaffolding", "dotnet-scaffold", "AspNet", "Templates");
+        return Path.Combine(testDir!, "src", "dotnet-scaffolding", "dotnet-scaffold", "AspNet", "Templates", "net8.0");
     }
 
     #region BlazorCrud Templates
@@ -62,31 +67,6 @@ public class Net8TemplateExistenceTests
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
-    [Fact]
-    public void BlazorCrud_NotFoundTemplate_Exists()
-    {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "BlazorCrud", "NotFound.tt");
-        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
-    }
-
-    #endregion
-
-    #region BlazorEntraId Templates
-
-    [Fact]
-    public void BlazorEntraId_LoginLogoutEndpointRouteBuilderExtensionsTemplate_Exists()
-    {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "BlazorEntraId", "LoginLogoutEndpointRouteBuilderExtensions.tt");
-        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
-    }
-
-    [Fact]
-    public void BlazorEntraId_LoginOrLogoutTemplate_Exists()
-    {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "BlazorEntraId", "LoginOrLogout.tt");
-        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
-    }
-
     #endregion
 
     #region BlazorIdentity Core Templates
@@ -120,29 +100,15 @@ public class Net8TemplateExistenceTests
     }
 
     [Fact]
-    public void BlazorIdentity_PasskeyInputModelTemplate_Exists()
+    public void BlazorIdentity_IdentityUserAccessorTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "BlazorIdentity", "PasskeyInputModel.tt");
-        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
-    }
-
-    [Fact]
-    public void BlazorIdentity_PasskeyOperationTemplate_Exists()
-    {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "BlazorIdentity", "PasskeyOperation.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "BlazorIdentity", "IdentityUserAccessor.tt");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     #endregion
 
     #region BlazorIdentity Pages Templates
-
-    [Fact]
-    public void BlazorIdentity_Pages_AccessDeniedTemplate_Exists()
-    {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "BlazorIdentity", "Pages", "AccessDenied.tt");
-        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
-    }
 
     [Fact]
     public void BlazorIdentity_Pages_ConfirmEmailTemplate_Exists()
@@ -324,23 +290,9 @@ public class Net8TemplateExistenceTests
     }
 
     [Fact]
-    public void BlazorIdentity_Pages_Manage_PasskeysTemplate_Exists()
-    {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "BlazorIdentity", "Pages", "Manage", "Passkeys.tt");
-        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
-    }
-
-    [Fact]
     public void BlazorIdentity_Pages_Manage_PersonalDataTemplate_Exists()
     {
         var templatePath = Path.Combine(GetTemplateBasePath(), "BlazorIdentity", "Pages", "Manage", "PersonalData.tt");
-        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
-    }
-
-    [Fact]
-    public void BlazorIdentity_Pages_Manage_RenamePasskeyTemplate_Exists()
-    {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "BlazorIdentity", "Pages", "Manage", "RenamePasskey.tt");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
@@ -398,13 +350,6 @@ public class Net8TemplateExistenceTests
     }
 
     [Fact]
-    public void BlazorIdentity_Shared_PasskeySubmitTemplate_Exists()
-    {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "BlazorIdentity", "Shared", "PasskeySubmit.tt");
-        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
-    }
-
-    [Fact]
     public void BlazorIdentity_Shared_RedirectToLoginTemplate_Exists()
     {
         var templatePath = Path.Combine(GetTemplateBasePath(), "BlazorIdentity", "Shared", "RedirectToLogin.tt");
@@ -427,19 +372,19 @@ public class Net8TemplateExistenceTests
 
     #endregion
 
-    #region EfController Templates
+    #region EfController Templates (.cshtml)
 
     [Fact]
-    public void EfController_ApiEfControllerTemplate_Exists()
+    public void EfController_ApiControllerWithContextTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "EfController", "ApiEfController.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "EfController", "ApiControllerWithContext.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void EfController_MvcEfControllerTemplate_Exists()
+    public void EfController_MvcControllerWithContextTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "EfController", "MvcEfController.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "EfController", "MvcControllerWithContext.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
@@ -448,59 +393,76 @@ public class Net8TemplateExistenceTests
     #region Files Templates
 
     [Fact]
-    public void Files_ApplicationUserTemplate_Exists()
+    public void Files_IdentityApplicationUserTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "Files", "ApplicationUser.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Files", "IdentityApplicationUser.tt");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Files_IdentityDbContextTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Files", "IdentityDbContext.tt");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Files_LayoutTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Files", "_Layout.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Files_ErrorTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Files", "Error.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Files_ReadMeTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Files", "ReadMe.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Files_StartupTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Files", "Startup.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     #endregion
 
-    #region Identity Templates
-
-    [Fact]
-    public void Identity_Pages_ErrorTemplate_Exists()
-    {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "Identity", "Pages", "Error.tt");
-        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
-    }
-
-    [Fact]
-    public void Identity_Pages_ErrorModelTemplate_Exists()
-    {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "Identity", "Pages", "ErrorModel.tt");
-        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
-    }
-
-    [Fact]
-    public void Identity_Pages_ViewImportsTemplate_Exists()
-    {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "Identity", "Pages", "_ViewImports.tt");
-        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
-    }
-
-    [Fact]
-    public void Identity_Pages_ViewStartTemplate_Exists()
-    {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "Identity", "Pages", "_ViewStart.tt");
-        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
-    }
-
-    #endregion
-
-    #region MinimalApi Templates
+    #region MinimalApi Templates (.cshtml)
 
     [Fact]
     public void MinimalApi_MinimalApiTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "MinimalApi", "MinimalApi.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "MinimalApi", "MinimalApi.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
     public void MinimalApi_MinimalApiEfTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "MinimalApi", "MinimalApiEf.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "MinimalApi", "MinimalApiEf.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void MinimalApi_MinimalApiEfNoClassTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "MinimalApi", "MinimalApiEfNoClass.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void MinimalApi_MinimalApiNoClassTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "MinimalApi", "MinimalApiNoClass.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
@@ -509,111 +471,258 @@ public class Net8TemplateExistenceTests
     #region RazorPages Templates
 
     [Fact]
-    public void RazorPages_CreateTemplate_Exists()
+    public void RazorPages_Bootstrap4_CreateTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Create.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap4", "Create.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void RazorPages_CreateModelTemplate_Exists()
+    public void RazorPages_Bootstrap5_CreateTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "CreateModel.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap5", "Create.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void RazorPages_DeleteTemplate_Exists()
+    public void RazorPages_Bootstrap4_CreatePageModelTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Delete.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap4", "CreatePageModel.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void RazorPages_DeleteModelTemplate_Exists()
+    public void RazorPages_Bootstrap5_CreatePageModelTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "DeleteModel.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap5", "CreatePageModel.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void RazorPages_DetailsTemplate_Exists()
+    public void RazorPages_Bootstrap4_DeleteTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Details.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap4", "Delete.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void RazorPages_DetailsModelTemplate_Exists()
+    public void RazorPages_Bootstrap5_DeleteTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "DetailsModel.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap5", "Delete.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void RazorPages_EditTemplate_Exists()
+    public void RazorPages_Bootstrap4_DeletePageModelTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Edit.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap4", "DeletePageModel.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void RazorPages_EditModelTemplate_Exists()
+    public void RazorPages_Bootstrap5_DeletePageModelTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "EditModel.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap5", "DeletePageModel.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void RazorPages_IndexTemplate_Exists()
+    public void RazorPages_Bootstrap4_DetailsTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Index.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap4", "Details.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void RazorPages_IndexModelTemplate_Exists()
+    public void RazorPages_Bootstrap5_DetailsTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "IndexModel.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap5", "Details.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void RazorPages_Bootstrap4_DetailsPageModelTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap4", "DetailsPageModel.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void RazorPages_Bootstrap5_DetailsPageModelTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap5", "DetailsPageModel.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void RazorPages_Bootstrap4_EditTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap4", "Edit.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void RazorPages_Bootstrap5_EditTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap5", "Edit.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void RazorPages_Bootstrap4_EditPageModelTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap4", "EditPageModel.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void RazorPages_Bootstrap5_EditPageModelTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap5", "EditPageModel.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void RazorPages_Bootstrap4_ListTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap4", "List.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void RazorPages_Bootstrap5_ListTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap5", "List.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void RazorPages_Bootstrap4_ListPageModelTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap4", "ListPageModel.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void RazorPages_Bootstrap5_ListPageModelTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap5", "ListPageModel.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void RazorPages_Bootstrap4_ValidationScriptsPartialTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap4", "_ValidationScriptsPartial.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void RazorPages_Bootstrap5_ValidationScriptsPartialTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "RazorPages", "Bootstrap5", "_ValidationScriptsPartial.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     #endregion
 
-    #region Views Templates
+    #region Views Templates (.cshtml)
 
     [Fact]
-    public void Views_CreateTemplate_Exists()
+    public void Views_Bootstrap4_CreateTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Create.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap4", "Create.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void Views_DeleteTemplate_Exists()
+    public void Views_Bootstrap5_CreateTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Delete.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap5", "Create.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void Views_DetailsTemplate_Exists()
+    public void Views_Bootstrap4_DeleteTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Details.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap4", "Delete.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void Views_EditTemplate_Exists()
+    public void Views_Bootstrap5_DeleteTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Edit.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap5", "Delete.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 
     [Fact]
-    public void Views_IndexTemplate_Exists()
+    public void Views_Bootstrap4_DetailsTemplate_Exists()
     {
-        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Index.tt");
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap4", "Details.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Views_Bootstrap5_DetailsTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap5", "Details.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Views_Bootstrap4_EditTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap4", "Edit.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Views_Bootstrap5_EditTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap5", "Edit.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Views_Bootstrap4_EmptyTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap4", "Empty.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Views_Bootstrap5_EmptyTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap5", "Empty.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Views_Bootstrap4_ListTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap4", "List.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Views_Bootstrap5_ListTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap5", "List.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Views_Bootstrap4_ValidationScriptsPartialTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap4", "_ValidationScriptsPartial.cshtml");
+        Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
+    }
+
+    [Fact]
+    public void Views_Bootstrap5_ValidationScriptsPartialTemplate_Exists()
+    {
+        var templatePath = Path.Combine(GetTemplateBasePath(), "Views", "Bootstrap5", "_ValidationScriptsPartial.cshtml");
         Assert.True(File.Exists(templatePath), $"Template not found: {templatePath}");
     }
 

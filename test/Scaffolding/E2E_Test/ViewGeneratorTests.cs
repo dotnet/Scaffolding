@@ -35,11 +35,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
-        [SkippableTheory, MemberData(nameof(TestData))]
+        [Theory, MemberData(nameof(TestData))]
         public void TestViewGenerator(string baselineFile, string generatedFilePath, string[] args)
         {
-            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
-            Skip.If(string.IsNullOrEmpty(runSkippableTests));
 
             using (var fileProvider = new TemporaryFileProvider())
             {

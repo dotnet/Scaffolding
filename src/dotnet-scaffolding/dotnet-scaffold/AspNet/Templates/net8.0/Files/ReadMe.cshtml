@@ -1,0 +1,73 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using System.Collections.Generic;
+@using System.Linq;
+Scaffolding has generated all the files and added the required dependencies.
+
+However the Application's Startup code may require additional changes for things to work end to end.
+@{if(!Model.IsAreaReadMe)
+{
+
+@:Add the following namespace usings if not already added:
+
+    var allNamespaces = new HashSet<string>(StringComparer.Ordinal);
+    foreach (var list in Model.StartupList)
+    {
+        allNamespaces.UnionWith(list.RequiredNamespaces);
+    }
+    foreach (var namespaceName in allNamespaces.OrderBy(n=>n))
+    {
+@:using @namespaceName;
+    }
+
+@:Add the following code to the end of Configure method in your Application's Startup class if not already done:
+@:
+            // Set up application services
+            @:app.UseServices(services =>
+            @:{
+
+    var count = Model.StartupList.Count;
+    for (var index = 0; index < count; index++)
+    {
+        var list = Model.StartupList[index];
+        var atleastOneStatement = false;
+        foreach (var statement in list.ServiceStatements)
+        {
+            atleastOneStatement = true;
+                @:@statement
+        }
+        if (atleastOneStatement && (index != count-1))
+        {
+@:
+        }
+    }
+@:}            });
+
+    for (var index = 0; index < count; index++)
+    {
+        var list = Model.StartupList[index];
+        var atleastOneStatement = false;
+        foreach (var statement in list.UseStatements)
+        {
+            atleastOneStatement = true;
+            @:@statement
+        }
+        if (atleastOneStatement && (index != count-1))
+        {
+@:
+        }
+        }
+
+    }
+    else
+    {
+@:Add the following code to the Configure method in your Application's Startup class if not already done:
+@:
+        @:app.UseEndpoints(endpoints =>
+        @:{
+        @:  endpoints.MapControllerRoute(
+        @:    name : "areas",
+        @:    pattern : "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+        @:  );
+        @:});
+}
+    }

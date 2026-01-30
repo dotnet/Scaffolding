@@ -15,11 +15,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
         {
         }
 
-        [SkippableFact]
+        [Fact]
         public void TestMinimalApiGenerator()
         {
-            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
-            Skip.If(string.IsNullOrEmpty(runSkippableTests));
 
             using (var fileProvider = new TemporaryFileProvider())
             {

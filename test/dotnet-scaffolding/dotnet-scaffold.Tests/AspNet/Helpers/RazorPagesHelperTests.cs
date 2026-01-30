@@ -20,7 +20,7 @@ public class RazorPagesHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages.Create), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.Create), result);
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class RazorPagesHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages.CreateModel), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.CreateModel), result);
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class RazorPagesHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages.Index), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.Index), result);
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class RazorPagesHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages.IndexModel), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.IndexModel), result);
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public class RazorPagesHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages.Delete), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.Delete), result);
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class RazorPagesHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages.DeleteModel), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.DeleteModel), result);
     }
 
     [Fact]
@@ -104,7 +104,7 @@ public class RazorPagesHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages.Edit), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.Edit), result);
     }
 
     [Fact]
@@ -118,7 +118,7 @@ public class RazorPagesHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages.EditModel), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.EditModel), result);
     }
 
     [Fact]
@@ -132,7 +132,7 @@ public class RazorPagesHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages.Details), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.Details), result);
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public class RazorPagesHelperTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages.DetailsModel), result);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.DetailsModel), result);
     }
 
     [Fact]

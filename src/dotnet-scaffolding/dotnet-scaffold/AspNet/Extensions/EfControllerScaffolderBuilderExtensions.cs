@@ -168,7 +168,7 @@ internal static class EfControllerScaffolderBuilderExtensions
                     throw new InvalidOperationException(missingViewModelExceptionMssg);
 
                 //TODO add extensions if 'TemplateFoldersUtilities' is not reworked.
-                var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["Views"]);
+                var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["net10.0\\Views"]);
                 var viewTemplateProperties = ViewHelper.GetTextTemplatingProperties(allT4TemplatePaths, viewModel);
                 if (viewTemplateProperties.Any())
                 {

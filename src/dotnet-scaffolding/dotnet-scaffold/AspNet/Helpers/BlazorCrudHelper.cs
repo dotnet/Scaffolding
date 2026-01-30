@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Roslyn;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorCrud;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
@@ -227,7 +227,7 @@ internal static class BlazorCrudHelper
                 templateType = typeof(Create);
                 break;
             case IndexBlazorTemplate:
-                templateType = typeof(Templates.BlazorCrud.Index);
+                templateType = typeof(Templates.net10.BlazorCrud.Index);
                 break;
             case DeleteBlazorTemplate:
                 templateType = typeof(Delete);

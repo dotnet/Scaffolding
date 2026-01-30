@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Views;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
@@ -95,7 +95,7 @@ internal class ViewHelper
                 templateType = typeof(Create);
                 break;
             case IndexTemplate:
-                templateType = typeof(Templates.Views.Index);
+                templateType = typeof(Templates.net10.Views.Index);
                 break;
             case DeleteTemplate:
                 templateType = typeof(Delete);

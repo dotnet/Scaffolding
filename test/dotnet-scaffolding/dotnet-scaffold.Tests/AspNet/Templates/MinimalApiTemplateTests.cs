@@ -5,7 +5,7 @@ using System.IO;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.MinimalApi;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;

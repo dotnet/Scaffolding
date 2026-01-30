@@ -72,8 +72,8 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             IdentityModel blazorIdentityModel = blazorIdentityModelObj as IdentityModel ??
                 throw new InvalidOperationException("missing 'IdentityModel' in 'ScaffolderContext.Properties'");
             var templateFolderUtilities = new TemplateFoldersUtilities();
-            var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4Templates(["BlazorIdentity"]);
-            var applicationUserFile = templateFolderUtilities.GetAllT4Templates(["Files"])
+            var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4Templates(["net10.0\\BlazorIdentity"]);
+            var applicationUserFile = templateFolderUtilities.GetAllT4Templates(["net10.0\\Files"])
                 .FirstOrDefault(x => x.EndsWith("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
             var blazorIdentityProperties = BlazorIdentityHelper.GetTextTemplatingProperties(allBlazorIdentityFiles, blazorIdentityModel);
             var applicationUserProperty = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(applicationUserFile, blazorIdentityModel);

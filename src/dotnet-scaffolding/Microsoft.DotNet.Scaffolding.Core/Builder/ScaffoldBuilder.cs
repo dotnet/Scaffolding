@@ -19,6 +19,8 @@ public class ScaffoldBuilder(string name) : IScaffoldBuilder
     private readonly List<ScaffolderOption> _options = [];
     // List of step preparers for the scaffolder
     private readonly List<ScaffoldStepPreparer> _stepPreparers = [];
+    // List of examples for the scaffolder
+    private readonly List<(string Example, string? Description)> _examples = [];
     // Name of the scaffolder
     private readonly string _name = FixName(name);
     // Display name of the scaffolder
@@ -40,6 +42,8 @@ public class ScaffoldBuilder(string name) : IScaffoldBuilder
     internal IEnumerable<ScaffolderOption> Options => _options;
     // Gets the step preparers for the scaffolder
     internal IEnumerable<ScaffoldStepPreparer> StepPreparers => _stepPreparers;
+    // Gets the examples for the scaffolder
+    internal IEnumerable<(string Example, string? Description)> Examples => _examples;
 
     /// <inheritdoc/>
     public IScaffoldBuilder WithDisplayName(string displayName)
@@ -59,6 +63,13 @@ public class ScaffoldBuilder(string name) : IScaffoldBuilder
     public IScaffoldBuilder WithDescription(string description)
     {
         _description = description;
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public IScaffoldBuilder WithExample(string example, string? description = null)
+    {
+        _examples.Add((example, description));
         return this;
     }
 
@@ -103,7 +114,7 @@ public class ScaffoldBuilder(string name) : IScaffoldBuilder
             steps.Add((ScaffoldStep)stepInstance);    
         }
 
-        return new Scaffolder(Name, DisplayName, Categories.ToList(), Description, _options, steps, _stepPreparers);
+        return new Scaffolder(Name, DisplayName, Categories.ToList(), Description, _options, steps, _stepPreparers, _examples);
     }
 
     /// <summary>

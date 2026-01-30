@@ -32,7 +32,7 @@ internal static class PackageExtensions
     /// <param name="logger">The logger to use for logging messages.</param>
     /// <returns>A package instance with the version property set to the resolved version for the specified target framework, or
     /// the original package if the version is already set or cannot be resolved.</returns>
-    public static async Task<Package> WithResolvedVersionAsync(this Package package, string? targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null)
+    public static async Task<Package> WithResolvedVersionAsync(this Package package, TargetFramework? targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null)
     {
         if (package.PackageVersion is not null)
         {
@@ -59,7 +59,7 @@ internal static class PackageExtensions
     /// <param name="logger">The logger to use for logging messages.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the corresponding NuGet package
     /// version if available; otherwise, <see langword="null"/> if the package does not require a version or target framework is not supported.</returns>
-    private static Task<NuGetVersion?> GetVersionForTargetFrameworkAsync(this Package package, string? targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null)
+    private static Task<NuGetVersion?> GetVersionForTargetFrameworkAsync(this Package package, TargetFramework? targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null)
     {
         if (!package.IsVersionRequired)
         {
@@ -72,19 +72,19 @@ internal static class PackageExtensions
             return Task.FromResult<NuGetVersion?>(null);
         }
 
-        if (targetFramework.Equals(TargetFrameworkConstants.Net8, StringComparison.OrdinalIgnoreCase))
+        if (targetFramework is TargetFramework.Net8)
         {
             return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 8);
         }
-        else if (targetFramework.Equals(TargetFrameworkConstants.Net9, StringComparison.OrdinalIgnoreCase))
+        else if (targetFramework is TargetFramework.Net9)
         {
             return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 9);
         }
-        else if (targetFramework.Equals(TargetFrameworkConstants.Net10, StringComparison.OrdinalIgnoreCase))
+        else if (targetFramework is TargetFramework.Net10)
         {
             return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 10);
         }
-        else if (targetFramework.Equals(TargetFrameworkConstants.Net11, StringComparison.OrdinalIgnoreCase))
+        else if (targetFramework is TargetFramework.Net11)
         {
             return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 11);
         }

@@ -17,6 +17,7 @@ public class Scaffolder : IScaffolder
     private readonly List<ScaffolderOption> _options;
     private readonly List<ScaffoldStep> _steps;
     private readonly List<ScaffoldStepPreparer> _preparers;
+    private readonly List<(string Example, string? Description)> _examples;
 
     /// <inheritdoc/>
     public string Name => _name;
@@ -28,6 +29,8 @@ public class Scaffolder : IScaffolder
     public string? Description => _description;
     /// <inheritdoc/>
     public IEnumerable<ScaffolderOption> Options => _options;
+    /// <inheritdoc/>
+    public IEnumerable<(string Example, string? Description)> Examples => _examples;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Scaffolder"/> class.
@@ -39,7 +42,8 @@ public class Scaffolder : IScaffolder
     /// <param name="options">The options for the scaffolder.</param>
     /// <param name="steps">The steps for the scaffolder.</param>
     /// <param name="preparers">The preparers for the scaffolder steps.</param>
-    internal Scaffolder(string name, string displayName, List<string> categories, string? description, List<ScaffolderOption> options, List<ScaffoldStep> steps, List<ScaffoldStepPreparer> preparers)
+    /// <param name="examples">The example usages for the scaffolder.</param>
+    internal Scaffolder(string name, string displayName, List<string> categories, string? description, List<ScaffolderOption> options, List<ScaffoldStep> steps, List<ScaffoldStepPreparer> preparers, List<(string Example, string? Description)>? examples = null)
     {
         _name = name;
         _displayName = displayName;
@@ -48,6 +52,7 @@ public class Scaffolder : IScaffolder
         _options = options;
         _steps = steps;
         _preparers = preparers;
+        _examples = examples ?? [];
     }
 
     /// <inheritdoc/>

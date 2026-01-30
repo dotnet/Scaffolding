@@ -14,6 +14,14 @@ using Microsoft.DotNet.Tools.Scaffold.Interactive.AppBuilder;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 
+// Handle --full-help option before building the runner
+// This allows users to invoke: dotnet scaffold --full-help
+if (args.Contains("--full-help", StringComparer.OrdinalIgnoreCase))
+{
+    // Convert --full-help to the full-help subcommand
+    args = ["full-help"];
+}
+
 IScaffoldRunnerBuilder builder = Host.CreateScaffoldBuilder();
 
 ConfigureServices(builder.Services);

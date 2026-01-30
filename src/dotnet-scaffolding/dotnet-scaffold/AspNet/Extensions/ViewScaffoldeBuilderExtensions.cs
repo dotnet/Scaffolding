@@ -29,7 +29,7 @@ internal static class ViewScaffoldeBuilderExtensions
             ViewModel viewModel = viewModelObj as ViewModel ??
                 throw new InvalidOperationException("missing 'ViewModel' in 'ScaffolderContext.Properties'");
 
-            var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["Views"]);
+            var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["net10.0\\Views"]);
             var viewTemplateProperties = ViewHelper.GetTextTemplatingProperties(allT4TemplatePaths, viewModel);
             if (viewTemplateProperties.Any())
             {

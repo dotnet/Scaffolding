@@ -18,7 +18,7 @@ internal static class EfControllerHelper
     /// <exception cref="InvalidOperationException">Thrown when the template for the specified controller type cannot be found.</exception>
     internal static TextTemplatingProperty GetEfControllerTemplatingProperty(EfControllerModel efControllerModel)
     {
-        var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["EfController"]);
+        var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["net10.0\\EfController"]);
         string? t4TemplatePath = null;
         if (efControllerModel.ControllerType.Equals("API", StringComparison.OrdinalIgnoreCase))
         {
@@ -62,9 +62,9 @@ internal static class EfControllerHelper
         switch (Path.GetFileName(templatePath))
         {
             case "ApiEfController.tt":
-                return typeof(Templates.EfController.ApiEfController);
+                return typeof(Templates.net10.EfController.ApiEfController);
             case "MvcEfController.tt":
-                return typeof(Templates.EfController.MvcEfController);
+                return typeof(Templates.net10.EfController.MvcEfController);
             default:
                 break;
         }

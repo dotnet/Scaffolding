@@ -31,7 +31,7 @@ internal static class BlazorCrudScaffolderBuilderExtensions
             BlazorCrudModel blazorCrudModel = blazorCrudModelObj as BlazorCrudModel ??
                 throw new InvalidOperationException("missing 'BlazorCrudModel' in 'ScaffolderContext.Properties'");
 
-            var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["BlazorCrud"]);
+            var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["net10.0\\BlazorCrud"]);
             var blazorCrudTemplateProperties = BlazorCrudHelper.GetTextTemplatingProperties(allT4TemplatePaths, blazorCrudModel);
             if (blazorCrudTemplateProperties.Any())
             {

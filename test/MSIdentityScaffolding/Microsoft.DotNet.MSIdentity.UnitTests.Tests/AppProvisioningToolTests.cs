@@ -1,8 +1,13 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.IO;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
+using Microsoft.DotNet.MSIdentity.Shared;
+using Microsoft.DotNet.MSIdentity.Tool;
+using Moq;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -596,5 +601,132 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
             (bool needsUpdate, JToken update) = AppSettingsModifier.GetUpdatedValue(propertyName, existingValue, newValue);
             Assert.Equal(update?.ToString(), expected);
         }
+
+        /// <summary>
+        /// Helper method to get the ValidateProjectPath method using reflection
+        /// </summary>
+        private static System.Reflection.MethodInfo GetValidateProjectPathMethod()
+        {
+            var methodInfo = typeof(AppProvisioningTool).GetMethod("ValidateProjectPath",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            Assert.NotNull(methodInfo); // Ensure the method exists
+            return methodInfo;
+        }
+
+        [Fact]
+        public void ValidateProjectPath_NullProjectFilePath_NoErrorThrown()
+        {
+            // Arrange
+            var options = new ProvisioningToolOptions
+            {
+                ProjectPath = "/test/path",
+                ProjectFilePath = null
+            };
+
+            var tool = new AppProvisioningTool("test-command", options, silent: true);
+            var methodInfo = GetValidateProjectPathMethod();
+
+            // Act - invoke the private method
+            methodInfo.Invoke(tool, null);
+
+            // Assert - ProjectPath should remain unchanged
+            Assert.Equal("/test/path", options.ProjectPath);
+        }
+
+        [Fact]
+        public void ValidateProjectPath_EmptyProjectFilePath_NoErrorThrown()
+        {
+            // Arrange
+            var options = new ProvisioningToolOptions
+            {
+                ProjectPath = "/test/path",
+                ProjectFilePath = string.Empty
+            };
+
+            var tool = new AppProvisioningTool("test-command", options, silent: true);
+            var methodInfo = GetValidateProjectPathMethod();
+
+            // Act - invoke the private method
+            methodInfo.Invoke(tool, null);
+
+            // Assert - ProjectPath should remain unchanged
+            Assert.Equal("/test/path", options.ProjectPath);
+        }
+
+        [Fact]
+        public void ValidateProjectPath_ValidProjectFilePath_UpdatesProjectPath()
+        {
+            // Arrange - create a temporary test file
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            var tempFile = Path.Combine(tempDir, "test.csproj");
+            File.WriteAllText(tempFile, "<Project></Project>");
+
+            try
+            {
+                var options = new ProvisioningToolOptions
+                {
+                    ProjectPath = "/some/other/path",
+                    ProjectFilePath = tempFile
+                };
+
+                var tool = new AppProvisioningTool("test-command", options, silent: true);
+                var methodInfo = GetValidateProjectPathMethod();
+
+                // Act
+                methodInfo.Invoke(tool, null);
+
+                // Assert - ProjectPath should be updated to the directory of the file
+                Assert.Equal(tempDir, options.ProjectPath);
+            }
+            finally
+            {
+                // Cleanup
+                if (Directory.Exists(tempDir))
+                {
+                    Directory.Delete(tempDir, true);
+                }
+            }
+        }
+
+        [Fact]
+        public void ValidateProjectPath_ValidProjectFilePathMatchingProjectPath_NoUpdate()
+        {
+            // Arrange - create a temporary test file
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDir);
+            var tempFile = Path.Combine(tempDir, "test.csproj");
+            File.WriteAllText(tempFile, "<Project></Project>");
+
+            try
+            {
+                var options = new ProvisioningToolOptions
+                {
+                    ProjectPath = tempDir,
+                    ProjectFilePath = tempFile
+                };
+
+                var tool = new AppProvisioningTool("test-command", options, silent: true);
+                var methodInfo = GetValidateProjectPathMethod();
+
+                // Act
+                methodInfo.Invoke(tool, null);
+
+                // Assert - ProjectPath should remain the same
+                Assert.Equal(tempDir, options.ProjectPath);
+            }
+            finally
+            {
+                // Cleanup
+                if (Directory.Exists(tempDir))
+                {
+                    Directory.Delete(tempDir, true);
+                }
+            }
+        }
+
+        // Note: Cannot add a test for invalid ProjectFilePath that calls LogFailureAndExit
+        // because LogFailureAndExit calls Environment.Exit(1), which would terminate
+        // the test runner process. This behavior is tested through integration tests instead.
     }
 }

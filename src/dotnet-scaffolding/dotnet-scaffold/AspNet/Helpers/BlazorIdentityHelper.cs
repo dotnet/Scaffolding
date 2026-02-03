@@ -22,6 +22,11 @@ internal static class BlazorIdentityHelper
     /// <returns>An <see cref="IEnumerable{TextTemplatingProperty}"/> collection containing the text templating properties for the specified templates.</returns>
     internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, IdentityModel blazorIdentityModel)
     {
+        if (blazorIdentityModel.ProjectInfo is null || string.IsNullOrEmpty(blazorIdentityModel.ProjectInfo.ProjectPath))
+        {
+            return [];
+        }
+
         var textTemplatingProperties = new List<TextTemplatingProperty>();
         foreach (var templatePath in allT4TemplatePaths)
         {
@@ -31,6 +36,7 @@ internal static class BlazorIdentityHelper
                 !string.IsNullOrEmpty(x.FullName) &&
                 x.FullName.Contains(templateFullName) &&
                 x.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase));
+
             var projectName = Path.GetFileNameWithoutExtension(blazorIdentityModel.ProjectInfo.ProjectPath);
 
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))

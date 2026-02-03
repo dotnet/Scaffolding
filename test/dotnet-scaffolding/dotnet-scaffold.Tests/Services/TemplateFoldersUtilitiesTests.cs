@@ -48,7 +48,7 @@ public class TemplateFoldersUtilitiesTests : IDisposable
         var utilities = new TemplateFoldersUtilities();
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => utilities.GetTemplateFolders(null!));
+        Assert.Throws<ArgumentNullException>(() => utilities.GetTemplateFoldersWithFramework("net8.0", null!));
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class TemplateFoldersUtilitiesTests : IDisposable
         var utilities = new TemplateFoldersUtilities();
 
         // Act
-        var result = utilities.GetTemplateFolders([]);
+        var result = utilities.GetTemplateFoldersWithFramework("net8.0", []);
 
         // Assert
         Assert.NotNull(result);
@@ -73,7 +73,7 @@ public class TemplateFoldersUtilitiesTests : IDisposable
         string[] baseFolders = ["TestFolder"];
 
         // Act
-        var result = utilities.GetAllT4Templates(baseFolders);
+        var result = utilities.GetAllFiles("net11.0", baseFolders, ".tt");
 
         // Assert
         Assert.NotNull(result);
@@ -89,7 +89,7 @@ public class TemplateFoldersUtilitiesTests : IDisposable
         string[] baseFolders = ["TestFolder"];
 
         // Act
-        var result = utilities.GetAllFiles(baseFolders, null);
+        var result = utilities.GetAllFiles("net11.0", baseFolders, null);
 
         // Assert
         Assert.NotNull(result);
@@ -104,7 +104,7 @@ public class TemplateFoldersUtilitiesTests : IDisposable
         string[] baseFolders = ["TestFolder"];
 
         // Act
-        var result = utilities.GetAllFiles(baseFolders, ".cs");
+        var result = utilities.GetAllFiles("net11.0", baseFolders, ".cs");
 
         // Assert
         Assert.NotNull(result);
@@ -269,7 +269,7 @@ public class TemplateFoldersUtilitiesTests : IDisposable
         string[] baseFolders = ["Folder1", "Folder2", "Folder3"];
 
         // Act
-        var result = utilities.GetTemplateFolders(baseFolders);
+        var result = utilities.GetTemplateFoldersWithFramework("net11.0", baseFolders);
 
         // Assert
         Assert.NotNull(result);

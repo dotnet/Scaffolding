@@ -41,7 +41,8 @@ public class AddFileStepTests
             _mockFileSystem.Object)
         {
             FileName = string.Empty,
-            BaseOutputDirectory = _testOutputDirectory
+            BaseOutputDirectory = _testOutputDirectory,
+            ProjectPath = "test.csproj"
         };
 
         // Act
@@ -60,7 +61,8 @@ public class AddFileStepTests
             _mockFileSystem.Object)
         {
             FileName = "test.txt",
-            BaseOutputDirectory = string.Empty
+            BaseOutputDirectory = string.Empty,
+            ProjectPath = "test.csproj"
         };
 
         // Act
@@ -79,7 +81,8 @@ public class AddFileStepTests
             _mockFileSystem.Object)
         {
             FileName = "test.txt",
-            BaseOutputDirectory = _testOutputDirectory
+            BaseOutputDirectory = _testOutputDirectory,
+            ProjectPath = "test.csproj"
         };
 
         // Assert
@@ -101,7 +104,8 @@ public class AddFileStepTests
             _mockFileSystem.Object)
         {
             FileName = expectedFileName,
-            BaseOutputDirectory = expectedOutputDirectory
+            BaseOutputDirectory = expectedOutputDirectory,
+            ProjectPath = "test.csproj"
         };
 
         // Assert
@@ -118,7 +122,8 @@ public class AddFileStepTests
             _mockFileSystem.Object)
         {
             FileName = "test.txt",
-            BaseOutputDirectory = _testOutputDirectory
+            BaseOutputDirectory = _testOutputDirectory,
+            ProjectPath = "test.csproj"
         };
 
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -140,7 +145,8 @@ public class AddFileStepTests
             _mockFileSystem.Object)
         {
             FileName = string.Empty,
-            BaseOutputDirectory = string.Empty
+            BaseOutputDirectory = string.Empty,
+            ProjectPath = "test.csproj"
         };
 
         // Act

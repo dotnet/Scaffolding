@@ -1,0 +1,178 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.EfControllerModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string modelNameUpperVariant = Model.ModelInfo.ModelTypeNameCapitalized;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName.ToUpperInvariant();
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
+    string dbContextName = Model.DbContextInfo.DbContextClassName;
+    string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string primaryKeyTypeName = Model.ModelInfo.PrimaryKeyTypeName;
+#>
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+<#
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
+        #>using <#= modelNamespace #>;
+<#  }
+#>
+<#
+    if (!string.IsNullOrEmpty(dbContextNamespace))
+    {
+        #>using <#= dbContextNamespace #>;
+<#  }
+#>
+
+public class <#= Model.ControllerName #> : Controller
+{
+    private readonly <#= dbContextName #> _context;
+
+    public <#= Model.ControllerName #>(<#= dbContextName #> context)
+    {
+        _context = context;
+    }
+
+    // GET: <#= pluralModel #>
+    public async Task<IActionResult> Index()    
+    {
+        return View(await _context.<#= entitySetName #>.ToListAsync());
+    }
+
+    // GET: <#= pluralModel #>/Details/5
+    public async Task<IActionResult> Details(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>)
+    {
+        if (<#= primaryKeyNameLowerInv #> == null)
+        {
+            return NotFound();
+        }
+
+        var <#= modelNameLowerInv #> = await _context.<#= entitySetName #>
+            .FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyNameLowerInv #>);
+        if (<#= modelNameLowerInv #> == null)
+        {
+            return NotFound();
+        }
+
+        return View(<#= modelNameLowerInv #>);
+    }
+
+    // GET: <#= pluralModel #>/Create
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    // POST: <#= pluralModel #>/Create
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([Bind("Title,ReleaseDate,Genre,Price")] <#= modelName #> <#= modelNameLowerInv #>)
+    {
+        if (ModelState.IsValid)
+        {
+            _context.Add(<#= modelNameLowerInv #>);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+        return View(<#= modelNameLowerInv #>);
+    }
+
+    // GET: <#= pluralModel #>/Edit/5
+    public async Task<IActionResult> Edit(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>)
+    {
+        if (<#= primaryKeyNameLowerInv #> == null)
+        {
+            return NotFound();
+        }
+
+        var <#= modelNameLowerInv #> = await _context.<#= entitySetName #>.FindAsync(<#= primaryKeyNameLowerInv #>);
+        if (<#= modelNameLowerInv #> == null)
+        {
+            return NotFound();
+        }
+        return View(<#= modelNameLowerInv #>);
+    }
+
+    // POST: <#= pluralModel #>/Edit/5
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>, [Bind("Id,Title,ReleaseDate,Genre,Price")] <#= modelName #> <#= modelNameLowerInv #>)
+    {
+        if (<#= primaryKeyNameLowerInv #> != <#= modelNameLowerInv #>.<#= primaryKeyName #>)
+        {
+            return NotFound();
+        }
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                _context.Update(<#= modelNameLowerInv #>);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!<#= modelNameUpperVariant #>Exists(<#= modelNameLowerInv #>.<#= primaryKeyName #>))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
+        }
+        return View(<#= modelNameLowerInv #>);
+    }
+
+    // GET: <#= pluralModel #>/Delete/5
+    public async Task<IActionResult> Delete(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>)
+    {
+        if (<#= primaryKeyNameLowerInv #> == null)
+        {
+            return NotFound();
+        }
+
+        var <#= modelNameLowerInv #> = await _context.<#= entitySetName #>
+            .FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyNameLowerInv #>);
+        if (<#= modelNameLowerInv #> == null)
+        {
+            return NotFound();
+        }
+
+        return View(<#= modelNameLowerInv #>);
+    }
+
+    // POST: <#= pluralModel #>/Delete/5
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>)
+    {
+        var <#= modelNameLowerInv #> = await _context.<#= entitySetName #>.FindAsync(<#= primaryKeyNameLowerInv #>);
+        if (<#= modelNameLowerInv #> != null)
+        {
+            _context.<#= entitySetName #>.Remove(<#= modelNameLowerInv #>);
+        }
+
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    private bool <#= modelNameUpperVariant #>Exists(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>)
+    {
+        return _context.<#= entitySetName #>.Any(e => e.<#= primaryKeyName #> == <#= primaryKeyNameLowerInv #>);
+    }
+}

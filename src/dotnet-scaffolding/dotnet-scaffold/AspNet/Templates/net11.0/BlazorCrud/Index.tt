@@ -1,0 +1,74 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.BlazorCrudModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName;
+    string modelNameLowerInv = modelName.ToLowerInvariant();
+    string pluralModelLowerInv = pluralModel.ToLowerInvariant();
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
+    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.DbContextInfo.DbContextClassName : $"{dbContextNamespace}.{Model.DbContextInfo.DbContextClassName}";
+    string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    var entityProperties =  Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;
+    string entitySetName = Model.DbContextInfo.EntitySetVariableName;
+#>
+@page "/<#= pluralModelLowerInv #>"
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Microsoft.EntityFrameworkCore
+<#
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
+        #>@using <#= modelNamespace#>
+<#  }
+#>
+<#
+    if (!string.IsNullOrEmpty(dbContextNamespace))
+    {
+        #>@using <#= dbContextNamespace#>
+<#  }
+#>
+@implements IAsyncDisposable
+@inject <#=dbContextFactory #>
+@inject NavigationManager NavigationManager
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="<#= pluralModelLowerInv #>/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.<#= entitySetName #>">
+<#
+    foreach (var property in entityProperties)
+    {
+        string modelPropertyName = property.Name;
+#>
+    <PropertyColumn Property="<#= modelNameLowerInv #> => <#= modelNameLowerInv #>.<#=modelPropertyName #>" />
+<#  } #>
+
+    <TemplateColumn Context="<#= modelNameLowerInv #>">
+        <a href="@($"<#= pluralModelLowerInv #>/edit?<#= primaryKeyNameLowerInv #>={<#= modelNameLowerInv #>.<#= primaryKeyName #>}")">Edit</a> |
+        <a href="@($"<#= pluralModelLowerInv #>/details?<#= primaryKeyNameLowerInv #>={<#= modelNameLowerInv #>.<#= primaryKeyName #>}")">Details</a> |
+        <a href="@($"<#= pluralModelLowerInv #>/delete?<#= primaryKeyNameLowerInv #>={<#= modelNameLowerInv #>.<#= primaryKeyName #>}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private <#= Model.DbContextInfo.DbContextClassName #> context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

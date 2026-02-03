@@ -131,11 +131,11 @@ internal class TemplateFoldersUtilities : ITemplateFolderService
                 return "net8.0";
             case TargetFramework.Net9:
                 return "net9.0";
+            case TargetFramework.Net10:
+                return "net10.0";
         }
 
-        // there are not any .net 11 specific templates yet, so default to net10.0
-
-        return "net10.0";
+        return "net11.0";
     }
 }
 

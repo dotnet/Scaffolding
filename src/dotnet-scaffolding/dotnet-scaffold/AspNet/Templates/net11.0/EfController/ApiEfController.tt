@@ -1,0 +1,126 @@
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.EfControllerModel" name="Model" #>
+<#@  import namespace="System.Collections.Generic" #>
+<#@  import namespace="System.Text" #>
+<#@  import namespace="System.Linq" #>
+<#
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string modelNameLowerVariant = modelName.ToLowerInvariant();
+    string pluralModel = Model.ModelInfo.ModelTypePluralName.ToUpperInvariant();
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
+    string dbContextName = Model.DbContextInfo.DbContextClassName;
+    string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
+    string primaryKeyTypeName = Model.ModelInfo.PrimaryKeyTypeName;
+#>
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+<#
+    if (!string.IsNullOrEmpty(modelNamespace))
+    {
+        #>using <#= modelNamespace #>;
+<#  }
+#>
+<#
+    if (!string.IsNullOrEmpty(dbContextNamespace))
+    {
+        #>using <#= dbContextNamespace #>;
+<#  }
+#>
+
+[Route("api/[controller]")]
+[ApiController]
+public class <#= Model.ControllerName #> : ControllerBase
+{
+    private readonly <#= dbContextName #> _context;
+    public <#= Model.ControllerName #>(<#= dbContextName #> context)
+    {
+        _context = context;
+    }
+
+    // GET: api/<#= modelName #>
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<<#= modelName #>>>> Get<#= modelName #>()
+    {
+        return await _context.<#= entitySetName #>.ToListAsync();
+    }
+
+    // GET: api/<#= modelName #>/5
+    [HttpGet("{<#= primaryKeyNameLowerInv #>}")]
+    public async Task<ActionResult<<#= modelName #>>> Get<#= modelName #>(<#= primaryKeyTypeName #> <#= primaryKeyNameLowerInv #>)
+    {
+        var <#= modelNameLowerVariant #> = await _context.<#= entitySetName #>.FindAsync(<#= primaryKeyNameLowerInv #>);
+
+        if (<#= modelNameLowerVariant #> == null)
+        {
+            return NotFound();
+        }
+
+        return <#= modelNameLowerVariant #>;
+    }
+
+    // PUT: api/<#= modelName #>/5
+    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    [HttpPut("{<#= primaryKeyNameLowerInv #>}")]
+    public async Task<IActionResult> Put<#= modelName #>(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>, <#= modelName #> <#= modelNameLowerVariant #>)
+    {
+        if (<#= primaryKeyNameLowerInv #> != <#= modelNameLowerVariant #>.<#= primaryKeyName #>)
+        {
+            return BadRequest();
+        }
+
+        _context.Entry(<#= modelNameLowerVariant #>).State = EntityState.Modified;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!<#= modelName #>Exists(<#= primaryKeyNameLowerInv #>))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        return NoContent();
+    }
+
+    // POST: api/<#= modelName #>
+    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    [HttpPost]
+    public async Task<ActionResult<<#= modelName #>>> Post<#= modelName #>(<#= modelName #> <#= modelNameLowerVariant #>)
+    {
+        _context.<#= entitySetName #>.Add(<#= modelNameLowerVariant #>);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction("Get<#= modelName #>", new { <#= primaryKeyNameLowerInv #> = <#= modelNameLowerVariant #>.<#= primaryKeyName #> }, <#= modelNameLowerVariant #>);
+    }
+
+    // DELETE: api/<#= modelName #>/5
+    [HttpDelete("{<#= primaryKeyNameLowerInv #>}")]
+    public async Task<IActionResult> Delete<#= modelName #>(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>)
+    {
+        var <#= modelNameLowerVariant #> = await _context.<#= entitySetName #>.FindAsync(<#= primaryKeyNameLowerInv #>);
+        if (<#= modelNameLowerVariant #> == null)
+        {
+            return NotFound();
+        }
+
+        _context.<#= entitySetName #>.Remove(<#= modelNameLowerVariant #>);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    private bool <#= modelName #>Exists(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>)
+    {
+        return _context.<#= entitySetName #>.Any(e => e.<#= primaryKeyName #> == <#= primaryKeyNameLowerInv #>);
+    }
+}

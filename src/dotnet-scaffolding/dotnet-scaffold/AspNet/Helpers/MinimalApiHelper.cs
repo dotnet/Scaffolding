@@ -18,7 +18,7 @@ internal static class MinimalApiHelper
     /// <exception cref="InvalidOperationException">Thrown when the minimal API template cannot be determined.</exception>
     internal static TextTemplatingProperty GetMinimalApiTemplatingProperty(MinimalApiModel minimalApiModel)
     {
-        var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["net10.0\\MinimalApi"]);
+        var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["net11.0\\MinimalApi"]);
         string? t4TemplatePath = null;
         if (minimalApiModel.DbContextInfo.EfScenario)
         {

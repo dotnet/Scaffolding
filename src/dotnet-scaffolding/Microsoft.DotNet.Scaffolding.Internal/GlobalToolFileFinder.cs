@@ -22,6 +22,14 @@ internal static class GlobalToolFileFinder
         var codeModificationConfigFolder = Path.Combine(toolsFolderPath, "CodeModificationConfigs");
         if (Directory.Exists(codeModificationConfigFolder))
         {
+            // First try to find the file using the full relative path (for folder-structured configs)
+            var fullPath = Path.Combine(codeModificationConfigFolder, fileName);
+            if (File.Exists(fullPath))
+            {
+                return fullPath;
+            }
+
+            // Fall back to searching by filename only (for backward compatibility)
             var files = Directory.EnumerateFiles(codeModificationConfigFolder, "*.json", SearchOption.AllDirectories);
             return files.FirstOrDefault(x => Path.GetFileName(x).Equals(fileName, StringComparison.OrdinalIgnoreCase));
         }

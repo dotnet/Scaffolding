@@ -1,0 +1,59 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using System.Linq;
+using Microsoft.AspNetCore.Builder;
+@{ 
+    var allNamespaces = new SortedSet<string>(StringComparer.Ordinal);
+    foreach (var list in Model.StartupList)
+    {
+        allNamespaces.UnionWith(list.RequiredNamespaces);
+    }
+    foreach (var namespaceName in allNamespaces)
+    {
+@:using @namespaceName;
+    }
+}
+namespace @Model.RootNamespace
+{
+    public class Startup
+    {
+        public void Configure(IBuilder app)
+        {
+            // Set up application services
+            app.UseServices(services =>
+            {
+@{
+    var count = Model.StartupList.Count;
+    for (var index = 0; index < count; index++)
+    {
+        var list = Model.StartupList[index];
+        var atleastOneStatement = false;
+        foreach (var statement in list.ServiceStatements)
+        {
+            atleastOneStatement = true;
+                @:@statement
+        }
+        if (atleastOneStatement && (index != count-1))
+        {
+@:
+        }
+    }
+}            });
+
+@{
+    for (var index = 0; index < count; index++)
+    {
+        var list = Model.StartupList[index];
+        var atleastOneStatement = false;
+        foreach (var statement in list.UseStatements)
+        {
+            atleastOneStatement = true;
+            @:@statement
+        }
+        if (atleastOneStatement && (index != count-1))
+        {
+@:
+        }
+    }
+}        }
+    }
+}

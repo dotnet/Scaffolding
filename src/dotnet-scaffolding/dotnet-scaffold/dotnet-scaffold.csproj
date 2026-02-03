@@ -10,8 +10,15 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RootNamespace>Microsoft.DotNet.Tools.Scaffold</RootNamespace>
     <NoWarn>$(NoWarn);8002</NoWarn>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Exclude net8.0 templates from compilation as they conflict with VS.Web.CG.Mvc -->
+    <Compile Remove="AspNet\Templates\net8.0\**\*.cs" />
+    <None Include="AspNet\Templates\net8.0\**\*.cs" Pack="false" />
+  </ItemGroup>
+  
   <ItemGroup>
     <!-- Exclude net9.0 folder .cs files from compilation to avoid duplicate definitions -->
     <Compile Remove="AspNet\Templates\net9.0\**\*.cs" />
@@ -39,6 +46,8 @@
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Core\Microsoft.DotNet.Scaffolding.Core.csproj" />
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\Microsoft.DotNet.Scaffolding.TextTemplating.csproj" />
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.CodeModification\Microsoft.DotNet.Scaffolding.CodeModification.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\Scaffolding\VS.Web.CG.Mvc\VS.Web.CG.Mvc.csproj" />
   </ItemGroup>
 
   <ItemGroup>

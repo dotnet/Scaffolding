@@ -99,7 +99,7 @@ internal static class DatabaseScaffolderBuilderExtensions
         builder = builder.WithStep<AddAspireCodeChangeStep>(config =>
         {
             // Find the code modification config file for AppHost database
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("db-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
+            var codeModificationFilePath = AspireCodeModificationHelper.FindNet11CodeModificationConfigFile("Database", "db-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
             if (!string.IsNullOrEmpty(codeModificationFilePath) &&
                 config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
@@ -123,7 +123,7 @@ internal static class DatabaseScaffolderBuilderExtensions
         {
             var step = config.Step;
             // Find the code modification config file for API database
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("db-webapi.json", System.Reflection.Assembly.GetExecutingAssembly());
+            var codeModificationFilePath = AspireCodeModificationHelper.FindNet11CodeModificationConfigFile("Database", "db-webapi.json", System.Reflection.Assembly.GetExecutingAssembly());
             if (config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings &&
                 !string.IsNullOrEmpty(codeModificationFilePath))

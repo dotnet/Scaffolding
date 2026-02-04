@@ -355,7 +355,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Fact]
-        public async Task GetUniqueUsingsTests()
+        public void GetUniqueUsingsTests()
         {
             // Test adding unique usings
             var existingUsings = new[] { "System", "System.Linq" };
@@ -374,7 +374,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Fact]
-        public async Task FilterUsingsWithOptionsTests()
+        public void FilterUsingsWithOptionsTests()
         {
             var codeFile = new CodeFile
             {
@@ -530,7 +530,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Fact]
-        public async Task ModifyMethodTests()
+        public void ModifyMethodTests()
         {
             var statement = SyntaxFactory.ParseStatement("{ }");
             var blockSyntax = SyntaxFactory.Block(statement);
@@ -550,7 +550,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Fact]
-        public async Task UpdateMethodTests()
+        public void UpdateMethodTests()
         {
             var blockStatement = SyntaxFactory.ParseStatement("{ app.UseRouting(); }");
             var blockSyntax = SyntaxFactory.Block(blockStatement);
@@ -570,7 +570,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Fact]
-        public async Task GetNodeWithUpdatedLambdaTests()
+        public void GetNodeWithUpdatedLambdaTests()
         {
             // Create a simple lambda expression for testing
             var lambdaExpression = SyntaxFactory.SimpleLambdaExpression(
@@ -838,7 +838,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         }
 
         [Fact]
-        public async Task AddLambdaToParentTests()
+        public void AddLambdaToParentTests()
         {
             // Create a parent node with an argument list
             var invocation = SyntaxFactory.InvocationExpression(

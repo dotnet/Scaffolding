@@ -585,10 +585,8 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.Equal("Hello World", result5);
         }
 
-        [Theory]
-        [InlineData(new object[] { new string[] { "var builder = WebApplication.CreateBuilder(args);", "IServiceCollection services" },
-                                   new string[] { "services" } })]
-        public async Task GetOriginalMethodTests(string[] nonMethodStatements, string[] methodNames)
+        [Fact]
+        public async Task GetOriginalMethodTests()
         {
             var editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
             var classSyntax = await CreateClassSyntax(editor);

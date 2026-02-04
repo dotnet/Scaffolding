@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Exclude net10.0 folder .cs files from compilation to avoid duplicate definitions -->
+    <Compile Remove="DbContext\net10.0\**\*.cs" />
+    <None Include="DbContext\net10.0\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Mono.TextTemplating" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
   </ItemGroup>
@@ -16,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="DbContext\NewDbContext.tt">
+    <None Update="DbContext\net11.0\NewDbContext.tt">
       <PackagePath>Templates\</PackagePath>
       <LastGenOutput>NewDbContext.cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
@@ -26,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="DbContext\NewDbContext.cs">
+    <Compile Update="DbContext\net11.0\NewDbContext.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>NewDbContext.tt</DependentUpon>

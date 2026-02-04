@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
@@ -103,7 +104,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
                 Constants.ReadMeOutputFileName);
             try
             {
-                File.WriteAllText(outputPath, content);
+                File.WriteAllText(outputPath, content, new UTF8Encoding(false));
             }
             catch (Exception ex)
             {

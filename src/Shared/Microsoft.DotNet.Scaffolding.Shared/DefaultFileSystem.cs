@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Scaffolding.Shared
@@ -72,7 +73,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared
 
         public void WriteAllText(string path, string contents)
         {
-            File.WriteAllText(path, contents);
+            File.WriteAllText(path, contents, new UTF8Encoding(false));
         }
     }
 }

@@ -96,7 +96,6 @@ internal static class EfControllerScaffolderBuilderExtensions
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("efControllerChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), efControllerSettings?.Project);
             config.Context.Properties.TryGetValue(nameof(EfControllerModel), out var efControllerModelObj);
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
-            var efControllerSettings = efControllerSettingsObj as EfControllerSettings;
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
             var efControllerModel = efControllerModelObj as EfControllerModel;
 

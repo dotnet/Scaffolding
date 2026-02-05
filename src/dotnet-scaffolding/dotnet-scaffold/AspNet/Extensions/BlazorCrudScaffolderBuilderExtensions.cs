@@ -97,7 +97,6 @@ internal static class BlazorCrudScaffolderBuilderExtensions
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorWebCrudChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), blazorCrudSettings?.Project);
             config.Context.Properties.TryGetValue(nameof(BlazorCrudModel), out var blazorCrudModelObj);
             config.Context.Properties.TryGetValue(Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
-            var blazorCrudSettings = blazorCrudSettingsObj as CrudSettings;
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
             var blazorCrudModel = blazorCrudModelObj as BlazorCrudModel;
 

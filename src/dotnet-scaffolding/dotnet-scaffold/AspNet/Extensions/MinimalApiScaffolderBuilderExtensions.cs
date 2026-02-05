@@ -33,7 +33,6 @@ internal static class MinimalApiScaffolderBuilderExtensions
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("minimalApiChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), minimalApiSettings?.Project);
             config.Context.Properties.TryGetValue(nameof(MinimalApiModel), out var minimalApiModelObj);
             config.Context.Properties.TryGetValue(Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
-            var minimalApiSettings = minimalApiSettingsObj as MinimalApiSettings;
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
             var minimalApiModel = minimalApiModelObj as MinimalApiModel;
 

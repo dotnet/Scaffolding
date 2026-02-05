@@ -26,6 +26,29 @@ public class TargetFrameworkHelpers
     }
 
     /// <summary>
+    /// Gets the target framework folder name (e.g., "net8.0", "net9.0") for the specified project file.
+    /// </summary>
+    /// <param name="projectPath">The full path to the project file to evaluate. Can be null or empty.</param>
+    /// <returns>The target framework folder name string (e.g., "net8.0"). Defaults to "net11.0" if the project path is null/empty or no compatible framework is found.</returns>
+    public static string GetTargetFrameworkFolder(string? projectPath)
+    {
+        if (string.IsNullOrEmpty(projectPath))
+        {
+            return "net11.0";
+        }
+
+        TargetFramework? targetFramework = GetTargetFrameworkForProject(projectPath);
+
+        return targetFramework switch
+        {
+            TargetFramework.Net8 => "net8.0",
+            TargetFramework.Net9 => "net9.0",
+            TargetFramework.Net10 => "net10.0",
+            _ => "net11.0"
+        };
+    }
+
+    /// <summary>
     /// Determines the lowest compatible target framework for the specified project file. Returns null if there are any incompatible target frameworks.
     /// </summary>
     /// <remarks>If the project specifies multiple target frameworks, the method evaluates each and returns

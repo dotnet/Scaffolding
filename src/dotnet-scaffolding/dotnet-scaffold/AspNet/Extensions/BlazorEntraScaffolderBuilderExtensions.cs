@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
@@ -326,7 +327,8 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             context.Properties.TryGetValue(nameof(EntraIdSettings), out var entraIdSettings);
             EntraIdSettings entraSettings = entraIdSettings as EntraIdSettings ??
                 throw new InvalidOperationException("missing 'EntraIdSettings' in 'ScaffolderContext.Properties'");
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorEntraChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), entraSettings?.Project);
+            string? targetFrameworkFolder = "net11.0"; //TODO invoke TargetFrameworkHelpers.GetTargetFrameworkFolder(entraSettings?.Project); when other tfm supported
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorEntraChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
             context.Properties.TryGetValue(nameof(EntraIdModel), out var entraIdModel);
             EntraIdModel entraModel = entraIdModel as EntraIdModel ??
                 throw new InvalidOperationException("missing 'EntraIdModel' in 'ScaffolderContext.Properties'");
@@ -374,7 +376,8 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             //get needed properties and cast them as needed
             if (context.Properties.TryGetValue("BlazorWasmClientProjectPath", out var blazorWasmProject) && blazorWasmProject is string clientProjectPath && !string.IsNullOrEmpty(clientProjectPath))
             {
-                var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorWasmEntraChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), clientProjectPath);
+                string targetFrameworkFolder = "net11.0"; //TODO invoke TargetFrameworkHelpers.GetTargetFrameworkFolder(clientProjectPath); when other tfm supported    
+                string? codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorWasmEntraChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
                 step.ProjectPath = clientProjectPath;
                 context.Properties.TryGetValue(nameof(EntraIdModel), out var entraIdModel);
                 EntraIdModel entraModel = entraIdModel as EntraIdModel ??

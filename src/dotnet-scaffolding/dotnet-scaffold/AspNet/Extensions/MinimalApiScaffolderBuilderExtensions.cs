@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -30,7 +31,8 @@ internal static class MinimalApiScaffolderBuilderExtensions
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(MinimalApiSettings), out var minimalApiSettingsObj);
             var minimalApiSettings = minimalApiSettingsObj as MinimalApiSettings;
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("minimalApiChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), minimalApiSettings?.Project);
+            string targetFrameworkFolder = "net11.0"; //TODO invoke TargetFrameworkHelpers.GetTargetFrameworkFolder(minimalApiSettings?.Project); when other tfm supported
+            string? codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("minimalApiChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
             config.Context.Properties.TryGetValue(nameof(MinimalApiModel), out var minimalApiModelObj);
             config.Context.Properties.TryGetValue(Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;

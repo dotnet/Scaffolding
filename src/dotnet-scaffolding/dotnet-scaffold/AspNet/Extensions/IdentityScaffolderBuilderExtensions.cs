@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
@@ -118,7 +119,8 @@ internal static class IdentityScaffolderBuilderExtensions
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(IdentitySettings), out var identitySettingsObj);
             var identitySettings = identitySettingsObj as IdentitySettings;
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("identityChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), identitySettings?.Project);
+            string targetFrameworkFolder = "net11.0"; //TODO invoke TargetFrameworkHelpers.GetTargetFrameworkFolder(identitySettings?.Project); when other tfm supported
+            string? codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("identityChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
             config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj);
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;

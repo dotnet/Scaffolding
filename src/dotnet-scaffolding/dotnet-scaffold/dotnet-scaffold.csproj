@@ -61,17 +61,17 @@
     <None Pack="true" Include="AspNet\Templates\net10.0\CodeModificationConfigs\*.json" PackagePath="Templates\net10.0\CodeModificationConfigs\" />
     <None Pack="true" Include="AspNet\Templates\net11.0\CodeModificationConfigs\*.json" PackagePath="Templates\net11.0\CodeModificationConfigs\" />
     <!-- Include net9.0 templates in build output -->
-    <Content Include="AspNet\Templates\net9.0\**\*.*">
+    <Content Include="AspNet\Templates\net9.0\**\*.*" Exclude="AspNet\Templates\net9.0\CodeModificationConfigs\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net9.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
     <!-- Include net10.0 templates in build output -->
-    <Content Include="AspNet\Templates\net10.0\**\*.*">
+    <Content Include="AspNet\Templates\net10.0\**\*.*" Exclude="AspNet\Templates\net10.0\CodeModificationConfigs\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net10.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
     <!-- Include net11.0 templates in build output -->
-    <Content Include="AspNet\Templates\net11.0\**\*.*">
+    <Content Include="AspNet\Templates\net11.0\**\*.*" Exclude="AspNet\Templates\net11.0\CodeModificationConfigs\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net11.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>

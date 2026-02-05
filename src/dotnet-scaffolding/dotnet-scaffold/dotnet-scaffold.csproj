@@ -75,6 +75,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net11.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
+    <!-- Include Aspire CodeModificationConfigs in build output -->
+    <Content Include="Aspire\CodeModificationConfigs\**\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>CodeModificationConfigs\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+    <!-- Include net11.0 templates in build output -->
+    <Content Include="AspNet\Templates\net11.0\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net11.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

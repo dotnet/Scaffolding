@@ -6,6 +6,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Constants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
@@ -29,7 +30,13 @@ internal static class ViewScaffoldeBuilderExtensions
             ViewModel viewModel = viewModelObj as ViewModel ??
                 throw new InvalidOperationException("missing 'ViewModel' in 'ScaffolderContext.Properties'");
 
-            var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["net11.0\\Views"]);
+            if (viewModel.ProjectInfo is null || string.IsNullOrEmpty(viewModel.ProjectInfo.ProjectPath))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
+            var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4TemplatesForTargetFramework(["Views"], viewModel.ProjectInfo.ProjectPath);
             var viewTemplateProperties = ViewHelper.GetTextTemplatingProperties(allT4TemplatePaths, viewModel);
             if (viewTemplateProperties.Any())
             {
@@ -58,6 +65,15 @@ internal static class ViewScaffoldeBuilderExtensions
             context.Properties.TryGetValue(nameof(CrudSettings), out var viewSettingsObj);
             var viewSettings = viewSettingsObj as CrudSettings ??
                 throw new InvalidOperationException("missing 'ViewModel' in 'ScaffolderContext.Properties'");
+
+            string? projectPath = context.GetOptionResult<string>(Constants.CliOptions.ProjectCliOption);
+            if (string.IsNullOrEmpty(projectPath))
+            { 
+                step.SkipStep = true;
+                return;
+            }
+
+            step.ProjectPath = projectPath;
 
             var projectDirectory = Path.GetDirectoryName(viewSettings.Project);
             if (Directory.Exists(projectDirectory))

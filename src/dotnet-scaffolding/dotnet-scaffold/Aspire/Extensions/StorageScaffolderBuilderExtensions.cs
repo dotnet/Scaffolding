@@ -89,7 +89,7 @@ internal static class StorageScaffolderBuilderExtensions
         builder = builder.WithStep<AddAspireCodeChangeStep>(config =>
         {
             // Find the code modification config file for AppHost storage
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("storage-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
+            var codeModificationFilePath = AspireCodeModificationHelper.FindNet11CodeModificationConfigFile("Storage", "storage-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
             if (!string.IsNullOrEmpty(codeModificationFilePath) &&
                 config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
@@ -112,7 +112,7 @@ internal static class StorageScaffolderBuilderExtensions
         builder = builder.WithStep<AddAspireCodeChangeStep>(config =>
         {
             // Find the code modification config file for API storage
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("storage-webapi.json", System.Reflection.Assembly.GetExecutingAssembly());
+            var codeModificationFilePath = AspireCodeModificationHelper.FindNet11CodeModificationConfigFile("Storage", "storage-webapi.json", System.Reflection.Assembly.GetExecutingAssembly());
             if (config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings &&
                 !string.IsNullOrEmpty(codeModificationFilePath))

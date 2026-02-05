@@ -116,14 +116,15 @@ if ((ModelValueAcquired == false))
         }
     }
 }
-if ((ModelValueAcquired == false))
-{
-    object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("Model");
-    if ((data != null))
-    {
-        this._ModelField = ((global::Microsoft.DotNet.Scaffolding.TextTemplating.DbContext.DbContextProperties)(data));
-    }
-}
+// CallContext is not supported in .NET Core/.NET 5+
+// if ((ModelValueAcquired == false))
+// {
+//     object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("Model");
+//     if ((data != null))
+//     {
+//         this._ModelField = ((global::Microsoft.DotNet.Scaffolding.TextTemplating.DbContext.DbContextProperties)(data));
+//     }
+// }
 
 
     }

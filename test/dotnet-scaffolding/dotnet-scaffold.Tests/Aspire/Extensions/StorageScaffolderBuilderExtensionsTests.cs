@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Helpers;
+using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Xunit;
+using System.Reflection;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.Aspire.Extensions;
 
@@ -238,4 +240,3 @@ public class StorageScaffolderBuilderExtensionsTests
         }
     }
 }
-

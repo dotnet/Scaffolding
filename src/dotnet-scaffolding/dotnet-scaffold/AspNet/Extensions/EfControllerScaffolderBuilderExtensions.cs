@@ -167,8 +167,14 @@ internal static class EfControllerScaffolderBuilderExtensions
                 ViewModel viewModel = viewModelObj as ViewModel ??
                     throw new InvalidOperationException(missingViewModelExceptionMssg);
 
+                if (viewModel.ProjectInfo is null || string.IsNullOrEmpty(viewModel.ProjectInfo.ProjectPath))
+                {
+                    step.SkipStep = true;
+                    return;
+                }
+
                 //TODO add extensions if 'TemplateFoldersUtilities' is not reworked.
-                var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["net11.0\\Views"]);
+                var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4TemplatesForTargetFramework(["Views"], viewModel.ProjectInfo.ProjectPath);
                 var viewTemplateProperties = ViewHelper.GetTextTemplatingProperties(allT4TemplatePaths, viewModel);
                 if (viewTemplateProperties.Any())
                 {
@@ -186,11 +192,14 @@ internal static class EfControllerScaffolderBuilderExtensions
                 var step = config.Step;
                 var context = config.Context;
                 var addViews = context.GetOptionResult<bool>(Constants.CliOptions.ViewsOption);
-                if (!addViews)
-                {
+                string? projectPath = context.GetOptionResult<string>(Constants.CliOptions.ProjectCliOption);
+                if (!addViews || string.IsNullOrEmpty(projectPath))
+                { 
                     step.SkipStep = true;
                     return;
                 }
+
+                step.ProjectPath = projectPath;
 
                 context.Properties.TryGetValue(nameof(CrudSettings), out var viewSettingsObj);
                 var viewSettings = viewSettingsObj as CrudSettings ??

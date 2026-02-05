@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
 {
     internal class AspNetCommandService(IScaffoldRunnerBuilder builder) : ICommandService
     {
-        IScaffoldRunnerBuilder _builder = builder;
+        private readonly IScaffoldRunnerBuilder _builder = builder;
 
         public Type[] GetScaffoldSteps()
         {

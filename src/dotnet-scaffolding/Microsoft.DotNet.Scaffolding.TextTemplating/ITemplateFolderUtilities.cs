@@ -8,22 +8,10 @@ namespace Microsoft.DotNet.Scaffolding.TextTemplating;
 internal interface ITemplateFolderService
 {
     /// <summary>
-    /// Gets the template folders for the specified base folders.
+    /// Gets all T4 template files (.tt) under the specified base folders for the project's target framework.
     /// </summary>
     /// <param name="baseFolders">The base folder names to search under.</param>
-    /// <returns>Enumerable of template folder paths.</returns>
-    IEnumerable<string> GetTemplateFolders(string[] baseFolders);
-    /// <summary>
-    /// Gets all T4 template files (.tt) under the specified base folders.
-    /// </summary>
-    /// <param name="baseFolders">The base folder names to search under.</param>
+    /// <param name="projectPath">The path to the project.</param>
     /// <returns>Enumerable of T4 template file paths.</returns>
-    IEnumerable<string> GetAllT4Templates(string[] baseFolders);
-    /// <summary>
-    /// Gets all files with the specified extension under the base folders.
-    /// </summary>
-    /// <param name="baseFolders">The base folder names to search under.</param>
-    /// <param name="extension">The file extension to search for (e.g., ".tt").</param>
-    /// <returns>Enumerable of file paths.</returns>
-    IEnumerable<string> GetAllFiles(string[] baseFolders, string extension);
+    IEnumerable<string> GetAllT4TemplatesForTargetFramework(string[] baseFolders, string? projectPath);
 }

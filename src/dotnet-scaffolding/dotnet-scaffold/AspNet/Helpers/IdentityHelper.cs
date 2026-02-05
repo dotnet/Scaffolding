@@ -21,6 +21,11 @@ internal static class IdentityHelper
     /// <returns>An enumerable of TextTemplatingProperty.</returns>
     internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allFilePaths, IdentityModel identityModel)
     {
+        if (identityModel.ProjectInfo is null || string.IsNullOrEmpty(identityModel.ProjectInfo.ProjectPath))
+        {
+            return [];
+        }
+
         var textTemplatingProperties = new List<TextTemplatingProperty>();
         foreach (var templatePath in allFilePaths)
         {
@@ -30,6 +35,7 @@ internal static class IdentityHelper
                 !string.IsNullOrEmpty(x.FullName) &&
                 x.FullName.Contains(templateFullName) &&
                 x.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase));
+
             var projectName = Path.GetFileNameWithoutExtension(identityModel.ProjectInfo.ProjectPath);
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {

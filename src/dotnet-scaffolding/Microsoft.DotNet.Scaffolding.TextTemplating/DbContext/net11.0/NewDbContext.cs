@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Scaffolding.TextTemplating.DbContext.net11_0
+namespace Microsoft.DotNet.Scaffolding.TextTemplating.DbContext
 {
     using System.Collections.Generic;
     using System.Text;

@@ -4,7 +4,6 @@ using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
-using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext.net11_0;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 using CliConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;

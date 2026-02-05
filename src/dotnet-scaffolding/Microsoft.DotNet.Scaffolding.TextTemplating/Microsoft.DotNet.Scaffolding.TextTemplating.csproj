@@ -7,7 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Exclude net10.0 folder .cs files from compilation to avoid duplicate definitions -->
+    <!-- Exclude version-specific folders .cs files from compilation to avoid duplicate definitions -->
+    <Compile Remove="DbContext\net8.0\**\*.cs" />
+    <None Include="DbContext\net8.0\**\*.cs" />
+    <Compile Remove="DbContext\net9.0\**\*.cs" />
+    <None Include="DbContext\net9.0\**\*.cs" />
     <Compile Remove="DbContext\net10.0\**\*.cs" />
     <None Include="DbContext\net10.0\**\*.cs" />
   </ItemGroup>

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
-using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext.net11_0;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -71,7 +70,7 @@ internal static class ScaffolderBuilderExtensions
 
         return new TextTemplatingProperty
         {
-            TemplateType = typeof(Scaffolding.TextTemplating.DbContext.net11_0.NewDbContext),
+            TemplateType = typeof(NewDbContext),
             TemplatePath = t4TemplatePath,
             TemplateModelName = "Model",
             OutputPath = dbContextProperties.DbContextPath,

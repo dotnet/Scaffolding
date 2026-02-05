@@ -14,7 +14,6 @@ public class Net9TemplatesFolderTests
     [
         "BlazorCrud",
         "BlazorIdentity",
-        "CodeModificationConfigs",
         "EfController",
         "Files",
         "Identity",

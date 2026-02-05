@@ -101,7 +101,7 @@ public class GlobalToolFileFinderTests : IDisposable
     {
         // Arrange
         var (assembly, _) = SetupTestEnvironment("net11.0", null);
-        var subfolder = Path.Combine(_testRootDirectory, "tools", "Templates", "net11.0", "CodeModificationConfigs", "subfolder");
+        var subfolder = Path.Combine(_testRootDirectory, "Templates", "net11.0", "CodeModificationConfigs", "subfolder");
         Directory.CreateDirectory(subfolder);
         _createdDirectories.Add(subfolder);
         
@@ -228,7 +228,7 @@ public class GlobalToolFileFinderTests : IDisposable
         // Arrange
         var (assembly, _) = SetupTestEnvironment("net11.0", null);
         
-        var subfolder1 = Path.Combine(_testRootDirectory, "tools", "Templates", "net11.0", "CodeModificationConfigs", "folder1");
+        var subfolder1 = Path.Combine(_testRootDirectory, "Templates", "net11.0", "CodeModificationConfigs", "folder1");
         Directory.CreateDirectory(subfolder1);
         _createdDirectories.Add(subfolder1);
         
@@ -236,7 +236,7 @@ public class GlobalToolFileFinderTests : IDisposable
         File.WriteAllText(configFile1, "{}");
         _createdFiles.Add(configFile1);
         
-        var subfolder2 = Path.Combine(_testRootDirectory, "tools", "Templates", "net11.0", "CodeModificationConfigs", "folder2");
+        var subfolder2 = Path.Combine(_testRootDirectory, "Templates", "net11.0", "CodeModificationConfigs", "folder2");
         Directory.CreateDirectory(subfolder2);
         _createdDirectories.Add(subfolder2);
         
@@ -258,7 +258,7 @@ public class GlobalToolFileFinderTests : IDisposable
         // Arrange
         var (assembly, directFile) = SetupTestEnvironment("net11.0", "config.json");
         
-        var subfolder = Path.Combine(_testRootDirectory, "tools", "Templates", "net11.0", "CodeModificationConfigs", "subfolder");
+        var subfolder = Path.Combine(_testRootDirectory, "Templates", "net11.0", "CodeModificationConfigs", "subfolder");
         Directory.CreateDirectory(subfolder);
         _createdDirectories.Add(subfolder);
         
@@ -276,13 +276,14 @@ public class GlobalToolFileFinderTests : IDisposable
 
     private (Assembly assembly, string configFile) SetupTestEnvironment(string targetFramework, string? fileName)
     {
-        // Create directory structure: {testRoot}/tools/Templates/{tfm}/CodeModificationConfigs
+        // Create directory structure: {testRoot}/tools (marker) and {testRoot}/Templates/{tfm}/CodeModificationConfigs
         // and {testRoot}/bin/assembly for the mock assembly location
         var toolsDir = Path.Combine(_testRootDirectory, "tools");
-        var templatesDir = Path.Combine(toolsDir, "Templates");
+        var templatesDir = Path.Combine(_testRootDirectory, "Templates");
         var tfmDir = Path.Combine(templatesDir, targetFramework);
         var configDir = Path.Combine(tfmDir, "CodeModificationConfigs");
         
+        Directory.CreateDirectory(toolsDir);
         Directory.CreateDirectory(configDir);
         _createdDirectories.Add(toolsDir);
         _createdDirectories.Add(templatesDir);

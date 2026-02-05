@@ -21,7 +21,7 @@ internal static class GlobalToolFileFinder
 
         // Use provided target framework folder or default to net11.0
         var tfmFolder = targetFrameworkFolder ?? "net11.0";
-        var codeModificationConfigFolder = Path.Combine(toolsFolderPath, "tools", "Templates", tfmFolder, "CodeModificationConfigs");
+        var codeModificationConfigFolder = Path.Combine(toolsFolderPath, "Templates", tfmFolder, "CodeModificationConfigs");
         if (Directory.Exists(codeModificationConfigFolder))
         {
             // Search for the file by name (case-insensitive)

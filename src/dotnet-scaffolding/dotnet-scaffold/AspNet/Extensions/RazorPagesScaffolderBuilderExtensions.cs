@@ -27,9 +27,10 @@ internal static class RazorPagesScaffolderBuilderExtensions
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("razorPagesChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(CrudSettings), out var crudSettingsObj);
+            var crudSettings = crudSettingsObj as CrudSettings;
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("razorPagesChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), crudSettings?.Project);
             config.Context.Properties.TryGetValue(nameof(RazorPageModel), out var razorPageModelObj);
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
             var crudSettings = crudSettingsObj as CrudSettings;

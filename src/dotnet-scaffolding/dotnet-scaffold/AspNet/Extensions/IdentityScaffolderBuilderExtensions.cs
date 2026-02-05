@@ -108,9 +108,10 @@ internal static class IdentityScaffolderBuilderExtensions
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("identityChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(IdentitySettings), out var identitySettingsObj);
+            var identitySettings = identitySettingsObj as IdentitySettings;
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("identityChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), identitySettings?.Project);
             config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj);
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
             var identitySettings = identitySettingsObj as IdentitySettings;

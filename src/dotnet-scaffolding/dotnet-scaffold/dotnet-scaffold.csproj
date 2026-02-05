@@ -56,7 +56,10 @@
     <None Pack="true" Include="AspNet\Templates\net11.0\Files\*.js" PackagePath="Templates\Files\" />
     <None Pack="true" Include="AspNet\Templates\**\*.tt" PackagePath="Templates\" />
     <None Pack="true" Include="README.md" PackagePath="\" />
-    <None Pack="true" Include="**\CodeModificationConfigs\**\*.json" PackagePath="CodeModificationConfigs\" />
+    <None Pack="true" Include="AspNet\Templates\net8.0\CodeModificationConfigs\*.json" PackagePath="Templates\net8.0\CodeModificationConfigs\" />
+    <None Pack="true" Include="AspNet\Templates\net9.0\CodeModificationConfigs\*.json" PackagePath="Templates\net9.0\CodeModificationConfigs\" />
+    <None Pack="true" Include="AspNet\Templates\net10.0\CodeModificationConfigs\*.json" PackagePath="Templates\net10.0\CodeModificationConfigs\" />
+    <None Pack="true" Include="AspNet\Templates\net11.0\CodeModificationConfigs\*.json" PackagePath="Templates\net11.0\CodeModificationConfigs\" />
     <!-- Include net9.0 templates in build output -->
     <Content Include="AspNet\Templates\net9.0\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

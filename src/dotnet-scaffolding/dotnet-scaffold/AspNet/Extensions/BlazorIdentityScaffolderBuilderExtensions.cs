@@ -25,12 +25,12 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorIdentityChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(IdentitySettings), out var blazorSettingsObj);
             config.Context.Properties.TryGetValue(nameof(IdentityModel), out var blazorIdentityModelObj);
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
             var blazorIdentitySettings = blazorSettingsObj as IdentitySettings;
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorIdentityChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), blazorIdentitySettings?.Project);
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
             var blazorIdentityModel = blazorIdentityModelObj as IdentityModel;
 

@@ -90,9 +90,10 @@ internal static class EfControllerScaffolderBuilderExtensions
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("efControllerChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(EfControllerSettings), out var efControllerSettingsObj);
+            var efControllerSettings = efControllerSettingsObj as EfControllerSettings;
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("efControllerChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), efControllerSettings?.Project);
             config.Context.Properties.TryGetValue(nameof(EfControllerModel), out var efControllerModelObj);
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
             var efControllerSettings = efControllerSettingsObj as EfControllerSettings;

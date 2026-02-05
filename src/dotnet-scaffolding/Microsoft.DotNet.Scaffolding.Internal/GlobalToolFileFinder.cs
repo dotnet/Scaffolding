@@ -5,7 +5,7 @@ namespace Microsoft.DotNet.Scaffolding.Internal;
 
 internal static class GlobalToolFileFinder
 {
-    internal static string? FindCodeModificationConfigFile(string fileName, Assembly executingAssembly)
+    internal static string? FindCodeModificationConfigFile(string fileName, Assembly executingAssembly, string? targetFrameworkFolder = null)
     {
         var assemblyDirectory = Path.GetDirectoryName(executingAssembly?.Location);
         if (string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(assemblyDirectory))
@@ -19,19 +19,29 @@ internal static class GlobalToolFileFinder
             return null;
         }
 
-        var codeModificationConfigFolder = Path.Combine(toolsFolderPath, "CodeModificationConfigs");
+        // Use provided target framework folder or default to net11.0
+        var tfmFolder = targetFrameworkFolder ?? "net11.0";
+        var codeModificationConfigFolder = Path.Combine(toolsFolderPath, "Templates", tfmFolder, "CodeModificationConfigs");
         if (Directory.Exists(codeModificationConfigFolder))
         {
-            // First try to find the file using the full relative path (for folder-structured configs)
-            var fullPath = Path.Combine(codeModificationConfigFolder, fileName);
-            if (File.Exists(fullPath))
-            {
-                return fullPath;
-            }
-
-            // Fall back to searching by filename only (for backward compatibility)
+            // Search for the file by name (case-insensitive)
             var files = Directory.EnumerateFiles(codeModificationConfigFolder, "*.json", SearchOption.AllDirectories);
-            return files.FirstOrDefault(x => Path.GetFileName(x).Equals(fileName, StringComparison.OrdinalIgnoreCase));
+            var matchedFile = files.FirstOrDefault(x => Path.GetFileName(x).Equals(fileName, StringComparison.OrdinalIgnoreCase));
+            
+            if (matchedFile != null)
+            {
+                return matchedFile;
+            }
+            
+            // Also check for the file as a relative path (e.g., "subfolder/config.json")
+            if (fileName.Contains(Path.DirectorySeparatorChar) || fileName.Contains(Path.AltDirectorySeparatorChar))
+            {
+                var fullPath = Path.Combine(codeModificationConfigFolder, fileName);
+                if (File.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+            }
         }
 
         return null;

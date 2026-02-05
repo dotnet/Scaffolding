@@ -1,0 +1,77 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Options": [
+        "EfScenario"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CheckBlock": "builder.Configuration.GetConnectionString",
+              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '$(ConnectionStringName)' not found.\")"
+            },
+            {
+              "InsertAfter": "builder.Configuration.GetConnectionString",
+              "CheckBlock": "builder.Services.AddDbContextFactory",
+              "Block": "builder.Services.AddDbContextFactory<$(DbContextName)>(options => options.$(UseDbMethod))",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContextFactory",
+              "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter",
+              "Block": "WebApplication.CreateBuilder.Services.AddDatabaseDeveloperPageExceptionFilter()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      },
+      "Replacements": [
+        {
+          "MultiLineBlock": [
+            "app.UseHsts();",
+            "    app.UseMigrationsEndPoint()"
+          ],
+          "ReplaceSnippet": [
+            "app.UseHsts()"
+          ]
+        },
+        {
+          "ReplaceSnippet": [ "app.UseHttpsRedirection();" ],
+          "Block": "app.UseStatusCodePagesWithReExecute(\"/not-found\", createScopeForStatusCodePages: true);\n\napp.UseHttpsRedirection();",
+          "CheckBlock": "UseStatusCodePagesWithReExecute"
+        }
+      ],
+      "Usings": [
+        "Microsoft.EntityFrameworkCore"
+      ]
+    },
+    {
+      "FileName": "Routes.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "<Router AppAssembly=\"typeof(Program).Assembly\">" ],
+          "Block": "<Router AppAssembly=\"typeof(Program).Assembly\" NotFoundPage=\"typeof(Pages.NotFound)\">",
+          "CheckBlock": "NotFoundPage=\"typeof(Pages.NotFound)\""
+        },
+        {
+          "ReplaceSnippet": [ "<Router AppAssembly=\"typeof(Program).Assembly\" AdditionalAssemblies=\"new[] { typeof(Client._Imports).Assembly }\">" ],
+          "Block": "<Router AppAssembly=\"typeof(Program).Assembly\" AdditionalAssemblies=\"new[] { typeof(Client._Imports).Assembly }\" NotFoundPage=\"typeof(Pages.NotFound)\">",
+          "CheckBlock": "NotFoundPage=\"typeof(Pages.NotFound)\""
+        }
+      ]
+    }
+  ]
+}

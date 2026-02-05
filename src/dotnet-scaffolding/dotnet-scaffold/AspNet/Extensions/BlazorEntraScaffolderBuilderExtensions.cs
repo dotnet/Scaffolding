@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
@@ -322,14 +323,15 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorEntraChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
             //get needed properties and cast them as needed
-            context.Properties.TryGetValue(nameof(EntraIdModel), out var entraIdModel);
-            EntraIdModel entraModel = entraIdModel as EntraIdModel ??
-                throw new InvalidOperationException("missing 'EntraIdModel' in 'ScaffolderContext.Properties'");
             context.Properties.TryGetValue(nameof(EntraIdSettings), out var entraIdSettings);
             EntraIdSettings entraSettings = entraIdSettings as EntraIdSettings ??
                 throw new InvalidOperationException("missing 'EntraIdSettings' in 'ScaffolderContext.Properties'");
+            string? targetFrameworkFolder = "net11.0"; //TODO invoke TargetFrameworkHelpers.GetTargetFrameworkFolder(entraSettings?.Project); when other tfm supported
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorEntraChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
+            context.Properties.TryGetValue(nameof(EntraIdModel), out var entraIdModel);
+            EntraIdModel entraModel = entraIdModel as EntraIdModel ??
+                throw new InvalidOperationException("missing 'EntraIdModel' in 'ScaffolderContext.Properties'");
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
 
@@ -371,20 +373,20 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorWasmEntraChanges.json", System.Reflection.Assembly.GetExecutingAssembly());
             //get needed properties and cast them as needed
-            context.Properties.TryGetValue(nameof(EntraIdModel), out var entraIdModel);
-            EntraIdModel entraModel = entraIdModel as EntraIdModel ??
-                throw new InvalidOperationException("missing 'EntraIdModel' in 'ScaffolderContext.Properties'");
-            context.Properties.TryGetValue(nameof(EntraIdSettings), out var entraIdSettings);
-            EntraIdSettings entraSettings = entraIdSettings as EntraIdSettings ??
-                throw new InvalidOperationException("missing 'EntraIdSettings' in 'ScaffolderContext.Properties'");
-            config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
-            var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
-
             if (context.Properties.TryGetValue("BlazorWasmClientProjectPath", out var blazorWasmProject) && blazorWasmProject is string clientProjectPath && !string.IsNullOrEmpty(clientProjectPath))
             {
+                string targetFrameworkFolder = "net11.0"; //TODO invoke TargetFrameworkHelpers.GetTargetFrameworkFolder(clientProjectPath); when other tfm supported    
+                string? codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorWasmEntraChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
                 step.ProjectPath = clientProjectPath;
+                context.Properties.TryGetValue(nameof(EntraIdModel), out var entraIdModel);
+                EntraIdModel entraModel = entraIdModel as EntraIdModel ??
+                    throw new InvalidOperationException("missing 'EntraIdModel' in 'ScaffolderContext.Properties'");
+                context.Properties.TryGetValue(nameof(EntraIdSettings), out var entraIdSettings);
+                EntraIdSettings entraSettings = entraIdSettings as EntraIdSettings ??
+                    throw new InvalidOperationException("missing 'EntraIdSettings' in 'ScaffolderContext.Properties'");
+                config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
+                var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
                 //initialize CodeModificationStep's properties
                 if (!string.IsNullOrEmpty(codeModificationFilePath) &&
                     entraSettings is not null &&

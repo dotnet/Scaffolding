@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Aspire;
 
 internal class AspireCommandService(IScaffoldRunnerBuilder builder) : ICommandService
 {
-    IScaffoldRunnerBuilder _builder = builder;
+    private readonly IScaffoldRunnerBuilder _builder = builder;
 
     public Type[] GetScaffoldSteps()
     {

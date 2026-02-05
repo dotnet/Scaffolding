@@ -9,6 +9,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Constants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 
@@ -72,8 +73,15 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             IdentityModel blazorIdentityModel = blazorIdentityModelObj as IdentityModel ??
                 throw new InvalidOperationException("missing 'IdentityModel' in 'ScaffolderContext.Properties'");
             var templateFolderUtilities = new TemplateFoldersUtilities();
-            var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4Templates(["net11.0\\BlazorIdentity"]);
-            var applicationUserFile = templateFolderUtilities.GetAllT4Templates(["net11.0\\Files"])
+
+            if (blazorIdentityModel.ProjectInfo is null || string.IsNullOrEmpty(blazorIdentityModel.ProjectInfo.ProjectPath))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
+            var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["BlazorIdentity"], blazorIdentityModel.ProjectInfo.ProjectPath);
+            var applicationUserFile = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Files"], blazorIdentityModel.ProjectInfo.ProjectPath)
                 .FirstOrDefault(x => x.EndsWith("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
             var blazorIdentityProperties = BlazorIdentityHelper.GetTextTemplatingProperties(allBlazorIdentityFiles, blazorIdentityModel);
             var applicationUserProperty = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(applicationUserFile, blazorIdentityModel);
@@ -107,6 +115,15 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
+
+            string? projectPath = context.GetOptionResult<string>(Constants.CliOptions.ProjectCliOption);
+            if (string.IsNullOrEmpty(projectPath))
+            { 
+                step.SkipStep = true;
+                return;
+            }
+
+            step.ProjectPath = projectPath;
 
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) && commandSettingsObj is IdentitySettings commandSettings)
             {

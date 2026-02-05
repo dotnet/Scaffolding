@@ -76,7 +76,13 @@ internal static class RazorPagesScaffolderBuilderExtensions
             RazorPageModel razorPagesModel = razorPagesModelObj as RazorPageModel ??
                 throw new InvalidOperationException("missing 'RazorPageModel' in 'ScaffolderContext.Properties'");
 
-            var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4Templates(["net11.0\\RazorPages"]);
+            if (razorPagesModel.ProjectInfo is null || string.IsNullOrEmpty(razorPagesModel.ProjectInfo.ProjectPath))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
+            var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4TemplatesForTargetFramework(["RazorPages"], razorPagesModel.ProjectInfo.ProjectPath);
             var razorPageTemplateProperties = RazorPagesHelper.GetTextTemplatingProperties(allT4TemplatePaths, razorPagesModel);
             if (razorPageTemplateProperties.Any())
             {

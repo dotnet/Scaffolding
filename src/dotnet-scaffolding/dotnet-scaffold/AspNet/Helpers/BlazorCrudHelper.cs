@@ -388,6 +388,11 @@ internal static class BlazorCrudHelper
                     break;
                 }
 
+                if (blazorCrudModel.ProjectInfo is null || string.IsNullOrEmpty(blazorCrudModel.ProjectInfo.ProjectPath))
+                {
+                    continue;
+                }
+
                 string outputFileName;
                 if (string.Equals(templateName, "NotFound", StringComparison.OrdinalIgnoreCase))
                 {

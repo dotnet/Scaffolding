@@ -5,6 +5,7 @@ using Microsoft.DotNet.Tools.Scaffold.Aspire;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Xunit;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.Aspire.Extensions;
 

@@ -1,12 +1,11 @@
 using System.Diagnostics;
 using System.Reflection;
-using Microsoft.DotNet.Scaffolding.Helpers;
 
 namespace Microsoft.DotNet.Scaffolding.Internal;
 
 internal static class GlobalToolFileFinder
 {
-    internal static string? FindCodeModificationConfigFile(string fileName, Assembly executingAssembly, string? projectPath = null)
+    internal static string? FindCodeModificationConfigFile(string fileName, Assembly executingAssembly)
     {
         var assemblyDirectory = Path.GetDirectoryName(executingAssembly?.Location);
         if (string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(assemblyDirectory))
@@ -20,37 +19,22 @@ internal static class GlobalToolFileFinder
             return null;
         }
 
-        // Get target framework folder (net8.0, net9.0, net10.0, net11.0)
-        string targetFrameworkFolder = "net11.0"; //TODO call GetTargetFrameworkFolder(projectPath); when other target frameworks are enabled
-        var codeModificationConfigFolder = Path.Combine(toolsFolderPath, "Templates", targetFrameworkFolder, "CodeModificationConfigs");
+        var codeModificationConfigFolder = Path.Combine(toolsFolderPath, "CodeModificationConfigs");
         if (Directory.Exists(codeModificationConfigFolder))
         {
-            var filePath = Path.Combine(codeModificationConfigFolder, fileName);
-            if (File.Exists(filePath))
+            // First try to find the file using the full relative path (for folder-structured configs)
+            var fullPath = Path.Combine(codeModificationConfigFolder, fileName);
+            if (File.Exists(fullPath))
             {
-                return filePath;
+                return fullPath;
             }
+
+            // Fall back to searching by filename only (for backward compatibility)
+            var files = Directory.EnumerateFiles(codeModificationConfigFolder, "*.json", SearchOption.AllDirectories);
+            return files.FirstOrDefault(x => Path.GetFileName(x).Equals(fileName, StringComparison.OrdinalIgnoreCase));
         }
 
         return null;
-    }
-
-    private static string GetTargetFrameworkFolder(string? projectPath)
-    {
-        if (string.IsNullOrEmpty(projectPath))
-        {
-            return "net11.0";
-        }
-
-        TargetFramework? targetFramework = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
-
-        return targetFramework switch
-        {
-            TargetFramework.Net8 => "net8.0",
-            TargetFramework.Net9 => "net9.0",
-            TargetFramework.Net10 => "net10.0",
-            _ => "net11.0"
-        };
     }
 
     private static string? FindFolderWithToolsFolder(string startPath)

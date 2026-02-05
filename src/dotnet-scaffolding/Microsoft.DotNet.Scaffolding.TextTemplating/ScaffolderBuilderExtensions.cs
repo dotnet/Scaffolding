@@ -30,7 +30,15 @@ internal static class ScaffolderBuilderExtensions
                 dbContextProperties = dbContextPropertiesObj as DbContextProperties;
             }
 
-            var dbContextTextTemplatingProperty = GetDbContextTemplatingStepProperty(dbContextProperties);
+
+            string? projectPath = context.GetOptionResult<string>(Constants.ProjectCliOption);
+            if (string.IsNullOrEmpty(projectPath))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
+            var dbContextTextTemplatingProperty = GetDbContextTemplatingStepProperty(dbContextProperties, projectPath);
             if (dbContextTextTemplatingProperty is null)
             {
                 config.Step.SkipStep = true;
@@ -48,11 +56,12 @@ internal static class ScaffolderBuilderExtensions
     /// Gets the T4 text templating property for the DbContext step.
     /// </summary>
     /// <param name="dbContextProperties">The DbContext properties to use as the model.</param>
+    /// <param name="projectPath">The project file path.</param>
     /// <returns>A configured TextTemplatingProperty or null if not available.</returns>
-    private static TextTemplatingProperty? GetDbContextTemplatingStepProperty(DbContextProperties? dbContextProperties)
+    private static TextTemplatingProperty? GetDbContextTemplatingStepProperty(DbContextProperties? dbContextProperties, string projectPath)
     {
         // Get .tt template file path
-        var allT4Templates = new TemplateFoldersUtilities().GetAllT4Templates(["DbContext"]);
+        var allT4Templates = new TemplateFoldersUtilities().GetAllT4TemplatesForTargetFramework(["DbContext"], projectPath);
         string? t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("NewDbContext.tt", StringComparison.OrdinalIgnoreCase));
         if (string.IsNullOrEmpty(t4TemplatePath) || dbContextProperties is null)
         {

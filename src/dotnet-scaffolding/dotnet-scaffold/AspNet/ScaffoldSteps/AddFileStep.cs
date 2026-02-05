@@ -18,6 +18,12 @@ internal class AddFileStep : ScaffoldStep
     /// Gets or sets the file name to add (should exist in the template folder).
     /// </summary>
     public required string FileName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the project file path where the file will be added.
+    /// </summary>
+    public required string ProjectPath {get; set; }
+
     /// <summary>
     /// Gets or sets the base output directory where the file will be added.
     /// </summary>
@@ -49,7 +55,7 @@ internal class AddFileStep : ScaffoldStep
             return Task.FromResult(false);
         }
 
-        var allFiles = new TemplateFoldersUtilities().GetAllFiles(["Files"]);
+        var allFiles = new TemplateFoldersUtilities().GetAllT4TemplatesForTargetFramework(["Files"], ProjectPath);
         var fileToCopy = allFiles.FirstOrDefault(x => x.EndsWith(FileName, StringComparison.OrdinalIgnoreCase));
         var destinationDirectory = Path.GetDirectoryName(destinationFilePath);
         if (!string.IsNullOrEmpty(fileToCopy) && !string.IsNullOrEmpty(destinationDirectory))

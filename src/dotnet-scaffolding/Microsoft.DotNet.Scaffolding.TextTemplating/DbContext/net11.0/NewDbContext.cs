@@ -116,15 +116,11 @@ if ((ModelValueAcquired == false))
         }
     }
 }
-// CallContext is not supported in .NET Core/.NET 5+
-// if ((ModelValueAcquired == false))
-// {
-//     object data = global::System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("Model");
-//     if ((data != null))
-//     {
-//         this._ModelField = ((global::Microsoft.DotNet.Scaffolding.TextTemplating.DbContext.DbContextProperties)(data));
-//     }
-// }
+if ((ModelValueAcquired == false))
+{
+    // System.Runtime.Remoting is not available in modern .NET
+    // This fallback is not needed for our use case
+}
 
 
     }

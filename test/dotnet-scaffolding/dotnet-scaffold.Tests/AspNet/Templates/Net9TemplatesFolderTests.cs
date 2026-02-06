@@ -33,7 +33,7 @@ public class Net9TemplatesFolderTests
 
         // Navigate to the dotnet-scaffold assembly location
         // From test assembly: test/dotnet-scaffolding/dotnet-scaffold.Tests/bin/.../
-        // To source assembly: artifacts/bin/dotnet-scaffold/.../AspNet/Templates/net9.0
+        // To source assembly: artifacts/bin/dotnet-scaffold/.../Aspnet/Templates/net9.0
         string? currentDir = assemblyDirectory;
         string? artifactsDir = null;
         
@@ -122,7 +122,7 @@ public class Net9TemplatesFolderTests
             string[] tfmDirs = Directory.Exists(configDir) ? Directory.GetDirectories(configDir) : Array.Empty<string>();
             foreach (var tfmDir in tfmDirs)
             {
-                var candidatePath = Path.Combine(tfmDir, "AspNet", "Templates", "net9.0", folderName);
+                var candidatePath = Path.Combine(tfmDir, "Aspnet", "Templates", "net9.0", folderName);
                 if (Directory.Exists(candidatePath))
                 {
                     templateFolderPath = candidatePath;
@@ -172,7 +172,7 @@ public class Net9TemplatesFolderTests
             string[] tfmDirs = Directory.Exists(configDir) ? Directory.GetDirectories(configDir) : Array.Empty<string>();
             foreach (var tfmDir in tfmDirs)
             {
-                var candidateTemplatesDir = Path.Combine(tfmDir, "AspNet", "Templates", "net9.0");
+                var candidateTemplatesDir = Path.Combine(tfmDir, "Aspnet", "Templates", "net9.0");
                 if (Directory.Exists(candidateTemplatesDir))
                 {
                     templatesDir = candidateTemplatesDir;
@@ -238,7 +238,7 @@ public class Net9TemplatesFolderTests
             string[] tfmDirs = Directory.Exists(configDir) ? Directory.GetDirectories(configDir) : Array.Empty<string>();
             foreach (var tfmDir in tfmDirs)
             {
-                var candidatePath = Path.Combine(tfmDir, "AspNet", "Templates", "net9.0", folderName);
+                var candidatePath = Path.Combine(tfmDir, "Aspnet", "Templates", "net9.0", folderName);
                 if (Directory.Exists(candidatePath))
                 {
                     templateFolderPath = candidatePath;

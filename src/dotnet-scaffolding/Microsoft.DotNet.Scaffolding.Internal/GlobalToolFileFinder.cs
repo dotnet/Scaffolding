@@ -21,26 +21,51 @@ internal static class GlobalToolFileFinder
 
         // Use provided target framework folder or default to net11.0
         var tfmFolder = targetFrameworkFolder ?? "net11.0";
-        var codeModificationConfigFolder = Path.Combine(toolsFolderPath, "Templates", tfmFolder, "CodeModificationConfigs");
-        if (Directory.Exists(codeModificationConfigFolder))
+        
+        // Search in Aspnet folder first
+        var aspnetConfigFolder = Path.Combine(toolsFolderPath, "Aspnet", "CodeModificationConfigs", tfmFolder);
+        var result = SearchForConfigFile(aspnetConfigFolder, fileName);
+        if (result != null)
         {
-            // Search for the file by name (case-insensitive)
-            var files = Directory.EnumerateFiles(codeModificationConfigFolder, "*.json", SearchOption.AllDirectories);
-            var matchedFile = files.FirstOrDefault(x => Path.GetFileName(x).Equals(fileName, StringComparison.OrdinalIgnoreCase));
-            
-            if (matchedFile != null)
+            return result;
+        }
+
+        // Search in Aspire folder
+        var aspireConfigFolder = Path.Combine(toolsFolderPath, "Aspire", tfmFolder, "CodeModificationConfigs");
+        result = SearchForConfigFile(aspireConfigFolder, fileName);
+        if (result != null)
+        {
+            return result;
+        }
+
+        // Fallback: Search in old Templates folder for backward compatibility
+        var templatesConfigFolder = Path.Combine(toolsFolderPath, "Templates", tfmFolder, "CodeModificationConfigs");
+        return SearchForConfigFile(templatesConfigFolder, fileName);
+    }
+
+    private static string? SearchForConfigFile(string configFolder, string fileName)
+    {
+        if (!Directory.Exists(configFolder))
+        {
+            return null;
+        }
+
+        // Search for the file by name (case-insensitive)
+        var files = Directory.EnumerateFiles(configFolder, "*.json", SearchOption.AllDirectories);
+        var matchedFile = files.FirstOrDefault(x => Path.GetFileName(x).Equals(fileName, StringComparison.OrdinalIgnoreCase));
+        
+        if (matchedFile != null)
+        {
+            return matchedFile;
+        }
+        
+        // Also check for the file as a relative path (e.g., "subfolder/config.json")
+        if (fileName.Contains(Path.DirectorySeparatorChar) || fileName.Contains(Path.AltDirectorySeparatorChar))
+        {
+            var fullPath = Path.Combine(configFolder, fileName);
+            if (File.Exists(fullPath))
             {
-                return matchedFile;
-            }
-            
-            // Also check for the file as a relative path (e.g., "subfolder/config.json")
-            if (fileName.Contains(Path.DirectorySeparatorChar) || fileName.Contains(Path.AltDirectorySeparatorChar))
-            {
-                var fullPath = Path.Combine(codeModificationConfigFolder, fileName);
-                if (File.Exists(fullPath))
-                {
-                    return fullPath;
-                }
+                return fullPath;
             }
         }
 

@@ -293,6 +293,143 @@ public class TargetFrameworkHelpersTests : IDisposable
         Assert.Null(result);
     }
 
+    [Fact]
+    public void GetTargetFrameworkFolder_Net8Project_ReturnsNet8Folder()
+    {
+        // Arrange
+        string projectPath = CreateTestProject("TestNet8Folder.csproj", "net8.0");
+
+        // Act
+        string result = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
+
+        // Assert
+        Assert.Equal("net8.0", result);
+    }
+
+    [Fact]
+    public void GetTargetFrameworkFolder_Net9Project_ReturnsNet9Folder()
+    {
+        // Arrange
+        string projectPath = CreateTestProject("TestNet9Folder.csproj", "net9.0");
+
+        // Act
+        string result = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
+
+        // Assert
+        Assert.Equal("net9.0", result);
+    }
+
+    [Fact]
+    public void GetTargetFrameworkFolder_Net10Project_ReturnsNet10Folder()
+    {
+        // Arrange
+        string projectPath = CreateTestProject("TestNet10Folder.csproj", "net10.0");
+
+        // Act
+        string result = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
+
+        // Assert
+        Assert.Equal("net10.0", result);
+    }
+
+    [Fact]
+    public void GetTargetFrameworkFolder_Net11Project_ReturnsNet11Folder()
+    {
+        // Arrange
+        string projectPath = CreateTestProject("TestNet11Folder.csproj", "net11.0");
+
+        // Act
+        string result = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
+
+        // Assert
+        Assert.Equal("net11.0", result);
+    }
+
+    [Fact]
+    public void GetTargetFrameworkFolder_MultiTargetNet8AndNet9_ReturnsNet8Folder()
+    {
+        // Arrange
+        string projectPath = CreateTestProject("TestMultiTargetFolder.csproj", "net8.0;net9.0", isMultiTarget: true);
+
+        // Act
+        string result = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
+
+        // Assert
+        Assert.Equal("net8.0", result);
+    }
+
+    [Fact]
+    public void GetTargetFrameworkFolder_MultiTargetNet9AndNet10_ReturnsNet9Folder()
+    {
+        // Arrange
+        string projectPath = CreateTestProject("TestMultiTargetFolder2.csproj", "net9.0;net10.0", isMultiTarget: true);
+
+        // Act
+        string result = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
+
+        // Assert
+        Assert.Equal("net9.0", result);
+    }
+
+    [Fact]
+    public void GetTargetFrameworkFolder_NullProjectPath_ReturnsNet11Default()
+    {
+        // Act
+        string result = TargetFrameworkHelpers.GetTargetFrameworkFolder(null);
+
+        // Assert
+        Assert.Equal("net11.0", result);
+    }
+
+    [Fact]
+    public void GetTargetFrameworkFolder_EmptyProjectPath_ReturnsNet11Default()
+    {
+        // Act
+        string result = TargetFrameworkHelpers.GetTargetFrameworkFolder(string.Empty);
+
+        // Assert
+        Assert.Equal("net11.0", result);
+    }
+
+    [Fact]
+    public void GetTargetFrameworkFolder_InvalidProjectPath_ReturnsNet11Default()
+    {
+        // Arrange
+        string projectPath = Path.Combine(_testProjectsDirectory, "NonExistentFolder.csproj");
+
+        // Act
+        string result = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
+
+        // Assert
+        Assert.Equal("net11.0", result);
+    }
+
+    [Fact]
+    public void GetTargetFrameworkFolder_EmptyProject_ReturnsNet11Default()
+    {
+        // Arrange
+        string projectPath = CreateEmptyProject("EmptyProjectFolder.csproj");
+
+        // Act
+        string result = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
+
+        // Assert
+        Assert.Equal("net11.0", result);
+    }
+
+    [Fact]
+    public void GetTargetFrameworkFolder_Net7Project_ReturnsNet11Default()
+    {
+        // Arrange
+        string projectPath = CreateTestProject("TestNet7Folder.csproj", "net7.0");
+
+        // Act
+        string result = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
+
+        // Assert
+        Assert.Equal("net11.0", result); // Net7 is not compatible, should return default
+    }
+
     private string CreateTestProject(string projectName, string targetFramework, bool isMultiTarget = false)
     {
         string projectPath = Path.Combine(_testProjectsDirectory, projectName);

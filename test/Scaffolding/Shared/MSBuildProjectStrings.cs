@@ -1269,5 +1269,266 @@ Outputs the Project Information needed for CodeGeneration to a file.
   </Target>
 </Project>
 ";
+
+        #region .NET 11 Project Templates
+
+        public const string Net11ProjectTxt = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <RootNamespace>Microsoft.TestProject</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.AspNetCore.OpenApi"" Version=""9.0.0"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""10.0.2"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Tools"" Version=""10.0.0"" />
+    <PackageReference Include=""Swashbuckle.AspNetCore"" Version=""6.5.0"" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include=""..\Library1\Library1.csproj"" />
+  </ItemGroup>
+</Project>
+";
+
+        public const string Net11LibraryProjectTxt = @"
+<Project Sdk=""Microsoft.NET.Sdk"">
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <RootNamespace>Library1</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.EntityFrameworkCore"" Version=""10.0.0"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""10.0.0"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Design"" Version=""10.0.0"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Tools"" Version=""10.0.0"" />
+  </ItemGroup>
+</Project>
+";
+
+        public const string Net11ProgramFileText = @"
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
+";
+
+        public const string Net11MinimalApiProjectTxt = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <RootNamespace>Microsoft.TestProject</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.AspNetCore.OpenApi"" Version=""9.0.0"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""10.0.2"" />
+    <PackageReference Include=""Swashbuckle.AspNetCore"" Version=""7.0.0"" />
+  </ItemGroup>
+</Project>
+";
+
+        public const string Net11MinimalApiProgramText = @"
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+app.Run();
+";
+
+        public const string Net11BlazorProjectTxt = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <RootNamespace>Microsoft.TestProject</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.AspNetCore.Components.WebAssembly.Server"" Version=""9.0.0"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""10.0.0"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Tools"" Version=""10.0.0"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""10.0.2"" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include=""..\Library1\Library1.csproj"" />
+  </ItemGroup>
+</Project>
+";
+
+        public const string Net11BlazorProgramText = @"
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler(""/Error"");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseAntiforgery();
+
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
+
+app.Run();
+
+public partial class App : ComponentBase
+{
+}
+";
+
+        public const string Net11BlazorIdentityProjectTxt = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <RootNamespace>Microsoft.TestProject</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.AspNetCore.Components.WebAssembly.Server"" Version=""9.0.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""10.0.0"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""10.0.0"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Tools"" Version=""10.0.0"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""10.0.2"" />
+  </ItemGroup>
+</Project>
+";
+
+        public const string Net11IdentityProjectTxt = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <RootNamespace>Microsoft.TestProject</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.AspNetCore.Identity.EntityFrameworkCore"" Version=""10.0.0"" />
+    <PackageReference Include=""Microsoft.AspNetCore.Identity.UI"" Version=""10.0.0"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.SqlServer"" Version=""10.0.0"" />
+    <PackageReference Include=""Microsoft.EntityFrameworkCore.Tools"" Version=""10.0.0"" />
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""10.0.2"" />
+  </ItemGroup>
+</Project>
+";
+
+        public const string Net11AspireProjectTxt = @"
+<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <Import Project=""$(MSBuildThisFileDirectory)\TestCodeGeneration.targets"" Condition=""Exists('$(MSBuildThisFileDirectory)\TestCodeGeneration.targets')"" />
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <RootNamespace>Microsoft.TestProject</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"" Version=""10.0.2"" />
+  </ItemGroup>
+</Project>
+";
+
+        public const string Net11AspireProgramText = @"
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
+";
+
+        public const string ProductContextTxt = @"
+using Microsoft.EntityFrameworkCore;
+
+namespace Library1
+{
+    public class ProductContext : DbContext
+    {
+        public ProductContext(DbContextOptions<ProductContext> options)
+            : base(options)
+        {
+        }
+
+        public DbSet<Product> Products { get; set; } = default!;
+    }
+}
+";
+
+        public const string Library1ProductTxt = @"
+namespace Library1
+{
+    public class Product
+    {
+        public int ID { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+    }
+}
+";
+
+        #endregion
     }
 }

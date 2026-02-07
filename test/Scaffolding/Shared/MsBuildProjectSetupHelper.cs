@@ -319,5 +319,191 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
             RestoreAndBuild(fileProvider.Root, output);
         }
+
+        #region .NET 11 Project Setup Methods
+
+        /// <summary>
+        /// Sets up a basic .NET 11 project for scaffolding tests
+        /// </summary>
+        public void SetupNet11Project(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        {
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net11.0"));
+
+            fileProvider.Add("global.json", GlobalJsonText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net11ProjectTxt);
+            fileProvider.Add($"Root/TestCodeGeneration.targets", MsBuildProjectStrings.TestCodeGenerationTargetFileText);
+
+            var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net11.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            
+            fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.Net11ProgramFileText);
+            fileProvider.Add($"Library1/{MsBuildProjectStrings.LibraryProjectName}", MsBuildProjectStrings.Net11LibraryProjectTxt);
+
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
+        }
+
+        /// <summary>
+        /// Sets up a .NET 11 project with models for scaffolding tests
+        /// </summary>
+        public void SetupNet11ProjectWithModels(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        {
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net11.0"));
+
+            fileProvider.Add("global.json", GlobalJsonText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net11ProjectTxt);
+            fileProvider.Add($"Root/TestCodeGeneration.targets", MsBuildProjectStrings.TestCodeGenerationTargetFileText);
+
+            var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net11.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            
+            fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.Net11ProgramFileText);
+            fileProvider.Add($"Library1/{MsBuildProjectStrings.LibraryProjectName}", MsBuildProjectStrings.Net11LibraryProjectTxt);
+            fileProvider.Add($"Library1/Car.cs", MsBuildProjectStrings.CarTxt);
+            fileProvider.Add($"Library1/CarContext.cs", MsBuildProjectStrings.CarContextTxt);
+            fileProvider.Add($"Library1/ProductContext.cs", MsBuildProjectStrings.ProductContextTxt);
+            fileProvider.Add($"Library1/Product.cs", MsBuildProjectStrings.Library1ProductTxt);
+
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
+        }
+
+        /// <summary>
+        /// Sets up a .NET 11 minimal API project for scaffolding tests
+        /// </summary>
+        public void SetupNet11MinimalApiProject(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        {
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net11.0"));
+
+            fileProvider.Add("global.json", GlobalJsonText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net11MinimalApiProjectTxt);
+            fileProvider.Add($"Root/TestCodeGeneration.targets", MsBuildProjectStrings.TestCodeGenerationTargetFileText);
+
+            var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net11.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            
+            fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.Net11MinimalApiProgramText);
+            fileProvider.Add($"Root/Car.cs", MsBuildProjectStrings.CarTxt);
+
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
+        }
+
+        /// <summary>
+        /// Sets up a .NET 11 minimal API project with database context for scaffolding tests
+        /// </summary>
+        public void SetupNet11MinimalApiProjectWithDb(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        {
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net11.0"));
+
+            fileProvider.Add("global.json", GlobalJsonText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net11MinimalApiProjectTxt);
+            fileProvider.Add($"Root/TestCodeGeneration.targets", MsBuildProjectStrings.TestCodeGenerationTargetFileText);
+
+            var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net11.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            
+            fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.Net11MinimalApiProgramText);
+            fileProvider.Add($"Library1/{MsBuildProjectStrings.LibraryProjectName}", MsBuildProjectStrings.Net11LibraryProjectTxt);
+            fileProvider.Add($"Library1/ProductContext.cs", MsBuildProjectStrings.ProductContextTxt);
+            fileProvider.Add($"Library1/Product.cs", MsBuildProjectStrings.Library1ProductTxt);
+
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
+        }
+
+        /// <summary>
+        /// Sets up a .NET 11 Blazor project for scaffolding tests
+        /// </summary>
+        public void SetupNet11BlazorProject(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        {
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Library1"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net11.0"));
+
+            fileProvider.Add("global.json", GlobalJsonText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net11BlazorProjectTxt);
+            fileProvider.Add($"Root/TestCodeGeneration.targets", MsBuildProjectStrings.TestCodeGenerationTargetFileText);
+
+            var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net11.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            
+            fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.Net11BlazorProgramText);
+            fileProvider.Add($"Library1/{MsBuildProjectStrings.LibraryProjectName}", MsBuildProjectStrings.Net11LibraryProjectTxt);
+            fileProvider.Add($"Library1/Car.cs", MsBuildProjectStrings.CarTxt);
+            fileProvider.Add($"Library1/CarContext.cs", MsBuildProjectStrings.CarContextTxt);
+
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
+        }
+
+        /// <summary>
+        /// Sets up a .NET 11 Blazor project with Identity for scaffolding tests
+        /// </summary>
+        public void SetupNet11BlazorIdentityProject(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        {
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net11.0"));
+
+            fileProvider.Add("global.json", GlobalJsonText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net11BlazorIdentityProjectTxt);
+            fileProvider.Add($"Root/TestCodeGeneration.targets", MsBuildProjectStrings.TestCodeGenerationTargetFileText);
+
+            var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net11.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            
+            fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.Net11BlazorProgramText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.IdentityContextName}", MsBuildProjectStrings.IdentityContextText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.IdentityUserName}", MsBuildProjectStrings.IdentityUserText);
+
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
+        }
+
+        /// <summary>
+        /// Sets up a .NET 11 project with Identity for scaffolding tests
+        /// </summary>
+        public void SetupNet11IdentityProject(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        {
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net11.0"));
+
+            fileProvider.Add("global.json", GlobalJsonText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net11IdentityProjectTxt);
+            fileProvider.Add($"Root/TestCodeGeneration.targets", MsBuildProjectStrings.TestCodeGenerationTargetFileText);
+
+            var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net11.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            
+            fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.Net11ProgramFileText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.IdentityContextName}", MsBuildProjectStrings.IdentityContextText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.IdentityUserName}", MsBuildProjectStrings.IdentityUserText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.AppSettingsFileName}", MsBuildProjectStrings.AppSettingsFileTxt);
+
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
+        }
+
+        /// <summary>
+        /// Sets up a .NET 11 project with Aspire for scaffolding tests
+        /// </summary>
+        public void SetupNet11AspireProject(TemporaryFileProvider fileProvider, ITestOutputHelper output)
+        {
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "Root"));
+            Directory.CreateDirectory(Path.Combine(fileProvider.Root, "toolAssets", "net11.0"));
+
+            fileProvider.Add("global.json", GlobalJsonText);
+            fileProvider.Add($"Root/{MsBuildProjectStrings.RootProjectName}", MsBuildProjectStrings.Net11AspireProjectTxt);
+            fileProvider.Add($"Root/TestCodeGeneration.targets", MsBuildProjectStrings.TestCodeGenerationTargetFileText);
+
+            var msbuildTaskDllPath = Path.Combine(Path.GetDirectoryName(typeof(MsBuildProjectSetupHelper).Assembly.Location), "Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            fileProvider.Copy(msbuildTaskDllPath, "toolAssets/net11.0/Microsoft.VisualStudio.Web.CodeGeneration.Msbuild.dll");
+            
+            fileProvider.Add($"Root/{MsBuildProjectStrings.ProgramFileName}", MsBuildProjectStrings.Net11AspireProgramText);
+
+            RestoreAndBuild(Path.Combine(fileProvider.Root, "Root"), output);
+        }
+
+        #endregion
     }
 }

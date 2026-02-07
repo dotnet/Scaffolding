@@ -33,14 +33,15 @@ public class Net9TemplatesFolderTests
 
         // Navigate to the dotnet-scaffold assembly location
         // From test assembly: test/dotnet-scaffolding/dotnet-scaffold.Tests/bin/.../
-        // To source assembly: artifacts/bin/dotnet-scaffold/.../AspNet/Templates/net9.0
+        // To source assembly: artifacts/bin/dotnet-scaffold/.../Aspnet/Templates/net9.0
         string? currentDir = assemblyDirectory;
         string? artifactsDir = null;
         
-        // Find artifacts directory
+        // Find artifacts directory (case-insensitive for cross-platform compatibility)
         while (currentDir != null && !string.IsNullOrEmpty(currentDir))
         {
-            if (Path.GetFileName(currentDir) == "artifacts")
+            string dirName = Path.GetFileName(currentDir);
+            if (dirName.Equals("artifacts", StringComparison.OrdinalIgnoreCase))
             {
                 artifactsDir = currentDir;
                 break;
@@ -65,7 +66,13 @@ public class Net9TemplatesFolderTests
             string[] tfmDirs = Directory.Exists(configDir) ? Directory.GetDirectories(configDir) : Array.Empty<string>();
             foreach (var tfmDir in tfmDirs)
             {
+                // Try both "AspNet" and "Aspnet" for case-sensitive file systems
                 var candidateTemplatesDir = Path.Combine(tfmDir, "AspNet", "Templates", "net9.0");
+                if (!Directory.Exists(candidateTemplatesDir))
+                {
+                    candidateTemplatesDir = Path.Combine(tfmDir, "Aspnet", "Templates", "net9.0");
+                }
+                
                 if (Directory.Exists(candidateTemplatesDir))
                 {
                     templatesDir = candidateTemplatesDir;
@@ -96,13 +103,14 @@ public class Net9TemplatesFolderTests
         string? assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
         Assert.NotNull(assemblyDirectory);
 
-        // Navigate to find artifacts directory
+        // Navigate to find artifacts directory (case-insensitive for cross-platform compatibility)
         string? currentDir = assemblyDirectory;
         string? artifactsDir = null;
         
         while (currentDir != null && !string.IsNullOrEmpty(currentDir))
         {
-            if (Path.GetFileName(currentDir) == "artifacts")
+            string dirName = Path.GetFileName(currentDir);
+            if (dirName.Equals("artifacts", StringComparison.OrdinalIgnoreCase))
             {
                 artifactsDir = currentDir;
                 break;
@@ -122,7 +130,13 @@ public class Net9TemplatesFolderTests
             string[] tfmDirs = Directory.Exists(configDir) ? Directory.GetDirectories(configDir) : Array.Empty<string>();
             foreach (var tfmDir in tfmDirs)
             {
+                // Try both "AspNet" and "Aspnet" for case-sensitive file systems
                 var candidatePath = Path.Combine(tfmDir, "AspNet", "Templates", "net9.0", folderName);
+                if (!Directory.Exists(candidatePath))
+                {
+                    candidatePath = Path.Combine(tfmDir, "Aspnet", "Templates", "net9.0", folderName);
+                }
+                
                 if (Directory.Exists(candidatePath))
                 {
                     templateFolderPath = candidatePath;
@@ -146,13 +160,14 @@ public class Net9TemplatesFolderTests
         string? assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
         Assert.NotNull(assemblyDirectory);
 
-        // Navigate to find artifacts directory
+        // Navigate to find artifacts directory (case-insensitive for cross-platform compatibility)
         string? currentDir = assemblyDirectory;
         string? artifactsDir = null;
         
         while (currentDir != null && !string.IsNullOrEmpty(currentDir))
         {
-            if (Path.GetFileName(currentDir) == "artifacts")
+            string dirName = Path.GetFileName(currentDir);
+            if (dirName.Equals("artifacts", StringComparison.OrdinalIgnoreCase))
             {
                 artifactsDir = currentDir;
                 break;
@@ -172,7 +187,12 @@ public class Net9TemplatesFolderTests
             string[] tfmDirs = Directory.Exists(configDir) ? Directory.GetDirectories(configDir) : Array.Empty<string>();
             foreach (var tfmDir in tfmDirs)
             {
+                // Try both "AspNet" and "Aspnet" for case-sensitive file systems
                 var candidateTemplatesDir = Path.Combine(tfmDir, "AspNet", "Templates", "net9.0");
+                if (!Directory.Exists(candidateTemplatesDir))
+                {
+                    candidateTemplatesDir = Path.Combine(tfmDir, "Aspnet", "Templates", "net9.0");
+                }
                 if (Directory.Exists(candidateTemplatesDir))
                 {
                     templatesDir = candidateTemplatesDir;
@@ -212,13 +232,14 @@ public class Net9TemplatesFolderTests
         string? assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
         Assert.NotNull(assemblyDirectory);
 
-        // Navigate to find artifacts directory
+        // Navigate to find artifacts directory (case-insensitive for cross-platform compatibility)
         string? currentDir = assemblyDirectory;
         string? artifactsDir = null;
         
         while (currentDir != null && !string.IsNullOrEmpty(currentDir))
         {
-            if (Path.GetFileName(currentDir) == "artifacts")
+            string dirName = Path.GetFileName(currentDir);
+            if (dirName.Equals("artifacts", StringComparison.OrdinalIgnoreCase))
             {
                 artifactsDir = currentDir;
                 break;
@@ -238,7 +259,13 @@ public class Net9TemplatesFolderTests
             string[] tfmDirs = Directory.Exists(configDir) ? Directory.GetDirectories(configDir) : Array.Empty<string>();
             foreach (var tfmDir in tfmDirs)
             {
+                // Try both "AspNet" and "Aspnet" for case-sensitive file systems
                 var candidatePath = Path.Combine(tfmDir, "AspNet", "Templates", "net9.0", folderName);
+                if (!Directory.Exists(candidatePath))
+                {
+                    candidatePath = Path.Combine(tfmDir, "Aspnet", "Templates", "net9.0", folderName);
+                }
+                
                 if (Directory.Exists(candidatePath))
                 {
                     templateFolderPath = candidatePath;

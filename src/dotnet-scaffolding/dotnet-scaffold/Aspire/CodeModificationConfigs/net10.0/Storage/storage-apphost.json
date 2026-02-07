@@ -1,0 +1,36 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "var builder = DistributedApplication.CreateBuilder(args);",
+              "Block": "var storage = builder.AddAzureStorage(\"storage\").RunAsEmulator()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "builder.AddAzureStorage",
+              "Block": "var $(StorageVariableName) = storage.$(AddStorageMethodName)(\"$(StorageVariableName)\")",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "WithReference($(StorageVariableName))",
+              "Parent": "builder.AddProject<$(AutoGenProjectName)>",
+              "CodeChangeType": "MemberAccess",
+              "LeadingTrivia": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

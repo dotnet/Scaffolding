@@ -1,0 +1,15 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Replacements": [
+        {
+          "Block": "builder.AddRedisOutputCache(\"redis\")",
+          "ReplaceSnippet": [
+            "builder.Services.AddOutputCache()"
+          ]
+        }
+      ]
+    }
+  ]
+}

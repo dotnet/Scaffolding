@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Reflection;
 
 namespace Microsoft.DotNet.Scaffolding.Internal;
@@ -50,26 +49,16 @@ internal static class GlobalToolFileFinder
             return null;
         }
 
-        // Search for the file by name (case-insensitive)
-        var files = Directory.EnumerateFiles(configFolder, "*.json", SearchOption.AllDirectories);
-        var matchedFile = files.FirstOrDefault(x => Path.GetFileName(x).Equals(fileName, StringComparison.OrdinalIgnoreCase));
-        
-        if (matchedFile != null)
-        {
-            return matchedFile;
-        }
-        
-        // Also check for the file as a relative path (e.g., "subfolder/config.json")
+        // check for the file as a relative path (e.g., "subfolder/config.json")
         if (fileName.Contains(Path.DirectorySeparatorChar) || fileName.Contains(Path.AltDirectorySeparatorChar))
         {
             var fullPath = Path.Combine(configFolder, fileName);
-            if (File.Exists(fullPath))
-            {
-                return fullPath;
-            }
+            return File.Exists(fullPath) ? fullPath : null;
         }
 
-        return null;
+        // Search for the file by name case-insensitively (Linux file systems are case-sensitive)
+        return Directory.EnumerateFiles(configFolder, "*", SearchOption.AllDirectories)
+            .FirstOrDefault(f => Path.GetFileName(f).Equals(fileName, StringComparison.OrdinalIgnoreCase));
     }
 
     private static string? FindFolderWithToolsFolder(string startPath)

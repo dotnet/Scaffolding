@@ -144,6 +144,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return null;
             }
 
+            if (!UseExistingApplication && !string.IsNullOrEmpty(Application))
+            {
+                _logger.LogError("ApplicationId cannot be specified when UseExistingApplication is false. A new application will be created automatically.");
+                return null;
+            }
+
             return new EntraIdSettings
             {
                 Username = Username,

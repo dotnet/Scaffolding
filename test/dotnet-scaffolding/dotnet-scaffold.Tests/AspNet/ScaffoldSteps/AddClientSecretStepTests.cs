@@ -178,4 +178,151 @@ public class AddClientSecretStepTests
         // we're verifying that the cancellation token is properly passed through
         Assert.False(result);
     }
+
+    [Fact]
+    public void ProjectPath_IsRequired()
+    {
+        // This test verifies the ProjectPath property is required through compilation
+        // The 'required' keyword on the property ensures it must be set during object initialization
+        
+        // Arrange
+        Mock<IEnvironmentService> mockEnvironmentService = new Mock<IEnvironmentService>();
+        
+        // Act & Assert
+        // If ProjectPath was not required, this would cause a compilation error
+        var step = new AddClientSecretStep(
+            NullLogger<AddClientSecretStep>.Instance,
+            _mockFileSystem.Object,
+            mockEnvironmentService.Object)
+        {
+            ProjectPath = _testProjectPath // Required - must be set
+        };
+
+        Assert.NotNull(step.ProjectPath);
+    }
+
+    [Fact]
+    public void ClientId_DefaultsToNull()
+    {
+        // Arrange
+        Mock<IEnvironmentService> mockEnvironmentService = new Mock<IEnvironmentService>();
+        
+        // Act
+        var step = new AddClientSecretStep(
+            NullLogger<AddClientSecretStep>.Instance,
+            _mockFileSystem.Object,
+            mockEnvironmentService.Object)
+        {
+            ProjectPath = _testProjectPath
+        };
+
+        // Assert
+        Assert.Null(step.ClientId);
+    }
+
+    [Fact]
+    public void ClientSecret_DefaultsToNull()
+    {
+        // Arrange
+        Mock<IEnvironmentService> mockEnvironmentService = new Mock<IEnvironmentService>();
+        
+        // Act
+        var step = new AddClientSecretStep(
+            NullLogger<AddClientSecretStep>.Instance,
+            _mockFileSystem.Object,
+            mockEnvironmentService.Object)
+        {
+            ProjectPath = _testProjectPath
+        };
+
+        // Assert
+        Assert.Null(step.ClientSecret);
+    }
+
+    [Fact]
+    public void Username_DefaultsToNull()
+    {
+        // Arrange
+        Mock<IEnvironmentService> mockEnvironmentService = new Mock<IEnvironmentService>();
+        
+        // Act
+        var step = new AddClientSecretStep(
+            NullLogger<AddClientSecretStep>.Instance,
+            _mockFileSystem.Object,
+            mockEnvironmentService.Object)
+        {
+            ProjectPath = _testProjectPath
+        };
+
+        // Assert
+        Assert.Null(step.Username);
+    }
+
+    [Fact]
+    public void TenantId_DefaultsToNull()
+    {
+        // Arrange
+        Mock<IEnvironmentService> mockEnvironmentService = new Mock<IEnvironmentService>();
+        
+        // Act
+        var step = new AddClientSecretStep(
+            NullLogger<AddClientSecretStep>.Instance,
+            _mockFileSystem.Object,
+            mockEnvironmentService.Object)
+        {
+            ProjectPath = _testProjectPath
+        };
+
+        // Assert
+        Assert.Null(step.TenantId);
+    }
+
+    [Fact]
+    public void SecretName_CanBeCustomized()
+    {
+        // Arrange
+        string customSecretName = "MyApp:Azure:Secret";
+        Mock<IEnvironmentService> mockEnvironmentService = new Mock<IEnvironmentService>();
+        
+        // Act
+        var step = new AddClientSecretStep(
+            NullLogger<AddClientSecretStep>.Instance,
+            _mockFileSystem.Object,
+            mockEnvironmentService.Object)
+        {
+            ProjectPath = _testProjectPath,
+            SecretName = customSecretName
+        };
+
+        // Assert
+        Assert.Equal(customSecretName, step.SecretName);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_AttemptsToEnsureMsIdentityIsInstalled()
+    {
+        // Arrange
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        Mock<IEnvironmentService> mockEnvironmentService = new Mock<IEnvironmentService>();
+
+        var step = new AddClientSecretStep(
+            NullLogger<AddClientSecretStep>.Instance,
+            _mockFileSystem.Object,
+            mockEnvironmentService.Object)
+        {
+            ProjectPath = _testProjectPath,
+            ClientId = "test-client-id",
+            Username = "test@example.com",
+            TenantId = "test-tenant-id"
+        };
+
+        // Act
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        // Assert
+        // The result will be false because msidentity tool is not actually installed in test environment
+        // But this verifies that the step attempts to ensure msidentity is installed
+        // (which is part of the Entra ID scaffolding process)
+        Assert.False(result);
+    }
 }

@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// <summary>
         /// Option to select application interactively.
         /// </summary>
-        public string? SelectApplication { get; set; }
+        public bool UseExistingApplication { get; set; }
 
         /// <summary>
         /// Constructor for ValidateEntraIdStep.
@@ -138,9 +138,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return null;
             }
 
-            if (string.IsNullOrEmpty(Application) && string.IsNullOrEmpty(SelectApplication))
+            if (UseExistingApplication && string.IsNullOrEmpty(Application))
             {
-                _logger.LogError("Either Application must be specified or SelectApplication must be true.");
+                _logger.LogError("When UseExistingApplication is true, ApplicationId must be specified.");
                 return null;
             }
 
@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 Project = Project,
                 TenantId = TenantId,
                 Application = Application,
-                SelectApplication = SelectApplication
+                UseExisitngApplication = UseExistingApplication
             };
         }
 
@@ -186,7 +186,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 Username = settings.Username,
                 TenantId = settings.TenantId,
                 Application = settings.Application,
-                SelectApplication = settings.SelectApplication,
+                UseExistingApplication = settings.UseExisitngApplication,
                 BaseOutputPath = projectDirectory,
                 EntraIdNamespace = $"{projectName}"
             };

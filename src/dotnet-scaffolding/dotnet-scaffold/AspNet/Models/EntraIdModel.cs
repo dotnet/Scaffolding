@@ -26,9 +26,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Models
         /// </summary>
         public string? Application { get; set; }
         /// <summary>
-        /// Gets or sets the selected application.
+        /// Gets or sets whether to create application.
         /// </summary>
-        public string? SelectApplication { get; set; }
+        public bool UseExistingApplication { get; set; }
         /// <summary>
         /// Gets or sets the base output path for generated files.
         /// </summary>

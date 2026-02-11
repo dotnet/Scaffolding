@@ -93,11 +93,15 @@
   <PropertyGroup>
     <!-- Microsoft.AspNetCore.Razor.Language -->
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.24</MicrosoftAspNetCoreRazorLanguagePackageVersion>
-    <!-- Microsoft.Build-->
+    <!-- Microsoft.Build - TFM-specific versions -->
+    <!-- net9.0 uses 17.x which has net9.0 support, net10/11 use 18.x -->
     <MicrosoftBuildPackageVersion>18.0.2</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion9>17.12.6</MicrosoftBuildPackageVersion9>
     <MicrosoftBuildTasksCorePackageVersion>18.0.2</MicrosoftBuildTasksCorePackageVersion>
-    <!-- Microsoft.Build.Utilities-->
+    <MicrosoftBuildTasksCorePackageVersion9>17.12.6</MicrosoftBuildTasksCorePackageVersion9>
+    <!-- Microsoft.Build.Utilities - TFM-specific versions -->
     <MicrosoftBuildUtilitiesCorePackageVersion>18.0.2</MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion9>17.12.6</MicrosoftBuildUtilitiesCorePackageVersion9>
     <MicrosoftBuildLocatorPackageVersion>1.9.1</MicrosoftBuildLocatorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
     <MicrosoftCodeAnalysisCSharpPackageVersion>$(MicrosoftCodeAnalysisVersion)</MicrosoftCodeAnalysisCSharpPackageVersion>

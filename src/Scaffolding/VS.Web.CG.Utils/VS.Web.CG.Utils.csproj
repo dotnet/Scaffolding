@@ -23,6 +23,13 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+  </ItemGroup>
+
+  <!-- TFM-specific Microsoft.Build versions: net9.0 uses 17.x, net10/11 use 18.x -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion9)" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'net9.0'">
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
   </ItemGroup>
 

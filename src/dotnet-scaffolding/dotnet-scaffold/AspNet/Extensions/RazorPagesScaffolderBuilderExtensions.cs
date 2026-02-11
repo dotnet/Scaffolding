@@ -31,7 +31,7 @@ internal static class RazorPagesScaffolderBuilderExtensions
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(CrudSettings), out var crudSettingsObj);
             var crudSettings = crudSettingsObj as CrudSettings;
-            string targetFrameworkFolder = "net11.0"; //TODO invoke TargetFrameworkHelpers.GetTargetFrameworkFolder(crudSettings?.Project); when other tfm supported
+            string targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(crudSettings?.Project);
             string? codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("razorPagesChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
             config.Context.Properties.TryGetValue(nameof(RazorPageModel), out var razorPageModelObj);
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);

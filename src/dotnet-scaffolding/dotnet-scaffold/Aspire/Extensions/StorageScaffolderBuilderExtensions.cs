@@ -88,46 +88,50 @@ internal static class StorageScaffolderBuilderExtensions
         // Step 1: Add code changes to AppHost project for storage
         builder = builder.WithStep<AddAspireCodeChangeStep>(config =>
         {
-            // Find the code modification config file for AppHost storage
-            var codeModificationFilePath = AspireCodeModificationHelper.FindNet11CodeModificationConfigFile("Storage", "storage-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
-            if (!string.IsNullOrEmpty(codeModificationFilePath) &&
-                config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
+            if (config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
-                var step = config.Step;
-                // Get code modifier properties for AppHost
-                var codeModifierProperties = GetAppHostProperties(commandSettings);
-                step.CodeModifierConfigPath = codeModificationFilePath;
-                foreach (var kvp in codeModifierProperties)
+                // Find the code modification config file for AppHost storage
+                var codeModificationFilePath = AspireCodeModificationHelper.FindCodeModificationConfigFile("Storage", "storage-apphost.json", System.Reflection.Assembly.GetExecutingAssembly(), commandSettings.AppHostProject);
+                if (!string.IsNullOrEmpty(codeModificationFilePath))
                 {
-                    step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
-                }
+                    var step = config.Step;
+                    // Get code modifier properties for AppHost
+                    var codeModifierProperties = GetAppHostProperties(commandSettings);
+                    step.CodeModifierConfigPath = codeModificationFilePath;
+                    foreach (var kvp in codeModifierProperties)
+                    {
+                        step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+                    }
 
-                step.ProjectPath = commandSettings.AppHostProject;
-                step.CodeChangeOptions = [];
+                    step.ProjectPath = commandSettings.AppHostProject;
+                    step.CodeChangeOptions = [];
+                }
             }
         });
 
         // Step 2: Add code changes to the target project for storage
         builder = builder.WithStep<AddAspireCodeChangeStep>(config =>
         {
-            // Find the code modification config file for API storage
-            var codeModificationFilePath = AspireCodeModificationHelper.FindNet11CodeModificationConfigFile("Storage", "storage-webapi.json", System.Reflection.Assembly.GetExecutingAssembly());
             if (config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
-                commandSettingsObj is CommandSettings commandSettings &&
-                !string.IsNullOrEmpty(codeModificationFilePath))
+                commandSettingsObj is CommandSettings commandSettings)
             {
-                var step = config.Step;
-                // Set code modification details for the project
-                step.CodeModifierConfigPath = codeModificationFilePath;
-                var codeModifierProperties = GetApiProjectProperties(commandSettings);
-                foreach (var kvp in codeModifierProperties)
+                // Find the code modification config file for API storage
+                var codeModificationFilePath = AspireCodeModificationHelper.FindCodeModificationConfigFile("Storage", "storage-webapi.json", System.Reflection.Assembly.GetExecutingAssembly(), commandSettings.Project);
+                if (!string.IsNullOrEmpty(codeModificationFilePath))
                 {
-                    step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
-                }
+                    var step = config.Step;
+                    // Set code modification details for the project
+                    step.CodeModifierConfigPath = codeModificationFilePath;
+                    var codeModifierProperties = GetApiProjectProperties(commandSettings);
+                    foreach (var kvp in codeModifierProperties)
+                    {
+                        step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+                    }
 
-                step.ProjectPath = commandSettings.Project;
-                step.CodeChangeOptions = [];
+                    step.ProjectPath = commandSettings.Project;
+                    step.CodeChangeOptions = [];
+                }
             }
         });
 

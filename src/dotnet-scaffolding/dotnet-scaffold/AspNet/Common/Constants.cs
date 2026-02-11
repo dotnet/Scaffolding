@@ -43,6 +43,7 @@ internal class Constants
         public const string ControllerNameOption = "--controller";
         public const string UsernameOption = "--username";
         public const string TenantIdOption = "--tenantId";
+        public const string UseExistingApplicationOption = "--use-existing-application";
         public const string ApplicationIdOption = "--applicationId";
     }
 

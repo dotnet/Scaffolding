@@ -133,8 +133,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string Name = "entra-id";
             internal const string DisplayName = "Entra ID";
             internal const string Description = "Add Entra auth";
-            internal const string EntraIdExample = "dotnet scaffold aspnet entra-id --project C:/MyWebApp/MyWebApp.csproj --tenant-id your-tenant-id";
-            internal const string EntraIdExampleDescription = "Add Microsoft Entra ID authentication:";
+            internal const string EntraIdExample1 = "dotnet scaffold aspnet entra-id --project C:/MyWebApp/MyWebApp.csproj --tenant-id your-tenant-id --use-existing-application true --application-id your-app-id";
+            internal const string EntraIdExample1Description = "Add Microsoft Entra ID authentication using an existing Azure application:";
+            internal const string EntraIdExample2 = "dotnet scaffold aspnet entra-id --project C:/MyWebApp/MyWebApp.csproj --tenant-id your-tenant-id --use-existing-application false";
+            internal const string EntraIdExample2Description = "Add Microsoft Entra ID authentication by creating a new Azure application:";
         }
 
         internal class Catagories
@@ -253,14 +255,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
 
             internal static class Application
             {
-                internal const string DisplayName = "Create or Select Application";
-                internal const string Description = "Create or select existing application";
-                internal static string[] Values = ["Select an existing Azure application object", "Create a new Azure application object"];
+                internal const string DisplayName = "Use Existing Application? (No = Create New)";
+                internal const string Description = "Set to true to select an existing Azure application object, or false to create a new one.";
             }
 
             internal static class SelectApplication
             {
-                internal const string DisplayName = "Select Application";
+                internal const string DisplayName = "Select Existing Application";
                 internal const string Description = "Select existing application";
             }
         }

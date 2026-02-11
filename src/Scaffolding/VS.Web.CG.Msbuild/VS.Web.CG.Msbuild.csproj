@@ -18,12 +18,16 @@
     </Compile>
   </ItemGroup>
 
-  <!-- TFM-specific Microsoft.Build versions: net9.0 uses 17.x, net10/11 use 18.x -->
+  <!-- TFM-specific Microsoft.Build versions: net8.0 uses 17.8.x, net9.0 uses 17.12.x, net10/11 use 18.x -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion8)" PrivateAssets="All" ExcludeAssets="Runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion8)" PrivateAssets="All" ExcludeAssets="Runtime" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion9)" PrivateAssets="All" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion9)" PrivateAssets="All" ExcludeAssets="Runtime" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != 'net9.0'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0' and '$(TargetFramework)' != 'net9.0'">
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" PrivateAssets="All" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" PrivateAssets="All" ExcludeAssets="Runtime" />
   </ItemGroup>

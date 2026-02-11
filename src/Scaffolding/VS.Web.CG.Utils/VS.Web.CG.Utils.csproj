@@ -25,11 +25,14 @@
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
   </ItemGroup>
 
-  <!-- TFM-specific Microsoft.Build versions: net9.0 uses 17.x, net10/11 use 18.x -->
+  <!-- TFM-specific Microsoft.Build versions: net8.0 uses 17.8.x, net9.0 uses 17.12.x, net10/11 use 18.x -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion8)" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion9)" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != 'net9.0'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0' and '$(TargetFramework)' != 'net9.0'">
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
   </ItemGroup>
 

@@ -28,6 +28,9 @@
        Extra deps are pulled into the project but only for 2 scenarios, area and view.
        The rest of them pull in EF dependencies regardless. -->
   <!-- TFM-specific EF Core package references (explicit versions since CPM disabled for multi-targeting) -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(MicrosoftEntityFrameworkCoreDesignPackageVersion8)" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(MicrosoftEntityFrameworkCoreDesignPackageVersion9)" />
   </ItemGroup>

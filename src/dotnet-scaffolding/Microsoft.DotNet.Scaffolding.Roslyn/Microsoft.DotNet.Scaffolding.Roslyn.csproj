@@ -17,12 +17,16 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" />
   </ItemGroup>
 
-  <!-- TFM-specific Microsoft.Build versions: net9.0 uses 17.x, net10/11 use 18.x -->
+  <!-- TFM-specific Microsoft.Build versions: net8.0 uses 17.8.x, net9.0 uses 17.12.x, net10/11 use 18.x -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="Microsoft.Build" VersionOverride="$(MicrosoftBuildPackageVersion8)" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" VersionOverride="$(MicrosoftBuildTasksCorePackageVersion8)" ExcludeAssets="runtime" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageReference Include="Microsoft.Build" VersionOverride="$(MicrosoftBuildPackageVersion9)" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" VersionOverride="$(MicrosoftBuildTasksCorePackageVersion9)" ExcludeAssets="runtime" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != 'net9.0'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0' and '$(TargetFramework)' != 'net9.0'">
     <PackageReference Include="Microsoft.Build" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" ExcludeAssets="runtime" />
   </ItemGroup>

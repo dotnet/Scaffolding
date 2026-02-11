@@ -10,12 +10,21 @@
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Ref packages from darc subscriptions-->
-    <!-- Microsoft.EntityFrameworkCore.Design -->
+    <!-- Microsoft.EntityFrameworkCore.Design - TFM-specific versions -->
     <MicrosoftEntityFrameworkCoreDesignPackageVersion>11.0.0-preview.2.26080.101</MicrosoftEntityFrameworkCoreDesignPackageVersion>
-    <!-- Microsoft.EntityFrameworkCore -->
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion8>8.0.11</MicrosoftEntityFrameworkCoreDesignPackageVersion8>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion9>9.0.1</MicrosoftEntityFrameworkCoreDesignPackageVersion9>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion10>10.0.0-preview.1.25081.1</MicrosoftEntityFrameworkCoreDesignPackageVersion10>
+    <!-- Microsoft.EntityFrameworkCore - TFM-specific versions -->
     <MicrosoftEntityFrameworkCorePackageVersion>11.0.0-preview.2.26080.101</MicrosoftEntityFrameworkCorePackageVersion>
-    <!-- Microsoft.EntityFrameworkCore.SqlServer -->
+    <MicrosoftEntityFrameworkCorePackageVersion8>8.0.11</MicrosoftEntityFrameworkCorePackageVersion8>
+    <MicrosoftEntityFrameworkCorePackageVersion9>9.0.1</MicrosoftEntityFrameworkCorePackageVersion9>
+    <MicrosoftEntityFrameworkCorePackageVersion10>10.0.0-preview.1.25081.1</MicrosoftEntityFrameworkCorePackageVersion10>
+    <!-- Microsoft.EntityFrameworkCore.SqlServer - TFM-specific versions -->
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>11.0.0-preview.2.26080.101</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion8>8.0.11</MicrosoftEntityFrameworkCoreSqlServerPackageVersion8>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion9>9.0.1</MicrosoftEntityFrameworkCoreSqlServerPackageVersion9>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion10>10.0.0-preview.1.25081.1</MicrosoftEntityFrameworkCoreSqlServerPackageVersion10>
     <!-- Microsoft.Extensions.DependencyInjection -->
     <MicrosoftExtensionsDependencyInjectionPackageVersion>11.0.0-preview.2.26080.101</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
@@ -96,6 +105,8 @@
     <MicrosoftCodeAnalysisRazorPackageVersion>6.0.24</MicrosoftCodeAnalysisRazorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp.Workspaces -->
     <MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>$(MicrosoftCodeAnalysisVersion)</MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion>
+    <!-- Microsoft.CodeAnalysis.Workspaces.MSBuild -->
+    <MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>$(MicrosoftCodeAnalysisVersion)</MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.3.21166.3</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.3</NewtonsoftJsonPackageVersion>

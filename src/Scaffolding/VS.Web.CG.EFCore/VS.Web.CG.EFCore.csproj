@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Contains Entity Framework Core Services used by ASP.NET Core Code Generators.</Description>
-    <TargetFramework>$(BuildTfm)</TargetFramework>
+    <TargetFrameworks>$(BuildTfm)</TargetFrameworks>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -15,17 +15,27 @@
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\Scaffolding\VS.Web.CG.Core\VS.Web.CG.Core.csproj" />
     <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
-    <!-- The EntityFramework.Design is intentionally set to PrivateAssets=All. Scaffolding will rely on the user's
+  </ItemGroup>
+
+  <!-- The EntityFramework.Design is intentionally set to PrivateAssets=All. Scaffolding will rely on the user's
        project to provide this dependency, rather than introducing the dependency.
        This way if the user wants to scaffold non-ef related controller/view, they could do so
        without adding EntityFrameworkCore dependency.
        https://github.com/dotnet/scaffolding/issues/434
        -->
-    <!-- Would ideally have this private but this dependency is failing to load on runtime 
-         starting with VS 17.3 Preview 3. This is a placeholder fix. 
-         Extra deps are pulled into the project but only for 2 scenarios, area and view.
-         The rest of them pull in EF dependencies regardless. -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design"/>
+  <!-- Would ideally have this private but this dependency is failing to load on runtime 
+       starting with VS 17.3 Preview 3. This is a placeholder fix. 
+       Extra deps are pulled into the project but only for 2 scenarios, area and view.
+       The rest of them pull in EF dependencies regardless. -->
+  <!-- TFM-specific EF Core package references (explicit versions since CPM disabled for multi-targeting) -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(MicrosoftEntityFrameworkCoreDesignPackageVersion9)" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(MicrosoftEntityFrameworkCoreDesignPackageVersion10)" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(MicrosoftEntityFrameworkCoreDesignPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

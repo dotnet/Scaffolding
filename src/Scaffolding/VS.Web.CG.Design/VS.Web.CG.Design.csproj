@@ -6,10 +6,10 @@
 
   <Import Project="Shared.props" />
   <PropertyGroup>
-    <TargetFramework>$(BuildTfm)</TargetFramework>
+    <TargetFrameworks>$(BuildTfm)</TargetFrameworks>
     <PackageTags>aspnetcore;codegenerator;scaffolding;visualstudioweb</PackageTags>
     <PackageId>Microsoft.VisualStudio.Web.CodeGeneration.Design</PackageId>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeBuildOutput>true</IncludeBuildOutput>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Nullable>disable</Nullable>
   </PropertyGroup>
@@ -18,12 +18,6 @@
     <ProjectReference Include="$(RepoRoot)src\Shared\Microsoft.DotNet.Scaffolding.Shared\Microsoft.DotNet.Scaffolding.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(OutputPath)$(AssemblyName).dll;
-                      $(OutputPath)$(AssemblyName).xml;"
-             Condition=" '$(DotNetBuildFromSource)' != 'true' ">
-      <Pack>true</Pack>
-      <PackagePath>lib\$(BuildTfm)\</PackagePath>
-    </Content>
     <None Include="$(RepoRoot)src\Scaffolding\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>

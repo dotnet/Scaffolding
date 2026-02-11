@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Contains utilities used by ASP.NET Core Code Generation packages.</Description>
-    <TargetFramework>$(BuildTfm)</TargetFramework>
+    <TargetFrameworks>$(BuildTfm)</TargetFrameworks>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Utils</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Utils</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -20,9 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
-    <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="Microsoft.Build" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(MicrosoftCodeAnalysisCSharpWorkspacesPackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

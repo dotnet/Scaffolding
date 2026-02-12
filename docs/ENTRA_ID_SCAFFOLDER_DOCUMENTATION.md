@@ -141,7 +141,7 @@ dotnet scaffold aspnet entra-id \
   --username john@contoso.com \
   --project ./MyBlazorApp.csproj \
   --tenantId "your-tenant-id" \
-  --create-or-select-application "Create a new Azure application object"
+  --use-existing-application false
 ```
 
 This will:
@@ -174,9 +174,9 @@ dotnet scaffold aspnet entra-id
 ? Tenant Id for the identity user:
 > 12345678-1234-1234-1234-123456789abc
 
-? Create or select existing application:
-> Create a new Azure application object
-  Select an existing Azure application object
+? Use Existing Application? (No = Create New):
+> No
+  Yes
 
 ✓ Installing dotnet msidentity tool...
 ✓ Registering application in Azure AD...
@@ -213,11 +213,11 @@ dotnet scaffold aspnet entra-id
 ? Tenant Id for the identity user:
 > contoso.onmicrosoft.com
 
-? Create or select existing application:
-  Create a new Azure application object
-> Select an existing Azure application object
+? Use Existing Application? (No = Create New):
+  No
+> Yes
 
-? Select existing application (Application ID):
+? Select Existing Application (Application ID):
 > 11111111-2222-3333-4444-555555555555
 
 ✓ Verifying application registration...
@@ -256,8 +256,10 @@ Description:
   Add Entra auth
 
   Examples:
-    Add Microsoft Entra ID authentication:
-      dotnet scaffold aspnet entra-id --project C:/MyWebApp/MyWebApp.csproj --tenant-id your-tenant-id
+    Add Microsoft Entra ID authentication using an existing Azure application:
+      dotnet scaffold aspnet entra-id --project C:/MyWebApp/MyWebApp.csproj --tenant-id your-tenant-id --use-existing-application true --application-id your-app-id
+    Add Microsoft Entra ID authentication by creating a new Azure application:
+      dotnet scaffold aspnet entra-id --project C:/MyWebApp/MyWebApp.csproj --tenant-id your-tenant-id --use-existing-application false
 
 Usage:
   dotnet-scaffold aspnet entra-id [options]
@@ -266,11 +268,8 @@ Options:
   --username <username> (REQUIRED)               User name for the identity user
   --project <project> (REQUIRED)                 .NET project to be used for scaffolding (.csproj file)
   --tenantId <tenantId> (REQUIRED)              Tenant Id for the identity user
-  --create-or-select-application <option> (REQUIRED)  Create or select existing application
-    Options:
-      - "Create a new Azure application object"
-      - "Select an existing Azure application object"
-  --applicationId <applicationId>                Select existing application (required when selecting existing)
+  --use-existing-application <true|false> (REQUIRED)  Set to true to select an existing Azure application object, or false to create a new one
+  --applicationId <applicationId>                Select existing application (required when --use-existing-application is true)
   -?, -h, --help                                 Show help and usage information
 ```
 
@@ -281,11 +280,11 @@ The following options must be provided:
 1. **--username**: Your Azure account email
 2. **--project**: Path to your .csproj file
 3. **--tenantId**: Your Entra ID tenant ID
-4. **--create-or-select-application**: Choose whether to create new or use existing app
+4. **--use-existing-application**: Set to `true` to use existing app, or `false` to create new
 
 ### Optional Options
 
-- **--applicationId**: Client ID of existing app (required if selecting existing application)
+- **--applicationId**: Client ID of existing app (required when `--use-existing-application true`)
 
 ---
 
@@ -305,7 +304,7 @@ dotnet scaffold aspnet entra-id \
   --username john@contoso.com \
   --project ./MyBlazorApp.csproj \
   --tenantId "12345678-1234-1234-1234-123456789abc" \
-  --create-or-select-application "Create a new Azure application object"
+  --use-existing-application false
 
 # Run the app
 dotnet run
@@ -322,7 +321,7 @@ dotnet scaffold aspnet entra-id \
   --username jane@contoso.com \
   --project ./MyBlazorWasmApp.csproj \
   --tenantId "contoso.onmicrosoft.com" \
-  --create-or-select-application "Create a new Azure application object"
+  --use-existing-application false
 ```
 
 ### Scenario 3: Use an Existing App Registration
@@ -334,7 +333,7 @@ dotnet scaffold aspnet entra-id \
   --username admin@fabrikam.com \
   --project ./MyProject/MyProject.csproj \
   --tenantId "87654321-4321-4321-4321-210987654321" \
-  --create-or-select-application "Select an existing Azure application object" \
+  --use-existing-application true \
   --applicationId "11111111-2222-3333-4444-555555555555"
 ```
 
@@ -348,14 +347,14 @@ dotnet scaffold aspnet entra-id \
   --username dev@company.com \
   --project ./WebApp/WebApp.csproj \
   --tenantId "your-tenant-id" \
-  --create-or-select-application "Create a new Azure application object"
+  --use-existing-application false
 
 # Project 2 - create separate app registration
 dotnet scaffold aspnet entra-id \
   --username dev@company.com \
   --project ./AdminApp/AdminApp.csproj \
   --tenantId "your-tenant-id" \
-  --create-or-select-application "Create a new Azure application object"
+  --use-existing-application false
 ```
 
 ### Scenario 5: Development → Production Workflow
@@ -368,14 +367,14 @@ dotnet scaffold aspnet entra-id \
   --username dev@contoso.com \
   --project ./MyApp.csproj \
   --tenantId "dev-tenant-id" \
-  --create-or-select-application "Create a new Azure application object"
+  --use-existing-application false
 
 # Production - use existing production app registration
 dotnet scaffold aspnet entra-id \
   --username ops@contoso.com \
   --project ./MyApp.csproj \
   --tenantId "prod-tenant-id" \
-  --create-or-select-application "Select an existing Azure application object" \
+  --use-existing-application true \
   --applicationId "prod-app-client-id"
 ```
 
@@ -443,27 +442,26 @@ The Microsoft Entra ID (Azure AD) tenant ID where the app will be registered.
 
 ---
 
-### --create-or-select-application (REQUIRED)
+### --use-existing-application (REQUIRED)
 
-Specifies whether to create a new Azure AD app registration or use an existing one.
+Specifies whether to use an existing Azure AD app registration or create a new one.
 
-**Options**:
-- `"Create a new Azure application object"`
-- `"Select an existing Azure application object"`
+**Values**:
+- `true` - Select an existing Azure application object
+- `false` - Create a new Azure application object
 
 **Examples**:
 ```bash
 # Create a new app
---create-or-select-application "Create a new Azure application object"
+--use-existing-application false
 
 # Use existing app
---create-or-select-application "Select an existing Azure application object"
+--use-existing-application true
 ```
 
 **Notes**:
-- Quote the option value as shown
-- If selecting existing, you must also provide --applicationId
-- Creating new is recommended for new projects
+- If using existing (`true`), you must also provide --applicationId
+- Creating new (`false`) is recommended for new projects
 
 ---
 
@@ -479,7 +477,7 @@ The client ID of an existing Azure AD app registration to use.
 ```
 
 **When to use**:
-- Required when --create-or-select-application is "Select an existing Azure application object"
+- Required when `--use-existing-application true`
 - When you want to configure the project to use a pre-existing app registration
 - When sharing an app registration across multiple projects
 
@@ -511,7 +509,7 @@ dotnet scaffold aspnet entra-id
 # - Enter your email
 # - Confirm project path
 # - Enter tenant ID
-# - Select "Create a new Azure application object"
+# - Select "No" for "Use Existing Application?" to create a new app
 
 # Run the app
 dotnet run
@@ -529,7 +527,7 @@ dotnet scaffold aspnet entra-id \
   --username john@contoso.com \
   --project ./MyBlazorApp.csproj \
   --tenantId "12345678-1234-1234-1234-123456789abc" \
-  --create-or-select-application "Create a new Azure application object"
+  --use-existing-application false
 ```
 
 ### Scenario 3: Add Auth to Blazor WebAssembly Project (Interactive)
@@ -547,7 +545,7 @@ dotnet scaffold aspnet entra-id \
   --username jane@contoso.com \
   --project ./MyBlazorWasmApp.csproj \
   --tenantId "contoso.onmicrosoft.com" \
-  --create-or-select-application "Create a new Azure application object"
+  --use-existing-application false
 ```
 
 ### Scenario 4: Use an Existing App Registration (Interactive)
@@ -562,7 +560,7 @@ dotnet scaffold aspnet entra-id
 # ? User name: admin@fabrikam.com
 # ? Project: ./MyProject.csproj
 # ? Tenant ID: 87654321-4321-4321-4321-210987654321
-# ? Create or select: Select an existing Azure application object
+# ? Use Existing Application?: Yes
 # ? Application ID: 11111111-2222-3333-4444-555555555555
 ```
 
@@ -573,7 +571,7 @@ dotnet scaffold aspnet entra-id \
   --username admin@fabrikam.com \
   --project ./MyProject/MyProject.csproj \
   --tenantId "87654321-4321-4321-4321-210987654321" \
-  --create-or-select-application "Select an existing Azure application object" \
+  --use-existing-application true \
   --applicationId "11111111-2222-3333-4444-555555555555"
 ```
 
@@ -593,7 +591,7 @@ dotnet scaffold aspnet entra-id \
   --username dev@company.com \
   --project ./AdminApp.csproj \
   --tenantId "your-tenant-id" \
-  --create-or-select-application "Create a new Azure application object"
+  --use-existing-application false
 ```
 
 ### Scenario 6: Development → Production Workflow
@@ -606,14 +604,14 @@ dotnet scaffold aspnet entra-id \
   --username dev@contoso.com \
   --project ./MyApp.csproj \
   --tenantId "dev-tenant-id" \
-  --create-or-select-application "Create a new Azure application object"
+  --use-existing-application false
 
 # Production - use existing production app registration
 dotnet scaffold aspnet entra-id \
   --username ops@contoso.com \
   --project ./MyApp.csproj \
   --tenantId "prod-tenant-id" \
-  --create-or-select-application "Select an existing Azure application object" \
+  --use-existing-application true \
   --applicationId "prod-app-client-id"
 ```
 
@@ -798,14 +796,14 @@ Use the correct tenant ID from the output in your command.
 #### Issue: "Application ID required when selecting existing app"
 
 **Solution:**
-When using "Select an existing Azure application object", you must provide the `--applicationId`:
+When using `--use-existing-application true`, you must provide the `--applicationId`:
 
 ```bash
 dotnet scaffold aspnet entra-id \
   --username your@email.com \
   --project ./MyApp.csproj \
   --tenantId "your-tenant-id" \
-  --create-or-select-application "Select an existing Azure application object" \
+  --use-existing-application true \
   --applicationId "your-existing-app-id"
 ```
 
@@ -1073,7 +1071,7 @@ dotnet scaffold aspnet entra-id \
   --username your@email.com \
   --project ./YourApp.csproj \
   --tenantId "your-tenant-id" \
-  --create-or-select-application "Create a new Azure application object"
+  --use-existing-application false
 
 # Or run interactively:
 dotnet scaffold aspnet entra-id

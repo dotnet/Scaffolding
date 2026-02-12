@@ -84,16 +84,14 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             EntraIdSettings entraSettings = entraIdSettings as EntraIdSettings ??
                 throw new InvalidOperationException("missing 'EntraIdSettings' in 'ScaffolderContext.Properties'");
 
-            bool.TryParse(entraSettings.Application, out var selectSelected);
-
-            if (!string.IsNullOrEmpty(entraSettings.SelectApplication))
+            if (!string.IsNullOrEmpty(entraSettings.Application) && entraSettings.UseExisitngApplication)
             {
-                string id = entraSettings.SelectApplication.Split(" ").Last();
+                string id = entraSettings.Application.Split(" ").Last();
                 step.ClientId = id;
                 context.Properties["ClientId"] = id;
             }
 
-            if (selectSelected)
+            if (entraSettings.UseExisitngApplication)
             {
                 step.SkipStep = true;
             }

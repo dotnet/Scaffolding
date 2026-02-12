@@ -85,6 +85,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 NextStep = NextStep?.NextStep;
             }
 
+            // Skip the application selection step if UseExistingApplication is 'false'
+            if (Parameter.DisplayName.Equals(AspnetStrings.Options.Application.DisplayName, StringComparison.Ordinal) && 
+                string.Equals(parameterValue, "false", StringComparison.OrdinalIgnoreCase))
+            {
+                NextStep = NextStep?.NextStep;
+            }
+
             if (NextStep is not null && NextStep.Parameter.DisplayName.Equals(AspnetStrings.Options.Prerelease.DisplayName, StringComparison.Ordinal) && ShouldSkipPrereleaseOption(context))
             {
                 // Skip the prerelease step if the target framework is not net11, prerelease only applies to net11

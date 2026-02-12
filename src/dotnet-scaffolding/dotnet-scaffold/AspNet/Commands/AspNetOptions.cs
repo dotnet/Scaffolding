@@ -29,7 +29,7 @@ internal class AspNetOptions
     public ScaffolderOption<string> ControllerName { get; }
     public ScaffolderOption<bool> Views { get; }
     public ScaffolderOption<bool> Overwrite { get; }
-    public ScaffolderOption<string> Application { get; }
+    public ScaffolderOption<bool> UseExistingApplication { get; }
 
     private ScaffolderOption<string>? _username = null;
     private ScaffolderOption<string>? _tenantId = null;
@@ -194,13 +194,13 @@ internal class AspNetOptions
             PickerType = InteractivePickerType.YesNo
         };
 
-        Application = new ScaffolderOption<string>
+        UseExistingApplication = new ScaffolderOption<bool>
         {
             DisplayName = AspnetStrings.Options.Application.DisplayName,
             Description = AspnetStrings.Options.Application.Description,
+            CliOption = Constants.CliOptions.UseExistingApplicationOption,
             Required = true,
-            PickerType = InteractivePickerType.ConditionalPicker,
-            CustomPickerValues = AspnetStrings.Options.Application.Values
+            PickerType = InteractivePickerType.YesNo
         };
     }
 
@@ -222,7 +222,7 @@ internal class AspNetOptions
         PickerType = InteractivePickerType.DynamicPicker,
     };
 
-    public ScaffolderOption<string> SelectApplication => _applicationId ??= new()
+    public ScaffolderOption<string> ApplicationId => _applicationId ??= new()
     {
         DisplayName = AspnetStrings.Options.SelectApplication.DisplayName,
         CliOption = Constants.CliOptions.ApplicationIdOption,

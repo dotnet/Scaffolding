@@ -44,7 +44,7 @@ internal class TemplateFoldersUtilities : ITemplateFolderService
         {
             foreach (var baseFolderName in baseFolders)
             {
-                string templatesFolderName = "Templates";
+                string templatesFolderName = Path.Combine("AspNet", "Templates");
                 var candidateTemplateFolders = Path.Combine(rootFolder, templatesFolderName, frameworkTemplateFolder, baseFolderName);
                 if (Directory.Exists(candidateTemplateFolders))
                 {

@@ -27,7 +27,7 @@ public class Net9ScaffoldingSupportTests : IDisposable
     {
         _testDirectory = Path.Combine(Path.GetTempPath(), "Net9ScaffoldingSupportTests", Guid.NewGuid().ToString());
         _toolsDirectory = Path.Combine(_testDirectory, "tools");
-        _templatesDirectory = Path.Combine(_testDirectory, "Templates");
+        _templatesDirectory = Path.Combine(_testDirectory, "AspNet", "Templates");
         _createdProjects = new List<string>();
         
         Directory.CreateDirectory(_toolsDirectory);
@@ -574,7 +574,7 @@ public class Net9ScaffoldingSupportTests : IDisposable
 
             foreach (var baseFolderName in baseFolders)
             {
-                string templatesFolderName = "Templates";
+                string templatesFolderName = Path.Combine("AspNet", "Templates");
                 var candidateTemplateFolders = Path.Combine(_basePath, templatesFolderName, frameworkTemplateFolder, baseFolderName);
                 if (Directory.Exists(candidateTemplateFolders))
                 {

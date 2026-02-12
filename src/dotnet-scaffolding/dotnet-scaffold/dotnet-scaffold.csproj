@@ -52,12 +52,40 @@
   <ItemGroup>
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net10.0\*.tt" PackagePath="AspNet\Templates\net10.0\DbContext\" />
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net11.0\*.tt" PackagePath="AspNet\Templates\net11.0\DbContext\" />
+    <!-- DbContext templates don't exist in net8.0/net9.0 folders, so we use copies from net10.0 -->
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net10.0\NewDbContext.tt" PackagePath="AspNet\Templates\net8.0\DbContext\" />
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net10.0\NewDbContext.tt" PackagePath="AspNet\Templates\net9.0\DbContext\" />
     <None Pack="true" Include="AspNet\Templates\**\*.tt" PackagePath="AspNet\Templates\" />
     <None Pack="true" Include="README.md" PackagePath="\" />
     <!-- Pack AspNet CodeModificationConfigs into AspNet folder -->
     <None Pack="true" Include="AspNet\Templates\net8.0\CodeModificationConfigs\*.json">
       <PackagePath>AspNet\CodeModificationConfigs\net8.0</PackagePath>
     </None>
+    <!-- 
+      The following net8.0 templates do not exist in the net8.0 folder, so we use copies from net9.0.
+      These folders/files were added in net9.0 and are not present in net8.0 Templates:
+      - EfController\*.tt (ApiEfController, MvcEfController)
+      - Identity\Pages\**\*.tt (full Identity scaffolding pages)
+      - MinimalApi\*.tt (MinimalApi, MinimalApiEf)
+      - RazorPages\*.tt (CRUD pages)
+      - Views\*.tt (MVC views)
+      - BlazorIdentity\Pages\AccessDenied.tt
+      - Files\ApplicationUser.tt, _ValidationScriptsPartial.cshtml
+      - CodeModificationConfigs (efControllerChanges.json, identityChanges.json, razorPagesChanges.json)
+    -->
+    <None Pack="true" Include="AspNet\Templates\net9.0\EfController\*.tt" PackagePath="AspNet\Templates\net8.0\EfController\" />
+    <None Pack="true" Include="AspNet\Templates\net9.0\Identity\Pages\**\*.tt" PackagePath="AspNet\Templates\net8.0\Identity\Pages\" />
+    <None Pack="true" Include="AspNet\Templates\net9.0\MinimalApi\*.tt" PackagePath="AspNet\Templates\net8.0\MinimalApi\" />
+    <None Pack="true" Include="AspNet\Templates\net9.0\RazorPages\*.tt" PackagePath="AspNet\Templates\net8.0\RazorPages\" />
+    <None Pack="true" Include="AspNet\Templates\net9.0\Views\*.tt" PackagePath="AspNet\Templates\net8.0\Views\" />
+    <None Pack="true" Include="AspNet\Templates\net9.0\BlazorIdentity\Pages\AccessDenied.tt" PackagePath="AspNet\Templates\net8.0\BlazorIdentity\Pages\" />
+    <None Pack="true" Include="AspNet\Templates\net9.0\Files\ApplicationUser.tt" PackagePath="AspNet\Templates\net8.0\Files\" />
+    <None Pack="true" Include="AspNet\Templates\net9.0\Files\_ValidationScriptsPartial.cshtml" PackagePath="AspNet\Templates\net8.0\Files\" />
+    <!-- Only copy CodeModificationConfigs that don't exist in net8.0 (efControllerChanges, identityChanges, razorPagesChanges) -->
+    <!-- minimalApiChanges.json, blazorWebCrudChanges.json, blazorIdentityChanges.json already exist in net8.0 -->
+    <None Pack="true" Include="AspNet\Templates\net9.0\CodeModificationConfigs\efControllerChanges.json" PackagePath="AspNet\CodeModificationConfigs\net8.0\" />
+    <None Pack="true" Include="AspNet\Templates\net9.0\CodeModificationConfigs\identityChanges.json" PackagePath="AspNet\CodeModificationConfigs\net8.0\" />
+    <None Pack="true" Include="AspNet\Templates\net9.0\CodeModificationConfigs\razorPagesChanges.json" PackagePath="AspNet\CodeModificationConfigs\net8.0\" />
     <None Pack="true" Include="AspNet\Templates\net9.0\CodeModificationConfigs\*.json">
       <PackagePath>AspNet\CodeModificationConfigs\net9.0</PackagePath>
     </None>
@@ -84,6 +112,11 @@
 
   <!-- Copy templates to output for runtime but exclude from publish/pack -->
   <ItemGroup>
+    <!-- Include net8.0 templates in build output -->
+    <None Include="AspNet\Templates\net8.0\**\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </None>
     <!-- Include net9.0 templates in build output -->
     <None Include="AspNet\Templates\net9.0\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

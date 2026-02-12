@@ -50,31 +50,35 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net10.0\*.tt" PackagePath="Templates\net10.0\DbContext\" />
-    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net11.0\*.tt" PackagePath="Templates\net11.0\DbContext\" />
-    <None Pack="true" Include="AspNet\Templates\net9.0\Files\*.cshtml" PackagePath="Templates\net9.0\Files\" />
-    <None Pack="true" Include="AspNet\Templates\net10.0\Files\*.cshtml" PackagePath="Templates\net10.0\Files\" />
-    <None Pack="true" Include="AspNet\Templates\net10.0\Files\*.razor.js" PackagePath="Templates\net10.0\Files\" />
-    <None Pack="true" Include="AspNet\Templates\net11.0\Files\*.cshtml" PackagePath="Templates\net11.0\Files\" />
-    <None Pack="true" Include="AspNet\Templates\net11.0\Files\*.razor.js" PackagePath="Templates\net11.0\Files\" />
-    <None Pack="true" Include="AspNet\Templates\**\*.tt" PackagePath="Templates\" />
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net10.0\*.tt" PackagePath="AspNet\Templates\net10.0\DbContext\" />
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net11.0\*.tt" PackagePath="AspNet\Templates\net11.0\DbContext\" />
+    <None Pack="true" Include="AspNet\Templates\**\*.tt" PackagePath="AspNet\Templates\" />
     <None Pack="true" Include="README.md" PackagePath="\" />
-    <!-- Pack AspNet CodeModificationConfigs into template folders -->
-    <None Pack="true" Include="AspNet\CodeModificationConfigs\*.json">
-      <PackagePath>Templates\net8.0\CodeModificationConfigs</PackagePath>
+    <!-- Pack AspNet CodeModificationConfigs into AspNet folder -->
+    <None Pack="true" Include="AspNet\Templates\net8.0\CodeModificationConfigs\*.json">
+      <PackagePath>AspNet\CodeModificationConfigs\net8.0</PackagePath>
     </None>
-    <None Pack="true" Include="AspNet\CodeModificationConfigs\*.json">
-      <PackagePath>Templates\net9.0\CodeModificationConfigs</PackagePath>
+    <None Pack="true" Include="AspNet\Templates\net9.0\CodeModificationConfigs\*.json">
+      <PackagePath>AspNet\CodeModificationConfigs\net9.0</PackagePath>
     </None>
-    <None Pack="true" Include="AspNet\CodeModificationConfigs\*.json">
-      <PackagePath>Templates\net10.0\CodeModificationConfigs</PackagePath>
+    <None Pack="true" Include="AspNet\Templates\net10.0\CodeModificationConfigs\*.json">
+      <PackagePath>AspNet\CodeModificationConfigs\net10.0</PackagePath>
     </None>
-    <None Pack="true" Include="AspNet\CodeModificationConfigs\*.json">
-      <PackagePath>Templates\net11.0\CodeModificationConfigs</PackagePath>
+    <None Pack="true" Include="AspNet\Templates\net11.0\CodeModificationConfigs\*.json">
+      <PackagePath>AspNet\CodeModificationConfigs\net11.0</PackagePath>
     </None>
-    <!-- Pack Aspire CodeModificationConfigs -->
+    <!-- Pack Aspire CodeModificationConfigs into Aspire folder -->
+    <None Pack="true" Include="Aspire\CodeModificationConfigs\net8.0\**\*.json">
+      <PackagePath>Aspire\net8.0\CodeModificationConfigs</PackagePath>
+    </None>
+    <None Pack="true" Include="Aspire\CodeModificationConfigs\net9.0\**\*.json">
+      <PackagePath>Aspire\net9.0\CodeModificationConfigs</PackagePath>
+    </None>
+    <None Pack="true" Include="Aspire\CodeModificationConfigs\net10.0\**\*.json">
+      <PackagePath>Aspire\net10.0\CodeModificationConfigs</PackagePath>
+    </None>
     <None Pack="true" Include="Aspire\CodeModificationConfigs\net11.0\**\*.json">
-      <PackagePath>Templates\net11.0\CodeModificationConfigs</PackagePath>
+      <PackagePath>Aspire\net11.0\CodeModificationConfigs</PackagePath>
     </None>
   </ItemGroup>
 
@@ -100,19 +104,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>Aspire\CodeModificationConfigs\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
-    <!-- Include AspNet CodeModificationConfigs in build output for each version -->
-    <None Include="AspNet\CodeModificationConfigs\*.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>AspNet\Templates\net9.0\CodeModificationConfigs\%(Filename)%(Extension)</Link>
-    </None>
-    <None Include="AspNet\CodeModificationConfigs\*.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>AspNet\Templates\net10.0\CodeModificationConfigs\%(Filename)%(Extension)</Link>
-    </None>
-    <None Include="AspNet\CodeModificationConfigs\*.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>AspNet\Templates\net11.0\CodeModificationConfigs\%(Filename)%(Extension)</Link>
-    </None>
+
+    <!-- Update .cshtml and .razor.js files to add Pack metadata -->
+    <None Update="AspNet\Templates\net9.0\Files\*.cshtml" Pack="true" PackagePath="AspNet\Templates\net9.0\Files\" />
+    <None Update="AspNet\Templates\net10.0\Files\*.cshtml" Pack="true" PackagePath="AspNet\Templates\net10.0\Files\" />
+    <None Update="AspNet\Templates\net10.0\Files\*.razor.js" Pack="true" PackagePath="AspNet\Templates\net10.0\Files\" />
+    <None Update="AspNet\Templates\net11.0\Files\*.cshtml" Pack="true" PackagePath="AspNet\Templates\net11.0\Files\" />
+    <None Update="AspNet\Templates\net11.0\Files\*.razor.js" Pack="true" PackagePath="AspNet\Templates\net11.0\Files\" />
   </ItemGroup>
 
   <!-- Exclude template files from publish output to prevent them from appearing in tools folder -->

@@ -101,7 +101,7 @@ public class GlobalToolFileFinderTests : IDisposable
     {
         // Arrange
         var (assembly, _) = SetupTestEnvironment("net11.0", null);
-        var subfolder = Path.Combine(_testRootDirectory, "Templates", "net11.0", "CodeModificationConfigs", "subfolder");
+        var subfolder = Path.Combine(_testRootDirectory, "Aspnet", "CodeModificationConfigs", "net11.0", "subfolder");
         Directory.CreateDirectory(subfolder);
         _createdDirectories.Add(subfolder);
         
@@ -228,7 +228,7 @@ public class GlobalToolFileFinderTests : IDisposable
         // Arrange
         var (assembly, _) = SetupTestEnvironment("net11.0", null);
         
-        var subfolder1 = Path.Combine(_testRootDirectory, "Templates", "net11.0", "CodeModificationConfigs", "folder1");
+        var subfolder1 = Path.Combine(_testRootDirectory, "Aspnet", "CodeModificationConfigs", "net11.0", "folder1");
         Directory.CreateDirectory(subfolder1);
         _createdDirectories.Add(subfolder1);
         
@@ -236,7 +236,7 @@ public class GlobalToolFileFinderTests : IDisposable
         File.WriteAllText(configFile1, "{}");
         _createdFiles.Add(configFile1);
         
-        var subfolder2 = Path.Combine(_testRootDirectory, "Templates", "net11.0", "CodeModificationConfigs", "folder2");
+        var subfolder2 = Path.Combine(_testRootDirectory, "Aspnet", "CodeModificationConfigs", "net11.0", "folder2");
         Directory.CreateDirectory(subfolder2);
         _createdDirectories.Add(subfolder2);
         
@@ -258,7 +258,7 @@ public class GlobalToolFileFinderTests : IDisposable
         // Arrange
         var (assembly, directFile) = SetupTestEnvironment("net11.0", "config.json");
         
-        var subfolder = Path.Combine(_testRootDirectory, "Templates", "net11.0", "CodeModificationConfigs", "subfolder");
+        var subfolder = Path.Combine(_testRootDirectory, "Aspnet", "CodeModificationConfigs", "net11.0", "subfolder");
         Directory.CreateDirectory(subfolder);
         _createdDirectories.Add(subfolder);
         
@@ -274,13 +274,85 @@ public class GlobalToolFileFinderTests : IDisposable
         Assert.Equal(directFile, result);
     }
 
-    private (Assembly assembly, string configFile) SetupTestEnvironment(string targetFramework, string? fileName)
+    [Fact]
+    public void FindCodeModificationConfigFile_WithAspireFolder_ReturnsFilePath()
     {
-        // Create directory structure: {testRoot}/tools (marker) and {testRoot}/Templates/{tfm}/CodeModificationConfigs
-        // and {testRoot}/bin/assembly for the mock assembly location
+        // Arrange
+        var toolsDir = Path.Combine(_testRootDirectory, "tools");
+        var aspireDir = Path.Combine(_testRootDirectory, "Aspire");
+        var tfmDir = Path.Combine(aspireDir, "net11.0");
+        var configDir = Path.Combine(tfmDir, "CodeModificationConfigs");
+        var subfolderDir = Path.Combine(configDir, "Database");
+        
+        Directory.CreateDirectory(toolsDir);
+        Directory.CreateDirectory(subfolderDir);
+        _createdDirectories.Add(toolsDir);
+        _createdDirectories.Add(aspireDir);
+        _createdDirectories.Add(tfmDir);
+        _createdDirectories.Add(configDir);
+        _createdDirectories.Add(subfolderDir);
+
+        var configFile = Path.Combine(subfolderDir, "db-apphost.json");
+        File.WriteAllText(configFile, "{}");
+        _createdFiles.Add(configFile);
+
+        var binDir = Path.Combine(_testRootDirectory, "bin");
+        var assemblyDir = Path.Combine(binDir, "net11.0");
+        Directory.CreateDirectory(assemblyDir);
+        _createdDirectories.Add(binDir);
+        _createdDirectories.Add(assemblyDir);
+
+        var assembly = CreateMockAssembly(assemblyDir);
+
+        // Act
+        string? result = GlobalToolFileFinder.FindCodeModificationConfigFile(Path.Combine("Database", "db-apphost.json"), assembly);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(configFile, result);
+    }
+
+    [Fact]
+    public void FindCodeModificationConfigFile_WithAspnetPriority_ReturnsAspnetFile()
+    {
+        // Arrange
+        var (assembly, _) = SetupTestEnvironment("net11.0", null);
+        
+        // Create Aspnet config file
+        var aspnetConfigDir = Path.Combine(_testRootDirectory, "Aspnet", "CodeModificationConfigs", "net11.0");
+        Directory.CreateDirectory(aspnetConfigDir);
+        var aspnetFile = Path.Combine(aspnetConfigDir, "config.json");
+        File.WriteAllText(aspnetFile, "{}");
+        _createdFiles.Add(aspnetFile);
+
+        // Create Aspire config file (should be checked second)
+        var aspireDir = Path.Combine(_testRootDirectory, "Aspire");
+        var aspireTfmDir = Path.Combine(aspireDir, "net11.0");
+        var aspireConfigDir = Path.Combine(aspireTfmDir, "CodeModificationConfigs");
+        Directory.CreateDirectory(aspireConfigDir);
+        _createdDirectories.Add(aspireDir);
+        _createdDirectories.Add(aspireTfmDir);
+        _createdDirectories.Add(aspireConfigDir);
+
+        var aspireFile = Path.Combine(aspireConfigDir, "config.json");
+        File.WriteAllText(aspireFile, "{}");
+        _createdFiles.Add(aspireFile);
+
+        // Act
+        string? result = GlobalToolFileFinder.FindCodeModificationConfigFile("config.json", assembly);
+
+        // Assert - Should return Aspnet file (checked first)
+        Assert.NotNull(result);
+        Assert.Equal(aspnetFile, result);
+    }
+
+    [Fact]
+    public void FindCodeModificationConfigFile_BackwardCompatibility_WithTemplatesFolder_ReturnsFilePath()
+    {
+        // Arrange - Create old Templates structure
         var toolsDir = Path.Combine(_testRootDirectory, "tools");
         var templatesDir = Path.Combine(_testRootDirectory, "Templates");
-        var tfmDir = Path.Combine(templatesDir, targetFramework);
+        var tfmDir = Path.Combine(templatesDir, "net11.0");
         var configDir = Path.Combine(tfmDir, "CodeModificationConfigs");
         
         Directory.CreateDirectory(toolsDir);
@@ -288,6 +360,42 @@ public class GlobalToolFileFinderTests : IDisposable
         _createdDirectories.Add(toolsDir);
         _createdDirectories.Add(templatesDir);
         _createdDirectories.Add(tfmDir);
+        _createdDirectories.Add(configDir);
+
+        var configFile = Path.Combine(configDir, "oldConfig.json");
+        File.WriteAllText(configFile, "{}");
+        _createdFiles.Add(configFile);
+
+        var binDir = Path.Combine(_testRootDirectory, "bin");
+        var assemblyDir = Path.Combine(binDir, "net11.0");
+        Directory.CreateDirectory(assemblyDir);
+        _createdDirectories.Add(binDir);
+        _createdDirectories.Add(assemblyDir);
+
+        var assembly = CreateMockAssembly(assemblyDir);
+
+        // Act
+        string? result = GlobalToolFileFinder.FindCodeModificationConfigFile("oldConfig.json", assembly);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(configFile, result);
+    }
+
+    private (Assembly assembly, string configFile) SetupTestEnvironment(string targetFramework, string? fileName)
+    {
+        // Create directory structure: {testRoot}/tools (marker) and {testRoot}/Aspnet/CodeModificationConfigs/{tfm}
+        // and {testRoot}/bin/assembly for the mock assembly location
+        var toolsDir = Path.Combine(_testRootDirectory, "tools");
+        var aspnetDir = Path.Combine(_testRootDirectory, "Aspnet");
+        var aspnetConfigDir = Path.Combine(aspnetDir, "CodeModificationConfigs");
+        var configDir = Path.Combine(aspnetConfigDir, targetFramework);
+        
+        Directory.CreateDirectory(toolsDir);
+        Directory.CreateDirectory(configDir);
+        _createdDirectories.Add(toolsDir);
+        _createdDirectories.Add(aspnetDir);
+        _createdDirectories.Add(aspnetConfigDir);
         _createdDirectories.Add(configDir);
 
         // Create the config file if fileName is provided

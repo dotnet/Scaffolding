@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "var builder = DistributedApplication.CreateBuilder(args)",
+              "Block": "var $(DbName) = builder.$(AddDbMethod)(\"$(DbType)\").AddDatabase(\"$(DbName)\")",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "WithReference($(DbName))",
+              "Parent": "builder.AddProject<$(AutoGenProjectName)>",
+              "CodeChangeType": "MemberAccess",
+              "LeadingTrivia": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

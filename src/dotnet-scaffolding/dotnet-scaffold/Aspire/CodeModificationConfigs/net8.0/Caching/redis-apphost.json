@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "var builder = DistributedApplication.CreateBuilder(args);",
+              "Block": "var redis = builder.AddRedis(\"redis\")",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "WithReference(redis)",
+              "Parent": "builder.AddProject<$(AutoGenProjectName)>",
+              "CodeChangeType": "MemberAccess",
+              "LeadingTrivia": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

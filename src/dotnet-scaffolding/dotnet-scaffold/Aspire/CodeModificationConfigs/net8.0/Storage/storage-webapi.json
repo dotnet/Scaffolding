@@ -1,0 +1,20 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertBefore": [ "builder.Build()" ],
+              "Block": "builder.$(AddClientMethodName)(\"$(StorageVariableName)\")",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

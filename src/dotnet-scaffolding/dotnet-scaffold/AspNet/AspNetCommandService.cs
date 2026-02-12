@@ -342,8 +342,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     .WithDisplayName(AspnetStrings.EntraId.DisplayName)
                     .WithCategory(AspnetStrings.Catagories.EntraId)
                     .WithDescription(AspnetStrings.EntraId.Description)
-                    .WithExample(AspnetStrings.EntraId.EntraIdExample, AspnetStrings.EntraId.EntraIdExampleDescription)
-                    .WithOptions([options.Username, options.Project, options.TenantId, options.Application, options.SelectApplication])
+                    .WithExample(AspnetStrings.EntraId.EntraIdExample1, AspnetStrings.EntraId.EntraIdExample1Description)
+                    .WithExample(AspnetStrings.EntraId.EntraIdExample2, AspnetStrings.EntraId.EntraIdExample2Description)
+                    .WithOptions([options.Username, options.Project, options.TenantId, options.UseExistingApplication, options.ApplicationId])
                     .WithStep<ValidateEntraIdStep>(config =>
                     {
                         var step = config.Step;
@@ -351,8 +352,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                         step.Username = context.GetOptionResult(options.Username);
                         step.Project = context.GetOptionResult(options.Project);
                         step.TenantId = context.GetOptionResult(options.TenantId);
-                        step.Application = context.GetOptionResult(options.Application);
-                        step.SelectApplication = context.GetOptionResult(options.SelectApplication);
+                        step.Application = context.GetOptionResult(options.ApplicationId);
+                        step.UseExistingApplication = context.GetOptionResult(options.UseExistingApplication);
                     })
                     .WithRegisterAppStep()
                     .WithAddClientSecretStep()

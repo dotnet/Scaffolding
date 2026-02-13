@@ -13,6 +13,17 @@ The tool can be used to configure ASP.NET Core projects to authenticate with the
 
 For more info on the `dotnet msidentity` tool, see the readme here at [README](./src/MSIdentityScaffolding/README.md)
 
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+- Setting up your development environment
+- Understanding the repository structure
+- Making changes to templates and code
+- Testing your changes
+- Submitting pull requests
+
+For a quick start on building and testing, see [Getting Started](docs/Getting-Started.md).
+
 ## Reporting security issues and bugs
 
 Security issues and bugs should be reported privately, via email, to the Microsoft Security Response Center (MSRC)  secure@microsoft.com. You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Further information, including the MSRC PGP key, can be found in the [Security TechCenter](https://technet.microsoft.com/en-us/security/ff852094.aspx).

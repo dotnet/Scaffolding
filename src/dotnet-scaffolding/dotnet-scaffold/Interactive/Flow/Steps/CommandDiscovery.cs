@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console;
 using Spectre.Console.Flow;
@@ -97,6 +98,19 @@ internal class CommandDiscovery
             .Where(x => x.Value.DisplayCategories.Intersect(scaffoldingCategories).Any())
             .OrderBy(kvp => kvp.Value.DisplayName)
             .ToList();
+
+        // Filter commands based on detected TFM
+        TargetFramework? detectedTfm = context.GetDetectedTargetFramework() as TargetFramework?;
+        if (allCommandsByCategory != null && detectedTfm.HasValue)
+        {
+            // Entra ID not available for .NET 8 or .NET 9
+            if (detectedTfm == TargetFramework.Net8 || detectedTfm == TargetFramework.Net9)
+            {
+                allCommandsByCategory = allCommandsByCategory
+                    .Where(x => !x.Value.IsCommandAnEntraIdCommand())
+                    .ToList();
+            }
+        }
 
         var prompt = new FlowSelectionPrompt<KeyValuePair<string, CommandInfo>>()
             .Title("[lightseagreen]Pick a scaffolding command: [/]")

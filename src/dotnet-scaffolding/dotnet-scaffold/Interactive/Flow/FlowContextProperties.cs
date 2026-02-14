@@ -59,4 +59,7 @@ internal static class FlowContextProperties
     public const string TelemetryEnvironmentVariables = nameof(TelemetryEnvironmentVariables);
 
     public const string ProjectFileParameterResult = nameof(ProjectFileParameterResult);
+
+    /// <summary>Key for the detected target framework of the project(s) in the current directory.</summary>
+    public const string DetectedTargetFramework = nameof(DetectedTargetFramework);
 }

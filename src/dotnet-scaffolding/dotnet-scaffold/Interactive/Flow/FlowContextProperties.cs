@@ -59,4 +59,7 @@ internal static class FlowContextProperties
     public const string TelemetryEnvironmentVariables = nameof(TelemetryEnvironmentVariables);
 
     public const string ProjectFileParameterResult = nameof(ProjectFileParameterResult);
+
+    /// <summary>Key for boolean indicating if Aspire scaffolders should be available (false for .NET 8 projects).</summary>
+    public const string IsAspireAvailable = nameof(IsAspireAvailable);
 }

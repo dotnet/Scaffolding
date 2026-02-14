@@ -72,6 +72,12 @@ internal class CategoryDiscovery
             ?.Order()
             ?.ToList();
 
+        // Filter out Aspire category if not available (e.g., .NET 8 project)
+        if (!context.GetIsAspireAvailable())
+        {
+            displayCategories?.Remove("Aspire");
+        }
+
         // Removes 'All' and adds it back at the end
         displayCategories?.Remove(ScaffolderConstants.DEFAULT_CATEGORY);
         displayCategories?.Add(ScaffolderConstants.DEFAULT_CATEGORY);

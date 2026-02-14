@@ -98,6 +98,15 @@ internal class CommandDiscovery
             .OrderBy(kvp => kvp.Value.DisplayName)
             .ToList();
 
+        // Filter out Aspire commands if not available (e.g., .NET 8 project)
+        bool isAspireAvailable = context.GetIsAspireAvailable();
+        if (!isAspireAvailable && allCommandsByCategory != null)
+        {
+            allCommandsByCategory = allCommandsByCategory
+                .Where(x => !x.Value.IsCommandAnAspireCommand())
+                .ToList();
+        }
+
         var prompt = new FlowSelectionPrompt<KeyValuePair<string, CommandInfo>>()
             .Title("[lightseagreen]Pick a scaffolding command: [/]")
             .Converter(GetCommandInfoDisplayName)

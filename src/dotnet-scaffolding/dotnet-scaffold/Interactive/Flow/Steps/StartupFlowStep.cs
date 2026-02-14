@@ -1,3 +1,5 @@
+using Microsoft.DotNet.Scaffolding.Core.Helpers;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
@@ -79,6 +81,14 @@ internal class StartupFlowStep : IFlowStep
                     }
                 }
 
+                // Detect project TFM to determine if Aspire scaffolders should be available
+                statusContext.Status = "Detecting project framework.";
+                bool isAspireAvailable = DetectAspireAvailability();
+                context.Set(new FlowProperty(
+                    FlowContextProperties.IsAspireAvailable,
+                    isAspireAvailable,
+                    isVisible: false));
+
                 statusContext.Status = "Done\n";
             });
 
@@ -140,6 +150,46 @@ internal class StartupFlowStep : IFlowStep
                 FlowContextProperties.TelemetryEnvironmentVariables,
                 envVars,
                 isVisible: false));
+        }
+    }
+
+    /// <summary>
+    /// Detects whether Aspire scaffolders should be available based on project TFMs in the current directory.
+    /// Aspire scaffolders are not available for .NET 8 projects.
+    /// </summary>
+    /// <returns>True if Aspire should be available (no .NET 8 only projects found), false otherwise.</returns>
+    private bool DetectAspireAvailability()
+    {
+        try
+        {
+            var workingDirectory = _environmentService.CurrentDirectory;
+            if (!_fileSystem.DirectoryExists(workingDirectory))
+            {
+                return true; // Default to available if can't determine
+            }
+
+            // Find .csproj files in current directory and subdirectories
+            var projects = _fileSystem.EnumerateFiles(workingDirectory, "*.csproj", SearchOption.AllDirectories).ToList();
+            if (projects.Count == 0)
+            {
+                return true; // No projects found, default to available
+            }
+
+            // Check each project's TFM - if any is .NET 8 only, don't show Aspire
+            foreach (var projectPath in projects)
+            {
+                TargetFramework? targetFramework = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+                if (targetFramework == TargetFramework.Net8)
+                {
+                    return false; // .NET 8 project found, Aspire not available
+                }
+            }
+
+            return true; // No .NET 8 only projects, Aspire is available
+        }
+        catch
+        {
+            return true; // On error, default to available
         }
     }
 }

@@ -103,6 +103,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow
         }
 
         /// <summary>
+        /// Gets whether Aspire scaffolders should be available (based on detected project TFM).
+        /// Returns true if Aspire is available or if the property hasn't been set.
+        /// </summary>
+        public static bool GetIsAspireAvailable(this IFlowContext context)
+        {
+            if (context.Properties.Get(FlowContextProperties.IsAspireAvailable) is FlowProperty flowProperty && flowProperty.Value is bool boolValue)
+            {
+                return boolValue;
+            }
+            return true; // Default to true if not set
+        }
+
+        /// <summary>
         /// Gets the command arguments dictionary from the context.
         /// </summary>
         public static IDictionary<string, List<string>>? GetArgsDict(this IFlowContext context, bool throwIfEmpty = false)

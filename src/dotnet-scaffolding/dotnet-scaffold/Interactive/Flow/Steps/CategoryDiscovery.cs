@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console;
 using Spectre.Console.Flow;
@@ -72,10 +73,20 @@ internal class CategoryDiscovery
             ?.Order()
             ?.ToList();
 
-        // Filter out Aspire category if not available (e.g., .NET 8 project)
-        if (!context.GetIsAspireAvailable())
+        TargetFramework? detectedTfm = context.GetDetectedTargetFramework();
+        if (displayCategories != null && detectedTfm.HasValue)
         {
-            displayCategories?.Remove("Aspire");
+            // Entra ID not available for .NET 8 or .NET 9
+            // Aspire not available for .NET 8
+            if (detectedTfm == TargetFramework.Net8)
+            {
+                displayCategories.Remove("Aspire");
+                displayCategories.Remove("Entra ID");
+            }
+            else if (detectedTfm == TargetFramework.Net9)
+            {
+                displayCategories.Remove("Entra ID");
+            }
         }
 
         // Removes 'All' and adds it back at the end

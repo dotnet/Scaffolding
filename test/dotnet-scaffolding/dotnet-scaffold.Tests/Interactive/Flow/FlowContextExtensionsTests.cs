@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.Flow;
 using Moq;
 using Spectre.Console.Flow;
@@ -10,12 +11,12 @@ using Xunit;
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.Interactive.Flow;
 
 /// <summary>
-/// Unit tests for FlowContextExtensions, particularly the GetIsAspireAvailable method.
+/// Unit tests for FlowContextExtensions, particularly the GetDetectedTargetFramework method.
 /// </summary>
 public class FlowContextExtensionsTests
 {
     [Fact]
-    public void GetIsAspireAvailable_WhenPropertyNotSet_ReturnsTrue()
+    public void GetDetectedTargetFramework_WhenPropertyNotSet_ReturnsNull()
     {
         // Arrange
         var properties = new FlowProperties(new Dictionary<string, object>());
@@ -23,51 +24,34 @@ public class FlowContextExtensionsTests
         mockContext.Setup(c => c.Properties).Returns(properties);
 
         // Act
-        bool result = mockContext.Object.GetIsAspireAvailable();
+        TargetFramework? result = mockContext.Object.GetDetectedTargetFramework();
 
-        // Assert - default should be true when not set
-        Assert.True(result);
+        // Assert
+        Assert.Null(result);
     }
 
-    [Fact]
-    public void GetIsAspireAvailable_WhenPropertySetToTrue_ReturnsTrue()
+    [Theory]
+    [InlineData(TargetFramework.Net8)]
+    [InlineData(TargetFramework.Net9)]
+    [InlineData(TargetFramework.Net10)]
+    [InlineData(TargetFramework.Net11)]
+    public void GetDetectedTargetFramework_WhenPropertySet_ReturnsValue(TargetFramework expectedTfm)
     {
         // Arrange
         var properties = new FlowProperties(new Dictionary<string, object>
         {
-            [FlowContextProperties.IsAspireAvailable] = new FlowProperty(
-                FlowContextProperties.IsAspireAvailable,
-                true,
+            [FlowContextProperties.DetectedTargetFramework] = new FlowProperty(
+                FlowContextProperties.DetectedTargetFramework,
+                expectedTfm,
                 isVisible: false)
         });
         var mockContext = new Mock<IFlowContext>();
         mockContext.Setup(c => c.Properties).Returns(properties);
 
         // Act
-        bool result = mockContext.Object.GetIsAspireAvailable();
+        TargetFramework? result = mockContext.Object.GetDetectedTargetFramework();
 
         // Assert
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void GetIsAspireAvailable_WhenPropertySetToFalse_ReturnsFalse()
-    {
-        // Arrange
-        var properties = new FlowProperties(new Dictionary<string, object>
-        {
-            [FlowContextProperties.IsAspireAvailable] = new FlowProperty(
-                FlowContextProperties.IsAspireAvailable,
-                false,
-                isVisible: false)
-        });
-        var mockContext = new Mock<IFlowContext>();
-        mockContext.Setup(c => c.Properties).Returns(properties);
-
-        // Act
-        bool result = mockContext.Object.GetIsAspireAvailable();
-
-        // Assert
-        Assert.False(result);
+        Assert.Equal(expectedTfm, result);
     }
 }

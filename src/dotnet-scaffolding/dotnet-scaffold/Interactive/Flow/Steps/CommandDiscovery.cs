@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Spectre.Console;
 using Spectre.Console.Flow;
@@ -98,13 +99,24 @@ internal class CommandDiscovery
             .OrderBy(kvp => kvp.Value.DisplayName)
             .ToList();
 
-        // Filter out Aspire commands if not available (e.g., .NET 8 project)
-        bool isAspireAvailable = context.GetIsAspireAvailable();
-        if (!isAspireAvailable && allCommandsByCategory != null)
+        // Filter commands based on detected TFM
+        TargetFramework? detectedTfm = context.GetDetectedTargetFramework() as TargetFramework?;
+        if (allCommandsByCategory is not null && detectedTfm.HasValue)
         {
-            allCommandsByCategory = allCommandsByCategory
-                .Where(x => !x.Value.IsCommandAnAspireCommand())
-                .ToList();
+            // Entra ID not available for .NET 8 or .NET 9
+            // Aspire not available for .NET 8
+            if (detectedTfm is TargetFramework.Net8)
+            {
+                allCommandsByCategory = allCommandsByCategory
+                    .Where(x => !x.Value.IsCommandAnEntraIdCommand() && !x.Value.IsCommandAnAspireCommand())
+                    .ToList();
+            }
+            else if (detectedTfm is TargetFramework.Net9)
+            {
+                allCommandsByCategory = allCommandsByCategory
+                    .Where(x => !x.Value.IsCommandAnEntraIdCommand())
+                    .ToList();
+            }
         }
 
         var prompt = new FlowSelectionPrompt<KeyValuePair<string, CommandInfo>>()

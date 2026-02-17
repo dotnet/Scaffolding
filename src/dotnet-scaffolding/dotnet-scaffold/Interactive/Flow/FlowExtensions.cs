@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.Command;
 using Spectre.Console;
@@ -103,16 +104,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow
         }
 
         /// <summary>
-        /// Gets whether Aspire scaffolders should be available (based on detected project TFM).
-        /// Returns true if Aspire is available or if the property hasn't been set.
+        /// Gets the detected target framework from the context.
+        /// Returns null if not set.
         /// </summary>
-        public static bool GetIsAspireAvailable(this IFlowContext context)
+        public static TargetFramework? GetDetectedTargetFramework(this IFlowContext context)
         {
-            if (context.Properties.Get(FlowContextProperties.IsAspireAvailable) is FlowProperty flowProperty && flowProperty.Value is bool boolValue)
+            if (context.Properties.Get(FlowContextProperties.DetectedTargetFramework) is FlowProperty flowProperty && flowProperty.Value is TargetFramework tfmValue)
             {
-                return boolValue;
+                return tfmValue;
             }
-            return true; // Default to true if not set
+            return null;
         }
 
         /// <summary>

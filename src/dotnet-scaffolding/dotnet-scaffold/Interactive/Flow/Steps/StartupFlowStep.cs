@@ -81,13 +81,16 @@ internal class StartupFlowStep : IFlowStep
                     }
                 }
 
-                // Detect project TFM to determine if Aspire scaffolders should be available
+                // Detect project TFM to determine which scaffolders should be available
                 statusContext.Status = "Detecting project framework.";
-                bool isAspireAvailable = DetectAspireAvailability();
-                context.Set(new FlowProperty(
-                    FlowContextProperties.IsAspireAvailable,
-                    isAspireAvailable,
-                    isVisible: false));
+                TargetFramework? detectedTfm = DetectLowestTargetFramework();
+                if (detectedTfm.HasValue)
+                {
+                    context.Set(new FlowProperty(
+                        FlowContextProperties.DetectedTargetFramework,
+                        detectedTfm.Value,
+                        isVisible: false));
+                }
 
                 statusContext.Status = "Done\n";
             });
@@ -154,42 +157,46 @@ internal class StartupFlowStep : IFlowStep
     }
 
     /// <summary>
-    /// Detects whether Aspire scaffolders should be available based on project TFMs in the current directory.
-    /// Aspire scaffolders are not available for .NET 8 projects.
+    /// Detects the lowest target framework from project(s) in the current directory.
+    /// Returns the TargetFramework enum value, or null if not detected.
     /// </summary>
-    /// <returns>True if Aspire should be available (no .NET 8 only projects found), false otherwise.</returns>
-    private bool DetectAspireAvailability()
+    private TargetFramework? DetectLowestTargetFramework()
     {
         try
         {
             var workingDirectory = _environmentService.CurrentDirectory;
             if (!_fileSystem.DirectoryExists(workingDirectory))
             {
-                return true; // Default to available if can't determine
+                return null;
             }
 
             // Find .csproj files in current directory and subdirectories
             var projects = _fileSystem.EnumerateFiles(workingDirectory, "*.csproj", SearchOption.AllDirectories).ToList();
             if (projects.Count == 0)
             {
-                return true; // No projects found, default to available
+                return null;
             }
 
-            // Check each project's TFM - if any is .NET 8 only, don't show Aspire
+            // Find the lowest TFM across all projects
+            TargetFramework? lowestTfm = null;
+
             foreach (var projectPath in projects)
             {
-                TargetFramework? targetFramework = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
-                if (targetFramework == TargetFramework.Net8)
+                TargetFramework? tfm = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+                if (tfm.HasValue)
                 {
-                    return false; // .NET 8 project found, Aspire not available
+                    if (!lowestTfm.HasValue || tfm.Value < lowestTfm.Value)
+                    {
+                        lowestTfm = tfm.Value;
+                    }
                 }
             }
 
-            return true; // No .NET 8 only projects, Aspire is available
+            return lowestTfm;
         }
         catch
         {
-            return true; // On error, default to available
+            return null;
         }
     }
 }

@@ -60,6 +60,6 @@ internal static class FlowContextProperties
 
     public const string ProjectFileParameterResult = nameof(ProjectFileParameterResult);
 
-    /// <summary>Key for boolean indicating if Aspire scaffolders should be available (false for .NET 8 projects).</summary>
-    public const string IsAspireAvailable = nameof(IsAspireAvailable);
+    /// <summary>Key for the detected target framework of the project(s) in the current directory.</summary>
+    public const string DetectedTargetFramework = nameof(DetectedTargetFramework);
 }

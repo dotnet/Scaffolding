@@ -1,3 +1,5 @@
+using Microsoft.DotNet.Scaffolding.Core.Helpers;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
@@ -79,6 +81,17 @@ internal class StartupFlowStep : IFlowStep
                     }
                 }
 
+                // Detect project TFM to determine which scaffolders should be available
+                statusContext.Status = "Detecting project framework.";
+                TargetFramework? detectedTfm = DetectLowestTargetFramework();
+                if (detectedTfm.HasValue)
+                {
+                    context.Set(new FlowProperty(
+                        FlowContextProperties.DetectedTargetFramework,
+                        detectedTfm.Value,
+                        isVisible: false));
+                }
+
                 statusContext.Status = "Done\n";
             });
 
@@ -140,6 +153,50 @@ internal class StartupFlowStep : IFlowStep
                 FlowContextProperties.TelemetryEnvironmentVariables,
                 envVars,
                 isVisible: false));
+        }
+    }
+
+    /// <summary>
+    /// Detects the lowest target framework from project(s) in the current directory.
+    /// Returns the TargetFramework enum value, or null if not detected.
+    /// </summary>
+    private TargetFramework? DetectLowestTargetFramework()
+    {
+        try
+        {
+            var workingDirectory = _environmentService.CurrentDirectory;
+            if (!_fileSystem.DirectoryExists(workingDirectory))
+            {
+                return null;
+            }
+
+            // Find .csproj files in current directory and subdirectories
+            var projects = _fileSystem.EnumerateFiles(workingDirectory, "*.csproj", SearchOption.AllDirectories).ToList();
+            if (projects.Count == 0)
+            {
+                return null;
+            }
+
+            // Find the lowest TFM across all projects
+            TargetFramework? lowestTfm = null;
+
+            foreach (var projectPath in projects)
+            {
+                TargetFramework? tfm = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
+                if (tfm.HasValue)
+                {
+                    if (!lowestTfm.HasValue || tfm.Value < lowestTfm.Value)
+                    {
+                        lowestTfm = tfm.Value;
+                    }
+                }
+            }
+
+            return lowestTfm;
+        }
+        catch
+        {
+            return null;
         }
     }
 }

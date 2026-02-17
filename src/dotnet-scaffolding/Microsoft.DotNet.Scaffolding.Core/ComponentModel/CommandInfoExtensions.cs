@@ -10,6 +10,11 @@ internal static class CommandInfoExtensions
         return commandInfo.DisplayCategories.Any(category => string.Equals(category, "Aspire", StringComparison.Ordinal));
     }
 
+    public static bool IsCommandAnEntraIdCommand(this CommandInfo commandInfo)
+    {
+        return commandInfo.DisplayCategories.Any(category => string.Equals(category, "Entra ID", StringComparison.Ordinal));
+    }
+
     //TODO improve this logic, maybe put the scaffolder catagory in the commandInfo?
     public static bool IsCommandAnAspNetCommand(this CommandInfo commandInfo)
     {

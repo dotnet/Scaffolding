@@ -55,7 +55,7 @@ internal class AddFileStep : ScaffoldStep
             return Task.FromResult(false);
         }
 
-        var allFiles = new TemplateFoldersUtilities().GetAllT4TemplatesForTargetFramework(["Files"], ProjectPath);
+        var allFiles = new TemplateFoldersUtilities().GetAllFilesForTargetFramework(["Files"], ProjectPath);
         var fileToCopy = allFiles.FirstOrDefault(x => x.EndsWith(FileName, StringComparison.OrdinalIgnoreCase));
         var destinationDirectory = Path.GetDirectoryName(destinationFilePath);
         if (!string.IsNullOrEmpty(fileToCopy) && !string.IsNullOrEmpty(destinationDirectory))

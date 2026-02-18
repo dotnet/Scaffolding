@@ -14,4 +14,12 @@ internal interface ITemplateFolderService
     /// <param name="projectPath">The path to the project.</param>
     /// <returns>Enumerable of T4 template file paths.</returns>
     IEnumerable<string> GetAllT4TemplatesForTargetFramework(string[] baseFolders, string? projectPath);
+
+    /// <summary>
+    /// Gets all files (regardless of extension) under the specified base folders for the project's target framework.
+    /// </summary>
+    /// <param name="baseFolders">The base folder names to search under.</param>
+    /// <param name="projectPath">The path to the project.</param>
+    /// <returns>Enumerable of file paths.</returns>
+    IEnumerable<string> GetAllFilesForTargetFramework(string[] baseFolders, string? projectPath);
 }

@@ -101,10 +101,17 @@ internal class CommandDiscovery
 
         // Filter commands based on detected TFM
         TargetFramework? detectedTfm = context.GetDetectedTargetFramework() as TargetFramework?;
-        if (allCommandsByCategory != null && detectedTfm.HasValue)
+        if (allCommandsByCategory is not null && detectedTfm.HasValue)
         {
             // Entra ID not available for .NET 8 or .NET 9
-            if (detectedTfm == TargetFramework.Net8 || detectedTfm == TargetFramework.Net9)
+            // Aspire not available for .NET 8
+            if (detectedTfm is TargetFramework.Net8)
+            {
+                allCommandsByCategory = allCommandsByCategory
+                    .Where(x => !x.Value.IsCommandAnEntraIdCommand() && !x.Value.IsCommandAnAspireCommand())
+                    .ToList();
+            }
+            else if (detectedTfm is TargetFramework.Net9)
             {
                 allCommandsByCategory = allCommandsByCategory
                     .Where(x => !x.Value.IsCommandAnEntraIdCommand())

@@ -73,12 +73,17 @@ internal class CategoryDiscovery
             ?.Order()
             ?.ToList();
 
-        // Filter categories based on detected TFM
         TargetFramework? detectedTfm = context.GetDetectedTargetFramework();
         if (displayCategories != null && detectedTfm.HasValue)
         {
             // Entra ID not available for .NET 8 or .NET 9
-            if (detectedTfm == TargetFramework.Net8 || detectedTfm == TargetFramework.Net9)
+            // Aspire not available for .NET 8
+            if (detectedTfm == TargetFramework.Net8)
+            {
+                displayCategories.Remove("Aspire");
+                displayCategories.Remove("Entra ID");
+            }
+            else if (detectedTfm == TargetFramework.Net9)
             {
                 displayCategories.Remove("Entra ID");
             }

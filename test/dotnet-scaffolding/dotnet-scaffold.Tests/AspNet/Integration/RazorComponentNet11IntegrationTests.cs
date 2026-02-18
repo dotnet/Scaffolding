@@ -708,7 +708,7 @@ public class RazorComponentNet11IntegrationTests : IDisposable
 
         // Assert
         Assert.True(result, "dotnet new razorcomponent should succeed for a valid project.");
-        string expectedFile = Path.Combine(_testProjectDir, "Components", "ProductCard.razor");
+        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
         Assert.True(File.Exists(expectedFile), $"Expected file '{expectedFile}' was not created.");
     }
 
@@ -739,7 +739,7 @@ public class RazorComponentNet11IntegrationTests : IDisposable
 
         // Assert
         Assert.True(result);
-        string expectedFile = Path.Combine(_testProjectDir, "Components", "ProductCard.razor");
+        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
         string content = File.ReadAllText(expectedFile);
         // The generated razor component should contain an @page-less component or a heading
         Assert.False(string.IsNullOrWhiteSpace(content), "Generated .razor file should not be empty.");

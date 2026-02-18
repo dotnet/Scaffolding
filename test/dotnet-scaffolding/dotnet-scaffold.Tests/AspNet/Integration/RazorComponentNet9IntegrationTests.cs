@@ -709,7 +709,7 @@ public class RazorComponentNet9IntegrationTests : IDisposable
 
         // Assert
         Assert.True(result, $"dotnet new razorcomponent should succeed for a valid {TargetFramework} project.");
-        string expectedFile = Path.Combine(_testProjectDir, "Components", "ProductCard.razor");
+        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
         Assert.True(File.Exists(expectedFile), $"Expected file '{expectedFile}' was not created.");
     }
 
@@ -740,7 +740,7 @@ public class RazorComponentNet9IntegrationTests : IDisposable
 
         // Assert
         Assert.True(result);
-        string expectedFile = Path.Combine(_testProjectDir, "Components", "ProductCard.razor");
+        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
         string content = File.ReadAllText(expectedFile);
         Assert.False(string.IsNullOrWhiteSpace(content), "Generated .razor file should not be empty.");
     }
@@ -772,7 +772,7 @@ public class RazorComponentNet9IntegrationTests : IDisposable
 
         // Assert
         Assert.True(result);
-        string expectedFile = Path.Combine(_testProjectDir, "Components", "HeadingComponent.razor");
+        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
         string content = File.ReadAllText(expectedFile);
         Assert.Contains("<h3>", content);
     }
@@ -804,7 +804,7 @@ public class RazorComponentNet9IntegrationTests : IDisposable
 
         // Assert
         Assert.True(result);
-        string expectedFile = Path.Combine(_testProjectDir, "Components", "CodeBlockComponent.razor");
+        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
         string content = File.ReadAllText(expectedFile);
         Assert.Contains("@code", content);
     }
@@ -836,7 +836,7 @@ public class RazorComponentNet9IntegrationTests : IDisposable
 
         // Assert
         Assert.True(result);
-        string expectedFile = Path.Combine(_testProjectDir, "Components", "NonPageComponent.razor");
+        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
         string content = File.ReadAllText(expectedFile);
         Assert.DoesNotContain("@page", content);
     }

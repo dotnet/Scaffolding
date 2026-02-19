@@ -13,6 +13,12 @@ internal class TemplateFoldersUtilities : ITemplateFolderService
         return GetAllFiles(targetFrameworkTemplateFolder, baseFolders, ".tt");
     }
 
+    public IEnumerable<string> GetAllFilesForTargetFramework(string[] baseFolders, string? projectPath)
+    {
+        string targetFrameworkTemplateFolder = "net11.0"; // TODO call GetTargetFrameworkTemplateFolder(projectPath); when the other target frameworks are supported
+        return GetAllFiles(targetFrameworkTemplateFolder, baseFolders);
+    }
+
     public IEnumerable<string> GetAllFiles(string targetFrameworkTemplateFolder, string[] baseFolders, string? extension = null)
     {
         List<string> allTemplates = [];

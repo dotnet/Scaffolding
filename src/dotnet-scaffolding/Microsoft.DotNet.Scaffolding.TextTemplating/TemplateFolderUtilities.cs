@@ -15,7 +15,7 @@ internal class TemplateFoldersUtilities : ITemplateFolderService
 
     public IEnumerable<string> GetAllFilesForTargetFramework(string[] baseFolders, string? projectPath)
     {
-        string targetFrameworkTemplateFolder = "net11.0"; // TODO call GetTargetFrameworkTemplateFolder(projectPath); when the other target frameworks are supported
+        string targetFrameworkTemplateFolder = GetTargetFrameworkTemplateFolder(projectPath);
         return GetAllFiles(targetFrameworkTemplateFolder, baseFolders);
     }
 

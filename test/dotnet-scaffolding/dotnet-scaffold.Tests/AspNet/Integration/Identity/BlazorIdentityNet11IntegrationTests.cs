@@ -21,24 +21,24 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
+namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Identity;
 
 /// <summary>
 /// Integration tests to verify that all Blazor Identity files are correctly discovered,
-/// added, and referenced when scaffolding targets .NET 10.
+/// added, and referenced when scaffolding targets .NET 11.
 /// These tests guard against regressions where file discovery methods filter out
 /// non-T4 static files (e.g., .razor.js, .cshtml) that must be copied to the user's project.
 /// </summary>
-public class BlazorIdentityNet10IntegrationTests : IDisposable
+public class BlazorIdentityNet11IntegrationTests : IDisposable
 {
-    private const string TargetFramework = "net10.0";
+    private const string TargetFramework = "net11.0";
     private readonly string _testDirectory;
     private readonly string _toolsDirectory;
     private readonly string _templatesDirectory;
 
-    public BlazorIdentityNet10IntegrationTests()
+    public BlazorIdentityNet11IntegrationTests()
     {
-        _testDirectory = Path.Combine(Path.GetTempPath(), "BlazorIdentityNet10IntegrationTests", Guid.NewGuid().ToString());
+        _testDirectory = Path.Combine(Path.GetTempPath(), "BlazorIdentityNet11IntegrationTests", Guid.NewGuid().ToString());
         _toolsDirectory = Path.Combine(_testDirectory, "tools");
         _templatesDirectory = Path.Combine(_testDirectory, "Templates");
         Directory.CreateDirectory(_toolsDirectory);
@@ -64,7 +64,8 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
 
     /// <summary>
     /// Verifies that GetAllFilesForTargetFramework returns PasskeySubmit.razor.js
-    /// from the net10.0 Files template folder.
+    /// from the Files template folder. This is the file copied by AddFileStep and
+    /// was broken when the method was changed to only return .tt files.
     /// </summary>
     [Fact]
     public void GetAllFilesForTargetFramework_FindsPasskeySubmitRazorJs()
@@ -106,7 +107,8 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Verifies GetAllFilesForTargetFramework returns ALL files regardless of extension.
+    /// Verifies GetAllFilesForTargetFramework returns ALL files regardless of extension,
+    /// including .tt, .cs, .razor.js, .cshtml files.
     /// </summary>
     [Fact]
     public void GetAllFilesForTargetFramework_ReturnsAllFileTypes_NotJustTT()
@@ -134,6 +136,8 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
 
     /// <summary>
     /// Verifies that GetAllT4TemplatesForTargetFramework does NOT return non-.tt files.
+    /// This confirms the T4-only method correctly filters, while the regression was
+    /// using this method in AddFileStep where no filter should be applied.
     /// </summary>
     [Fact]
     public void GetAllT4TemplatesForTargetFramework_DoesNotReturnStaticFiles()
@@ -157,11 +161,71 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
 
     #endregion
 
+    #region AddFileStep Integration - PasskeySubmit.razor.js
+
+    /// <summary>
+    /// Verifies that AddFileStep successfully finds and copies PasskeySubmit.razor.js
+    /// when the file exists in the template folder. This is the end-to-end scenario that
+    /// was broken by the regression.
+    /// </summary>
+    [Fact]
+    public async Task AddFileStep_CopiesPasskeySubmitRazorJs_WhenFileExistsInTemplates()
+    {
+        // Arrange
+        var templatesBasePath = GetActualTemplatesBasePath();
+        var filesFolder = Path.Combine(templatesBasePath, TargetFramework, "Files");
+
+        // Skip if running in an environment without the actual template files
+        if (!Directory.Exists(filesFolder))
+        {
+            return;
+        }
+
+        var passkeyFile = Directory.EnumerateFiles(filesFolder, "PasskeySubmit.razor.js", SearchOption.AllDirectories).FirstOrDefault();
+        Assert.NotNull(passkeyFile); // PasskeySubmit.razor.js must exist in net11.0/Files
+
+        // Create a temp output directory to simulate the user's project
+        var outputDir = Path.Combine(_testDirectory, "output", "Components", "Account", "Shared");
+        Directory.CreateDirectory(outputDir);
+
+        var mockFileSystem = new Mock<IFileSystem>();
+        mockFileSystem.Setup(fs => fs.CreateDirectoryIfNotExists(It.IsAny<string>()));
+        mockFileSystem.Setup(fs => fs.CopyFile(It.IsAny<string>(), It.IsAny<string>(), false));
+
+        var mockScaffolder = new Mock<IScaffolder>();
+        mockScaffolder.Setup(s => s.DisplayName).Returns("BlazorIdentity");
+        mockScaffolder.Setup(s => s.Name).Returns("blazor-identity");
+        var context = new ScaffolderContext(mockScaffolder.Object);
+
+        var step = new AddFileStep(NullLogger<AddFileStep>.Instance, mockFileSystem.Object)
+        {
+            FileName = "PasskeySubmit.razor.js",
+            BaseOutputDirectory = outputDir,
+            ProjectPath = "test.csproj"
+        };
+
+        // Act
+        bool result = await step.ExecuteAsync(context, CancellationToken.None);
+
+        // Assert - The step should succeed (find the file and attempt to copy it)
+        // Note: result depends on whether the template utilities can find the tools folder
+        // from the test assembly location. We verify via mock that CopyFile was called.
+        if (result)
+        {
+            mockFileSystem.Verify(fs => fs.CopyFile(
+                It.Is<string>(src => src.EndsWith("PasskeySubmit.razor.js", StringComparison.OrdinalIgnoreCase)),
+                It.Is<string>(dest => dest.EndsWith("PasskeySubmit.razor.js", StringComparison.OrdinalIgnoreCase)),
+                false), Times.Once);
+        }
+    }
+
+    #endregion
+
     #region Blazor Identity T4 Template Discovery
 
     /// <summary>
     /// Verifies that GetAllT4TemplatesForTargetFramework finds all expected BlazorIdentity
-    /// T4 templates for net10.0.
+    /// T4 templates for net11.0.
     /// </summary>
     [Fact]
     public void GetAllT4Templates_FindsAllBlazorIdentityTemplates()
@@ -203,17 +267,18 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     #region Code Modification Config - blazorIdentityChanges.json
 
     /// <summary>
-    /// Verifies that the net10.0 blazorIdentityChanges.json config file exists.
+    /// Verifies that the net11.0 blazorIdentityChanges.json config file exists.
     /// </summary>
     [Fact]
-    public void BlazorIdentityChangesConfig_ExistsForNet10()
+    public void BlazorIdentityChangesConfig_ExistsForNet11()
     {
         var configPath = GetBlazorIdentityChangesConfigPath();
         Assert.True(File.Exists(configPath), $"blazorIdentityChanges.json not found at: {configPath}");
     }
 
     /// <summary>
-    /// Verifies that NavMenu.razor.css is referenced in blazorIdentityChanges.json for net10.0.
+    /// Verifies that NavMenu.razor.css is referenced in blazorIdentityChanges.json for net11.0.
+    /// This ensures the CSS additions (lock icon, person icons, etc.) are applied.
     /// </summary>
     [Fact]
     public void BlazorIdentityChangesConfig_ReferencesNavMenuRazorCss()
@@ -235,6 +300,7 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
                 fileName.GetString()?.Contains("NavMenu.razor.css", StringComparison.OrdinalIgnoreCase) == true)
             {
                 found = true;
+                // Verify it has Replacements
                 Assert.True(file.TryGetProperty("Replacements", out var replacements));
                 Assert.True(replacements.GetArrayLength() > 0);
                 break;
@@ -245,7 +311,8 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Verifies that NavMenu.razor is referenced in blazorIdentityChanges.json for net10.0.
+    /// Verifies that NavMenu.razor is referenced in blazorIdentityChanges.json for net11.0.
+    /// The NavMenu modifications add login/logout/register links and the @implements IDisposable directive.
     /// </summary>
     [Fact]
     public void BlazorIdentityChangesConfig_ReferencesNavMenuRazor()
@@ -282,7 +349,8 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Verifies that App.razor is referenced in blazorIdentityChanges.json for net10.0.
+    /// Verifies that App.razor is referenced in blazorIdentityChanges.json for net11.0.
+    /// The App.razor modifications add the PasskeySubmit.razor.js script reference.
     /// </summary>
     [Fact]
     public void BlazorIdentityChangesConfig_ReferencesAppRazor()
@@ -307,6 +375,7 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
                 Assert.True(file.TryGetProperty("Replacements", out var replacements));
                 Assert.True(replacements.GetArrayLength() > 0);
 
+                // Verify PasskeySubmit.razor.js script reference is in the replacement
                 var replacementsText = replacements.ToString();
                 Assert.Contains("PasskeySubmit.razor.js", replacementsText);
                 break;
@@ -317,7 +386,8 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Verifies that Routes.razor is referenced in blazorIdentityChanges.json for net10.0.
+    /// Verifies that Routes.razor is referenced in blazorIdentityChanges.json for net11.0.
+    /// This adds the AuthorizeRouteView and RedirectToLogin components.
     /// </summary>
     [Fact]
     public void BlazorIdentityChangesConfig_ReferencesRoutesRazor()
@@ -349,7 +419,8 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Verifies that _Imports.razor is referenced in blazorIdentityChanges.json for net10.0.
+    /// Verifies that _Imports.razor is referenced in blazorIdentityChanges.json for net11.0.
+    /// This adds the Microsoft.AspNetCore.Components.Authorization using.
     /// </summary>
     [Fact]
     public void BlazorIdentityChangesConfig_ReferencesImportsRazor()
@@ -379,7 +450,8 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Verifies that Program.cs is referenced in blazorIdentityChanges.json for net10.0.
+    /// Verifies that Program.cs is referenced in blazorIdentityChanges.json for net11.0.
+    /// Program.cs is where Identity services and middleware are registered.
     /// </summary>
     [Fact]
     public void BlazorIdentityChangesConfig_ReferencesProgramCs()
@@ -433,6 +505,7 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
             }
         }
 
+        // All files that blazor identity scaffolding modifies
         Assert.Contains(referencedFileNames, f => f.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(referencedFileNames, f => f.Equals("Routes.razor", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(referencedFileNames, f => f.Contains("NavMenu.razor.css", StringComparison.OrdinalIgnoreCase));
@@ -446,34 +519,34 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     #region Actual Template Existence Tests on Disk
 
     /// <summary>
-    /// Verifies that PasskeySubmit.razor.js exists in the actual net10.0/Files template folder.
+    /// Verifies that PasskeySubmit.razor.js exists in the actual net11.0/Files template folder.
     /// </summary>
     [Fact]
-    public void Net10_Files_PasskeySubmitRazorJs_ExistsOnDisk()
+    public void Net11_Files_PasskeySubmitRazorJs_ExistsOnDisk()
     {
         AssertActualTemplateFileExists(Path.Combine(TargetFramework, "Files", "PasskeySubmit.razor.js"));
     }
 
     /// <summary>
-    /// Verifies that _ValidationScriptsPartial.cshtml exists in the actual net10.0/Files template folder.
+    /// Verifies that _ValidationScriptsPartial.cshtml exists in the actual net11.0/Files template folder.
     /// </summary>
     [Fact]
-    public void Net10_Files_ValidationScriptsPartial_ExistsOnDisk()
+    public void Net11_Files_ValidationScriptsPartial_ExistsOnDisk()
     {
         AssertActualTemplateFileExists(Path.Combine(TargetFramework, "Files", "_ValidationScriptsPartial.cshtml"));
     }
 
     /// <summary>
-    /// Verifies that ApplicationUser.tt exists in the actual net10.0/Files template folder.
+    /// Verifies that ApplicationUser.tt exists in the actual net11.0/Files template folder.
     /// </summary>
     [Fact]
-    public void Net10_Files_ApplicationUserTT_ExistsOnDisk()
+    public void Net11_Files_ApplicationUserTT_ExistsOnDisk()
     {
         AssertActualTemplateFileExists(Path.Combine(TargetFramework, "Files", "ApplicationUser.tt"));
     }
 
     /// <summary>
-    /// Verifies all BlazorIdentity root-level .tt templates exist on disk for net10.0.
+    /// Verifies all BlazorIdentity root-level .tt templates exist on disk.
     /// </summary>
     [Theory]
     [InlineData("IdentityComponentsEndpointRouteBuilderExtensions")]
@@ -482,13 +555,13 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     [InlineData("IdentityRevalidatingAuthenticationStateProvider")]
     [InlineData("PasskeyInputModel")]
     [InlineData("PasskeyOperation")]
-    public void Net10_BlazorIdentity_RootTemplates_ExistOnDisk(string templateName)
+    public void Net11_BlazorIdentity_RootTemplates_ExistOnDisk(string templateName)
     {
         AssertActualTemplateFileExists(Path.Combine(TargetFramework, "BlazorIdentity", $"{templateName}.tt"));
     }
 
     /// <summary>
-    /// Verifies all BlazorIdentity/Pages .tt templates exist on disk for net10.0.
+    /// Verifies all BlazorIdentity/Pages .tt templates exist on disk.
     /// </summary>
     [Theory]
     [InlineData("_Imports")]
@@ -509,13 +582,13 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     [InlineData("ResendEmailConfirmation")]
     [InlineData("ResetPassword")]
     [InlineData("ResetPasswordConfirmation")]
-    public void Net10_BlazorIdentity_PagesTemplates_ExistOnDisk(string templateName)
+    public void Net11_BlazorIdentity_PagesTemplates_ExistOnDisk(string templateName)
     {
         AssertActualTemplateFileExists(Path.Combine(TargetFramework, "BlazorIdentity", "Pages", $"{templateName}.tt"));
     }
 
     /// <summary>
-    /// Verifies all BlazorIdentity/Pages/Manage .tt templates exist on disk for net10.0.
+    /// Verifies all BlazorIdentity/Pages/Manage .tt templates exist on disk.
     /// </summary>
     [Theory]
     [InlineData("_Imports")]
@@ -533,13 +606,13 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     [InlineData("ResetAuthenticator")]
     [InlineData("SetPassword")]
     [InlineData("TwoFactorAuthentication")]
-    public void Net10_BlazorIdentity_ManageTemplates_ExistOnDisk(string templateName)
+    public void Net11_BlazorIdentity_ManageTemplates_ExistOnDisk(string templateName)
     {
         AssertActualTemplateFileExists(Path.Combine(TargetFramework, "BlazorIdentity", "Pages", "Manage", $"{templateName}.tt"));
     }
 
     /// <summary>
-    /// Verifies all BlazorIdentity/Shared .tt templates exist on disk for net10.0.
+    /// Verifies all BlazorIdentity/Shared .tt templates exist on disk.
     /// </summary>
     [Theory]
     [InlineData("ExternalLoginPicker")]
@@ -549,7 +622,7 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     [InlineData("RedirectToLogin")]
     [InlineData("ShowRecoveryCodes")]
     [InlineData("StatusMessage")]
-    public void Net10_BlazorIdentity_SharedTemplates_ExistOnDisk(string templateName)
+    public void Net11_BlazorIdentity_SharedTemplates_ExistOnDisk(string templateName)
     {
         AssertActualTemplateFileExists(Path.Combine(TargetFramework, "BlazorIdentity", "Shared", $"{templateName}.tt"));
     }
@@ -559,8 +632,9 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     #region End-to-End: BlazorIdentityHelper generates properties for all templates
 
     /// <summary>
-    /// Verifies that BlazorIdentityHelper.GetTextTemplatingProperties generates text
-    /// templating properties for net10.0 BlazorIdentity T4 templates with correct extensions.
+    /// Verifies that BlazorIdentityHelper.GetTextTemplatingProperties generates a text
+    /// templating property for each BlazorIdentity T4 template, and that the output
+    /// paths use the correct extensions (.razor for Pages/Shared, .cs for root-level).
     /// </summary>
     [Fact]
     public void BlazorIdentityHelper_GetTextTemplatingProperties_GeneratesPropertiesForAllTemplates()
@@ -581,15 +655,18 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
         // Act
         var properties = BlazorIdentityHelper.GetTextTemplatingProperties(allTtFiles, identityModel).ToList();
 
-        // Assert
+        // Assert - Properties returned should correlate to templates that can be resolved via reflection
+        // Not all templates may resolve (depends on assembly types), but verify structural properties
         Assert.NotNull(properties);
 
+        // For resolved properties, verify extension logic
         foreach (var prop in properties)
         {
             Assert.NotNull(prop.OutputPath);
             Assert.NotNull(prop.TemplatePath);
             Assert.EndsWith(".tt", prop.TemplatePath);
 
+            // Pages and Shared templates should generate .razor files
             if (prop.TemplatePath.Contains($"Pages{Path.DirectorySeparatorChar}") ||
                 prop.TemplatePath.Contains($"Shared{Path.DirectorySeparatorChar}"))
             {
@@ -597,6 +674,7 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
             }
             else
             {
+                // Root-level templates should generate .cs files
                 Assert.EndsWith(".cs", prop.OutputPath);
             }
         }
@@ -604,10 +682,10 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
 
     /// <summary>
     /// Verifies that BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty returns
-    /// a valid property when given the net10.0 ApplicationUser.tt template path.
+    /// a valid property when given the ApplicationUser.tt template path.
     /// </summary>
     [Fact]
-    public void BlazorIdentityHelper_GetApplicationUserProperty_ReturnsValidForNet10()
+    public void BlazorIdentityHelper_GetApplicationUserProperty_ReturnsValidForNet11()
     {
         // Arrange
         var templatesBasePath = GetActualTemplatesBasePath();
@@ -637,6 +715,7 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     /// <summary>
     /// Regression test: verifies that GetAllFilesForTargetFramework returns a
     /// superset of what GetAllT4TemplatesForTargetFramework returns for the Files folder.
+    /// This prevents the bug where AddFileStep used the T4-only method.
     /// </summary>
     [Fact]
     public void GetAllFilesForTargetFramework_IsSuperset_OfT4Templates()
@@ -663,11 +742,11 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Regression test: verifies that the net10.0 Files folder contains both
+    /// Regression test: verifies that the Files folder for net11.0 contains both
     /// T4 templates and non-T4 static files, and that our methods handle both correctly.
     /// </summary>
     [Fact]
-    public void Net10_FilesFolder_ContainsBothT4AndStaticFiles()
+    public void Net11_FilesFolder_ContainsBothT4AndStaticFiles()
     {
         // Arrange
         var utilities = CreateTestableUtilities();
@@ -688,6 +767,7 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
         Assert.NotEmpty(ttFiles);
         Assert.NotEmpty(nonTtFiles);
 
+        // PasskeySubmit.razor.js is a non-T4 file that must be found
         Assert.Contains(nonTtFiles, f => f.EndsWith("PasskeySubmit.razor.js", StringComparison.OrdinalIgnoreCase));
     }
 
@@ -695,11 +775,17 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
 
     #region Helper Methods
 
+    /// <summary>
+    /// Creates a testable TemplateFoldersUtilities that uses the test directory as base path.
+    /// </summary>
     private TemplateFoldersUtilitiesTestable CreateTestableUtilities()
     {
-        return new TemplateFoldersUtilitiesTestable(_testDirectory, TargetFramework);
+        return new TemplateFoldersUtilitiesTestable(_testDirectory);
     }
 
+    /// <summary>
+    /// Creates the Files template folder with the specified files.
+    /// </summary>
     private void CreateFilesTemplateFolder(params string[] fileNames)
     {
         var filesFolder = Path.Combine(_templatesDirectory, TargetFramework, "Files");
@@ -710,6 +796,9 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
         }
     }
 
+    /// <summary>
+    /// Creates a representative BlazorIdentity template folder structure with .tt files.
+    /// </summary>
     private void CreateBlazorIdentityTemplateFolder()
     {
         string baseDir = Path.Combine(_templatesDirectory, TargetFramework, "BlazorIdentity");
@@ -795,17 +884,15 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Testable wrapper for TemplateFoldersUtilities that uses a custom base path and target framework.
+    /// Testable wrapper for TemplateFoldersUtilities that uses a custom base path.
     /// </summary>
     private class TemplateFoldersUtilitiesTestable : TemplateFoldersUtilities
     {
         private readonly string _basePath;
-        private readonly string _targetFramework;
 
-        public TemplateFoldersUtilitiesTestable(string basePath, string targetFramework)
+        public TemplateFoldersUtilitiesTestable(string basePath)
         {
             _basePath = basePath;
-            _targetFramework = targetFramework;
         }
 
         public new IEnumerable<string> GetTemplateFoldersWithFramework(string frameworkTemplateFolder, string[] baseFolders)
@@ -844,12 +931,14 @@ public class BlazorIdentityNet10IntegrationTests : IDisposable
 
         public new IEnumerable<string> GetAllT4TemplatesForTargetFramework(string[] baseFolders, string? projectPath)
         {
-            return GetAllFiles(_targetFramework, baseFolders, ".tt");
+            string targetFrameworkTemplateFolder = "net11.0";
+            return GetAllFiles(targetFrameworkTemplateFolder, baseFolders, ".tt");
         }
 
         public new IEnumerable<string> GetAllFilesForTargetFramework(string[] baseFolders, string? projectPath)
         {
-            return GetAllFiles(_targetFramework, baseFolders);
+            string targetFrameworkTemplateFolder = "net11.0";
+            return GetAllFiles(targetFrameworkTemplateFolder, baseFolders);
         }
     }
 

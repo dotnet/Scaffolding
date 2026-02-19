@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
+namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.EntraId;
 
 /// <summary>
 /// End-to-end integration tests for the Entra ID scaffolder.

@@ -20,15 +20,16 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
+namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Blazor;
 
 /// <summary>
-/// Integration tests for the Razor Component (blazor-empty) scaffolder targeting .NET 11.
+/// Integration tests for the Razor Component (blazor-empty) scaffolder targeting .NET 9.
 /// Validates DotnetNewScaffolderStep validation logic, output folder mapping, title casing,
 /// scaffolder definition, and end-to-end file generation via 'dotnet new razorcomponent'.
 /// </summary>
-public class RazorComponentNet11IntegrationTests : IDisposable
+public class RazorComponentNet9IntegrationTests : IDisposable
 {
+    private const string TargetFramework = "net9.0";
     private readonly string _testDirectory;
     private readonly string _testProjectDir;
     private readonly string _testProjectPath;
@@ -37,9 +38,9 @@ public class RazorComponentNet11IntegrationTests : IDisposable
     private readonly Mock<IScaffolder> _mockScaffolder;
     private readonly ScaffolderContext _context;
 
-    public RazorComponentNet11IntegrationTests()
+    public RazorComponentNet9IntegrationTests()
     {
-        _testDirectory = Path.Combine(Path.GetTempPath(), "RazorComponentNet11IntegrationTests", Guid.NewGuid().ToString());
+        _testDirectory = Path.Combine(Path.GetTempPath(), "RazorComponentNet9IntegrationTests", Guid.NewGuid().ToString());
         _testProjectDir = Path.Combine(_testDirectory, "TestProject");
         _testProjectPath = Path.Combine(_testProjectDir, "TestProject.csproj");
         Directory.CreateDirectory(_testProjectDir);
@@ -445,7 +446,7 @@ public class RazorComponentNet11IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_PreservesFileName_WhenAlreadyCapitalized()
+    public async Task ExecuteAsync_AppliesTitleCase_WhenAlreadyCapitalized()
     {
         // Arrange
         string componentsDir = Path.Combine(_testProjectDir, "Components");
@@ -678,15 +679,15 @@ public class RazorComponentNet11IntegrationTests : IDisposable
 
     #endregion
 
-    #region End-to-End File Generation
+    #region End-to-End File Generation (net9.0)
 
     [Fact]
-    public async Task ExecuteAsync_GeneratesRazorFile_WhenProjectIsValid()
+    public async Task ExecuteAsync_GeneratesRazorFile_WhenNet9ProjectIsValid()
     {
-        // Arrange — create a real minimal project on disk for dotnet new
-        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        // Arrange — create a real minimal .NET 9 project on disk for dotnet new
+        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>net11.0</TargetFramework>
+    <TargetFramework>{TargetFramework}</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -707,18 +708,18 @@ public class RazorComponentNet11IntegrationTests : IDisposable
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
         // Assert
-        Assert.True(result, "dotnet new razorcomponent should succeed for a valid project.");
+        Assert.True(result, $"dotnet new razorcomponent should succeed for a valid {TargetFramework} project.");
         string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
         Assert.True(File.Exists(expectedFile), $"Expected file '{expectedFile}' was not created.");
     }
 
     [Fact]
-    public async Task ExecuteAsync_GeneratedRazorFile_ContainsValidContent()
+    public async Task ExecuteAsync_GeneratedRazorFile_ContainsValidContent_Net9()
     {
         // Arrange
-        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>net11.0</TargetFramework>
+    <TargetFramework>{TargetFramework}</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -741,17 +742,112 @@ public class RazorComponentNet11IntegrationTests : IDisposable
         Assert.True(result);
         string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
         string content = File.ReadAllText(expectedFile);
-        // The generated razor component should contain an @page-less component or a heading
         Assert.False(string.IsNullOrWhiteSpace(content), "Generated .razor file should not be empty.");
     }
 
     [Fact]
-    public async Task ExecuteAsync_CreatesComponentsSubdirectory()
+    public async Task ExecuteAsync_GeneratedRazorFile_ContainsH3Heading_Net9()
+    {
+        // Arrange — the default razorcomponent template typically includes an <h3> heading
+        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <TargetFramework>{TargetFramework}</TargetFramework>
+  </PropertyGroup>
+</Project>";
+        File.WriteAllText(_testProjectPath, projectContent);
+
+        var realFileSystem = new FileSystem();
+        var step = new DotnetNewScaffolderStep(
+            NullLogger<DotnetNewScaffolderStep>.Instance,
+            realFileSystem,
+            _testTelemetryService)
+        {
+            ProjectPath = _testProjectPath,
+            FileName = "HeadingComponent",
+            CommandName = Constants.DotnetCommands.RazorComponentCommandName
+        };
+
+        // Act
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        // Assert
+        Assert.True(result);
+        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
+        string content = File.ReadAllText(expectedFile);
+        Assert.Contains("<h3>", content);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_GeneratedRazorFile_ContainsCodeBlock_Net9()
+    {
+        // Arrange — the default razorcomponent template contains an @code block
+        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <TargetFramework>{TargetFramework}</TargetFramework>
+  </PropertyGroup>
+</Project>";
+        File.WriteAllText(_testProjectPath, projectContent);
+
+        var realFileSystem = new FileSystem();
+        var step = new DotnetNewScaffolderStep(
+            NullLogger<DotnetNewScaffolderStep>.Instance,
+            realFileSystem,
+            _testTelemetryService)
+        {
+            ProjectPath = _testProjectPath,
+            FileName = "CodeBlockComponent",
+            CommandName = Constants.DotnetCommands.RazorComponentCommandName
+        };
+
+        // Act
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        // Assert
+        Assert.True(result);
+        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
+        string content = File.ReadAllText(expectedFile);
+        Assert.Contains("@code", content);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_GeneratedRazorFile_DoesNotContainPageDirective_Net9()
+    {
+        // Arrange — a Razor component (not a page) should NOT contain @page
+        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <TargetFramework>{TargetFramework}</TargetFramework>
+  </PropertyGroup>
+</Project>";
+        File.WriteAllText(_testProjectPath, projectContent);
+
+        var realFileSystem = new FileSystem();
+        var step = new DotnetNewScaffolderStep(
+            NullLogger<DotnetNewScaffolderStep>.Instance,
+            realFileSystem,
+            _testTelemetryService)
+        {
+            ProjectPath = _testProjectPath,
+            FileName = "NonPageComponent",
+            CommandName = Constants.DotnetCommands.RazorComponentCommandName
+        };
+
+        // Act
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        // Assert
+        Assert.True(result);
+        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
+        string content = File.ReadAllText(expectedFile);
+        Assert.DoesNotContain("@page", content);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_CreatesComponentsSubdirectory_Net9()
     {
         // Arrange
-        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>net11.0</TargetFramework>
+    <TargetFramework>{TargetFramework}</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -776,12 +872,12 @@ public class RazorComponentNet11IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_GeneratesCorrectFileName_WhenLowercaseInput()
+    public async Task ExecuteAsync_GeneratesCorrectFileName_WhenLowercaseInput_Net9()
     {
         // Arrange — 'widget' should be title-cased to 'Widget'
-        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>net11.0</TargetFramework>
+    <TargetFramework>{TargetFramework}</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -807,12 +903,12 @@ public class RazorComponentNet11IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_TracksSuccessTelemetry_WhenGenerationSucceeds()
+    public async Task ExecuteAsync_TracksSuccessTelemetry_WhenNet9GenerationSucceeds()
     {
         // Arrange
-        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>net11.0</TargetFramework>
+    <TargetFramework>{TargetFramework}</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -840,12 +936,12 @@ public class RazorComponentNet11IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_OnlyGeneratesSingleRazorFile()
+    public async Task ExecuteAsync_OnlyGeneratesSingleRazorFile_Net9()
     {
         // Arrange — ensure only one .razor file is created (no .cs code-behind, no .css)
-        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>net11.0</TargetFramework>
+    <TargetFramework>{TargetFramework}</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -873,12 +969,12 @@ public class RazorComponentNet11IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_DoesNotCreatePagesDirectory()
+    public async Task ExecuteAsync_DoesNotCreatePagesDirectory_Net9()
     {
         // Arrange — Razor component should create Components, not Pages
-        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>net11.0</TargetFramework>
+    <TargetFramework>{TargetFramework}</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -903,12 +999,12 @@ public class RazorComponentNet11IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_DoesNotCreateViewsDirectory()
+    public async Task ExecuteAsync_DoesNotCreateViewsDirectory_Net9()
     {
         // Arrange — Razor component should create Components, not Views
-        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>net11.0</TargetFramework>
+    <TargetFramework>{TargetFramework}</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -930,6 +1026,42 @@ public class RazorComponentNet11IntegrationTests : IDisposable
         // Assert
         string viewsDir = Path.Combine(_testProjectDir, "Views");
         Assert.False(Directory.Exists(viewsDir), "Views directory should not be created for Razor components.");
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_GeneratedFile_HasRazorExtension_Net9()
+    {
+        // Arrange — verify the generated file has .razor extension (not .cshtml or .cs)
+        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <TargetFramework>{TargetFramework}</TargetFramework>
+  </PropertyGroup>
+</Project>";
+        File.WriteAllText(_testProjectPath, projectContent);
+
+        var realFileSystem = new FileSystem();
+        var step = new DotnetNewScaffolderStep(
+            NullLogger<DotnetNewScaffolderStep>.Instance,
+            realFileSystem,
+            _testTelemetryService)
+        {
+            ProjectPath = _testProjectPath,
+            FileName = "ExtensionCheck",
+            CommandName = Constants.DotnetCommands.RazorComponentCommandName
+        };
+
+        // Act
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        // Assert
+        Assert.True(result);
+        string componentsDir = Path.Combine(_testProjectDir, "Components");
+        string[] files = Directory.GetFiles(componentsDir);
+        Assert.All(files, f => Assert.EndsWith(".razor", f));
+        // No .cshtml files should be generated
+        Assert.Empty(Directory.GetFiles(componentsDir, "*.cshtml"));
+        // No .cs files should be generated
+        Assert.Empty(Directory.GetFiles(componentsDir, "*.cs"));
     }
 
     #endregion

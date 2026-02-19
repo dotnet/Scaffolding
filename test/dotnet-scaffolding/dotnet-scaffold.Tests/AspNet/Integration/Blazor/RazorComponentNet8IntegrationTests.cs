@@ -20,7 +20,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
+namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Blazor;
 
 /// <summary>
 /// Integration tests for the Razor Component (blazor-empty) scaffolder targeting .NET 8.

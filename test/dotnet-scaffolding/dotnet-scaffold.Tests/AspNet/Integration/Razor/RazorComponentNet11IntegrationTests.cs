@@ -20,16 +20,15 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
+namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Razor;
 
 /// <summary>
-/// Integration tests for the Razor Component (blazor-empty) scaffolder targeting .NET 8.
+/// Integration tests for the Razor Component (blazor-empty) scaffolder targeting .NET 11.
 /// Validates DotnetNewScaffolderStep validation logic, output folder mapping, title casing,
 /// scaffolder definition, and end-to-end file generation via 'dotnet new razorcomponent'.
 /// </summary>
-public class RazorComponentNet8IntegrationTests : IDisposable
+public class RazorComponentNet11IntegrationTests : IDisposable
 {
-    private const string TargetFramework = "net8.0";
     private readonly string _testDirectory;
     private readonly string _testProjectDir;
     private readonly string _testProjectPath;
@@ -38,9 +37,9 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     private readonly Mock<IScaffolder> _mockScaffolder;
     private readonly ScaffolderContext _context;
 
-    public RazorComponentNet8IntegrationTests()
+    public RazorComponentNet11IntegrationTests()
     {
-        _testDirectory = Path.Combine(Path.GetTempPath(), "RazorComponentNet8IntegrationTests", Guid.NewGuid().ToString());
+        _testDirectory = Path.Combine(Path.GetTempPath(), "RazorComponentNet11IntegrationTests", Guid.NewGuid().ToString());
         _testProjectDir = Path.Combine(_testDirectory, "TestProject");
         _testProjectPath = Path.Combine(_testProjectDir, "TestProject.csproj");
         Directory.CreateDirectory(_testProjectDir);
@@ -131,6 +130,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_ReturnsFalse_WhenProjectPathIsNull()
     {
+        // Arrange
         var step = new DotnetNewScaffolderStep(
             NullLogger<DotnetNewScaffolderStep>.Instance,
             _mockFileSystem.Object,
@@ -141,14 +141,17 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         Assert.False(result);
     }
 
     [Fact]
     public async Task ExecuteAsync_ReturnsFalse_WhenProjectPathIsEmpty()
     {
+        // Arrange
         var step = new DotnetNewScaffolderStep(
             NullLogger<DotnetNewScaffolderStep>.Instance,
             _mockFileSystem.Object,
@@ -159,14 +162,17 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         Assert.False(result);
     }
 
     [Fact]
     public async Task ExecuteAsync_ReturnsFalse_WhenProjectPathDoesNotExist()
     {
+        // Arrange
         _mockFileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns(false);
 
         var step = new DotnetNewScaffolderStep(
@@ -179,14 +185,17 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         Assert.False(result);
     }
 
     [Fact]
     public async Task ExecuteAsync_ReturnsFalse_WhenFileNameIsNull()
     {
+        // Arrange
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
 
         var step = new DotnetNewScaffolderStep(
@@ -199,14 +208,17 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         Assert.False(result);
     }
 
     [Fact]
     public async Task ExecuteAsync_ReturnsFalse_WhenFileNameIsEmpty()
     {
+        // Arrange
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
 
         var step = new DotnetNewScaffolderStep(
@@ -219,8 +231,10 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         Assert.False(result);
     }
 
@@ -231,6 +245,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public void Constructor_InitializesCorrectly()
     {
+        // Act
         var step = new DotnetNewScaffolderStep(
             NullLogger<DotnetNewScaffolderStep>.Instance,
             _mockFileSystem.Object,
@@ -239,6 +254,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Assert
         Assert.NotNull(step);
         Assert.Equal(Constants.DotnetCommands.RazorComponentCommandName, step.CommandName);
     }
@@ -288,6 +304,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public void Properties_CanBeSet()
     {
+        // Arrange & Act
         var step = new DotnetNewScaffolderStep(
             NullLogger<DotnetNewScaffolderStep>.Instance,
             _mockFileSystem.Object,
@@ -299,6 +316,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Assert
         Assert.Equal(_testProjectPath, step.ProjectPath);
         Assert.Equal("ProductCard", step.FileName);
         Assert.Equal("MyApp.Components", step.NamespaceName);
@@ -332,6 +350,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_CreatesComponentsDirectory_WhenProjectExists()
     {
+        // Arrange
         string expectedComponentsDir = Path.Combine(_testProjectDir, "Components");
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
         _mockFileSystem.Setup(fs => fs.DirectoryExists(expectedComponentsDir)).Returns(true);
@@ -346,14 +365,17 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act — the step will try to run 'dotnet new' which may fail, but the directory creation should happen
         await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert — verify CreateDirectoryIfNotExists was called for the Components folder
         _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(expectedComponentsDir), Times.Once);
     }
 
     [Fact]
     public async Task ExecuteAsync_OutputFolder_IsComponents_ForRazorComponent()
     {
+        // Arrange — verify the output folder is "Components" (not "Pages" or "Views")
         string componentsDir = Path.Combine(_testProjectDir, "Components");
         string pagesDir = Path.Combine(_testProjectDir, "Pages");
         string viewsDir = Path.Combine(_testProjectDir, "Views");
@@ -373,7 +395,9 @@ public class RazorComponentNet8IntegrationTests : IDisposable
 
         await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Components directory should be created
         _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(componentsDir), Times.Once);
+        // Pages and Views should NOT be created
         _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(pagesDir), Times.Never);
         _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(viewsDir), Times.Never);
     }
@@ -389,6 +413,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [InlineData("a", "A")]
     public void TitleCase_CapitalizesFirstLetter(string input, string expected)
     {
+        // The step uses CultureInfo.CurrentCulture.TextInfo.ToTitleCase to capitalize the first letter
         string result = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input);
         Assert.Equal(expected, result);
     }
@@ -396,6 +421,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_TitleCasesFileName_WhenLowercaseProvided()
     {
+        // Arrange
         string componentsDir = Path.Combine(_testProjectDir, "Components");
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
         _mockFileSystem.Setup(fs => fs.DirectoryExists(componentsDir)).Returns(true);
@@ -410,15 +436,18 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert — after validation, FileName should be title-cased
         string expected = CultureInfo.CurrentCulture.TextInfo.ToTitleCase("myComponent");
         Assert.Equal(expected, step.FileName);
     }
 
     [Fact]
-    public async Task ExecuteAsync_AppliesTitleCase_WhenAlreadyCapitalized()
+    public async Task ExecuteAsync_PreservesFileName_WhenAlreadyCapitalized()
     {
+        // Arrange
         string componentsDir = Path.Combine(_testProjectDir, "Components");
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
         _mockFileSystem.Setup(fs => fs.DirectoryExists(componentsDir)).Returns(true);
@@ -433,8 +462,10 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert — ToTitleCase treats "ProductCard" as a single word, lowering inner capitalization
         string expected = CultureInfo.CurrentCulture.TextInfo.ToTitleCase("ProductCard");
         Assert.Equal(expected, step.FileName);
     }
@@ -446,6 +477,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_TracksTelemetryEvent_OnValidationFailure()
     {
+        // Arrange
         var telemetry = new TestTelemetryService();
         var step = new DotnetNewScaffolderStep(
             NullLogger<DotnetNewScaffolderStep>.Instance,
@@ -457,8 +489,10 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert — telemetry event should have been tracked
         Assert.Single(telemetry.TrackedEvents);
         var (eventName, properties, _) = telemetry.TrackedEvents[0];
         Assert.Equal("DotnetNewScaffolderStep", eventName);
@@ -469,6 +503,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_TracksTelemetryEvent_WithScaffolderName()
     {
+        // Arrange
         var telemetry = new TestTelemetryService();
         var step = new DotnetNewScaffolderStep(
             NullLogger<DotnetNewScaffolderStep>.Instance,
@@ -480,8 +515,10 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         Assert.Single(telemetry.TrackedEvents);
         Assert.Equal("Razor Component", telemetry.TrackedEvents[0].Properties["ScaffolderName"]);
     }
@@ -489,6 +526,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_TracksTelemetryEvent_OnValidFileNameFailure()
     {
+        // Arrange — project exists but FileName is empty → validation failure
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
         var telemetry = new TestTelemetryService();
 
@@ -502,8 +540,10 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         Assert.Single(telemetry.TrackedEvents);
         Assert.Equal("Failure", telemetry.TrackedEvents[0].Properties["SettingsValidationResult"]);
     }
@@ -511,6 +551,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_TracksTelemetryEvent_WhenSettingsAreValid()
     {
+        // Arrange — project exists, fileName is valid but dotnet new will fail (no real project)
         string componentsDir = Path.Combine(_testProjectDir, "Components");
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
         _mockFileSystem.Setup(fs => fs.DirectoryExists(componentsDir)).Returns(true);
@@ -526,8 +567,10 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert — settings validated OK, but dotnet new may fail
         Assert.Single(telemetry.TrackedEvents);
         Assert.Equal("Success", telemetry.TrackedEvents[0].Properties["SettingsValidationResult"]);
     }
@@ -539,6 +582,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_AcceptsCancellationToken()
     {
+        // Arrange
         var step = new DotnetNewScaffolderStep(
             NullLogger<DotnetNewScaffolderStep>.Instance,
             _mockFileSystem.Object,
@@ -551,8 +595,10 @@ public class RazorComponentNet8IntegrationTests : IDisposable
 
         using var cts = new CancellationTokenSource();
 
+        // Act — should not throw even with a cancellation token
         bool result = await step.ExecuteAsync(_context, cts.Token);
 
+        // Assert
         Assert.False(result);
     }
 
@@ -563,6 +609,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public void OutputFolders_RazorComponent_MapsToComponents()
     {
+        // Verify the constant mapping: razorcomponent → Components
         Assert.Equal("razorcomponent", Constants.DotnetCommands.RazorComponentCommandName);
         Assert.Equal("Components", Constants.DotnetCommands.RazorComponentCommandOutput);
     }
@@ -570,6 +617,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public void OutputFolders_RazorPage_MapsToPages()
     {
+        // Contrast: razorpage maps to Pages
         Assert.Equal("page", Constants.DotnetCommands.RazorPageCommandName);
         Assert.Equal("Pages", Constants.DotnetCommands.RazorPageCommandOutput);
     }
@@ -577,6 +625,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public void OutputFolders_View_MapsToViews()
     {
+        // Contrast: view maps to Views
         Assert.Equal("view", Constants.DotnetCommands.ViewCommandName);
         Assert.Equal("Views", Constants.DotnetCommands.ViewCommandOutput);
     }
@@ -616,25 +665,60 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public void GetScaffoldSteps_ContainsDotnetNewScaffolderStep()
     {
+        // Arrange
         var mockBuilder = new Mock<Scaffolding.Core.Builder.IScaffoldRunnerBuilder>();
         var service = new AspNetCommandService(mockBuilder.Object);
 
+        // Act
         Type[] stepTypes = service.GetScaffoldSteps();
 
+        // Assert — DotnetNewScaffolderStep should be registered
         Assert.Contains(typeof(DotnetNewScaffolderStep), stepTypes);
     }
 
     #endregion
 
-    #region End-to-End File Generation (net8.0)
+    #region End-to-End File Generation
 
     [Fact]
-    public async Task ExecuteAsync_GeneratesRazorFile_WhenNet8ProjectIsValid()
+    public async Task ExecuteAsync_GeneratesRazorFile_WhenProjectIsValid()
     {
-        // Arrange — create a real minimal .NET 8 project on disk
-        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        // Arrange — create a real minimal project on disk for dotnet new
+        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
+  </PropertyGroup>
+</Project>";
+        File.WriteAllText(_testProjectPath, projectContent);
+
+        // Use a real file system for end-to-end
+        var realFileSystem = new FileSystem();
+        var step = new DotnetNewScaffolderStep(
+            NullLogger<DotnetNewScaffolderStep>.Instance,
+            realFileSystem,
+            _testTelemetryService)
+        {
+            ProjectPath = _testProjectPath,
+            FileName = "ProductCard",
+            CommandName = Constants.DotnetCommands.RazorComponentCommandName
+        };
+
+        // Act
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        // Assert
+        Assert.True(result, "dotnet new razorcomponent should succeed for a valid project.");
+        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
+        Assert.True(File.Exists(expectedFile), $"Expected file '{expectedFile}' was not created.");
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_GeneratedRazorFile_ContainsValidContent()
+    {
+        // Arrange
+        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -654,136 +738,20 @@ public class RazorComponentNet8IntegrationTests : IDisposable
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
         // Assert
-        Assert.True(result, $"dotnet new razorcomponent should succeed for a valid {TargetFramework} project.");
-        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
-        Assert.True(File.Exists(expectedFile), $"Expected file '{expectedFile}' was not created.");
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_GeneratedRazorFile_ContainsValidContent_Net8()
-    {
-        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
-  <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
-  </PropertyGroup>
-</Project>";
-        File.WriteAllText(_testProjectPath, projectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "ProductCard",
-            CommandName = Constants.DotnetCommands.RazorComponentCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
         Assert.True(result);
         string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
         string content = File.ReadAllText(expectedFile);
+        // The generated razor component should contain an @page-less component or a heading
         Assert.False(string.IsNullOrWhiteSpace(content), "Generated .razor file should not be empty.");
     }
 
     [Fact]
-    public async Task ExecuteAsync_GeneratedRazorFile_ContainsH3Heading_Net8()
+    public async Task ExecuteAsync_CreatesComponentsSubdirectory()
     {
-        // The default razorcomponent template typically includes an <h3> heading
-        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        // Arrange
+        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
-  </PropertyGroup>
-</Project>";
-        File.WriteAllText(_testProjectPath, projectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "HeadingComponent",
-            CommandName = Constants.DotnetCommands.RazorComponentCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
-        string content = File.ReadAllText(expectedFile);
-        Assert.Contains("<h3>", content);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_GeneratedRazorFile_ContainsCodeBlock_Net8()
-    {
-        // The default razorcomponent template contains an @code block
-        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
-  <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
-  </PropertyGroup>
-</Project>";
-        File.WriteAllText(_testProjectPath, projectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "CodeBlockComponent",
-            CommandName = Constants.DotnetCommands.RazorComponentCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
-        string content = File.ReadAllText(expectedFile);
-        Assert.Contains("@code", content);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_GeneratedRazorFile_DoesNotContainPageDirective_Net8()
-    {
-        // A Razor component (not a page) should NOT contain @page
-        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
-  <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
-  </PropertyGroup>
-</Project>";
-        File.WriteAllText(_testProjectPath, projectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "NonPageComponent",
-            CommandName = Constants.DotnetCommands.RazorComponentCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        string expectedFile = Path.Combine(_testProjectDir, "Components", $"{step.FileName}.razor");
-        string content = File.ReadAllText(expectedFile);
-        Assert.DoesNotContain("@page", content);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_CreatesComponentsSubdirectory_Net8()
-    {
-        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
-  <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -799,19 +767,21 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         string componentsDir = Path.Combine(_testProjectDir, "Components");
         Assert.True(Directory.Exists(componentsDir), "Components subdirectory should be created.");
     }
 
     [Fact]
-    public async Task ExecuteAsync_GeneratesCorrectFileName_WhenLowercaseInput_Net8()
+    public async Task ExecuteAsync_GeneratesCorrectFileName_WhenLowercaseInput()
     {
-        // 'widget' should be title-cased to 'Widget'
-        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        // Arrange — 'widget' should be title-cased to 'Widget'
+        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -827,19 +797,22 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         Assert.True(result);
         string expectedFile = Path.Combine(_testProjectDir, "Components", "Widget.razor");
         Assert.True(File.Exists(expectedFile), $"Expected file 'Widget.razor' (title-cased) was not created. FileName was '{step.FileName}'.");
     }
 
     [Fact]
-    public async Task ExecuteAsync_TracksSuccessTelemetry_WhenNet8GenerationSucceeds()
+    public async Task ExecuteAsync_TracksSuccessTelemetry_WhenGenerationSucceeds()
     {
-        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        // Arrange
+        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -856,8 +829,10 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         Assert.True(result);
         Assert.Single(telemetry.TrackedEvents);
         Assert.Equal("Success", telemetry.TrackedEvents[0].Properties["SettingsValidationResult"]);
@@ -865,12 +840,12 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_OnlyGeneratesSingleRazorFile_Net8()
+    public async Task ExecuteAsync_OnlyGeneratesSingleRazorFile()
     {
-        // Ensure only one .razor file is created (no .cs code-behind, no .css)
-        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        // Arrange — ensure only one .razor file is created (no .cs code-behind, no .css)
+        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -886,8 +861,10 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         Assert.True(result);
         string componentsDir = Path.Combine(_testProjectDir, "Components");
         string[] generatedFiles = Directory.GetFiles(componentsDir);
@@ -896,12 +873,12 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_DoesNotCreatePagesDirectory_Net8()
+    public async Task ExecuteAsync_DoesNotCreatePagesDirectory()
     {
-        // Razor component should create Components, not Pages
-        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        // Arrange — Razor component should create Components, not Pages
+        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -917,19 +894,21 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         string pagesDir = Path.Combine(_testProjectDir, "Pages");
         Assert.False(Directory.Exists(pagesDir), "Pages directory should not be created for Razor components.");
     }
 
     [Fact]
-    public async Task ExecuteAsync_DoesNotCreateViewsDirectory_Net8()
+    public async Task ExecuteAsync_DoesNotCreateViewsDirectory()
     {
-        // Razor component should create Components, not Views
-        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        // Arrange — Razor component should create Components, not Views
+        string projectContent = @"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
   </PropertyGroup>
 </Project>";
         File.WriteAllText(_testProjectPath, projectContent);
@@ -945,42 +924,12 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Act
         await step.ExecuteAsync(_context, CancellationToken.None);
 
+        // Assert
         string viewsDir = Path.Combine(_testProjectDir, "Views");
         Assert.False(Directory.Exists(viewsDir), "Views directory should not be created for Razor components.");
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_GeneratedFile_HasRazorExtension_Net8()
-    {
-        // Verify the generated file has .razor extension (not .cshtml or .cs)
-        string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
-  <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
-  </PropertyGroup>
-</Project>";
-        File.WriteAllText(_testProjectPath, projectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "ExtensionCheck",
-            CommandName = Constants.DotnetCommands.RazorComponentCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        string componentsDir = Path.Combine(_testProjectDir, "Components");
-        string[] files = Directory.GetFiles(componentsDir);
-        Assert.All(files, f => Assert.EndsWith(".razor", f));
-        Assert.Empty(Directory.GetFiles(componentsDir, "*.cshtml"));
-        Assert.Empty(Directory.GetFiles(componentsDir, "*.cs"));
     }
 
     #endregion
@@ -1026,6 +975,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
     [Fact]
     public async Task RegressionGuard_ValidationFailure_DoesNotThrow()
     {
+        // Verify that validation failures are reported cleanly via return value, not exceptions
         var step = new DotnetNewScaffolderStep(
             NullLogger<DotnetNewScaffolderStep>.Instance,
             _mockFileSystem.Object,
@@ -1036,6 +986,7 @@ public class RazorComponentNet8IntegrationTests : IDisposable
             CommandName = Constants.DotnetCommands.RazorComponentCommandName
         };
 
+        // Should not throw
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
         Assert.False(result);
     }

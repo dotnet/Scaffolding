@@ -20,16 +20,16 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
+namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Razor;
 
 /// <summary>
-/// Integration tests for the Razor Component (blazor-empty) scaffolder targeting .NET 10.
+/// Integration tests for the Razor Component (blazor-empty) scaffolder targeting .NET 9.
 /// Validates DotnetNewScaffolderStep validation logic, output folder mapping, title casing,
 /// scaffolder definition, and end-to-end file generation via 'dotnet new razorcomponent'.
 /// </summary>
-public class RazorComponentNet10IntegrationTests : IDisposable
+public class RazorComponentNet9IntegrationTests : IDisposable
 {
-    private const string TargetFramework = "net10.0";
+    private const string TargetFramework = "net9.0";
     private readonly string _testDirectory;
     private readonly string _testProjectDir;
     private readonly string _testProjectPath;
@@ -38,9 +38,9 @@ public class RazorComponentNet10IntegrationTests : IDisposable
     private readonly Mock<IScaffolder> _mockScaffolder;
     private readonly ScaffolderContext _context;
 
-    public RazorComponentNet10IntegrationTests()
+    public RazorComponentNet9IntegrationTests()
     {
-        _testDirectory = Path.Combine(Path.GetTempPath(), "RazorComponentNet10IntegrationTests", Guid.NewGuid().ToString());
+        _testDirectory = Path.Combine(Path.GetTempPath(), "RazorComponentNet9IntegrationTests", Guid.NewGuid().ToString());
         _testProjectDir = Path.Combine(_testDirectory, "TestProject");
         _testProjectPath = Path.Combine(_testProjectDir, "TestProject.csproj");
         Directory.CreateDirectory(_testProjectDir);
@@ -679,12 +679,12 @@ public class RazorComponentNet10IntegrationTests : IDisposable
 
     #endregion
 
-    #region End-to-End File Generation (net10.0)
+    #region End-to-End File Generation (net9.0)
 
     [Fact]
-    public async Task ExecuteAsync_GeneratesRazorFile_WhenNet10ProjectIsValid()
+    public async Task ExecuteAsync_GeneratesRazorFile_WhenNet9ProjectIsValid()
     {
-        // Arrange — create a real minimal .NET 10 project on disk for dotnet new
+        // Arrange — create a real minimal .NET 9 project on disk for dotnet new
         string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
   <PropertyGroup>
     <TargetFramework>{TargetFramework}</TargetFramework>
@@ -714,7 +714,7 @@ public class RazorComponentNet10IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_GeneratedRazorFile_ContainsValidContent_Net10()
+    public async Task ExecuteAsync_GeneratedRazorFile_ContainsValidContent_Net9()
     {
         // Arrange
         string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
@@ -746,7 +746,7 @@ public class RazorComponentNet10IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_GeneratedRazorFile_ContainsH3Heading_Net10()
+    public async Task ExecuteAsync_GeneratedRazorFile_ContainsH3Heading_Net9()
     {
         // Arrange — the default razorcomponent template typically includes an <h3> heading
         string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
@@ -778,7 +778,7 @@ public class RazorComponentNet10IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_GeneratedRazorFile_ContainsCodeBlock_Net10()
+    public async Task ExecuteAsync_GeneratedRazorFile_ContainsCodeBlock_Net9()
     {
         // Arrange — the default razorcomponent template contains an @code block
         string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
@@ -810,7 +810,7 @@ public class RazorComponentNet10IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_GeneratedRazorFile_DoesNotContainPageDirective_Net10()
+    public async Task ExecuteAsync_GeneratedRazorFile_DoesNotContainPageDirective_Net9()
     {
         // Arrange — a Razor component (not a page) should NOT contain @page
         string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
@@ -842,7 +842,7 @@ public class RazorComponentNet10IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_CreatesComponentsSubdirectory_Net10()
+    public async Task ExecuteAsync_CreatesComponentsSubdirectory_Net9()
     {
         // Arrange
         string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
@@ -872,7 +872,7 @@ public class RazorComponentNet10IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_GeneratesCorrectFileName_WhenLowercaseInput_Net10()
+    public async Task ExecuteAsync_GeneratesCorrectFileName_WhenLowercaseInput_Net9()
     {
         // Arrange — 'widget' should be title-cased to 'Widget'
         string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
@@ -903,7 +903,7 @@ public class RazorComponentNet10IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_TracksSuccessTelemetry_WhenNet10GenerationSucceeds()
+    public async Task ExecuteAsync_TracksSuccessTelemetry_WhenNet9GenerationSucceeds()
     {
         // Arrange
         string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
@@ -936,7 +936,7 @@ public class RazorComponentNet10IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_OnlyGeneratesSingleRazorFile_Net10()
+    public async Task ExecuteAsync_OnlyGeneratesSingleRazorFile_Net9()
     {
         // Arrange — ensure only one .razor file is created (no .cs code-behind, no .css)
         string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
@@ -969,7 +969,7 @@ public class RazorComponentNet10IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_DoesNotCreatePagesDirectory_Net10()
+    public async Task ExecuteAsync_DoesNotCreatePagesDirectory_Net9()
     {
         // Arrange — Razor component should create Components, not Pages
         string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
@@ -999,7 +999,7 @@ public class RazorComponentNet10IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_DoesNotCreateViewsDirectory_Net10()
+    public async Task ExecuteAsync_DoesNotCreateViewsDirectory_Net9()
     {
         // Arrange — Razor component should create Components, not Views
         string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
@@ -1029,7 +1029,7 @@ public class RazorComponentNet10IntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_GeneratedFile_HasRazorExtension_Net10()
+    public async Task ExecuteAsync_GeneratedFile_HasRazorExtension_Net9()
     {
         // Arrange — verify the generated file has .razor extension (not .cshtml or .cs)
         string projectContent = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">

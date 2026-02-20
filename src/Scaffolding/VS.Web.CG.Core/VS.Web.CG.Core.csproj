@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Contains the core infrastructure used by ASP.NET Core Code Generators.</Description>
-    <TargetFramework>$(BuildTfm)</TargetFramework>
+    <TargetFrameworks>$(BuildTfm)</TargetFrameworks>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGeneration.Core</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGeneration.Core</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -17,9 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Microsoft.Extensions.CommandLineUtils.Sources" Version="$(MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion)" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsDependencyInjectionPackageVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

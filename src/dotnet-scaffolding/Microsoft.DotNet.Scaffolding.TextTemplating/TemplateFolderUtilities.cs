@@ -9,13 +9,13 @@ internal class TemplateFoldersUtilities : ITemplateFolderService
 {
     public IEnumerable<string> GetAllT4TemplatesForTargetFramework(string[] baseFolders, string? projectPath)
     {
-        string targetFrameworkTemplateFolder = "net11.0"; // TODO call GetTargetFrameworkTemplateFolder(projectPath); when the other target frameworks are supported
+        string targetFrameworkTemplateFolder = GetTargetFrameworkTemplateFolder(projectPath);
         return GetAllFiles(targetFrameworkTemplateFolder, baseFolders, ".tt");
     }
 
     public IEnumerable<string> GetAllFilesForTargetFramework(string[] baseFolders, string? projectPath)
     {
-        string targetFrameworkTemplateFolder = "net11.0"; // TODO call GetTargetFrameworkTemplateFolder(projectPath); when the other target frameworks are supported
+        string targetFrameworkTemplateFolder = GetTargetFrameworkTemplateFolder(projectPath);
         return GetAllFiles(targetFrameworkTemplateFolder, baseFolders);
     }
 
@@ -50,7 +50,7 @@ internal class TemplateFoldersUtilities : ITemplateFolderService
         {
             foreach (var baseFolderName in baseFolders)
             {
-                string templatesFolderName = "Templates";
+                string templatesFolderName = Path.Combine("AspNet", "Templates");
                 var candidateTemplateFolders = Path.Combine(rootFolder, templatesFolderName, frameworkTemplateFolder, baseFolderName);
                 if (Directory.Exists(candidateTemplateFolders))
                 {
@@ -79,8 +79,13 @@ internal class TemplateFoldersUtilities : ITemplateFolderService
         return null;
     }
 
-    private string GetTargetFrameworkTemplateFolder(string projectPath)
+    private string GetTargetFrameworkTemplateFolder(string? projectPath)
     {
+        if (string.IsNullOrEmpty(projectPath))
+        {
+            return "net11.0";
+        }
+
         TargetFramework? targetFramework = TargetFrameworkHelpers.GetTargetFrameworkForProject(projectPath);
 
         switch (targetFramework)

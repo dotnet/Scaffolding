@@ -84,14 +84,14 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             EntraIdSettings entraSettings = entraIdSettings as EntraIdSettings ??
                 throw new InvalidOperationException("missing 'EntraIdSettings' in 'ScaffolderContext.Properties'");
 
-            if (!string.IsNullOrEmpty(entraSettings.Application) && entraSettings.UseExisitngApplication)
+            if (!string.IsNullOrEmpty(entraSettings.Application) && entraSettings.UseExistingApplication)
             {
                 string id = entraSettings.Application.Split(" ").Last();
                 step.ClientId = id;
                 context.Properties["ClientId"] = id;
             }
 
-            if (entraSettings.UseExisitngApplication)
+            if (entraSettings.UseExistingApplication)
             {
                 step.SkipStep = true;
             }
@@ -325,7 +325,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             context.Properties.TryGetValue(nameof(EntraIdSettings), out var entraIdSettings);
             EntraIdSettings entraSettings = entraIdSettings as EntraIdSettings ??
                 throw new InvalidOperationException("missing 'EntraIdSettings' in 'ScaffolderContext.Properties'");
-            string? targetFrameworkFolder = "net11.0"; //TODO invoke TargetFrameworkHelpers.GetTargetFrameworkFolder(entraSettings?.Project); when other tfm supported
+            string? targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(entraSettings?.Project);
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorEntraChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
             context.Properties.TryGetValue(nameof(EntraIdModel), out var entraIdModel);
             EntraIdModel entraModel = entraIdModel as EntraIdModel ??
@@ -374,7 +374,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             //get needed properties and cast them as needed
             if (context.Properties.TryGetValue("BlazorWasmClientProjectPath", out var blazorWasmProject) && blazorWasmProject is string clientProjectPath && !string.IsNullOrEmpty(clientProjectPath))
             {
-                string targetFrameworkFolder = "net11.0"; //TODO invoke TargetFrameworkHelpers.GetTargetFrameworkFolder(clientProjectPath); when other tfm supported    
+                string targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(clientProjectPath);
                 string? codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorWasmEntraChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
                 step.ProjectPath = clientProjectPath;
                 context.Properties.TryGetValue(nameof(EntraIdModel), out var entraIdModel);

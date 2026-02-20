@@ -39,6 +39,14 @@
     <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 
+  <!-- TFM-specific Microsoft.Build versions to fix NU1701: net8.0 uses 17.8.x, net9.0 uses 17.12.x, net10/11 use 18.x -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="Microsoft.Build" VersionOverride="$(MicrosoftBuildPackageVersion8)" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.Build" VersionOverride="$(MicrosoftBuildPackageVersion9)" ExcludeAssets="runtime" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Internal\Microsoft.DotNet.Scaffolding.Internal.csproj" />
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Roslyn\Microsoft.DotNet.Scaffolding.Roslyn.csproj" />
@@ -50,11 +58,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net8.0\*.cshtml" PackagePath="AspNet\Templates\net8.0\DbContext\" />
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net9.0\*.tt" PackagePath="AspNet\Templates\net9.0\DbContext\" />
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net10.0\*.tt" PackagePath="AspNet\Templates\net10.0\DbContext\" />
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net11.0\*.tt" PackagePath="AspNet\Templates\net11.0\DbContext\" />
-    <!-- DbContext templates don't exist in net8.0/net9.0 folders, so we use copies from net10.0 -->
-    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net10.0\NewDbContext.tt" PackagePath="AspNet\Templates\net8.0\DbContext\" />
-    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net10.0\NewDbContext.tt" PackagePath="AspNet\Templates\net9.0\DbContext\" />
+    <!-- DbContext templates for net8.0: use copy from net9.0 since net8.0 folder doesn't have .tt templates -->
+    <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net9.0\NewDbContext.tt" PackagePath="AspNet\Templates\net8.0\DbContext\" />
     <None Pack="true" Include="AspNet\Templates\**\*.tt" PackagePath="AspNet\Templates\" />
     <None Pack="true" Include="README.md" PackagePath="\" />
     <!-- Pack AspNet CodeModificationConfigs into AspNet folder -->
@@ -137,7 +146,23 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>Aspire\CodeModificationConfigs\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
-
+    <!-- Include AspNet CodeModificationConfigs in build output for each version -->
+    <None Include="AspNet\CodeModificationConfigs\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\CodeModificationConfigs\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="AspNet\CodeModificationConfigs\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net9.0\CodeModificationConfigs\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="AspNet\CodeModificationConfigs\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net10.0\CodeModificationConfigs\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="AspNet\CodeModificationConfigs\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net11.0\CodeModificationConfigs\%(Filename)%(Extension)</Link>
+    </None>
     <!-- Update .cshtml and .razor.js files to add Pack metadata -->
     <None Update="AspNet\Templates\net9.0\Files\*.cshtml" Pack="true" PackagePath="AspNet\Templates\net9.0\Files\" />
     <None Update="AspNet\Templates\net10.0\Files\*.cshtml" Pack="true" PackagePath="AspNet\Templates\net10.0\Files\" />

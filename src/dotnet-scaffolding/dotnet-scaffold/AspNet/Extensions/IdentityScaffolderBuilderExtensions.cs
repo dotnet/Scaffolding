@@ -119,7 +119,7 @@ internal static class IdentityScaffolderBuilderExtensions
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(IdentitySettings), out var identitySettingsObj);
             var identitySettings = identitySettingsObj as IdentitySettings;
-            string targetFrameworkFolder = "net11.0"; //TODO invoke TargetFrameworkHelpers.GetTargetFrameworkFolder(identitySettings?.Project); when other tfm supported
+            string targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(identitySettings?.Project);
             string? codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("identityChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
             config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj);
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);

@@ -1,0 +1,6 @@
+<Project>
+  <!-- Disable Central Package Management for Scaffolding projects to enable multi-targeting with TFM-specific package versions -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+</Project>

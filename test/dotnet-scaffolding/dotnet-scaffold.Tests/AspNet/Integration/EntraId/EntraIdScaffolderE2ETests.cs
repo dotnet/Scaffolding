@@ -292,7 +292,7 @@ public class EntraIdScaffolderE2ETests
         Assert.NotNull(entraIdSettingsType.GetProperty("Project"));
         Assert.NotNull(entraIdSettingsType.GetProperty("TenantId"));
         Assert.NotNull(entraIdSettingsType.GetProperty("Application"));
-        Assert.NotNull(entraIdSettingsType.GetProperty("UseExisitngApplication"));
+        Assert.NotNull(entraIdSettingsType.GetProperty("UseExistingApplication"));
     }
 
     private class TestTelemetryService : ITelemetryService

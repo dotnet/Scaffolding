@@ -25,8 +25,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// </summary>
         public string? Application { get; set; }
         /// <summary>
-        /// Option to create the application.
+        /// Option to use existing application.
         /// </summary>
-        public bool UseExisitngApplication { get; set; }
+        public bool UseExistingApplication { get; set; }
     }
 }

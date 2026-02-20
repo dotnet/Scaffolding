@@ -31,7 +31,7 @@ internal static class MinimalApiScaffolderBuilderExtensions
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(MinimalApiSettings), out var minimalApiSettingsObj);
             var minimalApiSettings = minimalApiSettingsObj as MinimalApiSettings;
-            string targetFrameworkFolder = "net11.0"; //TODO invoke TargetFrameworkHelpers.GetTargetFrameworkFolder(minimalApiSettings?.Project); when other tfm supported
+            string targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(minimalApiSettings?.Project);
             string? codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("minimalApiChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
             config.Context.Properties.TryGetValue(nameof(MinimalApiModel), out var minimalApiModelObj);
             config.Context.Properties.TryGetValue(Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);

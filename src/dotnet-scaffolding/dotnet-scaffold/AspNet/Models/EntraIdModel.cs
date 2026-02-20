@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Models
         /// </summary>
         public string? Application { get; set; }
         /// <summary>
-        /// Gets or sets whether to create application.
+        /// Gets or sets whether to use existing application.
         /// </summary>
         public bool UseExistingApplication { get; set; }
         /// <summary>

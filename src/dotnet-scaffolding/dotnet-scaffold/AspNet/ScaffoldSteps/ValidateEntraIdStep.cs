@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// </summary>
         public string? Application { get; set; }
         /// <summary>
-        /// Option to select application interactively.
+        /// Option to use existing application.
         /// </summary>
         public bool UseExistingApplication { get; set; }
 
@@ -156,7 +156,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 Project = Project,
                 TenantId = TenantId,
                 Application = Application,
-                UseExisitngApplication = UseExistingApplication
+                UseExistingApplication = UseExistingApplication
             };
         }
 
@@ -192,7 +192,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 Username = settings.Username,
                 TenantId = settings.TenantId,
                 Application = settings.Application,
-                UseExistingApplication = settings.UseExisitngApplication,
+                UseExistingApplication = settings.UseExistingApplication,
                 BaseOutputPath = projectDirectory,
                 EntraIdNamespace = $"{projectName}"
             };

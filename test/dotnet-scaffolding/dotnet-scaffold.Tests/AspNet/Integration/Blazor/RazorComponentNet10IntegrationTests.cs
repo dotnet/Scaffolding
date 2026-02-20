@@ -10,29 +10,26 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
+namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Blazor;
 
 /// <summary>
-/// .NET 8-specific integration tests for the Razor Component (blazor-empty) scaffolder.
+/// .NET 10-specific integration tests for the Razor Component (blazor-empty) scaffolder.
 /// Inherits shared tests from <see cref="RazorComponentIntegrationTestsBase"/>.
 /// </summary>
-public class RazorComponentNet8IntegrationTests : RazorComponentIntegrationTestsBase
+public class RazorComponentNet10IntegrationTests : RazorComponentIntegrationTestsBase
 {
-    protected override string TargetFramework => "net8.0";
-    protected override string TestClassName => nameof(RazorComponentNet8IntegrationTests);
+    protected override string TargetFramework => "net10.0";
+    protected override string TestClassName => nameof(RazorComponentNet10IntegrationTests);
 
     [Fact]
-    public async Task ExecuteAsync_ScaffoldsCorrectFilesAndBuilds_Net8()
+    public async Task ExecuteAsync_ScaffoldsCorrectFilesAndBuilds_Net10()
     {
-        // Arrange  write a real .NET 8 project
         File.WriteAllText(_testProjectPath, ProjectContent);
 
-        // Assert  project builds before scaffolding
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
         Assert.True(preExitCode == 0,
             $"Project should build before scaffolding.\nExit code: {preExitCode}\nOutput: {preOutput}\nError: {preError}");
 
-        // Act  scaffold a Razor component
         var realFileSystem = new FileSystem();
         var step = new DotnetNewScaffolderStep(
             NullLogger<DotnetNewScaffolderStep>.Instance,
@@ -47,7 +44,6 @@ public class RazorComponentNet8IntegrationTests : RazorComponentIntegrationTests
         bool scaffoldResult = await step.ExecuteAsync(_context, CancellationToken.None);
         Assert.True(scaffoldResult, "Scaffolding should succeed.");
 
-        // Assert  correct files were added
         string componentsDir = Path.Combine(_testProjectDir, "Components");
         Assert.True(Directory.Exists(componentsDir), "Components directory should be created.");
 
@@ -66,7 +62,6 @@ public class RazorComponentNet8IntegrationTests : RazorComponentIntegrationTests
         Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Pages")), "Pages directory should not exist.");
         Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Views")), "Views directory should not exist.");
 
-        // Assert  project builds after scaffolding
         var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
         Assert.True(postExitCode == 0,
             $"Project should build after scaffolding.\nExit code: {postExitCode}\nOutput: {postOutput}\nError: {postError}");

@@ -21,7 +21,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
+namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Identity;
 
 /// <summary>
 /// Integration tests to verify that all Blazor Identity files are correctly discovered,

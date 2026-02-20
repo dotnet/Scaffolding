@@ -21,29 +21,24 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
+namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Identity;
 
 /// <summary>
 /// Integration tests to verify that all Blazor Identity files are correctly discovered,
-/// added, and referenced when scaffolding targets .NET 8.
-/// Net 8 differs from net9+ in several ways:
-///  - Root templates: same 5 as net9 (IdentityUserAccessor, no passkeys)
-///  - Pages: 17 templates (no AccessDenied compared to net9's 18)
-///  - Manage: 13 templates (same as net9)
-///  - Shared: 7 templates (same as net9: AccountLayout, no PasskeySubmit)
-///  - Files: 12 files (IdentityApplicationUser/IdentityDbContext pattern, various .cshtml)
-///  - blazorIdentityChanges.json: NavMenu.razor (not Components\Layout\NavMenu.razor)
+/// added, and referenced when scaffolding targets .NET 10.
+/// These tests guard against regressions where file discovery methods filter out
+/// non-T4 static files (e.g., .razor.js, .cshtml) that must be copied to the user's project.
 /// </summary>
-public class BlazorIdentityNet8IntegrationTests : IDisposable
+public class BlazorIdentityNet10IntegrationTests : IDisposable
 {
-    private const string TargetFramework = "net8.0";
+    private const string TargetFramework = "net10.0";
     private readonly string _testDirectory;
     private readonly string _toolsDirectory;
     private readonly string _templatesDirectory;
 
-    public BlazorIdentityNet8IntegrationTests()
+    public BlazorIdentityNet10IntegrationTests()
     {
-        _testDirectory = Path.Combine(Path.GetTempPath(), "BlazorIdentityNet8IntegrationTests", Guid.NewGuid().ToString());
+        _testDirectory = Path.Combine(Path.GetTempPath(), "BlazorIdentityNet10IntegrationTests", Guid.NewGuid().ToString());
         _toolsDirectory = Path.Combine(_testDirectory, "tools");
         _templatesDirectory = Path.Combine(_testDirectory, "Templates");
         Directory.CreateDirectory(_toolsDirectory);
@@ -68,8 +63,50 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
     #region Template File Discovery - Static Files (AddFileStep)
 
     /// <summary>
-    /// Verifies that GetAllFilesForTargetFramework returns all files from the net8.0 Files folder.
-    /// Net 8 has 12 files with a completely different structure from net9+.
+    /// Verifies that GetAllFilesForTargetFramework returns PasskeySubmit.razor.js
+    /// from the net10.0 Files template folder.
+    /// </summary>
+    [Fact]
+    public void GetAllFilesForTargetFramework_FindsPasskeySubmitRazorJs()
+    {
+        // Arrange
+        var utilities = CreateTestableUtilities();
+        CreateFilesTemplateFolder(
+            "PasskeySubmit.razor.js",
+            "_ValidationScriptsPartial.cshtml",
+            "ApplicationUser.tt",
+            "ApplicationUser.cs",
+            "ApplicationUser.Interfaces.cs");
+
+        // Act
+        var allFiles = utilities.GetAllFilesForTargetFramework(["Files"], null).ToList();
+
+        // Assert
+        Assert.Contains(allFiles, f => f.EndsWith("PasskeySubmit.razor.js", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Verifies that GetAllFilesForTargetFramework returns _ValidationScriptsPartial.cshtml.
+    /// </summary>
+    [Fact]
+    public void GetAllFilesForTargetFramework_FindsValidationScriptsPartial()
+    {
+        // Arrange
+        var utilities = CreateTestableUtilities();
+        CreateFilesTemplateFolder(
+            "PasskeySubmit.razor.js",
+            "_ValidationScriptsPartial.cshtml",
+            "ApplicationUser.tt");
+
+        // Act
+        var allFiles = utilities.GetAllFilesForTargetFramework(["Files"], null).ToList();
+
+        // Assert
+        Assert.Contains(allFiles, f => f.EndsWith("_ValidationScriptsPartial.cshtml", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Verifies GetAllFilesForTargetFramework returns ALL files regardless of extension.
     /// </summary>
     [Fact]
     public void GetAllFilesForTargetFramework_ReturnsAllFileTypes_NotJustTT()
@@ -77,93 +114,45 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
         // Arrange
         var utilities = CreateTestableUtilities();
         CreateFilesTemplateFolder(
-            "_Layout.cshtml",
-            "Startup.cshtml",
-            "ReadMe.cshtml",
-            "Error.cshtml",
-            "IdentityDbContextModel.cs",
-            "IdentityDbContext.tt",
-            "IdentityDbContext.Interfaces.cs",
-            "IdentityDbContext.cs",
-            "IdentityApplicationUserModel.cs",
-            "IdentityApplicationUser.tt",
-            "IdentityApplicationUser.Interfaces.cs",
-            "IdentityApplicationUser.cs");
+            "PasskeySubmit.razor.js",
+            "_ValidationScriptsPartial.cshtml",
+            "ApplicationUser.tt",
+            "ApplicationUser.cs",
+            "ApplicationUser.Interfaces.cs");
 
         // Act
         var allFiles = utilities.GetAllFilesForTargetFramework(["Files"], null).ToList();
 
-        // Assert - all 12 files should be found
-        Assert.Equal(12, allFiles.Count);
+        // Assert - all 5 files should be found
+        Assert.Equal(5, allFiles.Count);
+        Assert.Contains(allFiles, f => f.EndsWith(".razor.js", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(allFiles, f => f.EndsWith(".cshtml", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(allFiles, f => f.EndsWith(".tt", StringComparison.OrdinalIgnoreCase));
-        Assert.Contains(allFiles, f => f.EndsWith("IdentityApplicationUser.cs", StringComparison.OrdinalIgnoreCase));
-        Assert.Contains(allFiles, f => f.EndsWith("IdentityDbContext.cs", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(allFiles, f => f.EndsWith("ApplicationUser.cs", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(allFiles, f => f.EndsWith("ApplicationUser.Interfaces.cs", StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
-    /// Verifies that GetAllT4TemplatesForTargetFramework only returns .tt files from Files folder.
-    /// Net 8 has 2 .tt files: IdentityApplicationUser.tt and IdentityDbContext.tt.
+    /// Verifies that GetAllT4TemplatesForTargetFramework does NOT return non-.tt files.
     /// </summary>
     [Fact]
-    public void GetAllT4TemplatesForTargetFramework_ReturnsOnlyTTFiles()
+    public void GetAllT4TemplatesForTargetFramework_DoesNotReturnStaticFiles()
     {
         // Arrange
         var utilities = CreateTestableUtilities();
         CreateFilesTemplateFolder(
-            "_Layout.cshtml",
-            "Error.cshtml",
-            "IdentityDbContext.tt",
-            "IdentityDbContext.cs",
-            "IdentityApplicationUser.tt",
-            "IdentityApplicationUser.cs");
+            "PasskeySubmit.razor.js",
+            "_ValidationScriptsPartial.cshtml",
+            "ApplicationUser.tt");
 
         // Act
         var ttFiles = utilities.GetAllT4TemplatesForTargetFramework(["Files"], null).ToList();
 
-        // Assert - only .tt files
-        Assert.Equal(2, ttFiles.Count);
-        Assert.Contains(ttFiles, f => f.EndsWith("IdentityApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
-        Assert.Contains(ttFiles, f => f.EndsWith("IdentityDbContext.tt", StringComparison.OrdinalIgnoreCase));
+        // Assert - only .tt file should be returned
+        Assert.Single(ttFiles);
+        Assert.Contains(ttFiles, f => f.EndsWith("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(ttFiles, f => f.EndsWith(".razor.js", StringComparison.OrdinalIgnoreCase));
         Assert.DoesNotContain(ttFiles, f => f.EndsWith(".cshtml", StringComparison.OrdinalIgnoreCase));
-        Assert.DoesNotContain(ttFiles, f => f.EndsWith("IdentityApplicationUser.cs", StringComparison.OrdinalIgnoreCase));
-    }
-
-    /// <summary>
-    /// Net 8 does NOT have PasskeySubmit.razor.js (no passkey support).
-    /// </summary>
-    [Fact]
-    public void Net8_Files_DoesNotContainPasskeySubmitRazorJs()
-    {
-        var basePath = GetActualTemplatesBasePath();
-        var filesDir = Path.Combine(basePath, TargetFramework, "Files");
-        if (!Directory.Exists(filesDir))
-        {
-            return;
-        }
-
-        var allFiles = Directory.EnumerateFiles(filesDir, "*", SearchOption.AllDirectories).ToList();
-        Assert.DoesNotContain(allFiles, f => f.EndsWith("PasskeySubmit.razor.js", StringComparison.OrdinalIgnoreCase));
-    }
-
-    /// <summary>
-    /// Net 8 does NOT use ApplicationUser.tt (uses IdentityApplicationUser.tt instead).
-    /// </summary>
-    [Fact]
-    public void Net8_Files_DoesNotContainApplicationUserTT()
-    {
-        var basePath = GetActualTemplatesBasePath();
-        var filesDir = Path.Combine(basePath, TargetFramework, "Files");
-        if (!Directory.Exists(filesDir))
-        {
-            return;
-        }
-
-        var allFiles = Directory.EnumerateFiles(filesDir, "*", SearchOption.AllDirectories)
-            .Select(Path.GetFileName)
-            .ToList();
-        Assert.DoesNotContain("ApplicationUser.tt", allFiles);
-        Assert.Contains("IdentityApplicationUser.tt", allFiles);
     }
 
     #endregion
@@ -172,7 +161,7 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
 
     /// <summary>
     /// Verifies that GetAllT4TemplatesForTargetFramework finds all expected BlazorIdentity
-    /// T4 templates for net8.0.
+    /// T4 templates for net10.0.
     /// </summary>
     [Fact]
     public void GetAllT4Templates_FindsAllBlazorIdentityTemplates()
@@ -188,33 +177,25 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
         Assert.NotEmpty(templates);
         Assert.All(templates, t => Assert.EndsWith(".tt", t));
 
-        // Root-level templates (same as net9)
+        // Root-level templates
         Assert.Contains(templates, f => f.EndsWith("IdentityComponentsEndpointRouteBuilderExtensions.tt", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(templates, f => f.EndsWith("IdentityNoOpEmailSender.tt", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(templates, f => f.EndsWith("IdentityRedirectManager.tt", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(templates, f => f.EndsWith("IdentityRevalidatingAuthenticationStateProvider.tt", StringComparison.OrdinalIgnoreCase));
-        Assert.Contains(templates, f => f.EndsWith("IdentityUserAccessor.tt", StringComparison.OrdinalIgnoreCase));
-
-        // Net8 should NOT have passkey root templates
-        Assert.DoesNotContain(templates, f => f.EndsWith("PasskeyInputModel.tt", StringComparison.OrdinalIgnoreCase));
-        Assert.DoesNotContain(templates, f => f.EndsWith("PasskeyOperation.tt", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(templates, f => f.EndsWith("PasskeyInputModel.tt", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(templates, f => f.EndsWith("PasskeyOperation.tt", StringComparison.OrdinalIgnoreCase));
 
         // Pages templates
         Assert.Contains(templates, f => f.Contains("Pages") && f.EndsWith("Login.tt", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(templates, f => f.Contains("Pages") && f.EndsWith("Register.tt", StringComparison.OrdinalIgnoreCase));
 
-        // Net8 does NOT have AccessDenied
-        Assert.DoesNotContain(templates, f => f.Contains("Pages") && f.EndsWith("AccessDenied.tt", StringComparison.OrdinalIgnoreCase));
-
-        // Shared templates (same as net9: AccountLayout, no PasskeySubmit)
-        Assert.Contains(templates, f => f.Contains("Shared") && f.EndsWith("AccountLayout.tt", StringComparison.OrdinalIgnoreCase));
+        // Shared templates
+        Assert.Contains(templates, f => f.Contains("Shared") && f.EndsWith("PasskeySubmit.tt", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(templates, f => f.Contains("Shared") && f.EndsWith("StatusMessage.tt", StringComparison.OrdinalIgnoreCase));
-        Assert.DoesNotContain(templates, f => f.Contains("Shared") && f.EndsWith("PasskeySubmit.tt", StringComparison.OrdinalIgnoreCase));
 
-        // Manage templates (same as net9: no Passkeys/RenamePasskey)
+        // Manage templates
         Assert.Contains(templates, f => f.Contains("Manage") && f.EndsWith("Index.tt", StringComparison.OrdinalIgnoreCase));
-        Assert.DoesNotContain(templates, f => f.Contains("Manage") && f.EndsWith("Passkeys.tt", StringComparison.OrdinalIgnoreCase));
-        Assert.DoesNotContain(templates, f => f.Contains("Manage") && f.EndsWith("RenamePasskey.tt", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(templates, f => f.Contains("Manage") && f.EndsWith("Passkeys.tt", StringComparison.OrdinalIgnoreCase));
     }
 
     #endregion
@@ -222,17 +203,17 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
     #region Code Modification Config - blazorIdentityChanges.json
 
     /// <summary>
-    /// Verifies that the net8.0 blazorIdentityChanges.json config file exists.
+    /// Verifies that the net10.0 blazorIdentityChanges.json config file exists.
     /// </summary>
     [Fact]
-    public void BlazorIdentityChangesConfig_ExistsForNet8()
+    public void BlazorIdentityChangesConfig_ExistsForNet10()
     {
         var configPath = GetBlazorIdentityChangesConfigPath();
         Assert.True(File.Exists(configPath), $"blazorIdentityChanges.json not found at: {configPath}");
     }
 
     /// <summary>
-    /// Verifies that NavMenu.razor.css is referenced in blazorIdentityChanges.json for net8.0.
+    /// Verifies that NavMenu.razor.css is referenced in blazorIdentityChanges.json for net10.0.
     /// </summary>
     [Fact]
     public void BlazorIdentityChangesConfig_ReferencesNavMenuRazorCss()
@@ -264,8 +245,7 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Verifies that NavMenu.razor is referenced in blazorIdentityChanges.json for net8.0.
-    /// Note: net8 uses "NavMenu.razor" (not "Components\Layout\NavMenu.razor").
+    /// Verifies that NavMenu.razor is referenced in blazorIdentityChanges.json for net10.0.
     /// </summary>
     [Fact]
     public void BlazorIdentityChangesConfig_ReferencesNavMenuRazor()
@@ -291,6 +271,7 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
                 Assert.True(file.TryGetProperty("Replacements", out var replacements));
                 Assert.True(replacements.GetArrayLength() > 0);
 
+                // Verify AuthorizeView is mentioned in replacements
                 var replacementsText = replacements.ToString();
                 Assert.Contains("AuthorizeView", replacementsText);
                 break;
@@ -301,10 +282,10 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Net 8 does NOT have an App.razor entry in blazorIdentityChanges.json.
+    /// Verifies that App.razor is referenced in blazorIdentityChanges.json for net10.0.
     /// </summary>
     [Fact]
-    public void BlazorIdentityChangesConfig_DoesNotReferenceAppRazor()
+    public void BlazorIdentityChangesConfig_ReferencesAppRazor()
     {
         var configPath = GetBlazorIdentityChangesConfigPath();
         if (!File.Exists(configPath))
@@ -316,22 +297,27 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
         var configJson = JsonDocument.Parse(configContent);
         var files = configJson.RootElement.GetProperty("Files");
 
+        bool found = false;
         foreach (var file in files.EnumerateArray())
         {
             if (file.TryGetProperty("FileName", out var fileName) &&
-                fileName.GetString()?.Equals("App.razor", StringComparison.OrdinalIgnoreCase) == true)
+                fileName.GetString()?.Contains("App.razor", StringComparison.OrdinalIgnoreCase) == true)
             {
-                if (file.TryGetProperty("Replacements", out var replacements))
-                {
-                    var replacementsText = replacements.ToString();
-                    Assert.DoesNotContain("PasskeySubmit.razor.js", replacementsText);
-                }
+                found = true;
+                Assert.True(file.TryGetProperty("Replacements", out var replacements));
+                Assert.True(replacements.GetArrayLength() > 0);
+
+                var replacementsText = replacements.ToString();
+                Assert.Contains("PasskeySubmit.razor.js", replacementsText);
+                break;
             }
         }
+
+        Assert.True(found, "App.razor not found in blazorIdentityChanges.json Files array");
     }
 
     /// <summary>
-    /// Verifies that Routes.razor is referenced in blazorIdentityChanges.json for net8.0.
+    /// Verifies that Routes.razor is referenced in blazorIdentityChanges.json for net10.0.
     /// </summary>
     [Fact]
     public void BlazorIdentityChangesConfig_ReferencesRoutesRazor()
@@ -363,7 +349,7 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Verifies that _Imports.razor is referenced in blazorIdentityChanges.json for net8.0.
+    /// Verifies that _Imports.razor is referenced in blazorIdentityChanges.json for net10.0.
     /// </summary>
     [Fact]
     public void BlazorIdentityChangesConfig_ReferencesImportsRazor()
@@ -393,7 +379,7 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Verifies that Program.cs is referenced in blazorIdentityChanges.json for net8.0.
+    /// Verifies that Program.cs is referenced in blazorIdentityChanges.json for net10.0.
     /// </summary>
     [Fact]
     public void BlazorIdentityChangesConfig_ReferencesProgramCs()
@@ -424,7 +410,6 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
 
     /// <summary>
     /// Comprehensive test: verifies ALL expected file references exist in blazorIdentityChanges.json.
-    /// Net 8 references: Program.cs, Routes.razor, NavMenu.razor.css, NavMenu.razor, Components\_Imports.razor.
     /// </summary>
     [Fact]
     public void BlazorIdentityChangesConfig_ContainsAllRequiredFileReferences()
@@ -453,22 +438,7 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
         Assert.Contains(referencedFileNames, f => f.Contains("NavMenu.razor.css", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(referencedFileNames, f => f.Contains("NavMenu.razor", StringComparison.OrdinalIgnoreCase) && !f.Contains(".css", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(referencedFileNames, f => f.Contains("_Imports.razor", StringComparison.OrdinalIgnoreCase));
-    }
-
-    /// <summary>
-    /// Verifies that Program.cs code changes reference IdentityUserAccessor (net8 uses this, not passkeys).
-    /// </summary>
-    [Fact]
-    public void BlazorIdentityChangesConfig_ProgramCs_ReferencesIdentityUserAccessor()
-    {
-        var configPath = GetBlazorIdentityChangesConfigPath();
-        if (!File.Exists(configPath))
-        {
-            return;
-        }
-
-        var configContent = File.ReadAllText(configPath);
-        Assert.Contains("IdentityUserAccessor", configContent);
+        Assert.Contains(referencedFileNames, f => f.Contains("App.razor", StringComparison.OrdinalIgnoreCase));
     }
 
     #endregion
@@ -476,47 +446,53 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
     #region Actual Template Existence Tests on Disk
 
     /// <summary>
-    /// Verifies net8-specific Files exist on disk.
+    /// Verifies that PasskeySubmit.razor.js exists in the actual net10.0/Files template folder.
     /// </summary>
-    [Theory]
-    [InlineData("_Layout.cshtml")]
-    [InlineData("Startup.cshtml")]
-    [InlineData("ReadMe.cshtml")]
-    [InlineData("Error.cshtml")]
-    [InlineData("IdentityDbContextModel.cs")]
-    [InlineData("IdentityDbContext.tt")]
-    [InlineData("IdentityDbContext.Interfaces.cs")]
-    [InlineData("IdentityDbContext.cs")]
-    [InlineData("IdentityApplicationUserModel.cs")]
-    [InlineData("IdentityApplicationUser.tt")]
-    [InlineData("IdentityApplicationUser.Interfaces.cs")]
-    [InlineData("IdentityApplicationUser.cs")]
-    public void Net8_Files_ExistOnDisk(string fileName)
+    [Fact]
+    public void Net10_Files_PasskeySubmitRazorJs_ExistsOnDisk()
     {
-        AssertActualTemplateFileExists(Path.Combine(TargetFramework, "Files", fileName));
+        AssertActualTemplateFileExists(Path.Combine(TargetFramework, "Files", "PasskeySubmit.razor.js"));
     }
 
     /// <summary>
-    /// Verifies all BlazorIdentity root-level .tt templates exist on disk for net8.0.
-    /// Same 5 root templates as net9.
+    /// Verifies that _ValidationScriptsPartial.cshtml exists in the actual net10.0/Files template folder.
+    /// </summary>
+    [Fact]
+    public void Net10_Files_ValidationScriptsPartial_ExistsOnDisk()
+    {
+        AssertActualTemplateFileExists(Path.Combine(TargetFramework, "Files", "_ValidationScriptsPartial.cshtml"));
+    }
+
+    /// <summary>
+    /// Verifies that ApplicationUser.tt exists in the actual net10.0/Files template folder.
+    /// </summary>
+    [Fact]
+    public void Net10_Files_ApplicationUserTT_ExistsOnDisk()
+    {
+        AssertActualTemplateFileExists(Path.Combine(TargetFramework, "Files", "ApplicationUser.tt"));
+    }
+
+    /// <summary>
+    /// Verifies all BlazorIdentity root-level .tt templates exist on disk for net10.0.
     /// </summary>
     [Theory]
     [InlineData("IdentityComponentsEndpointRouteBuilderExtensions")]
     [InlineData("IdentityNoOpEmailSender")]
     [InlineData("IdentityRedirectManager")]
     [InlineData("IdentityRevalidatingAuthenticationStateProvider")]
-    [InlineData("IdentityUserAccessor")]
-    public void Net8_BlazorIdentity_RootTemplates_ExistOnDisk(string templateName)
+    [InlineData("PasskeyInputModel")]
+    [InlineData("PasskeyOperation")]
+    public void Net10_BlazorIdentity_RootTemplates_ExistOnDisk(string templateName)
     {
         AssertActualTemplateFileExists(Path.Combine(TargetFramework, "BlazorIdentity", $"{templateName}.tt"));
     }
 
     /// <summary>
-    /// Verifies all BlazorIdentity/Pages .tt templates exist on disk for net8.0.
-    /// Net 8 has 17 Pages templates (no AccessDenied compared to net9's 18).
+    /// Verifies all BlazorIdentity/Pages .tt templates exist on disk for net10.0.
     /// </summary>
     [Theory]
     [InlineData("_Imports")]
+    [InlineData("AccessDenied")]
     [InlineData("ConfirmEmail")]
     [InlineData("ConfirmEmailChange")]
     [InlineData("ExternalLogin")]
@@ -533,14 +509,13 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
     [InlineData("ResendEmailConfirmation")]
     [InlineData("ResetPassword")]
     [InlineData("ResetPasswordConfirmation")]
-    public void Net8_BlazorIdentity_PagesTemplates_ExistOnDisk(string templateName)
+    public void Net10_BlazorIdentity_PagesTemplates_ExistOnDisk(string templateName)
     {
         AssertActualTemplateFileExists(Path.Combine(TargetFramework, "BlazorIdentity", "Pages", $"{templateName}.tt"));
     }
 
     /// <summary>
-    /// Verifies all BlazorIdentity/Pages/Manage .tt templates exist on disk for net8.0.
-    /// Same 13 Manage templates as net9.
+    /// Verifies all BlazorIdentity/Pages/Manage .tt templates exist on disk for net10.0.
     /// </summary>
     [Theory]
     [InlineData("_Imports")]
@@ -552,85 +527,31 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
     [InlineData("ExternalLogins")]
     [InlineData("GenerateRecoveryCodes")]
     [InlineData("Index")]
+    [InlineData("Passkeys")]
     [InlineData("PersonalData")]
+    [InlineData("RenamePasskey")]
     [InlineData("ResetAuthenticator")]
     [InlineData("SetPassword")]
     [InlineData("TwoFactorAuthentication")]
-    public void Net8_BlazorIdentity_ManageTemplates_ExistOnDisk(string templateName)
+    public void Net10_BlazorIdentity_ManageTemplates_ExistOnDisk(string templateName)
     {
         AssertActualTemplateFileExists(Path.Combine(TargetFramework, "BlazorIdentity", "Pages", "Manage", $"{templateName}.tt"));
     }
 
     /// <summary>
-    /// Verifies all BlazorIdentity/Shared .tt templates exist on disk for net8.0.
-    /// Same 7 Shared templates as net9 (AccountLayout, no PasskeySubmit).
+    /// Verifies all BlazorIdentity/Shared .tt templates exist on disk for net10.0.
     /// </summary>
     [Theory]
-    [InlineData("AccountLayout")]
     [InlineData("ExternalLoginPicker")]
     [InlineData("ManageLayout")]
     [InlineData("ManageNavMenu")]
+    [InlineData("PasskeySubmit")]
     [InlineData("RedirectToLogin")]
     [InlineData("ShowRecoveryCodes")]
     [InlineData("StatusMessage")]
-    public void Net8_BlazorIdentity_SharedTemplates_ExistOnDisk(string templateName)
+    public void Net10_BlazorIdentity_SharedTemplates_ExistOnDisk(string templateName)
     {
         AssertActualTemplateFileExists(Path.Combine(TargetFramework, "BlazorIdentity", "Shared", $"{templateName}.tt"));
-    }
-
-    /// <summary>
-    /// Verifies net8 does NOT have AccessDenied in Pages templates.
-    /// </summary>
-    [Fact]
-    public void Net8_BlazorIdentity_PagesTemplates_DoNotIncludeAccessDenied()
-    {
-        var basePath = GetActualTemplatesBasePath();
-        var pagesDir = Path.Combine(basePath, TargetFramework, "BlazorIdentity", "Pages");
-        if (!Directory.Exists(pagesDir))
-        {
-            return;
-        }
-
-        var pagesFiles = Directory.EnumerateFiles(pagesDir, "*.tt", SearchOption.TopDirectoryOnly)
-            .Select(Path.GetFileName)
-            .ToList();
-        Assert.DoesNotContain("AccessDenied.tt", pagesFiles);
-    }
-
-    /// <summary>
-    /// Verifies net8 does NOT have passkey-related Manage templates.
-    /// </summary>
-    [Fact]
-    public void Net8_BlazorIdentity_ManageTemplates_DoNotIncludePasskeys()
-    {
-        var basePath = GetActualTemplatesBasePath();
-        var manageDir = Path.Combine(basePath, TargetFramework, "BlazorIdentity", "Pages", "Manage");
-        if (!Directory.Exists(manageDir))
-        {
-            return;
-        }
-
-        var manageFiles = Directory.EnumerateFiles(manageDir, "*.tt").Select(Path.GetFileName).ToList();
-        Assert.DoesNotContain("Passkeys.tt", manageFiles);
-        Assert.DoesNotContain("RenamePasskey.tt", manageFiles);
-    }
-
-    /// <summary>
-    /// Verifies net8 does NOT have PasskeySubmit in Shared templates.
-    /// </summary>
-    [Fact]
-    public void Net8_BlazorIdentity_SharedTemplates_DoNotIncludePasskeySubmit()
-    {
-        var basePath = GetActualTemplatesBasePath();
-        var sharedDir = Path.Combine(basePath, TargetFramework, "BlazorIdentity", "Shared");
-        if (!Directory.Exists(sharedDir))
-        {
-            return;
-        }
-
-        var sharedFiles = Directory.EnumerateFiles(sharedDir, "*.tt").Select(Path.GetFileName).ToList();
-        Assert.DoesNotContain("PasskeySubmit.tt", sharedFiles);
-        Assert.Contains("AccountLayout.tt", sharedFiles);
     }
 
     #endregion
@@ -639,7 +560,7 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
 
     /// <summary>
     /// Verifies that BlazorIdentityHelper.GetTextTemplatingProperties generates text
-    /// templating properties for net8.0 BlazorIdentity T4 templates with correct extensions.
+    /// templating properties for net10.0 BlazorIdentity T4 templates with correct extensions.
     /// </summary>
     [Fact]
     public void BlazorIdentityHelper_GetTextTemplatingProperties_GeneratesPropertiesForAllTemplates()
@@ -681,62 +602,32 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
         }
     }
 
-    #endregion
-
-    #region Net8-specific template count validation
-
     /// <summary>
-    /// Validates the exact expected template counts for net8.0 BlazorIdentity.
-    /// Root: 5, Pages: 17, Manage: 13, Shared: 7 = 42 total (one less Pages than net9).
+    /// Verifies that BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty returns
+    /// a valid property when given the net10.0 ApplicationUser.tt template path.
     /// </summary>
     [Fact]
-    public void Net8_BlazorIdentity_HasExpectedTemplateCount()
+    public void BlazorIdentityHelper_GetApplicationUserProperty_ReturnsValidForNet10()
     {
-        var basePath = GetActualTemplatesBasePath();
-        var blazorIdentityDir = Path.Combine(basePath, TargetFramework, "BlazorIdentity");
-        if (!Directory.Exists(blazorIdentityDir))
+        // Arrange
+        var templatesBasePath = GetActualTemplatesBasePath();
+        var applicationUserTt = Path.Combine(templatesBasePath, TargetFramework, "Files", "ApplicationUser.tt");
+        if (!File.Exists(applicationUserTt))
         {
             return;
         }
 
-        var allTtFiles = Directory.EnumerateFiles(blazorIdentityDir, "*.tt", SearchOption.AllDirectories).ToList();
-        Assert.Equal(42, allTtFiles.Count);
+        var identityModel = CreateTestIdentityModel();
 
-        // Root templates
-        var rootFiles = Directory.EnumerateFiles(blazorIdentityDir, "*.tt", SearchOption.TopDirectoryOnly).ToList();
-        Assert.Equal(5, rootFiles.Count);
+        // Act
+        var property = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(applicationUserTt, identityModel);
 
-        // Pages templates (17 — no AccessDenied)
-        var pagesDir = Path.Combine(blazorIdentityDir, "Pages");
-        var pagesFiles = Directory.EnumerateFiles(pagesDir, "*.tt", SearchOption.TopDirectoryOnly).ToList();
-        Assert.Equal(17, pagesFiles.Count);
-
-        // Manage templates
-        var manageDir = Path.Combine(pagesDir, "Manage");
-        var manageFiles = Directory.EnumerateFiles(manageDir, "*.tt", SearchOption.TopDirectoryOnly).ToList();
-        Assert.Equal(13, manageFiles.Count);
-
-        // Shared templates
-        var sharedDir = Path.Combine(blazorIdentityDir, "Shared");
-        var sharedFiles = Directory.EnumerateFiles(sharedDir, "*.tt", SearchOption.TopDirectoryOnly).ToList();
-        Assert.Equal(7, sharedFiles.Count);
-    }
-
-    /// <summary>
-    /// Validates the exact expected file count in the net8.0 Files folder (12 files).
-    /// </summary>
-    [Fact]
-    public void Net8_FilesFolder_HasExpectedFileCount()
-    {
-        var basePath = GetActualTemplatesBasePath();
-        var filesDir = Path.Combine(basePath, TargetFramework, "Files");
-        if (!Directory.Exists(filesDir))
-        {
-            return;
-        }
-
-        var allFiles = Directory.EnumerateFiles(filesDir, "*", SearchOption.AllDirectories).ToList();
-        Assert.Equal(12, allFiles.Count);
+        // Assert
+        Assert.NotNull(property);
+        Assert.Equal(applicationUserTt, property.TemplatePath);
+        Assert.Contains("ApplicationUser", property.OutputPath);
+        Assert.EndsWith(".cs", property.OutputPath);
+        Assert.Contains("Data", property.OutputPath);
     }
 
     #endregion
@@ -753,12 +644,11 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
         // Arrange
         var utilities = CreateTestableUtilities();
         CreateFilesTemplateFolder(
-            "_Layout.cshtml",
-            "Error.cshtml",
-            "IdentityDbContext.tt",
-            "IdentityDbContext.cs",
-            "IdentityApplicationUser.tt",
-            "IdentityApplicationUser.cs");
+            "PasskeySubmit.razor.js",
+            "_ValidationScriptsPartial.cshtml",
+            "ApplicationUser.tt",
+            "ApplicationUser.cs",
+            "ApplicationUser.Interfaces.cs");
 
         // Act
         var allFiles = utilities.GetAllFilesForTargetFramework(["Files"], null).ToList();
@@ -773,21 +663,20 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
     }
 
     /// <summary>
-    /// Regression test: verifies that the net8.0 Files folder contains both
+    /// Regression test: verifies that the net10.0 Files folder contains both
     /// T4 templates and non-T4 static files, and that our methods handle both correctly.
     /// </summary>
     [Fact]
-    public void Net8_FilesFolder_ContainsBothT4AndStaticFiles()
+    public void Net10_FilesFolder_ContainsBothT4AndStaticFiles()
     {
         // Arrange
         var utilities = CreateTestableUtilities();
         CreateFilesTemplateFolder(
-            "_Layout.cshtml",
-            "Error.cshtml",
-            "IdentityDbContext.tt",
-            "IdentityDbContext.cs",
-            "IdentityApplicationUser.tt",
-            "IdentityApplicationUser.cs");
+            "PasskeySubmit.razor.js",
+            "_ValidationScriptsPartial.cshtml",
+            "ApplicationUser.tt",
+            "ApplicationUser.cs",
+            "ApplicationUser.Interfaces.cs");
 
         // Act
         var allFiles = utilities.GetAllFilesForTargetFramework(["Files"], null).ToList();
@@ -799,8 +688,7 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
         Assert.NotEmpty(ttFiles);
         Assert.NotEmpty(nonTtFiles);
 
-        Assert.Contains(nonTtFiles, f => f.EndsWith("_Layout.cshtml", StringComparison.OrdinalIgnoreCase));
-        Assert.Contains(nonTtFiles, f => f.EndsWith("Error.cshtml", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(nonTtFiles, f => f.EndsWith("PasskeySubmit.razor.js", StringComparison.OrdinalIgnoreCase));
     }
 
     #endregion
@@ -826,14 +714,15 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
     {
         string baseDir = Path.Combine(_templatesDirectory, TargetFramework, "BlazorIdentity");
 
-        // Root-level templates (same as net9)
+        // Root-level templates
         var rootTemplates = new[]
         {
             "IdentityComponentsEndpointRouteBuilderExtensions",
             "IdentityNoOpEmailSender",
             "IdentityRedirectManager",
             "IdentityRevalidatingAuthenticationStateProvider",
-            "IdentityUserAccessor"
+            "PasskeyInputModel",
+            "PasskeyOperation"
         };
 
         Directory.CreateDirectory(baseDir);
@@ -842,28 +731,28 @@ public class BlazorIdentityNet8IntegrationTests : IDisposable
             File.WriteAllText(Path.Combine(baseDir, $"{name}.tt"), $"// {name} template");
         }
 
-        // Pages templates (17 — no AccessDenied)
+        // Pages templates
         var pagesDir = Path.Combine(baseDir, "Pages");
         Directory.CreateDirectory(pagesDir);
-        var pageTemplates = new[] { "Login", "Register", "_Imports", "ConfirmEmail", "ExternalLogin" };
+        var pageTemplates = new[] { "Login", "Register", "_Imports", "AccessDenied", "ConfirmEmail" };
         foreach (var name in pageTemplates)
         {
             File.WriteAllText(Path.Combine(pagesDir, $"{name}.tt"), $"// {name} template");
         }
 
-        // Manage templates (same as net9)
+        // Manage templates
         var manageDir = Path.Combine(pagesDir, "Manage");
         Directory.CreateDirectory(manageDir);
-        var manageTemplates = new[] { "Index", "_Imports", "ChangePassword" };
+        var manageTemplates = new[] { "Index", "Passkeys", "_Imports", "ChangePassword" };
         foreach (var name in manageTemplates)
         {
             File.WriteAllText(Path.Combine(manageDir, $"{name}.tt"), $"// {name} template");
         }
 
-        // Shared templates (same as net9: AccountLayout)
+        // Shared templates
         var sharedDir = Path.Combine(baseDir, "Shared");
         Directory.CreateDirectory(sharedDir);
-        var sharedTemplates = new[] { "AccountLayout", "StatusMessage", "ManageNavMenu", "ExternalLoginPicker", "RedirectToLogin" };
+        var sharedTemplates = new[] { "PasskeySubmit", "StatusMessage", "ManageNavMenu", "ExternalLoginPicker", "RedirectToLogin" };
         foreach (var name in sharedTemplates)
         {
             File.WriteAllText(Path.Combine(sharedDir, $"{name}.tt"), $"// {name} template");

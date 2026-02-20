@@ -10,7 +10,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
+namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Blazor;
 
 /// <summary>
 /// .NET 9-specific integration tests for the Razor Component (blazor-empty) scaffolder.

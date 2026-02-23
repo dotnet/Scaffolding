@@ -98,23 +98,25 @@ internal static class DatabaseScaffolderBuilderExtensions
         // Step 1: Add code changes to AppHost project for database
         builder = builder.WithStep<AddAspireCodeChangeStep>(config =>
         {
-            // Find the code modification config file for AppHost database
-            var codeModificationFilePath = AspireCodeModificationHelper.FindNet11CodeModificationConfigFile("Database", "db-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
-            if (!string.IsNullOrEmpty(codeModificationFilePath) &&
-                config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
+            if (config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
-                var step = config.Step;
-                // Get code modifier properties for AppHost
-                var codeModifierProperties = GetAppHostProperties(commandSettings);
-                step.CodeModifierConfigPath = codeModificationFilePath;
-                foreach (var kvp in codeModifierProperties)
+                // Find the code modification config file for AppHost database
+                var codeModificationFilePath = AspireCodeModificationHelper.FindCodeModificationConfigFile("Database", "db-apphost.json", System.Reflection.Assembly.GetExecutingAssembly(), commandSettings.AppHostProject);
+                if (!string.IsNullOrEmpty(codeModificationFilePath))
                 {
-                    step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
-                }
+                    var step = config.Step;
+                    // Get code modifier properties for AppHost
+                    var codeModifierProperties = GetAppHostProperties(commandSettings);
+                    step.CodeModifierConfigPath = codeModificationFilePath;
+                    foreach (var kvp in codeModifierProperties)
+                    {
+                        step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+                    }
 
-                step.ProjectPath = commandSettings.AppHostProject;
-                step.CodeChangeOptions = [];
+                    step.ProjectPath = commandSettings.AppHostProject;
+                    step.CodeChangeOptions = [];
+                }
             }
         });
 
@@ -122,22 +124,30 @@ internal static class DatabaseScaffolderBuilderExtensions
         builder = builder.WithStep<AddAspireCodeChangeStep>(config =>
         {
             var step = config.Step;
-            // Find the code modification config file for API database
-            var codeModificationFilePath = AspireCodeModificationHelper.FindNet11CodeModificationConfigFile("Database", "db-webapi.json", System.Reflection.Assembly.GetExecutingAssembly());
             if (config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
-                commandSettingsObj is CommandSettings commandSettings &&
-                !string.IsNullOrEmpty(codeModificationFilePath))
+                commandSettingsObj is CommandSettings commandSettings)
             {
-                // Set code modification details for the API project
-                step.CodeModifierConfigPath = codeModificationFilePath;
-                var codeModifierProperties = GetApiProjectProperties(commandSettings);
-                foreach (var kvp in codeModifierProperties)
+                // Find the code modification config file for API database
+                var codeModificationFilePath = AspireCodeModificationHelper.FindCodeModificationConfigFile("Database", "db-webapi.json", System.Reflection.Assembly.GetExecutingAssembly(), commandSettings.Project);
+                if (!string.IsNullOrEmpty(codeModificationFilePath))
                 {
-                    step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
-                }
+                    // Set code modification details for the API project
+                    step.CodeModifierConfigPath = codeModificationFilePath;
+                    var codeModifierProperties = GetApiProjectProperties(commandSettings);
+                    foreach (var kvp in codeModifierProperties)
+                    {
+                        step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+                    }
 
-                step.ProjectPath = commandSettings.Project;
-                step.CodeChangeOptions = [];
+                    step.ProjectPath = commandSettings.Project;
+                    step.CodeChangeOptions = [];
+                }
+                else
+                {
+                    // Skip step if config file not found
+                    step.SkipStep = true;
+                    return;
+                }
             }
             else
             {

@@ -17,6 +17,8 @@
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <!-- Suppress TFM support warnings for .NET 11 preview packages used on net9.0 - required to support net8 and net9 projects -->
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <PropertyGroup Label="Package and Assembly Metadata">

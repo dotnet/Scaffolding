@@ -21,7 +21,7 @@ public class TemplateFoldersUtilitiesTests : IDisposable
     {
         _testDirectory = Path.Combine(Path.GetTempPath(), "TemplateFoldersUtilitiesTests", Guid.NewGuid().ToString());
         _toolsDirectory = Path.Combine(_testDirectory, "tools");
-        _templatesDirectory = Path.Combine(_testDirectory, "Templates");
+        _templatesDirectory = Path.Combine(_testDirectory, "AspNet", "Templates");
         Directory.CreateDirectory(_toolsDirectory);
         Directory.CreateDirectory(_templatesDirectory);
     }
@@ -638,7 +638,7 @@ public class TemplateFoldersUtilitiesTests : IDisposable
 
         // Assert
         Assert.Single(result);
-        Assert.EndsWith(Path.Combine("Templates", framework, "TestFolder"), result[0]);
+        Assert.EndsWith(Path.Combine("AspNet", "Templates", framework, "TestFolder"), result[0]);
     }
 
     #endregion
@@ -736,7 +736,7 @@ public class TemplateFoldersUtilitiesTests : IDisposable
 
             foreach (var baseFolderName in baseFolders)
             {
-                string templatesFolderName = "Templates";
+                string templatesFolderName = Path.Combine("AspNet", "Templates");
                 var candidateTemplateFolders = Path.Combine(_basePath, templatesFolderName, frameworkTemplateFolder, baseFolderName);
                 if (Directory.Exists(candidateTemplateFolders))
                 {

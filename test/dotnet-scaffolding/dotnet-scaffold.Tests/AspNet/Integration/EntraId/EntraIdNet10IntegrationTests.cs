@@ -653,10 +653,9 @@ public class EntraIdNet10IntegrationTests : IDisposable
     }
 
     [Fact]
-    public void EntraIdSettings_HasUseExisitngApplicationProperty_Net10()
+    public void EntraIdSettings_HasUseExistingApplicationProperty_Net10()
     {
-        // Note: property name has a typo (UseExisitngApplication) matching source code
-        Assert.NotNull(typeof(EntraIdSettings).GetProperty("UseExisitngApplication"));
+        Assert.NotNull(typeof(EntraIdSettings).GetProperty("UseExistingApplication"));
     }
 
     [Fact]
@@ -1407,7 +1406,7 @@ public class EntraIdNet10IntegrationTests : IDisposable
             Project = _testProjectPath,
             TenantId = "tenant-id",
             Application = "app-id",
-            UseExisitngApplication = true
+            UseExistingApplication = true
         };
 
         _context.Properties.Add(nameof(EntraIdSettings), settings);
@@ -1417,7 +1416,7 @@ public class EntraIdNet10IntegrationTests : IDisposable
         Assert.NotNull(retrieved);
         Assert.Equal("user@example.com", retrieved!.Username);
         Assert.Equal(_testProjectPath, retrieved.Project);
-        Assert.True(retrieved.UseExisitngApplication);
+        Assert.True(retrieved.UseExistingApplication);
     }
 
     [Fact]
@@ -1518,7 +1517,7 @@ public class EntraIdNet10IntegrationTests : IDisposable
     public void EntraIdSettings_DefaultUseExisitngApplication_IsFalse_Net10()
     {
         var settings = new EntraIdSettings();
-        Assert.False(settings.UseExisitngApplication);
+        Assert.False(settings.UseExistingApplication);
     }
 
     [Fact]

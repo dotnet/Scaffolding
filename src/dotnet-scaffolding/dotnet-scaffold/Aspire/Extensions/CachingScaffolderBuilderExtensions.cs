@@ -88,20 +88,28 @@ internal static class CachingScaffolderBuilderExtensions
         // Step 1: Add code changes to AppHost project for Redis
         builder = builder.WithStep<AddAspireCodeChangeStep>(config =>
         {
-            // Find the code modification config file for AppHost Redis
-            var codeModificationFilePath = AspireCodeModificationHelper.FindNet11CodeModificationConfigFile("Caching", "redis-apphost.json", System.Reflection.Assembly.GetExecutingAssembly());
-            if (!string.IsNullOrEmpty(codeModificationFilePath) &&
-                config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
+            if (config.Context.Properties.TryGetValue(nameof(CommandSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CommandSettings commandSettings)
             {
-                var step = config.Step;
-                step.CodeModifierConfigPath = codeModificationFilePath;
-                step.ProjectPath = commandSettings.AppHostProject;
-                step.CodeChangeOptions = [];
+                // Find the code modification config file for AppHost Redis
+                var codeModificationFilePath = AspireCodeModificationHelper.FindCodeModificationConfigFile("Caching", "redis-apphost.json", System.Reflection.Assembly.GetExecutingAssembly(), commandSettings.AppHostProject);
+                if (!string.IsNullOrEmpty(codeModificationFilePath))
+                {
+                    var step = config.Step;
+                    step.CodeModifierConfigPath = codeModificationFilePath;
+                    step.ProjectPath = commandSettings.AppHostProject;
+                    step.CodeChangeOptions = [];
+                }
+                else
+                {
+                    // Skip step if config file not found
+                    config.Step.SkipStep = true;
+                    return;
+                }
             }
             else
             {
-                // Skip step if config file or CommandSettings not found
+                // Skip step if CommandSettings not found
                 config.Step.SkipStep = true;
                 return;
             }
@@ -117,7 +125,7 @@ internal static class CachingScaffolderBuilderExtensions
             {
                 // Choose config file based on type
                 var configName = commandSettings.Type.Equals("redis-with-output-caching", StringComparison.OrdinalIgnoreCase) ? "redis-webapp-oc.json" : "redis-webapp.json";
-                var codeModificationFilePath = AspireCodeModificationHelper.FindNet11CodeModificationConfigFile("Caching", configName, System.Reflection.Assembly.GetExecutingAssembly());
+                var codeModificationFilePath = AspireCodeModificationHelper.FindCodeModificationConfigFile("Caching", configName, System.Reflection.Assembly.GetExecutingAssembly(), commandSettings.Project);
                 if (string.IsNullOrEmpty(codeModificationFilePath))
                 {
                     // Skip if config file not found

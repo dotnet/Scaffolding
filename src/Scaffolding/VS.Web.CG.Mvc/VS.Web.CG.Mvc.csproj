@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Code Generators for ASP.NET Core MVC. Contains code generators for MVC Controllers and Views.</Description>
-    <TargetFramework>$(BuildTfm)</TargetFramework>
+    <TargetFrameworks>$(BuildTfm)</TargetFrameworks>
     <AssemblyName>Microsoft.VisualStudio.Web.CodeGenerators.Mvc</AssemblyName>
     <RootNamespace>Microsoft.VisualStudio.Web.CodeGenerators.Mvc</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

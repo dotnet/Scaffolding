@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\Shared.props" />
   <PropertyGroup>
-    <TargetFramework>$(BuildTfm)</TargetFramework>
+    <TargetFrameworks>$(BuildTfm)</TargetFrameworks>
     <RuntimeIdentifier>win-arm64</RuntimeIdentifier>
     <IsPackable>false</IsPackable>
     <Nullable>disable</Nullable>

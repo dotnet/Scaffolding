@@ -32,7 +32,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             config.Context.Properties.TryGetValue(nameof(IdentityModel), out var blazorIdentityModelObj);
             config.Context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
             var blazorIdentitySettings = blazorSettingsObj as IdentitySettings;
-            string targetFrameworkFolder = "net11.0"; //TODO invoke TargetFrameworkHelpers.GetTargetFrameworkFolder(blazorIdentitySettings?.Project); when other tfm supported
+            string targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(blazorIdentitySettings?.Project);
             string? codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorIdentityChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
             var blazorIdentityModel = blazorIdentityModelObj as IdentityModel;

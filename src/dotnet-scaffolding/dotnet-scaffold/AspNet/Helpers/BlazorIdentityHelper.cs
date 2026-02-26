@@ -112,7 +112,7 @@ internal static class BlazorIdentityHelper
             if (_blazorIdentityTemplateTypes is null)
             {
                 var allTypes = Assembly.GetExecutingAssembly().GetTypes();
-                _blazorIdentityTemplateTypes = allTypes.Where(t => !string.IsNullOrEmpty(t.FullName) && t.FullName.Contains("AspNet.Templates.BlazorIdentity")).ToList();
+                _blazorIdentityTemplateTypes = allTypes.Where(t => !string.IsNullOrEmpty(t.FullName) && t.FullName.Contains("AspNet.Templates.net10.BlazorIdentity")).ToList();
             }
 
             return _blazorIdentityTemplateTypes;

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorIdentity.Shared;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorIdentity.Shared;
 
 public partial class PasskeySubmit : ITextTransformation
 {

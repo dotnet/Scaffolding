@@ -119,7 +119,7 @@ internal static class IdentityHelper
             if (_identityTemplateTypes is null)
             {
                 var allTypes = Assembly.GetExecutingAssembly().GetTypes();
-                _identityTemplateTypes = allTypes.Where(t => !string.IsNullOrEmpty(t.FullName) && t.FullName.Contains("AspNet.Templates.Identity")).ToList();
+                _identityTemplateTypes = allTypes.Where(t => !string.IsNullOrEmpty(t.FullName) && t.FullName.Contains("AspNet.Templates.net10.Identity")).ToList();
             }
 
             return _identityTemplateTypes;

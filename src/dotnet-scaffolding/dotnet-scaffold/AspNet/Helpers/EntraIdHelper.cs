@@ -78,7 +78,7 @@ internal static class EntraIdHelper
             if (_blazorEntraIdTemplateTypes is null)
             {
                 var allTypes = Assembly.GetExecutingAssembly().GetTypes();
-                _blazorEntraIdTemplateTypes = allTypes.Where(t => !string.IsNullOrEmpty(t.FullName) && t.FullName.Contains("AspNet.Templates.BlazorEntraId")).ToList();
+                _blazorEntraIdTemplateTypes = allTypes.Where(t => !string.IsNullOrEmpty(t.FullName) && t.FullName.Contains("AspNet.Templates.net10.BlazorEntraId")).ToList();
             }
 
             return _blazorEntraIdTemplateTypes;

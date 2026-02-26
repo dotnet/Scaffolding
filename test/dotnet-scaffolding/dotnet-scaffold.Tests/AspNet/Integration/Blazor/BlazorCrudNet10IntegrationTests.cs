@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
@@ -596,7 +597,7 @@ public class BlazorCrudNet10IntegrationTests : IDisposable
     public void GetTemplateType_WithCreateTemplate_ReturnsNonNull_Net10()
     {
         string templatePath = Path.Combine("templates", BlazorCrudHelper.CreateBlazorTemplate);
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10);
         Assert.NotNull(result);
     }
 
@@ -604,7 +605,7 @@ public class BlazorCrudNet10IntegrationTests : IDisposable
     public void GetTemplateType_WithDeleteTemplate_ReturnsNonNull_Net10()
     {
         string templatePath = Path.Combine("templates", BlazorCrudHelper.DeleteBlazorTemplate);
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10);
         Assert.NotNull(result);
     }
 
@@ -612,7 +613,7 @@ public class BlazorCrudNet10IntegrationTests : IDisposable
     public void GetTemplateType_WithDetailsTemplate_ReturnsNonNull_Net10()
     {
         string templatePath = Path.Combine("templates", BlazorCrudHelper.DetailsBlazorTemplate);
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10);
         Assert.NotNull(result);
     }
 
@@ -620,7 +621,7 @@ public class BlazorCrudNet10IntegrationTests : IDisposable
     public void GetTemplateType_WithEditTemplate_ReturnsNonNull_Net10()
     {
         string templatePath = Path.Combine("templates", BlazorCrudHelper.EditBlazorTemplate);
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10);
         Assert.NotNull(result);
     }
 
@@ -628,7 +629,7 @@ public class BlazorCrudNet10IntegrationTests : IDisposable
     public void GetTemplateType_WithIndexTemplate_ReturnsNonNull_Net10()
     {
         string templatePath = Path.Combine("templates", BlazorCrudHelper.IndexBlazorTemplate);
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10);
         Assert.NotNull(result);
     }
 
@@ -636,28 +637,28 @@ public class BlazorCrudNet10IntegrationTests : IDisposable
     public void GetTemplateType_WithNotFoundTemplate_ReturnsNonNull_Net10()
     {
         string templatePath = Path.Combine("templates", BlazorCrudHelper.NotFoundBlazorTemplate);
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10);
         Assert.NotNull(result);
     }
 
     [Fact]
     public void GetTemplateType_WithNull_ReturnsNull_Net10()
     {
-        Type? result = BlazorCrudHelper.GetTemplateType(null);
+        Type? result = BlazorCrudHelper.GetTemplateType(null, Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10);
         Assert.Null(result);
     }
 
     [Fact]
     public void GetTemplateType_WithEmpty_ReturnsNull_Net10()
     {
-        Type? result = BlazorCrudHelper.GetTemplateType(string.Empty);
+        Type? result = BlazorCrudHelper.GetTemplateType(string.Empty, Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10);
         Assert.Null(result);
     }
 
     [Fact]
     public void GetTemplateType_WithUnknownTemplate_ReturnsNull_Net10()
     {
-        Type? result = BlazorCrudHelper.GetTemplateType(Path.Combine("templates", "Unknown.tt"));
+        Type? result = BlazorCrudHelper.GetTemplateType(Path.Combine("templates", "Unknown.tt"), Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10);
         Assert.Null(result);
     }
 
@@ -1594,7 +1595,7 @@ public class BlazorCrudNet10IntegrationTests : IDisposable
 
         foreach (var template in templates)
         {
-            var result = BlazorCrudHelper.GetTemplateType(Path.Combine("any", template));
+            var result = BlazorCrudHelper.GetTemplateType(Path.Combine("any", template), Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net10);
             Assert.NotNull(result);
         }
     }

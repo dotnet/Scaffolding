@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.IO;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Xunit;
 
@@ -16,7 +17,7 @@ public class BlazorCrudHelperTests
         string templatePath = Path.Combine("templates", BlazorCrudHelper.CreateBlazorTemplate);
 
         // Act
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -30,7 +31,7 @@ public class BlazorCrudHelperTests
         string templatePath = Path.Combine("templates", BlazorCrudHelper.IndexBlazorTemplate);
 
         // Act
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -44,7 +45,7 @@ public class BlazorCrudHelperTests
         string templatePath = Path.Combine("templates", BlazorCrudHelper.DeleteBlazorTemplate);
 
         // Act
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -58,7 +59,7 @@ public class BlazorCrudHelperTests
         string templatePath = Path.Combine("templates", BlazorCrudHelper.EditBlazorTemplate);
 
         // Act
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -72,7 +73,7 @@ public class BlazorCrudHelperTests
         string templatePath = Path.Combine("templates", BlazorCrudHelper.DetailsBlazorTemplate);
 
         // Act
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -86,7 +87,7 @@ public class BlazorCrudHelperTests
         string templatePath = Path.Combine("templates", BlazorCrudHelper.NotFoundBlazorTemplate);
 
         // Act
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -97,7 +98,7 @@ public class BlazorCrudHelperTests
     public void GetTemplateType_WithNullPath_ReturnsNull()
     {
         // Act
-        Type? result = BlazorCrudHelper.GetTemplateType(null);
+        Type? result = BlazorCrudHelper.GetTemplateType(null, TargetFramework.Net10);
 
         // Assert
         Assert.Null(result);
@@ -107,7 +108,7 @@ public class BlazorCrudHelperTests
     public void GetTemplateType_WithEmptyPath_ReturnsNull()
     {
         // Act
-        Type? result = BlazorCrudHelper.GetTemplateType(string.Empty);
+        Type? result = BlazorCrudHelper.GetTemplateType(string.Empty, TargetFramework.Net10);
 
         // Assert
         Assert.Null(result);
@@ -120,7 +121,7 @@ public class BlazorCrudHelperTests
         string templatePath = Path.Combine("templates", "Unknown.tt");
 
         // Act
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath);
+        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.Null(result);

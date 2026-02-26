@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.IO;
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Roslyn;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
@@ -208,42 +208,47 @@ internal static class BlazorCrudHelper
     }";
 
     /// <summary>
-    /// Gets the template type for a given template path.
+    /// Gets the template type for a given template path and target framework.
     /// </summary>
     /// <param name="templatePath">The path to the template file.</param>
+    /// <param name="targetFramework">The target framework of the project.</param>
     /// <returns>The type of the template, or null if the template path is invalid.</returns>
-    internal static Type? GetTemplateType(string? templatePath)
+    internal static Type? GetTemplateType(string? templatePath, TargetFramework? targetFramework)
     {
         if (string.IsNullOrEmpty(templatePath))
         {
             return null;
         }
 
-        Type? templateType = null;
+        var fileName = Path.GetFileName(templatePath);
 
-        switch (Path.GetFileName(templatePath))
+        switch (targetFramework)
         {
-            case CreateBlazorTemplate:
-                templateType = typeof(Create);
-                break;
-            case IndexBlazorTemplate:
-                templateType = typeof(Templates.net10.BlazorCrud.Index);
-                break;
-            case DeleteBlazorTemplate:
-                templateType = typeof(Delete);
-                break;
-            case EditBlazorTemplate:
-                templateType = typeof(Edit);
-                break;
-            case DetailsBlazorTemplate:
-                templateType = typeof(Details);
-                break;
-            case NotFoundBlazorTemplate:
-                templateType = typeof(NotFound);
-                break;
+            case TargetFramework.Net9:
+                return fileName switch
+                {
+                    CreateBlazorTemplate => typeof(Templates.BlazorCrud.Create),
+                    IndexBlazorTemplate => typeof(Templates.BlazorCrud.Index),
+                    DeleteBlazorTemplate => typeof(Templates.BlazorCrud.Delete),
+                    EditBlazorTemplate => typeof(Templates.BlazorCrud.Edit),
+                    DetailsBlazorTemplate => typeof(Templates.BlazorCrud.Details),
+                    _ => null
+                };
+            case TargetFramework.Net8:
+            case TargetFramework.Net10:
+            case TargetFramework.Net11:
+            default:
+                return fileName switch
+                {
+                    CreateBlazorTemplate => typeof(Templates.net10.BlazorCrud.Create),
+                    IndexBlazorTemplate => typeof(Templates.net10.BlazorCrud.Index),
+                    DeleteBlazorTemplate => typeof(Templates.net10.BlazorCrud.Delete),
+                    EditBlazorTemplate => typeof(Templates.net10.BlazorCrud.Edit),
+                    DetailsBlazorTemplate => typeof(Templates.net10.BlazorCrud.Details),
+                    NotFoundBlazorTemplate => typeof(Templates.net10.BlazorCrud.NotFound),
+                    _ => null
+                };
         }
-
-        return templateType;
     }
 
     /// <summary>
@@ -380,7 +385,7 @@ internal static class BlazorCrudHelper
         foreach (var templatePath in allT4TemplatePaths)
         {
             var templateName = Path.GetFileNameWithoutExtension(templatePath);
-            var templateType = GetTemplateType(templatePath);
+            var templateType = GetTemplateType(templatePath, blazorCrudModel.ProjectInfo?.LowestSupportedTargetFramework);
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null)
             {
                 if (!IsValidTemplate(blazorCrudModel.PageType, templateName))

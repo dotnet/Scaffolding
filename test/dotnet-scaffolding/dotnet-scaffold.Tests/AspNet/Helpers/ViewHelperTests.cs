@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views;
@@ -174,7 +175,7 @@ public class ViewHelperTests
         string templatePath = Path.Combine("templates", ViewHelper.CreateTemplate);
 
         // Act
-        Type? result = ViewHelper.GetTemplateType(templatePath);
+        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -188,7 +189,7 @@ public class ViewHelperTests
         string templatePath = Path.Combine("templates", ViewHelper.IndexTemplate);
 
         // Act
-        Type? result = ViewHelper.GetTemplateType(templatePath);
+        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -202,7 +203,7 @@ public class ViewHelperTests
         string templatePath = Path.Combine("templates", ViewHelper.DeleteTemplate);
 
         // Act
-        Type? result = ViewHelper.GetTemplateType(templatePath);
+        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -216,7 +217,7 @@ public class ViewHelperTests
         string templatePath = Path.Combine("templates", ViewHelper.EditTemplate);
 
         // Act
-        Type? result = ViewHelper.GetTemplateType(templatePath);
+        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -230,7 +231,7 @@ public class ViewHelperTests
         string templatePath = Path.Combine("templates", ViewHelper.DetailsTemplate);
 
         // Act
-        Type? result = ViewHelper.GetTemplateType(templatePath);
+        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -241,7 +242,7 @@ public class ViewHelperTests
     public void GetTemplateType_WithNullPath_ReturnsNull()
     {
         // Act
-        Type? result = ViewHelper.GetTemplateType(null);
+        Type? result = ViewHelper.GetTemplateType(null, TargetFramework.Net10);
 
         // Assert
         Assert.Null(result);
@@ -251,7 +252,7 @@ public class ViewHelperTests
     public void GetTemplateType_WithEmptyPath_ReturnsNull()
     {
         // Act
-        Type? result = ViewHelper.GetTemplateType(string.Empty);
+        Type? result = ViewHelper.GetTemplateType(string.Empty, TargetFramework.Net10);
 
         // Assert
         Assert.Null(result);
@@ -264,7 +265,7 @@ public class ViewHelperTests
         string templatePath = Path.Combine("templates", "Unknown.tt");
 
         // Act
-        Type? result = ViewHelper.GetTemplateType(templatePath);
+        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.Null(result);

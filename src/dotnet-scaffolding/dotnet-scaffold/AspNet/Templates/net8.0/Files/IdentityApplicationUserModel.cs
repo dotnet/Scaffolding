@@ -4,7 +4,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.Files
 {
     internal class IdentityApplicationUserModel
     {
-        internal string UserClassNamespace { get; set; }
-        internal string UserClassName { get; set; }
+        internal required string UserClassNamespace { get; set; }
+        internal required string UserClassName { get; set; }
     }
 }

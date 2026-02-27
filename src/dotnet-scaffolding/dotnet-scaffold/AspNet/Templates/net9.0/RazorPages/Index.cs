@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.RazorPages
 {
     using System.Collections.Generic;
     using System.Text;

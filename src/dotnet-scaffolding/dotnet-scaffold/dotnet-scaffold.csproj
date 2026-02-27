@@ -12,13 +12,7 @@
     <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- Exclude net9.0 folder .cs files from compilation to avoid duplicate definitions -->
-    <Compile Remove="AspNet\Templates\net9.0\**\*.cs" />
-    <None Include="AspNet\Templates\net9.0\**\*.cs" />
-  </ItemGroup>
-
-  <!-- net10.0 and net11.0 templates are compiled (they have distinct net10/net11 namespaces) -->
+  <!-- net8.0, net9.0, net10.0, net11.0 template .cs files are all compiled (each uses a distinct namespace) -->
 
   <ItemGroup>
     <PackageReference Include="Spectre.Console.Flow" />
@@ -111,13 +105,13 @@
 
   <!-- Copy templates to output for runtime but exclude from publish/pack -->
   <ItemGroup>
-    <!-- Include net8.0 templates in build output -->
-    <None Include="AspNet\Templates\net8.0\**\*.*">
+    <!-- Include net8.0 templates in build output (exclude .cs since they are compiled) -->
+    <None Include="AspNet\Templates\net8.0\**\*.*" Exclude="AspNet\Templates\net8.0\**\*.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net8.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
-    <!-- Include net9.0 templates in build output -->
-    <None Include="AspNet\Templates\net9.0\**\*.*">
+    <!-- Include net9.0 templates in build output (exclude .cs since they are compiled) -->
+    <None Include="AspNet\Templates\net9.0\**\*.*" Exclude="AspNet\Templates\net9.0\**\*.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net9.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>

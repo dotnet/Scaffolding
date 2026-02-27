@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.MinimalApi;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.MinimalApi;
 
 public partial class MinimalApiEf : ITextTransformation
 {

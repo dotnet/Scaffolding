@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Files
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.Files
 {
     using System.Collections.Generic;
     using System.Text;

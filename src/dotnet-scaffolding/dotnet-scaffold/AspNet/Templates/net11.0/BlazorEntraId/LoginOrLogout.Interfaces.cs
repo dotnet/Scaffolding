@@ -3,7 +3,7 @@
 
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorEntraId
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorEntraId
 {
     public partial class LoginOrLogout: ITextTransformation
     {

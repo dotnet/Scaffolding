@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorIdentity.Pages.Manage
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorIdentity.Pages.Manage
 {
     using System.Collections.Generic;
     using System.Text;

@@ -19,6 +19,12 @@
   </ItemGroup>
   
   <ItemGroup>
+    <!-- Exclude net9.0 folder .cs files from compilation to avoid duplicate definitions -->
+    <Compile Remove="AspNet\Templates\net9.0\**\*.cs" />
+    <None Include="AspNet\Templates\net9.0\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Exclude net10.0 folder .cs files from compilation to avoid duplicate definitions -->
     <Compile Remove="AspNet\Templates\net10.0\**\*.cs" />
     <None Include="AspNet\Templates\net10.0\**\*.cs" />
@@ -125,13 +131,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net9.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
-    <!-- Include net10.0 templates in build output -->
-    <None Include="AspNet\Templates\net10.0\**\*.*">
+    <!-- Include net10.0 templates in build output (exclude .cs since they are compiled) -->
+    <None Include="AspNet\Templates\net10.0\**\*.*" Exclude="AspNet\Templates\net10.0\**\*.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net10.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
-    <!-- Include net11.0 templates in build output -->
-    <None Include="AspNet\Templates\net11.0\**\*.*">
+    <!-- Include net11.0 templates in build output (exclude .cs since they are compiled) -->
+    <None Include="AspNet\Templates\net11.0\**\*.*" Exclude="AspNet\Templates\net11.0\**\*.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net11.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>

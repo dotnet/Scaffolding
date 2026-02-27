@@ -1,5 +1,5 @@
-﻿<#@  template hostSpecific="true" linePragmas="false" #>
-<#@  parameter type="Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.General.IdentityApplicationUserModel" name="Model" #>
+<#@  template hostSpecific="true" linePragmas="false" #>
+<#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.Files.IdentityApplicationUserModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>

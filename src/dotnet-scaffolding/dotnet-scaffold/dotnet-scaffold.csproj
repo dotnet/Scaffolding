@@ -13,12 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Exclude net8.0 templates from compilation as they conflict with VS.Web.CG.Mvc -->
-    <Compile Remove="AspNet\Templates\net8.0\**\*.cs" />
-    <None Include="AspNet\Templates\net8.0\**\*.cs" Pack="false" />
-  </ItemGroup>
-  
-  <ItemGroup>
     <!-- Exclude net9.0 folder .cs files from compilation to avoid duplicate definitions -->
     <Compile Remove="AspNet\Templates\net9.0\**\*.cs" />
     <None Include="AspNet\Templates\net9.0\**\*.cs" />

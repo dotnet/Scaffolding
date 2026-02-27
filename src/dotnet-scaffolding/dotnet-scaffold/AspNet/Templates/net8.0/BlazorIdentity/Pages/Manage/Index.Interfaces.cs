@@ -1,6 +1,6 @@
-﻿using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
+using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
 
-namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.Pages.Manage
 {
     public partial class Index : ITextTransformation
     {

@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Newtonsoft.Json.Linq;
@@ -70,7 +71,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             // TODO: save comments somehow, only write to appsettings.json if changes are made
             if (modifiedAppSettings != null)
             {
-                System.IO.File.WriteAllText(_provisioningToolOptions.AppSettingsFilePath, modifiedAppSettings.ToString());
+                System.IO.File.WriteAllText(_provisioningToolOptions.AppSettingsFilePath, modifiedAppSettings.ToString(), new UTF8Encoding(false));
             }
         }
 

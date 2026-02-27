@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Identity.Pages.Account.Manage;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.Account.Manage;
 
 public partial class ExternalLoginsModel : ITextTransformation
 {

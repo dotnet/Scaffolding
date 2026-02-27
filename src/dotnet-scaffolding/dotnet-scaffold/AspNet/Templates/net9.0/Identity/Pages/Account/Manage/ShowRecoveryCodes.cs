@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.Identity.Pages.Account.Manage
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.Identity.Pages.Account.Manage
 {
     using System.Collections.Generic;
     using System.Text;

@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.BlazorIdentity.Shared
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorIdentity.Shared
 {
     using System.Collections.Generic;
     using System.Text;

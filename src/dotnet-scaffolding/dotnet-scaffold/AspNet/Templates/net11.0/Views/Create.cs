@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Views
 {
     using System.Collections.Generic;
     using System.Text;

@@ -1,6 +1,6 @@
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.RazorPages;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.RazorPages;
 
 public partial class Edit : ITextTransformation
 {

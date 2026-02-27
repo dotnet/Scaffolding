@@ -19,12 +19,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <!-- Exclude net9.0 folder .cs files from compilation to avoid duplicate definitions -->
-    <Compile Remove="AspNet\Templates\net9.0\**\*.cs" />
-    <None Include="AspNet\Templates\net9.0\**\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <!-- Exclude net10.0 folder .cs files from compilation to avoid duplicate definitions -->
     <Compile Remove="AspNet\Templates\net10.0\**\*.cs" />
     <None Include="AspNet\Templates\net10.0\**\*.cs" />

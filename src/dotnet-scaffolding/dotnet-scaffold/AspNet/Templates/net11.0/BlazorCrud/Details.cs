@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorCrud
 {
     using System.Collections.Generic;
     using System.Text;

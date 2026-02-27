@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorEntraId
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorEntraId
 {
     using System;
     

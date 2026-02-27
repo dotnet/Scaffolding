@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorIdentity.Pages.Manage;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorIdentity.Pages.Manage;
 
 public partial class DeletePersonalData : ITextTransformation
 {

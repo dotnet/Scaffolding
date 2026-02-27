@@ -39,25 +39,23 @@ internal static class RazorPagesHelper
 
         switch (targetFramework)
         {
+            case TargetFramework.Net8:
             case TargetFramework.Net9:
                 return fileName switch
                 {
-                    CreateTemplate => typeof(Templates.RazorPages.Create),
-                    CreateModelTemplate => typeof(Templates.RazorPages.CreateModel),
-                    IndexTemplate => typeof(Templates.RazorPages.Index),
-                    IndexModelTemplate => typeof(Templates.RazorPages.IndexModel),
-                    DeleteTemplate => typeof(Templates.RazorPages.Delete),
-                    DeleteModelTemplate => typeof(Templates.RazorPages.DeleteModel),
-                    EditTemplate => typeof(Templates.RazorPages.Edit),
-                    EditModelTemplate => typeof(Templates.RazorPages.EditModel),
-                    DetailsTemplate => typeof(Templates.RazorPages.Details),
-                    DetailsModelTemplate => typeof(Templates.RazorPages.DetailsModel),
+                    CreateTemplate => typeof(Templates.net9.RazorPages.Create),
+                    CreateModelTemplate => typeof(Templates.net9.RazorPages.CreateModel),
+                    IndexTemplate => typeof(Templates.net9.RazorPages.Index),
+                    IndexModelTemplate => typeof(Templates.net9.RazorPages.IndexModel),
+                    DeleteTemplate => typeof(Templates.net9.RazorPages.Delete),
+                    DeleteModelTemplate => typeof(Templates.net9.RazorPages.DeleteModel),
+                    EditTemplate => typeof(Templates.net9.RazorPages.Edit),
+                    EditModelTemplate => typeof(Templates.net9.RazorPages.EditModel),
+                    DetailsTemplate => typeof(Templates.net9.RazorPages.Details),
+                    DetailsModelTemplate => typeof(Templates.net9.RazorPages.DetailsModel),
                     _ => null
                 };
-            case TargetFramework.Net8:
             case TargetFramework.Net10:
-            case TargetFramework.Net11:
-            default:
                 return fileName switch
                 {
                     CreateTemplate => typeof(Templates.net10.RazorPages.Create),
@@ -70,6 +68,22 @@ internal static class RazorPagesHelper
                     EditModelTemplate => typeof(Templates.net10.RazorPages.EditModel),
                     DetailsTemplate => typeof(Templates.net10.RazorPages.Details),
                     DetailsModelTemplate => typeof(Templates.net10.RazorPages.DetailsModel),
+                    _ => null
+                };
+            case TargetFramework.Net11:
+            default:
+                return fileName switch
+                {
+                    CreateTemplate => typeof(Templates.net11.RazorPages.Create),
+                    CreateModelTemplate => typeof(Templates.net11.RazorPages.CreateModel),
+                    IndexTemplate => typeof(Templates.net11.RazorPages.Index),
+                    IndexModelTemplate => typeof(Templates.net11.RazorPages.IndexModel),
+                    DeleteTemplate => typeof(Templates.net11.RazorPages.Delete),
+                    DeleteModelTemplate => typeof(Templates.net11.RazorPages.DeleteModel),
+                    EditTemplate => typeof(Templates.net11.RazorPages.Edit),
+                    EditModelTemplate => typeof(Templates.net11.RazorPages.EditModel),
+                    DetailsTemplate => typeof(Templates.net11.RazorPages.Details),
+                    DetailsModelTemplate => typeof(Templates.net11.RazorPages.DetailsModel),
                     _ => null
                 };
         }

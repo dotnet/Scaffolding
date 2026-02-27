@@ -91,20 +91,18 @@ internal class ViewHelper
 
         switch (targetFramework)
         {
+            case TargetFramework.Net8:
             case TargetFramework.Net9:
                 return fileName switch
                 {
-                    CreateTemplate => typeof(Templates.Views.Create),
-                    IndexTemplate => typeof(Templates.Views.Index),
-                    DeleteTemplate => typeof(Templates.Views.Delete),
-                    EditTemplate => typeof(Templates.Views.Edit),
-                    DetailsTemplate => typeof(Templates.Views.Details),
+                    CreateTemplate => typeof(Templates.net9.Views.Create),
+                    IndexTemplate => typeof(Templates.net9.Views.Index),
+                    DeleteTemplate => typeof(Templates.net9.Views.Delete),
+                    EditTemplate => typeof(Templates.net9.Views.Edit),
+                    DetailsTemplate => typeof(Templates.net9.Views.Details),
                     _ => null
                 };
-            case TargetFramework.Net8:
             case TargetFramework.Net10:
-            case TargetFramework.Net11:
-            default:
                 return fileName switch
                 {
                     CreateTemplate => typeof(Templates.net10.Views.Create),
@@ -112,6 +110,17 @@ internal class ViewHelper
                     DeleteTemplate => typeof(Templates.net10.Views.Delete),
                     EditTemplate => typeof(Templates.net10.Views.Edit),
                     DetailsTemplate => typeof(Templates.net10.Views.Details),
+                    _ => null
+                };
+            case TargetFramework.Net11:
+            default:
+                return fileName switch
+                {
+                    CreateTemplate => typeof(Templates.net11.Views.Create),
+                    IndexTemplate => typeof(Templates.net11.Views.Index),
+                    DeleteTemplate => typeof(Templates.net11.Views.Delete),
+                    EditTemplate => typeof(Templates.net11.Views.Edit),
+                    DetailsTemplate => typeof(Templates.net11.Views.Details),
                     _ => null
                 };
         }

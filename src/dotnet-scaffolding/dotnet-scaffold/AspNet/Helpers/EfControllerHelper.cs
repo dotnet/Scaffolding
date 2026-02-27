@@ -11,6 +11,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 /// </summary>
 internal static class EfControllerHelper
 {
+    internal const string ApiEfControllerTemplate = "ApiEfController.tt";
+    internal const string MvcEfControllerTemplate = "MvcEfController.tt";
+
     /// <summary>
     /// Gets the text templating properties for the EF Controller based on the given model.
     /// </summary>
@@ -28,11 +31,11 @@ internal static class EfControllerHelper
         string? t4TemplatePath = null;
         if (efControllerModel.ControllerType.Equals("API", StringComparison.OrdinalIgnoreCase))
         {
-            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("ApiEfController.tt", StringComparison.OrdinalIgnoreCase));
+            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith(ApiEfControllerTemplate, StringComparison.OrdinalIgnoreCase));
         }
         else
         {
-            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MvcEfController.tt", StringComparison.OrdinalIgnoreCase));
+            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith(MvcEfControllerTemplate, StringComparison.OrdinalIgnoreCase));
         }
 
         var templateType = GetCrudControllerType(t4TemplatePath, efControllerModel.ProjectInfo.LowestSupportedTargetFramework);
@@ -70,21 +73,27 @@ internal static class EfControllerHelper
 
         switch (targetFramework)
         {
+            case TargetFramework.Net8:
             case TargetFramework.Net9:
                 return fileName switch
                 {
-                    "ApiEfController.tt" => typeof(Templates.EfController.ApiEfController),
-                    "MvcEfController.tt" => typeof(Templates.EfController.MvcEfController),
+                    ApiEfControllerTemplate => typeof(Templates.net9.EfController.ApiEfController),
+                    MvcEfControllerTemplate => typeof(Templates.net9.EfController.MvcEfController),
                     _ => null
                 };
-            case TargetFramework.Net8:
             case TargetFramework.Net10:
+                return fileName switch
+                {
+                    ApiEfControllerTemplate => typeof(Templates.net10.EfController.ApiEfController),
+                    MvcEfControllerTemplate => typeof(Templates.net10.EfController.MvcEfController),
+                    _ => null
+                };
             case TargetFramework.Net11:
             default:
                 return fileName switch
                 {
-                    "ApiEfController.tt" => typeof(Templates.net10.EfController.ApiEfController),
-                    "MvcEfController.tt" => typeof(Templates.net10.EfController.MvcEfController),
+                    ApiEfControllerTemplate => typeof(Templates.net11.EfController.ApiEfController),
+                    MvcEfControllerTemplate => typeof(Templates.net11.EfController.MvcEfController),
                     _ => null
                 };
         }

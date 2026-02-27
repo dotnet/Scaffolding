@@ -224,20 +224,27 @@ internal static class BlazorCrudHelper
 
         switch (targetFramework)
         {
+            case TargetFramework.Net8:
+                return fileName switch
+                {
+                    CreateBlazorTemplate => typeof(Templates.net8.BlazorCrud.Create),
+                    IndexBlazorTemplate => typeof(Templates.net8.BlazorCrud.Index),
+                    DeleteBlazorTemplate => typeof(Templates.net8.BlazorCrud.Delete),
+                    EditBlazorTemplate => typeof(Templates.net8.BlazorCrud.Edit),
+                    DetailsBlazorTemplate => typeof(Templates.net8.BlazorCrud.Details),
+                    _ => null
+                };
             case TargetFramework.Net9:
                 return fileName switch
                 {
-                    CreateBlazorTemplate => typeof(Templates.BlazorCrud.Create),
-                    IndexBlazorTemplate => typeof(Templates.BlazorCrud.Index),
-                    DeleteBlazorTemplate => typeof(Templates.BlazorCrud.Delete),
-                    EditBlazorTemplate => typeof(Templates.BlazorCrud.Edit),
-                    DetailsBlazorTemplate => typeof(Templates.BlazorCrud.Details),
+                    CreateBlazorTemplate => typeof(Templates.net9.BlazorCrud.Create),
+                    IndexBlazorTemplate => typeof(Templates.net9.BlazorCrud.Index),
+                    DeleteBlazorTemplate => typeof(Templates.net9.BlazorCrud.Delete),
+                    EditBlazorTemplate => typeof(Templates.net9.BlazorCrud.Edit),
+                    DetailsBlazorTemplate => typeof(Templates.net9.BlazorCrud.Details),
                     _ => null
                 };
-            case TargetFramework.Net8:
             case TargetFramework.Net10:
-            case TargetFramework.Net11:
-            default:
                 return fileName switch
                 {
                     CreateBlazorTemplate => typeof(Templates.net10.BlazorCrud.Create),
@@ -246,6 +253,18 @@ internal static class BlazorCrudHelper
                     EditBlazorTemplate => typeof(Templates.net10.BlazorCrud.Edit),
                     DetailsBlazorTemplate => typeof(Templates.net10.BlazorCrud.Details),
                     NotFoundBlazorTemplate => typeof(Templates.net10.BlazorCrud.NotFound),
+                    _ => null
+                };
+            case TargetFramework.Net11:
+            default:
+                return fileName switch
+                {
+                    CreateBlazorTemplate => typeof(Templates.net11.BlazorCrud.Create),
+                    IndexBlazorTemplate => typeof(Templates.net11.BlazorCrud.Index),
+                    DeleteBlazorTemplate => typeof(Templates.net11.BlazorCrud.Delete),
+                    EditBlazorTemplate => typeof(Templates.net11.BlazorCrud.Edit),
+                    DetailsBlazorTemplate => typeof(Templates.net11.BlazorCrud.Details),
+                    NotFoundBlazorTemplate => typeof(Templates.net11.BlazorCrud.NotFound),
                     _ => null
                 };
         }

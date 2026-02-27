@@ -11,6 +11,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 /// </summary>
 internal static class MinimalApiHelper
 {
+    internal const string MinimalApiTemplate = "MinimalApi.tt";
+    internal const string MinimalApiEfTemplate = "MinimalApiEf.tt";
+
     /// <summary>
     /// Gets the <see cref="TextTemplatingProperty"/> for the specified <see cref="MinimalApiModel"/>.
     /// </summary>
@@ -28,11 +31,11 @@ internal static class MinimalApiHelper
         string? t4TemplatePath = null;
         if (minimalApiModel.DbContextInfo.EfScenario)
         {
-            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MinimalApiEf.tt", StringComparison.OrdinalIgnoreCase));
+            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith(MinimalApiEfTemplate, StringComparison.OrdinalIgnoreCase));
         }
         else
         {
-            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MinimalApi.tt", StringComparison.OrdinalIgnoreCase));
+            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith(MinimalApiTemplate, StringComparison.OrdinalIgnoreCase));
         }
 
         var templateType = GetMinimalApiTemplateType(t4TemplatePath, minimalApiModel.ProjectInfo.LowestSupportedTargetFramework);
@@ -71,21 +74,27 @@ internal static class MinimalApiHelper
 
         switch (targetFramework)
         {
+            case TargetFramework.Net8:
             case TargetFramework.Net9:
                 return fileName switch
                 {
-                    "MinimalApi.tt" => typeof(Templates.MinimalApi.MinimalApi),
-                    "MinimalApiEf.tt" => typeof(Templates.MinimalApi.MinimalApiEf),
+                    MinimalApiTemplate => typeof(Templates.net9.MinimalApi.MinimalApi),
+                    MinimalApiEfTemplate => typeof(Templates.net9.MinimalApi.MinimalApiEf),
                     _ => null
                 };
-            case TargetFramework.Net8:
             case TargetFramework.Net10:
+                return fileName switch
+                {
+                    MinimalApiTemplate => typeof(Templates.net10.MinimalApi.MinimalApi),
+                    MinimalApiEfTemplate => typeof(Templates.net10.MinimalApi.MinimalApiEf),
+                    _ => null
+                };
             case TargetFramework.Net11:
             default:
                 return fileName switch
                 {
-                    "MinimalApi.tt" => typeof(Templates.net10.MinimalApi.MinimalApi),
-                    "MinimalApiEf.tt" => typeof(Templates.net10.MinimalApi.MinimalApiEf),
+                    MinimalApiTemplate => typeof(Templates.net11.MinimalApi.MinimalApi),
+                    MinimalApiEfTemplate => typeof(Templates.net11.MinimalApi.MinimalApiEf),
                     _ => null
                 };
         }

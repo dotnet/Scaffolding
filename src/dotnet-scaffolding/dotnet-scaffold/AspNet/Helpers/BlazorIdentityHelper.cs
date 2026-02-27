@@ -97,8 +97,10 @@ internal static class BlazorIdentityHelper
         var targetFramework = blazorIdentityModel.ProjectInfo.LowestSupportedTargetFramework;
         Type appUserType = targetFramework switch
         {
+            TargetFramework.Net8 => typeof(Templates.net8.Files.IdentityApplicationUser),
             TargetFramework.Net9 => typeof(Templates.net9.Files.ApplicationUser),
-            TargetFramework.Net8 or TargetFramework.Net10 or TargetFramework.Net11 or _ => typeof(Templates.net10.Files.ApplicationUser),
+            TargetFramework.Net10 => typeof(Templates.net10.Files.ApplicationUser),
+            TargetFramework.Net11 or _ => typeof(Templates.net11.Files.ApplicationUser),
         };
         return new TextTemplatingProperty()
         {
@@ -117,15 +119,63 @@ internal static class BlazorIdentityHelper
     {
         switch (targetFramework)
         {
+            case TargetFramework.Net8:
+                return _blazorIdentityTemplateTypesNet8;
             case TargetFramework.Net9:
                 return _blazorIdentityTemplateTypesNet9;
-            case TargetFramework.Net8:
             case TargetFramework.Net10:
+                return _blazorIdentityTemplateTypesNet10;
             case TargetFramework.Net11:
             default:
-                return _blazorIdentityTemplateTypesNet10;
+                return _blazorIdentityTemplateTypesNet11;
         }
     }
+
+    private static readonly IList<Type> _blazorIdentityTemplateTypesNet8 =
+    [
+        typeof(Templates.net8.BlazorIdentity.IdentityComponentsEndpointRouteBuilderExtensions),
+        typeof(Templates.net8.BlazorIdentity.IdentityNoOpEmailSender),
+        typeof(Templates.net8.BlazorIdentity.IdentityRedirectManager),
+        typeof(Templates.net8.BlazorIdentity.IdentityRevalidatingAuthenticationStateProvider),
+        typeof(Templates.net8.BlazorIdentity.IdentityUserAccessor),
+        typeof(Templates.net8.BlazorIdentity.Pages._Imports),
+        typeof(Templates.net8.BlazorIdentity.Pages.ConfirmEmail),
+        typeof(Templates.net8.BlazorIdentity.Pages.ConfirmEmailChange),
+        typeof(Templates.net8.BlazorIdentity.Pages.ExternalLogin),
+        typeof(Templates.net8.BlazorIdentity.Pages.ForgotPassword),
+        typeof(Templates.net8.BlazorIdentity.Pages.ForgotPasswordConfirmation),
+        typeof(Templates.net8.BlazorIdentity.Pages.InvalidPasswordReset),
+        typeof(Templates.net8.BlazorIdentity.Pages.InvalidUser),
+        typeof(Templates.net8.BlazorIdentity.Pages.Lockout),
+        typeof(Templates.net8.BlazorIdentity.Pages.Login),
+        typeof(Templates.net8.BlazorIdentity.Pages.LoginWith2fa),
+        typeof(Templates.net8.BlazorIdentity.Pages.LoginWithRecoveryCode),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage._Imports),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage.ChangePassword),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage.DeletePersonalData),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage.Disable2fa),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage.Email),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage.EnableAuthenticator),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage.ExternalLogins),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage.GenerateRecoveryCodes),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage.Index),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage.PersonalData),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage.ResetAuthenticator),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage.SetPassword),
+        typeof(Templates.net8.BlazorIdentity.Pages.Manage.TwoFactorAuthentication),
+        typeof(Templates.net8.BlazorIdentity.Pages.Register),
+        typeof(Templates.net8.BlazorIdentity.Pages.RegisterConfirmation),
+        typeof(Templates.net8.BlazorIdentity.Pages.ResendEmailConfirmation),
+        typeof(Templates.net8.BlazorIdentity.Pages.ResetPassword),
+        typeof(Templates.net8.BlazorIdentity.Pages.ResetPasswordConfirmation),
+        typeof(Templates.net8.BlazorIdentity.Shared.AccountLayout),
+        typeof(Templates.net8.BlazorIdentity.Shared.ExternalLoginPicker),
+        typeof(Templates.net8.BlazorIdentity.Shared.ManageLayout),
+        typeof(Templates.net8.BlazorIdentity.Shared.ManageNavMenu),
+        typeof(Templates.net8.BlazorIdentity.Shared.RedirectToLogin),
+        typeof(Templates.net8.BlazorIdentity.Shared.ShowRecoveryCodes),
+        typeof(Templates.net8.BlazorIdentity.Shared.StatusMessage),
+    ];
 
     private static readonly IList<Type> _blazorIdentityTemplateTypesNet9 =
     [
@@ -222,5 +272,55 @@ internal static class BlazorIdentityHelper
         typeof(Templates.net10.BlazorIdentity.Shared.RedirectToLogin),
         typeof(Templates.net10.BlazorIdentity.Shared.ShowRecoveryCodes),
         typeof(Templates.net10.BlazorIdentity.Shared.StatusMessage),
+    ];
+
+    private static readonly IList<Type> _blazorIdentityTemplateTypesNet11 =
+    [
+        typeof(Templates.net11.BlazorIdentity.IdentityComponentsEndpointRouteBuilderExtensions),
+        typeof(Templates.net11.BlazorIdentity.IdentityNoOpEmailSender),
+        typeof(Templates.net11.BlazorIdentity.IdentityRedirectManager),
+        typeof(Templates.net11.BlazorIdentity.IdentityRevalidatingAuthenticationStateProvider),
+        typeof(Templates.net11.BlazorIdentity.PasskeyInputModel),
+        typeof(Templates.net11.BlazorIdentity.PasskeyOperation),
+        typeof(Templates.net11.BlazorIdentity.Pages._Imports),
+        typeof(Templates.net11.BlazorIdentity.Pages.AccessDenied),
+        typeof(Templates.net11.BlazorIdentity.Pages.ConfirmEmail),
+        typeof(Templates.net11.BlazorIdentity.Pages.ConfirmEmailChange),
+        typeof(Templates.net11.BlazorIdentity.Pages.ExternalLogin),
+        typeof(Templates.net11.BlazorIdentity.Pages.ForgotPassword),
+        typeof(Templates.net11.BlazorIdentity.Pages.ForgotPasswordConfirmation),
+        typeof(Templates.net11.BlazorIdentity.Pages.InvalidPasswordReset),
+        typeof(Templates.net11.BlazorIdentity.Pages.InvalidUser),
+        typeof(Templates.net11.BlazorIdentity.Pages.Lockout),
+        typeof(Templates.net11.BlazorIdentity.Pages.Login),
+        typeof(Templates.net11.BlazorIdentity.Pages.LoginWith2fa),
+        typeof(Templates.net11.BlazorIdentity.Pages.LoginWithRecoveryCode),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage._Imports),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.ChangePassword),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.DeletePersonalData),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.Disable2fa),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.Email),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.EnableAuthenticator),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.ExternalLogins),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.GenerateRecoveryCodes),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.Index),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.Passkeys),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.PersonalData),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.RenamePasskey),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.ResetAuthenticator),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.SetPassword),
+        typeof(Templates.net11.BlazorIdentity.Pages.Manage.TwoFactorAuthentication),
+        typeof(Templates.net11.BlazorIdentity.Pages.Register),
+        typeof(Templates.net11.BlazorIdentity.Pages.RegisterConfirmation),
+        typeof(Templates.net11.BlazorIdentity.Pages.ResendEmailConfirmation),
+        typeof(Templates.net11.BlazorIdentity.Pages.ResetPassword),
+        typeof(Templates.net11.BlazorIdentity.Pages.ResetPasswordConfirmation),
+        typeof(Templates.net11.BlazorIdentity.Shared.ExternalLoginPicker),
+        typeof(Templates.net11.BlazorIdentity.Shared.ManageLayout),
+        typeof(Templates.net11.BlazorIdentity.Shared.ManageNavMenu),
+        typeof(Templates.net11.BlazorIdentity.Shared.PasskeySubmit),
+        typeof(Templates.net11.BlazorIdentity.Shared.RedirectToLogin),
+        typeof(Templates.net11.BlazorIdentity.Shared.ShowRecoveryCodes),
+        typeof(Templates.net11.BlazorIdentity.Shared.StatusMessage),
     ];
 }

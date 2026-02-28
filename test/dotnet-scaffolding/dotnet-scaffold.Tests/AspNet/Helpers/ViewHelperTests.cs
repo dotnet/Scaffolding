@@ -9,7 +9,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Views;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
@@ -74,7 +74,7 @@ public class ViewHelperTests
         Assert.NotNull(result);
         TextTemplatingProperty? property = result.FirstOrDefault();
         Assert.NotNull(property);
-        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views.Index), property.TemplateType);
+        Assert.Equal(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Views.Index), property.TemplateType);
     }
 
     [Fact]
@@ -175,7 +175,7 @@ public class ViewHelperTests
         string templatePath = Path.Combine("templates", ViewHelper.CreateTemplate);
 
         // Act
-        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net10);
+        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net11);
 
         // Assert
         Assert.NotNull(result);
@@ -203,7 +203,7 @@ public class ViewHelperTests
         string templatePath = Path.Combine("templates", ViewHelper.DeleteTemplate);
 
         // Act
-        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net10);
+        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net11);
 
         // Assert
         Assert.NotNull(result);
@@ -217,7 +217,7 @@ public class ViewHelperTests
         string templatePath = Path.Combine("templates", ViewHelper.EditTemplate);
 
         // Act
-        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net10);
+        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net11);
 
         // Assert
         Assert.NotNull(result);
@@ -231,7 +231,7 @@ public class ViewHelperTests
         string templatePath = Path.Combine("templates", ViewHelper.DetailsTemplate);
 
         // Act
-        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net10);
+        Type? result = ViewHelper.GetTemplateType(templatePath, TargetFramework.Net11);
 
         // Assert
         Assert.NotNull(result);

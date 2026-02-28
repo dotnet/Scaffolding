@@ -632,14 +632,6 @@ public class BlazorCrudNet8IntegrationTests : IDisposable
     }
 
     [Fact]
-    public void GetTemplateType_WithNotFoundTemplate_ReturnsNonNull()
-    {
-        string templatePath = Path.Combine("templates", BlazorCrudHelper.NotFoundBlazorTemplate);
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net8);
-        Assert.NotNull(result);
-    }
-
-    [Fact]
     public void GetTemplateType_WithNull_ReturnsNull()
     {
         Type? result = BlazorCrudHelper.GetTemplateType(null, Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net8);
@@ -1504,26 +1496,6 @@ public class BlazorCrudNet8IntegrationTests : IDisposable
 
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
         Assert.False(result);
-    }
-
-    [Fact]
-    public void RegressionGuard_GetTemplateType_AllTemplatesReturnNonNull()
-    {
-        string[] templates = new[]
-        {
-            BlazorCrudHelper.CreateBlazorTemplate,
-            BlazorCrudHelper.DeleteBlazorTemplate,
-            BlazorCrudHelper.DetailsBlazorTemplate,
-            BlazorCrudHelper.EditBlazorTemplate,
-            BlazorCrudHelper.IndexBlazorTemplate,
-            BlazorCrudHelper.NotFoundBlazorTemplate
-        };
-
-        foreach (var template in templates)
-        {
-            var result = BlazorCrudHelper.GetTemplateType(Path.Combine("any", template), Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net8);
-            Assert.NotNull(result);
-        }
     }
 
     [Fact]

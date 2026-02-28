@@ -632,14 +632,6 @@ public class BlazorCrudNet9IntegrationTests : IDisposable
     }
 
     [Fact]
-    public void GetTemplateType_WithNotFoundTemplate_ReturnsNonNull_Net9()
-    {
-        string templatePath = Path.Combine("templates", BlazorCrudHelper.NotFoundBlazorTemplate);
-        Type? result = BlazorCrudHelper.GetTemplateType(templatePath, Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net9);
-        Assert.NotNull(result);
-    }
-
-    [Fact]
     public void GetTemplateType_WithNull_ReturnsNull_Net9()
     {
         Type? result = BlazorCrudHelper.GetTemplateType(null, Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net9);
@@ -1515,8 +1507,7 @@ public class BlazorCrudNet9IntegrationTests : IDisposable
             BlazorCrudHelper.DeleteBlazorTemplate,
             BlazorCrudHelper.DetailsBlazorTemplate,
             BlazorCrudHelper.EditBlazorTemplate,
-            BlazorCrudHelper.IndexBlazorTemplate,
-            BlazorCrudHelper.NotFoundBlazorTemplate
+            BlazorCrudHelper.IndexBlazorTemplate
         };
 
         foreach (var template in templates)

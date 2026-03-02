@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 
@@ -10,6 +11,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 /// </summary>
 internal static class EfControllerHelper
 {
+    internal const string ApiEfControllerTemplate = "ApiEfController.tt";
+    internal const string MvcEfControllerTemplate = "MvcEfController.tt";
+
     /// <summary>
     /// Gets the text templating properties for the EF Controller based on the given model.
     /// </summary>
@@ -27,14 +31,14 @@ internal static class EfControllerHelper
         string? t4TemplatePath = null;
         if (efControllerModel.ControllerType.Equals("API", StringComparison.OrdinalIgnoreCase))
         {
-            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("ApiEfController.tt", StringComparison.OrdinalIgnoreCase));
+            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith(ApiEfControllerTemplate, StringComparison.OrdinalIgnoreCase));
         }
         else
         {
-            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MvcEfController.tt", StringComparison.OrdinalIgnoreCase));
+            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith(MvcEfControllerTemplate, StringComparison.OrdinalIgnoreCase));
         }
 
-        var templateType = GetCrudControllerType(t4TemplatePath);
+        var templateType = GetCrudControllerType(t4TemplatePath, efControllerModel.ProjectInfo.LowestSupportedTargetFramework);
 
         if (string.IsNullOrEmpty(t4TemplatePath) ||
             templateType is null)
@@ -56,24 +60,42 @@ internal static class EfControllerHelper
     /// Gets the CRUD controller type associated with the specified template path.
     /// </summary>
     /// <param name="templatePath">The path of the template file.</param>
+    /// <param name="targetFramework">The target framework of the project.</param>
     /// <returns>The <see cref="Type"/> representing the CRUD controller, or null if the template path is null or empty.</returns>
-    private static Type? GetCrudControllerType(string? templatePath)
+    private static Type? GetCrudControllerType(string? templatePath, TargetFramework? targetFramework)
     {
         if (string.IsNullOrEmpty(templatePath))
         {
             return null;
         }
 
-        switch (Path.GetFileName(templatePath))
-        {
-            case "ApiEfController.tt":
-                return typeof(Templates.net10.EfController.ApiEfController);
-            case "MvcEfController.tt":
-                return typeof(Templates.net10.EfController.MvcEfController);
-            default:
-                break;
-        }
+        var fileName = Path.GetFileName(templatePath);
 
-        return null;
+        switch (targetFramework)
+        {
+            case TargetFramework.Net8:
+            case TargetFramework.Net9:
+                return fileName switch
+                {
+                    ApiEfControllerTemplate => typeof(Templates.net9.EfController.ApiEfController),
+                    MvcEfControllerTemplate => typeof(Templates.net9.EfController.MvcEfController),
+                    _ => null
+                };
+            case TargetFramework.Net10:
+                return fileName switch
+                {
+                    ApiEfControllerTemplate => typeof(Templates.net10.EfController.ApiEfController),
+                    MvcEfControllerTemplate => typeof(Templates.net10.EfController.MvcEfController),
+                    _ => null
+                };
+            case TargetFramework.Net11:
+            default:
+                return fileName switch
+                {
+                    ApiEfControllerTemplate => typeof(Templates.net11.EfController.ApiEfController),
+                    MvcEfControllerTemplate => typeof(Templates.net11.EfController.MvcEfController),
+                    _ => null
+                };
+        }
     }
 }

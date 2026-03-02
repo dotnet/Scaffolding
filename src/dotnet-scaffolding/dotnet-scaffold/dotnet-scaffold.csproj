@@ -12,8 +12,6 @@
     <NoWarn>$(NoWarn);8002</NoWarn>
   </PropertyGroup>
 
-  <!-- net8.0, net9.0, net10.0, net11.0 template .cs files are all compiled (each uses a distinct namespace) -->
-
   <ItemGroup>
     <PackageReference Include="Spectre.Console.Flow" />
     <PackageReference Include="Spectre.Console" />

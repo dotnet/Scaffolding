@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.IO;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Xunit;
 
@@ -16,7 +17,7 @@ public class RazorPagesHelperTests
         string templatePath = Path.Combine("templates", RazorPagesHelper.CreateTemplate);
 
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(templatePath);
+        Type? result = RazorPagesHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -30,7 +31,7 @@ public class RazorPagesHelperTests
         string templatePath = Path.Combine("templates", RazorPagesHelper.CreateModelTemplate);
 
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(templatePath);
+        Type? result = RazorPagesHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -44,7 +45,7 @@ public class RazorPagesHelperTests
         string templatePath = Path.Combine("templates", RazorPagesHelper.IndexTemplate);
 
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(templatePath);
+        Type? result = RazorPagesHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -58,7 +59,7 @@ public class RazorPagesHelperTests
         string templatePath = Path.Combine("templates", RazorPagesHelper.IndexModelTemplate);
 
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(templatePath);
+        Type? result = RazorPagesHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -72,7 +73,7 @@ public class RazorPagesHelperTests
         string templatePath = Path.Combine("templates", RazorPagesHelper.DeleteTemplate);
 
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(templatePath);
+        Type? result = RazorPagesHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -86,7 +87,7 @@ public class RazorPagesHelperTests
         string templatePath = Path.Combine("templates", RazorPagesHelper.DeleteModelTemplate);
 
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(templatePath);
+        Type? result = RazorPagesHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -100,7 +101,7 @@ public class RazorPagesHelperTests
         string templatePath = Path.Combine("templates", RazorPagesHelper.EditTemplate);
 
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(templatePath);
+        Type? result = RazorPagesHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -114,7 +115,7 @@ public class RazorPagesHelperTests
         string templatePath = Path.Combine("templates", RazorPagesHelper.EditModelTemplate);
 
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(templatePath);
+        Type? result = RazorPagesHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -128,7 +129,7 @@ public class RazorPagesHelperTests
         string templatePath = Path.Combine("templates", RazorPagesHelper.DetailsTemplate);
 
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(templatePath);
+        Type? result = RazorPagesHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -142,7 +143,7 @@ public class RazorPagesHelperTests
         string templatePath = Path.Combine("templates", RazorPagesHelper.DetailsModelTemplate);
 
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(templatePath);
+        Type? result = RazorPagesHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.NotNull(result);
@@ -153,7 +154,7 @@ public class RazorPagesHelperTests
     public void GetTemplateType_WithNullPath_ReturnsNull()
     {
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(null);
+        Type? result = RazorPagesHelper.GetTemplateType(null, TargetFramework.Net10);
 
         // Assert
         Assert.Null(result);
@@ -163,7 +164,7 @@ public class RazorPagesHelperTests
     public void GetTemplateType_WithEmptyPath_ReturnsNull()
     {
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(string.Empty);
+        Type? result = RazorPagesHelper.GetTemplateType(string.Empty, TargetFramework.Net10);
 
         // Assert
         Assert.Null(result);
@@ -176,7 +177,7 @@ public class RazorPagesHelperTests
         string templatePath = Path.Combine("templates", "Unknown.tt");
 
         // Act
-        Type? result = RazorPagesHelper.GetTemplateType(templatePath);
+        Type? result = RazorPagesHelper.GetTemplateType(templatePath, TargetFramework.Net10);
 
         // Assert
         Assert.Null(result);

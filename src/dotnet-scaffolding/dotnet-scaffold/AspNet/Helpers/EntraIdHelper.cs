@@ -1,6 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using System.Reflection;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
@@ -21,11 +21,12 @@ internal static class EntraIdHelper
     internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, EntraIdModel entraIdModel)
     {
         var textTemplatingProperties = new List<TextTemplatingProperty>();
+        var templateTypes = GetBlazorEntraIdTemplateTypes(entraIdModel.ProjectInfo?.LowestSupportedTargetFramework);
         foreach (var templatePath in allT4TemplatePaths)
         {
             var templateFullName = GetFormattedRelativeIdentityFile(templatePath);
             var typeName = StringUtil.GetTypeNameFromNamespace(templateFullName);
-            var templateType = BlazorEntraIdTemplateTypes.FirstOrDefault(x =>
+            var templateType = templateTypes.FirstOrDefault(x =>
                 !string.IsNullOrEmpty(x.FullName) &&
                 x.FullName.Contains(templateFullName) &&
                 x.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase));
@@ -70,18 +71,24 @@ internal static class EntraIdHelper
         return string.Empty;
     }
 
-    private static IList<Type>? _blazorEntraIdTemplateTypes;
-    private static IList<Type> BlazorEntraIdTemplateTypes
+    private static IList<Type> GetBlazorEntraIdTemplateTypes(TargetFramework? targetFramework)
     {
-        get
+        return targetFramework switch
         {
-            if (_blazorEntraIdTemplateTypes is null)
-            {
-                var allTypes = Assembly.GetExecutingAssembly().GetTypes();
-                _blazorEntraIdTemplateTypes = allTypes.Where(t => !string.IsNullOrEmpty(t.FullName) && t.FullName.Contains("AspNet.Templates.net10.BlazorEntraId")).ToList();
-            }
-
-            return _blazorEntraIdTemplateTypes;
-        }
+            TargetFramework.Net10 => _blazorEntraIdTemplateTypesNet10,
+            TargetFramework.Net11 or _ => _blazorEntraIdTemplateTypesNet11,
+        };
     }
+
+    private static readonly IList<Type> _blazorEntraIdTemplateTypesNet10 =
+    [
+        typeof(Templates.net10.BlazorEntraId.LoginLogoutEndpointRouteBuilderExtensions),
+        typeof(Templates.net10.BlazorEntraId.LoginOrLogout),
+    ];
+
+    private static readonly IList<Type> _blazorEntraIdTemplateTypesNet11 =
+    [
+        typeof(Templates.net11.BlazorEntraId.LoginLogoutEndpointRouteBuilderExtensions),
+        typeof(Templates.net11.BlazorEntraId.LoginOrLogout),
+    ];
 }

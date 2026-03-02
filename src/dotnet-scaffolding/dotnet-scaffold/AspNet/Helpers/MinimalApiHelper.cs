@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 
@@ -10,6 +11,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 /// </summary>
 internal static class MinimalApiHelper
 {
+    internal const string MinimalApiTemplate = "MinimalApi.tt";
+    internal const string MinimalApiEfTemplate = "MinimalApiEf.tt";
+
     /// <summary>
     /// Gets the <see cref="TextTemplatingProperty"/> for the specified <see cref="MinimalApiModel"/>.
     /// </summary>
@@ -27,14 +31,14 @@ internal static class MinimalApiHelper
         string? t4TemplatePath = null;
         if (minimalApiModel.DbContextInfo.EfScenario)
         {
-            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MinimalApiEf.tt", StringComparison.OrdinalIgnoreCase));
+            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith(MinimalApiEfTemplate, StringComparison.OrdinalIgnoreCase));
         }
         else
         {
-            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith("MinimalApi.tt", StringComparison.OrdinalIgnoreCase));
+            t4TemplatePath = allT4Templates.FirstOrDefault(x => x.EndsWith(MinimalApiTemplate, StringComparison.OrdinalIgnoreCase));
         }
 
-        var templateType = GetMinimalApiTemplateType(t4TemplatePath);
+        var templateType = GetMinimalApiTemplateType(t4TemplatePath, minimalApiModel.ProjectInfo.LowestSupportedTargetFramework);
 
         if (string.IsNullOrEmpty(t4TemplatePath) ||
             string.IsNullOrEmpty(minimalApiModel.EndpointsPath) ||
@@ -57,24 +61,42 @@ internal static class MinimalApiHelper
     /// Gets the template type for the specified template path.
     /// </summary>
     /// <param name="templatePath">The path of the template for which to get the type.</param>
+    /// <param name="targetFramework">The target framework of the project.</param>
     /// <returns>The template type, or null if the template path is invalid.</returns>
-    private static Type? GetMinimalApiTemplateType(string? templatePath)
+    private static Type? GetMinimalApiTemplateType(string? templatePath, TargetFramework? targetFramework)
     {
         if (string.IsNullOrEmpty(templatePath))
         {
             return null;
         }
 
-        switch (Path.GetFileName(templatePath))
-        {
-            case "MinimalApi.tt":
-                return typeof(Templates.net10.MinimalApi.MinimalApi);
-            case "MinimalApiEf.tt":
-                return typeof(Templates.net10.MinimalApi.MinimalApiEf);
-            default:
-                break;
-        }
+        var fileName = Path.GetFileName(templatePath);
 
-        return null;
+        switch (targetFramework)
+        {
+            case TargetFramework.Net8:
+            case TargetFramework.Net9:
+                return fileName switch
+                {
+                    MinimalApiTemplate => typeof(Templates.net9.MinimalApi.MinimalApi),
+                    MinimalApiEfTemplate => typeof(Templates.net9.MinimalApi.MinimalApiEf),
+                    _ => null
+                };
+            case TargetFramework.Net10:
+                return fileName switch
+                {
+                    MinimalApiTemplate => typeof(Templates.net10.MinimalApi.MinimalApi),
+                    MinimalApiEfTemplate => typeof(Templates.net10.MinimalApi.MinimalApiEf),
+                    _ => null
+                };
+            case TargetFramework.Net11:
+            default:
+                return fileName switch
+                {
+                    MinimalApiTemplate => typeof(Templates.net11.MinimalApi.MinimalApi),
+                    MinimalApiEfTemplate => typeof(Templates.net11.MinimalApi.MinimalApiEf),
+                    _ => null
+                };
+        }
     }
 }

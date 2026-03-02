@@ -1,9 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views;
-
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 /// <summary>
@@ -50,7 +49,7 @@ internal class ViewHelper
             foreach (var templatePath in allT4TemplatePaths)
             {
                 var templateName = Path.GetFileNameWithoutExtension(templatePath);
-                var templateType = GetTemplateType(templatePath);
+                var templateType = GetTemplateType(templatePath, viewModel.ProjectInfo.LowestSupportedTargetFramework);
                 if (!string.IsNullOrEmpty(templatePath) && templateType is not null)
                 {
                     if (!IsValidTemplate(viewModel.PageType, templateName))
@@ -79,36 +78,52 @@ internal class ViewHelper
     /// Gets the template type for the specified template path.
     /// </summary>
     /// <param name="templatePath">The template path.</param>
+    /// <param name="targetFramework">The target framework of the project.</param>
     /// <returns>The <see cref="Type"/> of the template, or null if the templatePath is null or empty.</returns>
-    internal static Type? GetTemplateType(string? templatePath)
+    internal static Type? GetTemplateType(string? templatePath, TargetFramework? targetFramework)
     {
         if (string.IsNullOrEmpty(templatePath))
         {
             return null;
         }
 
-        Type? templateType = null;
+        var fileName = Path.GetFileName(templatePath);
 
-        switch (Path.GetFileName(templatePath))
+        switch (targetFramework)
         {
-            case CreateTemplate:
-                templateType = typeof(Create);
-                break;
-            case IndexTemplate:
-                templateType = typeof(Templates.net10.Views.Index);
-                break;
-            case DeleteTemplate:
-                templateType = typeof(Delete);
-                break;
-            case EditTemplate:
-                templateType = typeof(Edit);
-                break;
-            case DetailsTemplate:
-                templateType = typeof(Details);
-                break;
+            case TargetFramework.Net8:
+            case TargetFramework.Net9:
+                return fileName switch
+                {
+                    CreateTemplate => typeof(Templates.net9.Views.Create),
+                    IndexTemplate => typeof(Templates.net9.Views.Index),
+                    DeleteTemplate => typeof(Templates.net9.Views.Delete),
+                    EditTemplate => typeof(Templates.net9.Views.Edit),
+                    DetailsTemplate => typeof(Templates.net9.Views.Details),
+                    _ => null
+                };
+            case TargetFramework.Net10:
+                return fileName switch
+                {
+                    CreateTemplate => typeof(Templates.net10.Views.Create),
+                    IndexTemplate => typeof(Templates.net10.Views.Index),
+                    DeleteTemplate => typeof(Templates.net10.Views.Delete),
+                    EditTemplate => typeof(Templates.net10.Views.Edit),
+                    DetailsTemplate => typeof(Templates.net10.Views.Details),
+                    _ => null
+                };
+            case TargetFramework.Net11:
+            default:
+                return fileName switch
+                {
+                    CreateTemplate => typeof(Templates.net11.Views.Create),
+                    IndexTemplate => typeof(Templates.net11.Views.Index),
+                    DeleteTemplate => typeof(Templates.net11.Views.Delete),
+                    EditTemplate => typeof(Templates.net11.Views.Edit),
+                    DetailsTemplate => typeof(Templates.net11.Views.Details),
+                    _ => null
+                };
         }
-
-        return templateType;
     }
 
     /// <summary>

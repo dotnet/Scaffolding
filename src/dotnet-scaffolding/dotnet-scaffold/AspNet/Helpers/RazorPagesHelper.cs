@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 
@@ -25,50 +26,67 @@ internal static class RazorPagesHelper
     /// Gets the template type for a given template path.
     /// </summary>
     /// <param name="templatePath">The template path.</param>
+    /// <param name="targetFramework">The target framework of the project.</param>
     /// <returns>The type of the template, or null if the template path is null or empty.</returns>
-    internal static Type? GetTemplateType(string? templatePath)
+    internal static Type? GetTemplateType(string? templatePath, TargetFramework? targetFramework)
     {
         if (string.IsNullOrEmpty(templatePath))
         {
             return null;
         }
 
-        Type? templateType = null;
-        switch (Path.GetFileName(templatePath))
-        {
-            case CreateTemplate:
-                templateType = typeof(Templates.net10.RazorPages.Create);
-                break;
-            case CreateModelTemplate:
-                templateType = typeof(Templates.net10.RazorPages.CreateModel);
-                break;
-            case IndexTemplate:
-                templateType = typeof(Templates.net10.RazorPages.Index);
-                break;
-            case IndexModelTemplate:
-                templateType = typeof(Templates.net10.RazorPages.IndexModel);
-                break;
-            case DeleteTemplate:
-                templateType = typeof(Templates.net10.RazorPages.Delete);
-                break;
-            case DeleteModelTemplate:
-                templateType = typeof(Templates.net10.RazorPages.DeleteModel);
-                break;
-            case EditTemplate:
-                templateType = typeof(Templates.net10.RazorPages.Edit);
-                break;
-            case EditModelTemplate:
-                templateType = typeof(Templates.net10.RazorPages.EditModel);
-                break;
-            case DetailsTemplate:
-                templateType = typeof(Templates.net10.RazorPages.Details);
-                break;
-            case DetailsModelTemplate:
-                templateType = typeof(Templates.net10.RazorPages.DetailsModel);
-                break;
-        }
+        var fileName = Path.GetFileName(templatePath);
 
-        return templateType;
+        switch (targetFramework)
+        {
+            case TargetFramework.Net8:
+            case TargetFramework.Net9:
+                return fileName switch
+                {
+                    CreateTemplate => typeof(Templates.net9.RazorPages.Create),
+                    CreateModelTemplate => typeof(Templates.net9.RazorPages.CreateModel),
+                    IndexTemplate => typeof(Templates.net9.RazorPages.Index),
+                    IndexModelTemplate => typeof(Templates.net9.RazorPages.IndexModel),
+                    DeleteTemplate => typeof(Templates.net9.RazorPages.Delete),
+                    DeleteModelTemplate => typeof(Templates.net9.RazorPages.DeleteModel),
+                    EditTemplate => typeof(Templates.net9.RazorPages.Edit),
+                    EditModelTemplate => typeof(Templates.net9.RazorPages.EditModel),
+                    DetailsTemplate => typeof(Templates.net9.RazorPages.Details),
+                    DetailsModelTemplate => typeof(Templates.net9.RazorPages.DetailsModel),
+                    _ => null
+                };
+            case TargetFramework.Net10:
+                return fileName switch
+                {
+                    CreateTemplate => typeof(Templates.net10.RazorPages.Create),
+                    CreateModelTemplate => typeof(Templates.net10.RazorPages.CreateModel),
+                    IndexTemplate => typeof(Templates.net10.RazorPages.Index),
+                    IndexModelTemplate => typeof(Templates.net10.RazorPages.IndexModel),
+                    DeleteTemplate => typeof(Templates.net10.RazorPages.Delete),
+                    DeleteModelTemplate => typeof(Templates.net10.RazorPages.DeleteModel),
+                    EditTemplate => typeof(Templates.net10.RazorPages.Edit),
+                    EditModelTemplate => typeof(Templates.net10.RazorPages.EditModel),
+                    DetailsTemplate => typeof(Templates.net10.RazorPages.Details),
+                    DetailsModelTemplate => typeof(Templates.net10.RazorPages.DetailsModel),
+                    _ => null
+                };
+            case TargetFramework.Net11:
+            default:
+                return fileName switch
+                {
+                    CreateTemplate => typeof(Templates.net11.RazorPages.Create),
+                    CreateModelTemplate => typeof(Templates.net11.RazorPages.CreateModel),
+                    IndexTemplate => typeof(Templates.net11.RazorPages.Index),
+                    IndexModelTemplate => typeof(Templates.net11.RazorPages.IndexModel),
+                    DeleteTemplate => typeof(Templates.net11.RazorPages.Delete),
+                    DeleteModelTemplate => typeof(Templates.net11.RazorPages.DeleteModel),
+                    EditTemplate => typeof(Templates.net11.RazorPages.Edit),
+                    EditModelTemplate => typeof(Templates.net11.RazorPages.EditModel),
+                    DetailsTemplate => typeof(Templates.net11.RazorPages.Details),
+                    DetailsModelTemplate => typeof(Templates.net11.RazorPages.DetailsModel),
+                    _ => null
+                };
+        }
     }
 
     /// <summary>
@@ -118,7 +136,7 @@ internal static class RazorPagesHelper
         foreach (var templatePath in allT4TemplatePaths)
         {
             var templateName = Path.GetFileNameWithoutExtension(templatePath);
-            var templateType = GetTemplateType(templatePath);
+            var templateType = GetTemplateType(templatePath, razorPagesModel.ProjectInfo.LowestSupportedTargetFramework);
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(templateName))
             {
                 if (!IsValidTemplate(razorPagesModel.PageType, templateName))

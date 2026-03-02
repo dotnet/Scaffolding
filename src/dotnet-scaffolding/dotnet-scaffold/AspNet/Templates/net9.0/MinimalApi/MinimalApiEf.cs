@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.MinimalApi
     string typedTaskWithNotFound = Model.UseTypedResults ? $"Task<Results<Ok<{modelName}>, NotFound>>" : "";
     string typedTaskOkNotFound = Model.UseTypedResults ? $"Task<Results<Ok, NotFound>>" : "";
     string typedTaskWithNoContent = Model.UseTypedResults ? $"Task<Results<NotFound, NoContent>>" : "";
-    string resultsNotFound = $"{resultsExtension}.NavigateTo(\"notfound\");";
+    string resultsNotFound = $"{resultsExtension}.NotFound()";
     string resultsOkModel = $"{resultsExtension}.Ok(model)";
     string resultsOkEmpty = $"{resultsExtension}.Ok()";
     string resultsNoContent = $"{resultsExtension}.NoContent()";

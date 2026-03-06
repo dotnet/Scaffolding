@@ -103,7 +103,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind(""Title,ReleaseDate,Genre,Price"")] ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" movie)\r\n    {\r\n        if (ModelState.IsValid)\r\n        {\r\n            _context." +
+            this.Write(" ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(")\r\n    {\r\n        if (ModelState.IsValid)\r\n        {\r\n            _context." +
                     "Add(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(");\r\n            await _context.SaveChangesAsync();\r\n            return RedirectTo" +
@@ -141,7 +143,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
             this.Write(", [Bind(\"Id,Title,ReleaseDate,Genre,Price\")] ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" movie)\r\n    {\r\n        if (");
+            this.Write(" ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(")\r\n    {\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
             this.Write(" != ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));

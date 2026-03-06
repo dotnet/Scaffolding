@@ -108,6 +108,60 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net8.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
+    <!--
+      net8.0 template folders lack .tt files (only old .cshtml exist).
+      Copy net9.0 .tt files into the net8.0 build output so that
+      'dotnet run ‑‑framework net8.0' (dev / integration-test) can find them,
+      mirroring what already happens at pack time.
+    -->
+    <None Include="AspNet\Templates\net9.0\EfController\*.tt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\EfController\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="AspNet\Templates\net9.0\RazorPages\*.tt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\RazorPages\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="AspNet\Templates\net9.0\Views\*.tt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\Views\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="AspNet\Templates\net9.0\MinimalApi\*.tt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\MinimalApi\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="AspNet\Templates\net9.0\Identity\Pages\**\*.tt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\Identity\Pages\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="AspNet\Templates\net9.0\BlazorIdentity\Pages\AccessDenied.tt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\BlazorIdentity\Pages\AccessDenied.tt</Link>
+    </None>
+    <None Include="AspNet\Templates\net9.0\Files\ApplicationUser.tt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\Files\ApplicationUser.tt</Link>
+    </None>
+    <None Include="AspNet\Templates\net9.0\Files\_ValidationScriptsPartial.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\Files\_ValidationScriptsPartial.cshtml</Link>
+    </None>
+    <!--
+      net8.0 CodeModificationConfigs is missing efControllerChanges, identityChanges,
+      razorPagesChanges. Copy from net9.0 so CopyCodeModConfigsToPacked picks them up.
+    -->
+    <None Include="AspNet\Templates\net9.0\CodeModificationConfigs\efControllerChanges.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\CodeModificationConfigs\efControllerChanges.json</Link>
+    </None>
+    <None Include="AspNet\Templates\net9.0\CodeModificationConfigs\identityChanges.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\CodeModificationConfigs\identityChanges.json</Link>
+    </None>
+    <None Include="AspNet\Templates\net9.0\CodeModificationConfigs\razorPagesChanges.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\CodeModificationConfigs\razorPagesChanges.json</Link>
+    </None>
     <!-- Include net9.0 templates in build output (exclude .cs since they are compiled) -->
     <None Include="AspNet\Templates\net9.0\**\*.*" Exclude="AspNet\Templates\net9.0\**\*.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -151,7 +205,63 @@
     <None Update="AspNet\Templates\net10.0\Files\*.razor.js" Pack="true" PackagePath="AspNet\Templates\net10.0\Files\" />
     <None Update="AspNet\Templates\net11.0\Files\*.cshtml" Pack="true" PackagePath="AspNet\Templates\net11.0\Files\" />
     <None Update="AspNet\Templates\net11.0\Files\*.razor.js" Pack="true" PackagePath="AspNet\Templates\net11.0\Files\" />
+    <!-- Include DbContext templates in build output (source is in TextTemplating project, only Pack items above) -->
+    <None Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net8.0\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\DbContext\%(Filename)%(Extension)</Link>
+    </None>
+    <!-- net8.0 DbContext folder lacks .tt template; copy from net9.0 to match pack-time behavior -->
+    <None Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net9.0\NewDbContext.tt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\DbContext\NewDbContext.tt</Link>
+    </None>
+    <None Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net9.0\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net9.0\DbContext\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net10.0\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net10.0\DbContext\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net11.0\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net11.0\DbContext\%(Filename)%(Extension)</Link>
+    </None>
   </ItemGroup>
+
+  <!--
+    Mock the packed global-tool store layout in the build output so that
+    FindFolderWithToolsFolder (which walks up from the assembly location
+    looking for a 'tools' sibling) can discover templates and code-modification
+    configs when running via 'dotnet run' (dev / integration-test scenarios).
+
+    Packed layout expected by the runtime:
+      {root}/tools/                              ← marker directory
+      {root}/AspNet/Templates/{tfm}/...          ← T4 templates (already copied above)
+      {root}/Aspnet/CodeModificationConfigs/{tfm}/...  ← code-mod configs
+      {root}/Aspire/{tfm}/CodeModificationConfigs/...  ← Aspire configs
+  -->
+  <Target Name="CreateMockToolLayout" AfterTargets="Build">
+    <!-- Create the 'tools' marker directory so FindFolderWithToolsFolder succeeds -->
+    <MakeDir Directories="$(OutputPath)tools" />
+    <!-- Mirror AspNet CodeModificationConfigs into the packed layout path -->
+    <MakeDir Directories="$(OutputPath)Aspnet\CodeModificationConfigs\net8.0" />
+    <MakeDir Directories="$(OutputPath)Aspnet\CodeModificationConfigs\net9.0" />
+    <MakeDir Directories="$(OutputPath)Aspnet\CodeModificationConfigs\net10.0" />
+    <MakeDir Directories="$(OutputPath)Aspnet\CodeModificationConfigs\net11.0" />
+  </Target>
+  <Target Name="CopyCodeModConfigsToPacked" AfterTargets="CreateMockToolLayout">
+    <ItemGroup>
+      <_AspNetConfigs_net8 Include="$(OutputPath)AspNet\Templates\net8.0\CodeModificationConfigs\*.json" />
+      <_AspNetConfigs_net9 Include="$(OutputPath)AspNet\Templates\net9.0\CodeModificationConfigs\*.json" />
+      <_AspNetConfigs_net10 Include="$(OutputPath)AspNet\Templates\net10.0\CodeModificationConfigs\*.json" />
+      <_AspNetConfigs_net11 Include="$(OutputPath)AspNet\Templates\net11.0\CodeModificationConfigs\*.json" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_AspNetConfigs_net8)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net8.0" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_AspNetConfigs_net9)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net9.0" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_AspNetConfigs_net10)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net10.0" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_AspNetConfigs_net11)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net11.0" SkipUnchangedFiles="true" />
+  </Target>
 
   <!-- Exclude template files from publish output to prevent them from appearing in tools folder -->
   <Target Name="ExcludeTemplatesFromPublish" AfterTargets="ComputeFilesToPublish">

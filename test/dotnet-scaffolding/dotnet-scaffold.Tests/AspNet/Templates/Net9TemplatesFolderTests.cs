@@ -15,6 +15,7 @@ public class Net9TemplatesFolderTests
         "BlazorCrud",
         "BlazorIdentity",
         "CodeModificationConfigs",
+        "DbContext",
         "EfController",
         "Files",
         "Identity",
@@ -219,6 +220,7 @@ public class Net9TemplatesFolderTests
     [Theory]
     [InlineData("BlazorCrud")]
     [InlineData("BlazorIdentity")]
+    [InlineData("DbContext")]
     [InlineData("EfController")]
     [InlineData("Files")]
     [InlineData("Identity")]

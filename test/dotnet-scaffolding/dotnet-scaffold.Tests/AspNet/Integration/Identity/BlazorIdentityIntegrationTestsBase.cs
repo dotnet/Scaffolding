@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -218,27 +219,8 @@ public abstract class BlazorIdentityIntegrationTestsBase : IDisposable
         return Path.Combine(basePath, TargetFramework, "CodeModificationConfigs", "blazorIdentityChanges.json");
     }
 
-    protected async Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)
-    {
-        var buildProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "dotnet",
-                Arguments = $"build -f {TargetFramework}",
-                WorkingDirectory = workingDirectory,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-        buildProcess.Start();
-        string output = await buildProcess.StandardOutput.ReadToEndAsync();
-        string error = await buildProcess.StandardError.ReadToEndAsync();
-        await buildProcess.WaitForExitAsync();
-        return (buildProcess.ExitCode, output, error);
-    }
+    protected Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)
+        => ScaffoldCliHelper.RunBuildForFrameworkAsync(workingDirectory, TargetFramework);
 
     #endregion
 

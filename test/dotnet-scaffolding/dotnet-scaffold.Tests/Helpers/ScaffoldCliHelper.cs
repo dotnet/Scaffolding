@@ -17,19 +17,122 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 internal static class ScaffoldCliHelper
 {
     /// <summary>
+    /// Gets the repository root directory by navigating up from the test assembly output path.
+    /// The Arcade build layout is: {repoRoot}/artifacts/bin/{project}/{Config}/{TFM}/{assembly}.dll
+    /// </summary>
+    private static string GetRepoRoot()
+    {
+        var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+        var assemblyDirectory = Path.GetDirectoryName(assemblyLocation)!;
+        // Navigate from artifacts/bin/dotnet-scaffold.Tests/{Config}/{TFM}/ up to repo root
+        return Path.GetFullPath(Path.Combine(assemblyDirectory, "..", "..", "..", "..", ".."));
+    }
+
+    /// <summary>
     /// Gets the absolute path to the dotnet-scaffold.csproj source project.
     /// </summary>
     public static string GetScaffoldProjectPath()
     {
-        var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-        var assemblyDirectory = Path.GetDirectoryName(assemblyLocation)!;
-        var projectPath = Path.Combine(assemblyDirectory, "..", "..", "..", "..", "..", "src", "dotnet-scaffolding", "dotnet-scaffold", "dotnet-scaffold.csproj");
-        return Path.GetFullPath(projectPath);
+        return Path.Combine(GetRepoRoot(), "src", "dotnet-scaffolding", "dotnet-scaffold", "dotnet-scaffold.csproj");
     }
 
     /// <summary>
-    /// Runs a dotnet-scaffold CLI command by invoking <c>dotnet run --no-build --project {scaffoldCsproj} --framework {framework} -- aspnet {command} {args}</c>.
+    /// Gets the path to the dotnet executable.
+    /// On CI, the Arcade build system installs the correct .NET SDK at {repoRoot}/.dotnet/.
+    /// This method checks multiple sources in priority order:
+    /// 1. DOTNET_INSTALL_DIR environment variable (set by Arcade's eng/common/tools.ps1)
+    /// 2. {repoRoot}/.dotnet/ directory (standard Arcade layout)
+    /// 3. The directory of the currently-running dotnet process (the host running the tests)
+    /// 4. Falls back to "dotnet" (resolved via PATH)
+    /// </summary>
+    public static string GetDotNetPath()
+    {
+        // 1. Check DOTNET_INSTALL_DIR — Arcade always sets this
+        var installDir = System.Environment.GetEnvironmentVariable("DOTNET_INSTALL_DIR");
+        if (!string.IsNullOrEmpty(installDir))
+        {
+            var candidate = FindDotNetInDir(installDir);
+            if (candidate != null) return candidate;
+        }
+
+        // 2. Check {repoRoot}/.dotnet/
+        var repoRoot = GetRepoRoot();
+        var dotnetDir = Path.Combine(repoRoot, ".dotnet");
+        var fromRepo = FindDotNetInDir(dotnetDir);
+        if (fromRepo != null) return fromRepo;
+
+        // 3. Check the running process's directory
+        var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+        var processDir = Path.GetDirectoryName(currentProcess.MainModule?.FileName);
+        if (!string.IsNullOrEmpty(processDir))
+        {
+            var fromProcess = FindDotNetInDir(processDir);
+            if (fromProcess != null) return fromProcess;
+        }
+
+        return "dotnet";
+    }
+
+    private static string? FindDotNetInDir(string directory)
+    {
+        if (!Directory.Exists(directory)) return null;
+
+        var dotnetExe = Path.Combine(directory, "dotnet.exe");
+        if (File.Exists(dotnetExe)) return dotnetExe;
+
+        var dotnetBin = Path.Combine(directory, "dotnet");
+        if (File.Exists(dotnetBin)) return dotnetBin;
+
+        return null;
+    }
+
+    /// <summary>
+    /// Configures a <see cref="ProcessStartInfo"/> to use the Arcade dotnet installation.
+    /// Sets DOTNET_ROOT so child processes (e.g., <c>dotnet new</c> invoked by the scaffold tool)
+    /// also resolve the correct SDK and runtimes.
+    /// Sets DOTNET_MULTILEVEL_LOOKUP=0 to prevent the dotnet host from falling back to
+    /// the global install at C:\Program Files\dotnet\ which may have an older SDK.
+    /// </summary>
+    private static void ConfigureDotNetEnvironment(ProcessStartInfo startInfo)
+    {
+        var dotnetPath = GetDotNetPath();
+        startInfo.FileName = dotnetPath;
+
+        if (dotnetPath != "dotnet")
+        {
+            var dotnetRoot = Path.GetDirectoryName(dotnetPath)!;
+            startInfo.Environment["DOTNET_ROOT"] = dotnetRoot;
+            startInfo.Environment["DOTNET_MULTILEVEL_LOOKUP"] = "0";
+        }
+    }
+
+    /// <summary>
+    /// Detects the build configuration (Debug/Release) from the test assembly's output path.
+    /// The Arcade build layout is: artifacts/bin/{project}/{Config}/{TFM}/{assembly}.dll
+    /// so the configuration is the parent of the TFM directory.
+    /// Falls back to "Debug" if the configuration cannot be determined.
+    /// </summary>
+    public static string GetBuildConfiguration()
+    {
+        var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+        var assemblyDirectory = Path.GetDirectoryName(assemblyLocation)!;
+        // assemblyDirectory = .../artifacts/bin/dotnet-scaffold.Tests/{Config}/{TFM}
+        // Parent = {Config}, GrandParent = dotnet-scaffold.Tests
+        var configDir = Path.GetFileName(Path.GetDirectoryName(assemblyDirectory));
+        if (configDir != null &&
+            (configDir.Equals("Release", System.StringComparison.OrdinalIgnoreCase) ||
+             configDir.Equals("Debug", System.StringComparison.OrdinalIgnoreCase)))
+        {
+            return configDir;
+        }
+        return "Debug";
+    }
+
+    /// <summary>
+    /// Runs a dotnet-scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspnet {command} {args}</c>.
     /// Uses <c>--no-build</c> because the solution must already be built before running tests.
+    /// The build configuration is auto-detected from the test assembly output path so the correct
+    /// Debug or Release build of the tool is used.
     /// The <paramref name="targetFramework"/> controls which TFM of the multi-targeted dotnet-scaffold tool is executed,
     /// simulating a machine that only has that .NET version installed.
     /// </summary>
@@ -40,13 +143,13 @@ internal static class ScaffoldCliHelper
     public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAsync(string targetFramework, string command, params string[] args)
     {
         var scaffoldCsproj = GetScaffoldProjectPath();
-        var cliArgs = $"run --no-build --project \"{scaffoldCsproj}\" --framework {targetFramework} -- aspnet {command} {string.Join(" ", args.Select(a => a.Contains(' ') ? $"\"{a}\"" : a))}";
+        var configuration = GetBuildConfiguration();
+        var cliArgs = $"run --no-build -c {configuration} --project \"{scaffoldCsproj}\" --framework {targetFramework} -- aspnet {command} {string.Join(" ", args.Select(a => a.Contains(' ') ? $"\"{a}\"" : a))}";
 
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = "dotnet",
                 Arguments = cliArgs,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -54,6 +157,7 @@ internal static class ScaffoldCliHelper
                 CreateNoWindow = true
             }
         };
+        ConfigureDotNetEnvironment(process.StartInfo);
 
         process.Start();
         string output = await process.StandardOutput.ReadToEndAsync();
@@ -71,7 +175,6 @@ internal static class ScaffoldCliHelper
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = "dotnet",
                 Arguments = "build",
                 WorkingDirectory = workingDirectory,
                 RedirectStandardOutput = true,
@@ -80,6 +183,34 @@ internal static class ScaffoldCliHelper
                 CreateNoWindow = true
             }
         };
+        ConfigureDotNetEnvironment(buildProcess.StartInfo);
+        buildProcess.Start();
+        string output = await buildProcess.StandardOutput.ReadToEndAsync();
+        string error = await buildProcess.StandardError.ReadToEndAsync();
+        await buildProcess.WaitForExitAsync();
+        return (buildProcess.ExitCode, output, error);
+    }
+
+    /// <summary>
+    /// Runs <c>dotnet build -f {targetFramework}</c> in the specified working directory.
+    /// Used by integration test base classes to build test projects targeting a specific framework.
+    /// Uses the Arcade dotnet installation when available.
+    /// </summary>
+    public static async Task<(int ExitCode, string Output, string Error)> RunBuildForFrameworkAsync(string workingDirectory, string targetFramework)
+    {
+        var buildProcess = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                Arguments = $"build -f {targetFramework}",
+                WorkingDirectory = workingDirectory,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        ConfigureDotNetEnvironment(buildProcess.StartInfo);
         buildProcess.Start();
         string output = await buildProcess.StandardOutput.ReadToEndAsync();
         string error = await buildProcess.StandardError.ReadToEndAsync();

@@ -86,6 +86,30 @@ extends:
             steps:
             - checkout: self
               clean: true
+            # Install additional .NET runtimes needed by integration tests.
+            # The global.json SDK is .NET 11 preview, but the multi-targeted
+            # dotnet-scaffold tool also builds for net8.0, net9.0, and net10.0.
+            # Integration tests invoke 'dotnet run --framework net8.0/net9.0/net10.0'
+            # which requires those runtimes to be present on the agent.
+            - task: UseDotNet@2
+              displayName: Install .NET 8 runtime
+              inputs:
+                packageType: runtime
+                version: 8.x
+                installationPath: $(Build.SourcesDirectory)/.dotnet
+            - task: UseDotNet@2
+              displayName: Install .NET 9 runtime
+              inputs:
+                packageType: runtime
+                version: 9.x
+                installationPath: $(Build.SourcesDirectory)/.dotnet
+            - task: UseDotNet@2
+              displayName: Install .NET 10 runtime
+              inputs:
+                packageType: runtime
+                version: 10.x
+                includePreviewVersions: true
+                installationPath: $(Build.SourcesDirectory)/.dotnet
             # Use utility script to run script command dependent on agent OS.
             - script: $(_Script)
                 -configuration $(_BuildConfig)

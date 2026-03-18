@@ -141,7 +141,7 @@ internal static class RazorPagesHelper
             {
                 if (!IsValidTemplate(razorPagesModel.PageType, templateName))
                 {
-                    break;
+                    continue;
                 }
 
                 string baseOutputPath = GetBaseOutputPath(

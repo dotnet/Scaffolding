@@ -54,7 +54,7 @@ internal class ViewHelper
                 {
                     if (!IsValidTemplate(viewModel.PageType, templateName))
                     {
-                        break;
+                        continue;
                     }
 
                     string baseOutputPath = GetBaseOutputPath(viewModel.ModelInfo.ModelTypeName, viewModel.ProjectInfo.ProjectPath);

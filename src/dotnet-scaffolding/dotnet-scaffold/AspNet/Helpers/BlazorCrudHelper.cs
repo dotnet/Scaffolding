@@ -409,7 +409,7 @@ internal static class BlazorCrudHelper
             {
                 if (!IsValidTemplate(blazorCrudModel.PageType, templateName))
                 {
-                    break;
+                    continue;
                 }
 
                 if (blazorCrudModel.ProjectInfo is null || string.IsNullOrEmpty(blazorCrudModel.ProjectInfo.ProjectPath))

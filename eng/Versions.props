@@ -11,67 +11,64 @@
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
     <!-- Ref packages from darc subscriptions-->
     <!-- Microsoft.EntityFrameworkCore.Design - TFM-specific versions -->
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>11.0.0-preview.1.26104.118</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>11.0.0-preview.3.26171.106</MicrosoftEntityFrameworkCoreDesignPackageVersion>
     <MicrosoftEntityFrameworkCoreDesignPackageVersion10>10.0.3</MicrosoftEntityFrameworkCoreDesignPackageVersion10>
     <MicrosoftEntityFrameworkCoreDesignPackageVersion9>9.0.13</MicrosoftEntityFrameworkCoreDesignPackageVersion9>
     <MicrosoftEntityFrameworkCoreDesignPackageVersion8>8.0.24</MicrosoftEntityFrameworkCoreDesignPackageVersion8>
-
     <!-- Microsoft.EntityFrameworkCore - TFM-specific versions -->
-    <MicrosoftEntityFrameworkCorePackageVersion>11.0.0-preview.1.26104.118</MicrosoftEntityFrameworkCorePackageVersion>
+    <MicrosoftEntityFrameworkCorePackageVersion>11.0.0-preview.3.26171.106</MicrosoftEntityFrameworkCorePackageVersion>
     <MicrosoftEntityFrameworkCorePackageVersion10>10.0.3</MicrosoftEntityFrameworkCorePackageVersion10>
     <MicrosoftEntityFrameworkCorePackageVersion9>9.0.13</MicrosoftEntityFrameworkCorePackageVersion9>
     <MicrosoftEntityFrameworkCorePackageVersion8>8.0.24</MicrosoftEntityFrameworkCorePackageVersion8>
-    
     <!-- Microsoft.EntityFrameworkCore.SqlServer - TFM-specific versions -->
-    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>11.0.0-preview.1.26104.118</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>11.0.0-preview.3.26171.106</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion10>10.0.3</MicrosoftEntityFrameworkCoreSqlServerPackageVersion10>
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion9>9.0.13</MicrosoftEntityFrameworkCoreSqlServerPackageVersion9>
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion8>8.0.24</MicrosoftEntityFrameworkCoreSqlServerPackageVersion8>
-    
     <!-- Microsoft.Extensions.DependencyInjection -->
-    <MicrosoftExtensionsDependencyInjectionPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
-    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
+    <MicrosoftExtensionsFileProvidersPhysicalPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsFileProvidersPhysicalPackageVersion>
     <!-- Microsoft.Extensions.Identity.Stores -->
-    <MicrosoftExtensionsIdentityStoresPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsIdentityStoresPackageVersion>
+    <MicrosoftExtensionsIdentityStoresPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsIdentityStoresPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Abstractions -->
-    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
+    <MicrosoftExtensionsConfigurationAbstractionsPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsConfigurationAbstractionsPackageVersion>
     <!-- Microsoft.Extensions.Configuration.EnvironmentVariables -->
-    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
+    <MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsConfigurationEnvironmentVariablesPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Json -->
-    <MicrosoftExtensionsConfigurationJsonPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsConfigurationJsonPackageVersion>
+    <MicrosoftExtensionsConfigurationJsonPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsConfigurationJsonPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Secrets -->
-    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
+    <MicrosoftExtensionsConfigurationUserSecretsPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsConfigurationUserSecretsPackageVersion>
     <!-- Microsoft.Extensions.DependencyModel -->
-    <MicrosoftExtensionsDependencyModelPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsDependencyModelPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
-    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
+    <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <!-- Microsoft.Extensions.Hosting -->
     <MicrosoftExtensionsHostingPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsHostingPackageVersion>
     <!-- Microsoft.Extensions.Logging.Console -->
-    <MicrosoftExtensionsLoggingConsolePackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsLoggingConsolePackageVersion>
+    <MicrosoftExtensionsLoggingConsolePackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsLoggingConsolePackageVersion>
     <!-- Microsoft.Extensions.Logging.Debug -->
-    <MicrosoftExtensionsLoggingDebugPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsLoggingDebugPackageVersion>
+    <MicrosoftExtensionsLoggingDebugPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsLoggingDebugPackageVersion>
     <!-- Microsoft.Extensions.Logging -->
-    <MicrosoftExtensionsLoggingPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsLoggingPackageVersion>
     <!-- Microsoft.Extensions.Options.ConfigurationExtensions -->
-    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
+    <MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsOptionsConfigurationExtensionsPackageVersion>
     <!-- Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>11.0.0-preview.1.26104.118</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>11.0.0-preview.3.26171.106</MicrosoftAspNetCoreDiagnosticsEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.EntityFrameworkCore -->
-    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>11.0.0-preview.1.26104.118</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
+    <MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>11.0.0-preview.3.26171.106</MicrosoftAspNetCoreIdentityEntityFrameworkCorePackageVersion>
     <!-- Microsoft.AspNetCore.Identity.UI -->
-    <MicrosoftAspNetCoreIdentityUIPackageVersion>11.0.0-preview.1.26104.118</MicrosoftAspNetCoreIdentityUIPackageVersion>
+    <MicrosoftAspNetCoreIdentityUIPackageVersion>11.0.0-preview.3.26171.106</MicrosoftAspNetCoreIdentityUIPackageVersion>
     <!-- Mono.TextTemplating-->
     <MonoTextTemplatingVersion>3.0.0</MonoTextTemplatingVersion>
     <!-- Microsoft.Extensions.Configuration -->
-    <MicrosoftExtensionsConfigurationPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsConfigurationPackageVersion>
+    <MicrosoftExtensionsConfigurationPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsConfigurationPackageVersion>
     <!-- Microsoft.Extensions.Configuration.Binder -->
-    <MicrosoftExtensionsConfigurationBinderPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsConfigurationBinderPackageVersion>
+    <MicrosoftExtensionsConfigurationBinderPackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsConfigurationBinderPackageVersion>
     <!-- Microsoft.Extensions.Configuration.CommandLine -->
-    <MicrosoftExtensionsConfigurationCommandLinePackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsConfigurationCommandLinePackageVersion>
+    <MicrosoftExtensionsConfigurationCommandLinePackageVersion>11.0.0-preview.3.26171.106</MicrosoftExtensionsConfigurationCommandLinePackageVersion>
     <!-- System.Text.Json -->
-    <SystemTextJsonPackageVersion>11.0.0-preview.1.26104.118</SystemTextJsonPackageVersion>
+    <SystemTextJsonPackageVersion>11.0.0-preview.3.26171.106</SystemTextJsonPackageVersion>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
     <MicrosoftCodeAnalysisPreviewVersion>5.0.0</MicrosoftCodeAnalysisPreviewVersion>
@@ -101,16 +98,13 @@
     <MicrosoftBuildPackageVersion>18.3.3</MicrosoftBuildPackageVersion>
     <MicrosoftBuildPackageVersion9>17.13.26</MicrosoftBuildPackageVersion9>
     <MicrosoftBuildPackageVersion8>17.11.48</MicrosoftBuildPackageVersion8>
-    
     <MicrosoftBuildTasksCorePackageVersion>18.3.3</MicrosoftBuildTasksCorePackageVersion>
     <MicrosoftBuildTasksCorePackageVersion9>17.13.26</MicrosoftBuildTasksCorePackageVersion9>
     <MicrosoftBuildTasksCorePackageVersion8>17.11.48</MicrosoftBuildTasksCorePackageVersion8>
-    
     <!-- Microsoft.Build.Utilities - TFM-specific versions -->
     <MicrosoftBuildUtilitiesCorePackageVersion>18.3.3</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion9>17.13.26</MicrosoftBuildUtilitiesCorePackageVersion9>
     <MicrosoftBuildUtilitiesCorePackageVersion8>17.11.48</MicrosoftBuildUtilitiesCorePackageVersion8>
-
     <MicrosoftBuildLocatorPackageVersion>1.9.1</MicrosoftBuildLocatorPackageVersion>
     <!-- Microsoft.CodeAnalysis.CSharp -->
     <MicrosoftCodeAnalysisCSharpPackageVersion>$(MicrosoftCodeAnalysisVersion)</MicrosoftCodeAnalysisCSharpPackageVersion>

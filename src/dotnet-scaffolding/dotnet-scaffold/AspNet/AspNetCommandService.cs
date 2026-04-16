@@ -24,6 +24,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
             [
                 typeof(AddClientSecretStep),
                 typeof(AddAspNetConnectionStringStep),
+                typeof(AddDbSetToExistingContextStep),
                 typeof(AddFileStep),
                 typeof(AreaScaffolderStep),
                 typeof(DetectBlazorWasmStep),
@@ -154,6 +155,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 })
                 .WithEfControllerAddPackagesStep()
                 .WithDbContextStep()
+                .WithAddDbSetStep()
                 .WithAspNetConnectionStringStep()
                 .WithEfControllerTextTemplatingStep()
                 .WithEfControllerCodeChangeStep();
@@ -179,6 +181,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 })
                 .WithEfControllerAddPackagesStep()
                 .WithDbContextStep()
+                .WithAddDbSetStep()
                 .WithAspNetConnectionStringStep()
                 .WithEfControllerTextTemplatingStep()
                 .WithEfControllerCodeChangeStep()
@@ -204,6 +207,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 })
                 .WithBlazorCrudAddPackagesStep()
                 .WithDbContextStep()
+                .WithAddDbSetStep()
                 .WithAspNetConnectionStringStep()
                 .WithBlazorCrudTextTemplatingStep()
                 .WithBlazorCrudCodeChangeStep();
@@ -228,6 +232,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 })
                 .WithRazorPagesAddPackagesStep()
                 .WithDbContextStep()
+                .WithAddDbSetStep()
                 .WithAspNetConnectionStringStep()
                 .WithRazorPagesTextTemplatingStep()
                 .WithRazorPagesCodeChangeStep();
@@ -272,6 +277,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 })
                 .WithMinimalApiAddPackagesStep()
                 .WithDbContextStep()
+                .WithAddDbSetStep()
                 .WithAspNetConnectionStringStep()
                 .WithMinimalApiTextTemplatingStep()
                 .WithMinimalApiCodeChangeStep();

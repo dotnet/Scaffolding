@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("()\r\n    {\r\n        using var context = DbFactory.CreateDbContext();\r\n        cont" +
                     "ext.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.EntitySetVariableName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.EntitySetVariableName ?? modelName));
             this.Write(".Add(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(");\r\n        await context.SaveChangesAsync();\r\n        NavigationManager.Navigate" +

@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;
-    string entitySetName = Model.DbContextInfo.EntitySetVariableName;
+    string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));

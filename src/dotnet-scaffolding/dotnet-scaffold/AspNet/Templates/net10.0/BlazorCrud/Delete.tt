@@ -17,7 +17,7 @@
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;
-    string entitySetName = Model.DbContextInfo.EntitySetVariableName;
+    string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
 #>
 @page "/<#= pluralModelLowerInv #>/delete"
 @using Microsoft.EntityFrameworkCore

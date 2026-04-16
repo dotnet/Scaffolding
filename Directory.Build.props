@@ -24,8 +24,14 @@
   <PropertyGroup Label="Package and Assembly Metadata">
     <Product>Microsoft ASP.NET Core</Product>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <None Include="$(RepoRoot)NOTICE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+  </PropertyGroup>
 </Project>

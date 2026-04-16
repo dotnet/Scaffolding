@@ -37,6 +37,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string primaryKeyTypeName = Model.ModelInfo.PrimaryKeyTypeName;
+    string bindProperties = string.Join(",", Model.ModelInfo.ModelProperties?.Select(p => p.Name) ?? Enumerable.Empty<string>());
 
             this.Write("\r\nusing Microsoft.AspNetCore.Mvc;\r\nusing Microsoft.EntityFrameworkCore;\r\n");
 
@@ -101,9 +102,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind(""Title,ReleaseDate,Genre,Price"")] ");
+    public async Task<IActionResult> Create([Bind(""");
+            this.Write(this.ToStringHelper.ToStringWithCulture(bindProperties));
+            this.Write(@""")] ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" movie)\r\n    {\r\n        if (ModelState.IsValid)\r\n        {\r\n            _context." +
+            this.Write(" ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(")\r\n    {\r\n        if (ModelState.IsValid)\r\n        {\r\n            _context." +
                     "Add(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(");\r\n            await _context.SaveChangesAsync();\r\n            return RedirectTo" +
@@ -139,9 +144,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyTypeName));
             this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
-            this.Write(", [Bind(\"Id,Title,ReleaseDate,Genre,Price\")] ");
+            this.Write(", [Bind(\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(bindProperties));
+            this.Write("\")] ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" movie)\r\n    {\r\n        if (");
+            this.Write(" ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(")\r\n    {\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
             this.Write(" != ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));

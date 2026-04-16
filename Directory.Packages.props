@@ -49,12 +49,12 @@
     <PackageVersion Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />
     <PackageVersion Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataVersion)" />
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="$(SystemSecurityCryptographyXmlVersion)" />
     <PackageVersion Include="xunit.skippablefact" Version="$(XunitSkippableFactPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Pinned transitive package versions for Component Governance alerts -->
     <PackageVersion Include="System.Formats.Asn1" Version="$(SystemFormatsAsn1Version)" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="$(SystemSecurityCryptographyXmlVersion)" />
   </ItemGroup>
 </Project>

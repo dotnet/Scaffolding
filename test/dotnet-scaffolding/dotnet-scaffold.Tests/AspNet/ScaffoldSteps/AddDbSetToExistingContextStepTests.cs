@@ -213,5 +213,77 @@ public class AddDbSetToExistingContextStepTests : IDisposable
         Assert.NotNull(step.CodeChangeOptions);
         Assert.Empty(step.CodeChangeOptions);
     }
+
+    // -----------------------------------------------------------------------
+    // Scenario 11: File exists and already contains the DbSet
+    //              (newly-created context from WithDbContextStep) — step skips
+    // -----------------------------------------------------------------------
+    [Fact]
+    public async Task ExecuteAsync_ReturnsTrue_WhenDbSetAlreadyPresentInFile()
+    {
+        const string dbSetStatement = "public DbSet<Movie> Movie { get; set; } = default!;";
+        string path = WriteContextFile($"public class ApplicationDbContext {{ {dbSetStatement} }}");
+        DbContextProperties props = new DbContextProperties
+        {
+            DbContextPath = path,
+            DbSetStatement = dbSetStatement
+        };
+        _context.Properties[nameof(DbContextProperties)] = props;
+
+        AddDbSetToExistingContextStep step = CreateStep();
+        step.ProjectPath = Path.Combine(_tempDir, "App.csproj");
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.True(result);
+    }
+
+    // -----------------------------------------------------------------------
+    // Scenario 12: DbSetAlreadyPresent returns true when marker is in file
+    // -----------------------------------------------------------------------
+    [Fact]
+    public void DbSetAlreadyPresent_ReturnsTrue_WhenDbSetIsInFile()
+    {
+        const string statement = "public DbSet<Movie> Movie { get; set; } = default!;";
+        const string fileContent = "public class Ctx { public DbSet<Movie> Movie { get; set; } = default!; }";
+
+        Assert.True(AddDbSetToExistingContextStep.DbSetAlreadyPresent(fileContent, statement));
+    }
+
+    // -----------------------------------------------------------------------
+    // Scenario 13: DbSetAlreadyPresent returns false when marker is absent
+    // -----------------------------------------------------------------------
+    [Fact]
+    public void DbSetAlreadyPresent_ReturnsFalse_WhenDbSetNotInFile()
+    {
+        const string statement = "public DbSet<Movie> Movie { get; set; } = default!;";
+        const string fileContent = "public class Ctx { }";
+
+        Assert.False(AddDbSetToExistingContextStep.DbSetAlreadyPresent(fileContent, statement));
+    }
+
+    // -----------------------------------------------------------------------
+    // Scenario 14: DbSetAlreadyPresent returns true for fully-qualified names
+    // -----------------------------------------------------------------------
+    [Fact]
+    public void DbSetAlreadyPresent_ReturnsTrue_WithFullyQualifiedTypeName()
+    {
+        const string statement = "public DbSet<MyApp.Models.Movie> Movie { get; set; } = default!;";
+        const string fileContent = "public class Ctx { public DbSet<MyApp.Models.Movie> Movie { get; set; } = default!; }";
+
+        Assert.True(AddDbSetToExistingContextStep.DbSetAlreadyPresent(fileContent, statement));
+    }
+
+    // -----------------------------------------------------------------------
+    // Scenario 15: DbSetAlreadyPresent returns false when statement lacks DbSet<
+    // -----------------------------------------------------------------------
+    [Fact]
+    public void DbSetAlreadyPresent_ReturnsFalse_WhenStatementHasNoDbSetMarker()
+    {
+        const string statement = "public string Foo { get; set; }";
+        const string fileContent = "public class Ctx { public string Foo { get; set; } }";
+
+        Assert.False(AddDbSetToExistingContextStep.DbSetAlreadyPresent(fileContent, statement));
+    }
 }
 

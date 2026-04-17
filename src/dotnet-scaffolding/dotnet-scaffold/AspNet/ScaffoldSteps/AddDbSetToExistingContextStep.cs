@@ -59,6 +59,15 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
             return true;
         }
 
+        // Fast pre-check: if the DbSet property is already present in the file
+        // (e.g. because WithDbContextStep just created the file with the DbSet included),
+        // skip the modification pass to avoid a redundant Roslyn workspace update.
+        string fileContent = await File.ReadAllTextAsync(dbContextPath, cancellationToken);
+        if (DbSetAlreadyPresent(fileContent, dbSetStatement))
+        {
+            return true;
+        }
+
         string dbContextFileName = Path.GetFileName(dbContextPath);
         string configJson = BuildCodeModifierConfig(dbContextFileName, dbSetStatement);
 
@@ -103,6 +112,27 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
         };
 
         return JsonSerializer.Serialize(config);
+    }
+
+    /// <summary>
+    /// Returns <c>true</c> when <paramref name="fileContent"/> already contains a
+    /// <c>DbSet&lt;T&gt;</c> property for the same type as <paramref name="dbSetStatement"/>
+    /// would introduce, preventing a duplicate insertion.
+    /// </summary>
+    internal static bool DbSetAlreadyPresent(string fileContent, string dbSetStatement)
+    {
+        // dbSetStatement looks like:
+        //   "public DbSet<Full.Type.Name> TypeName { get; set; } = default!;"
+        // Extract "DbSet<Full.Type.Name>" to check whether the file already has it.
+        int start = dbSetStatement.IndexOf("DbSet<", StringComparison.Ordinal);
+        int end = start >= 0 ? dbSetStatement.IndexOf('>', start) : -1;
+        if (start < 0 || end < 0)
+        {
+            return false;
+        }
+
+        string dbSetMarker = dbSetStatement[start..(end + 1)];
+        return fileContent.Contains(dbSetMarker, StringComparison.Ordinal);
     }
 }
 

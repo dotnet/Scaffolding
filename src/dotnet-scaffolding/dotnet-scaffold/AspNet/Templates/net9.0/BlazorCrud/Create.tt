@@ -75,7 +75,7 @@
     private async Task Add<#= modelName #>()
     {
         using var context = DbFactory.CreateDbContext();
-        context.<#= Model.DbContextInfo.EntitySetVariableName #>.Add(<#= modelName #>);
+        context.<#= Model.DbContextInfo.EntitySetVariableName ?? modelName #>.Add(<#= modelName #>);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
     }

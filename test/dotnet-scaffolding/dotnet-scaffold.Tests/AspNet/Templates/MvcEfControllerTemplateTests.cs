@@ -284,7 +284,7 @@ namespace Models
                 PrimaryKeyShortTypeName = "int",
                 ModelProperties = properties
             },
-            ProjectInfo = new AspNetProjectInfo(Path.Combine("test", "TestProject.csproj"))
+            ProjectInfo = new AspNetProjectInfo(null)
         };
     }
 

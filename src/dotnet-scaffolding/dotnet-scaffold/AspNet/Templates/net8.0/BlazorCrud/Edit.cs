@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;
-    string entitySetName = Model.DbContextInfo.EntitySetVariableName;
+    string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
     var entityProperties = Model.ModelInfo.ModelProperties.Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
 
             this.Write("@page \"/");

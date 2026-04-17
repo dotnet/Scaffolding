@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud
             this.Write("\r\n\r\n<PageTitle>Index</PageTitle>\r\n\r\n<h1>Index</h1>\r\n\r\n<p>\r\n    <a href=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
             this.Write("/create\">Create New</a>\r\n</p>\r\n\r\n<QuickGrid Class=\"table\" Items=\"context.");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.EntitySetVariableName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.EntitySetVariableName ?? modelName));
             this.Write("\">\r\n");
 
     foreach (var property in entityProperties)

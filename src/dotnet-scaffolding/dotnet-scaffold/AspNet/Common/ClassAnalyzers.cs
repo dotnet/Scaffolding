@@ -38,7 +38,7 @@ internal static class ClassAnalyzers
             dbContextInfo.DbContextClassPath = existingDbContextClass.Locations.FirstOrDefault()?.SourceTree?.FilePath;
             dbContextInfo.DbContextNamespace = existingDbContextClass.ContainingNamespace.ToDisplayString();
             dbContextInfo.EntitySetVariableName = modelInfo is null ?
-                string.Empty : EfDbContextHelpers.GetEntitySetVariableName(existingDbContextClass, modelInfo.ModelTypeName, modelInfo.ModelFullName) ?? modelInfo.ModelTypeName;
+                string.Empty : EfDbContextHelpers.GetEntitySetVariableName(existingDbContextClass, modelInfo.ModelTypeName, modelInfo.ModelFullName) ?? string.Empty;
 
             // If the DbSet for this model doesn't exist in the existing context yet, prepare the statement to add it.
             if (string.IsNullOrEmpty(dbContextInfo.EntitySetVariableName) && modelInfo is not null)

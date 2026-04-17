@@ -154,6 +154,6 @@
     <MicrosoftIdentityClientExtensionsMsalVersion>4.73.1</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>6.12.1</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0</SystemCommandLineVersion>
-    <SystemSecurityCryptographyProtectedDataVersion>9.0.11</SystemSecurityCryptographyProtectedDataVersion>
+    <SystemSecurityCryptographyProtectedDataVersion>9.0.13</SystemSecurityCryptographyProtectedDataVersion>
   </PropertyGroup>
 </Project>

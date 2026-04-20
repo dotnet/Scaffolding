@@ -323,19 +323,152 @@ public class Product
         Assert.False(result);
     }
 
+    [Fact]
+    public void GetDbContextInfo_WithExistingDbContext_PopulatesNewDbSetStatement_WhenDbSetIsMissing()
+    {
+        // Arrange — context exists but has NO DbSet for Movie
+        string code = @"
+using Microsoft.EntityFrameworkCore;
+namespace MyApp.Data
+{
+    public class ApplicationDbContext : DbContext
+    {
+        public DbSet<Customer> Customers { get; set; }
+    }
+
+    public class Customer { public int Id { get; set; } }
+    public class Movie { public int Id { get; set; } }
+}";
+        CSharpCompilation compilation = CreateCompilation(code);
+        INamedTypeSymbol dbContextSymbol = GetTypeSymbol(compilation, "ApplicationDbContext");
+        ModelInfo modelInfo = new ModelInfo
+        {
+            ModelTypeName = "Movie",
+            ModelFullName = "MyApp.Data.Movie"
+        };
+
+        // Act
+        DbContextInfo result = ClassAnalyzers.GetDbContextInfo(
+            "TestProject.csproj",
+            dbContextSymbol,
+            "ApplicationDbContext",
+            "SqlServer",
+            modelInfo);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("ApplicationDbContext", result.DbContextClassName);
+        // EntitySetVariableName should be empty (not found)
+        Assert.True(string.IsNullOrEmpty(result.EntitySetVariableName));
+        // NewDbSetStatement must be set so AddDbSetToExistingContextStep can insert it
+        Assert.NotNull(result.NewDbSetStatement);
+        Assert.Contains("DbSet<MyApp.Data.Movie>", result.NewDbSetStatement);
+        Assert.Contains("Movie", result.NewDbSetStatement);
+        Assert.Contains("default!", result.NewDbSetStatement);
+    }
+
+    [Fact]
+    public void GetDbContextInfo_WithExistingDbContext_DoesNotPopulateNewDbSetStatement_WhenDbSetAlreadyPresent()
+    {
+        // Arrange — context already has a DbSet<Movie>
+        string code = @"
+using Microsoft.EntityFrameworkCore;
+namespace MyApp.Data
+{
+    public class ApplicationDbContext : DbContext
+    {
+        public DbSet<Movie> Movie { get; set; }
+    }
+
+    public class Movie { public int Id { get; set; } }
+}";
+        CSharpCompilation compilation = CreateCompilation(code);
+        INamedTypeSymbol dbContextSymbol = GetTypeSymbol(compilation, "ApplicationDbContext");
+        ModelInfo modelInfo = new ModelInfo
+        {
+            ModelTypeName = "Movie",
+            ModelFullName = "MyApp.Data.Movie"
+        };
+
+        // Act
+        DbContextInfo result = ClassAnalyzers.GetDbContextInfo(
+            "TestProject.csproj",
+            dbContextSymbol,
+            "ApplicationDbContext",
+            "SqlServer",
+            modelInfo);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("Movie", result.EntitySetVariableName);
+        // DbSet exists → no statement to inject
+        Assert.Null(result.NewDbSetStatement);
+    }
+
+    [Fact]
+    public void GetDbContextInfo_WithExistingDbContext_NullModelInfo_DoesNotPopulateNewDbSetStatement()
+    {
+        // Arrange
+        string code = @"
+using Microsoft.EntityFrameworkCore;
+namespace MyApp.Data
+{
+    public class ApplicationDbContext : DbContext { }
+}";
+        CSharpCompilation compilation = CreateCompilation(code);
+        INamedTypeSymbol dbContextSymbol = GetTypeSymbol(compilation, "ApplicationDbContext");
+
+        // Act — no modelInfo provided
+        DbContextInfo result = ClassAnalyzers.GetDbContextInfo(
+            "TestProject.csproj",
+            dbContextSymbol,
+            "ApplicationDbContext",
+            "SqlServer",
+            modelInfo: null);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(string.IsNullOrEmpty(result.EntitySetVariableName));
+        Assert.Null(result.NewDbSetStatement);
+    }
+
     private static CSharpCompilation CreateCompilation(string source)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
-        MetadataReference[] references = new[]
+        string baseDir = System.AppContext.BaseDirectory;
+
+        // Start with all currently-loaded assemblies so framework + DI/logging transitive deps are present
+        System.Collections.Generic.HashSet<string> addedFileNames =
+            new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        System.Collections.Generic.List<MetadataReference> references = new System.Collections.Generic.List<MetadataReference>();
+
+        foreach (System.Reflection.Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
         {
-            MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-            MetadataReference.CreateFromFile(typeof(System.Linq.Enumerable).Assembly.Location)
-        };
+            if (!asm.IsDynamic && !string.IsNullOrEmpty(asm.Location) &&
+                addedFileNames.Add(System.IO.Path.GetFileName(asm.Location)))
+            {
+                references.Add(MetadataReference.CreateFromFile(asm.Location));
+            }
+        }
+
+        // Explicitly add EF Core assemblies from the test output directory if not already loaded
+        string[] efCoreNames = { "Microsoft.EntityFrameworkCore.dll", "Microsoft.EntityFrameworkCore.Abstractions.dll" };
+        foreach (string asmName in efCoreNames)
+        {
+            if (addedFileNames.Add(asmName))
+            {
+                string path = System.IO.Path.Combine(baseDir, asmName);
+                if (System.IO.File.Exists(path))
+                {
+                    references.Add(MetadataReference.CreateFromFile(path));
+                }
+            }
+        }
 
         return CSharpCompilation.Create(
             "TestAssembly",
             new[] { syntaxTree },
-            references,
+            references.ToArray(),
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
     }
 

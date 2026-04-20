@@ -55,5 +55,8 @@
   <ItemGroup>
     <!-- Pinned transitive package versions for Component Governance alerts -->
     <PackageVersion Include="System.Formats.Asn1" Version="$(SystemFormatsAsn1Version)" />
+    <!-- Pinned transitive package versions to resolve assembly version conflicts -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(MicrosoftExtensionsDependencyInjectionPackageVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.FileProviders.Abstractions" Version="$(MicrosoftExtensionsFileProvidersPhysicalPackageVersion)" />
   </ItemGroup>
 </Project>

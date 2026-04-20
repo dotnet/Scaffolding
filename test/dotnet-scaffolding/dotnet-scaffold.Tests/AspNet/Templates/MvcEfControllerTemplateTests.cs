@@ -14,6 +14,9 @@ using AspNetProjectInfo = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.ProjectI
 using Net9MvcEfController = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController.MvcEfController;
 using Net10MvcEfController = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController.MvcEfController;
 using Net11MvcEfController = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.EfController.MvcEfController;
+using Net9RazorCreateModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.RazorPages.CreateModel;
+using Net10RazorCreateModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.CreateModel;
+using Net11RazorCreateModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.RazorPages.CreateModel;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;
 
@@ -54,6 +57,17 @@ public class MvcEfControllerTemplateTests
         Assert.Contains("Create([Bind(", result);
         Assert.Contains("] Blog blog)", result);
         Assert.DoesNotContain("] Blog movie)", result);
+    }
+
+    [Fact]
+    public void Net9_WhenModelAndDbContextShareNamespace_EmitsSingleUsing()
+    {
+        EfControllerModel model = CreateBlogEfControllerModel();
+        var template = CreateNet9Template(model);
+
+        string result = template.TransformText();
+
+        Assert.Equal(1, CountOccurrences(result, "using Models;"));
     }
 
     [Fact]
@@ -152,6 +166,17 @@ public class MvcEfControllerTemplateTests
     }
 
     [Fact]
+    public void Net10_WhenModelAndDbContextShareNamespace_EmitsSingleUsing()
+    {
+        EfControllerModel model = CreateBlogEfControllerModel();
+        var template = CreateNet10Template(model);
+
+        string result = template.TransformText();
+
+        Assert.Equal(1, CountOccurrences(result, "using Models;"));
+    }
+
+    [Fact]
     public void Net10_Edit_BindAttribute_ContainsActualModelProperties()
     {
         // Arrange
@@ -216,6 +241,17 @@ public class MvcEfControllerTemplateTests
     }
 
     [Fact]
+    public void Net11_WhenModelAndDbContextShareNamespace_EmitsSingleUsing()
+    {
+        EfControllerModel model = CreateBlogEfControllerModel();
+        var template = CreateNet11Template(model);
+
+        string result = template.TransformText();
+
+        Assert.Equal(1, CountOccurrences(result, "using Models;"));
+    }
+
+    [Fact]
     public void Net11_Edit_BindAttribute_ContainsActualModelProperties()
     {
         // Arrange
@@ -244,6 +280,43 @@ public class MvcEfControllerTemplateTests
         Assert.DoesNotContain("Title,ReleaseDate,Genre,Price", result);
         Assert.DoesNotContain("Id,Title,ReleaseDate,Genre,Price", result);
         Assert.DoesNotContain(" movie)", result);
+    }
+
+    #endregion
+
+    #region Razor Pages — single namespace import regression
+
+    [Fact]
+    public void Net9_RazorCreateModel_WhenModelAndDbContextShareNamespace_EmitsSingleUsing()
+    {
+        RazorPageModel model = CreateBlogRazorPageModel();
+        var template = CreateNet9RazorTemplate(model);
+
+        string result = template.TransformText();
+
+        Assert.Equal(1, CountOccurrences(result, "using Models;"));
+    }
+
+    [Fact]
+    public void Net10_RazorCreateModel_WhenModelAndDbContextShareNamespace_EmitsSingleUsing()
+    {
+        RazorPageModel model = CreateBlogRazorPageModel();
+        var template = CreateNet10RazorTemplate(model);
+
+        string result = template.TransformText();
+
+        Assert.Equal(1, CountOccurrences(result, "using Models;"));
+    }
+
+    [Fact]
+    public void Net11_RazorCreateModel_WhenModelAndDbContextShareNamespace_EmitsSingleUsing()
+    {
+        RazorPageModel model = CreateBlogRazorPageModel();
+        var template = CreateNet11RazorTemplate(model);
+
+        string result = template.TransformText();
+
+        Assert.Equal(1, CountOccurrences(result, "using Models;"));
     }
 
     #endregion
@@ -327,6 +400,43 @@ namespace Models
         };
     }
 
+    private static RazorPageModel CreateBlogRazorPageModel()
+    {
+        List<IPropertySymbol> properties = GetPropertiesFromCode(@"
+namespace Models
+{
+    public class Blog
+    {
+        public int BlogId { get; set; }
+        public string? Url { get; set; }
+    }
+}", "Blog");
+
+        return new RazorPageModel
+        {
+            PageType = "Create",
+            DbContextInfo = new DbContextInfo
+            {
+                DbContextClassName = "BloggingContext",
+                DbContextNamespace = "Models",
+                EfScenario = true,
+                EntitySetVariableName = "Blogs"
+            },
+            ModelInfo = new ModelInfo
+            {
+                ModelTypeName = "Blog",
+                ModelNamespace = "Models",
+                ModelFullName = "Models.Blog",
+                PrimaryKeyName = "BlogId",
+                PrimaryKeyTypeName = "int",
+                PrimaryKeyShortTypeName = "int",
+                ModelProperties = properties
+            },
+            RazorPageNamespace = "Pages.Blogs",
+            ProjectInfo = new AspNetProjectInfo(null)
+        };
+    }
+
     private static List<IPropertySymbol> GetPropertiesFromCode(string source, string typeName)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
@@ -366,6 +476,30 @@ namespace Models
     private static Net11MvcEfController CreateNet11Template(EfControllerModel model)
     {
         var template = new Net11MvcEfController();
+        template.Session = new Dictionary<string, object> { { "Model", model } };
+        template.Initialize();
+        return template;
+    }
+
+    private static Net9RazorCreateModel CreateNet9RazorTemplate(RazorPageModel model)
+    {
+        var template = new Net9RazorCreateModel();
+        template.Session = new Dictionary<string, object> { { "Model", model } };
+        template.Initialize();
+        return template;
+    }
+
+    private static Net10RazorCreateModel CreateNet10RazorTemplate(RazorPageModel model)
+    {
+        var template = new Net10RazorCreateModel();
+        template.Session = new Dictionary<string, object> { { "Model", model } };
+        template.Initialize();
+        return template;
+    }
+
+    private static Net11RazorCreateModel CreateNet11RazorTemplate(RazorPageModel model)
+    {
+        var template = new Net11RazorCreateModel();
         template.Session = new Dictionary<string, object> { { "Model", model } };
         template.Initialize();
         return template;

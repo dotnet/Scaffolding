@@ -27,7 +27,8 @@ using Microsoft.EntityFrameworkCore;
 <#  }
 #>
 <#
-    if (!string.IsNullOrEmpty(dbContextNamespace))
+    if (!string.IsNullOrEmpty(dbContextNamespace) &&
+        !string.Equals(dbContextNamespace, modelNamespace, System.StringComparison.Ordinal))
     {
         #>using <#= dbContextNamespace #>;
 <#  }

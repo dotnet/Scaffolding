@@ -15,6 +15,7 @@
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string primaryKeyTypeName = Model.ModelInfo.PrimaryKeyTypeName;
+    string bindProperties = string.Join(",", Model.ModelInfo.ModelProperties?.Select(p => p.Name) ?? Enumerable.Empty<string>());
 #>
 
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +27,8 @@ using Microsoft.EntityFrameworkCore;
 <#  }
 #>
 <#
-    if (!string.IsNullOrEmpty(dbContextNamespace))
+    if (!string.IsNullOrEmpty(dbContextNamespace) &&
+        !string.Equals(dbContextNamespace, modelNamespace, System.StringComparison.Ordinal))
     {
         #>using <#= dbContextNamespace #>;
 <#  }
@@ -76,7 +78,7 @@ public class <#= Model.ControllerName #> : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Title,ReleaseDate,Genre,Price")] <#= modelName #> movie)
+    public async Task<IActionResult> Create([Bind("<#= bindProperties #>")] <#= modelName #> <#= modelNameLowerInv #>)
     {
         if (ModelState.IsValid)
         {
@@ -108,7 +110,7 @@ public class <#= Model.ControllerName #> : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>, [Bind("Id,Title,ReleaseDate,Genre,Price")] <#= modelName #> movie)
+    public async Task<IActionResult> Edit(<#= primaryKeyTypeName #>? <#= primaryKeyNameLowerInv #>, [Bind("<#= bindProperties #>")] <#= modelName #> <#= modelNameLowerInv #>)
     {
         if (<#= primaryKeyNameLowerInv #> != <#= modelNameLowerInv #>.<#= primaryKeyName #>)
         {

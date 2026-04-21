@@ -37,6 +37,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string primaryKeyTypeName = Model.ModelInfo.PrimaryKeyTypeName;
+    string bindProperties = string.Join(",", Model.ModelInfo.ModelProperties?.Select(p => p.Name) ?? Enumerable.Empty<string>());
 
             this.Write("\r\nusing Microsoft.AspNetCore.Mvc;\r\nusing Microsoft.EntityFrameworkCore;\r\n");
 
@@ -49,7 +50,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController
   }
 
 
-    if (!string.IsNullOrEmpty(dbContextNamespace))
+    if (!string.IsNullOrEmpty(dbContextNamespace) &&
+        !string.Equals(dbContextNamespace, modelNamespace, global::System.StringComparison.Ordinal))
     {
         
             this.Write("using ");
@@ -101,7 +103,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind(""Title,ReleaseDate,Genre,Price"")] ");
+    public async Task<IActionResult> Create([Bind(""");
+            this.Write(this.ToStringHelper.ToStringWithCulture(bindProperties));
+            this.Write(@""")] ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
@@ -140,7 +144,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyTypeName));
             this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
-            this.Write(", [Bind(\"Id,Title,ReleaseDate,Genre,Price\")] ");
+            this.Write(", [Bind(\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(bindProperties));
+            this.Write("\")] ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));

@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
@@ -60,6 +61,37 @@ internal static class ScaffolderBuilderAspNetExtensions
         });
 
         return builder;
+    }
+
+    /// <summary>
+    /// Adds a step that inserts a missing DbSet property into a DbContext class.
+    /// This step may run after <c>WithDbContextStep</c>, including when a new DbContext has just been created,
+    /// and relies on the underlying step to avoid introducing duplicate DbSet properties when one already exists.
+    /// Delegates modification to <see cref="Microsoft.DotNet.Scaffolding.CodeModification.CodeModificationStep"/>
+    /// via an in-memory JSON config, consistent with how all other code changes are applied.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    public static IScaffoldBuilder WithAddDbSetStep(this IScaffoldBuilder builder)
+    {
+        return builder.WithStep<AddDbSetToExistingContextStep>(config =>
+        {
+            ScaffolderContext context = config.Context;
+            if (!context.Properties.ContainsKey(nameof(DbContextProperties)))
+            {
+                config.Step.SkipStep = true;
+                return;
+            }
+
+            string? projectPath = context.GetOptionResult<string>(CliConstants.CliOptions.ProjectCliOption);
+            if (string.IsNullOrEmpty(projectPath))
+            {
+                config.Step.SkipStep = true;
+                return;
+            }
+
+            config.Step.ProjectPath = projectPath;
+        });
     }
 
     /// <summary>

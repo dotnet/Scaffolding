@@ -48,7 +48,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController
   }
 
 
-    if (!string.IsNullOrEmpty(dbContextNamespace))
+    if (!string.IsNullOrEmpty(dbContextNamespace) &&
+        !string.Equals(dbContextNamespace, modelNamespace, global::System.StringComparison.Ordinal))
     {
         
             this.Write("using ");

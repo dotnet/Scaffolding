@@ -130,8 +130,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow
         {
             return status
                 .AutoRefresh(true)
-                .Spinner(Spinner.Known.Dots)
-                .SpinnerStyle(Styles.Highlight);
+                .Spinner(Spinner.Known.Dots);
         }
 
         /// <summary>

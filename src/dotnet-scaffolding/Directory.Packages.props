@@ -31,7 +31,7 @@
     <PackageVersion Include="NuGet.Versioning" Version="$(NugetProtocolVersion)" />
     <PackageVersion Include="Spectre.Console.Flow" Version="$(SpectreConsoleFlowVersion)" />
     <PackageVersion Include="Spectre.Console" Version="$(SpectreConsoleVersion)" />
-    <PackageVersion Include="Spectre.Console.Cli" Version="$(SpectreConsoleVersion)" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="$(SpectreConsoleCliVersion)" />
     <PackageVersion Include="System.CommandLine" Version="$(SystemCommandLinePackageVersion)" />
   </ItemGroup>
   <!-- <ItemGroup>

@@ -74,6 +74,7 @@
     <SystemTextJsonPackageVersion>11.0.0-preview.1.26104.118</SystemTextJsonPackageVersion>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
+    <SpectreConsoleCliVersion>0.47.0</SpectreConsoleCliVersion>
     <MicrosoftCodeAnalysisPreviewVersion>5.0.0</MicrosoftCodeAnalysisPreviewVersion>
     <MicrosoftCodeAnalysisVersion>5.0.0</MicrosoftCodeAnalysisVersion>
     <SystemCommandLinePackageVersion>2.0.0</SystemCommandLinePackageVersion>

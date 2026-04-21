@@ -37,25 +37,48 @@ internal class NuGetVersionService
     /// </summary>
     /// <param name="packageId">the ID of the NuGet package</param>
     /// <param name="MajorVersion">the .NET major version</param>
+    /// <param name="projectDirectory">
+    /// Optional directory of the project being scaffolded. When provided, NuGet settings are loaded
+    /// from this directory so that the same package sources used by <c>dotnet add package</c> are
+    /// queried, rather than the repo-root NuGet.config (which may have <c>&lt;clear /&gt;</c> and
+    /// no nuget.org feed).
+    /// </param>
     /// <returns></returns>
-    public async Task<NuGetVersion?> GetLatestPackageForNetVersionAsync(string packageId, int MajorVersion)
+    public async Task<NuGetVersion?> GetLatestPackageForNetVersionAsync(string packageId, int MajorVersion, string? projectDirectory = null)
     {
-        IEnumerable<NuGetVersion> versions = await GetVersionsForPackageAsync(packageId);
+        IEnumerable<NuGetVersion> versions = await GetVersionsForPackageAsync(packageId, projectDirectory);
 
         // Filter for the specified .NET major version
         var compatibleVersions = versions.Where(v => v.Major == MajorVersion).OrderByDescending(v => v);
         return compatibleVersions.FirstOrDefault();
     }
 
-    private async Task<IEnumerable<NuGetVersion>> GetVersionsForPackageAsync(string packageId)
+    private async Task<IEnumerable<NuGetVersion>> GetVersionsForPackageAsync(string packageId, string? projectDirectory = null)
     {
+        // When a project directory is provided, load settings from there so that the package
+        // sources match the context used by 'dotnet add package' (e.g. a temp project directory
+        // that is outside the repo and therefore does not inherit the repo-root NuGet.config with
+        // <clear /> that strips away nuget.org).
+        ISettings effectiveSettings = projectDirectory is not null
+            ? Settings.LoadDefaultSettings(projectDirectory)
+            : _settings;
+        PackageSourceProvider effectiveSourceProvider = projectDirectory is not null
+            ? new PackageSourceProvider(effectiveSettings)
+            : _sourceProvider;
+        CachingSourceProvider effectiveCachingProvider = projectDirectory is not null
+            ? new CachingSourceProvider(effectiveSourceProvider)
+            : _cachingProvider;
+        PackageSourceMapping? effectiveSourceMapping = projectDirectory is not null
+            ? PackageSourceMapping.GetPackageSourceMapping(effectiveSettings)
+            : _sourceMapping;
+
         // Load package sources and filter enabled ones
-        IEnumerable<PackageSource> packageSources = _sourceProvider.LoadPackageSources().Where(s => s.IsEnabled);
+        IEnumerable<PackageSource> packageSources = effectiveSourceProvider.LoadPackageSources().Where(s => s.IsEnabled);
 
         // Check if package source mapping is enabled
-        if (_sourceMapping?.IsEnabled == true)
+        if (effectiveSourceMapping?.IsEnabled == true)
         {
-            IReadOnlyList<string> configuredSources = _sourceMapping.GetConfiguredPackageSources(packageId);
+            IReadOnlyList<string> configuredSources = effectiveSourceMapping.GetConfiguredPackageSources(packageId);
             if (configuredSources.Any())
             {
                 packageSources = packageSources.Where(s => configuredSources.Contains(s.Name));
@@ -63,7 +86,7 @@ internal class NuGetVersionService
         }
 
         List<SourceRepository> repositories = [.. packageSources
-            .Select(source => _cachingProvider.CreateRepository(source))];
+            .Select(source => effectiveCachingProvider.CreateRepository(source))];
 
         if (repositories.Count == 0)
         {

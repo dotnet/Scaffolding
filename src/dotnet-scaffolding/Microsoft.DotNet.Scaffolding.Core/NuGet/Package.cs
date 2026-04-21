@@ -30,15 +30,20 @@ internal static class PackageExtensions
     /// <param name="targetFramework">The target framework identifier used to determine the appropriate package version. For example, "net6.0".</param>
     /// <param name="nugetVersionHelper">The NuGet version helper to use for version resolution.</param>
     /// <param name="logger">The logger to use for logging messages.</param>
+    /// <param name="projectDirectory">
+    /// Optional directory of the project being scaffolded. When provided, NuGet settings are loaded
+    /// from this directory so that the same package sources used by <c>dotnet add package</c> are
+    /// queried.
+    /// </param>
     /// <returns>A package instance with the version property set to the resolved version for the specified target framework, or
     /// the original package if the version is already set or cannot be resolved.</returns>
-    public static async Task<Package> WithResolvedVersionAsync(this Package package, TargetFramework? targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null)
+    public static async Task<Package> WithResolvedVersionAsync(this Package package, TargetFramework? targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null, string? projectDirectory = null)
     {
         if (package.PackageVersion is not null)
         {
             return package;
         }
-        NuGetVersion? resolvedVersion = await package.GetVersionForTargetFrameworkAsync(targetFramework, nugetVersionHelper, logger);
+        NuGetVersion? resolvedVersion = await package.GetVersionForTargetFrameworkAsync(targetFramework, nugetVersionHelper, logger, projectDirectory);
         if (resolvedVersion is null)
         {
             return package;
@@ -59,7 +64,7 @@ internal static class PackageExtensions
     /// <param name="logger">The logger to use for logging messages.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the corresponding NuGet package
     /// version if available; otherwise, <see langword="null"/> if the package does not require a version or target framework is not supported.</returns>
-    private static Task<NuGetVersion?> GetVersionForTargetFrameworkAsync(this Package package, TargetFramework? targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null)
+    private static Task<NuGetVersion?> GetVersionForTargetFrameworkAsync(this Package package, TargetFramework? targetFramework, NuGetVersionService nugetVersionHelper, ILogger? logger = null, string? projectDirectory = null)
     {
         if (!package.IsVersionRequired)
         {
@@ -74,19 +79,19 @@ internal static class PackageExtensions
 
         if (targetFramework is TargetFramework.Net8)
         {
-            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 8);
+            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 8, projectDirectory);
         }
         else if (targetFramework is TargetFramework.Net9)
         {
-            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 9);
+            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 9, projectDirectory);
         }
         else if (targetFramework is TargetFramework.Net10)
         {
-            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 10);
+            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 10, projectDirectory);
         }
         else if (targetFramework is TargetFramework.Net11)
         {
-            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 11);
+            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 11, projectDirectory);
         }
         else
         {

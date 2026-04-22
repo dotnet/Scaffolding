@@ -37,6 +37,26 @@
           ]
         }
       }
+    },
+    {
+      "FileName": "_Layout.cshtml",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "MultiLineBlock": [
+                "</ul>",
+                "                <partial name=\"_LoginPartial\" />",
+                "                </div>"
+              ],
+              "ReplaceSnippet": [
+                "</ul>",
+                "                </div>"
+              ]
+            }
+          ]
+        }
+      }
     }
   ]
 }

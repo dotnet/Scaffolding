@@ -118,6 +118,32 @@ public class MvcEfControllerTemplateTests
     }
 
     [Fact]
+    public void Net9_WhenEntitySetVariableNameEmpty_FallsBackToModelName()
+    {
+        EfControllerModel model = CreateBlogEfControllerModel();
+        model.DbContextInfo.EntitySetVariableName = string.Empty;
+        var template = CreateNet9Template(model);
+
+        string result = template.TransformText();
+
+        Assert.Contains("_context.Blog.ToListAsync()", result);
+        Assert.DoesNotContain("_context..ToListAsync()", result);
+    }
+
+    [Fact]
+    public void Net9_WhenEntitySetVariableNameWhitespace_FallsBackToModelName()
+    {
+        EfControllerModel model = CreateBlogEfControllerModel();
+        model.DbContextInfo.EntitySetVariableName = "   ";
+        var template = CreateNet9Template(model);
+
+        string result = template.TransformText();
+
+        Assert.Contains("_context.Blog.ToListAsync()", result);
+        Assert.DoesNotContain("_context.   .ToListAsync()", result);
+    }
+
+    [Fact]
     public void Net9_Create_BindAttribute_UsesProductProperties()
     {
         // Arrange – Product model: ProductId (PK), Name, Price
@@ -207,6 +233,32 @@ public class MvcEfControllerTemplateTests
         Assert.DoesNotContain(" movie)", result);
     }
 
+    [Fact]
+    public void Net10_WhenEntitySetVariableNameEmpty_FallsBackToModelName()
+    {
+        EfControllerModel model = CreateBlogEfControllerModel();
+        model.DbContextInfo.EntitySetVariableName = string.Empty;
+        var template = CreateNet10Template(model);
+
+        string result = template.TransformText();
+
+        Assert.Contains("_context.Blog.ToListAsync()", result);
+        Assert.DoesNotContain("_context..ToListAsync()", result);
+    }
+
+    [Fact]
+    public void Net10_WhenEntitySetVariableNameWhitespace_FallsBackToModelName()
+    {
+        EfControllerModel model = CreateBlogEfControllerModel();
+        model.DbContextInfo.EntitySetVariableName = "   ";
+        var template = CreateNet10Template(model);
+
+        string result = template.TransformText();
+
+        Assert.Contains("_context.Blog.ToListAsync()", result);
+        Assert.DoesNotContain("_context.   .ToListAsync()", result);
+    }
+
     #endregion
 
     #region Net11 — [Bind] uses actual model properties
@@ -280,6 +332,32 @@ public class MvcEfControllerTemplateTests
         Assert.DoesNotContain("Title,ReleaseDate,Genre,Price", result);
         Assert.DoesNotContain("Id,Title,ReleaseDate,Genre,Price", result);
         Assert.DoesNotContain(" movie)", result);
+    }
+
+    [Fact]
+    public void Net11_WhenEntitySetVariableNameEmpty_FallsBackToModelName()
+    {
+        EfControllerModel model = CreateBlogEfControllerModel();
+        model.DbContextInfo.EntitySetVariableName = string.Empty;
+        var template = CreateNet11Template(model);
+
+        string result = template.TransformText();
+
+        Assert.Contains("_context.Blog.ToListAsync()", result);
+        Assert.DoesNotContain("_context..ToListAsync()", result);
+    }
+
+    [Fact]
+    public void Net11_WhenEntitySetVariableNameWhitespace_FallsBackToModelName()
+    {
+        EfControllerModel model = CreateBlogEfControllerModel();
+        model.DbContextInfo.EntitySetVariableName = "   ";
+        var template = CreateNet11Template(model);
+
+        string result = template.TransformText();
+
+        Assert.Contains("_context.Blog.ToListAsync()", result);
+        Assert.DoesNotContain("_context.   .ToListAsync()", result);
     }
 
     #endregion

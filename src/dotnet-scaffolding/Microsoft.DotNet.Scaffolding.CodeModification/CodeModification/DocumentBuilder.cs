@@ -185,10 +185,10 @@ internal class DocumentBuilder
         if (_codeFile.ClassProperties != null && _codeFile.ClassProperties.Any() && classDeclarationSyntax != null)
         {
             _codeFile.ClassProperties = ProjectModifierHelper.FilterCodeBlocks(_codeFile.ClassProperties, options);
-            //get a sample member for leading trivia. Trailing trivia will still be semi colon and new line.
+            // get a sample member for leading trivia; trailing trivia should only add a newline.
             var sampleMember = modifiedClassDeclarationSyntax.Members.FirstOrDefault();
             var memberLeadingTrivia = sampleMember?.GetLeadingTrivia() ?? SyntaxFactory.TriviaList(SyntaxFactory.Whitespace("    "));
-            var memberTrailingTrivia = SyntaxFactory.TriviaList(SemiColonTrivia, SyntaxFactory.CarriageReturnLineFeed);
+            var memberTrailingTrivia = SyntaxFactory.TriviaList(SyntaxFactory.CarriageReturnLineFeed);
 
             //create MemberDeclarationSyntax[] with all the Property strings. 
             var classProperties = CreateClassProperties(modifiedClassDeclarationSyntax.Members, memberLeadingTrivia, memberTrailingTrivia);

@@ -358,8 +358,8 @@ namespace MyApp.Data
         // Assert
         Assert.NotNull(result);
         Assert.Equal("ApplicationDbContext", result.DbContextClassName);
-        // EntitySetVariableName should be empty (not found)
-        Assert.True(string.IsNullOrEmpty(result.EntitySetVariableName));
+        // EntitySetVariableName should fall back to model name when DbSet is missing.
+        Assert.Equal("Movie", result.EntitySetVariableName);
         // NewDbSetStatement must be set so AddDbSetToExistingContextStep can insert it
         Assert.NotNull(result.NewDbSetStatement);
         Assert.Contains("DbSet<MyApp.Data.Movie>", result.NewDbSetStatement);
@@ -428,7 +428,7 @@ namespace MyApp.Data
 
         // Assert
         Assert.NotNull(result);
-        Assert.True(string.IsNullOrEmpty(result.EntitySetVariableName));
+        Assert.Equal(string.Empty, result.EntitySetVariableName);
         Assert.Null(result.NewDbSetStatement);
     }
 

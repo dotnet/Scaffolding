@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Threading.Tasks;
+using System;
+using System.IO;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -80,6 +82,41 @@ public class PackageTests
         // Assert
         Assert.NotNull(result.PackageVersion);
         Assert.NotEqual(package, result);
+    }
+
+    [Fact]
+    public async Task WithResolvedVersionAsync_Net10EfPackage_UsesAspNetReferenceVersion()
+    {
+        // Arrange
+        string tempProjectPath = Path.Combine(Path.GetTempPath(), $"{nameof(PackageTests)}-{Guid.NewGuid():N}.csproj");
+        await File.WriteAllTextAsync(
+            tempProjectPath,
+            """
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <PropertyGroup>
+                <TargetFramework>net10.0</TargetFramework>
+              </PropertyGroup>
+              <ItemGroup>
+                <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0-preview.5.25277.114" />
+              </ItemGroup>
+            </Project>
+            """);
+
+        Package package = new Package("Microsoft.EntityFrameworkCore.Tools", IsVersionRequired: true);
+
+        try
+        {
+            // Act
+            Package result = await package.WithResolvedVersionAsync(TargetFramework.Net10, _nugetVersionService, tempProjectPath);
+
+            // Assert
+            Assert.Equal("10.0.0-preview.5.25277.114", result.PackageVersion);
+            Assert.NotEqual(package, result);
+        }
+        finally
+        {
+            File.Delete(tempProjectPath);
+        }
     }
 
     [Fact]

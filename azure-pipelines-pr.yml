@@ -38,11 +38,7 @@ stages:
       - job: Windows_NT
         timeoutInMinutes: 180
         pool:
-          # For public or PR jobs, use the hosted pool.  For internal jobs use the internal pool.
-          # Will eventually change this to two BYOC pools.
-          ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-            name: $(DncEngPublicBuildPool)
-            demands: ImageOverride -equals 1es-windows-2019-open
+          vmImage: windows-2022
 
         variables:
         - _Script: eng\common\build.cmd

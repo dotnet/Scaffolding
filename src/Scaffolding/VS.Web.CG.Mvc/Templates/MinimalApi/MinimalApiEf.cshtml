@@ -107,7 +107,7 @@ public static class @endPointsClassName
             @:var affected = await db.@entitySetName
                 @:.Where(model => model.@primaryKeyName == @primaryKeyNameLowerCase)
                 @:.ExecuteUpdateAsync(setters => setters
-    //should be atleast one property (primary key)
+    //should be atleast one property
     foreach(var modelProperty in entityProperties)
     {
         string modelPropertyName = modelProperty.PropertyName;

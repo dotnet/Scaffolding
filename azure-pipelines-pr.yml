@@ -92,7 +92,6 @@ stages:
           inputs:
             packageType: sdk
             version: 10.x
-            includePreviewVersions: true
             installationPath: $(Build.SourcesDirectory)/.dotnet
         # Use utility script to run script command dependent on agent OS.
         - script: $(_Script)
@@ -136,7 +135,6 @@ stages:
             inputs:
               packageType: sdk
               version: 10.x
-              includePreviewVersions: true
               installationPath: $(Build.SourcesDirectory)/.dotnet
           - script: eng/common/build.sh
               --configuration $(_BuildConfig)
@@ -178,7 +176,6 @@ stages:
             inputs:
               packageType: sdk
               version: 10.x
-              includePreviewVersions: true
               installationPath: $(Build.SourcesDirectory)/.dotnet
           - script: eng/common/build.sh
               --configuration $(_BuildConfig)

@@ -114,28 +114,28 @@ public class CliOptionInventoryTests
         // Collect all distinct CliOption values from every property on AspNetOptions
         var declaredFlags = new HashSet<string>
         {
-            options.Project.CliOption,
-            options.Prerelease.CliOption,
-            options.FileName.CliOption,
-            options.Actions.CliOption,
-            options.AreaName.CliOption,
-            options.ModelName.CliOption,
-            options.EndpointsClass.CliOption,
-            options.DatabaseProvider.CliOption,
-            options.DatabaseProviderRequired.CliOption,
-            options.IdentityDbProviderRequired.CliOption,
-            options.DataContextClass.CliOption,
-            options.DataContextClassRequired.CliOption,
-            options.OpenApi.CliOption,
-            options.TypedResults.CliOption,
-            options.PageType.CliOption,
-            options.ControllerName.CliOption,
-            options.Views.CliOption,
-            options.Overwrite.CliOption,
-            options.UseExistingApplication.CliOption,
-            options.Username.CliOption,
-            options.TenantId.CliOption,
-            options.ApplicationId.CliOption,
+            options.Project.CliOption!,
+            options.Prerelease.CliOption!,
+            options.FileName.CliOption!,
+            options.Actions.CliOption!,
+            options.AreaName.CliOption!,
+            options.ModelName.CliOption!,
+            options.EndpointsClass.CliOption!,
+            options.DatabaseProvider.CliOption!,
+            options.DatabaseProviderRequired.CliOption!,
+            options.IdentityDbProviderRequired.CliOption!,
+            options.DataContextClass.CliOption!,
+            options.DataContextClassRequired.CliOption!,
+            options.OpenApi.CliOption!,
+            options.TypedResults.CliOption!,
+            options.PageType.CliOption!,
+            options.ControllerName.CliOption!,
+            options.Views.CliOption!,
+            options.Overwrite.CliOption!,
+            options.UseExistingApplication.CliOption!,
+            options.Username.CliOption!,
+            options.TenantId.CliOption!,
+            options.ApplicationId.CliOption!,
         };
 
         var missingFromManifest = declaredFlags.Except(AllAspNetCliFlags).ToList();
@@ -149,12 +149,12 @@ public class CliOptionInventoryTests
     {
         var declaredFlags = new HashSet<string>
         {
-            AspireOptions.CachingType.CliOption,
-            AspireOptions.DatabaseType.CliOption,
-            AspireOptions.StorageType.CliOption,
-            AspireOptions.AppHostProject.CliOption,
-            AspireOptions.Project.CliOption,
-            AspireOptions.Prerelease.CliOption,
+            AspireOptions.CachingType.CliOption!,
+            AspireOptions.DatabaseType.CliOption!,
+            AspireOptions.StorageType.CliOption!,
+            AspireOptions.AppHostProject.CliOption!,
+            AspireOptions.Project.CliOption!,
+            AspireOptions.Prerelease.CliOption!,
         };
 
         var missingFromManifest = declaredFlags.Except(AllAspireCliFlags).ToList();
@@ -169,28 +169,28 @@ public class CliOptionInventoryTests
         var options = new AspNetOptions();
         var declaredFlags = new HashSet<string>
         {
-            options.Project.CliOption,
-            options.Prerelease.CliOption,
-            options.FileName.CliOption,
-            options.Actions.CliOption,
-            options.AreaName.CliOption,
-            options.ModelName.CliOption,
-            options.EndpointsClass.CliOption,
-            options.DatabaseProvider.CliOption,
-            options.DatabaseProviderRequired.CliOption,
-            options.IdentityDbProviderRequired.CliOption,
-            options.DataContextClass.CliOption,
-            options.DataContextClassRequired.CliOption,
-            options.OpenApi.CliOption,
-            options.TypedResults.CliOption,
-            options.PageType.CliOption,
-            options.ControllerName.CliOption,
-            options.Views.CliOption,
-            options.Overwrite.CliOption,
-            options.UseExistingApplication.CliOption,
-            options.Username.CliOption,
-            options.TenantId.CliOption,
-            options.ApplicationId.CliOption,
+            options.Project.CliOption!,
+            options.Prerelease.CliOption!,
+            options.FileName.CliOption!,
+            options.Actions.CliOption!,
+            options.AreaName.CliOption!,
+            options.ModelName.CliOption!,
+            options.EndpointsClass.CliOption!,
+            options.DatabaseProvider.CliOption!,
+            options.DatabaseProviderRequired.CliOption!,
+            options.IdentityDbProviderRequired.CliOption!,
+            options.DataContextClass.CliOption!,
+            options.DataContextClassRequired.CliOption!,
+            options.OpenApi.CliOption!,
+            options.TypedResults.CliOption!,
+            options.PageType.CliOption!,
+            options.ControllerName.CliOption!,
+            options.Views.CliOption!,
+            options.Overwrite.CliOption!,
+            options.UseExistingApplication.CliOption!,
+            options.Username.CliOption!,
+            options.TenantId.CliOption!,
+            options.ApplicationId.CliOption!,
         };
 
         var staleFlags = AllAspNetCliFlags.Except(declaredFlags).ToList();
@@ -203,12 +203,12 @@ public class CliOptionInventoryTests
     {
         var declaredFlags = new HashSet<string>
         {
-            AspireOptions.CachingType.CliOption,
-            AspireOptions.DatabaseType.CliOption,
-            AspireOptions.StorageType.CliOption,
-            AspireOptions.AppHostProject.CliOption,
-            AspireOptions.Project.CliOption,
-            AspireOptions.Prerelease.CliOption,
+            AspireOptions.CachingType.CliOption!,
+            AspireOptions.DatabaseType.CliOption!,
+            AspireOptions.StorageType.CliOption!,
+            AspireOptions.AppHostProject.CliOption!,
+            AspireOptions.Project.CliOption!,
+            AspireOptions.Prerelease.CliOption!,
         };
 
         var staleFlags = AllAspireCliFlags.Except(declaredFlags).ToList();

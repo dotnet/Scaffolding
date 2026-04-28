@@ -40,8 +40,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.MinimalApi
     string dbContextName = Model.DbContextInfo.DbContextClassName;
     var entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
     var entitySetNoTracking = $"{entitySetName}.AsNoTracking()";
-    var entityProperties =  Model.ModelInfo.ModelProperties
-        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    var entityProperties =  Model.ModelInfo.ModelProperties;
     var primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     var primaryKeyNameLowerCase = primaryKeyName.ToLowerInvariant();
     var primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyShortTypeName;
@@ -176,7 +175,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.MinimalApi
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerCase));
             this.Write(")\r\n                .ExecuteUpdateAsync(setters => setters\r\n        ");
 
-            //should be atleast one property (primary key)
+            //should be atleast one property
             foreach(var modelProperty in entityProperties)
             {
                 string modelPropertyName = modelProperty.Name;

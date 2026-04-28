@@ -75,8 +75,8 @@
     <SystemTextJsonPackageVersion>11.0.0-preview.5.26226.111</SystemTextJsonPackageVersion>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
-    <MicrosoftCodeAnalysisPreviewVersion>5.0.0</MicrosoftCodeAnalysisPreviewVersion>
-    <MicrosoftCodeAnalysisVersion>5.0.0</MicrosoftCodeAnalysisVersion>
+    <MicrosoftCodeAnalysisPreviewVersion>5.3.0</MicrosoftCodeAnalysisPreviewVersion>
+    <MicrosoftCodeAnalysisVersion>5.3.0</MicrosoftCodeAnalysisVersion>
     <SystemCommandLinePackageVersion>2.0.0</SystemCommandLinePackageVersion>
     <MicrosoftApplicationInsightsWorkerServicePackageVersion>2.22.0</MicrosoftApplicationInsightsWorkerServicePackageVersion>
     <MicrosoftDotNetPlatformAbstractionsVersion>3.1.6</MicrosoftDotNetPlatformAbstractionsVersion>
@@ -99,7 +99,7 @@
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.24</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.Build - TFM-specific versions -->
     <!-- net8.0 uses 17.8.x, net9.0 uses 17.12.x, net10/11 use 18.x -->
-    <MicrosoftBuildPackageVersion>18.3.3</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>18.4.0</MicrosoftBuildPackageVersion>
     <MicrosoftBuildPackageVersion9>17.13.26</MicrosoftBuildPackageVersion9>
     <MicrosoftBuildPackageVersion8>17.11.48</MicrosoftBuildPackageVersion8>
 
@@ -124,7 +124,7 @@
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.3.21166.3</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.3</NewtonsoftJsonPackageVersion>
     <NuGetPackagingVersion>7.3.1</NuGetPackagingVersion>
-    <HumanizerCorePackageVersion>3.0.1</HumanizerCorePackageVersion>
+    <HumanizerCorePackageVersion>3.0.10</HumanizerCorePackageVersion>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- Everything below here are Packages only used by test projects -->
     <!-- Microsoft.AspNetCore.Server.Kestrel -->

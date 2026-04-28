@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity;
 using Xunit;
 
@@ -9,11 +10,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
     public class BlazorIdentityHelperTests
     {
-        [SkippableTheory]
+        [Theory]
         [MemberData(nameof(BlazorIdentityFiles))]
         public void GetFormattedRelativeIdentityFileTest(string fullFileName, string expected)
         {
-            Skip.If(!OperatingSystem.IsWindows());
             // Arrange & Act
             string result = BlazorIdentityHelper.GetFormattedRelativeIdentityFile(fullFileName);
             // Assert
@@ -26,16 +26,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 return new[]
                 {
-                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\file.tt", "file" },
-                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Pages\\file.tt", "Pages.file" },
-                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Pages\\Manage\\file.tt", "Pages.Manage.file" },
-                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Pages\\Manage\\Passkeys.tt", "Pages.Manage.Passkeys" },
-                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Pages\\Manage\\RenamePasskey.tt", "Pages.Manage.RenamePasskey" },
-                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Shared\\PasskeySubmit.tt", "Shared.PasskeySubmit" },
-                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\PasskeyInputModel.tt", "PasskeyInputModel" },
-                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\PasskeyOperation.tt", "PasskeyOperation" },
-                    new object[] { "C:\\Some\\Path\\Templates\\BlazorIdentity\\Thing\\file.tt", "Thing.file" },
-                    new object[] { "C:\\Some\\Path\\Templates\\Thing\\file.tt", "" },
+                    new object[] { Path.Combine("some", "path", "Templates", "BlazorIdentity", "file.tt"), "file" },
+                    new object[] { Path.Combine("some", "path", "Templates", "BlazorIdentity", "Pages", "file.tt"), "Pages.file" },
+                    new object[] { Path.Combine("some", "path", "Templates", "BlazorIdentity", "Pages", "Manage", "file.tt"), "Pages.Manage.file" },
+                    new object[] { Path.Combine("some", "path", "Templates", "BlazorIdentity", "Pages", "Manage", "Passkeys.tt"), "Pages.Manage.Passkeys" },
+                    new object[] { Path.Combine("some", "path", "Templates", "BlazorIdentity", "Pages", "Manage", "RenamePasskey.tt"), "Pages.Manage.RenamePasskey" },
+                    new object[] { Path.Combine("some", "path", "Templates", "BlazorIdentity", "Shared", "PasskeySubmit.tt"), "Shared.PasskeySubmit" },
+                    new object[] { Path.Combine("some", "path", "Templates", "BlazorIdentity", "PasskeyInputModel.tt"), "PasskeyInputModel" },
+                    new object[] { Path.Combine("some", "path", "Templates", "BlazorIdentity", "PasskeyOperation.tt"), "PasskeyOperation" },
+                    new object[] { Path.Combine("some", "path", "Templates", "BlazorIdentity", "Thing", "file.tt"), "Thing.file" },
+                    new object[] { Path.Combine("some", "path", "Templates", "Thing", "file.tt"), "" },
                 };
             }
         }

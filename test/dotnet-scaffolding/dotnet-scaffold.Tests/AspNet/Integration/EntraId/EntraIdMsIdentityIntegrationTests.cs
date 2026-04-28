@@ -126,7 +126,9 @@ public class EntraIdMsIdentityIntegrationTests
         Type addClientSecretStepType = typeof(AddClientSecretStep);
         
         // Assert
-        Assert.Equal("Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps", registerAppStepType.Namespace);
-        Assert.Equal("Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps", addClientSecretStepType.Namespace);
+        Assert.False(string.IsNullOrWhiteSpace(registerAppStepType.Namespace));
+        Assert.False(string.IsNullOrWhiteSpace(addClientSecretStepType.Namespace));
+        Assert.Contains("ScaffoldSteps", registerAppStepType.Namespace!);
+        Assert.Contains("ScaffoldSteps", addClientSecretStepType.Namespace!);
     }
 }

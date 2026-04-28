@@ -101,7 +101,7 @@ internal class ToolManifestService(IFileSystem fileSystem) : IToolManifestServic
     /// Gets the directory path for the tool manifest.
     /// </summary>
     private static string GetToolManifestDirectory()
-        => Path.Combine(Environment.GetEnvironmentVariable("USERPROFILE") ?? "", ".dotnet-scaffold");
+        => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dotnet-scaffold");
 
     /// <summary>
     /// Gets the file path for the tool manifest (tools.json).

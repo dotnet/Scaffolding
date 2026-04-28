@@ -79,7 +79,7 @@
     <SystemCommandLinePackageVersion>2.0.0</SystemCommandLinePackageVersion>
     <MicrosoftApplicationInsightsWorkerServicePackageVersion>2.22.0</MicrosoftApplicationInsightsWorkerServicePackageVersion>
     <MicrosoftDotNetPlatformAbstractionsVersion>3.1.6</MicrosoftDotNetPlatformAbstractionsVersion>
-    <NugetProtocolVersion>7.3.1</NugetProtocolVersion>
+    <NugetProtocolVersion>7.0.1</NugetProtocolVersion>
   </PropertyGroup>
   <PropertyGroup>
     <VersionPrefix>11.0.0</VersionPrefix>
@@ -123,7 +123,7 @@
     <!-- Microsoft.Extensions.CommandLineUtils.Sources -->
     <MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>6.0.0-preview.3.21166.3</MicrosoftExtensionsCommandLineUtilsSourcesPackageVersion>
     <NewtonsoftJsonPackageVersion>13.0.3</NewtonsoftJsonPackageVersion>
-    <NuGetPackagingVersion>7.3.1</NuGetPackagingVersion>
+    <NuGetPackagingVersion>6.12.1</NuGetPackagingVersion>
     <HumanizerCorePackageVersion>3.0.1</HumanizerCorePackageVersion>
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- Everything below here are Packages only used by test projects -->
@@ -158,7 +158,7 @@
     <CodeAnalysisVersion>$(MicrosoftCodeAnalysisVersion)</CodeAnalysisVersion>
     <MicrosoftGraphVersion>5.66.0</MicrosoftGraphVersion>
     <MicrosoftIdentityClientExtensionsMsalVersion>4.73.1</MicrosoftIdentityClientExtensionsMsalVersion>
-    <NuGetProjectModelVersion>7.3.1</NuGetProjectModelVersion>
+    <NuGetProjectModelVersion>6.12.1</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0</SystemCommandLineVersion>
     <SystemSecurityCryptographyProtectedDataVersion>9.0.11</SystemSecurityCryptographyProtectedDataVersion>
   </PropertyGroup>

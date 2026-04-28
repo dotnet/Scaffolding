@@ -18,8 +18,7 @@
     string dbContextName = Model.DbContextInfo.DbContextClassName;
     var entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
     var entitySetNoTracking = $"{entitySetName}.AsNoTracking()";
-    var entityProperties =  Model.ModelInfo.ModelProperties
-        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+    var entityProperties =  Model.ModelInfo.ModelProperties;
     var primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     var primaryKeyNameLowerCase = primaryKeyName.ToLowerInvariant();
     var primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyShortTypeName;
@@ -115,7 +114,7 @@ public static class <#= Model.EndpointsClassName #>
                 .Where(model => model.<#= primaryKeyName #> == <#= primaryKeyNameLowerCase #>)
                 .ExecuteUpdateAsync(setters => setters
         <#
-            //should be atleast one property (primary key)
+            //should be atleast one property
             foreach(var modelProperty in entityProperties)
             {
                 string modelPropertyName = modelProperty.Name;

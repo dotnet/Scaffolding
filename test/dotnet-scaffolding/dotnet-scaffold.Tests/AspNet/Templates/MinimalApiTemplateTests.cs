@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
@@ -182,6 +185,17 @@ public class MinimalApiTemplateTests
 
     private MinimalApiModel CreateTestMinimalApiModel(bool efScenario, bool useTypedResults)
     {
+        List<IPropertySymbol> properties = GetPropertiesFromCode(@"
+namespace TestProject.Models
+{
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+    }
+}", "Product");
+
         return new MinimalApiModel
         {
             OpenAPI = true,
@@ -206,9 +220,9 @@ public class MinimalApiTemplateTests
                 PrimaryKeyName = "Id",
                 PrimaryKeyShortTypeName = "int",
                 PrimaryKeyTypeName = "System.Int32",
-                ModelProperties = new List<Microsoft.CodeAnalysis.IPropertySymbol>()
+                ModelProperties = properties
             },
-            ProjectInfo = new ProjectInfo(Path.Combine("test", "project", "TestProject.csproj"))
+            ProjectInfo = new Microsoft.DotNet.Tools.Scaffold.AspNet.Common.ProjectInfo(Path.Combine("test", "project", "TestProject.csproj"))
         };
     }
 
@@ -597,4 +611,45 @@ public class MinimalApiTemplateTests
     }
 
     #endregion
+
+    #region SetProperty Tests
+
+    [Fact]
+    public void MinimalApiEf_MapPut_GeneratesSetPropertyCalls()
+    {
+        // Arrange
+        var model = CreateTestMinimalApiModel(efScenario: true, useTypedResults: true);
+        var template = CreateMinimalApiEfTemplate(model);
+
+        // Act
+        var result = template.TransformText();
+
+        // Assert - SetProperty calls should be generated for all model properties
+        Assert.Contains(".SetProperty(m => m.Id, product.Id)", result);
+        Assert.Contains(".SetProperty(m => m.Name, product.Name)", result);
+        Assert.Contains(".SetProperty(m => m.Price, product.Price)", result);
+        Assert.Contains("ExecuteUpdateAsync(setters => setters", result);
+    }
+
+    #endregion
+
+    private static List<IPropertySymbol> GetPropertiesFromCode(string source, string typeName)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
+        MetadataReference[] references =
+        [
+            MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+        ];
+        CSharpCompilation compilation = CSharpCompilation.Create(
+            "TestAssembly",
+            [syntaxTree],
+            references,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        INamedTypeSymbol? symbol = compilation.GetTypeByMetadataName($"TestProject.Models.{typeName}")
+            ?? compilation.GetSymbolsWithName(typeName, SymbolFilter.Type).OfType<INamedTypeSymbol>().FirstOrDefault()
+            ?? throw new System.Exception($"Type '{typeName}' not found in compilation");
+
+        return symbol.GetMembers().OfType<IPropertySymbol>().ToList();
+    }
 }

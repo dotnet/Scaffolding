@@ -51,9 +51,6 @@ internal class AddPackagesStep : ScaffoldStep
     {
         // Try to get the target framework from the context
         TargetFramework? targetFramework = context.GetSpecifiedTargetFramework();
-        string? projectDirectory = !string.IsNullOrEmpty(ProjectPath)
-            ? Path.GetDirectoryName(Path.GetFullPath(ProjectPath))
-            : null;
 
         foreach (Package package in Packages)
         {
@@ -61,7 +58,7 @@ internal class AddPackagesStep : ScaffoldStep
             Package resolvedPackage = package;
             if (package.IsVersionRequired && !Prerelease)
             {
-                resolvedPackage = await package.WithResolvedVersionAsync(targetFramework, _nugetVersionHelper, _logger, projectDirectory);
+                resolvedPackage = await package.WithResolvedVersionAsync(targetFramework, _nugetVersionHelper, ProjectPath, _logger);
                 packageVersion = resolvedPackage.PackageVersion;
             }
 

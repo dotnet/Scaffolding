@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -65,9 +64,9 @@ internal class PackageConstants
     public static class AspNetCorePackages
     {
         public static readonly Package QuickGridEfAdapterPackage = new("Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter", IsVersionRequired: true);
-        public static readonly Package AspNetCoreDiagnosticsEfCorePackage = new("Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore", IsVersionRequired: true);
+        public static readonly Package AspNetCoreDiagnosticsEfCorePackage = new(PackageNameConstants.AspNetCorePackages.DiagnosticsEntityFrameworkCorePackageName, IsVersionRequired: true);
         public static readonly Package OpenApiPackage = new("Microsoft.AspNetCore.OpenApi", IsVersionRequired: true);
-        public static readonly Package AspNetCoreIdentityEfPackage = new("Microsoft.AspNetCore.Identity.EntityFrameworkCore", IsVersionRequired: true);
+        public static readonly Package AspNetCoreIdentityEfPackage = new(PackageNameConstants.AspNetCorePackages.IdentityEntityFrameworkCorePackageName, IsVersionRequired: true);
         public static readonly Package AspNetCoreIdentityUiPackage = new("Microsoft.AspNetCore.Identity.UI", IsVersionRequired: true);
         public static readonly Package AspNetCoreComponentsWebAssemblyAuthenticationPackage = new("Microsoft.AspNetCore.Components.WebAssembly.Authentication", IsVersionRequired: true);
         public static readonly Package AspNetCoreAuthenticationJwtBearerPackage = new("Microsoft.AspNetCore.Authentication.JwtBearer", IsVersionRequired: true);

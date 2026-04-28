@@ -135,15 +135,15 @@ public class AspNetOptionCoverageTests
 
     [Fact]
     public void DatabaseProvider_HasCustomPickerValues()
-        => Assert.NotEmpty(_options.DatabaseProvider.CustomPickerValues);
+        => Assert.NotEmpty(_options.DatabaseProvider.CustomPickerValues!);
 
     [Fact]
     public void DatabaseProviderRequired_HasCustomPickerValues()
-        => Assert.NotEmpty(_options.DatabaseProviderRequired.CustomPickerValues);
+        => Assert.NotEmpty(_options.DatabaseProviderRequired.CustomPickerValues!);
 
     [Fact]
     public void IdentityDbProviderRequired_HasCustomPickerValues()
-        => Assert.NotEmpty(_options.IdentityDbProviderRequired.CustomPickerValues);
+        => Assert.NotEmpty(_options.IdentityDbProviderRequired.CustomPickerValues!);
 
     #endregion
 
@@ -203,7 +203,7 @@ public class AspNetOptionCoverageTests
 
     [Fact]
     public void PageType_HasCustomPickerValues()
-        => Assert.NotEmpty(_options.PageType.CustomPickerValues);
+        => Assert.NotEmpty(_options.PageType.CustomPickerValues!);
 
     #endregion
 

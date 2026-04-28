@@ -54,7 +54,13 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
         //     handled by WithDbContextStep via its T4 template which already includes the DbSet).
         //   A DbSet statement was produced (only set when GetDbContextInfo found no existing DbSet).
         //   The project path is available to initialise the Roslyn workspace.
-        if (string.IsNullOrEmpty(dbContextPath) || !File.Exists(dbContextPath) || string.IsNullOrEmpty(dbSetStatement) || string.IsNullOrEmpty(ProjectPath))
+        if (string.IsNullOrEmpty(dbContextPath) || !File.Exists(dbContextPath) || string.IsNullOrWhiteSpace(dbSetStatement) || string.IsNullOrEmpty(ProjectPath))
+        {
+            return true;
+        }
+
+        dbSetStatement = NormalizeDbSetStatement(dbSetStatement);
+        if (string.IsNullOrWhiteSpace(dbSetStatement))
         {
             return true;
         }
@@ -96,6 +102,8 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
     /// </summary>
     internal static string BuildCodeModifierConfig(string dbContextFileName, string dbSetStatement)
     {
+        dbSetStatement = NormalizeDbSetStatement(dbSetStatement);
+
         object config = new
         {
             Files = new[]
@@ -112,6 +120,18 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
         };
 
         return JsonSerializer.Serialize(config);
+    }
+
+    internal static string NormalizeDbSetStatement(string dbSetStatement)
+    {
+        if (string.IsNullOrWhiteSpace(dbSetStatement))
+        {
+            return string.Empty;
+        }
+
+        string normalized = dbSetStatement.Trim();
+        normalized = normalized.TrimEnd(';').TrimEnd();
+        return string.IsNullOrWhiteSpace(normalized) ? string.Empty : $"{normalized};";
     }
 
     /// <summary>

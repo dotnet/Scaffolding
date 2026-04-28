@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.EfController
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
     string dbContextName = Model.DbContextInfo.DbContextClassName;
-    string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
+    string entitySetName = string.IsNullOrWhiteSpace(Model.DbContextInfo.EntitySetVariableName) ? modelName : Model.DbContextInfo.EntitySetVariableName;
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();

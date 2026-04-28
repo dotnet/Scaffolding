@@ -194,6 +194,23 @@ public class AddDbSetToExistingContextStepTests : IDisposable
         Assert.Equal(dbSetStatement, block.GetString());
     }
 
+    [Fact]
+    public void BuildCodeModifierConfig_NormalizesTrailingSemicolons()
+    {
+        const string fileName = "AppDb.cs";
+        const string dbSetStatementWithExtraSemicolons = "public DbSet<MyApp.Models.Movie> Movie { get; set; } = default!;;;";
+
+        string json = AddDbSetToExistingContextStep.BuildCodeModifierConfig(fileName, dbSetStatementWithExtraSemicolons);
+
+        JsonDocument doc = JsonDocument.Parse(json);
+        JsonElement block = doc.RootElement
+            .GetProperty("Files")[0]
+            .GetProperty("ClassProperties")[0]
+            .GetProperty("Block");
+
+        Assert.Equal("public DbSet<MyApp.Models.Movie> Movie { get; set; } = default!;", block.GetString());
+    }
+
     // -----------------------------------------------------------------------
     // Scenario 9: ProjectPath is exposed as a settable property
     // -----------------------------------------------------------------------
@@ -284,6 +301,16 @@ public class AddDbSetToExistingContextStepTests : IDisposable
         const string fileContent = "public class Ctx { public string Foo { get; set; } }";
 
         Assert.False(AddDbSetToExistingContextStep.DbSetAlreadyPresent(fileContent, statement));
+    }
+
+    [Fact]
+    public void NormalizeDbSetStatement_EnsuresSingleTrailingSemicolon()
+    {
+        const string statement = "  public DbSet<Movie> Movie { get; set; } = default!;;  ";
+
+        string normalized = AddDbSetToExistingContextStep.NormalizeDbSetStatement(statement);
+
+        Assert.Equal("public DbSet<Movie> Movie { get; set; } = default!;", normalized);
     }
 }
 

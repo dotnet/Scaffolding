@@ -167,10 +167,11 @@ internal static class ScaffoldCliHelper
         ConfigureDotNetEnvironment(process.StartInfo);
 
         process.Start();
-        string output = await process.StandardOutput.ReadToEndAsync();
-        string error = await process.StandardError.ReadToEndAsync();
+        var stdoutTask = process.StandardOutput.ReadToEndAsync();
+        var stderrTask = process.StandardError.ReadToEndAsync();
+        await Task.WhenAll(stdoutTask, stderrTask);
         await process.WaitForExitAsync();
-        return (process.ExitCode, output, error);
+        return (process.ExitCode, stdoutTask.Result, stderrTask.Result);
     }
 
     /// <summary>

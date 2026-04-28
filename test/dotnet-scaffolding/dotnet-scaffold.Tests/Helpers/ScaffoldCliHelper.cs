@@ -193,10 +193,11 @@ internal static class ScaffoldCliHelper
         };
         ConfigureDotNetEnvironment(buildProcess.StartInfo);
         buildProcess.Start();
-        string output = await buildProcess.StandardOutput.ReadToEndAsync();
-        string error = await buildProcess.StandardError.ReadToEndAsync();
+        var buildStdoutTask = buildProcess.StandardOutput.ReadToEndAsync();
+        var buildStderrTask = buildProcess.StandardError.ReadToEndAsync();
+        await Task.WhenAll(buildStdoutTask, buildStderrTask);
         await buildProcess.WaitForExitAsync();
-        return (buildProcess.ExitCode, output, error);
+        return (buildProcess.ExitCode, buildStdoutTask.Result, buildStderrTask.Result);
     }
 
     /// <summary>
@@ -220,10 +221,11 @@ internal static class ScaffoldCliHelper
         };
         ConfigureDotNetEnvironment(buildProcess.StartInfo);
         buildProcess.Start();
-        string output = await buildProcess.StandardOutput.ReadToEndAsync();
-        string error = await buildProcess.StandardError.ReadToEndAsync();
+        var fwBuildStdoutTask = buildProcess.StandardOutput.ReadToEndAsync();
+        var fwBuildStderrTask = buildProcess.StandardError.ReadToEndAsync();
+        await Task.WhenAll(fwBuildStdoutTask, fwBuildStderrTask);
         await buildProcess.WaitForExitAsync();
-        return (buildProcess.ExitCode, output, error);
+        return (buildProcess.ExitCode, fwBuildStdoutTask.Result, fwBuildStderrTask.Result);
     }
 
     /// <summary>

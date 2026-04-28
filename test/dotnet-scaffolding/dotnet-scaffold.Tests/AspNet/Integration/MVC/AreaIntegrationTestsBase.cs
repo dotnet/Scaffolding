@@ -209,7 +209,8 @@ public abstract class AreaIntegrationTestsBase : IDisposable
     {
         var createdDirs = SetupFileSystemForSuccess();
         _mockFileSystem.Setup(fs => fs.DirectoryExists(It.IsAny<string>())).Returns(false);
-        _mockEnvironmentService.Setup(e => e.CurrentDirectory).Returns(@"C:\FallbackDir");
+        var fallbackDir = Path.Combine(Path.GetTempPath(), "FallbackDir");
+        _mockEnvironmentService.Setup(e => e.CurrentDirectory).Returns(fallbackDir);
 
         var step = CreateAreaScaffolderStep();
         step.Project = _testProjectPath;
@@ -218,7 +219,7 @@ public abstract class AreaIntegrationTestsBase : IDisposable
         await step.ExecuteAsync(_context);
 
         var areasDir = createdDirs.First(d => d.EndsWith("Areas") && !d.Contains("Reports"));
-        Assert.StartsWith(@"C:\FallbackDir", areasDir);
+        Assert.StartsWith(fallbackDir, areasDir);
     }
 
     [Fact]

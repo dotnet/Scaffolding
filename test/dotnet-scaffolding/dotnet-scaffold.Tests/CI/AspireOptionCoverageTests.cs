@@ -33,15 +33,15 @@ public class AspireOptionCoverageTests
 
     [Fact]
     public void CachingType_HasCustomPickerValues()
-        => Assert.NotEmpty(AspireOptions.CachingType.CustomPickerValues);
+        => Assert.NotEmpty(AspireOptions.CachingType.CustomPickerValues!);
 
     [Fact]
     public void CachingType_ValuesContainRedis()
-        => Assert.Contains("redis", AspireOptions.CachingType.CustomPickerValues);
+        => Assert.Contains("redis", AspireOptions.CachingType.CustomPickerValues!);
 
     [Fact]
     public void CachingType_ValuesContainRedisWithOutputCaching()
-        => Assert.Contains("redis-with-output-caching", AspireOptions.CachingType.CustomPickerValues);
+        => Assert.Contains("redis-with-output-caching", AspireOptions.CachingType.CustomPickerValues!);
 
     #endregion
 
@@ -61,15 +61,15 @@ public class AspireOptionCoverageTests
 
     [Fact]
     public void DatabaseType_HasCustomPickerValues()
-        => Assert.NotEmpty(AspireOptions.DatabaseType.CustomPickerValues);
+        => Assert.NotEmpty(AspireOptions.DatabaseType.CustomPickerValues!);
 
     [Fact]
     public void DatabaseType_ValuesContainNpgsqlEfCore()
-        => Assert.Contains("npgsql-efcore", AspireOptions.DatabaseType.CustomPickerValues);
+        => Assert.Contains("npgsql-efcore", AspireOptions.DatabaseType.CustomPickerValues!);
 
     [Fact]
     public void DatabaseType_ValuesContainSqlServerEfCore()
-        => Assert.Contains("sqlserver-efcore", AspireOptions.DatabaseType.CustomPickerValues);
+        => Assert.Contains("sqlserver-efcore", AspireOptions.DatabaseType.CustomPickerValues!);
 
     #endregion
 
@@ -89,19 +89,19 @@ public class AspireOptionCoverageTests
 
     [Fact]
     public void StorageType_HasCustomPickerValues()
-        => Assert.NotEmpty(AspireOptions.StorageType.CustomPickerValues);
+        => Assert.NotEmpty(AspireOptions.StorageType.CustomPickerValues!);
 
     [Fact]
     public void StorageType_ValuesContainAzureStorageQueues()
-        => Assert.Contains("azure-storage-queues", AspireOptions.StorageType.CustomPickerValues);
+        => Assert.Contains("azure-storage-queues", AspireOptions.StorageType.CustomPickerValues!);
 
     [Fact]
     public void StorageType_ValuesContainAzureStorageBlobs()
-        => Assert.Contains("azure-storage-blobs", AspireOptions.StorageType.CustomPickerValues);
+        => Assert.Contains("azure-storage-blobs", AspireOptions.StorageType.CustomPickerValues!);
 
     [Fact]
     public void StorageType_ValuesContainAzureDataTables()
-        => Assert.Contains("azure-data-tables", AspireOptions.StorageType.CustomPickerValues);
+        => Assert.Contains("azure-data-tables", AspireOptions.StorageType.CustomPickerValues!);
 
     #endregion
 
@@ -187,8 +187,8 @@ public class AspireOptionCoverageTests
         foreach (var option in allOptions)
         {
             Assert.NotNull(option.CustomPickerValues);
-            var distinct = option.CustomPickerValues.Distinct().ToList();
-            Assert.Equal(option.CustomPickerValues.Count(), distinct.Count);
+            var distinct = option.CustomPickerValues!.Distinct().ToList();
+            Assert.Equal(option.CustomPickerValues!.Count(), distinct.Count);
         }
     }
 

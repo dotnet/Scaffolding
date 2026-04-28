@@ -58,7 +58,7 @@ internal class AddPackagesStep : ScaffoldStep
             Package resolvedPackage = package;
             if (package.IsVersionRequired && !Prerelease)
             {
-                resolvedPackage = await package.WithResolvedVersionAsync(targetFramework, _nugetVersionHelper, _logger);
+                resolvedPackage = await package.WithResolvedVersionAsync(targetFramework, _nugetVersionHelper, ProjectPath, _logger);
                 packageVersion = resolvedPackage.PackageVersion;
             }
 

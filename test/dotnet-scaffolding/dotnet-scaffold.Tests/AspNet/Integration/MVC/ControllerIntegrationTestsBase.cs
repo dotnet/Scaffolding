@@ -27,6 +27,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
 /// Shared base class for MVC Controller (empty) integration tests across .NET versions.
 /// Subclasses provide the target framework via <see cref="TargetFramework"/>.
 /// </summary>
+[Trait("Suite", "ScaffoldIntegration")]
+[Trait("Family", "mvccontroller")]
 public abstract class ControllerIntegrationTestsBase : IDisposable
 {
     protected abstract string TargetFramework { get; }

@@ -27,6 +27,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
 /// Shared base class for Razor Page Empty (razorpage-empty) integration tests across .NET versions.
 /// Subclasses provide the target framework via <see cref="TargetFramework"/>.
 /// </summary>
+[Trait("Suite", "ScaffoldIntegration")]
+[Trait("Family", "razorpage-empty")]
 public abstract class RazorPageEmptyIntegrationTestsBase : IDisposable
 {
     protected abstract string TargetFramework { get; }

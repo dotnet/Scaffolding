@@ -1,0 +1,148 @@
+# Template: Scaffold Integration Matrix
+# Runs integration tests sharded by scaffolder Family, with all Framework TFMs per job.
+# Usage: Reference from azure-pipelines-pr.yml and azure-pipelines.yml
+
+parameters:
+- name: buildConfig
+  type: string
+  default: Release
+- name: poolName
+  type: string
+  default: ''
+- name: poolImage
+  type: string
+  default: ''
+- name: poolVmImage
+  type: string
+  default: ''
+
+jobs:
+# CLI Option Coverage gate — fast, non-matrix
+- job: CLIOptionCoverage
+  displayName: CLI Option Coverage Gate
+  timeoutInMinutes: 30
+  pool:
+    ${{ if ne(parameters.poolName, '') }}:
+      name: ${{ parameters.poolName }}
+      ${{ if ne(parameters.poolImage, '') }}:
+        image: ${{ parameters.poolImage }}
+    ${{ if ne(parameters.poolVmImage, '') }}:
+      vmImage: ${{ parameters.poolVmImage }}
+  steps:
+  - checkout: self
+    clean: true
+  - task: UseDotNet@2
+    displayName: Install .NET 8 SDK
+    inputs:
+      packageType: sdk
+      version: 8.x
+      installationPath: $(Build.SourcesDirectory)/.dotnet
+  - task: UseDotNet@2
+    displayName: Install .NET 9 SDK
+    inputs:
+      packageType: sdk
+      version: 9.x
+      installationPath: $(Build.SourcesDirectory)/.dotnet
+  - task: UseDotNet@2
+    displayName: Install .NET 10 SDK
+    inputs:
+      packageType: sdk
+      version: 10.x
+      installationPath: $(Build.SourcesDirectory)/.dotnet
+  - script: eng\common\build.cmd
+      -configuration ${{ parameters.buildConfig }}
+      -prepareMachine
+      -restore -build -ci
+    displayName: Build
+  - script: >
+      dotnet test test/dotnet-scaffolding/dotnet-scaffold.Tests/dotnet-scaffold.Tests.csproj
+      --no-build
+      -c ${{ parameters.buildConfig }}
+      --filter "FullyQualifiedName~CI."
+      --logger "trx;LogFileName=CLIOptionCoverage.trx"
+      --results-directory $(Build.ArtifactStagingDirectory)/TestResults
+    displayName: Run CLI Option Coverage Tests
+  - task: PublishTestResults@2
+    displayName: Publish CLI Option Coverage Results
+    condition: always()
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '$(Build.ArtifactStagingDirectory)/TestResults/*.trx'
+      testRunTitle: CLI Option Coverage
+
+# Integration test matrix — one job per scaffolder family
+- job: ScaffoldIntegration
+  displayName: 'Integration: '
+  dependsOn: CLIOptionCoverage
+  timeoutInMinutes: 60
+  pool:
+    ${{ if ne(parameters.poolName, '') }}:
+      name: ${{ parameters.poolName }}
+      ${{ if ne(parameters.poolImage, '') }}:
+        image: ${{ parameters.poolImage }}
+    ${{ if ne(parameters.poolVmImage, '') }}:
+      vmImage: ${{ parameters.poolVmImage }}
+  strategy:
+    matrix:
+      API:
+        _Family: 'apicontroller|minimalapi'
+        _FamilyLabel: API
+      Blazor:
+        _Family: 'blazor-crud|blazor-empty'
+        _FamilyLabel: Blazor
+      MVC:
+        _Family: 'mvccontroller|mvccontroller-crud|razorviews|razorview-empty|area'
+        _FamilyLabel: MVC
+      RazorPages:
+        _Family: 'razorpages-crud|razorpage-empty'
+        _FamilyLabel: RazorPages
+      Identity:
+        _Family: 'identity|blazor-identity'
+        _FamilyLabel: Identity
+      EntraId:
+        _Family: 'entra-id'
+        _FamilyLabel: EntraId
+      Aspire:
+        _Family: 'aspire-caching|aspire-database|aspire-storage'
+        _FamilyLabel: Aspire
+  steps:
+  - checkout: self
+    clean: true
+  - task: UseDotNet@2
+    displayName: Install .NET 8 SDK
+    inputs:
+      packageType: sdk
+      version: 8.x
+      installationPath: $(Build.SourcesDirectory)/.dotnet
+  - task: UseDotNet@2
+    displayName: Install .NET 9 SDK
+    inputs:
+      packageType: sdk
+      version: 9.x
+      installationPath: $(Build.SourcesDirectory)/.dotnet
+  - task: UseDotNet@2
+    displayName: Install .NET 10 SDK
+    inputs:
+      packageType: sdk
+      version: 10.x
+      installationPath: $(Build.SourcesDirectory)/.dotnet
+  - script: eng\common\build.cmd
+      -configuration ${{ parameters.buildConfig }}
+      -prepareMachine
+      -restore -build -ci
+    displayName: Build
+  - script: >
+      dotnet test test/dotnet-scaffolding/dotnet-scaffold.Tests/dotnet-scaffold.Tests.csproj
+      --no-build
+      -c ${{ parameters.buildConfig }}
+      --filter "Suite=ScaffoldIntegration&(Family=$(_Family))"
+      --logger "trx;LogFileName=Integration-$(_FamilyLabel).trx"
+      --results-directory $(Build.ArtifactStagingDirectory)/TestResults
+    displayName: 'Run $(_FamilyLabel) Integration Tests'
+  - task: PublishTestResults@2
+    displayName: Publish Integration Test Results
+    condition: always()
+    inputs:
+      testResultsFormat: VSTest
+      testResultsFiles: '$(Build.ArtifactStagingDirectory)/TestResults/*.trx'
+      testRunTitle: 'Integration - $(_FamilyLabel)'

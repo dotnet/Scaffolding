@@ -26,6 +26,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
 /// <summary>
 /// Shared base class for Entra ID integration tests across .NET versions (net10+).
 /// </summary>
+[Trait("Suite", "ScaffoldIntegration")]
+[Trait("Family", "entra-id")]
 public abstract class EntraIdIntegrationTestsBase : IDisposable
 {
     protected abstract string TargetFramework { get; }

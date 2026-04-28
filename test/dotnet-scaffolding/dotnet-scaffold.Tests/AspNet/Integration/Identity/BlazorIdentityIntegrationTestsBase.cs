@@ -24,6 +24,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
 /// Shared base class for Blazor Identity integration tests across .NET versions.
 /// Tests template file discovery and code modification configs on disk.
 /// </summary>
+[Trait("Suite", "ScaffoldIntegration")]
+[Trait("Family", "blazor-identity")]
 public abstract class BlazorIdentityIntegrationTestsBase : IDisposable
 {
     protected abstract string TargetFramework { get; }

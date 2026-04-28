@@ -175,6 +175,40 @@ internal static class ScaffoldCliHelper
     }
 
     /// <summary>
+    /// Runs an Aspire scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspire {command} {args}</c>.
+    /// </summary>
+    /// <param name="targetFramework">The target framework moniker to run the tool under (e.g., "net8.0", "net9.0", "net10.0", "net11.0").</param>
+    /// <param name="command">The Aspire sub-command (e.g., "caching", "database", "storage").</param>
+    /// <param name="args">CLI arguments for the command (e.g., "--type", "redis", "--apphost-project", path, "--project", path).</param>
+    /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
+    public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAspireAsync(string targetFramework, string command, params string[] args)
+    {
+        var scaffoldCsproj = GetScaffoldProjectPath();
+        var configuration = GetBuildConfiguration();
+        var cliArgs = $"run --no-build -c {configuration} --project \"{scaffoldCsproj}\" --framework {targetFramework} -- aspire {command} {string.Join(" ", args.Select(a => a.Contains(' ') ? $"\"{a}\"" : a))}";
+
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                Arguments = cliArgs,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        ConfigureDotNetEnvironment(process.StartInfo);
+
+        process.Start();
+        var aspireStdoutTask = process.StandardOutput.ReadToEndAsync();
+        var aspireStderrTask = process.StandardError.ReadToEndAsync();
+        await Task.WhenAll(aspireStdoutTask, aspireStderrTask);
+        await process.WaitForExitAsync();
+        return (process.ExitCode, aspireStdoutTask.Result, aspireStderrTask.Result);
+    }
+
+    /// <summary>
     /// Runs <c>dotnet build</c> in the specified working directory.
     /// </summary>
     public static async Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)

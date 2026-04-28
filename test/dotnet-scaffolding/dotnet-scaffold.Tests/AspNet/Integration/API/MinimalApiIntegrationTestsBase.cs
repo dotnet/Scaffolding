@@ -25,6 +25,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
 /// <summary>
 /// Shared base class for Minimal API integration tests across .NET versions.
 /// </summary>
+[Trait("Suite", "ScaffoldIntegration")]
+[Trait("Family", "minimalapi")]
 public abstract class MinimalApiIntegrationTestsBase : IDisposable
 {
     protected abstract string TargetFramework { get; }

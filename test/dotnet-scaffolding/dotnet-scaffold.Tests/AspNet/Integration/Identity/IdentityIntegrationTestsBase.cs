@@ -25,6 +25,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
 /// <summary>
 /// Shared base class for ASP.NET Core Identity integration tests across .NET versions.
 /// </summary>
+[Trait("Suite", "ScaffoldIntegration")]
+[Trait("Family", "identity")]
 public abstract class IdentityIntegrationTestsBase : IDisposable
 {
     protected abstract string TargetFramework { get; }

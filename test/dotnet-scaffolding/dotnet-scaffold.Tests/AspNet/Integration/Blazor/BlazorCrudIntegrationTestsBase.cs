@@ -27,6 +27,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
 /// <summary>
 /// Shared base class for Blazor CRUD integration tests across .NET versions.
 /// </summary>
+[Trait("Suite", "ScaffoldIntegration")]
+[Trait("Family", "blazor-crud")]
 public abstract class BlazorCrudIntegrationTestsBase : IDisposable
 {
     protected abstract string TargetFramework { get; }

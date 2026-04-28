@@ -28,6 +28,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
 /// with no templates, no NuGet packages, and no code modifications.
 /// Subclasses provide the target framework via <see cref="TargetFramework"/>.
 /// </summary>
+[Trait("Suite", "ScaffoldIntegration")]
+[Trait("Family", "area")]
 public abstract class AreaIntegrationTestsBase : IDisposable
 {
     protected abstract string TargetFramework { get; }

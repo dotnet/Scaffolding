@@ -25,6 +25,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
 /// <summary>
 /// Shared base class for API Controller with EF (CRUD) integration tests across .NET versions.
 /// </summary>
+[Trait("Suite", "ScaffoldIntegration")]
+[Trait("Family", "apicontroller")]
 public abstract class ApiControllerIntegrationTestsBase : IDisposable
 {
     protected abstract string TargetFramework { get; }

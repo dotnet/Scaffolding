@@ -185,3 +185,13 @@ stages:
             displayName: Build
             condition: succeeded()
 
+- ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+  - stage: integration
+    displayName: Scaffold Integration Matrix
+    dependsOn: build
+    jobs:
+    - template: /eng/pipelines/scaffold-integration-matrix.yml
+      parameters:
+        buildConfig: Release
+        poolVmImage: windows-latest
+

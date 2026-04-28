@@ -31,6 +31,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
 /// operations for a given model.
 /// Subclasses provide the target framework via <see cref="TargetFramework"/>.
 /// </summary>
+[Trait("Suite", "ScaffoldIntegration")]
+[Trait("Family", "razorviews")]
 public abstract class RazorViewsIntegrationTestsBase : IDisposable
 {
     protected abstract string TargetFramework { get; }

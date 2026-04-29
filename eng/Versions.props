@@ -103,12 +103,12 @@
     <MicrosoftBuildPackageVersion9>17.13.26</MicrosoftBuildPackageVersion9>
     <MicrosoftBuildPackageVersion8>17.11.48</MicrosoftBuildPackageVersion8>
 
-    <MicrosoftBuildTasksCorePackageVersion>18.3.3</MicrosoftBuildTasksCorePackageVersion>
+    <MicrosoftBuildTasksCorePackageVersion>18.4.0</MicrosoftBuildTasksCorePackageVersion>
     <MicrosoftBuildTasksCorePackageVersion9>17.13.26</MicrosoftBuildTasksCorePackageVersion9>
     <MicrosoftBuildTasksCorePackageVersion8>17.11.48</MicrosoftBuildTasksCorePackageVersion8>
 
     <!-- Microsoft.Build.Utilities - TFM-specific versions -->
-    <MicrosoftBuildUtilitiesCorePackageVersion>18.3.3</MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>18.4.0</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion9>17.13.26</MicrosoftBuildUtilitiesCorePackageVersion9>
     <MicrosoftBuildUtilitiesCorePackageVersion8>17.11.48</MicrosoftBuildUtilitiesCorePackageVersion8>
     <MicrosoftBuildLocatorPackageVersion>1.9.1</MicrosoftBuildLocatorPackageVersion>

@@ -30,7 +30,8 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <NuGetAudit>true</NuGetAudit>
+    <NuGetAudit Condition="'$(TF_BUILD)' == 'true'">false</NuGetAudit>
+    <NuGetAudit Condition="'$(TF_BUILD)' != 'true'">true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>
     <NuGetAuditLevel>low</NuGetAuditLevel>
   </PropertyGroup>

@@ -204,7 +204,7 @@ public class BlazorIdentityHelperTests
         {
             ProjectInfo = new ProjectInfo(Path.Combine("test", "project", "TestProject.csproj")),
             IdentityNamespace = "TestNamespace",
-            BaseOutputPath = "Components\\Account",
+            BaseOutputPath = Path.Combine("Components", "Account"),
             UserClassName = "ApplicationUser",
             UserClassNamespace = "TestNamespace.Data",
             DbContextInfo = new DbContextInfo()

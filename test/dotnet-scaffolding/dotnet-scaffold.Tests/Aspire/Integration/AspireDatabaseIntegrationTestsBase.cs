@@ -17,6 +17,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.Aspire.Integration;
 [Trait("Family", "aspire-database")]
 public abstract class AspireDatabaseIntegrationTestsBase : IDisposable
 {
+    private const string SkipReason = "Aspire tests on separate branch";
+
     protected abstract string TargetFramework { get; }
     protected abstract string TestClassName { get; }
 
@@ -80,7 +82,7 @@ app.Run();
         File.WriteAllText(Path.Combine(_workerDir, "Program.cs"), WorkerProgramCs);
     }
 
-    [Fact]
+    [Fact(Skip = SkipReason)]
     public async Task AspireDatabase_FailsWithMissingType()
     {
         SetupProjects();
@@ -99,7 +101,7 @@ app.Run();
         }
     }
 
-    [Fact]
+    [Fact(Skip = SkipReason)]
     public async Task AspireDatabase_FailsWithInvalidType()
     {
         SetupProjects();
@@ -114,7 +116,7 @@ app.Run();
         Assert.NotEqual(0, exitCode);
     }
 
-    [Fact]
+    [Fact(Skip = SkipReason)]
     public async Task AspireDatabase_FailsWithMissingAppHostProject()
     {
         SetupProjects();
@@ -133,7 +135,7 @@ app.Run();
         }
     }
 
-    [Fact]
+    [Fact(Skip = SkipReason)]
     public async Task AspireDatabase_FailsWithMissingWorkerProject()
     {
         SetupProjects();
@@ -152,7 +154,7 @@ app.Run();
         }
     }
 
-    [Theory]
+    [Theory(Skip = SkipReason)]
     [InlineData("npgsql-efcore")]
     [InlineData("sqlserver-efcore")]
     public async Task AspireDatabase_AcceptsValidType(string dbType)

@@ -18,6 +18,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.Aspire.Integration;
 [Trait("Family", "aspire-caching")]
 public abstract class AspireCachingIntegrationTestsBase : IDisposable
 {
+    private const string SkipReason = "Aspire tests on separate branch";
+
     protected abstract string TargetFramework { get; }
     protected abstract string TestClassName { get; }
 
@@ -81,7 +83,7 @@ app.Run();
         File.WriteAllText(Path.Combine(_workerDir, "Program.cs"), WorkerProgramCs);
     }
 
-    [Fact]
+    [Fact(Skip = SkipReason)]
     public async Task AspireCaching_FailsWithMissingType()
     {
         SetupProjects();
@@ -102,7 +104,7 @@ app.Run();
         }
     }
 
-    [Fact]
+    [Fact(Skip = SkipReason)]
     public async Task AspireCaching_FailsWithInvalidType()
     {
         SetupProjects();
@@ -117,7 +119,7 @@ app.Run();
         Assert.NotEqual(0, exitCode);
     }
 
-    [Fact]
+    [Fact(Skip = SkipReason)]
     public async Task AspireCaching_FailsWithMissingAppHostProject()
     {
         SetupProjects();
@@ -136,7 +138,7 @@ app.Run();
         }
     }
 
-    [Fact]
+    [Fact(Skip = SkipReason)]
     public async Task AspireCaching_FailsWithMissingWorkerProject()
     {
         SetupProjects();
@@ -155,7 +157,7 @@ app.Run();
         }
     }
 
-    [Theory]
+    [Theory(Skip = SkipReason)]
     [InlineData("redis")]
     [InlineData("redis-with-output-caching")]
     public async Task AspireCaching_AcceptsValidType(string cachingType)

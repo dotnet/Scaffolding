@@ -3,6 +3,7 @@
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.Aspire.Integration;
 
+[Skip("Aspire tests on separate branch")]
 public class AspireCachingNet8IntegrationTests : AspireCachingIntegrationTestsBase
 {
     protected override string TargetFramework => "net8.0";

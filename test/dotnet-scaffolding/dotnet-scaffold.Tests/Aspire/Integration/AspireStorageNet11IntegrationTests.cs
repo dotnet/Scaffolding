@@ -3,6 +3,7 @@
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.Aspire.Integration;
 
+[Skip("Aspire tests on separate branch")]
 public class AspireStorageNet11IntegrationTests : AspireStorageIntegrationTestsBase
 {
     protected override string TargetFramework => "net11.0";

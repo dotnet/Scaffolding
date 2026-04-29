@@ -4,10 +4,10 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
     <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageVersion Include="Azure.Identity" Version="$(AzureIdentityVersion)" />
     <PackageVersion Include="Humanizer.Core" Version="$(HumanizerCorePackageVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Build.Locator" Version="$(MicrosoftBuildLocatorPackageVersion)" />
     <PackageVersion Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageVersion Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildPackageVersion)" />
@@ -51,7 +51,6 @@
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataVersion)" />
     <PackageVersion Include="xunit.skippablefact" Version="$(XunitSkippableFactPackageVersion)" />
   </ItemGroup>
-
   <ItemGroup>
     <!-- Pinned transitive package versions for Component Governance alerts -->
     <PackageVersion Include="System.Formats.Asn1" Version="$(SystemFormatsAsn1Version)" />

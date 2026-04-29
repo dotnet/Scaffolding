@@ -86,6 +86,31 @@ extends:
             steps:
             - checkout: self
               clean: true
+            # Install additional .NET SDKs needed by integration tests.
+            # The global.json SDK is .NET 11 preview, but the multi-targeted
+            # dotnet-scaffold tool also builds for net8.0, net9.0, and net10.0.
+            # Integration tests invoke 'dotnet run --framework net8.0/net9.0/net10.0'
+            # which requires those runtimes AND matching SDKs (with MSBuild.dll)
+            # to be present on the agent.
+            - task: UseDotNet@2
+              displayName: Install .NET 8 SDK
+              inputs:
+                packageType: sdk
+                version: 8.x
+                installationPath: $(Build.SourcesDirectory)/.dotnet
+            - task: UseDotNet@2
+              displayName: Install .NET 9 SDK
+              inputs:
+                packageType: sdk
+                version: 9.x
+                installationPath: $(Build.SourcesDirectory)/.dotnet
+            - task: UseDotNet@2
+              displayName: Install .NET 10 SDK
+              inputs:
+                packageType: sdk
+                version: 10.x
+                includePreviewVersions: true
+                installationPath: $(Build.SourcesDirectory)/.dotnet
             # Use utility script to run script command dependent on agent OS.
             - script: $(_Script)
                 -configuration $(_BuildConfig)
@@ -93,6 +118,16 @@ extends:
                 $(_InternalBuildArgs)
                 $(_ValidateSdkArgs)
               displayName: Windows Build / Publish
+
+    - stage: integration
+      displayName: Scaffold Integration Matrix
+      dependsOn: build
+      jobs:
+      - template: /eng/pipelines/scaffold-integration-matrix.yml@self
+        parameters:
+          buildConfig: Release
+          poolName: $(DncEngInternalBuildPool)
+          poolImage: 1es-windows-2022
 
     - template: eng/common/templates-official/post-build/post-build.yml@self
       parameters:

@@ -2,6 +2,7 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using System.Text;
 
 namespace Microsoft.DotNet.Scaffolding.Internal.Services;
 
@@ -41,7 +42,7 @@ public class FileSystem : IFileSystem
     /// <inheritdoc />
     public void WriteAllText(string filePath, string content)
     {
-        File.WriteAllText(filePath, content);
+        File.WriteAllText(filePath, content, new UTF8Encoding(false));
     }
 
     /// <inheritdoc />
@@ -53,7 +54,7 @@ public class FileSystem : IFileSystem
     /// <inheritdoc />
     public void WriteAllLines(string filePath, string[] content)
     {
-        File.WriteAllLines(filePath, content);
+        File.WriteAllLines(filePath, content, new UTF8Encoding(false));
     }
 
     /// <inheritdoc />

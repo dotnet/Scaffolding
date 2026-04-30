@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.Project;
 using Microsoft.DotNet.MSIdentity.Properties;
@@ -47,7 +48,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                     {
                         File.Copy(filePath, filePath + "%");
                     }
-                    File.WriteAllText(filePath, fileContent);
+                    File.WriteAllText(filePath, fileContent, new UTF8Encoding(false));
                 }
             }
         }

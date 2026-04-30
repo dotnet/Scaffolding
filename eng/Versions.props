@@ -21,13 +21,13 @@
     <MicrosoftEntityFrameworkCorePackageVersion10>10.0.3</MicrosoftEntityFrameworkCorePackageVersion10>
     <MicrosoftEntityFrameworkCorePackageVersion9>9.0.13</MicrosoftEntityFrameworkCorePackageVersion9>
     <MicrosoftEntityFrameworkCorePackageVersion8>8.0.24</MicrosoftEntityFrameworkCorePackageVersion8>
-
+    
     <!-- Microsoft.EntityFrameworkCore.SqlServer - TFM-specific versions -->
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>11.0.0-preview.1.26104.118</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion10>10.0.3</MicrosoftEntityFrameworkCoreSqlServerPackageVersion10>
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion9>9.0.13</MicrosoftEntityFrameworkCoreSqlServerPackageVersion9>
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion8>8.0.24</MicrosoftEntityFrameworkCoreSqlServerPackageVersion8>
-
+    
     <!-- Microsoft.Extensions.DependencyInjection -->
     <MicrosoftExtensionsDependencyInjectionPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsDependencyInjectionPackageVersion>
     <!-- Microsoft.Extensions.FileProviders.Physical -->
@@ -70,8 +70,6 @@
     <MicrosoftExtensionsConfigurationBinderPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsConfigurationBinderPackageVersion>
     <!-- Microsoft.Extensions.Configuration.CommandLine -->
     <MicrosoftExtensionsConfigurationCommandLinePackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsConfigurationCommandLinePackageVersion>
-    <!-- System.Security.Cryptography.Xml -->
-    <SystemSecurityCryptographyXmlVersion>9.0.15</SystemSecurityCryptographyXmlVersion>
     <!-- System.Text.Json -->
     <SystemTextJsonPackageVersion>11.0.0-preview.1.26104.118</SystemTextJsonPackageVersion>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
@@ -103,11 +101,11 @@
     <MicrosoftBuildPackageVersion>18.3.3</MicrosoftBuildPackageVersion>
     <MicrosoftBuildPackageVersion9>17.13.26</MicrosoftBuildPackageVersion9>
     <MicrosoftBuildPackageVersion8>17.11.48</MicrosoftBuildPackageVersion8>
-
+    
     <MicrosoftBuildTasksCorePackageVersion>18.3.3</MicrosoftBuildTasksCorePackageVersion>
     <MicrosoftBuildTasksCorePackageVersion9>17.13.26</MicrosoftBuildTasksCorePackageVersion9>
     <MicrosoftBuildTasksCorePackageVersion8>17.11.48</MicrosoftBuildTasksCorePackageVersion8>
-
+    
     <!-- Microsoft.Build.Utilities - TFM-specific versions -->
     <MicrosoftBuildUtilitiesCorePackageVersion>18.3.3</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion9>17.13.26</MicrosoftBuildUtilitiesCorePackageVersion9>

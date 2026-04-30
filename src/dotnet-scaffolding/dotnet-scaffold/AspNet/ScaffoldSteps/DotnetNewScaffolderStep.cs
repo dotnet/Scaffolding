@@ -1,6 +1,5 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using System.Globalization;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
@@ -132,8 +131,8 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
         }
         else
         {
-            //Component names cannot start with a lowercase character, using CurrentCulture to capitalize the first letter
-            FileName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(FileName);
+            //Component names cannot start with a lowercase character, capitalize the first letter only
+            FileName = char.ToUpper(FileName[0]) + FileName.Substring(1);
         }
 
         return new DotnetNewStepSettings

@@ -11,6 +11,7 @@
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string pageModelFullName = string.IsNullOrEmpty(Model.RazorPageNamespace) ? "IndexModel" : $"{Model.RazorPageNamespace}.IndexModel";
 #>
 @page
@@ -55,9 +56,9 @@ foreach (var property in entityProperties)
 }
 #>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.<#= primaryKeyName #>">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.<#= primaryKeyName #>">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.<#= primaryKeyName #>">Delete</a>
+                <a asp-page="./Edit" asp-route-<#= primaryKeyNameLowerInv #>="@item.<#= primaryKeyName #>">Edit</a> |
+                <a asp-page="./Details" asp-route-<#= primaryKeyNameLowerInv #>="@item.<#= primaryKeyName #>">Details</a> |
+                <a asp-page="./Delete" asp-route-<#= primaryKeyNameLowerInv #>="@item.<#= primaryKeyName #>">Delete</a>
             </td>
         </tr>
 }

@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string pageModelFullName = string.IsNullOrEmpty(Model.RazorPageNamespace) ? "DetailsModel" : $"{Model.RazorPageNamespace}.DetailsModel";
 
             this.Write("@page\r\n@model ");
@@ -59,7 +60,9 @@ foreach (var property in entityProperties)
 
 }
 
-            this.Write("    </dl>\r\n</div>\r\n<div>\r\n    <a asp-page=\"./Edit\" asp-route-id=\"@Model.");
+            this.Write("    </dl>\r\n</div>\r\n<div>\r\n    <a asp-page=\"./Edit\" asp-route-");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write("=\"@Model.");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));

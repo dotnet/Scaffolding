@@ -33,6 +33,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string pageModelFullName = string.IsNullOrEmpty(Model.RazorPageNamespace) ? "IndexModel" : $"{Model.RazorPageNamespace}.IndexModel";
 
             this.Write("@page\r\n@model ");
@@ -66,11 +67,17 @@ foreach (var property in entityProperties)
 
 }
 
-            this.Write("            <td>\r\n                <a asp-page=\"./Edit\" asp-route-id=\"@item.");
+            this.Write("            <td>\r\n                <a asp-page=\"./Edit\" asp-route-");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write("=\"@item.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write("\">Edit</a> |\r\n                <a asp-page=\"./Details\" asp-route-id=\"@item.");
+            this.Write("\">Edit</a> |\r\n                <a asp-page=\"./Details\" asp-route-");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write("=\"@item.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write("\">Details</a> |\r\n                <a asp-page=\"./Delete\" asp-route-id=\"@item.");
+            this.Write("\">Details</a> |\r\n                <a asp-page=\"./Delete\" asp-route-");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
+            this.Write("=\"@item.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write("\">Delete</a>\r\n            </td>\r\n        </tr>\r\n}\r\n    </tbody>\r\n</table>\r\n");
             return this.GenerationEnvironment.ToString();

@@ -177,7 +177,21 @@ internal static class EfControllerScaffolderBuilderExtensions
 
                 //TODO add extensions if 'TemplateFoldersUtilities' is not reworked.
                 var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4TemplatesForTargetFramework(["Views"], viewModel.ProjectInfo.ProjectPath);
-                var viewTemplateProperties = ViewHelper.GetTextTemplatingProperties(allT4TemplatePaths, viewModel);
+
+                // Use controller root name for view folder to match MVC conventions
+                // e.g. BlogsController -> /Views/Blogs/
+                string? viewFolderName = null;
+                context.Properties.TryGetValue(nameof(EfControllerModel), out var efControllerModelObj);
+                if (efControllerModelObj is EfControllerModel efControllerModel)
+                {
+                    var controllerName = efControllerModel.ControllerName;
+                    const string controllerSuffix = "Controller";
+                    viewFolderName = controllerName.EndsWith(controllerSuffix, StringComparison.Ordinal)
+                        ? controllerName.Substring(0, controllerName.Length - controllerSuffix.Length)
+                        : controllerName;
+                }
+
+                var viewTemplateProperties = ViewHelper.GetTextTemplatingProperties(allT4TemplatePaths, viewModel, viewFolderName);
                 if (viewTemplateProperties.Any())
                 {
                     step.TextTemplatingProperties = viewTemplateProperties;

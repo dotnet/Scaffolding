@@ -68,7 +68,7 @@
     <!-- Microsoft.Extensions.Configuration.CommandLine -->
     <MicrosoftExtensionsConfigurationCommandLinePackageVersion>11.0.0-preview.5.26251.112</MicrosoftExtensionsConfigurationCommandLinePackageVersion>
     <!-- System.Security.Cryptography.Xml -->
-    <SystemSecurityCryptographyXmlVersion>9.0.15</SystemSecurityCryptographyXmlVersion>
+    <SystemSecurityCryptographyXmlVersion>10.0.1</SystemSecurityCryptographyXmlVersion>
     <!-- System.Text.Json -->
     <SystemTextJsonPackageVersion>11.0.0-preview.5.26251.112</SystemTextJsonPackageVersion>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
@@ -156,6 +156,6 @@
     <MicrosoftIdentityClientExtensionsMsalVersion>4.73.1</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>7.3.1</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0</SystemCommandLineVersion>
-    <SystemSecurityCryptographyProtectedDataVersion>9.0.11</SystemSecurityCryptographyProtectedDataVersion>
+    <SystemSecurityCryptographyProtectedDataVersion>10.0.1</SystemSecurityCryptographyProtectedDataVersion>
   </PropertyGroup>
 </Project>

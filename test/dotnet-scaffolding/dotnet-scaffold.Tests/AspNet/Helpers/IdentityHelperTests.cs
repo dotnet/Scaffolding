@@ -144,7 +144,7 @@ public class IdentityHelperTests
         {
             ProjectInfo = new ProjectInfo(Path.Combine("test", "project", "TestProject.csproj")),
             IdentityNamespace = "TestNamespace",
-            BaseOutputPath = "Areas\\Identity",
+            BaseOutputPath = Path.Combine("Areas", "Identity"),
             UserClassName = "ApplicationUser",
             UserClassNamespace = "TestNamespace.Data",
             DbContextInfo = new DbContextInfo()

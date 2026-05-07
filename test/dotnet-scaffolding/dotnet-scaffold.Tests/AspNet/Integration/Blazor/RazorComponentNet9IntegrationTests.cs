@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -405,22 +404,22 @@ public class RazorComponentNet9IntegrationTests : IDisposable
 
     #endregion
 
-    #region DotnetNewScaffolderStep — Title Casing
+    #region DotnetNewScaffolderStep — First Character Uppercasing
 
     [Theory]
     [InlineData("product", "Product")]
-    [InlineData("productCard", "Productcard")]
+    [InlineData("productCard", "ProductCard")]
     [InlineData("UPPERCASE", "UPPERCASE")]
     [InlineData("a", "A")]
-    public void TitleCase_CapitalizesFirstLetter(string input, string expected)
+    public void FirstCharUppercase_CapitalizesFirstLetter(string input, string expected)
     {
-        // The step uses CultureInfo.CurrentCulture.TextInfo.ToTitleCase to capitalize the first letter
-        string result = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input);
+        // The step only capitalizes the first character, preserving the rest
+        string result = char.ToUpper(input[0]) + input.Substring(1);
         Assert.Equal(expected, result);
     }
 
     [Fact]
-    public async Task ExecuteAsync_TitleCasesFileName_WhenLowercaseProvided()
+    public async Task ExecuteAsync_CapitalizesFirstChar_WhenLowercaseProvided()
     {
         // Arrange
         string componentsDir = Path.Combine(_testProjectDir, "Components");
@@ -440,13 +439,12 @@ public class RazorComponentNet9IntegrationTests : IDisposable
         // Act
         await step.ExecuteAsync(_context, CancellationToken.None);
 
-        // Assert — after validation, FileName should be title-cased
-        string expected = CultureInfo.CurrentCulture.TextInfo.ToTitleCase("myComponent");
-        Assert.Equal(expected, step.FileName);
+        // Assert — after validation, only first char should be uppercased
+        Assert.Equal("MyComponent", step.FileName);
     }
 
     [Fact]
-    public async Task ExecuteAsync_AppliesTitleCase_WhenAlreadyCapitalized()
+    public async Task ExecuteAsync_PreservesFileName_WhenAlreadyCapitalized()
     {
         // Arrange
         string componentsDir = Path.Combine(_testProjectDir, "Components");
@@ -466,9 +464,8 @@ public class RazorComponentNet9IntegrationTests : IDisposable
         // Act
         await step.ExecuteAsync(_context, CancellationToken.None);
 
-        // Assert — ToTitleCase treats "ProductCard" as a single word, lowering inner capitalization
-        string expected = CultureInfo.CurrentCulture.TextInfo.ToTitleCase("ProductCard");
-        Assert.Equal(expected, step.FileName);
+        // Assert — already capitalized, name should be preserved
+        Assert.Equal("ProductCard", step.FileName);
     }
 
     #endregion

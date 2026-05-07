@@ -249,7 +249,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             //Blazor projects with Individual Auth enabled ship with a custom Account\Logout.cshtml file. If found, don't add the Account\Logout template shipped with dotnet/Scaffolding (based on aspnetcore\Identity's template).
             if (templateModel.IsBlazorProject)
             {
-                string logoutFilePath = $"{_applicationInfo.ApplicationBasePath}\\Areas\\Identity\\Pages\\Account\\LogOut.cshtml";
+                string logoutFilePath = Path.Combine(_applicationInfo.ApplicationBasePath, "Areas", "Identity", "Pages", "Account", "LogOut.cshtml");
                 if (File.Exists(logoutFilePath))
                 {
                     //remove Account\Logout.cshtml and Account\Logout.cshtml.cs files. This is not super performant but doesn't need to be.

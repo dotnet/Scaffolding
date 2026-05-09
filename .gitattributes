@@ -32,14 +32,6 @@
 *.less text=auto
 *.js text=auto
 *.json text
-*.cshtml text=auto
-*.tt text=auto
-*.yml text=auto
-*.yaml text=auto
-*.txt text=auto
-*.md text=auto
-*.ps1 text=auto
-*.cmd text=auto
 *.lisp text=auto
 *.clj text=auto
 *.sql text=auto
@@ -53,8 +45,6 @@
 *.hs text=auto
 
 *.csproj text=auto
-*.props text=auto
-*.targets text=auto
 *.vbproj text=auto
 *.fsproj text=auto
 *.dbproj text=auto

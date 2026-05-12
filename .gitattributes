@@ -31,7 +31,7 @@
 *.sass text=auto
 *.less text=auto
 *.js text=auto
-*.json text
+*.json diff
 *.lisp text=auto
 *.clj text=auto
 *.sql text=auto

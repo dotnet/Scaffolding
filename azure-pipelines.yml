@@ -1,3 +1,9 @@
+parameters:
+- name: stabilizePackageVersion
+  displayName: 'Stabilize Package Version (produce stable release)'
+  type: boolean
+  default: false
+
 trigger:
   batch: true
   branches:
@@ -73,6 +79,7 @@ extends:
             - _InternalBuildArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
                 /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
                 /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+                /p:StabilizePackageVersion=${{ parameters.stabilizePackageVersion }}
 
             strategy:
               matrix:

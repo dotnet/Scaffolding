@@ -12,7 +12,7 @@ variables:
   - name: TeamName
     value: DotNetCore
   - name: _PublishUsingPipelines
-    value: true
+    value: false
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - template: /eng/common/templates-official/variables/pool-providers.yml@self
@@ -51,7 +51,7 @@ extends:
           enableMicrobuild: true
           enablePublishBuildArtifacts: true
           enablePublishTestResults: true
-          enablePublishBuildAssets: true
+          enablePublishBuildAssets: false
           enablePublishUsingPipelines: ${{ variables._PublishUsingPipelines }}
           enableTelemetry: true
           helixRepo: dotnet/scaffolding

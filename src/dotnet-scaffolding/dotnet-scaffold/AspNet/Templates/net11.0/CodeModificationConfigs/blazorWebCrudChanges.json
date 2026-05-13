@@ -15,7 +15,7 @@
             },
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",
-              "CheckBlock": "builder.Services.AddDbContextFactory",
+              "CheckBlock": "builder.Services.AddDbContext",
               "Block": "builder.Services.AddDbContextFactory<$(DbContextName)>(options => options.$(UseDbMethod))",
               "LeadingTrivia": {
                 "Newline": true
@@ -23,6 +23,13 @@
             },
             {
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContextFactory",
+              "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
               "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
               "LeadingTrivia": {
                 "Newline": true
@@ -52,6 +59,11 @@
           "ReplaceSnippet": [ "app.UseHttpsRedirection();" ],
           "Block": "app.UseStatusCodePagesWithReExecute(\"/not-found\", createScopeForStatusCodePages: true);\n\napp.UseHttpsRedirection();",
           "CheckBlock": "UseStatusCodePagesWithReExecute"
+        },
+        {
+          "ReplaceSnippet": [".AddDbContext<"],
+          "Block": ".AddDbContextFactory<",
+          "CheckBlock": ".AddDbContextFactory<"
         }
       ],
       "Usings": [

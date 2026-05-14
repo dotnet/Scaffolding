@@ -44,7 +44,7 @@
     <!-- Microsoft.Extensions.FileProviders.Embedded -->
     <MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>11.0.0-preview.5.26261.101</MicrosoftExtensionsFileProvidersEmbeddedPackageVersion>
     <!-- Microsoft.Extensions.Hosting -->
-    <MicrosoftExtensionsHostingPackageVersion>11.0.0-preview.1.26104.118</MicrosoftExtensionsHostingPackageVersion>
+    <MicrosoftExtensionsHostingPackageVersion>11.0.0-preview.4.26230.115</MicrosoftExtensionsHostingPackageVersion>
     <!-- Microsoft.Extensions.Logging.Console -->
     <MicrosoftExtensionsLoggingConsolePackageVersion>11.0.0-preview.5.26261.101</MicrosoftExtensionsLoggingConsolePackageVersion>
     <!-- Microsoft.Extensions.Logging.Debug -->

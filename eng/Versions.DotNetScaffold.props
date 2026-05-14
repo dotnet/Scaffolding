@@ -11,5 +11,9 @@
     -->
     <StabilizePackageVersion Condition="'$(StabilizePackageVersion)' == ''">false</StabilizePackageVersion>
     <DotNetFinalVersionKind Condition="'$(StabilizePackageVersion)' == 'true'">release</DotNetFinalVersionKind>
+    <!-- Suppress NU5104 for stable releases: the tool intentionally targets net11.0 whose
+         Microsoft.Extensions.* packages are still in preview. The warning is not actionable
+         until net11.0 ships stable framework packages. -->
+    <NoWarn Condition="'$(StabilizePackageVersion)' == 'true'">$(NoWarn);NU5104</NoWarn>
   </PropertyGroup>
 </Project>

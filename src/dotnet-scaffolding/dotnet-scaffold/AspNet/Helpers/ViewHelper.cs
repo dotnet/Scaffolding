@@ -58,7 +58,9 @@ internal class ViewHelper
                         continue;
                     }
 
-                    string folderName = viewFolderName ?? viewModel.ModelInfo.ModelTypeName;
+                    string folderName = viewFolderName is not null && IsValidFolderName(viewFolderName)
+                        ? viewFolderName
+                        : viewModel.ModelInfo.ModelTypeName;
                     string baseOutputPath = GetBaseOutputPath(folderName, viewModel.ProjectInfo.ProjectPath);
                     string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.ViewExtension}");
                     textTemplatingProperties.Add(new()
@@ -154,5 +156,13 @@ internal class ViewHelper
     {
         string projectBasePath = Path.GetDirectoryName(projectPath) ?? Directory.GetCurrentDirectory();
         return Path.Combine(projectBasePath, "Views", modelName);
+    }
+
+    private static bool IsValidFolderName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        if (name == "." || name == "..") return false;
+        if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) return false;
+        return true;
     }
 }

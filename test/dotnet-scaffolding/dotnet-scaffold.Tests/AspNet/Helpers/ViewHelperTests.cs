@@ -305,4 +305,85 @@ public class ViewHelperTests
         // Assert
         Assert.Equal("Index.tt", ViewHelper.IndexTemplate);
     }
+
+    [Fact]
+    public void GetTextTemplatingProperties_WithViewFolderName_UsesViewFolderNameInOutputPath()
+    {
+        // Arrange
+        string projectPath = Path.Combine("test", "project", "TestProject.csproj");
+        string templatePath = Path.Combine("templates", ViewHelper.CreateTemplate);
+        List<string> templatePaths = [templatePath];
+
+        ViewModel viewModel = new ViewModel
+        {
+            PageType = "Create",
+            ModelInfo = new ModelInfo { ModelTypeName = "Blog" },
+            ProjectInfo = new ProjectInfo(projectPath),
+            DbContextInfo = new DbContextInfo()
+        };
+
+        // Act
+        IEnumerable<TextTemplatingProperty> result = ViewHelper.GetTextTemplatingProperties(templatePaths, viewModel, "Blogs");
+
+        // Assert
+        TextTemplatingProperty? property = result.FirstOrDefault();
+        Assert.NotNull(property);
+        Assert.Contains("Blogs", property.OutputPath);
+        Assert.DoesNotContain("Blog" + Path.DirectorySeparatorChar, property.OutputPath.Replace("Blogs", string.Empty));
+    }
+
+    [Fact]
+    public void GetTextTemplatingProperties_WithNullViewFolderName_FallsBackToModelTypeName()
+    {
+        // Arrange
+        string projectPath = Path.Combine("test", "project", "TestProject.csproj");
+        string templatePath = Path.Combine("templates", ViewHelper.CreateTemplate);
+        List<string> templatePaths = [templatePath];
+
+        ViewModel viewModel = new ViewModel
+        {
+            PageType = "Create",
+            ModelInfo = new ModelInfo { ModelTypeName = "Product" },
+            ProjectInfo = new ProjectInfo(projectPath),
+            DbContextInfo = new DbContextInfo()
+        };
+
+        // Act
+        IEnumerable<TextTemplatingProperty> result = ViewHelper.GetTextTemplatingProperties(templatePaths, viewModel, null);
+
+        // Assert
+        TextTemplatingProperty? property = result.FirstOrDefault();
+        Assert.NotNull(property);
+        Assert.Contains("Product", property.OutputPath);
+    }
+
+    [Theory]
+    [InlineData("..")]
+    [InlineData(".")]
+    [InlineData("Views/../secrets")]
+    [InlineData("foo/bar")]
+    [InlineData("foo\\bar")]
+    public void GetTextTemplatingProperties_WithInvalidViewFolderName_FallsBackToModelTypeName(string invalidFolderName)
+    {
+        // Arrange
+        string projectPath = Path.Combine("test", "project", "TestProject.csproj");
+        string templatePath = Path.Combine("templates", ViewHelper.CreateTemplate);
+        List<string> templatePaths = [templatePath];
+
+        ViewModel viewModel = new ViewModel
+        {
+            PageType = "Create",
+            ModelInfo = new ModelInfo { ModelTypeName = "Product" },
+            ProjectInfo = new ProjectInfo(projectPath),
+            DbContextInfo = new DbContextInfo()
+        };
+
+        // Act
+        IEnumerable<TextTemplatingProperty> result = ViewHelper.GetTextTemplatingProperties(templatePaths, viewModel, invalidFolderName);
+
+        // Assert
+        TextTemplatingProperty? property = result.FirstOrDefault();
+        Assert.NotNull(property);
+        Assert.Contains("Product", property.OutputPath);
+    }
 }

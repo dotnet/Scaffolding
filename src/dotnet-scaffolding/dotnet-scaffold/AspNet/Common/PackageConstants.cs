@@ -20,6 +20,7 @@ internal class PackageConstants
         public const string Postgres = "npgsql-efcore";
         public static readonly Package EfCorePackage = new("Microsoft.EntityFrameworkCore", IsVersionRequired: true);
         public static readonly Package EfCoreToolsPackage = new("Microsoft.EntityFrameworkCore.Tools", IsVersionRequired: true);
+        public static readonly Package EfCoreDesignPackage = new("Microsoft.EntityFrameworkCore.Design", IsVersionRequired: true);
         public static readonly Package SqlServerPackage = new("Microsoft.EntityFrameworkCore.SqlServer", IsVersionRequired: true);
         public static readonly Package SqlitePackage = new("Microsoft.EntityFrameworkCore.Sqlite", IsVersionRequired: true);
         public static readonly Package CosmosPackage = new("Microsoft.EntityFrameworkCore.Cosmos", IsVersionRequired: true);

@@ -156,7 +156,8 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             List<Package> packages = [
                 PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackage,
                 PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackage,
-                PackageConstants.EfConstants.EfCoreToolsPackage
+                PackageConstants.EfConstants.EfCoreToolsPackage,
+                PackageConstants.EfConstants.EfCoreDesignPackage
             ];
 
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) &&

@@ -59,7 +59,7 @@ internal static class ClassAnalyzers
             dbContextInfo.NewDbSetStatement = modelInfo is null ?
                 string.Empty : $"public DbSet<{modelInfo.ModelFullName}> {modelInfo.ModelTypeName} {{ get; set; }} = default!;";
             dbContextInfo.DbContextClassName = dbContextClassName;
-            dbContextInfo.DbContextClassPath = CommandHelpers.GetNewFilePath(projectPath, dbContextClassName);
+            dbContextInfo.DbContextClassPath = AspNetDbContextHelper.GetIdentityDataContextPath(projectPath, dbContextClassName);
             dbContextInfo.DatabaseProvider = dbProvider;
             dbContextInfo.EntitySetVariableName = modelInfo?.ModelTypeName;
         }

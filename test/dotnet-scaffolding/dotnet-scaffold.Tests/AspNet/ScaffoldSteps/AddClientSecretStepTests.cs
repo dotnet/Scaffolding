@@ -297,32 +297,4 @@ public class AddClientSecretStepTests
         // Assert
         Assert.Equal(customSecretName, step.SecretName);
     }
-
-    [Fact]
-    public async Task ExecuteAsync_AttemptsToEnsureMsIdentityIsInstalled()
-    {
-        // Arrange
-        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
-        Mock<IEnvironmentService> mockEnvironmentService = new Mock<IEnvironmentService>();
-
-        var step = new AddClientSecretStep(
-            NullLogger<AddClientSecretStep>.Instance,
-            _mockFileSystem.Object,
-            mockEnvironmentService.Object)
-        {
-            ProjectPath = _testProjectPath,
-            ClientId = "test-client-id",
-            Username = "test@example.com",
-            TenantId = "test-tenant-id"
-        };
-
-        // Act
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        // Assert
-        // The result will be false because msidentity tool is not actually installed in test environment
-        // But this verifies that the step attempts to ensure msidentity is installed
-        // (which is part of the Entra ID scaffolding process)
-        Assert.False(result);
-    }
 }

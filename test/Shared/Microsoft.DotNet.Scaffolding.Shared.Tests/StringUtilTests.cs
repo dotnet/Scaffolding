@@ -48,27 +48,24 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.False(input7.ContainsIgnoreCase(value8));
         }
 
-        [SkippableTheory]
+        [Theory]
         [MemberData(nameof(ToPathTestData))]
         public void ToPathTests(string namespaceString, string basePath, string projectRootNamespace, string expectedPath)
         {
-            Skip.If(!OperatingSystem.IsWindows());
             Assert.Equal(expectedPath, StringUtil.ToPath(namespaceString, basePath, projectRootNamespace));
         }
 
-        [SkippableTheory]
+        [Theory]
         [MemberData(nameof(ToNamespaceTestData))]
         public void ToNamespaceTests(string path, string expectedNamespace)
         {
-            Skip.If(!OperatingSystem.IsWindows());
             Assert.Equal(expectedNamespace, StringUtil.ToNamespace(path));
         }
 
-        [SkippableTheory]
+        [Theory]
         [MemberData(nameof(GetFilePathWithoutExtensionTestData))]
         public void GetFilePathWithoutExtensionTests(string fullFileName, string expected)
         {
-            Skip.If(!OperatingSystem.IsWindows());
             Assert.Equal(expected, StringUtil.GetFilePathWithoutExtension(fullFileName));
         }
 
@@ -76,19 +73,21 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         {
             get
             {
+                string root1 = OperatingSystem.IsWindows() ? @"C:\Some\Path" : "/some/path";
+                string root2 = OperatingSystem.IsWindows() ? @"C:\SomePath" : "/somepath";
                 return
                 [
-                    new object[] { "Project.Namespace.SubNamespace", "C:\\Some\\Path\\Project.csproj", "Project", "C:\\Some\\Path\\Project\\Namespace\\SubNamespace" },
-                    new object[] { "Project.Web.Namespace.SubNamespace", "C:\\Some\\Path\\Project.Web.csproj", "Project.Web", "C:\\Some\\Path\\Project.Web\\Namespace\\SubNamespace" },
-                    new object[] { "Project.Namespace.SubNamespace", "C:\\Some\\Path\\", "Project", "C:\\Some\\Path\\Project\\Namespace\\SubNamespace" },
+                    new object[] { "Project.Namespace.SubNamespace", Path.Combine(root1, "Project.csproj"), "Project", Path.Combine(root1, "Project", "Namespace", "SubNamespace") },
+                    new object[] { "Project.Web.Namespace.SubNamespace", Path.Combine(root1, "Project.Web.csproj"), "Project.Web", Path.Combine(root1, "Project.Web", "Namespace", "SubNamespace") },
+                    new object[] { "Project.Namespace.SubNamespace", root1 + Path.DirectorySeparatorChar, "Project", Path.Combine(root1, "Project", "Namespace", "SubNamespace") },
                     //special case : default namespace of a project in VS solution folder
-                    new object[] { "Project.Components.Account", "C:\\SomePath\\Project\\Project\\", "Project", "C:\\SomePath\\Project\\Project\\Components\\Account" },
+                    new object[] { "Project.Components.Account", Path.Combine(root2, "Project", "Project") + Path.DirectorySeparatorChar, "Project", Path.Combine(root2, "Project", "Project", "Components", "Account") },
                     //special case : default namespace of a project in just a project folder
-                    new object[] { "Project.Components.Account", "C:\\SomePath\\Project\\", "Project", "C:\\SomePath\\Project\\Components\\Account" },
+                    new object[] { "Project.Components.Account", Path.Combine(root2, "Project") + Path.DirectorySeparatorChar, "Project", Path.Combine(root2, "Project", "Components", "Account") },
                     new object[] { "Project.Namespace.SubNamespace", "", "Project", "" },
-                    new object[] { "Project", "C:\\Some\\Path\\Project.csproj", "Project", "C:\\Some\\Path\\Project\\Project" },
+                    new object[] { "Project", Path.Combine(root1, "Project.csproj"), "Project", Path.Combine(root1, "Project", "Project") },
                     new object[] { "Project", "", "Project", "" },
-                    new object[] { "", "C:\\Some\\Path\\Project.csproj", "Project", "" },
+                    new object[] { "", Path.Combine(root1, "Project.csproj"), "Project", "" },
                 ];
             }
         }
@@ -97,13 +96,14 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         {
             get
             {
+                char sep = Path.DirectorySeparatorChar;
                 return new[]
                 {
-                    new object[] { "Some\\Path\\Project\\Namespace\\SubNamespace\\file.txt", "Some.Path.Project.Namespace.SubNamespace" },
-                    new object[] { "Some\\Path\\Project\\Namespace\\SubNamespace\\", "Some.Path.Project.Namespace.SubNamespace" },
-                    new object[] { "Some\\Path\\Project\\Namespace\\SubNamespace", "Some.Path.Project.Namespace.SubNamespace" },
-                    new object[] { "Some\\Path\\", "Some.Path" },
-                    new object[] { "Namespace\\", "Namespace" },
+                    new object[] { Path.Combine("Some", "Path", "Project", "Namespace", "SubNamespace", "file.txt"), "Some.Path.Project.Namespace.SubNamespace" },
+                    new object[] { Path.Combine("Some", "Path", "Project", "Namespace", "SubNamespace") + sep, "Some.Path.Project.Namespace.SubNamespace" },
+                    new object[] { Path.Combine("Some", "Path", "Project", "Namespace", "SubNamespace"), "Some.Path.Project.Namespace.SubNamespace" },
+                    new object[] { Path.Combine("Some", "Path") + sep, "Some.Path" },
+                    new object[] { "Namespace" + sep, "Namespace" },
                     new object[] { "", "" },
                     new object[] { null, "" }
                 };
@@ -114,12 +114,13 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
         {
             get
             {
+                char sep = Path.DirectorySeparatorChar;
                 return new[]
                 {
-                    new object[] { "Some\\Path\\Project\\Namespace\\SubNamespace\\file.txt", "Some.Path.Project.Namespace.SubNamespace.file" },
-                    new object[] { "Some\\Path\\Project\\Namespace\\SubNamespace\\thing.cs", "Some.Path.Project.Namespace.SubNamespace.thing" },
-                    new object[] { "Some\\Path\\", "Some.Path" },
-                    new object[] { "Namespace\\", "Namespace" },
+                    new object[] { Path.Combine("Some", "Path", "Project", "Namespace", "SubNamespace", "file.txt"), "Some.Path.Project.Namespace.SubNamespace.file" },
+                    new object[] { Path.Combine("Some", "Path", "Project", "Namespace", "SubNamespace", "thing.cs"), "Some.Path.Project.Namespace.SubNamespace.thing" },
+                    new object[] { Path.Combine("Some", "Path") + sep, "Some.Path" },
+                    new object[] { "Namespace" + sep, "Namespace" },
                     new object[] { "", "" },
                     new object[] { null, "" }
                 };

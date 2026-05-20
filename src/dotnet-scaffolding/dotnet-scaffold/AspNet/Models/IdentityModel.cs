@@ -45,4 +45,9 @@ internal class IdentityModel
     /// Gets or sets a value indicating whether to overwrite existing files.
     /// </summary>
     public bool Overwrite { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether the target project is a Razor Pages project.
+    /// Used to determine the correct layout path in _ViewStart.cshtml.
+    /// </summary>
+    public bool IsRazorPages { get; set; }
 }

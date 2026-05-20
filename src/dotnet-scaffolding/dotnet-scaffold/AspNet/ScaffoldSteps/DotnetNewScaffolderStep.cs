@@ -106,7 +106,12 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
             }
 
             var runner = DotnetCliRunner.CreateDotNet("new", args);
-            var exitCode = runner.ExecuteAndCaptureOutput(out _, out _);
+            var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+            if (exitCode != 0)
+            {
+                _logger.LogError($"'dotnet new {stepSettings.CommandName}' failed with exit code {exitCode}.\nStdOut: {stdOut}\nStdErr: {stdErr}");
+            }
+
             return exitCode == 0;
         }
 

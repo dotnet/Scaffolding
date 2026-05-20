@@ -136,7 +136,7 @@ internal class DotnetCliRunner
     {
         _psi = new ProcessStartInfo
         {
-            FileName = commandName,
+            FileName = commandName == DotnetCommandName ? ResolveDotNetPath() : commandName,
             Arguments = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args),
             UseShellExecute = false,
             RedirectStandardError = true,
@@ -157,4 +157,79 @@ internal class DotnetCliRunner
             }
         }
     }
+
+    /// <summary>
+    /// Resolves the full path to the dotnet executable. Checks DOTNET_ROOT, then the
+    /// directory of the current process, and falls back to "dotnet" (PATH resolution).
+    /// </summary>
+    private static string ResolveDotNetPath()
+    {
+        if (_resolvedDotNetPath is not null)
+        {
+            return _resolvedDotNetPath;
+        }
+
+        // 1. Check DOTNET_ROOT (set by Arcade and many CI systems)
+        var dotnetRoot = Environment.GetEnvironmentVariable("DOTNET_ROOT");
+        if (!string.IsNullOrEmpty(dotnetRoot))
+        {
+            var candidate = FindDotNetInDirectory(dotnetRoot);
+            if (candidate is not null)
+            {
+                _resolvedDotNetPath = candidate;
+                return candidate;
+            }
+        }
+
+        // 2. Check the current process — if running under dotnet, use the same host
+        try
+        {
+            var processPath = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(processPath))
+            {
+                var processDir = Path.GetDirectoryName(processPath);
+                if (!string.IsNullOrEmpty(processDir))
+                {
+                    var candidate = FindDotNetInDirectory(processDir);
+                    if (candidate is not null)
+                    {
+                        _resolvedDotNetPath = candidate;
+                        return candidate;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Ignore — fall through to default
+        }
+
+        // 3. Fallback to bare "dotnet" (resolved via PATH)
+        _resolvedDotNetPath = DotnetCommandName;
+        return DotnetCommandName;
+    }
+
+    private static string? FindDotNetInDirectory(string directory)
+    {
+        if (!Directory.Exists(directory))
+        {
+            return null;
+        }
+
+        var exe = Path.Combine(directory, "dotnet.exe");
+        if (File.Exists(exe))
+        {
+            return exe;
+        }
+
+        var bin = Path.Combine(directory, "dotnet");
+        if (File.Exists(bin))
+        {
+            return bin;
+        }
+
+        return null;
+    }
+
+    private static string? _resolvedDotNetPath;
 }

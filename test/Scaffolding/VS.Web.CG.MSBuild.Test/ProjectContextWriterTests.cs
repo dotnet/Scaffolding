@@ -136,15 +136,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
         }
 
         [SkippableTheory]
-        [InlineData("C://Users//User//.nuget//packages//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//packages//x.y.z//1.2.3")]
-        [InlineData("C://Users//User//.nuget//", "X.Y.Z", "1.2.3", "C://Users//User//.nuget//x.y.z//1.2.3")]
-        [InlineData("C://Users//User//.nuget//packages//", null, null, "")]
-        [InlineData("C://Users//User//.nuget//packages//", "X.Y.Z", null, "")]
-        [InlineData("C://Users//User//.nuget//packages//", null, "1.2.3", "")]
+        [InlineData("/home/user/.nuget/packages/", "X.Y.Z", "1.2.3", "/home/user/.nuget/packages/x.y.z/1.2.3")]
+        [InlineData("/home/user/.nuget/", "X.Y.Z", "1.2.3", "/home/user/.nuget/x.y.z/1.2.3")]
+        [InlineData("/home/user/.nuget/packages/", null, null, "")]
+        [InlineData("/home/user/.nuget/packages/", "X.Y.Z", null, "")]
+        [InlineData("/home/user/.nuget/packages/", null, "1.2.3", "")]
         [InlineData(null, "X.Y.Z", "1.2.3", "")]
         public void GetPathTestOSX(string nugetPath, string packageName, string version, string expectedPath)
         {
-            Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || !RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
+            Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && !RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
             using (var fileProvider = new TemporaryFileProvider())
             {
                 Tuple<string, string> nameAndVersion = new Tuple<string, string>(packageName, version);

@@ -171,7 +171,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
 
             var rootIdentityNamespace = $"{commandlineModel.RootNamespace}.Components.Account";
-            var layoutNamespace = $"{commandlineModel.RootNamespace}.Components.Layout.MainLayout";
+            // For WASM/Auto Global Blazor projects, MainLayout lives in the client project (e.g. BlazorApp1.Client).
+            // For Blazor Server projects, it lives directly under Components/Layout/ in the server project.
+            var mainLayoutInServerProject = Path.Combine(AppInfo.ApplicationBasePath, "Components", "Layout", "MainLayout.razor");
+            var layoutNamespace = FileSystem.FileExists(mainLayoutInServerProject)
+                ? $"{commandlineModel.RootNamespace}.Components.Layout.MainLayout"
+                : $"{commandlineModel.RootNamespace}.Client.Layout.MainLayout";
             var defaultDbContextNamespace = $"{commandlineModel.RootNamespace}.Data";
             var defaultUserNamespace = $"{commandlineModel.RootNamespace}.Data";
             var blazorIdentityModel = new BlazorIdentityModel

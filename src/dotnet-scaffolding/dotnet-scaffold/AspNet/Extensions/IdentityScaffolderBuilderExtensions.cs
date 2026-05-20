@@ -32,7 +32,8 @@ internal static class IdentityScaffolderBuilderExtensions
             List<Package> packages = [
                 PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackage,
                 PackageConstants.AspNetCorePackages.AspNetCoreIdentityUiPackage,
-                PackageConstants.EfConstants.EfCoreToolsPackage
+                PackageConstants.EfConstants.EfCoreToolsPackage,
+                PackageConstants.EfConstants.EfCoreDesignPackage
             ];
 
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) &&

@@ -84,6 +84,7 @@ node_reuse=true
 build_check=false
 binary_log=false
 exclude_ci_binary_log=false
+pipelines_log=false
 
 projects=''
 configuration=''
@@ -116,6 +117,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     -excludecibinarylog|-nobl)
       exclude_ci_binary_log=true
+      ;;
+    -pipelineslog|-pl)
+      pipelines_log=true
       ;;
     -restore|-r)
       restore=true
@@ -206,6 +210,7 @@ if [[ -z "$configuration" ]]; then
 fi
 
 if [[ "$ci" == true ]]; then
+  pipelines_log=true
   node_reuse=false
   if [[ "$exclude_ci_binary_log" == false ]]; then
     binary_log=true

@@ -23,5 +23,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
         public DbProvider DatabaseProvider { get; set; }
         public List<string> FilesToGenerate { get; set; }
         public string BaseOutputPath { get; set; }
+        // The root namespace used for computing output file paths. Defaults to the server project's
+        // root namespace, but overridden to the client project's namespace for WASM/Auto Global projects.
+        public string RootNamespace { get; set; }
     }
 }

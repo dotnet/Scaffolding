@@ -226,6 +226,32 @@ internal class ValidateIdentityStep : ScaffoldStep
             userClassNamespace = $"{projectName}.Data";
         }
 
+        // For WASM/Auto Global Blazor projects, Identity Account files belong in the client project.
+        // In server/server-global projects, MainLayout.razor lives at Components/Layout/MainLayout.razor.
+        // Its absence indicates a WASM/Auto Global setup where the client project holds all interactive components.
+        string baseOutputPath = projectDirectory;
+        string? identityProjectName = null;
+        if (settings.BlazorScenario && !string.IsNullOrEmpty(projectName))
+        {
+            var mainLayoutInServerProject = Path.Combine(projectDirectory, "Components", "Layout", "MainLayout.razor");
+            if (!_fileSystem.FileExists(mainLayoutInServerProject))
+            {
+                var parentDirectory = Path.GetDirectoryName(projectDirectory);
+                if (!string.IsNullOrEmpty(parentDirectory))
+                {
+                    var clientProjectFolderName = projectName + ".Client";
+                    var clientProjectDirectory = Path.Combine(parentDirectory, clientProjectFolderName);
+                    if (_fileSystem.DirectoryExists(clientProjectDirectory))
+                    {
+                        baseOutputPath = clientProjectDirectory;
+                        identityProjectName = clientProjectFolderName;
+                        identityNamespace = $"{clientProjectFolderName}.Components.Account";
+                        identityLayoutNamespace = $"{clientProjectFolderName}.Layout.MainLayout";
+                    }
+                }
+            }
+        }
+
         IdentityModel scaffoldingModel = new()
         {
             ProjectInfo = projectInfo,
@@ -234,7 +260,8 @@ internal class ValidateIdentityStep : ScaffoldStep
             UserClassName = AspNetConstants.Identity.UserClassName,
             UserClassNamespace = userClassNamespace,
             IdentityLayoutNamespace = identityLayoutNamespace,
-            BaseOutputPath = projectDirectory,
+            BaseOutputPath = baseOutputPath,
+            IdentityProjectName = identityProjectName,
             Overwrite = settings.Overwrite
         };
 

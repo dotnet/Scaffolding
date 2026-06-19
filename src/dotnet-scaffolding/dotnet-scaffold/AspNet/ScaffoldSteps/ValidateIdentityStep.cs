@@ -226,6 +226,7 @@ internal class ValidateIdentityStep : ScaffoldStep
             userClassNamespace = $"{projectName}.Data";
         }
 
+        bool isRazorPages = Directory.Exists(Path.Combine(projectDirectory, "Pages"));
         IdentityModel scaffoldingModel = new()
         {
             ProjectInfo = projectInfo,
@@ -235,7 +236,8 @@ internal class ValidateIdentityStep : ScaffoldStep
             UserClassNamespace = userClassNamespace,
             IdentityLayoutNamespace = identityLayoutNamespace,
             BaseOutputPath = projectDirectory,
-            Overwrite = settings.Overwrite
+            Overwrite = settings.Overwrite,
+            IsRazorPages = isRazorPages
         };
 
         if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)

@@ -4,5 +4,5 @@
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
 @{
-    Layout = "/Pages/Shared/_Layout.cshtml";
+    Layout = "<#= Model.IsRazorPages ? "/Pages/Shared/_Layout.cshtml" : "/Views/Shared/_Layout.cshtml" #>";
 }

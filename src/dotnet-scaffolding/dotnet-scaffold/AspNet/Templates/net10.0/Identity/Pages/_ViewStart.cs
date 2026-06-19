@@ -25,7 +25,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Identity.Pages
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@{\r\n    Layout = \"/Pages/Shared/_Layout.cshtml\";\r\n}\r\n");
+            this.Write("@{\r\n    Layout = \"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IsRazorPages ? "/Pages/Shared/_Layout.cshtml" : "/Views/Shared/_Layout.cshtml"));
+            this.Write("\";\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

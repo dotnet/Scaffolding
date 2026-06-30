@@ -42,7 +42,7 @@ stages:
           # Will eventually change this to two BYOC pools.
           ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
             name: $(DncEngPublicBuildPool)
-            demands: ImageOverride -equals 1es-windows-2019-open
+            demands: ImageOverride -equals 1es-windows-2022-open
 
         variables:
         - _Script: eng\common\build.cmd

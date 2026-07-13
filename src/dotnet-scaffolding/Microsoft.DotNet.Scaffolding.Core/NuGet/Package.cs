@@ -92,21 +92,29 @@ internal static class PackageExtensions
             return Task.FromResult<NuGetVersion?>(alignedVersion);
         }
 
+        // Resolve versions using the target project's NuGet settings (not the scaffold process's
+        // current directory). This ensures the same package sources used by restore / 'dotnet add
+        // package' are queried. It is essential for preview target frameworks such as net11.0 whose
+        // packages live on preview-only feeds (declared in the project's NuGet.config): without it,
+        // no matching major version is found on the default feeds and version resolution silently
+        // returns null, producing flaky/incorrect package references.
+        string? projectDirectory = string.IsNullOrEmpty(projectPath) ? null : Path.GetDirectoryName(projectPath);
+
         if (targetFramework is TargetFramework.Net8)
         {
-            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 8);
+            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 8, projectDirectory);
         }
         else if (targetFramework is TargetFramework.Net9)
         {
-            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 9);
+            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 9, projectDirectory);
         }
         else if (targetFramework is TargetFramework.Net10)
         {
-            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 10);
+            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 10, projectDirectory);
         }
         else if (targetFramework is TargetFramework.Net11)
         {
-            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 11);
+            return nugetVersionHelper.GetLatestPackageForNetVersionAsync(package.Name, 11, projectDirectory);
         }
         else
         {

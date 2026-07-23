@@ -60,6 +60,22 @@ internal class AddPackagesStep : ScaffoldStep
             {
                 resolvedPackage = await package.WithResolvedVersionAsync(targetFramework, _nugetVersionHelper, ProjectPath, _logger);
                 packageVersion = resolvedPackage.PackageVersion;
+
+                // Stabilization: if a concrete compatible version could not be resolved (for example a
+                // transient NuGet metadata query failure), fall back to a floating version constrained to
+                // the target framework's major version. Without this, 'dotnet add package' would be invoked
+                // with no version and install the absolute latest package, which is frequently incompatible
+                // with the project's target framework (e.g. installing a net10.0-only package into a net9.0
+                // project) and produced flaky NU1202 failures in CI. The trailing '-*' keeps the fallback
+                // prerelease-aware so preview target frameworks are still satisfied.
+                if (string.IsNullOrEmpty(packageVersion) && targetFramework.TryGetMajorVersion(out int majorVersion))
+                {
+                    packageVersion = $"{majorVersion}.*-*";
+                    _logger.LogInformation(
+                        "Could not resolve a specific version of '{PackageName}' for the target framework; falling back to floating version '{PackageVersion}' to keep the package compatible.",
+                        resolvedPackage.Name,
+                        packageVersion);
+                }
             }
 
             // Add the package to the project

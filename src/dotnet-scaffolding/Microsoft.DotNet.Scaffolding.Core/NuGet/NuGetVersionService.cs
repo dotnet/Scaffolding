@@ -97,29 +97,41 @@ internal class NuGetVersionService
         SourceCacheContext cache = new();
         var allVersionsTasks = repositories.Select(async repo =>
         {
-            try
+            PackageMetadataResource? metadataResource = await repo.GetResourceAsync<PackageMetadataResource>();
+            if (metadataResource == null)
             {
-                PackageMetadataResource? metadataResource = await repo.GetResourceAsync<PackageMetadataResource>();
-                if (metadataResource == null)
+                return Enumerable.Empty<IPackageSearchMetadata>();
+            }
+
+            // Retry transient failures (e.g. network blips or feed throttling) before giving up on a
+            // source. Silently dropping a source here is a primary cause of flaky version resolution:
+            // when the source that hosts the package fails, resolution returns no version and callers
+            // fall back to installing the latest (potentially framework-incompatible) package.
+            const int maxAttempts = 3;
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                try
                 {
-                    return [];
+                    return await metadataResource.GetMetadataAsync(
+                        packageId,
+                        includePrerelease: true,
+                        includeUnlisted: false,
+                        cache,
+                        NuGet.Common.NullLogger.Instance,
+                        CancellationToken.None);
                 }
-
-                IEnumerable<IPackageSearchMetadata> metadata = await metadataResource.GetMetadataAsync(
-                    packageId,
-                    includePrerelease: true,
-                    includeUnlisted: false,
-                    cache,
-                    NuGet.Common.NullLogger.Instance,
-                    CancellationToken.None);
-
-                return metadata;
+                catch when (attempt < maxAttempts)
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(200 * attempt));
+                }
+                catch
+                {
+                    // If a source keeps failing after all retries, continue with other sources.
+                    return Enumerable.Empty<IPackageSearchMetadata>();
+                }
             }
-            catch
-            {
-                // If a source fails, continue with other sources
-                return [];
-            }
+
+            return Enumerable.Empty<IPackageSearchMetadata>();
         });
 
         IEnumerable<IPackageSearchMetadata>[] allMetadataResults = await Task.WhenAll(allVersionsTasks);

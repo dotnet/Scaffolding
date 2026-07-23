@@ -213,7 +213,16 @@ internal class ValidateIdentityStep : ScaffoldStep
         if (!string.IsNullOrEmpty(projectName))
         {
             identityNamespace = settings.BlazorScenario ? $"{projectName}.Components.Account" : $"{projectName}.Areas.Identity";
-            identityLayoutNamespace = settings.BlazorScenario ? $"{projectName}.Components.Layout.MainLayout" : string.Empty;
+            if (settings.BlazorScenario)
+            {
+                // For WASM/Auto Global Blazor projects, MainLayout lives in the client project (e.g. BlazorApp1.Client).
+                // For Blazor Server projects, it lives directly under Components/Layout/ in the server project.
+                var mainLayoutInServerProject = Path.Combine(projectDirectory, "Components", "Layout", "MainLayout.razor");
+                identityLayoutNamespace = _fileSystem.FileExists(mainLayoutInServerProject)
+                    ? $"{projectName}.Components.Layout.MainLayout"
+                    : $"{projectName}.Client.Layout.MainLayout";
+            }
+
             userClassNamespace = $"{projectName}.Data";
         }
 
@@ -243,6 +252,7 @@ internal class ValidateIdentityStep : ScaffoldStep
             }
         }
 
+        bool isRazorPages = Directory.Exists(Path.Combine(projectDirectory, "Pages"));
         IdentityModel scaffoldingModel = new()
         {
             ProjectInfo = projectInfo,
@@ -253,7 +263,8 @@ internal class ValidateIdentityStep : ScaffoldStep
             IdentityLayoutNamespace = identityLayoutNamespace,
             BaseOutputPath = baseOutputPath,
             IdentityProjectName = identityProjectName,
-            Overwrite = settings.Overwrite
+            Overwrite = settings.Overwrite,
+            IsRazorPages = isRazorPages
         };
 
         if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)

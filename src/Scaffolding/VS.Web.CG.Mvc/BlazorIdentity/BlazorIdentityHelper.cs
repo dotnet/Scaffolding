@@ -24,7 +24,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
 
         internal static string GetFormattedRelativeIdentityFile(string fullFileName)
         {
-            string identifier = "BlazorIdentity\\";
+            string identifier = "BlazorIdentity" + Path.DirectorySeparatorChar;
             int index = fullFileName.IndexOf(identifier);
             if (index != -1)
             {

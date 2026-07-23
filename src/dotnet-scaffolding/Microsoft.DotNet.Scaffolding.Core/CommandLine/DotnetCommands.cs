@@ -47,6 +47,18 @@ internal static class DotnetCommands
             logger.LogInformation($"\nAdding package '{packageDisplayName}'...");
             var runner = DotnetCliRunner.CreateDotNet("add", arguments);
 
+            // Set working directory to the project's directory so that NuGet.config
+            // resolution uses the project's NuGet.config rather than inheriting feeds
+            // from the current working directory (which may have preview/dev feeds).
+            if (!string.IsNullOrEmpty(projectFile))
+            {
+                var projectDir = Path.GetDirectoryName(Path.GetFullPath(projectFile));
+                if (!string.IsNullOrEmpty(projectDir))
+                {
+                    runner._psi.WorkingDirectory = projectDir;
+                }
+            }
+
             // Buffer the output here because we'll only display it in the failure scenario
             var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
 

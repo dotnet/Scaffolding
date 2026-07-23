@@ -82,13 +82,11 @@ internal static class EntraIdHelper
 
     private static readonly IList<Type> _blazorEntraIdTemplateTypesNet10 =
     [
-        typeof(Templates.net10.BlazorEntraId.LoginLogoutEndpointRouteBuilderExtensions),
         typeof(Templates.net10.BlazorEntraId.LoginOrLogout),
     ];
 
     private static readonly IList<Type> _blazorEntraIdTemplateTypesNet11 =
     [
-        typeof(Templates.net11.BlazorEntraId.LoginLogoutEndpointRouteBuilderExtensions),
         typeof(Templates.net11.BlazorEntraId.LoginOrLogout),
     ];
 }

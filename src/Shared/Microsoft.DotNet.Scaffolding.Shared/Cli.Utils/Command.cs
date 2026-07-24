@@ -71,11 +71,31 @@ namespace Microsoft.Extensions.Internal
             return $"{psi.FileName} {psi.Arguments}";
         }
 
+        private static string RedactSecrets(string command)
+        {
+            if (string.IsNullOrEmpty(command))
+            {
+                return command;
+            }
+
+            // Redact the secret value passed to 'user-secrets set <key> <value>'
+            // so plaintext secrets are never written to trace logs.
+            var setMatch = System.Text.RegularExpressions.Regex.Match(
+                command,
+                @"(user-secrets\b.*?\bset\s+\S+\s+)(.+)$");
+            if (setMatch.Success)
+            {
+                return setMatch.Groups[1].Value + "***";
+            }
+
+            return command;
+        }
+
         public CommandResult Execute()
         {
             ThrowIfRunning();
             Command._logger.LogMessage(
-                $"Executing external command:\n{this}\n", LogMessageLevel.Trace
+                $"Executing external command:\n{RedactSecrets(ToString())}\n", LogMessageLevel.Trace
             );
             _running = true;
             _process.EnableRaisingEvents = true;

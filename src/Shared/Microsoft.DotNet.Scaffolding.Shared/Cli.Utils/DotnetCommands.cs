@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Cli.Utils
 
             if (result.ExitCode != 0)
             {
-                throw new Exception($"Error while running dotnet-user-secrets set {key} {value}");
+                throw new Exception($"Error while running 'dotnet user-secrets set {key} ***'");
             }
             else
             {

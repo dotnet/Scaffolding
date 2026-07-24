@@ -25,6 +25,11 @@ internal class PackageConstants
         public static readonly Package SqlitePackage = new("Microsoft.EntityFrameworkCore.Sqlite", IsVersionRequired: true);
         public static readonly Package CosmosPackage = new("Microsoft.EntityFrameworkCore.Cosmos", IsVersionRequired: true);
         public static readonly Package PostgresPackage = new("Npgsql.EntityFrameworkCore.PostgreSQL", IsVersionRequired: true);
+        public static readonly Package SqlitePclRawBundlePackage = new("SQLitePCLRaw.bundle_e_sqlite3", IsVersionRequired: true)
+        {
+            UseLatestVersion = true
+        };
+
         public const string ConnectionStringVariableName = "connectionString";
 
         /// <summary>

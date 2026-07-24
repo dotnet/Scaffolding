@@ -45,6 +45,10 @@ internal static class IdentityScaffolderBuilderExtensions
                     PackageConstants.EfConstants.IdentityEfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out Package? dbProviderPackage))
                 {
                     packages.Add(dbProviderPackage);
+                    if (commandSettings.DatabaseProvider == PackageConstants.EfConstants.SQLite)
+                    {
+                        packages.Add(PackageConstants.EfConstants.SqlitePclRawBundlePackage);
+                    }
                 }
 
                 step.Packages = packages;

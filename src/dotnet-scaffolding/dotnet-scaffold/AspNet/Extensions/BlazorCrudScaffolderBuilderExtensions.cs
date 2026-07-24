@@ -78,6 +78,10 @@ internal static class BlazorCrudScaffolderBuilderExtensions
                     PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out Package? projectPackage))
                 {
                     packages.Add(projectPackage);
+                    if (commandSettings.DatabaseProvider == PackageConstants.EfConstants.SQLite)
+                    {
+                        packages.Add(PackageConstants.EfConstants.SqlitePclRawBundlePackage);
+                    }
                 }
 
                 step.Packages = packages;

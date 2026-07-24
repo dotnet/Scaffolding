@@ -53,6 +53,24 @@ internal class NuGetVersionService
         return compatibleVersions.FirstOrDefault();
     }
 
+    /// <summary>
+    /// Gets the latest stable (non-prerelease) NuGet package version available on the configured feeds,
+    /// irrespective of the target framework. Used for packages whose versioning is not aligned to the
+    /// .NET major version (for example native runtime bundles such as SQLitePCLRaw).
+    /// </summary>
+    /// <param name="packageId">the ID of the NuGet package</param>
+    /// <param name="projectDirectory">
+    /// Optional directory of the project being scaffolded. When provided, NuGet settings are loaded
+    /// from this directory so that the same package sources used by <c>dotnet add package</c> are queried.
+    /// </param>
+    /// <returns>The highest stable version found, or <see langword="null"/> if none is available.</returns>
+    public async Task<NuGetVersion?> GetLatestStableVersionAsync(string packageId, string? projectDirectory = null)
+    {
+        IEnumerable<NuGetVersion> versions = await GetVersionsForPackageAsync(packageId, projectDirectory);
+
+        return versions.Where(v => !v.IsPrerelease).OrderByDescending(v => v).FirstOrDefault();
+    }
+
     private async Task<IEnumerable<NuGetVersion>> GetVersionsForPackageAsync(string packageId, string? projectDirectory = null)
     {
         // When a project directory is provided, load settings from there so that the package

@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
+using System.Text;
 
 namespace Microsoft.Extensions.Internal
 {
@@ -100,7 +101,7 @@ namespace Microsoft.Extensions.Internal
             {
                 var text = File.ReadAllText(bindingRedirectFile);
                 var toolBindingRedirectFile = Path.Combine(Path.GetDirectoryName(assemblyFullPath), $"{toolName}.config");
-                File.WriteAllText(toolBindingRedirectFile, text);
+                File.WriteAllText(toolBindingRedirectFile, text, new UTF8Encoding(false));
             }
         }
 

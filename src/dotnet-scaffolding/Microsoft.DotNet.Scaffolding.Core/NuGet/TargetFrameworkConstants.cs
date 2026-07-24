@@ -33,3 +33,27 @@ public enum TargetFramework
     Net10,
     Net11
 }
+
+internal static class TargetFrameworkExtensions
+{
+    /// <summary>
+    /// Attempts to get the .NET major version number (for example, 9 for <see cref="TargetFramework.Net9"/>)
+    /// for the specified target framework.
+    /// </summary>
+    /// <param name="targetFramework">The target framework to resolve. May be <see langword="null"/>.</param>
+    /// <param name="majorVersion">When this method returns, contains the .NET major version number if resolution succeeded; otherwise 0.</param>
+    /// <returns><see langword="true"/> if a major version could be determined; otherwise <see langword="false"/>.</returns>
+    public static bool TryGetMajorVersion(this TargetFramework? targetFramework, out int majorVersion)
+    {
+        majorVersion = targetFramework switch
+        {
+            TargetFramework.Net8 => 8,
+            TargetFramework.Net9 => 9,
+            TargetFramework.Net10 => 10,
+            TargetFramework.Net11 => 11,
+            _ => 0
+        };
+
+        return majorVersion != 0;
+    }
+}

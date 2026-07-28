@@ -120,6 +120,27 @@ public class PackageTests
     }
 
     [Fact]
+    public async Task WithResolvedVersionAsync_UseLatestVersion_ResolvesNonVulnerableSqlitePclRawBundle()
+    {
+        // Arrange: SQLitePCLRaw is not versioned in lockstep with .NET, so it is resolved to the latest
+        // stable version on the feed regardless of target framework. CVE-2025-6965 (GHSA-2m69-gcr7-jv3q)
+        // flags SQLitePCLRaw.lib.e_sqlite3 <= 2.1.11, so the resolved version must be strictly greater.
+        Package package = new Package("SQLitePCLRaw.bundle_e_sqlite3", IsVersionRequired: true)
+        {
+            UseLatestVersion = true
+        };
+
+        // Act
+        Package result = await package.WithResolvedVersionAsync(TargetFramework.Net10, _nugetVersionService);
+
+        // Assert
+        Assert.NotNull(result.PackageVersion);
+        NuGetVersion resolved = NuGetVersion.Parse(result.PackageVersion!);
+        Assert.False(resolved.IsPrerelease);
+        Assert.True(resolved > NuGetVersion.Parse("2.1.11"));
+    }
+
+    [Fact]
     public async Task WithResolvedVersionAsync_Net11Framework_ResolvesVersion()
     {
         // Arrange

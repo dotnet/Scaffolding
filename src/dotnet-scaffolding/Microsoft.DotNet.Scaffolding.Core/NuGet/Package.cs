@@ -16,6 +16,14 @@ internal sealed record Package(string Name, bool IsVersionRequired = false)
     /// Gets or sets the package version.
     /// </summary>
     public string? PackageVersion { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether the version should be resolved to the latest stable version available
+    /// on the configured NuGet feeds, ignoring the target framework's .NET major version. Use this for
+    /// packages whose versioning is not aligned to the .NET release cadence (for example native runtime
+    /// bundles such as SQLitePCLRaw).
+    /// </summary>
+    public bool UseLatestVersion { get; init; }
 }
 
 internal static class PackageExtensions
@@ -79,6 +87,15 @@ internal static class PackageExtensions
         if (!package.IsVersionRequired)
         {
             return Task.FromResult<NuGetVersion?>(null);
+        }
+
+        // Some packages (for example native runtime bundles such as SQLitePCLRaw) are not versioned in
+        // lockstep with the .NET major release. Resolve those to the latest stable version on the feed
+        // instead of filtering by the target framework's major version.
+        if (package.UseLatestVersion)
+        {
+            string? latestProjectDirectory = string.IsNullOrEmpty(projectPath) ? null : Path.GetDirectoryName(projectPath);
+            return nugetVersionHelper.GetLatestStableVersionAsync(package.Name, latestProjectDirectory);
         }
 
         if (targetFramework is null)

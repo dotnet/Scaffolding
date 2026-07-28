@@ -87,6 +87,10 @@ internal static class MinimalApiScaffolderBuilderExtensions
                 {
                     packages.Add(PackageConstants.EfConstants.EfCoreToolsPackage);
                     packages.Add(projectPackage);
+                    if (commandSettings.DatabaseProvider == PackageConstants.EfConstants.SQLite)
+                    {
+                        packages.Add(PackageConstants.EfConstants.SqlitePclRawBundlePackage);
+                    }
                 }
 
                 if (commandSettings.OpenApi)

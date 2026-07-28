@@ -235,6 +235,19 @@ public abstract class IdentityIntegrationTestsBase : IDisposable
         Assert.False(PackageConstants.EfConstants.IdentityEfPackagesDict.ContainsKey(provider));
     }
 
+    [Fact]
+    public void SqlitePclRawBundlePackage_IsResolvedFromFeed()
+    {
+        // EF Core's SQLite provider transitively pins the vulnerable SQLitePCLRaw.lib.e_sqlite3 <= 2.1.11
+        // (CVE-2025-6965 / GHSA-2m69-gcr7-jv3q). Scaffolding adds this bundle directly to override it, with
+        // the version resolved to the latest stable release from the feed rather than hardcoded.
+        var bundle = PackageConstants.EfConstants.SqlitePclRawBundlePackage;
+        Assert.Equal("SQLitePCLRaw.bundle_e_sqlite3", bundle.Name);
+        Assert.True(bundle.IsVersionRequired);
+        Assert.True(bundle.UseLatestVersion);
+        Assert.Null(bundle.PackageVersion);
+    }
+
     #endregion
 
     #region Identity — Template Folder Structure

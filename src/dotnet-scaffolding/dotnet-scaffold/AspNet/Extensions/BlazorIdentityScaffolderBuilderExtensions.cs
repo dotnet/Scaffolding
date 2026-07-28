@@ -169,6 +169,10 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
                     PackageConstants.EfConstants.IdentityEfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out Package? projectPackage))
                 {
                     packages.Add(projectPackage);
+                    if (commandSettings.DatabaseProvider == PackageConstants.EfConstants.SQLite)
+                    {
+                        packages.Add(PackageConstants.EfConstants.SqlitePclRawBundlePackage);
+                    }
                 }
 
                 step.Packages = packages;

@@ -324,8 +324,16 @@ public class CodeService : ICodeService, IDisposable
                     .Where(classSymbol => classSymbol is not null &&
                                          !classSymbol.MetadataName.StartsWith("<"));    //if the metadata name starts with < it is a compiler generated class
             })
-            .Append(compilation.GetEntryPoint(CancellationToken.None)?.ContainingType)
             .ToList();
+
+            if (ReferenceEquals(compilation, _compilation))
+            {
+                var entryPointType = compilation.GetEntryPoint(CancellationToken.None)?.ContainingType;
+                if (entryPointType is not null)
+                {
+                    compilationClassSymbols.Add(entryPointType);
+                }
+            }
 
             compilationClassSymbols?.ForEach(x =>
             {
@@ -342,38 +350,16 @@ public class CodeService : ICodeService, IDisposable
     }
 
     /// <summary>
-    /// Recursively collects all Roslyn <see cref="Project"/> instances referenced (directly or
+    /// Collects all Roslyn <see cref="Project"/> instances referenced (directly or
     /// transitively) by <paramref name="project"/> via ProjectReference (e.g. a class library
     /// containing a DbContext and/or model classes referenced from the main scaffolding project).
     /// </summary>
     private static IEnumerable<Project> GetTransitiveProjectReferences(Project project)
     {
-        var visited = new HashSet<ProjectId>();
-        var toVisit = new Queue<Project>();
-        foreach (var referencedProject in project.Solution.GetProjectDependencyGraph().GetProjectsThatThisProjectDirectlyDependsOn(project.Id)
+        var dependencyGraph = project.Solution.GetProjectDependencyGraph();
+        return dependencyGraph.GetProjectsThatThisProjectTransitivelyDependsOn(project.Id)
             .Select(project.Solution.GetProject)
-            .OfType<Project>())
-        {
-            toVisit.Enqueue(referencedProject);
-        }
-
-        while (toVisit.Count > 0)
-        {
-            var current = toVisit.Dequeue();
-            if (!visited.Add(current.Id))
-            {
-                continue;
-            }
-
-            yield return current;
-
-            foreach (var referencedProject in current.Solution.GetProjectDependencyGraph().GetProjectsThatThisProjectDirectlyDependsOn(current.Id)
-                .Select(current.Solution.GetProject)
-                .OfType<Project>())
-            {
-                toVisit.Enqueue(referencedProject);
-            }
-        }
+            .OfType<Project>();
     }
 
     /// <summary>

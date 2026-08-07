@@ -73,7 +73,6 @@ extends:
             - _ValidateSdkArgs: ''
             - _InternalBuildArgs: ''
             # DotNet-Symbol-Server-Pats provides: microsoft-symbol-server-pat, symweb-symbol-server-pat
-            # Publish-Build-Assets provides: MaestroAccessToken, BotAccount-dotnet-maestro-bot-PAT
             - group: DotNet-Symbol-Server-Pats
             - _InternalBuildArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
                 /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)

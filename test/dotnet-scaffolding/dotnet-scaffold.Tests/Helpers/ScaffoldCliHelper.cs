@@ -501,21 +501,51 @@ public class {modelName}
     }
 
     /// <summary>
-    /// NuGet.config content for net11.0 preview feeds.
-    /// net11.0 is in preview — the SDK and its NuGet packages live on preview-only feeds
-    /// that are not in the default NuGet sources. Write this into the temp project directory
-    /// so dotnet restore / build can find them.
+    /// NuGet.config content used by net11.0 integration tests when restoring the temporary
+    /// scaffolded projects.
+    /// <para>
+    /// The temporary test projects live under <see cref="Path.GetTempPath"/>, i.e. outside the
+    /// repository tree, so they cannot discover the repository's root <c>NuGet.config</c> by the
+    /// normal directory walk. To keep a single source of truth — and, critically, to restore from
+    /// the exact same curated, CI-mirrored dnceng feeds the rest of the build uses — this returns
+    /// the repository root <c>NuGet.config</c> content verbatim.
+    /// </para>
+    /// <para>
+    /// This deliberately avoids the live public <c>https://api.nuget.org</c> feed (which the repo's
+    /// own config does not use). Restoring the scaffolded preview projects directly against the live
+    /// nuget.org endpoint was the root cause of the CI flakiness: transient throttling/timeouts on
+    /// that endpoint failed the pre-/post-build restores. The dnceng mirror feeds in the repo config
+    /// are the same ones the solution build already warmed, so these restores become cache hits.
+    /// </para>
     /// </summary>
-    public static readonly string PreviewNuGetConfig = @"<?xml version=""1.0"" encoding=""utf-8""?>
+    public static string PreviewNuGetConfig => GetRepoRootNuGetConfig();
+
+    /// <summary>
+    /// Reads the repository root <c>NuGet.config</c> so temporary test projects restore from the
+    /// identical feed set as the rest of the build. Falls back to an embedded copy of the repo's
+    /// dnceng feeds (still excluding the live nuget.org endpoint) if the file cannot be located.
+    /// </summary>
+    private static string GetRepoRootNuGetConfig()
+    {
+        var repoConfig = Path.Combine(GetRepoRoot(), "NuGet.config");
+        if (File.Exists(repoConfig))
+        {
+            return File.ReadAllText(repoConfig);
+        }
+
+        // Defensive fallback mirroring the repo's dnceng feeds. Intentionally excludes
+        // https://api.nuget.org — the dotnet-public feed is a reliable mirror of it.
+        return @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <packageSources>
     <clear />
-    <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
+    <add key=""dotnet-public"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json"" />
     <add key=""dotnet11"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet11/nuget/v3/index.json"" />
     <add key=""dotnet11-transport"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet11-transport/nuget/v3/index.json"" />
-    <add key=""dotnet-public"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json"" />
   </packageSources>
+  <disabledPackageSources />
 </configuration>";
+    }
 
     /// <summary>
     /// NuGet.config content that restricts package sources to nuget.org only.

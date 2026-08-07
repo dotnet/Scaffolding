@@ -64,7 +64,6 @@ extends:
             # DotNet-Symbol-Server-Pats provides: microsoft-symbol-server-pat, symweb-symbol-server-pat
             # Publish-Build-Assets provides: MaestroAccessToken, BotAccount-dotnet-maestro-bot-PAT
             - group: DotNet-Symbol-Server-Pats
-            - group: Publish-Build-Assets
             - _InternalBuildArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
                 /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
                 /p:OfficialBuildId=$(BUILD.BUILDNUMBER)

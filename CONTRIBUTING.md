@@ -4,19 +4,52 @@ Thank you for your interest in contributing to .NET Scaffolding! This document p
 
 ## Table of Contents
 - [Code of Conduct](#code-of-conduct)
+- [Contributor License Agreement](#contributor-license-agreement)
+- [Ways to Contribute](#ways-to-contribute)
 - [Getting Started](#getting-started)
 - [Repository Structure](#repository-structure)
 - [Development Workflow](#development-workflow)
 - [Making Code Changes](#making-code-changes)
+- [Coding Conventions](#coding-conventions)
 - [Testing Your Changes](#testing-your-changes)
+- [Debugging](#debugging)
 - [Submitting Your Changes](#submitting-your-changes)
 - [Reporting Issues](#reporting-issues)
+- [Additional Resources](#additional-resources)
+- [License](#license)
 
 ---
 
 ## Code of Conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](CODE-OF-CONDUCT.md). For more information see the Code of Conduct FAQ or contact opencode@microsoft.com with any additional questions or comments.
+
+---
+
+## Contributor License Agreement
+
+Most contributions require you to agree to a **Contributor License Agreement (CLA)** declaring that you have the right to, and actually do, grant us the rights to use your contribution.
+
+- When you open a pull request, a CLA bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (for example, with a status check or comment).
+- You only need to sign the CLA **once** across all Microsoft/.NET Foundation repositories.
+- Simply follow the instructions provided by the bot and complete the signing process before your PR can be merged.
+
+For details, see https://cla.opensource.microsoft.com/.
+
+---
+
+## Ways to Contribute
+
+There are many ways to contribute beyond writing code:
+
+- **Report bugs**: File clear, reproducible [issues](#reporting-issues).
+- **Fix bugs**: Look for issues labeled `bug` or `help wanted`. Before you start, **reproduce the bug yourself first** to confirm it still occurs on the latest `main` — some issues are already fixed or environment-specific. Capture the exact reproduction steps so you can re-run them after your fix to verify it's resolved.
+- **Add or update templates and scaffolders**: See [Making Code Changes](#making-code-changes).
+- **Improve documentation**: Fix typos, clarify instructions, or add examples in the `docs/` folder and READMEs.
+- **Write tests**: Increase coverage for existing functionality.
+- **Answer questions**: Help others in GitHub Discussions and Issues.
+
+If you're new, look for issues tagged **`good first issue`** or **`help wanted`** — these are curated to be approachable. For anything non-trivial, please open or comment on an issue first so we can align on the approach before you invest significant time.
 
 ---
 
@@ -144,6 +177,13 @@ Scaffolding/
    dotnet build
    ```
 
+> **Tip:** The repository also ships convenience scripts at the root that restore and build with the pinned SDK from `global.json`:
+> ```bash
+> build.cmd    # Windows
+> ./build.sh   # macOS/Linux
+> ```
+> To launch a fully configured IDE that uses the repo-local SDK, use `startvs.cmd` (Visual Studio) or `start-code.cmd` (VS Code) instead of opening the solution directly. This ensures the correct preview SDK is picked up.
+
 ### 2. Install Local Development Packages
 
 After making changes, install your local build to test:
@@ -158,19 +198,38 @@ scripts\install-scaffold.cmd
 scripts/install-scaffold.sh
 ```
 
-These scripts will:
-- Build the project
-- Uninstall any existing scaffolding tools
-- Install your local build globally
-- Make `dotnet scaffold` available with your changes
+These scripts automate the full local install cycle. Under the hood they:
+
+1. Kill any running `dotnet.exe` processes (so the tool isn't locked).
+2. Clear the previous `artifacts` output and pack a fresh NuGet package via `dotnet pack` (Debug configuration).
+3. Uninstall the existing global `Microsoft.dotnet-scaffold` tool.
+4. Purge the cached scaffolding packages from your NuGet cache (`Microsoft.dotnet-scaffold`, `Microsoft.DotNet.Scaffolding.Internal`, `Microsoft.DotNet.Scaffolding.Core`) so the new build isn't shadowed by a cached copy.
+5. Reinstall the tool globally from your freshly built local package, making `dotnet scaffold` point at your changes.
+
+Because the tool is installed **globally**, you must re-run the install script after **every** change you want to test — a plain `dotnet build` updates the binaries in `artifacts/` but does **not** update the globally installed `dotnet scaffold` command.
 
 ### 3. Development Loop
 
-1. **Make Changes**: Edit the code, templates, or configs
-2. **Rebuild**: Build the solution
-3. **Reinstall**: Run the install script
-4. **Test**: Test your changes (see [Testing Your Changes](#testing-your-changes))
-5. **Repeat**: Iterate as needed
+This is the core inner loop you'll repeat while working:
+
+1. **Make Changes**: Edit the code, templates, or configs.
+2. **Reinstall**: Run the install script for your platform to rebuild, repack, and reinstall the global tool:
+   ```cmd
+   scripts\install-scaffold.cmd    :: Windows (cmd)
+   ```
+   ```bash
+   scripts/install-scaffold.sh     # macOS/Linux
+   ```
+   (The script builds for you, so a separate `dotnet build` step isn't required before running it.)
+
+   **Verify the install script completed successfully.** Watch the output and confirm it finishes without errors — the final `dotnet tool install -g Microsoft.dotnet-scaffold ...` step should report that the tool was installed. If the script fails partway (for example, because a `dotnet` process was still locking files, or the pack step errored), your changes won't be deployed. Re-run the script after resolving the error, and sanity-check the active version with:
+   ```bash
+   dotnet scaffold --version
+   ```
+3. **Test**: Run `dotnet scaffold ...` against a test project to exercise your change (see [Testing Your Changes](#testing-your-changes)).
+4. **Repeat**: Iterate until the behavior is correct.
+
+> **Important:** If you skip the install step, `dotnet scaffold` will keep running the **previously installed** version and you won't see your changes. When in doubt, re-run the install script. If results still look stale, delete `.config` folders and clear the NuGet cache (see [Common Issues](#common-issues)).
 
 ---
 
@@ -269,6 +328,44 @@ src/dotnet-scaffolding/dotnet-scaffold/Aspire/CodeModificationConfigs/{version}/
 3. Update corresponding scaffold steps if needed
 4. Update existing tests or add new ones
 5. Test thoroughly
+
+---
+
+## Coding Conventions
+
+Consistent code makes review faster and the codebase easier to maintain.
+
+### Style and Formatting
+
+- **Follow `.editorconfig`**: The repository root contains an [`.editorconfig`](.editorconfig) that defines indentation, spacing, `using` ordering, and naming rules. Most IDEs apply it automatically.
+- **Match the surrounding code**: Prefer the patterns already used in the file you're editing.
+- **Format before committing**: Run `dotnet format` to apply style fixes and catch violations early:
+  ```bash
+  dotnet format All.sln
+  ```
+- **General C# guidance**: Follow the [.NET runtime coding style](https://github.com/dotnet/runtime/blob/main/docs/coding-guidelines/coding-style.md) where this repo does not specify otherwise.
+
+### Naming and Documentation
+
+- Use `PascalCase` for types and public members, `camelCase` for locals and parameters, and `_camelCase` for private fields.
+- Add XML documentation comments (`///`) to public APIs.
+- Keep methods focused and avoid unrelated changes in the same PR.
+
+### Commit Messages
+
+- Write clear, imperative-mood subject lines (e.g., "Add Entra ID logout template" rather than "Added" or "Adds").
+- Keep the subject under ~72 characters and add a body explaining *why* when the change isn't obvious.
+- Reference related issues in the body (e.g., `Fixes #123`).
+
+### Branch Naming
+
+Use branch names in the format `dev/<alias>/<description>` — the literal `dev`, then your user alias, then a kebab-case description of the bug or feature after the second `/`:
+
+```
+dev/jdoe/blazor-identity-logout
+dev/jdoe/minimal-api-null-ref
+dev/jdoe/contributing-updates
+```
 
 ---
 
@@ -374,19 +471,30 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet
 
 #### Running Tests
 
+**You must run the test suite and confirm it passes before opening a pull request.** A PR with failing or unrun tests will not be merged, and CI will run these same tests on your branch.
+
 ```bash
-# Run all tests
-dotnet test
+# Run the entire test suite (do this before every PR)
+dotnet test All.sln
 
-# Run specific test project
-dotnet test test/dotnet-scaffolding/dotnet-scaffold.Tests/
+# Run a single test project (faster inner loop)
+dotnet test test/dotnet-scaffolding/dotnet-scaffold.Tests/dotnet-scaffold.Tests.csproj
 
-# Run tests with filter
-dotnet test --filter "FullyQualifiedName~BlazorEntra"
+# Run only the tests related to your change using a filter
+dotnet test test/dotnet-scaffolding/dotnet-scaffold.Tests/dotnet-scaffold.Tests.csproj --filter "FullyQualifiedName~BlazorEntra"
 
-# Run tests with verbose output
-dotnet test -v detailed
+# Run with detailed output to diagnose a failure
+dotnet test test/dotnet-scaffolding/dotnet-scaffold.Tests/dotnet-scaffold.Tests.csproj -v detailed
 ```
+
+**Example — full pre-PR test run:**
+```bash
+# From the repository root
+dotnet test All.sln -c Debug
+```
+Confirm the summary reports `Failed: 0` for every test project before you push and open your PR. If any test fails, fix it (or update the test if the behavior intentionally changed) before submitting.
+
+> **Note:** Some end-to-end integration tests are known to be flaky or are intentionally skipped (for example, `net11`/preview-SDK scaffolding tests and tests needing real Azure AD credentials). Before assuming a failure is caused by your change, check [docs/KNOWN_FLAKY_TESTS.md](docs/KNOWN_FLAKY_TESTS.md) and re-run the test in isolation.
 
 #### Test Guidelines
 
@@ -449,8 +557,9 @@ For larger changes, perform integration testing:
 2. ✅ **All tests pass**: `dotnet test` shows all green
 3. ✅ **New tests added**: Unit tests cover your changes
 4. ✅ **Manual testing done**: Verified with actual scaffolding scenarios
-5. ✅ **Code formatted**: Follow C# coding conventions
+5. ✅ **Code formatted**: `dotnet format` run and [conventions](#coding-conventions) followed
 6. ✅ **Documentation updated**: Update relevant docs if needed
+7. ✅ **CLA signed**: [Contributor License Agreement](#contributor-license-agreement) completed
 
 ### Creating a Pull Request
 
@@ -543,6 +652,7 @@ For feature requests:
 ### Documentation
 
 - **Getting Started**: [docs/Getting-Started.md](docs/Getting-Started.md)
+- **Known Flaky/Skipped Tests**: [docs/KNOWN_FLAKY_TESTS.md](docs/KNOWN_FLAKY_TESTS.md)
 - **Entra ID Scaffolder**: [docs/ENTRA_ID_SCAFFOLDER_DOCUMENTATION.md](docs/ENTRA_ID_SCAFFOLDER_DOCUMENTATION.md)
 - **Main README**: [README.md](README.md)
 
@@ -568,8 +678,8 @@ For feature requests:
 # Build the solution
 dotnet build
 
-# Run tests
-dotnet test
+# Run tests (run before every PR)
+dotnet test All.sln
 
 # Install local changes
 scripts/install-scaffold.cmd   # Windows
@@ -590,6 +700,12 @@ dotnet scaffold aspnet --help
 | Scaffold Steps | `src/dotnet-scaffolding/dotnet-scaffold/AspNet/ScaffoldSteps/` |
 | Unit Tests | `test/dotnet-scaffolding/dotnet-scaffold.Tests/AspNet/` |
 | Documentation | `docs/` |
+
+---
+
+## License
+
+By contributing to this repository, you agree that your contributions will be licensed under the same license that covers the project. See the [LICENSE](LICENSE) file for the full terms. Do not contribute code, templates, or assets that you do not have the right to license under these terms.
 
 ---
 

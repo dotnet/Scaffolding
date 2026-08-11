@@ -5,6 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Tools.Scaffold.Helpers;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -61,6 +62,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return Task.FromResult(false);
             }
 
+            // Ensure the msidentity tool is available before attempting to invoke it,
+            // so a missing tool surfaces a clear, actionable message instead of a cryptic dotnet error.
+            if (!MsIdentityToolHelper.EnsureMsIdentityIsInstalled(_logger))
+            {
+                return Task.FromResult(false);
+            }
+
             if(ClientId is not null)
             {
                 _logger.LogInformation("Updating project...");
@@ -109,6 +117,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 if (exitCode != 0)
                 {
                     _logger.LogError($"Error registering application: {stdErr}");
+                    _logger.LogError(MsIdentityToolHelper.NotInstalledMessage);
                     return false;
                 }
                 if (!string.IsNullOrEmpty(stdOut))
@@ -156,6 +165,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 if (exitCode != 0)
                 {
                     _logger.LogError($"Error updating registration: {stdErr}");
+                    _logger.LogError(MsIdentityToolHelper.NotInstalledMessage);
                     return false;
                 }
                 if (!string.IsNullOrEmpty(stdOut))

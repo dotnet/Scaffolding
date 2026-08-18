@@ -47,6 +47,7 @@ public class BlazorIdentityNet10IntegrationTests : BlazorIdentityIntegrationTest
         var sharedDir = Path.Combine(_testProjectDir, "Components", "Account", "Shared");
         Assert.True(Directory.Exists(sharedDir), "Components/Account/Shared directory should be created.");
         Assert.True(File.Exists(Path.Combine(sharedDir, "ManageNavMenu.razor")), "ManageNavMenu.razor should be created.");
+        Assert.True(File.Exists(Path.Combine(sharedDir, "PasskeySubmit.razor.js")), "PasskeySubmit.razor.js should be created.");
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("TestDbContext", programContent);
 

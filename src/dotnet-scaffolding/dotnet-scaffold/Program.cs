@@ -48,8 +48,9 @@ builder.AddHandler(async (parseResult, cancellationToken) =>
 
 var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
 telemetryWrapper?.ConfigureFirstTimeTelemetry();
-await runner.RunAsync(args);
+int exitCode = await runner.RunAsync(args);
 telemetryWrapper?.Flush();
+return exitCode;
 
 static void ConfigureServices(IServiceCollection services)
 {

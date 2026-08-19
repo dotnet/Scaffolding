@@ -22,7 +22,7 @@ internal static class AspireCodeModificationHelper
     internal static string? FindCodeModificationConfigFile(string folderName, string fileName, Assembly assembly, string? projectPath)
     {
         var targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
-        var configPath = Path.Combine(targetFrameworkFolder, folderName, fileName);
-        return GlobalToolFileFinder.FindCodeModificationConfigFile(configPath, assembly);
+        var configPath = Path.Combine(folderName, fileName);
+        return GlobalToolFileFinder.FindCodeModificationConfigFile(configPath, assembly, targetFrameworkFolder);
     }
 }

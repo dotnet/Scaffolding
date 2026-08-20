@@ -18,10 +18,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.Aspire.Integration;
 [Trait("Family", "aspire-caching")]
 public abstract class AspireCachingIntegrationTestsBase : IDisposable
 {
-    private const string SkipReason = "Aspire tests on separate branch";
-
     protected abstract string TargetFramework { get; }
     protected abstract string TestClassName { get; }
+
+    /// <summary>Whether to pass <c>--prerelease</c> to the scaffolder and restore preview packages (net11.0).</summary>
+    protected bool Prerelease => TargetFramework == "net11.0";
 
     protected readonly string _testDirectory;
     protected readonly string _appHostDir;
@@ -49,41 +50,72 @@ public abstract class AspireCachingIntegrationTestsBase : IDisposable
         }
     }
 
-    protected string AppHostProjectContent => $@"<Project Sdk=""Microsoft.NET.Sdk"">
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>{TargetFramework}</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <IsAspireHost>true</IsAspireHost>
-  </PropertyGroup>
-</Project>";
+    protected string AppHostProjectContent =>
+        ScaffoldCliHelper.GetAspireAppHostProjectContent(TargetFramework, @"..\TestApp.Web\TestApp.Web.csproj");
 
-    protected string WorkerProjectContent => $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
-  <PropertyGroup>
-    <TargetFramework>{TargetFramework}</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-</Project>";
+    protected string WorkerProjectContent =>
+        ScaffoldCliHelper.GetAspireWorkerProjectContent(TargetFramework);
 
-    protected static string AppHostProgramCs => @"var builder = DistributedApplication.CreateBuilder(args);
-builder.Build().Run();
-";
+    protected static string AppHostProgramCs =>
+        ScaffoldCliHelper.GetAspireAppHostProgramCs("TestApp_Web");
 
-    protected static string WorkerProgramCs => @"var builder = WebApplication.CreateBuilder(args);
-builder.AddServiceDefaults();
-var app = builder.Build();
-app.Run();
-";
+    protected static string WorkerProgramCs =>
+        ScaffoldCliHelper.GetAspireWorkerProgramCs();
 
     protected void SetupProjects()
     {
+        ScaffoldCliHelper.WriteAspireNuGetConfig(_testDirectory, TargetFramework);
         File.WriteAllText(_appHostProjectPath, AppHostProjectContent);
         File.WriteAllText(Path.Combine(_appHostDir, "Program.cs"), AppHostProgramCs);
         File.WriteAllText(_workerProjectPath, WorkerProjectContent);
         File.WriteAllText(Path.Combine(_workerDir, "Program.cs"), WorkerProgramCs);
     }
 
-    [Fact(Skip = SkipReason)]
+    /// <summary>
+    /// End-to-end: the Aspire caching scaffold applies the AppHost/worker code changes and the
+    /// solution still builds afterward. Mirrors the AspNet build-before/scaffold/build-after pattern.
+    /// </summary>
+    [Fact]
+    public async Task AspireCaching_ScaffoldsAndBuilds()
+    {
+        SetupProjects();
+
+        // Building the AppHost also builds the referenced worker project.
+        var (beforeExitCode, _, beforeError) = await ScaffoldCliHelper.RunBuildForFrameworkAsync(_appHostDir, TargetFramework);
+        Assert.True(beforeExitCode == 0, $"AppHost should build before scaffolding. Error: {beforeError}");
+
+        var args = new System.Collections.Generic.List<string>
+        {
+            "--type", "redis",
+            "--apphost-project", _appHostProjectPath,
+            "--project", _workerProjectPath
+        };
+        if (Prerelease)
+        {
+            args.Add("--prerelease");
+        }
+
+        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAspireAsync(
+            TargetFramework,
+            "caching",
+            args.ToArray());
+        Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
+
+        Assert.False(cliOutput.Contains("error: NU"),
+            $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
+
+        // Assert the code modifications were applied to both projects.
+        var appHostProgram = File.ReadAllText(Path.Combine(_appHostDir, "Program.cs"));
+        Assert.Contains("AddRedis", appHostProgram);
+        var workerProgram = File.ReadAllText(Path.Combine(_workerDir, "Program.cs"));
+        Assert.Contains("AddRedisClient", workerProgram);
+
+        // Verify the project still builds after scaffolding.
+        var (afterExitCode, afterOutput, afterError) = await ScaffoldCliHelper.RunBuildForFrameworkAsync(_appHostDir, TargetFramework);
+        Assert.True(afterExitCode == 0, $"Project should still build after scaffolding.\nOutput: {afterOutput}\nError: {afterError}");
+    }
+
+    [Fact]
     public async Task AspireCaching_FailsWithMissingType()
     {
         SetupProjects();
@@ -104,7 +136,7 @@ app.Run();
         }
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task AspireCaching_FailsWithInvalidType()
     {
         SetupProjects();
@@ -119,7 +151,7 @@ app.Run();
         Assert.NotEqual(0, exitCode);
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task AspireCaching_FailsWithMissingAppHostProject()
     {
         SetupProjects();
@@ -138,7 +170,7 @@ app.Run();
         }
     }
 
-    [Fact(Skip = SkipReason)]
+    [Fact]
     public async Task AspireCaching_FailsWithMissingWorkerProject()
     {
         SetupProjects();
@@ -157,7 +189,7 @@ app.Run();
         }
     }
 
-    [Theory(Skip = SkipReason)]
+    [Theory]
     [InlineData("redis")]
     [InlineData("redis-with-output-caching")]
     public async Task AspireCaching_AcceptsValidType(string cachingType)
@@ -180,3 +212,4 @@ app.Run();
         Assert.DoesNotContain("Missing/Invalid --project", combined);
     }
 }
+

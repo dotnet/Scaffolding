@@ -44,8 +44,8 @@ internal static class BlazorIdentityHelper
                 // Files in Pages and Shared folders are Razor components, others are C# files
                 string extension = templateFullName.StartsWith("Pages", StringComparison.OrdinalIgnoreCase) ||
                                    templateFullName.StartsWith("Shared", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
-                string templateNameWithNamespace = $"{blazorIdentityModel.IdentityNamespace}.{templateFullName}";
-                string outputFileName = $"{StringUtil.ToPath(templateNameWithNamespace, blazorIdentityModel.BaseOutputPath, projectName)}{extension}";
+                string relativeTemplatePath = templateFullName.Replace('.', Path.DirectorySeparatorChar);
+                string outputFileName = $"{Path.Combine(GetIdentityComponentsPath(blazorIdentityModel.BaseOutputPath), relativeTemplatePath)}{extension}";
                 textTemplatingProperties.Add(new()
                 {
                     TemplateModel = blazorIdentityModel,
@@ -59,6 +59,9 @@ internal static class BlazorIdentityHelper
 
         return textTemplatingProperties;
     }
+
+    internal static string GetIdentityComponentsPath(string projectDirectory)
+        => Path.Combine(projectDirectory, "Components", "Account");
 
     /// <summary>
     /// Retrieves the formatted relative identity file path from the full file name.

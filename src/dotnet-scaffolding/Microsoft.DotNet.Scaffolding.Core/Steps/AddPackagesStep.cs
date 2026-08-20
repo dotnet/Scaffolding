@@ -68,7 +68,9 @@ internal class AddPackagesStep : ScaffoldStep
                 // with the project's target framework (e.g. installing a net10.0-only package into a net9.0
                 // project) and produced flaky NU1202 failures in CI. The trailing '-*' keeps the fallback
                 // prerelease-aware so preview target frameworks are still satisfied.
-                if (string.IsNullOrEmpty(packageVersion) && targetFramework.TryGetMajorVersion(out int majorVersion))
+                if (string.IsNullOrEmpty(packageVersion) &&
+                    !resolvedPackage.UseLatestVersion &&
+                    targetFramework.TryGetMajorVersion(out int majorVersion))
                 {
                     packageVersion = $"{majorVersion}.*-*";
                     _logger.LogInformation(

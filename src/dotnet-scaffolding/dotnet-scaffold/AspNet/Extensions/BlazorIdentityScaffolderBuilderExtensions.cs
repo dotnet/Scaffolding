@@ -132,7 +132,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
                 var projectDirectory = Path.GetDirectoryName(commandSettings.Project);
                 if (Directory.Exists(projectDirectory))
                 {
-                    step.BaseOutputDirectory = Path.Combine(projectDirectory, "Components", "Account", "Shared");
+                    step.BaseOutputDirectory = Path.Combine(BlazorIdentityHelper.GetIdentityComponentsPath(projectDirectory), "Shared");
                     step.FileName = "PasskeySubmit.razor.js";
                     return;
                 }

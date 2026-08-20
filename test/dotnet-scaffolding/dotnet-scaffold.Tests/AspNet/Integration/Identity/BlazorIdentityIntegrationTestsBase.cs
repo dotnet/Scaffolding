@@ -43,7 +43,7 @@ public abstract class BlazorIdentityIntegrationTestsBase : IDisposable
     protected BlazorIdentityIntegrationTestsBase()
     {
         _testDirectory = Path.Combine(Path.GetTempPath(), TestClassName, Guid.NewGuid().ToString());
-        _testProjectDir = Path.Combine(_testDirectory, "TestProject");
+        _testProjectDir = Path.Combine(_testDirectory, "RenamedProjectDirectory");
         _testProjectPath = Path.Combine(_testProjectDir, "TestProject.csproj");
         _toolsDirectory = Path.Combine(_testDirectory, "tools");
         _templatesDirectory = Path.Combine(_testDirectory, "Templates");

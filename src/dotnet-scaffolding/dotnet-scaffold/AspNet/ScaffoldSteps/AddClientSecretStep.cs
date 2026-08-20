@@ -47,8 +47,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         private readonly IFileSystem _fileSystem;
         private readonly IEnvironmentService _environmentService;
 
-        private const string _msIdentityToolName = "Microsoft.dotnet-msidentity";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="AddClientSecretStep"/> class.
         /// </summary>
@@ -74,7 +72,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 
             _logger.LogInformation("Initializing user secrets for project...");
 
-            if (EnsureMsIdentityIsInstalled())
+            if (MsIdentityToolHelper.EnsureMsIdentityIsInstalled(_logger, GetCliEnvVars()))
             {
                 // Initialize user secrets
                 bool success = AddClientSecret(context);
@@ -107,6 +105,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 if (exitCode != 0)
                 {
                     _logger.LogError($"Error adding client secret: {stdErr}");
+                    _logger.LogError(MsIdentityToolHelper.NotInstalledMessage);
                     return false;
                 }
 
@@ -153,74 +152,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 _logger.LogError($"Error adding client secret: {e.Message}");
             }
 
-            return false;
-        }
-
-        private bool EnsureMsIdentityIsInstalled()
-        {
-            try
-            {
-                if (IsMsIdentityAlreadyInstalled())
-                {
-                    return true;
-                }
-
-                // Determine if prerelease is needed
-                bool isPreRelease = ToolHelper.IsToolPrerelease();
-                string commandName = "tool";
-
-                // install the tool locally
-                List<string> args = ["install", _msIdentityToolName];
-                if (isPreRelease)
-                {
-                    args.Add("--prerelease");
-                }
-
-                DotnetCliRunner runner = DotnetCliRunner.CreateDotNet(commandName, [.. args], GetCliEnvVars());
-                int exitCode = runner.ExecuteAndCaptureOutput(out string? stdOut, out string? stdErr);
-                if (exitCode == 0)
-                {
-                    _logger.LogInformation($"Successfully installed {_msIdentityToolName}...");
-                    return true;
-                }
-                else
-                {
-                    _logger.LogError($"Failed to install {_msIdentityToolName}: {stdErr}");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception during tool installation: {ex.Message}");
-            }
-            return false;
-        }
-
-        bool IsMsIdentityAlreadyInstalled()
-        {
-            try
-            {
-                // Check if the tool is installed globally
-                DotnetCliRunner globalRunner = DotnetCliRunner.CreateDotNet("tool", ["list", "-g"]);
-                int globalExitCode = globalRunner.ExecuteAndCaptureOutput(out string? globalStdOut, out string? globalStdErr);
-                if (globalExitCode == 0 && !string.IsNullOrEmpty(globalStdOut) && globalStdOut.Contains(_msIdentityToolName, StringComparison.OrdinalIgnoreCase))
-                {
-                    _logger.LogInformation($"{_msIdentityToolName} is already installed globally.");
-                    return true;
-                }
-
-                // Check if the tool is installed locally
-                DotnetCliRunner localRunner = DotnetCliRunner.CreateDotNet("tool", ["list"]);
-                int localExitCode = localRunner.ExecuteAndCaptureOutput(out string? localStdOut, out string? localStdErr);
-                if (localExitCode == 0 && !string.IsNullOrEmpty(localStdOut) && localStdOut.Contains(_msIdentityToolName, StringComparison.OrdinalIgnoreCase))
-                {
-                    _logger.LogInformation($"{_msIdentityToolName} is already installed locally.");
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception checking the installation of dotnet MsIdentity: {ex.Message}");
-            }
             return false;
         }
 

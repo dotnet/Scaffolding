@@ -1,4 +1,4 @@
-﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 @using System.Collections.Generic
 @using System.Linq
@@ -61,9 +61,8 @@
                 if (isCheckbox)
                 {
             @:<div class="form-group form-check">
-                @:<label class="form-check-label">
-                    @:<input class="form-check-input" asp-for="@property.PropertyName" /> @@Html.DisplayNameFor(model => model.@GetValueExpression(property))
-                @:</label>
+                @:<input class="form-check-input" asp-for="@property.PropertyName" />
+                @:<label class="form-check-label" asp-for="@property.PropertyName"></label>
             @:</div>
                 }
                 else if (property.IsEnum && !property.IsEnumFlags)

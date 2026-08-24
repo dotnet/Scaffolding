@@ -335,7 +335,7 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             if (!string.IsNullOrEmpty(fileDir))
             {
                 Directory.CreateDirectory(fileDir);
-                File.WriteAllText(filePath, codeFileString);
+                File.WriteAllText(filePath, codeFileString, new UTF8Encoding(false));
             }
         }
 

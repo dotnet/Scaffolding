@@ -42,6 +42,11 @@ internal class IdentityModel
     /// </summary>
     public required string BaseOutputPath { get; set; }
     /// <summary>
+    /// Gets or sets the project name used for identity file namespace and path resolution.
+    /// For WASM/Auto Global projects this is the client project name; otherwise the server project name.
+    /// </summary>
+    public string? IdentityProjectName { get; set; }
+    /// <summary>
     /// Gets or sets a value indicating whether to overwrite existing files.
     /// </summary>
     public bool Overwrite { get; set; }

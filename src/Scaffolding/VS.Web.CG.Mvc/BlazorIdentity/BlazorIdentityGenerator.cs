@@ -328,6 +328,33 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
 
             blazorIdentityModel.BaseOutputPath = Path.Combine(AppInfo.ApplicationBasePath, commandlineModel.RelativeFolderPath);
+            blazorIdentityModel.RootNamespace = ProjectContext.RootNamespace;
+
+            // For WASM/Auto Global Blazor projects, Identity Account files belong in the client project,
+            // not the server project. In server/server-global projects, MainLayout.razor lives at
+            // Components/Layout/MainLayout.razor. Its absence indicates a WASM/Auto Global setup where
+            // the client project holds all interactive components.
+            if (!FileSystem.FileExists(mainLayoutInServerProject))
+            {
+                var clientProjectRef = ProjectContext.ProjectReferenceInformation
+                    ?.FirstOrDefault(p =>
+                        (p.AssemblyName?.EndsWith(".Client", StringComparison.OrdinalIgnoreCase) == true) ||
+                        (p.ProjectName?.EndsWith(".Client", StringComparison.OrdinalIgnoreCase) == true));
+                if (clientProjectRef != null)
+                {
+                    var clientProjectPath = Path.GetDirectoryName(clientProjectRef.FullPath);
+                    if (!string.IsNullOrEmpty(clientProjectPath))
+                    {
+                        var clientRootNamespace = clientProjectRef.AssemblyName
+                            ?? Path.GetFileNameWithoutExtension(clientProjectRef.FullPath);
+                        blazorIdentityModel.BaseOutputPath = Path.Combine(clientProjectPath, commandlineModel.RelativeFolderPath);
+                        blazorIdentityModel.RootNamespace = clientRootNamespace;
+                        blazorIdentityModel.BlazorIdentityNamespace = $"{clientRootNamespace}.Components.Account";
+                        blazorIdentityModel.BlazorLayoutNamespace = $"{clientRootNamespace}.Layout.MainLayout";
+                    }
+                }
+            }
+
             return blazorIdentityModel;
         }
 
@@ -479,7 +506,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     string extension = templateName.StartsWith("Pages", StringComparison.OrdinalIgnoreCase) ||
                                        templateName.StartsWith("Shared", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
                     string templateNameWithNamespace = $"{templateModel.BlazorIdentityNamespace}.{templateName}";
-                    string templatePath = StringUtil.ToPath(templateNameWithNamespace, templateModel.BaseOutputPath, ProjectContext.RootNamespace);
+                    string templatePath = StringUtil.ToPath(templateNameWithNamespace, templateModel.BaseOutputPath, templateModel.RootNamespace ?? ProjectContext.RootNamespace);
                     string templatedFilePath = $"{templatePath}{extension}";
                     var folderName = Path.GetDirectoryName(templatedFilePath);
                     if (!FileSystem.DirectoryExists(folderName))

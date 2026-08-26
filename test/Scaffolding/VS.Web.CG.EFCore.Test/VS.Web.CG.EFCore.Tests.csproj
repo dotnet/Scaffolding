@@ -27,7 +27,6 @@
     <PackageReference Include="Microsoft.Build.Runtime" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" />
   </ItemGroup>

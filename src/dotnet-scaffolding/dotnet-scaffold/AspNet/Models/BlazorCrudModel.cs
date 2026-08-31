@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.CodeAnalysis;
+
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 
 /// <summary>
@@ -20,9 +22,15 @@ internal class BlazorCrudModel : CrudModel
     /// Used in BlazorCrud Create/Edit templates.
     /// </summary>
     /// <param name="inputType">The .NET type name (e.g., "string", "int").</param>
+    /// <param name="isEnum">Whether the type is an enum.</param>
     /// <returns>The Blazor input component type (e.g., "InputText").</returns>
-    public string GetInputType(string inputType)
+    public string GetInputType(string inputType, bool isEnum = false)
     {
+        if (isEnum)
+        {
+            return "InputSelect";
+        }
+
         if (string.IsNullOrEmpty(inputType))
         {
             return "InputText";
@@ -56,6 +64,24 @@ internal class BlazorCrudModel : CrudModel
             default:
                 return "InputText";
         }
+    }
+
+    /// <summary>
+    /// Determines whether a Roslyn type symbol represents an enum or nullable enum.
+    /// </summary>
+    public bool IsEnumType(ITypeSymbol typeSymbol)
+    {
+        return typeSymbol.TypeKind == TypeKind.Enum || IsNullableEnumType(typeSymbol);
+    }
+
+    /// <summary>
+    /// Determines whether a Roslyn type symbol represents a nullable enum.
+    /// </summary>
+    public bool IsNullableEnumType(ITypeSymbol typeSymbol)
+    {
+        return typeSymbol is INamedTypeSymbol namedType &&
+            namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T &&
+            namedType.TypeArguments[0].TypeKind == TypeKind.Enum;
     }
 
     //used to get correct form class to add to BlazorCrud\Create.tt and BlazorCrud\Edit.tt template

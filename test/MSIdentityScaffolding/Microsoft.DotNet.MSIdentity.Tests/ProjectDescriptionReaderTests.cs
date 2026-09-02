@@ -23,21 +23,26 @@ namespace Tests
 
         readonly CodeReader _codeReader = new CodeReader();
 
-        [InlineData(@"mvc\mvc-b2c", "dotnet new mvc --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com", "dotnet-webapp-mvc", true)]
-        [InlineData(@"mvc\mvc-b2c-callswebapi", "dotnet new mvc --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com --called-api-url \"https://fabrikamb2chello.azurewebsites.net/hello\" --called-api-scopes \"https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read\"", "dotnet-webapp-mvc", true)]
-        [InlineData(@"mvc\mvc-singleorg", "dotnet new mvc --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com", "dotnet-webapp-mvc")]
-        [InlineData(@"mvc\mvc-singleorg-callsgraph", "dotnet new mvc --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --calls-graph", "dotnet-webapp-mvc")]
-        [InlineData(@"mvc\mvc-singleorg-callswebapi", "dotnet new mvc --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --called-api-url \"https://graph.microsoft.com/beta/me\" --called-api-scopes \"user.read\"", "dotnet-webapp-mvc")]
-        [InlineData(@"webapi\webapi-b2c", "dotnet new webapi --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com", "dotnet-minimal_api", true)]
-        [InlineData(@"webapi\webapi-singleorg", "dotnet new webapi --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com", "dotnet-minimal_api")]
-        [InlineData(@"webapi\webapi-singleorg-callsgraph", "dotnet new webapi --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --calls-graph", "dotnet-minimal_api")]
-        [InlineData(@"webapi\webapi-singleorg-callswebapi", "dotnet new webapi --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --called-api-url \"https://graph.microsoft.com/beta/me\" --called-api-scopes \"user.read\"", "dotnet-minimal_api")]
+        [InlineData(@"blazorserver\blazorserver-b2c", "dotnet new blazorserver --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com", "dotnet-webapp", true)]
+        [InlineData(@"blazorserver\blazorserver-b2c-callswebapi", "dotnet new blazorserver --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com --called-api-url \"https://fabrikamb2chello.azurewebsites.net/hello\" --called-api-scopes \"https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read\"", "dotnet-webapp", true)]
+        [InlineData(@"blazorserver\blazorserver-singleorg", "dotnet new blazorserver --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com", "dotnet-webapp")]
+        [InlineData(@"blazorserver\blazorserver-singleorg-callsgraph", "dotnet new blazorserver --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --calls-graph", "dotnet-webapp")]
+        [InlineData(@"blazorserver\blazorserver-singleorg-callswebapi", "dotnet new blazorserver --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --called-api-url \"https://graph.microsoft.com/beta/me\" --called-api-scopes \"user.read\"", "dotnet-webapp")]
+        [InlineData(@"mvc\mvc-b2c", "dotnet new mvc --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com", "dotnet-webapp", true)]
+        [InlineData(@"mvc\mvc-b2c-callswebapi", "dotnet new mvc --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com --called-api-url \"https://fabrikamb2chello.azurewebsites.net/hello\" --called-api-scopes \"https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read\"", "dotnet-webapp", true)]
+        [InlineData(@"mvc\mvc-singleorg", "dotnet new mvc --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com", "dotnet-webapp")]
+        [InlineData(@"mvc\mvc-singleorg-callsgraph", "dotnet new mvc --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --calls-graph", "dotnet-webapp")]
+        [InlineData(@"mvc\mvc-singleorg-callswebapi", "dotnet new mvc --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --called-api-url \"https://graph.microsoft.com/beta/me\" --called-api-scopes \"user.read\"", "dotnet-webapp")]
+        [InlineData(@"webapi\webapi-b2c", "dotnet new webapi --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com", "dotnet-webapi", true)]
+        [InlineData(@"webapi\webapi-singleorg", "dotnet new webapi --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com", "dotnet-webapi")]
+        [InlineData(@"webapi\webapi-singleorg-callsgraph", "dotnet new webapi --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --calls-graph", "dotnet-webapi")]
+        [InlineData(@"webapi\webapi-singleorg-callswebapi", "dotnet new webapi --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --called-api-url \"https://graph.microsoft.com/beta/me\" --called-api-scopes \"user.read\"", "dotnet-webapi")]
         [InlineData(@"webapp\webapp-b2c", "dotnet new webapp --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com", "dotnet-webapp", true)]
         [InlineData(@"webapp\webapp-b2c-callswebapi", "dotnet new webapp --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com --called-api-url \"https://fabrikamb2chello.azurewebsites.net/hello\" --called-api-scopes \"https://fabrikamb2c.onmicrosoft.com/helloapi/demo.read\"", "dotnet-webapp", true)]
         [InlineData(@"webapp\webapp-singleorg", "dotnet new webapp --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com", "dotnet-webapp")]
         [InlineData(@"webapp\webapp-singleorg-callsgraph", "dotnet new webapp --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --calls-graph", "dotnet-webapp")]
         [InlineData(@"webapp\webapp-singleorg-callswebapi", "dotnet new webapp --auth SingleOrg --client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --called-api-url \"https://graph.microsoft.com/beta/me\" --called-api-scopes \"user.read\"", "dotnet-webapp")]
-        [Theory]
+        [Theory(Skip = "Test gets stuck on macOS and Linux. Tracking https://github.com/dotnet/Scaffolding/issues/1598 for fix.")]
         public void TestProjectDescriptionReader(string folderPath, string command, string expectedProjectType, bool isB2C = false)
         {
             string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "ProjectDescriptionReaderTests");
@@ -115,6 +120,33 @@ namespace Tests
                 Assert.Equal(TestConstants.DefaultDomain, authenticationSettings.ApplicationParameters.Domain1);
                 Assert.Equal(TestConstants.BlazorWasmAuthority, authenticationSettings.ApplicationParameters.Authority);
             }
+        }
+
+        [InlineData(@"blazorwasm\blazorwasm-b2c-hosted", "dotnet new blazorwasm --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --api-client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com --hosted", "dotnet-blazorwasm-hosted")]
+        //[InlineData(@"blazorwasm\blazorwasm-singleorg-callsgraph-hosted", "dotnet new blazorwasm --auth SingleOrg --api-client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --calls-graph --hosted", "dotnet-blazorwasm-hosted")]
+        //[InlineData(@"blazorwasm\blazorwasm-singleorg-callswebapi-hosted", "dotnet new blazorwasm --auth SingleOrg --api-client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --called-api-url \"https://graph.microsoft.com/beta/me\" --called-api-scopes \"user.read\" --hosted", "dotnet-blazorwasm-hosted")]
+        [InlineData(@"blazorwasm\blazorwasm-singleorg-hosted", "dotnet new blazorwasm --auth SingleOrg --api-client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com  --hosted", "dotnet-blazorwasm-hosted")]
+        [Theory(Skip = "Test gets stuck on macOS and Linux. Tracking https://github.com/dotnet/Scaffolding/issues/1598 for fix.")]
+        public void TestProjectDescriptionReader_TemplatesWithBlazorWasmHosted(string folderPath, string command, string expectedProjectType)
+        {
+            string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "ProjectDescriptionReaderTests");
+            var files = Directory.EnumerateFiles(createdProjectFolder);
+            var projectDescriptionReader = new ProjectDescriptionReader(files);
+
+            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty);
+
+            Assert.NotNull(projectDescription);
+            Assert.Equal(expectedProjectType, projectDescription.Identifier);
+
+            var authenticationSettings = _codeReader.ReadFromFiles(
+                           projectDescription,
+                           projectDescriptionReader.ProjectDescriptions,
+                           files);
+
+            // Blazorwasm now delegates twice (once to the Client [Blazor], and once to the
+            // Server [Web API]
+            Assert.True(authenticationSettings.ApplicationParameters.IsBlazorWasm);
+            Assert.True(authenticationSettings.ApplicationParameters.IsWebApi);
         }
 
         [InlineData(@"blazorserver\blazorserver-noauth", "dotnet new blazorserver", "dotnet-webapp")]

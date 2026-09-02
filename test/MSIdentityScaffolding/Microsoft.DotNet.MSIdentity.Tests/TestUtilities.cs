@@ -27,17 +27,13 @@ namespace Tests
             processStartInfo.RedirectStandardError = true;
             Environment.GetEnvironmentVariables();
             processStartInfo.WorkingDirectory = folder;
-            using Process process = Process.Start(processStartInfo);
-            var outputTask = process.StandardOutput.ReadToEndAsync();
-            var errorTask = process.StandardError.ReadToEndAsync();
+            Process process = Process.Start(processStartInfo);
             process.WaitForExit();
-            string output = outputTask.GetAwaiter().GetResult();
+            string output = process.StandardOutput.ReadToEnd();
             testOutput.WriteLine(output);
-            string errors = errorTask.GetAwaiter().GetResult();
+            string errors = process.StandardError.ReadToEnd();
             testOutput.WriteLine(errors);
-            Assert.True(
-                process.ExitCode == 0,
-                $"'{command + postFix}' exited with code {process.ExitCode}.{Environment.NewLine}{errors}");
+            Assert.Equal(string.Empty, errors);
         }
     }
 }

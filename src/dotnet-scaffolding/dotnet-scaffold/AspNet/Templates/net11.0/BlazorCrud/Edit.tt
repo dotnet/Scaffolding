@@ -29,7 +29,7 @@
 <#  }
 #>
 @inject <#=dbContextFactory #>
-@inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 
 <PageTitle>Edit</PageTitle>
 
@@ -47,7 +47,7 @@ else
         <div class="col-md-4">
             <EditForm method="post" Model="<#= modelName #>" OnValidSubmit="Update<#= modelName #>" FormName="edit" Enhance>
                 <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
+                <ValidationSummary role="alert" />
                 <input type="hidden" name="<#= modelName #>.<#= primaryKeyName #>" value="@<#= modelName #>.<#= primaryKeyName #>" />
 <#
                 foreach (var property in entityProperties)
@@ -57,13 +57,13 @@ else
                     string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
-                    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
+                    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? " aria-required=\"true\"" : string.Empty;
                     var divWhitespace = new string(' ', 16);
                     var requiredSpanAttributeHtml = property.HasRequiredAttribute() ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
 #>
                 <div class="mb-3"><#= requiredSpanAttributeHtml #>
                     <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label>
-                    <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" <#= ariaRequiredAttributeHtml #>/>
+                    <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>"<#= ariaRequiredAttributeHtml #>/>
                     <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" />
                 </div>
 <#  } #>
@@ -91,7 +91,7 @@ else
 
         if (<#= modelName #> is null)
         {
-            NavigationManager.NotFound();
+            Navigation.NotFound();
         }
     }
 
@@ -110,7 +110,7 @@ else
         {
             if (!<#= modelName #>Exists(<#= modelName #>!.<#= primaryKeyName #>))
             {
-                NavigationManager.NotFound();
+                Navigation.NotFound();
             }
             else
             {
@@ -118,7 +118,7 @@ else
             }
         }
 
-        NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
+        Navigation.NavigateTo("/<#= pluralModelLowerInv #>");
     }
 
     private bool <#= modelName #>Exists(<#= primaryKeyShortTypeName #> <#= primaryKeyNameLowerInv #>)

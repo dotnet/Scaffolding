@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud
 
             this.Write("@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Create</PageTitle>\r\n\r" +
+            this.Write("\r\n@inject NavigationManager Navigation\r\n\r\n<PageTitle>Create</PageTitle>\r\n\r" +
                     "\n<h1>Create</h1>\r\n\r\n<h2>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h2>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <EditForm m" +
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
             this.Write("\" class=\"form-label\">");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write(":</label> \r\n                <");
+            this.Write(":</label>\r\n                <");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputTypeName));
             this.Write(" id=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
@@ -90,13 +90,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write("\" class=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
-            this.Write("\" ");
+            this.Write("\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(ariaRequiredAttributeHtml));
-            this.Write("/> \r\n                <ValidationMessage For=\"() => ");
+            this.Write("/>\r\n                <ValidationMessage For=\"() => ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write("\" class=\"text-danger\" /> \r\n            </div>        \r\n            ");
+            this.Write("\" class=\"text-danger\" />\r\n            </div>\r\n            ");
   } 
             this.Write("<button type=\"submit\" class=\"btn btn-primary\">Create</button>\r\n        </EditForm" +
                     ">\r\n    </div>\r\n</div>\r\n\r\n<div>\r\n    <a href=\"/");
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.EntitySetVariableName ?? modelName));
             this.Write(".Add(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(");\r\n        await context.SaveChangesAsync();\r\n        NavigationManager.Navigate" +
+            this.Write(");\r\n        await context.SaveChangesAsync();\r\n        Navigation.Navigate" +
                     "To(\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
             this.Write("\");\r\n    }\r\n}\r\n");

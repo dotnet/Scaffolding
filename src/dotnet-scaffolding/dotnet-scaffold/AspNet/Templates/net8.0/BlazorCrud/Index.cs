@@ -31,8 +31,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
-    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.DbContextInfo.DbContextClassName : $"{dbContextNamespace}.{Model.DbContextInfo.DbContextClassName}";
-    string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
+    string dbContextFactory = $"IDbContextFactory<{Model.DbContextInfo.DbContextClassName}> DbFactory";
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;

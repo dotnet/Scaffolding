@@ -31,8 +31,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorCrud
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
-    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.DbContextInfo.DbContextClassName : $"{dbContextNamespace}.{Model.DbContextInfo.DbContextClassName}";
-    string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
+    string dbContextFactory = $"IDbContextFactory<{Model.DbContextInfo.DbContextClassName}> DbFactory";
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -65,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorCrud
 
             this.Write("@implements IAsyncDisposable\r\n@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Index</PageTitle>\r\n\r\n" +
+            this.Write("\r\n@inject NavigationManager Navigation\r\n\r\n<PageTitle>Index</PageTitle>\r\n\r\n" +
                     "<h1>Index</h1>\r\n\r\n<p>\r\n    <a href=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
             this.Write("/create\">Create New</a>\r\n</p>\r\n\r\n<QuickGrid Class=\"table\" Items=\"context.");

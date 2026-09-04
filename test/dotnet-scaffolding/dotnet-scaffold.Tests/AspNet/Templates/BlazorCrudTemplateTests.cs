@@ -19,6 +19,8 @@ public class BlazorCrudTemplateTests
     [InlineData(10, "Edit")]
     [InlineData(11, "Create")]
     [InlineData(11, "Edit")]
+    [InlineData(8, "Create")]
+    [InlineData(8, "Edit")]
     public void FormTemplate_WithEnumProperty_GeneratesInputSelect(int frameworkVersion, string pageType)
     {
         // Arrange
@@ -46,6 +48,8 @@ public class BlazorCrudTemplateTests
     [InlineData(10, "Edit")]
     [InlineData(11, "Create")]
     [InlineData(11, "Edit")]
+    [InlineData(8, "Create")]
+    [InlineData(8, "Edit")]
     public void FormTemplate_WithNullableEnumProperty_GeneratesInputSelectWithEmptyOption(int frameworkVersion, string pageType)
     {
         BlazorCrudModel model = CreateModel(pageType);
@@ -67,6 +71,8 @@ public class BlazorCrudTemplateTests
     [InlineData(10, "Edit")]
     [InlineData(11, "Create")]
     [InlineData(11, "Edit")]
+    [InlineData(8, "Create")]
+    [InlineData(8, "Edit")]
     public void FormTemplate_WithStandardProperties_PreservesInputTypes(int frameworkVersion, string pageType)
     {
         BlazorCrudModel model = CreateModel(pageType);
@@ -126,6 +132,16 @@ public class BlazorCrudTemplateTests
 
     private static string TransformTemplate(int frameworkVersion, string pageType, BlazorCrudModel model)
     {
+        if (frameworkVersion == 8 && pageType == "Create")
+        {
+            return Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Create(), model);
+        }
+
+        if (frameworkVersion == 8)
+        {
+            return Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Edit(), model);
+        }
+
         if (frameworkVersion == 9 && pageType == "Create")
         {
             return Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud.Create(), model);
@@ -155,6 +171,13 @@ public class BlazorCrudTemplateTests
     }
 
     private static string Transform(Microsoft.DotNet.Scaffolding.TextTemplating.ITextTransformation template, BlazorCrudModel model)
+    {
+        template.Session = new Dictionary<string, object> { { "Model", model } };
+        template.Initialize();
+        return template.TransformText();
+    }
+
+    private static string Transform(Microsoft.DotNet.Scaffolding.Shared.T4Templating.ITextTransformation template, BlazorCrudModel model)
     {
         template.Session = new Dictionary<string, object> { { "Model", model } };
         template.Initialize();

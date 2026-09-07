@@ -273,6 +273,7 @@ public class CodeService : ICodeService, IDisposable
     {
         EnsureInitialized();
         List<ISymbol> classSymbols = [];
+        var compilations = new List<Compilation>();
         if (_compilation is null)
         {
             // Explicitly use only the MSBuildWorkspace for compilation — the fallback
@@ -284,6 +285,18 @@ public class CodeService : ICodeService, IDisposable
             if (project is not null)
             {
                 _compilation = await project.GetCompilationAsync();
+
+                // Also gather compilations for any referenced projects (e.g. a DbContext/model
+                // class library referenced via a ProjectReference) so that types declared there
+                // are discoverable, not just types in the main scaffolding project.
+                foreach (var referencedProject in GetTransitiveProjectReferences(project))
+                {
+                    var referencedCompilation = await referencedProject.GetCompilationAsync();
+                    if (referencedCompilation is not null)
+                    {
+                        compilations.Add(referencedCompilation);
+                    }
+                }
             }
 
             // Fallback: MSBuildWorkspace can fail to open projects when the SDK resolver
@@ -296,27 +309,57 @@ public class CodeService : ICodeService, IDisposable
             }
         }
 
-        List<ISymbol?>? compilationClassSymbols = _compilation?.SyntaxTrees.SelectMany(tree =>
+        if (_compilation is not null)
         {
-            var model = _compilation.GetSemanticModel(tree);
-            return tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
-                .Select(classSyntax => model.GetDeclaredSymbol(classSyntax))
-                .Where(classSymbol => classSymbol is not null &&
-                                     !classSymbol.MetadataName.StartsWith("<"));    //if the metadata name starts with < it is a compiler generated class
-        })
-        .Append(_compilation.GetEntryPoint(CancellationToken.None)?.ContainingType)
-        .Distinct(SymbolEqualityComparer.Default)
-        .ToList();
+            compilations.Insert(0, _compilation);
+        }
 
-        compilationClassSymbols?.ForEach(x =>
+        foreach (var compilation in compilations)
         {
-            if (x is not null)
+            var compilationClassSymbols = compilation.SyntaxTrees.SelectMany(tree =>
             {
-                classSymbols.Add(x);
-            }
-        });
+                var model = compilation.GetSemanticModel(tree);
+                return tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
+                    .Select(classSyntax => model.GetDeclaredSymbol(classSyntax))
+                    .Where(classSymbol => classSymbol is not null &&
+                                         !classSymbol.MetadataName.StartsWith("<"));    //if the metadata name starts with < it is a compiler generated class
+            })
+            .ToList();
 
-        return classSymbols;
+            if (ReferenceEquals(compilation, _compilation))
+            {
+                var entryPointType = compilation.GetEntryPoint(CancellationToken.None)?.ContainingType;
+                if (entryPointType is not null)
+                {
+                    compilationClassSymbols.Add(entryPointType);
+                }
+            }
+
+            compilationClassSymbols?.ForEach(x =>
+            {
+                if (x is not null)
+                {
+                    classSymbols.Add(x);
+                }
+            });
+        }
+
+        return classSymbols
+            .Distinct(SymbolEqualityComparer.Default)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Collects all Roslyn <see cref="Project"/> instances referenced (directly or
+    /// transitively) by <paramref name="project"/> via ProjectReference (e.g. a class library
+    /// containing a DbContext and/or model classes referenced from the main scaffolding project).
+    /// </summary>
+    private static IEnumerable<Project> GetTransitiveProjectReferences(Project project)
+    {
+        var dependencyGraph = project.Solution.GetProjectDependencyGraph();
+        return dependencyGraph.GetProjectsThatThisProjectTransitivelyDependsOn(project.Id)
+            .Select(project.Solution.GetProject)
+            .OfType<Project>();
     }
 
     /// <summary>

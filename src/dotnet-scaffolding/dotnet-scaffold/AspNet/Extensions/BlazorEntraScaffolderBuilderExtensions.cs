@@ -238,6 +238,9 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
+            List<Package> packages = [
+                PackageConstants.AspNetCorePackages.MicrosoftIdentityWebPackage
+            ];
 
             if (context.Properties.TryGetValue(nameof(EntraIdSettings), out var entraIdSettings) &&
                 entraIdSettings is EntraIdSettings entraSettings)
@@ -248,7 +251,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
                 }
 
                 step.ProjectPath = entraSettings.Project;
-                step.Packages = [PackageConstants.AspNetCorePackages.MicrosoftIdentityWebPackage];
+                step.Packages = packages;
             }
             else
             {
@@ -277,6 +280,10 @@ internal static class BlazorEntraScaffolderBuilderExtensions
                 {
                     step.ProjectPath = projectPath;
 
+                    List<Package> packages = new List<Package>
+                    {
+                        PackageConstants.AspNetCorePackages.AspNetCoreComponentsWebAssemblyAuthenticationPackage
+                    };
                     if (context.Properties.TryGetValue(nameof(EntraIdSettings), out var entraIdSettings) &&
                         entraIdSettings is EntraIdSettings entraSettings)
                     {
@@ -285,7 +292,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
                             throw new InvalidOperationException("Project path is not set in EntraIdSettings.");
                         }
 
-                        step.Packages = [PackageConstants.AspNetCorePackages.AspNetCoreComponentsWebAssemblyAuthenticationPackage];
+                        step.Packages = packages;
                     }
                 }
                 else
@@ -430,7 +437,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
                 step.SkipStep = true;
                 return;
             }
-
+            
             var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["BlazorEntraId"], entraIdModel.ProjectInfo.ProjectPath);
             var blazorEntraIdProperties = EntraIdHelper.GetTextTemplatingProperties(allBlazorIdentityFiles, entraIdModel);
 

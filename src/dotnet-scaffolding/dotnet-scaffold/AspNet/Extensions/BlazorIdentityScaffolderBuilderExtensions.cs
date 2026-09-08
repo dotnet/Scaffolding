@@ -120,7 +120,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
 
             string? projectPath = context.GetOptionResult<string>(Constants.CliOptions.ProjectCliOption);
             if (string.IsNullOrEmpty(projectPath))
-            {
+            { 
                 step.SkipStep = true;
                 return;
             }
@@ -153,17 +153,16 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
+            List<Package> packages = [
+                PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackage,
+                PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackage,
+                PackageConstants.EfConstants.EfCoreToolsPackage,
+                PackageConstants.EfConstants.EfCoreDesignPackage
+            ];
 
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) &&
                 commandSettingsObj is IdentitySettings commandSettings)
             {
-                List<Package> packages = [
-                    PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackage,
-                    PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackage,
-                    PackageConstants.EfConstants.EfCoreToolsPackage,
-                    PackageConstants.EfConstants.EfCoreDesignPackage
-                ];
-
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&

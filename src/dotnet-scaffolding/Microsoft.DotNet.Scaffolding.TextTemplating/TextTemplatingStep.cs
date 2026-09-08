@@ -96,11 +96,6 @@ public class TextTemplatingStep : ScaffoldStep
                     }
                 }
             }
-            else
-            {
-                _logger.LogError($"Template type '{templatingProperty.TemplateType.FullName}' does not implement '{typeof(ITextTransformation).FullName}'.");
-                return Task.FromResult(false);
-            }
         }
 
         _logger.LogInformation("Done\n");

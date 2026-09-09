@@ -129,6 +129,13 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
 
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) && commandSettingsObj is IdentitySettings commandSettings)
             {
+                var targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(commandSettings.Project);
+                if (targetFrameworkFolder is "net9.0")
+                {
+                    step.SkipStep = true;
+                    return;
+                }
+
                 var projectDirectory = Path.GetDirectoryName(commandSettings.Project);
                 if (Directory.Exists(projectDirectory))
                 {

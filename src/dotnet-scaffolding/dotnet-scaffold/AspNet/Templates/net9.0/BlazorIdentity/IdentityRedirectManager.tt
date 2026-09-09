@@ -1,14 +1,17 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
 <#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 using <#= Model.UserClassNamespace #>;
 
 namespace <#= Model.BlazorIdentityNamespace #>
 {
-    internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
+    internal sealed class IdentityRedirectManager(IServiceProvider serviceProvider)
     {
         public const string StatusCookieName = "Identity.StatusMessage";
+
+        private NavigationManager NavigationManager => serviceProvider.GetRequiredService<NavigationManager>();
 
         private static readonly CookieBuilder StatusCookieBuilder = new()
         {
@@ -26,20 +29,20 @@ namespace <#= Model.BlazorIdentityNamespace #>
             // Prevent open redirects.
             if (!Uri.IsWellFormedUriString(uri, UriKind.Relative))
             {
-                uri = navigationManager.ToBaseRelativePath(uri);
+                uri = NavigationManager.ToBaseRelativePath(uri);
             }
 
             // During static rendering, NavigateTo throws a NavigationException which is handled by the framework as a redirect.
             // So as long as this is called from a statically rendered Identity component, the InvalidOperationException is never thrown.
-            navigationManager.NavigateTo(uri);
+            NavigationManager.NavigateTo(uri);
             throw new InvalidOperationException($"{nameof(IdentityRedirectManager)} can only be used during static rendering.");
         }
 
         [DoesNotReturn]
         public void RedirectTo(string uri, Dictionary<string, object?> queryParameters)
         {
-            var uriWithoutQuery = navigationManager.ToAbsoluteUri(uri).GetLeftPart(UriPartial.Path);
-            var newUri = navigationManager.GetUriWithQueryParameters(uriWithoutQuery, queryParameters);
+            var uriWithoutQuery = NavigationManager.ToAbsoluteUri(uri).GetLeftPart(UriPartial.Path);
+            var newUri = NavigationManager.GetUriWithQueryParameters(uriWithoutQuery, queryParameters);
             RedirectTo(newUri);
         }
 
@@ -50,7 +53,7 @@ namespace <#= Model.BlazorIdentityNamespace #>
             RedirectTo(uri);
         }
 
-        private string CurrentPath => navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
+        private string CurrentPath => NavigationManager.ToAbsoluteUri(NavigationManager.Uri).GetLeftPart(UriPartial.Path);
 
         [DoesNotReturn]
         public void RedirectToCurrentPage() => RedirectTo(CurrentPath);

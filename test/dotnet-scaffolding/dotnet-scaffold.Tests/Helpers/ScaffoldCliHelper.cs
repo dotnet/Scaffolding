@@ -333,7 +333,12 @@ app.Run();
     public static string GetBlazorProgramCs(string projectName) =>
         $@"using {projectName}.Components;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+
 var app = builder.Build();
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 app.Run();
 ";
 

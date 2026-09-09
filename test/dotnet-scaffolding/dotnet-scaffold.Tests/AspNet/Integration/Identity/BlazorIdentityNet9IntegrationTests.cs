@@ -54,12 +54,19 @@ public class BlazorIdentityNet9IntegrationTests : BlazorIdentityIntegrationTests
             $"App.razor was not modified.\nCLI output: {cliOutput}\nCLI error: {cliError}\nApp.razor: {appContent}\nProgram.cs: {File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"))}");
         Assert.Contains("<Routes @rendermode=\"PageRenderMode\" />", appContent);
         Assert.Contains("HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null", appContent);
+        Assert.Contains("AuthorizeRouteView", appContent);
+        Assert.Contains("RedirectToLogin", appContent);
         var accountImportsContent = File.ReadAllText(Path.Combine(accountPagesDir, "_Imports.razor"));
         Assert.Contains("@attribute [ExcludeFromInteractiveRouting]", accountImportsContent);
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("AddScoped<IdentityRedirectManager>()", programContent);
         Assert.Contains("AddScoped<IdentityUserAccessor>()", programContent);
         Assert.Contains("TestDbContext", programContent);
+        Assert.Contains("app.MapAdditionalIdentityEndpoints()", programContent);
+        Assert.Contains("app.UseMigrationsEndPoint()", programContent);
+        Assert.Contains("AddIdentityCore<", programContent);
+        Assert.Contains("AddAuthentication(", programContent);
+        Assert.Contains("AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()", programContent);
 
         // Assert — no NuGet errors and project builds after scaffolding
         Assert.False(cliOutput.Contains("error: NU"),

@@ -6,6 +6,13 @@
         "Global": {
           "CodeChanges": [
             {
+              "Block": "app.UseMigrationsEndPoint()",
+              "InsertBefore": [ "app.Run();" ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
               "Block": "app.MapAdditionalIdentityEndpoints();",
               "InsertBefore": [ "app.Run();" ],
               "LeadingTrivia": {

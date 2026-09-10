@@ -44,7 +44,8 @@ public static class RoslynExtensions
             var fileText = File.ReadAllText(filePath);
             if (!string.IsNullOrEmpty(fileText))
             {
-                return project.AddDocument(filePath, fileText);
+                // Pass both name and filePath so TryApplyChanges / disk persistence can locate the file.
+                return project.AddDocument(Path.GetFileName(filePath), fileText, filePath: filePath);
             }
         }
 
@@ -97,7 +98,7 @@ public static class RoslynExtensions
         }
 
         //often Document.Name is the file path of the document and not the name.
-        //check for all possible cases. 
+        //check for all possible cases.
         return project.Documents.FirstOrDefault(x =>
             x.Name.EndsWith(documentName.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase) ||
             (!string.IsNullOrEmpty(x.FilePath) && x.FilePath.EndsWith(documentName.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase)));
@@ -110,10 +111,12 @@ public static class RoslynExtensions
             return null;
         }
 
-        //often TextDocument.Name is the file path of the document and not the name.
-        //check for all possible cases. 
+        // Match GetDocument: Document.Name may be file name only (AdhocWorkspace fallback)
+        // or a relative/full path (MSBuildWorkspace). FilePath is preferred when set.
+        var normalizedName = documentName.Replace("\\", Path.DirectorySeparatorChar.ToString());
         return project.AdditionalDocuments.FirstOrDefault(x =>
-            !string.IsNullOrEmpty(x.FilePath) &&
-            x.FilePath.EndsWith(documentName.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase));
+            x.Name.EndsWith(normalizedName, StringComparison.OrdinalIgnoreCase) ||
+            (!string.IsNullOrEmpty(x.FilePath) &&
+             x.FilePath.EndsWith(normalizedName, StringComparison.OrdinalIgnoreCase)));
     }
 }

@@ -71,8 +71,11 @@ public class CodeService : ICodeService, IDisposable
 
         var msBuildWorkspace = await GetMsBuildWorkspaceAsync();
 
-        // Happy path: MSBuildWorkspace successfully loaded the project.
-        if (msBuildWorkspace?.CurrentSolution?.GetProject(_projectPath) is not null)
+        // Happy path: MSBuildWorkspace loaded the project with source documents.
+        // An empty project (common with preview SDKs like net11.0 where evaluation
+        // "succeeds" but yields no documents) is treated as a load failure.
+        var msBuildProject = msBuildWorkspace?.CurrentSolution?.GetProject(_projectPath);
+        if (msBuildProject is not null && msBuildProject.Documents.Any())
         {
             return msBuildWorkspace;
         }
@@ -105,12 +108,22 @@ public class CodeService : ICodeService, IDisposable
             {
                 foreach (var changedDocId in projectChange.GetChangedDocuments())
                 {
-                    var newDoc = solution.GetDocument(changedDocId);
-                    if (newDoc?.FilePath is not null && newDoc.TryGetText(out var sourceText))
-                    {
-                        try { File.WriteAllText(newDoc.FilePath, sourceText.ToString(), Encoding.UTF8); }
-                        catch { /* best-effort */ }
-                    }
+                    PersistDocumentToDisk(solution.GetDocument(changedDocId));
+                }
+
+                foreach (var changedAdditionalDocId in projectChange.GetChangedAdditionalDocuments())
+                {
+                    PersistTextDocumentToDisk(solution.GetAdditionalDocument(changedAdditionalDocId));
+                }
+
+                foreach (var addedDocId in projectChange.GetAddedDocuments())
+                {
+                    PersistDocumentToDisk(solution.GetDocument(addedDocId));
+                }
+
+                foreach (var addedAdditionalDocId in projectChange.GetAddedAdditionalDocuments())
+                {
+                    PersistTextDocumentToDisk(solution.GetAdditionalDocument(addedAdditionalDocId));
                 }
             }
 
@@ -118,6 +131,38 @@ public class CodeService : ICodeService, IDisposable
         }
 
         return _msBuildWorkspace?.TryApplyChanges(solution) == true;
+    }
+
+    private static void PersistDocumentToDisk(Document? document)
+    {
+        if (document?.FilePath is null)
+        {
+            return;
+        }
+
+        if (!document.TryGetText(out var sourceText))
+        {
+            sourceText = document.GetTextAsync().GetAwaiter().GetResult();
+        }
+
+        try { File.WriteAllText(document.FilePath, sourceText.ToString(), Encoding.UTF8); }
+        catch { /* best-effort */ }
+    }
+
+    private static void PersistTextDocumentToDisk(TextDocument? document)
+    {
+        if (document?.FilePath is null)
+        {
+            return;
+        }
+
+        if (!document.TryGetText(out var sourceText))
+        {
+            sourceText = document.GetTextAsync().GetAwaiter().GetResult();
+        }
+
+        try { File.WriteAllText(document.FilePath, sourceText.ToString(), Encoding.UTF8); }
+        catch { /* best-effort */ }
     }
 
     private async Task<MSBuildWorkspace?> GetMsBuildWorkspaceAsync(bool refresh = false)
@@ -150,9 +195,11 @@ public class CodeService : ICodeService, IDisposable
     }
 
     /// <summary>
-    /// Builds an <see cref="AdhocWorkspace"/> populated with the project's .cs source files.
+    /// Builds an <see cref="AdhocWorkspace"/> populated with the project's source files.
+    /// C# files are added as Documents; razor/cshtml/html files as AdditionalDocuments so
+    /// <see cref="ProjectModifier"/> can resolve them the same way MSBuildWorkspace does.
     /// Used when <see cref="MSBuildWorkspace"/> cannot load the project (e.g., preview SDK
-    /// versions such as net11.0).  Document changes are written to disk manually inside
+    /// versions such as net11.0). Document changes are written to disk manually inside
     /// <see cref="TryApplyChanges"/> before the in-memory workspace state is updated.
     /// </summary>
     private async Task<AdhocWorkspace?> BuildFallbackWorkspaceAsync()
@@ -174,15 +221,7 @@ public class CodeService : ICodeService, IDisposable
         workspace.AddProject(projectInfo);
         var addedProject = workspace.CurrentSolution.Projects.First();
 
-        var sourceFiles = Directory.GetFiles(projectDirectory, "*.cs", SearchOption.AllDirectories)
-            .Where(f =>
-            {
-                var rel = Path.GetRelativePath(projectDirectory, f);
-                return !rel.StartsWith("obj" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-                    && !rel.StartsWith("bin" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
-            });
-
-        foreach (var file in sourceFiles)
+        foreach (var file in EnumerateProjectSourceFiles(projectDirectory, "*.cs"))
         {
             try
             {
@@ -200,7 +239,44 @@ public class CodeService : ICodeService, IDisposable
             catch { /* skip unreadable files */ }
         }
 
+        // Markup files must be AdditionalDocuments — ProjectModifier resolves razor/html/cshtml
+        // via GetAdditionalDocument, not GetDocument.
+        var solution = workspace.CurrentSolution;
+        var additionalGlobs = new[] { "*.razor", "*.cshtml", "*.html" };
+        foreach (var glob in additionalGlobs)
+        {
+            foreach (var file in EnumerateProjectSourceFiles(projectDirectory, glob))
+            {
+                try
+                {
+                    var text = await File.ReadAllTextAsync(file);
+                    solution = solution.AddAdditionalDocument(
+                        DocumentId.CreateNewId(addedProject.Id),
+                        name: Path.GetFileName(file),
+                        text: SourceText.From(text, Encoding.UTF8),
+                        filePath: file);
+                }
+                catch { /* skip unreadable files */ }
+            }
+        }
+
+        if (!ReferenceEquals(solution, workspace.CurrentSolution))
+        {
+            workspace.TryApplyChanges(solution);
+        }
+
         return workspace;
+    }
+
+    private static IEnumerable<string> EnumerateProjectSourceFiles(string projectDirectory, string searchPattern)
+    {
+        return Directory.GetFiles(projectDirectory, searchPattern, SearchOption.AllDirectories)
+            .Where(f =>
+            {
+                var rel = Path.GetRelativePath(projectDirectory, f);
+                return !rel.StartsWith("obj" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+                    && !rel.StartsWith("bin" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+            });
     }
 
     public async Task OpenProjectAsync()

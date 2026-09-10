@@ -1,0 +1,78 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CheckBlock": "AddSyncfusionBlazorToolkit",
+              "Block": "builder.Services.AddSyncfusionBlazorToolkit();",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Syncfusion.Blazor.Toolkit"
+      ]
+    },
+    {
+      "FileName": "Components\\_Imports.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "@using Microsoft.AspNetCore.Components.Forms"
+          ],
+          "MultiLineBlock": [
+            "@using Microsoft.AspNetCore.Components.Forms",
+            "@using Syncfusion.Blazor.Toolkit",
+            "@using Syncfusion.Blazor.Toolkit.Charts"
+          ],
+          "CheckBlock": "Syncfusion.Blazor.Toolkit"
+        }
+      ]
+    },
+    {
+      "FileName": "Components\\App.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "</head>"
+          ],
+          "MultiLineBlock": [
+            "    <link href=\"_content/Syncfusion.Blazor.Toolkit/Styles/fluent.css\" rel=\"stylesheet\" />",
+            "</head>"
+          ],
+          "CheckBlock": "Syncfusion.Blazor.Toolkit/Styles/fluent.css"
+        }
+      ]
+    },
+    {
+      "FileName": "NavMenu.razor",
+      "Replacements": [
+        {
+          "CheckBlock": "healthcare-tracker",
+          "ReplaceSnippet": [
+            "<span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather",
+            "            </NavLink>",
+            "        </div>"
+          ],
+          "MultiLineBlock": [
+            "<span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather",
+            "            </NavLink>",
+            "        </div>",
+            "        <div class=\"nav-item px-3\">",
+            "            <NavLink class=\"nav-link\" href=\"healthcare-tracker\">",
+            "                <span class=\"bi bi-heart-pulse-nav-menu\" aria-hidden=\"true\"></span> Healthcare Tracker",
+            "            </NavLink>",
+            "        </div>"
+          ]
+        }
+      ]
+    }
+  ]
+}

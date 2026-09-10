@@ -1,0 +1,85 @@
+<#@ template hostSpecific="true" linePragmas="false" #>
+<#@ parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.HealthcareTrackerModel" name="Model" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Linq" #>
+
+@page "/healthcare-tracker"
+<# if (Model.HasMainLayout) { #>
+@layout MainLayout
+<# } #>
+
+<PageTitle>Healthcare Tracker</PageTitle>
+
+<div class="container-fluid py-3">
+    <h1 class="mb-3">Healthcare Tracker</h1>
+    <p class="text-muted mb-4">Sample vitals dashboard built with Syncfusion Blazor Toolkit.</p>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">Heart Rate</div>
+                    <div class="fs-3 fw-semibold">72 <span class="fs-6 text-muted">bpm</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">Blood Pressure</div>
+                    <div class="fs-3 fw-semibold">120/80 <span class="fs-6 text-muted">mmHg</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">SpO2</div>
+                    <div class="fs-3 fw-semibold">98 <span class="fs-6 text-muted">%</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">Temperature</div>
+                    <div class="fs-3 fw-semibold">98.6 <span class="fs-6 text-muted">&deg;F</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header">Weekly Heart Rate Trend</div>
+        <div class="card-body">
+            <SfChart Title="Heart Rate (bpm)">
+                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Toolkit.Charts.ValueType.Category" Title="Day"></ChartPrimaryXAxis>
+                <ChartPrimaryYAxis Title="BPM" Minimum="40" Maximum="120"></ChartPrimaryYAxis>
+                <ChartSeriesCollection>
+                    <ChartSeries DataSource="@HeartRateData" XName="Day" YName="Bpm" Type="ChartSeriesType.Line" Name="Heart Rate">
+                    </ChartSeries>
+                </ChartSeriesCollection>
+            </SfChart>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<HeartRatePoint> HeartRateData = new()
+    {
+        new() { Day = "Mon", Bpm = 72 },
+        new() { Day = "Tue", Bpm = 75 },
+        new() { Day = "Wed", Bpm = 70 },
+        new() { Day = "Thu", Bpm = 78 },
+        new() { Day = "Fri", Bpm = 74 },
+        new() { Day = "Sat", Bpm = 68 },
+        new() { Day = "Sun", Bpm = 71 },
+    };
+
+    private sealed class HeartRatePoint
+    {
+        public string Day { get; set; } = string.Empty;
+        public double Bpm { get; set; }
+    }
+}

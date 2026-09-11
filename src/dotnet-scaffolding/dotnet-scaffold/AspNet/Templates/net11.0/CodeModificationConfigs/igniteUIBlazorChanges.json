@@ -1,0 +1,24 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();", "WebApplication.CreateBuilder.Build()" ],
+              "CheckBlock": "AddIgniteUIBlazor",
+              "Block": "WebApplication.CreateBuilder.Services.AddIgniteUIBlazor()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "IgniteUI.Blazor.Controls"
+      ]
+    }
+  ]
+}

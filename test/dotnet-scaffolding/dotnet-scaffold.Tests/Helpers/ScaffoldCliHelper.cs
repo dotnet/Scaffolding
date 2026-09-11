@@ -164,7 +164,20 @@ internal static class ScaffoldCliHelper
     /// <param name="command">The scaffold sub-command (e.g., "minimalapi", "mvccontroller", "blazor-empty").</param>
     /// <param name="args">CLI arguments for the command (e.g., "--project", path, "--name", "Foo").</param>
     /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
-    public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAsync(string targetFramework, string command, params string[] args)
+    public static Task<(int ExitCode, string Output, string Error)> RunScaffoldAsync(string targetFramework, string command, params string[] args)
+        => RunScaffoldInDirectoryAsync(workingDirectory: null, targetFramework, command, args);
+
+    /// <summary>
+    /// Same as <see cref="RunScaffoldAsync"/>, but runs the tool with <paramref name="workingDirectory"/> as its current
+    /// directory so that relative CLI arguments such as <c>--project .\App\App.csproj</c> resolve against it. This mirrors
+    /// how users invoke <c>dotnet scaffold</c> from a solution folder; always passing absolute paths hides path-resolution bugs.
+    /// </summary>
+    /// <param name="workingDirectory">Working directory for the tool process, or null to inherit the test host's.</param>
+    /// <param name="targetFramework">The target framework moniker to run the tool under (e.g., "net8.0", "net9.0", "net10.0", "net11.0").</param>
+    /// <param name="command">The scaffold sub-command (e.g., "minimalapi", "mvccontroller", "blazor-empty").</param>
+    /// <param name="args">CLI arguments for the command (e.g., "--project", path, "--name", "Foo").</param>
+    /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
+    public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldInDirectoryAsync(string? workingDirectory, string targetFramework, string command, params string[] args)
     {
         var scaffoldCsproj = GetScaffoldProjectPath();
         var configuration = GetBuildConfiguration();
@@ -179,6 +192,11 @@ internal static class ScaffoldCliHelper
                 CreateNoWindow = true
             }
         };
+        if (!string.IsNullOrEmpty(workingDirectory))
+        {
+            process.StartInfo.WorkingDirectory = workingDirectory;
+        }
+
         ConfigureDotNetEnvironment(process.StartInfo);
         process.StartInfo.ArgumentList.Add("run");
         process.StartInfo.ArgumentList.Add("--no-build");

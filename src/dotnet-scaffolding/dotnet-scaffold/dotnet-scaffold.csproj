@@ -263,6 +263,11 @@
     <MakeDir Directories="$(OutputPath)Aspnet\CodeModificationConfigs\net9.0" />
     <MakeDir Directories="$(OutputPath)Aspnet\CodeModificationConfigs\net10.0" />
     <MakeDir Directories="$(OutputPath)Aspnet\CodeModificationConfigs\net11.0" />
+    <!-- Mirror Aspire CodeModificationConfigs into the packed layout path -->
+    <MakeDir Directories="$(OutputPath)Aspire\net8.0\CodeModificationConfigs" />
+    <MakeDir Directories="$(OutputPath)Aspire\net9.0\CodeModificationConfigs" />
+    <MakeDir Directories="$(OutputPath)Aspire\net10.0\CodeModificationConfigs" />
+    <MakeDir Directories="$(OutputPath)Aspire\net11.0\CodeModificationConfigs" />
   </Target>
   <Target Name="CopyCodeModConfigsToPacked" AfterTargets="CreateMockToolLayout">
     <ItemGroup>
@@ -270,11 +275,23 @@
       <_AspNetConfigs_net9 Include="$(OutputPath)AspNet\Templates\net9.0\CodeModificationConfigs\*.json" />
       <_AspNetConfigs_net10 Include="$(OutputPath)AspNet\Templates\net10.0\CodeModificationConfigs\*.json" />
       <_AspNetConfigs_net11 Include="$(OutputPath)AspNet\Templates\net11.0\CodeModificationConfigs\*.json" />
+      <!-- Aspire configs live under Aspire\CodeModificationConfigs\{tfm}\... in the build
+           output, but the runtime (GlobalToolFileFinder) expects the packed layout
+           Aspire\{tfm}\CodeModificationConfigs\... — recursively include so the
+           Caching/Database/Storage subfolders are preserved. -->
+      <_AspireConfigs_net8 Include="$(OutputPath)Aspire\CodeModificationConfigs\net8.0\**\*.json" />
+      <_AspireConfigs_net9 Include="$(OutputPath)Aspire\CodeModificationConfigs\net9.0\**\*.json" />
+      <_AspireConfigs_net10 Include="$(OutputPath)Aspire\CodeModificationConfigs\net10.0\**\*.json" />
+      <_AspireConfigs_net11 Include="$(OutputPath)Aspire\CodeModificationConfigs\net11.0\**\*.json" />
     </ItemGroup>
     <Copy SourceFiles="@(_AspNetConfigs_net8)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net8.0" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(_AspNetConfigs_net9)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net9.0" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(_AspNetConfigs_net10)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net10.0" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(_AspNetConfigs_net11)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net11.0" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_AspireConfigs_net8)" DestinationFiles="@(_AspireConfigs_net8->'$(OutputPath)Aspire\net8.0\CodeModificationConfigs\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_AspireConfigs_net9)" DestinationFiles="@(_AspireConfigs_net9->'$(OutputPath)Aspire\net9.0\CodeModificationConfigs\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_AspireConfigs_net10)" DestinationFiles="@(_AspireConfigs_net10->'$(OutputPath)Aspire\net10.0\CodeModificationConfigs\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_AspireConfigs_net11)" DestinationFiles="@(_AspireConfigs_net11->'$(OutputPath)Aspire\net11.0\CodeModificationConfigs\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
 
   <!-- Exclude template files from publish output to prevent them from appearing in tools folder -->

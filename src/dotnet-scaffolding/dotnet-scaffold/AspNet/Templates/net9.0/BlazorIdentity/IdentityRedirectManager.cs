@@ -10,8 +10,7 @@
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorIdentity
 {
     using System;
-    using Microsoft.Extensions.DependencyInjection;
-
+    
     /// <summary>
     /// Class to produce the template output
     /// </summary>
@@ -23,36 +22,40 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorIdentity
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("\r\n{\r\n    internal sealed class IdentityRedirectManager(IServiceProvider serviceP" +
-                "rovider)\r\n    {\r\n        public const string StatusCookieName = \"Identity.Stat" +
-                "usMessage\";\r\n\r\n        private NavigationManager NavigationManager => serv" +
-                "iceProvider.GetRequiredService<NavigationManager>();\r\n\r\n        private static read" +
-                "only CookieBuilder StatusCookieBuilder = new()\r\n        {\r\n            SameSite = S" +
-                "ameSiteMode.Strict,\r\n            HttpOnly = true,\r\n            IsEssential = tr" +
-                "ue,\r\n            MaxAge = TimeSpan.FromSeconds(5),\r\n        };\r\n\r\n        [Do" +
-                "esNotReturn]\r\n        public void RedirectTo(string? uri)\r\n        {\r\n          " +
-                "  uri ??= \"\";\r\n\r\n            // Prevent open redirects.\r\n            if (!Uri.IsWe" +
-                "llFormedUriString(uri, UriKind.Relative))\r\n            {\r\n                uri = Nav" +
-                "igationManager.ToBaseRelativePath(uri);\r\n            }\r\n\r\n            // During s" +
-                "tatic rendering, NavigateTo throws a NavigationException which is handled by the " +
-                "framework as a redirect.\r\n            // So as long as this is called from a sta" +
-                "tically rendered Identity component, the InvalidOperationException is never thro" +
-                "wn.\r\n            NavigationManager.NavigateTo(uri);\r\n            throw new Inval" +
-                "idOperationException($\"{nameof(IdentityRedirectManager)} can only be used during" +
-                " static rendering.\");\r\n        }\r\n\r\n        [DoesNotReturn]\r\n        public v" +
-                "oid RedirectTo(string uri, Dictionary<string, object?> queryParameters)\r\n      " +
-                "  {\r\n            var uriWithoutQuery = NavigationManager.ToAbsoluteUri(uri).GetL" +
-                "eftPart(UriPartial.Path);\r\n            var newUri = NavigationManager.GetUriWith" +
-                "QueryParameters(uriWithoutQuery, queryParameters);\r\n            RedirectTo(newUri);" +
-                "\r\n        }\r\n\r\n        [DoesNotReturn]\r\n        public void RedirectToWithSta" +
-                "tus(string uri, string message, HttpContext context)\r\n        {\r\n            cont" +
-                "ext.Response.Cookies.Append(StatusCookieName, message, StatusCookieBuilder.Build(c" +
-                "ontext));\r\n            RedirectTo(uri);\r\n        }\r\n\r\n        private strin" +
-                "g CurrentPath => NavigationManager.ToAbsoluteUri(NavigationManager.Uri).GetLeftPa" +
-                "rt(UriPartial.Path);\r\n\r\n        [DoesNotReturn]\r\n        public void RedirectToC" +
-                "urrentPage() => RedirectTo(CurrentPath);\r\n\r\n        [DoesNotReturn]\r\n        pu" +
-                "blic void RedirectToCurrentPageWithStatus(string message, HttpContext context)\r\n" +
-                "            => RedirectToWithStatus(CurrentPath, message, context);\r\n    }\r\n}\r\n");
+            this.Write("using Microsoft.AspNetCore.Components;\r\nusing System.Diagnostics.CodeAnalysis;\r\nu" +
+                    "sing ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
+            this.Write(";\r\n\r\nnamespace ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
+            this.Write("\r\n{\r\n    internal sealed class IdentityRedirectManager(NavigationManager navigati" +
+                    "onManager)\r\n    {\r\n        public const string StatusCookieName = \"Identity.Stat" +
+                    "usMessage\";\r\n\r\n        private static readonly CookieBuilder StatusCookieBuilder" +
+                    " = new()\r\n        {\r\n            SameSite = SameSiteMode.Strict,\r\n            Ht" +
+                    "tpOnly = true,\r\n            IsEssential = true,\r\n            MaxAge = TimeSpan.F" +
+                    "romSeconds(5),\r\n        };\r\n\r\n        [DoesNotReturn]\r\n        public void Redir" +
+                    "ectTo(string? uri)\r\n        {\r\n            uri ??= \"\";\r\n\r\n            // Prevent" +
+                    " open redirects.\r\n            if (!Uri.IsWellFormedUriString(uri, UriKind.Relati" +
+                    "ve))\r\n            {\r\n                uri = navigationManager.ToBaseRelativePath(" +
+                    "uri);\r\n            }\r\n\r\n            // During static rendering, NavigateTo throw" +
+                    "s a NavigationException which is handled by the framework as a redirect.\r\n      " +
+                    "      // So as long as this is called from a statically rendered Identity compon" +
+                    "ent, the InvalidOperationException is never thrown.\r\n            navigationManag" +
+                    "er.NavigateTo(uri);\r\n            throw new InvalidOperationException($\"{nameof(I" +
+                    "dentityRedirectManager)} can only be used during static rendering.\");\r\n        }" +
+                    "\r\n\r\n        [DoesNotReturn]\r\n        public void RedirectTo(string uri, Dictiona" +
+                    "ry<string, object?> queryParameters)\r\n        {\r\n            var uriWithoutQuery" +
+                    " = navigationManager.ToAbsoluteUri(uri).GetLeftPart(UriPartial.Path);\r\n         " +
+                    "   var newUri = navigationManager.GetUriWithQueryParameters(uriWithoutQuery, que" +
+                    "ryParameters);\r\n            RedirectTo(newUri);\r\n        }\r\n\r\n        [DoesNotRe" +
+                    "turn]\r\n        public void RedirectToWithStatus(string uri, string message, Http" +
+                    "Context context)\r\n        {\r\n            context.Response.Cookies.Append(StatusC" +
+                    "ookieName, message, StatusCookieBuilder.Build(context));\r\n            RedirectTo" +
+                    "(uri);\r\n        }\r\n\r\n        private string CurrentPath => navigationManager.ToA" +
+                    "bsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);\r\n\r\n        [Does" +
+                    "NotReturn]\r\n        public void RedirectToCurrentPage() => RedirectTo(CurrentPat" +
+                    "h);\r\n\r\n        [DoesNotReturn]\r\n        public void RedirectToCurrentPageWithSta" +
+                    "tus(string message, HttpContext context)\r\n            => RedirectToWithStatus(Cu" +
+                    "rrentPath, message, context);\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

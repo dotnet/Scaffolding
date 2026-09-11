@@ -1,4 +1,4 @@
-﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
 @using System.Collections.Generic
 @using System.Linq
@@ -96,9 +96,9 @@
         else
         {
             <td>
-                @@Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @@Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @@Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                @:<a asp-action="Edit">Edit</a> |
+                @:<a asp-action="Details">Details</a> |
+                @:<a asp-action="Delete">Delete</a>
             </td>
         }
         @:</tr>

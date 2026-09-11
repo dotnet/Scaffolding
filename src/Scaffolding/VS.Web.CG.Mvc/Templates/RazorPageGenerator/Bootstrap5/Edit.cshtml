@@ -76,9 +76,8 @@
                 if (isCheckbox)
                 {
             @:<div class="form-group form-check">@propertyRequiredText
-                @:<label class="form-check-label">
-                    @:<input class="form-check-input" asp-for="@(Model.ModelTypeName).@property.PropertyName" @ariaRequiredAttributeHtml/> @@Html.DisplayNameFor(model => model.@(Model.ModelTypeName).@GetValueExpression(property))
-                @:</label>
+                @:<input class="form-check-input" asp-for="@(Model.ModelTypeName).@property.PropertyName" @ariaRequiredAttributeHtml/>
+                @:<label class="form-check-label" asp-for="@(Model.ModelTypeName).@property.PropertyName"></label>
             @:</div>
                 }
                 else if (property.IsEnum && !property.IsEnumFlags)

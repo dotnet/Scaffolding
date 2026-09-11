@@ -69,22 +69,30 @@ public class BlazorIdentityRuntimeE2ETests : BlazorIdentityIntegrationTestsBase
         var sw = Stopwatch.StartNew();
         while (sw.Elapsed < timeout)
         {
-            while (!process.StandardOutput.EndOfStream)
+            var remaining = timeout - sw.Elapsed;
+            string? line;
+            try
             {
-                var line = await process.StandardOutput.ReadLineAsync();
-                output += line + "\n";
-                // Look for Kestrel listening line
-                var m = Regex.Match(line ?? string.Empty, @"Now listening on: (?<url>https?://\S+)", RegexOptions.IgnoreCase);
-                if (m.Success)
-                {
-                    listenUrl = m.Groups["url"].Value.TrimEnd('/');
-                    break;
-                }
+                line = await process.StandardOutput.ReadLineAsync().WaitAsync(remaining);
+            }
+            catch (TimeoutException)
+            {
+                break;
             }
 
-            if (!string.IsNullOrEmpty(listenUrl)) break;
-            await Task.Delay(250);
-            if (process.HasExited) break;
+            if (line is null)
+            {
+                break;
+            }
+
+            output += line + "\n";
+            // Look for Kestrel listening line
+            var m = Regex.Match(line, @"Now listening on: (?<url>https?://\S+)", RegexOptions.IgnoreCase);
+            if (m.Success)
+            {
+                listenUrl = m.Groups["url"].Value.TrimEnd('/');
+                break;
+            }
         }
 
         if (string.IsNullOrEmpty(listenUrl))
@@ -113,7 +121,7 @@ public class BlazorIdentityRuntimeE2ETests : BlazorIdentityIntegrationTestsBase
             var reqUrl = listenUrl + "/Account/Register";
             string body = string.Empty;
             var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(30);
-            HttpResponseMessage resp = null;
+            HttpResponseMessage? resp = null;
             while (DateTime.UtcNow < deadline)
             {
                 try

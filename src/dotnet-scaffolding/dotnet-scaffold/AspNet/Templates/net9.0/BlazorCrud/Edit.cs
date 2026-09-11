@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud
 
             this.Write("@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Edit</PageTitle>\r\n\r\n<" +
+            this.Write("\r\n@inject NavigationManager Navigation\r\n\r\n<PageTitle>Edit</PageTitle>\r\n\r\n<" +
                     "h1>Edit</h1>\r\n\r\n<h2>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h2>\r\n<hr />\r\n@if (");
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write("\" class=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
-            this.Write("\" ");
+            this.Write("\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(ariaRequiredAttributeHtml));
             this.Write("/>\r\n                    <ValidationMessage For=\"() => ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
@@ -138,7 +138,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(@" is null)
         {
-            NavigationManager.NavigateTo(""notfound"");
+            Navigation.NavigateTo(""notfound"");
         }
     }
 
@@ -157,9 +157,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("!.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write("))\r\n            {\r\n                NavigationManager.NavigateTo(\"notfound\");\r\n   " +
+            this.Write("))\r\n            {\r\n                Navigation.NavigateTo(\"notfound\");\r\n   " +
                     "         }\r\n            else\r\n            {\r\n                throw;\r\n           " +
-                    " }\r\n        }\r\n\r\n        NavigationManager.NavigateTo(\"/");
+                    " }\r\n        }\r\n\r\n        Navigation.NavigateTo(\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
             this.Write("\");\r\n    }\r\n\r\n    private bool ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));

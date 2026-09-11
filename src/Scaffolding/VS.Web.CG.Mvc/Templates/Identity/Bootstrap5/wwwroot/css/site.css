@@ -81,3 +81,13 @@ body {
   white-space: nowrap;
   line-height: 60px;
 }
+
+/* Bootstrap 5 input group reset to work with ASP Tag Helpers inserting hidden input[name="__Invariant"] elements, for certain field types, starting in .NET 7 */
+.input-group:not(.has-validation) > :not(:last-child):not(.dropdown-toggle):not(.dropdown-menu):not(.form-floating) {
+    border-top-right-radius: var(--bs-border-radius);
+    border-bottom-right-radius: var(--bs-border-radius);
+}
+.input-group:not(.has-validation) > :not(:last-child):not(:has(+ input[type="hidden"]:last-child)):not(.dropdown-toggle):not(.dropdown-menu):not(.form-floating) {
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+}

@@ -21,6 +21,7 @@ public class BlazorIdentityNet9IntegrationTests : BlazorIdentityIntegrationTests
         File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.StableNuGetConfig);
         File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
         ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"), GloballyInteractiveAppContent);
 
         // Assert project builds before scaffolding
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
@@ -36,34 +37,42 @@ public class BlazorIdentityNet9IntegrationTests : BlazorIdentityIntegrationTests
             "--dbProvider", "sqlite-efcore");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
-        // Assert expected files were created (only if scaffolding produced output;
-        // the scaffolder may silently skip file generation for older TFMs if model
-        // resolution or template execution encounters issues)
-        bool scaffoldingProducedFiles = File.Exists(Path.Combine(_testProjectDir, "Data", "ApplicationUser.cs"));
-        if (scaffoldingProducedFiles)
-        {
-            Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
-                "DbContext file should be created.");
-            var accountPagesDir = Path.Combine(_testProjectDir, "Components", "Account", "Pages");
-            Assert.True(Directory.Exists(accountPagesDir), "Components/Account/Pages directory should be created.");
-            Assert.True(File.Exists(Path.Combine(accountPagesDir, "Login.razor")), "Login.razor should be created.");
-            Assert.True(File.Exists(Path.Combine(accountPagesDir, "Register.razor")), "Register.razor should be created.");
-            var sharedDir = Path.Combine(_testProjectDir, "Components", "Account", "Shared");
-            Assert.True(Directory.Exists(sharedDir), "Components/Account/Shared directory should be created.");
-            Assert.True(File.Exists(Path.Combine(sharedDir, "ManageNavMenu.razor")), "ManageNavMenu.razor should be created.");
-            var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+        // Assert expected files were created
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "ApplicationUser.cs")),
+            "ApplicationUser file should be created.");
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
+            "DbContext file should be created.");
+        var accountPagesDir = Path.Combine(_testProjectDir, "Components", "Account", "Pages");
+        Assert.True(Directory.Exists(accountPagesDir), "Components/Account/Pages directory should be created.");
+        Assert.True(File.Exists(Path.Combine(accountPagesDir, "Login.razor")), "Login.razor should be created.");
+        Assert.True(File.Exists(Path.Combine(accountPagesDir, "Register.razor")), "Register.razor should be created.");
+        var sharedDir = Path.Combine(_testProjectDir, "Components", "Account", "Shared");
+        Assert.True(Directory.Exists(sharedDir), "Components/Account/Shared directory should be created.");
+        Assert.True(File.Exists(Path.Combine(sharedDir, "ManageNavMenu.razor")), "ManageNavMenu.razor should be created.");
+        var appContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
+        Assert.True(appContent.Contains("<HeadOutlet @rendermode=\"PageRenderMode\" />"),
+            $"App.razor was not modified.\nCLI output: {cliOutput}\nCLI error: {cliError}\nApp.razor: {appContent}\nProgram.cs: {File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"))}");
+        Assert.Contains("<Routes @rendermode=\"PageRenderMode\" />", appContent);
+        Assert.Contains("HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null", appContent);
+        Assert.Contains("AuthorizeRouteView", appContent);
+        Assert.Contains("RedirectToLogin", appContent);
+        var accountImportsContent = File.ReadAllText(Path.Combine(accountPagesDir, "_Imports.razor"));
+        Assert.Contains("@attribute [ExcludeFromInteractiveRouting]", accountImportsContent);
+        var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+        Assert.Contains("AddScoped<IdentityRedirectManager>()", programContent);
+        Assert.Contains("AddScoped<IdentityUserAccessor>()", programContent);
+        Assert.Contains("TestDbContext", programContent);
+        Assert.Contains("app.MapAdditionalIdentityEndpoints()", programContent);
+        Assert.Contains("app.UseMigrationsEndPoint()", programContent);
+        Assert.Contains("AddIdentityCore<", programContent);
+        Assert.Contains("AddAuthentication(", programContent);
+        Assert.Contains("AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()", programContent);
 
-            // Program.cs modification and post-build verification only if the scaffolder
-            // successfully injected DbContext registration (older TFMs may skip this step)
-            if (programContent.Contains("TestDbContext"))
-            {
-                // Assert — no NuGet errors and project builds after scaffolding
-                Assert.False(cliOutput.Contains("error: NU"),
-                    $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
-                var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
-                Assert.True(postExitCode == 0,
-                    $"Project should build after scaffolding.\nExit code: {postExitCode}\nOutput: {postOutput}\nError: {postError}");
-            }
-        }
+        // Assert — no NuGet errors and project builds after scaffolding
+        Assert.False(cliOutput.Contains("error: NU"),
+            $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
+        var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(postExitCode == 0,
+            $"Project should build after scaffolding.\nExit code: {postExitCode}\nOutput: {postOutput}\nError: {postError}");
     }
 }

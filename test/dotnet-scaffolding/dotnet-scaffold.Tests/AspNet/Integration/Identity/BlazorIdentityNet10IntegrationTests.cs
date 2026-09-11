@@ -20,6 +20,7 @@ public class BlazorIdentityNet10IntegrationTests : BlazorIdentityIntegrationTest
         File.WriteAllText(_testProjectPath, ProjectContent);
         File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
         ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"), GloballyInteractiveAppContent);
 
         // Assert project builds before scaffolding
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
@@ -48,8 +49,21 @@ public class BlazorIdentityNet10IntegrationTests : BlazorIdentityIntegrationTest
         Assert.True(Directory.Exists(sharedDir), "Components/Account/Shared directory should be created.");
         Assert.True(File.Exists(Path.Combine(sharedDir, "ManageNavMenu.razor")), "ManageNavMenu.razor should be created.");
         Assert.True(File.Exists(Path.Combine(sharedDir, "PasskeySubmit.razor.js")), "PasskeySubmit.razor.js should be created.");
+        var appContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
+        Assert.Contains("<HeadOutlet @rendermode=\"PageRenderMode\" />", appContent);
+        Assert.Contains("<Routes @rendermode=\"PageRenderMode\" />", appContent);
+        Assert.Contains("HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null", appContent);
+        Assert.Contains("AuthorizeRouteView", appContent);
+        Assert.Contains("RedirectToLogin", appContent);
+        var accountImportsContent = File.ReadAllText(Path.Combine(accountPagesDir, "_Imports.razor"));
+        Assert.Contains("@attribute [ExcludeFromInteractiveRouting]", accountImportsContent);
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("TestDbContext", programContent);
+        Assert.Contains("app.MapAdditionalIdentityEndpoints()", programContent);
+        Assert.Contains("app.UseMigrationsEndPoint()", programContent);
+        Assert.Contains("AddIdentityCore<", programContent);
+        Assert.Contains("AddAuthentication(", programContent);
+        Assert.Contains("AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()", programContent);
 
         // Assert — no NuGet errors and project builds after scaffolding
         Assert.False(cliOutput.Contains("error: NU"),

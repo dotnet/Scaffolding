@@ -130,10 +130,20 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) && commandSettingsObj is IdentitySettings commandSettings)
             {
                 var projectDirectory = Path.GetDirectoryName(commandSettings.Project);
-                if (Directory.Exists(projectDirectory))
+                if (!string.IsNullOrEmpty(projectDirectory) && Directory.Exists(projectDirectory))
                 {
-                    step.BaseOutputDirectory = Path.Combine(BlazorIdentityHelper.GetIdentityComponentsPath(projectDirectory), "Shared");
-                    step.FileName = "PasskeySubmit.razor.js";
+                    // Determine whether the passkey static asset exists for this project's templates.
+                    var templateFiles = new TemplateFoldersUtilities().GetAllFilesForTargetFramework(new[] { "Files" }, commandSettings.Project);
+                    var passkeyFile = templateFiles.FirstOrDefault(x => x.EndsWith("PasskeySubmit.razor.js", StringComparison.OrdinalIgnoreCase));
+                    if (!string.IsNullOrEmpty(passkeyFile))
+                    {
+                        step.BaseOutputDirectory = Path.Combine(BlazorIdentityHelper.GetIdentityComponentsPath(projectDirectory), "Shared");
+                        step.FileName = "PasskeySubmit.razor.js";
+                        return;
+                    }
+
+                    // Asset not present for this framework/version; skip the static-file step instead
+                    step.SkipStep = true;
                     return;
                 }
             }

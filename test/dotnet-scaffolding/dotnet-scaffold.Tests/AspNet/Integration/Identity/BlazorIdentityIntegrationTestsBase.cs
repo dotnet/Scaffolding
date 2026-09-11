@@ -76,10 +76,10 @@ public abstract class BlazorIdentityIntegrationTestsBase : IDisposable
 </Project>";
 
     // App.razor content used by integration tests before scaffolding modifies it.
-        // Matches the structure expected by the Blazor Identity code-mods so replacements apply.
-        protected const string GloballyInteractiveAppContent = @"<body>
-<HeadOutlet @rendermode=\"InteractiveServer\" />
-<Routes @rendermode=\"InteractiveServer\" />
+    // Matches the structure expected by the Blazor Identity code-mods so replacements apply.
+    protected const string GloballyInteractiveAppContent = @"<body>
+<HeadOutlet @rendermode=""InteractiveServer"" />
+<Routes @rendermode=""InteractiveServer"" />
 <AuthorizeRouteView />
 <RedirectToLogin />
 </body>";

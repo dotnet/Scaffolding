@@ -78,13 +78,10 @@ public abstract class BlazorIdentityIntegrationTestsBase : IDisposable
     // App.razor content used by integration tests before scaffolding modifies it.
         // Matches the structure expected by the Blazor Identity code-mods so replacements apply.
         protected const string GloballyInteractiveAppContent = @"<body>
-<HeadOutlet />
-<Router AppAssembly=""typeof(Program).Assembly"" NotFoundPage=""typeof(Pages.NotFound)"">
-    <Found Context=""routeData"">
-        <RouteView RouteData=""routeData"" DefaultLayout=""typeof(Layout.MainLayout)"" />
-        <FocusOnNavigate RouteData=""routeData"" Selector=""h1"" />
-    </Found>
-</Router>
+<HeadOutlet @rendermode=\"InteractiveServer\" />
+<Routes @rendermode=\"InteractiveServer\" />
+<AuthorizeRouteView />
+<RedirectToLogin />
 </body>";
     #region Blazor Identity — Template Root Folders
 

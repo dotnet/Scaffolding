@@ -64,6 +64,7 @@ public class BlazorIdentityNet10IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains("AddIdentityCore<", programContent);
         Assert.Contains("AddAuthentication(", programContent);
         Assert.Contains("AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()", programContent);
+        Assert.DoesNotContain("throw new InvalidOperationException(\"Connection string", programContent);
 
         // Assert — no NuGet errors and project builds after scaffolding
         Assert.False(cliOutput.Contains("error: NU"),

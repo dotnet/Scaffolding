@@ -11,17 +11,17 @@
               "InsertBefore": [ "app.Run();" ],
               "LeadingTrivia": {
                 "Newline": true
-              }
-            }
-          ]
-        }
-      }
+              {
+                "InsertAfter": "WebApplication.CreateBuilder",
+                "CheckBlock": "builder.Configuration.GetConnectionString",
+                "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? \"Data Source=TestDb.db\""
+              },
     },
     {
       "FileName": "Program.cs",
       "Usings": [
         "Microsoft.EntityFrameworkCore"
-      ], 
+      ],
       "Options": [
         "EfScenario"
       ],

@@ -19,11 +19,11 @@
               "Block": "builder.Services.AddDbContextFactory<$(DbContextName)>(options => options.$(UseDbMethod))",
               "LeadingTrivia": {
                 "Newline": true
-              }
-            },
-            {
-              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContextFactory",
-              "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
+              {
+                "InsertAfter": "WebApplication.CreateBuilder",
+                "CheckBlock": "builder.Configuration.GetConnectionString",
+                "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? \"Data Source=TestDb.db\""
+              },
               "LeadingTrivia": {
                 "Newline": true
               }

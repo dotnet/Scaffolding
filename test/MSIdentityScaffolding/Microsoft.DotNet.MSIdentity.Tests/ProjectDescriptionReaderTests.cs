@@ -117,6 +117,33 @@ namespace Tests
             }
         }
 
+        [InlineData(@"blazorwasm\blazorwasm-b2c-hosted", "dotnet new blazorwasm --auth IndividualB2C --aad-b2c-instance https://fabrikamb2c.b2clogin.com --api-client-id fdb91ff5-5ce6-41f3-bdbd-8267c817015d --domain fabrikamb2c.onmicrosoft.com --hosted", "dotnet-blazorwasm-hosted")]
+        //[InlineData(@"blazorwasm\blazorwasm-singleorg-callsgraph-hosted", "dotnet new blazorwasm --auth SingleOrg --api-client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --calls-graph --hosted", "dotnet-blazorwasm-hosted")]
+        //[InlineData(@"blazorwasm\blazorwasm-singleorg-callswebapi-hosted", "dotnet new blazorwasm --auth SingleOrg --api-client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com --called-api-url \"https://graph.microsoft.com/beta/me\" --called-api-scopes \"user.read\" --hosted", "dotnet-blazorwasm-hosted")]
+        [InlineData(@"blazorwasm\blazorwasm-singleorg-hosted", "dotnet new blazorwasm --auth SingleOrg --api-client-id 86699d80-dd21-476a-bcd1-7c1a3d471f75 --domain msidentitysamplestesting.onmicrosoft.com  --hosted", "dotnet-blazorwasm-hosted")]
+        [Theory(Skip = "Test gets stuck on macOS and Linux. Tracking https://github.com/dotnet/Scaffolding/issues/1598 for fix.")]
+        public void TestProjectDescriptionReader_TemplatesWithBlazorWasmHosted(string folderPath, string command, string expectedProjectType)
+        {
+            string createdProjectFolder = CreateProjectIfNeeded(folderPath, command, "ProjectDescriptionReaderTests");
+            var files = Directory.EnumerateFiles(createdProjectFolder);
+            var projectDescriptionReader = new ProjectDescriptionReader(files);
+
+            var projectDescription = projectDescriptionReader.GetProjectDescription(string.Empty);
+
+            Assert.NotNull(projectDescription);
+            Assert.Equal(expectedProjectType, projectDescription.Identifier);
+
+            var authenticationSettings = _codeReader.ReadFromFiles(
+                           projectDescription,
+                           projectDescriptionReader.ProjectDescriptions,
+                           files);
+
+            // Blazorwasm now delegates twice (once to the Client [Blazor], and once to the
+            // Server [Web API]
+            Assert.True(authenticationSettings.ApplicationParameters.IsBlazorWasm);
+            Assert.True(authenticationSettings.ApplicationParameters.IsWebApi);
+        }
+
         [InlineData(@"blazorserver\blazorserver-noauth", "dotnet new blazorserver", "dotnet-webapp")]
         [InlineData(@"blazorwasm2\blazorwasm2-noauth", "dotnet new blazorwasm", "dotnet-blazorwasm")]
         [InlineData(@"mvc\mvc-noauth", "dotnet new mvc", "dotnet-webapp")]

@@ -101,8 +101,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure("No component (dotnet tool) provided."));
             }
 
-            commandInfo = scaffolderComponent.Commands.FirstOrDefault(
-                command => command.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
+            commandInfo = scaffolderComponent.Commands.FirstOrDefault(command => command.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
             if (commandInfo is null)
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Invalid or empty command provided for component '{componentName}'"));

@@ -22,8 +22,7 @@ internal sealed class ScaffolderCatalog
 
     public IList<KeyValuePair<string, CommandInfo>> GetCommands()
         => GetComponents()
-            .SelectMany(component => component.Commands.Select(
-                command => KeyValuePair.Create(component.Component.Command, command)))
+            .SelectMany(component => component.Commands.Select(command => KeyValuePair.Create(component.Component.Command, command)))
             .ToList();
 
     public ScaffolderComponent? FindComponent(string? command)
@@ -33,7 +32,6 @@ internal sealed class ScaffolderCatalog
             return null;
         }
 
-        return GetComponents().FirstOrDefault(component =>
-            string.Equals(component.Component.Command, command, StringComparison.OrdinalIgnoreCase));
+        return GetComponents().FirstOrDefault(component => string.Equals(component.Component.Command, command, StringComparison.OrdinalIgnoreCase));
     }
 }

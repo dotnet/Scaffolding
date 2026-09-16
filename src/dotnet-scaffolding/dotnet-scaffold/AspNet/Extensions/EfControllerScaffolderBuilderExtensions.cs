@@ -59,10 +59,10 @@ internal static class EfControllerScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<Package> packages = [PackageConstants.EfConstants.EfCoreToolsPackage];
             if (context.Properties.TryGetValue(nameof(EfControllerSettings), out var commandSettingsObj) &&
                 commandSettingsObj is EfControllerSettings commandSettings)
             {
+                List<Package> packages = [PackageConstants.EfConstants.EfCoreToolsPackage];
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
@@ -200,7 +200,7 @@ internal static class EfControllerScaffolderBuilderExtensions
                 var addViews = context.GetOptionResult<bool>(Constants.CliOptions.ViewsOption);
                 string? projectPath = context.GetOptionResult<string>(Constants.CliOptions.ProjectCliOption);
                 if (!addViews || string.IsNullOrEmpty(projectPath))
-                { 
+                {
                     step.SkipStep = true;
                     return;
                 }

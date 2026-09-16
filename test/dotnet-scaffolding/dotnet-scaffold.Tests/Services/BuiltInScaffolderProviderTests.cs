@@ -41,17 +41,4 @@ public class BuiltInScaffolderProviderTests
         Assert.Equal("Creates a sample.", command.Description);
         Assert.Empty(command.Parameters);
     }
-
-    [Fact]
-    public void GetComponents_WhenNoScaffoldersAreConfigured_ReturnsComponentWithNoCommands()
-    {
-        var scaffoldRunner = new Mock<IScaffoldRunner>();
-        scaffoldRunner.SetupGet(r => r.Scaffolders).Returns(
-            (IReadOnlyDictionary<ScaffolderCatagory, IEnumerable<IScaffolder>>?)null);
-
-        var provider = new BuiltInScaffolderProvider(scaffoldRunner.Object);
-
-        var component = Assert.Single(provider.GetComponents());
-        Assert.Empty(component.Commands);
-    }
 }

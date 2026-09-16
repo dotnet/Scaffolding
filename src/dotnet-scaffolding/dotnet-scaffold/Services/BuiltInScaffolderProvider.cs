@@ -11,31 +11,28 @@ namespace Microsoft.DotNet.Tools.Scaffold.Services;
 /// <summary>
 /// Provides metadata for scaffolders that are built into the current process.
 /// </summary>
-internal class BuiltInScaffolderDiscoveryService(IScaffoldRunner scaffoldRunner)
+internal sealed class BuiltInScaffolderProvider(IScaffoldRunner scaffoldRunner) : IScaffolderProvider
 {
     private const string ComponentCommand = "dotnet-scaffold";
     private const string ComponentPackage = "Microsoft.dotnet-scaffold";
 
     private readonly IScaffoldRunner _scaffoldRunner = scaffoldRunner;
 
-    public DotNetToolInfo Component { get; } = new()
+    public IReadOnlyList<ScaffolderComponent> GetComponents()
     {
-        PackageName = ComponentPackage,
-        Version = ToolHelper.GetToolVersion() ?? string.Empty,
-        Command = ComponentCommand,
-        IsGlobalTool = true
-    };
-
-    public IList<KeyValuePair<string, CommandInfo>> GetCommands()
-    {
-        if (_scaffoldRunner.Scaffolders is null)
-        {
-            return [];
-        }
-
-        return _scaffoldRunner.Scaffolders
+        var commands = _scaffoldRunner.Scaffolders?
             .SelectMany(category => category.Value)
-            .Select(scaffolder => KeyValuePair.Create(ComponentCommand, scaffolder.ToCommandInfo()))
-            .ToList();
+            .Select(scaffolder => scaffolder.ToCommandInfo())
+            .ToList() ?? [];
+
+        DotNetToolInfo component = new()
+        {
+            PackageName = ComponentPackage,
+            Version = ToolHelper.GetToolVersion() ?? string.Empty,
+            Command = ComponentCommand,
+            IsGlobalTool = true
+        };
+
+        return [new ScaffolderComponent(component, commands)];
     }
 }

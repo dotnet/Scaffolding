@@ -57,7 +57,8 @@ internal class ScaffoldCommandAppBuilder(IScaffoldRunner runnner, string[] args)
         registrar.Register(typeof(IEnvironmentService), typeof(EnvironmentService));
         registrar.Register(typeof(IFlowProvider), typeof(FlowProvider));
         registrar.Register(typeof(IDotNetToolService), typeof(DotNetToolService));
-        registrar.Register(typeof(BuiltInScaffolderDiscoveryService), typeof(BuiltInScaffolderDiscoveryService));
+        registrar.Register(typeof(IScaffolderProvider), typeof(BuiltInScaffolderProvider));
+        registrar.Register(typeof(ScaffolderCatalog), typeof(ScaffolderCatalog));
         registrar.Register(typeof(IToolManager), typeof(ToolManager));
         registrar.Register(typeof(IToolManifestService), typeof(ToolManifestService));
         registrar.Register(typeof(IFirstTimeUseNoticeSentinel), typeof(FirstTimeUseNoticeSentinel));

@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Command;
 /// </summary>
 internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 {
-    private readonly BuiltInScaffolderDiscoveryService _scaffolderDiscoveryService;
+    private readonly ScaffolderCatalog _scaffolderCatalog;
     // Service for file system operations.
     private readonly IFileSystem _fileSystem;
     // Logger for command output and diagnostics.
@@ -30,7 +30,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     /// <summary>
     /// Initializes a new instance of the <see cref="ScaffoldCommand"/> class.
     /// </summary>
-    /// <param name="scaffolderDiscoveryService">Provides metadata for built-in scaffolders.</param>
+    /// <param name="scaffolderCatalog">Provides metadata for available scaffolders.</param>
     /// <param name="environmentService">The environment service.</param>
     /// <param name="fileSystem">The file system service.</param>
     /// <param name="flowProvider">The flow provider.</param>
@@ -39,7 +39,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     /// <param name="firstTimeUseNoticeSentinel">The first-time use notice sentinel.</param>
     /// <param name="scaffoldRunner">The command runner, implemeneted with System.CommandLine</param>
     public ScaffoldCommand(
-        BuiltInScaffolderDiscoveryService scaffolderDiscoveryService,
+        ScaffolderCatalog scaffolderCatalog,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
         IFlowProvider flowProvider,
@@ -49,7 +49,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         IScaffoldRunner scaffoldRunner)
         : base(flowProvider, telemetry)
     {
-        _scaffolderDiscoveryService = scaffolderDiscoveryService;
+        _scaffolderCatalog = scaffolderCatalog;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
         _logger = logger;
@@ -88,8 +88,8 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         IEnumerable<IFlowStep> flowSteps =
         [
             new StartupFlowStep(_environmentService, _fileSystem, _firstTimeUseNoticeSentinel),
-            new CategoryPickerFlowStep(_scaffolderDiscoveryService),
-            new CommandPickerFlowStep(_logger, _scaffolderDiscoveryService, _environmentService, _fileSystem),
+            new CategoryPickerFlowStep(_scaffolderCatalog),
+            new CommandPickerFlowStep(_logger, _scaffolderCatalog, _environmentService, _fileSystem),
             new CommandExecuteFlowStep(TelemetryService, _scaffoldRunner)
         ];
 

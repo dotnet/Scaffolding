@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
     internal class CommandPickerFlowStep : IFlowStep
     {
         private readonly ILogger _logger;
-        private readonly BuiltInScaffolderDiscoveryService _scaffolderDiscoveryService;
+        private readonly ScaffolderCatalog _scaffolderCatalog;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
 
@@ -23,12 +23,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// </summary>
         public CommandPickerFlowStep(
             ILogger logger,
-            BuiltInScaffolderDiscoveryService scaffolderDiscoveryService,
+            ScaffolderCatalog scaffolderCatalog,
             IEnvironmentService environmentService,
             IFileSystem fileSystem)
         {
             _logger = logger;
-            _scaffolderDiscoveryService = scaffolderDiscoveryService;
+            _scaffolderCatalog = scaffolderCatalog;
             _environmentService = environmentService;
             _fileSystem = fileSystem;
         }
@@ -54,8 +54,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             // KeyValuePair with key being name of the DotNetToolInfo (component) and value being the CommandInfo supported by that component.
             KeyValuePair<string, CommandInfo>? commandInfoKvp = null;
             CommandInfo? commandInfo = null;
-            var dotnetToolComponent = _scaffolderDiscoveryService.Component;
-            CommandDiscovery commandDiscovery = new(_scaffolderDiscoveryService.GetCommands(), dotnetToolComponent);
+            CommandDiscovery commandDiscovery = new(_scaffolderCatalog.GetCommands(), componentPicked: null);
             commandInfoKvp = commandDiscovery.Discover(context);
             if (commandDiscovery.State.IsNavigation())
             {
@@ -69,7 +68,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             else
             {
                 commandInfo = commandInfoKvp.Value.Value;
-                SelectComponent(context, dotnetToolComponent);
+                var scaffolderComponent = _scaffolderCatalog.FindComponent(commandInfoKvp.Value.Key);
+                if (scaffolderComponent is null)
+                {
+                    return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Unable to find component '{commandInfoKvp.Value.Key}'."));
+                }
+
+                SelectComponent(context, scaffolderComponent.Component);
                 SelectCommand(context, commandInfo);
             }
 
@@ -90,17 +95,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             var commandName = settings?.CommandName;
             CommandInfo? commandInfo = null;
 
-            var dotnetToolComponent = _scaffolderDiscoveryService.Component;
-            if (string.Equals(dotnetToolComponent.Command, componentName, StringComparison.OrdinalIgnoreCase))
-            {
-                var allCommands = _scaffolderDiscoveryService.GetCommands().Select(entry => entry.Value);
-                commandInfo = allCommands.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
-            }
-            else
+            var scaffolderComponent = _scaffolderCatalog.FindComponent(componentName);
+            if (scaffolderComponent is null)
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure("No component (dotnet tool) provided."));
             }
 
+            commandInfo = scaffolderComponent.Commands.FirstOrDefault(
+                command => command.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
             if (commandInfo is null)
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Invalid or empty command provided for component '{componentName}'"));
@@ -112,7 +114,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Failed to get/parse parameters for command '{commandInfo.Name}'"));
             }
 
-            SelectComponent(context, dotnetToolComponent);
+            SelectComponent(context, scaffolderComponent.Component);
             SelectCommand(context, commandInfo);
             return new ValueTask<FlowStepResult>(new FlowStepResult { State = FlowStepState.Success, Steps = new List<ParameterBasedFlowStep> { commandFirstStep } });
         }

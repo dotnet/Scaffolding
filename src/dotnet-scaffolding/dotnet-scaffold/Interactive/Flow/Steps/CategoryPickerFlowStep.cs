@@ -2,27 +2,23 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Tools.Scaffold.Services;
-using Microsoft.Extensions.Logging;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
 {
     /// <summary>
-    /// IFlowStep that deals with the selection of the component (DotNetToolInfo) and the associated command (CommandInfo).
-    /// If provided by the user, verifies if the component is installed and the command is supported.
+    /// IFlowStep that deals with the selection of a scaffolding category.
     /// </summary>
     internal class CategoryPickerFlowStep : IFlowStep
     {
-        private readonly ILogger _logger;
-        private readonly IDotNetToolService _dotnetToolService;
+        private readonly BuiltInScaffolderDiscoveryService _scaffolderDiscoveryService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CategoryPickerFlowStep"/> class.
         /// </summary>
-        public CategoryPickerFlowStep(ILogger logger, IDotNetToolService dotnetToolService)
+        public CategoryPickerFlowStep(BuiltInScaffolderDiscoveryService scaffolderDiscoveryService)
         {
-            _logger = logger;
-            _dotnetToolService = dotnetToolService;
+            _scaffolderDiscoveryService = scaffolderDiscoveryService;
         }
 
         /// <inheritdoc/>
@@ -45,15 +41,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// <inheritdoc/>
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            var settings = context.GetCommandSettings();
-            var componentName = settings?.ComponentName;
-            var commandName = settings?.CommandName;
-            string? displayCategory = null;
-            var dotnetTools = _dotnetToolService.GetDotNetTools();
-            var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
+            var dotnetToolComponent = _scaffolderDiscoveryService.Component;
 
-            CategoryDiscovery categoryDiscovery = new(_dotnetToolService, dotnetToolComponent);
-            displayCategory = categoryDiscovery.Discover(context);
+            CategoryDiscovery categoryDiscovery = new(_scaffolderDiscoveryService.GetCommands(), dotnetToolComponent);
+            string? displayCategory = categoryDiscovery.Discover(context);
             if (categoryDiscovery.State.IsNavigation())
             {
                 return new ValueTask<FlowStepResult>(new FlowStepResult { State = categoryDiscovery.State });
@@ -75,18 +66,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var settings = context.GetCommandSettings();
-            var envVars = context.GetTelemetryEnvironmentVariables();
             var componentName = settings?.ComponentName;
             var commandName = settings?.CommandName;
             CommandInfo? commandInfo = null;
 
-            // Check if user input included a component name.
-            // If included, check for a command name, and get the CommandInfo object.
-            var dotnetTools = _dotnetToolService.GetDotNetTools();
-            var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
-            if (dotnetToolComponent != null)
+            var dotnetToolComponent = _scaffolderDiscoveryService.Component;
+            if (string.Equals(dotnetToolComponent.Command, componentName, StringComparison.OrdinalIgnoreCase))
             {
-                var allCommands = _dotnetToolService.GetCommands(dotnetToolComponent, envVars);
+                var allCommands = _scaffolderDiscoveryService.GetCommands().Select(entry => entry.Value);
                 commandInfo = allCommands.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
             }
             else

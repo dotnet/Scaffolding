@@ -131,7 +131,7 @@ internal static class CommandLineExtensions
     /// </summary>
     /// <param name="scaffolder">The scaffolder.</param>
     /// <returns>The command info.</returns>
-    private static CommandInfo ToCommandInfo(this IScaffolder scaffolder)
+    internal static CommandInfo ToCommandInfo(this IScaffolder scaffolder)
     {
         var commandInfo = new CommandInfo
         {

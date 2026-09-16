@@ -6,18 +6,10 @@ using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 namespace Microsoft.DotNet.Tools.Scaffold.Services;
 
 /// <summary>
-/// Defines operations for managing .NET CLI tools, such as installing, uninstalling, and retrieving tool information and commands.
+/// Defines operations for managing installed .NET CLI tools.
 /// </summary>
 internal interface IDotNetToolService
 {
-    /// <summary>
-    /// Gets all commands for the specified tools in parallel.
-    /// </summary>
-    /// <param name="components">The list of tool components to query. If null, all tools are used.</param>
-    /// <param name="envVars">Optional environment variables for the command execution.</param>
-    /// <returns>A list of key-value pairs mapping tool command names to their command info.</returns>
-    IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null);
-
     /// <summary>
     /// Gets information about a specific .NET tool by name and optional version.
     /// </summary>
@@ -54,11 +46,4 @@ internal interface IDotNetToolService
     /// <returns>True if the tool was uninstalled successfully; otherwise, false.</returns>
     bool UninstallDotNetTool(string toolName, bool global = false);
 
-    /// <summary>
-    /// Gets the list of commands provided by a specific .NET tool.
-    /// </summary>
-    /// <param name="dotnetTool">The tool to query for commands.</param>
-    /// <param name="envVars">Optional environment variables for the command execution.</param>
-    /// <returns>A list of <see cref="CommandInfo"/> objects for the tool.</returns>
-    List<CommandInfo> GetCommands(DotNetToolInfo dotnetTool, IDictionary<string, string>? envVars = null);
 }

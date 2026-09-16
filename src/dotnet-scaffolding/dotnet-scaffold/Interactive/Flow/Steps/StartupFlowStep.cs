@@ -4,7 +4,6 @@ using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Services;
-using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Spectre.Console.Flow;
 
@@ -17,9 +16,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps;
 internal class StartupFlowStep : IFlowStep
 {
     private readonly IEnvironmentService _environmentService;
-    private readonly IDotNetToolService _dotnetToolService;
     private readonly IFileSystem _fileSystem;
-    private readonly ILogger _logger;
     private readonly IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
     private readonly bool _initializeMsbuild;
 
@@ -27,17 +24,13 @@ internal class StartupFlowStep : IFlowStep
     /// Initializes a new instance of the <see cref="StartupFlowStep"/> class.
     /// </summary>
     public StartupFlowStep(
-        IDotNetToolService dotnetToolService,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
-        ILogger logger,
         IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
         bool initializeMsbuild = true)
     {
-        _dotnetToolService = dotnetToolService;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
-        _logger = logger;
         _firstTimeUseNoticeSentinel = firstTimeUseNoticeSentinel;
         _initializeMsbuild = initializeMsbuild;
     }

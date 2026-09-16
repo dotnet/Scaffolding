@@ -9,13 +9,12 @@ using Spectre.Console.Flow;
 namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
 {
     /// <summary>
-    /// IFlowStep that deals with the selection of the component (DotNetToolInfo) and the associated command (CommandInfo).
-    /// If provided by the user, verifies if the component is installed and the command is supported.
+    /// IFlowStep that deals with the selection of a built-in scaffolding command.
     /// </summary>
     internal class CommandPickerFlowStep : IFlowStep
     {
         private readonly ILogger _logger;
-        private readonly IDotNetToolService _dotnetToolService;
+        private readonly BuiltInScaffolderDiscoveryService _scaffolderDiscoveryService;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
 
@@ -24,12 +23,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// </summary>
         public CommandPickerFlowStep(
             ILogger logger,
-            IDotNetToolService dotnetToolService,
+            BuiltInScaffolderDiscoveryService scaffolderDiscoveryService,
             IEnvironmentService environmentService,
             IFileSystem fileSystem)
         {
             _logger = logger;
-            _dotnetToolService = dotnetToolService;
+            _scaffolderDiscoveryService = scaffolderDiscoveryService;
             _environmentService = environmentService;
             _fileSystem = fileSystem;
         }
@@ -52,15 +51,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// <inheritdoc/>
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            var settings = context.GetCommandSettings();
-            var componentName = settings?.ComponentName;
-            var commandName = settings?.CommandName;
             // KeyValuePair with key being name of the DotNetToolInfo (component) and value being the CommandInfo supported by that component.
             KeyValuePair<string, CommandInfo>? commandInfoKvp = null;
             CommandInfo? commandInfo = null;
-            var dotnetTools = _dotnetToolService.GetDotNetTools();
-            var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
-            CommandDiscovery commandDiscovery = new(_dotnetToolService, dotnetToolComponent);
+            var dotnetToolComponent = _scaffolderDiscoveryService.Component;
+            CommandDiscovery commandDiscovery = new(_scaffolderDiscoveryService.GetCommands(), dotnetToolComponent);
             commandInfoKvp = commandDiscovery.Discover(context);
             if (commandDiscovery.State.IsNavigation())
             {
@@ -74,13 +69,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             else
             {
                 commandInfo = commandInfoKvp.Value.Value;
-                componentName = commandInfoKvp.Value.Key;
-                dotnetToolComponent ??= _dotnetToolService.GetDotNetTool(componentName);
-                if (dotnetToolComponent != null)
-                {
-                    SelectComponent(context, dotnetToolComponent);
-                }
-
+                SelectComponent(context, dotnetToolComponent);
                 SelectCommand(context, commandInfo);
             }
 
@@ -97,18 +86,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var settings = context.GetCommandSettings();
-            var envVars = context.GetTelemetryEnvironmentVariables();
             var componentName = settings?.ComponentName;
             var commandName = settings?.CommandName;
             CommandInfo? commandInfo = null;
 
-            // Check if user input included a component name.
-            // If included, check for a command name, and get the CommandInfo object.
-            var dotnetTools = _dotnetToolService.GetDotNetTools();
-            var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
-            if (dotnetToolComponent != null)
+            var dotnetToolComponent = _scaffolderDiscoveryService.Component;
+            if (string.Equals(dotnetToolComponent.Command, componentName, StringComparison.OrdinalIgnoreCase))
             {
-                var allCommands = _dotnetToolService.GetCommands(dotnetToolComponent, envVars);
+                var allCommands = _scaffolderDiscoveryService.GetCommands().Select(entry => entry.Value);
                 commandInfo = allCommands.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
             }
             else

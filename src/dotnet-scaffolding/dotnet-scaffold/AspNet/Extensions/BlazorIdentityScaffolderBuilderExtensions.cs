@@ -84,7 +84,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
 
             var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["BlazorIdentity"], blazorIdentityModel.ProjectInfo.ProjectPath);
             var applicationUserFile = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Files"], blazorIdentityModel.ProjectInfo.ProjectPath)
-                .FirstOrDefault(x => x.EndsWith("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(x => Path.GetFileName(x).Equals("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
             var blazorIdentityProperties = BlazorIdentityHelper.GetTextTemplatingProperties(allBlazorIdentityFiles, blazorIdentityModel);
             var applicationUserProperty = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(applicationUserFile, blazorIdentityModel);
             if (applicationUserProperty is not null)
@@ -120,7 +120,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
 
             string? projectPath = context.GetOptionResult<string>(Constants.CliOptions.ProjectCliOption);
             if (string.IsNullOrEmpty(projectPath))
-            { 
+            {
                 step.SkipStep = true;
                 return;
             }

@@ -197,7 +197,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 
                     try
                     {
-                        _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
+                        _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options) + Environment.NewLine);
                         _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with AzureAd configuration");
 
                         // Also check for appsettings.Development.json and update it if present
@@ -261,7 +261,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         devContent["AzureAd"] = content["AzureAd"]?.DeepClone();
 
                         var options = new JsonSerializerOptions { WriteIndented = true };
-                        _fileSystem.WriteAllText(devSettingsPath, devContent.ToJsonString(options));
+                        _fileSystem.WriteAllText(devSettingsPath, devContent.ToJsonString(options) + Environment.NewLine);
                     }
                 }
                 catch (Exception ex)

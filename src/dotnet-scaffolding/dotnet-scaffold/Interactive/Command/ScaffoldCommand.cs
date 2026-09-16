@@ -93,7 +93,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         IEnumerable<IFlowStep> flowSteps =
         [
             new StartupFlowStep(_dotnetToolService, _environmentService, _fileSystem, _logger, _firstTimeUseNoticeSentinel),
-            new CategoryPickerFlowStep(_scaffolderCatalog),
+            new CategoryPickerFlowStep(_logger, _scaffolderCatalog),
             new CommandPickerFlowStep(_logger, _scaffolderCatalog, _environmentService, _fileSystem),
             new CommandExecuteFlowStep(TelemetryService, _scaffoldRunner)
         ];

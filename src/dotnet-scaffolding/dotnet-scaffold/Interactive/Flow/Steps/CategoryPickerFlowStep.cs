@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Tools.Scaffold.Services;
+using Microsoft.Extensions.Logging;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
@@ -11,13 +12,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
     /// </summary>
     internal class CategoryPickerFlowStep : IFlowStep
     {
+        private readonly ILogger _logger;
         private readonly ScaffolderCatalog _scaffolderCatalog;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CategoryPickerFlowStep"/> class.
         /// </summary>
-        public CategoryPickerFlowStep(ScaffolderCatalog scaffolderCatalog)
+        public CategoryPickerFlowStep(ILogger logger, ScaffolderCatalog scaffolderCatalog)
         {
+            _logger = logger;
             _scaffolderCatalog = scaffolderCatalog;
         }
 

@@ -22,11 +22,11 @@
               "Block": "builder.Services.AddDbContext<$(DbContextName)>(options => options.$(UseDbMethod))",
               "LeadingTrivia": {
                 "Newline": true
-              {
-                "InsertAfter": "WebApplication.CreateBuilder",
-                "CheckBlock": "builder.Configuration.GetConnectionString",
-                "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? \"Data Source=TestDb.db\""
-              },
+              }
+            }
+          ]
+        }
+      }
     },
     {
       "FileName": "Program.cs",

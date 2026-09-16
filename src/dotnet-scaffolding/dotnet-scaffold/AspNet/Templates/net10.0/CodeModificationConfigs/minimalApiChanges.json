@@ -11,11 +11,11 @@
               "InsertBefore": [ "app.Run();" ],
               "LeadingTrivia": {
                 "Newline": true
-              {
-                "InsertAfter": "WebApplication.CreateBuilder",
-                "CheckBlock": "builder.Configuration.GetConnectionString",
-                "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? \"Data Source=TestDb.db\""
-              },
+              }
+            }
+          ]
+        }
+      }
     },
     {
       "FileName": "Program.cs",
@@ -66,7 +66,7 @@
               "CheckBlock": "app.MapOpenApi()",
               "Block": "if (app.Environment.IsDevelopment())\r\n{\r\n    app.MapOpenApi();\r\n}",
               "Options": [ "OpenApi" ],
-              "InsertAfter": "var app = WebApplication.CreateBuilder.Build();",
+              "InsertAfter": "var app = builder.Build();",
               "InsertBefore": [ "app.UseHttpsRedirection();" ],
               "LeadingTrivia": {
                 "Newline": true

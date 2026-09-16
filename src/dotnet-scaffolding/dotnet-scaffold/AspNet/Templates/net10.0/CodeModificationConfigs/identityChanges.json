@@ -24,12 +24,12 @@
               "Block": "builder.Services.AddDbContext<$(DbContextName)>(options => options.$(UseDbMethod))",
               "LeadingTrivia": {
                 "Newline": true
-              {
-                "InsertAfter": "WebApplication.CreateBuilder",
-                "CheckBlock": "builder.Configuration.GetConnectionString",
-                "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? \"Data Source=TestDb.db\""
-              },
-              "Block": "builder.Services.AddDefaultIdentity<$(UserClassName)>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<$(DbContextName)>()\"",
+              }
+            },
+            {
+              "InsertAfter": "builder.Services.AddDbContext",
+              "CheckBlock": "builder.Services.AddDefaultIdentity",
+              "Block": "builder.Services.AddDefaultIdentity<$(UserClassName)>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<$(DbContextName)>()",
               "LeadingTrivia": {
                 "Newline": true
               }

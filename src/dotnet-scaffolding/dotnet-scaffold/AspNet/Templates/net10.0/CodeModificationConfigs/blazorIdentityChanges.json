@@ -122,6 +122,15 @@
                 "Newline": true
               }
             }
+            ,
+            {
+              "InsertAfter": "var builder = WebApplication.CreateBuilder(args);",
+              "CheckBlock": "builder.Services.AddDbContextFactory",
+              "Block": "builder.Services.AddDbContextFactory<$(DbContextName)>(options => options.$(UseDbMethod))",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
           ]
         }
       }

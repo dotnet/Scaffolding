@@ -11,7 +11,7 @@
             {
               "InsertAfter": "WebApplication.CreateBuilder",
               "CheckBlock": "builder.Configuration.GetConnectionString",
-              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '$(ConnectionStringName)' not found.\")"
+              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '\\"$(ConnectionStringName)\\' not found.\")"
             },
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",
@@ -19,15 +19,24 @@
               "Block": "builder.Services.AddDbContextFactory<$(DbContextName)>(options => options.$(UseDbMethod))",
               "LeadingTrivia": {
                 "Newline": true
-              {
-                "InsertAfter": "WebApplication.CreateBuilder",
-                "CheckBlock": "builder.Configuration.GetConnectionString",
-                "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? \"Data Source=TestDb.db\""
-              },
+              }
+            },
+            {
+              "InsertAfter": "var builder = WebApplication.CreateBuilder(args);",
+              "CheckBlock": "builder.Services.AddDbContext",
+              "Block": "builder.Services.AddDbContextFactory<$(DbContextName)>(options => options.$(UseDbMethod))",
               "LeadingTrivia": {
                 "Newline": true
               }
             },
+            {
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContextFactory",
+              "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+
             {
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
               "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",

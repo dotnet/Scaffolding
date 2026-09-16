@@ -57,6 +57,11 @@ internal class ProjectModifier
         return _codeService.TryApplyChanges(roslynProject?.Solution);
     }
 
+    public string GetOutput()
+    {
+        return _output.ToString();
+    }
+
     private async Task<Project> HandleCodeFileAsync(CodeFile file, IList<string> options, Project project)
     {
         try

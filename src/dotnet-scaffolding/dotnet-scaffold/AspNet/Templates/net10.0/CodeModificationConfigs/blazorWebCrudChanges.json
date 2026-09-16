@@ -11,7 +11,7 @@
             {
               "InsertAfter": "WebApplication.CreateBuilder",
               "CheckBlock": "builder.Configuration.GetConnectionString",
-              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '\\"$(ConnectionStringName)\\' not found.\")"
+              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '$(ConnectionStringName)' not found.\")"
             },
             {
               "InsertAfter": "builder.Configuration.GetConnectionString",
@@ -36,8 +36,7 @@
                 "Newline": true
               }
             },
-
-            {
+           {
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
               "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
               "LeadingTrivia": {

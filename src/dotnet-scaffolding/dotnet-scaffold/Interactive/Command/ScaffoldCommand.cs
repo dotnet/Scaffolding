@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Command;
 /// </summary>
 internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 {
+    // Service for managing .NET tools.
+    private readonly IDotNetToolService _dotnetToolService;
     private readonly ScaffolderCatalog _scaffolderCatalog;
     // Service for file system operations.
     private readonly IFileSystem _fileSystem;
@@ -30,6 +32,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     /// <summary>
     /// Initializes a new instance of the <see cref="ScaffoldCommand"/> class.
     /// </summary>
+    /// <param name="dotnetToolService">The .NET tool service.</param>
     /// <param name="scaffolderCatalog">Provides metadata for available scaffolders.</param>
     /// <param name="environmentService">The environment service.</param>
     /// <param name="fileSystem">The file system service.</param>
@@ -39,6 +42,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     /// <param name="firstTimeUseNoticeSentinel">The first-time use notice sentinel.</param>
     /// <param name="scaffoldRunner">The command runner, implemeneted with System.CommandLine</param>
     public ScaffoldCommand(
+        IDotNetToolService dotnetToolService,
         ScaffolderCatalog scaffolderCatalog,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
@@ -49,6 +53,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         IScaffoldRunner scaffoldRunner)
         : base(flowProvider, telemetry)
     {
+        _dotnetToolService = dotnetToolService;
         _scaffolderCatalog = scaffolderCatalog;
         _environmentService = environmentService;
         _fileSystem = fileSystem;
@@ -87,7 +92,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         // Define the sequence of flow steps for the scaffold command.
         IEnumerable<IFlowStep> flowSteps =
         [
-            new StartupFlowStep(_environmentService, _fileSystem, _firstTimeUseNoticeSentinel),
+            new StartupFlowStep(_dotnetToolService, _environmentService, _fileSystem, _logger, _firstTimeUseNoticeSentinel),
             new CategoryPickerFlowStep(_scaffolderCatalog),
             new CommandPickerFlowStep(_logger, _scaffolderCatalog, _environmentService, _fileSystem),
             new CommandExecuteFlowStep(TelemetryService, _scaffoldRunner)

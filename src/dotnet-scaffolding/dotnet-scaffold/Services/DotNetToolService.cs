@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
+using System.Collections.Concurrent;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
@@ -10,7 +12,7 @@ using Microsoft.Extensions.Logging;
 namespace Microsoft.DotNet.Tools.Scaffold.Services;
 
 /// <summary>
-/// Service for managing installed .NET tools.
+/// Service for managing .NET tools, including installation, uninstallation, and command discovery.
 /// </summary>
 internal class DotNetToolService : IDotNetToolService
 {
@@ -34,6 +36,36 @@ internal class DotNetToolService : IDotNetToolService
 
     // Cached list of discovered .NET tools.
     private IList<DotNetToolInfo> _dotNetTools;
+
+    /// <summary>
+    /// Gets the list of commands provided by a specific .NET tool.
+    /// </summary>
+    /// <param name="dotnetTool">The .NET tool information.</param>
+    /// <param name="envVars">Optional environment variables.</param>
+    /// <returns>List of <see cref="CommandInfo"/> objects, or an empty list if none found.</returns>
+    public List<CommandInfo> GetCommands(DotNetToolInfo dotnetTool, IDictionary<string, string>? envVars = null)
+    {
+        List<CommandInfo>? commands = null;
+        var runner = dotnetTool.IsGlobalTool ?
+            DotnetCliRunner.Create(dotnetTool.Command, ["get-commands"], envVars) :
+            DotnetCliRunner.CreateDotNet(dotnetTool.Command, ["get-commands"], envVars);
+
+        var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
+        if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
+        {
+            try
+            {
+                string escapedJsonString = stdOut.Replace("\r", "").Replace("\n", "");
+                commands = JsonSerializer.Deserialize<List<CommandInfo>>(escapedJsonString);
+            }
+            catch (Exception)
+            {
+                // Ignore deserialization errors
+            }
+        }
+
+        return commands ?? [];
+    }
 
     /// <summary>
     /// Gets a specific .NET tool by component name and optional version.
@@ -60,6 +92,49 @@ internal class DotNetToolService : IDotNetToolService
         {
             return matchingTools.FirstOrDefault(x => x.Version.Equals(version));
         }
+    }
+
+    /// <summary>
+    /// Gets all commands from all .NET tools in parallel.
+    /// </summary>
+    /// <param name="components">Optional list of components to query. If null, all tools are queried.</param>
+    /// <param name="envVars">Optional environment variables.</param>
+    /// <returns>List of key-value pairs of tool command and <see cref="CommandInfo"/>.</returns>
+    public IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null)
+    {
+        if (components is null || components.Count == 0)
+        {
+            components = GetDotNetTools(refresh: true, envVars);
+        }
+
+        //if any local tools are present, we need to restore them first
+        //when sdks/runtimes are switched/rolled forward, local tools need to be restored before they are called
+        var anyLocalTools = components.FirstOrDefault(x => !x.IsGlobalTool) is not null;
+        if (anyLocalTools)
+        {
+            var runner = DotnetCliRunner.CreateDotNet("tool", ["restore"], envVars);
+            runner.ExecuteAndCaptureOutput(out _, out _);
+        }
+
+        var options = new ParallelOptions
+        {
+            MaxDegreeOfParallelism = System.Environment.ProcessorCount
+        };
+
+        var commands = new ConcurrentBag<KeyValuePair<string, CommandInfo>>();
+        Parallel.ForEach(components, options, dotnetTool =>
+        {
+            var commandInfo = GetCommands(dotnetTool, envVars);
+            if (commandInfo != null)
+            {
+                foreach (var cmd in commandInfo)
+                {
+                    commands.Add(KeyValuePair.Create(dotnetTool.Command, cmd));
+                }
+            }
+        });
+
+        return commands.ToList();
     }
 
     /// <summary>

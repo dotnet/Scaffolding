@@ -72,6 +72,7 @@ public class AddAspNetConnectionStringStepTests
         // Assert
         Assert.True(result);
         Assert.NotNull(capturedContent);
+        Assert.EndsWith(Environment.NewLine, capturedContent);
 
         JsonNode? jsonContent = JsonNode.Parse(capturedContent);
         Assert.NotNull(jsonContent);
@@ -131,6 +132,7 @@ public class AddAspNetConnectionStringStepTests
         // Assert
         Assert.True(result);
         Assert.NotNull(capturedContent);
+        Assert.EndsWith(Environment.NewLine, capturedContent);
 
         JsonNode? jsonContent = JsonNode.Parse(capturedContent);
         Assert.NotNull(jsonContent);
@@ -269,6 +271,7 @@ public class AddAspNetConnectionStringStepTests
         // Assert
         Assert.True(result);
         Assert.NotNull(capturedContent);
+        Assert.EndsWith(Environment.NewLine, capturedContent);
 
         JsonNode? jsonContent = JsonNode.Parse(capturedContent);
         Assert.NotNull(jsonContent);

@@ -84,7 +84,7 @@ if ((ModelValueAcquired == false))
     if ((string.IsNullOrEmpty(parameterValue) == false))
     {
         global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel));
-        if (((tc != null)
+      if (((tc != null)
                     && tc.CanConvertFrom(typeof(string))))
         {
             this._ModelField = ((global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel)(tc.ConvertFrom(parameterValue)));

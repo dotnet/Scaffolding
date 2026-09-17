@@ -6,7 +6,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Services;
 /// <summary>
 /// Provides metadata for available scaffolding components.
 /// </summary>
-internal interface IScaffolderProvider
+internal interface IScaffolderMetadataProvider
 {
     IReadOnlyList<ScaffolderComponent> GetComponents();
 }

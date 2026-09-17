@@ -8,11 +8,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Services;
 /// <summary>
 /// Combines the scaffolding components supplied by registered providers.
 /// </summary>
-internal sealed class ScaffolderCatalog
+internal sealed class ScaffolderMetadataCatalog
 {
     private readonly Lazy<IReadOnlyList<ScaffolderComponent>> _components;
 
-    public ScaffolderCatalog(IEnumerable<IScaffolderProvider> providers)
+    public ScaffolderMetadataCatalog(IEnumerable<IScaffolderMetadataProvider> providers)
     {
         _components = new(() => providers.SelectMany(provider => provider.GetComponents()).ToList());
     }

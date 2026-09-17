@@ -17,7 +17,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
 {
     // Service for managing .NET tools.
     private readonly IDotNetToolService _dotnetToolService;
-    private readonly ScaffolderCatalog _scaffolderCatalog;
+    private readonly ScaffolderMetadataCatalog _scaffolderCatalog;
     // Service for file system operations.
     private readonly IFileSystem _fileSystem;
     // Logger for command output and diagnostics.
@@ -43,7 +43,7 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
     /// <param name="scaffoldRunner">The command runner, implemeneted with System.CommandLine</param>
     public ScaffoldCommand(
         IDotNetToolService dotnetToolService,
-        ScaffolderCatalog scaffolderCatalog,
+        ScaffolderMetadataCatalog scaffolderCatalog,
         IEnvironmentService environmentService,
         IFileSystem fileSystem,
         IFlowProvider flowProvider,

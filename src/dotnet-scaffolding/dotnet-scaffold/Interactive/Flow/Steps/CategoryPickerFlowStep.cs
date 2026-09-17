@@ -13,12 +13,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
     internal class CategoryPickerFlowStep : IFlowStep
     {
         private readonly ILogger _logger;
-        private readonly ScaffolderCatalog _scaffolderCatalog;
+        private readonly ScaffolderMetadataCatalog _scaffolderCatalog;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CategoryPickerFlowStep"/> class.
         /// </summary>
-        public CategoryPickerFlowStep(ILogger logger, ScaffolderCatalog scaffolderCatalog)
+        public CategoryPickerFlowStep(ILogger logger, ScaffolderMetadataCatalog scaffolderCatalog)
         {
             _logger = logger;
             _scaffolderCatalog = scaffolderCatalog;

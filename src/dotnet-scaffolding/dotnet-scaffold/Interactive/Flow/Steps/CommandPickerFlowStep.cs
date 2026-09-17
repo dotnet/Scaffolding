@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
     internal class CommandPickerFlowStep : IFlowStep
     {
         private readonly ILogger _logger;
-        private readonly ScaffolderCatalog _scaffolderCatalog;
+        private readonly ScaffolderMetadataCatalog _scaffolderCatalog;
         private readonly IEnvironmentService _environmentService;
         private readonly IFileSystem _fileSystem;
 
@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// </summary>
         public CommandPickerFlowStep(
             ILogger logger,
-            ScaffolderCatalog scaffolderCatalog,
+            ScaffolderMetadataCatalog scaffolderCatalog,
             IEnvironmentService environmentService,
             IFileSystem fileSystem)
         {

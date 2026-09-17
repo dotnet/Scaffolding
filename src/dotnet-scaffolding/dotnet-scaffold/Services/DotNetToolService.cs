@@ -104,18 +104,17 @@ internal class DotNetToolService : IDotNetToolService
     /// <returns>List of key-value pairs of tool command and <see cref="CommandInfo"/>.</returns>
     public IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null)
     {
-        IList<DotNetToolInfo> componentsToQuery = components ?? [];
-        var componentsWereProvided = componentsToQuery.Count > 0;
-        if (!componentsWereProvided)
+        var restoreLocalTools = components is { Count: > 0 };
+        if (components is null || components.Count == 0)
         {
-            componentsToQuery = GetDotNetTools(refresh: true, envVars)
+            components = GetDotNetTools(refresh: true, envVars)
                 .Where(IsDotNetScaffoldTool)
                 .ToList();
         }
 
         // Explicitly supplied local tools may need to be restored when SDKs or runtimes change.
         // The default dotnet-scaffold tool is already running and does not require restoration.
-        if (componentsWereProvided && componentsToQuery.Any(x => !x.IsGlobalTool))
+        if (restoreLocalTools && components.Any(x => !x.IsGlobalTool))
         {
             var runner = DotnetCliRunner.CreateDotNet("tool", ["restore"], envVars);
             runner.ExecuteAndCaptureOutput(out _, out _);
@@ -127,7 +126,7 @@ internal class DotNetToolService : IDotNetToolService
         };
 
         var commands = new ConcurrentBag<KeyValuePair<string, CommandInfo>>();
-        Parallel.ForEach(componentsToQuery, options, dotnetTool =>
+        Parallel.ForEach(components, options, dotnetTool =>
         {
             var commandInfo = GetCommands(dotnetTool, envVars);
             if (commandInfo != null)

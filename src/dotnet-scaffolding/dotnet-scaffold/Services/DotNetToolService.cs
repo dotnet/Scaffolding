@@ -105,7 +105,7 @@ internal class DotNetToolService : IDotNetToolService
     public IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null)
     {
         var componentsWereProvided = components is { Count: > 0 };
-        if (components is null || components.Count == 0)
+        if (!componentsWereProvided)
         {
             components = GetDotNetTools(refresh: true, envVars)
                 .Where(IsDotNetScaffoldTool)

@@ -42,30 +42,30 @@ public class BlazorCrudNet10IntegrationTests : BlazorCrudIntegrationTestsBase
             "--page", "CRUD");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
-        // Assert — expected files were created (only if model resolution succeeded)
-        bool scaffoldingSucceeded = !cliOutput.Contains("An error occurred") && !cliOutput.Contains("Failed");
-        if (scaffoldingSucceeded)
+        var combinedOutput = cliOutput + cliError;
+        Assert.DoesNotContain("An error occurred", combinedOutput);
+        Assert.DoesNotContain("Unable to parse", combinedOutput);
+        Assert.DoesNotContain("Failed", combinedOutput);
+        Assert.DoesNotContain("No modifications made for file: Program.cs", combinedOutput);
+
+        // Assert expected files were created
+        var blazorPagesDir = Path.Combine(_testProjectDir, "Components", "Pages", "TestModelPages");
+        Assert.True(Directory.Exists(blazorPagesDir), "Components/Pages/TestModelPages directory should be created.");
+        foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
         {
-            var blazorPagesDir = Path.Combine(_testProjectDir, "Components", "Pages", "TestModelPages");
-            Assert.True(Directory.Exists(blazorPagesDir), "Components/Pages/TestModelPages directory should be created.");
-            foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
-            {
-                Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
-            }
-            Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
-                "DbContext file 'Data/TestDbContext.cs' should be created.");
-            var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-            Assert.Contains("TestDbContext", programContent);
-
-            // Assert no NuGet errors during scaffolding
-            Assert.False(cliOutput.Contains("error: NU"),
-                $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
-            Assert.False(cliOutput.Contains("Failed"),
-                $"Scaffolding should not contain failures for {TargetFramework}.\nOutput: {cliOutput}");
-
-            // Verify project builds after scaffolding
-            var (afterExitCode, _, afterError) = await RunBuildAsync(_testProjectDir);
-            Assert.True(afterExitCode == 0, $"Project should still build after scaffolding. Error: {afterError}");
+            Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
         }
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
+            "DbContext file 'Data/TestDbContext.cs' should be created.");
+        var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+        Assert.True(programContent.Contains("TestDbContext"),
+            $"Program.cs should register TestDbContext.\nProgram.cs:\n{programContent}\nOutput:\n{cliOutput}\nError:\n{cliError}");
+
+        // Assert no NuGet errors during scaffolding
+        Assert.DoesNotContain("error: NU", combinedOutput);
+
+        // Verify project builds after scaffolding
+        var (afterExitCode, _, afterError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(afterExitCode == 0, $"Project should still build after scaffolding. Error: {afterError}");
     }
 }

@@ -104,12 +104,14 @@ internal class DotNetToolService : IDotNetToolService
     /// <returns>List of key-value pairs of tool command and <see cref="CommandInfo"/>.</returns>
     public IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null)
     {
-        var componentsWereProvided = components is { Count: > 0 };
-        var componentsToQuery = componentsWereProvided
-            ? components!
-            : GetDotNetTools(refresh: true, envVars)
+        IList<DotNetToolInfo> componentsToQuery = components ?? [];
+        var componentsWereProvided = componentsToQuery.Count > 0;
+        if (!componentsWereProvided)
+        {
+            componentsToQuery = GetDotNetTools(refresh: true, envVars)
                 .Where(IsDotNetScaffoldTool)
                 .ToList();
+        }
 
         // Explicitly supplied local tools may need to be restored when SDKs or runtimes change.
         // The default dotnet-scaffold tool is already running and does not require restoration.

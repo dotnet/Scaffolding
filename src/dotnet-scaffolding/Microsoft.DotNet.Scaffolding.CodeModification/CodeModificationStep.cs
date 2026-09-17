@@ -21,7 +21,7 @@ public class CodeModificationStep : ScaffoldStep
     //.csproj path for the .NET project
     public required string ProjectPath { get; set; }
     //properties to be injected into the CodeModifierConfig.CodeFile.Method.CodeSnippet's Blocks/Parents/CheckBlock
-    public IDictionary<string, string> CodeModifierProperties { get; }
+    public IDictionary<string, string> CodeModifierProperties { get; } 
     private readonly ILogger _logger;
 
     public CodeModificationStep(ILogger<CodeModificationStep> logger)
@@ -47,7 +47,7 @@ public class CodeModificationStep : ScaffoldStep
             _logger.LogError($"No {nameof(CodeModifierConfig)} provided. Provide a valid value for either '{nameof(CodeModifierConfigJsonText)}' or '{nameof(CodeModifierConfigPath)}' variable");
             return false;
         }
-
+        
         if (codeModifierConfig is null)
         {
             _logger.LogError($"Unable to parse the {nameof(CodeModifierConfig)} provided. Check the {nameof(CodeModifierConfig)} definition.");

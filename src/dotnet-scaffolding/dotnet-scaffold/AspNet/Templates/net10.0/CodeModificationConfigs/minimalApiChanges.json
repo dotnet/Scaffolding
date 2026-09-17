@@ -21,7 +21,7 @@
       "FileName": "Program.cs",
       "Usings": [
         "Microsoft.EntityFrameworkCore"
-      ],
+      ], 
       "Options": [
         "EfScenario"
       ],

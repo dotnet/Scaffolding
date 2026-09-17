@@ -120,7 +120,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
 
             string? projectPath = context.GetOptionResult<string>(Constants.CliOptions.ProjectCliOption);
             if (string.IsNullOrEmpty(projectPath))
-            {
+            { 
                 step.SkipStep = true;
                 return;
             }

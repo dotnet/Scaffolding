@@ -110,6 +110,7 @@ internal class DotNetToolService : IDotNetToolService
             .Where(IsDotNetScaffoldTool)
             .ToList();
 
+        // Explicitly supplied local tools may need to be restored when SDKs or runtimes change.
         // The default dotnet-scaffold tool is already running and does not require restoration.
         if (componentsWereProvided && componentsToQuery.Any(x => !x.IsGlobalTool))
         {

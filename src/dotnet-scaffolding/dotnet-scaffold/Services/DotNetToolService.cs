@@ -141,7 +141,7 @@ internal class DotNetToolService : IDotNetToolService
         return commands.ToList();
     }
 
-    internal static bool IsDotNetScaffoldTool(DotNetToolInfo tool)
+    private static bool IsDotNetScaffoldTool(DotNetToolInfo tool)
         => tool.PackageName.Equals(DotNetScaffoldPackageName, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>

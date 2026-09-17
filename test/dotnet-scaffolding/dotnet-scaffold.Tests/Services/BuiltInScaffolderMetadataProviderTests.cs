@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
+using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Moq;
@@ -20,7 +22,14 @@ public class BuiltInScaffolderMetadataProviderTests
         scaffolder.SetupGet(s => s.Description).Returns("Creates a sample.");
         scaffolder.SetupGet(s => s.Options).Returns([]);
 
-        var provider = new BuiltInScaffolderMetadataProvider([scaffolder.Object]);
+        var scaffoldRunner = new Mock<IScaffoldRunner>();
+        scaffoldRunner.SetupGet(r => r.Scaffolders).Returns(
+            new Dictionary<ScaffolderCatagory, IEnumerable<IScaffolder>>
+            {
+                [ScaffolderCatagory.AspNet] = [scaffolder.Object]
+            });
+
+        var provider = new BuiltInScaffolderMetadataProvider(scaffoldRunner.Object);
 
         var component = Assert.Single(provider.GetComponents());
         var command = Assert.Single(component.Commands);

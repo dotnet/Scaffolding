@@ -104,6 +104,7 @@ internal class DotNetToolService : IDotNetToolService
     /// <returns>List of key-value pairs of tool command and <see cref="CommandInfo"/>.</returns>
     public IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null)
     {
+        var componentsWereProvided = components is { Count: > 0 };
         if (components is null || components.Count == 0)
         {
             components = GetDotNetTools(refresh: true, envVars)
@@ -111,10 +112,10 @@ internal class DotNetToolService : IDotNetToolService
                 .ToList();
         }
 
-        //if any local tools are present, we need to restore them first
-        //when sdks/runtimes are switched/rolled forward, local tools need to be restored before they are called
+        // Explicitly supplied local tools may need to be restored when SDKs or runtimes change.
+        // The default dotnet-scaffold tool is already running and does not require restoration.
         var anyLocalTools = components.FirstOrDefault(x => !x.IsGlobalTool) is not null;
-        if (anyLocalTools)
+        if (componentsWereProvided && anyLocalTools)
         {
             var runner = DotnetCliRunner.CreateDotNet("tool", ["restore"], envVars);
             runner.ExecuteAndCaptureOutput(out _, out _);

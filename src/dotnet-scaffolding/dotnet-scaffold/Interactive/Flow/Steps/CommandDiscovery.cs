@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Model;
+using Microsoft.DotNet.Tools.Scaffold.Services;
+using Spectre.Console;
 using Spectre.Console.Flow;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps;
@@ -12,17 +14,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps;
 /// </summary>
 internal class CommandDiscovery
 {
-    private readonly IList<KeyValuePair<string, CommandInfo>> _commands;
+    private readonly IDotNetToolService _dotnetToolService;
     private readonly DotNetToolInfo? _componentPicked;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommandDiscovery"/> class.
     /// </summary>
-    /// <param name="commands">Commands available from built-in scaffolders.</param>
+    /// <param name="dotnetToolService">Service for dotnet tool operations.</param>
     /// <param name="componentPicked">The selected component, if any.</param>
-    public CommandDiscovery(IList<KeyValuePair<string, CommandInfo>> commands, DotNetToolInfo? componentPicked)
+    public CommandDiscovery(IDotNetToolService dotnetToolService, DotNetToolInfo? componentPicked)
     {
-        _commands = commands;
+        _dotnetToolService = dotnetToolService;
         _componentPicked = componentPicked;
     }
 
@@ -39,10 +41,21 @@ internal class CommandDiscovery
     public KeyValuePair<string, CommandInfo>? Discover(IFlowContext context)
     {
         var allCommands = context.GetCommandInfos();
+        var envVars = context.GetTelemetryEnvironmentVariables();
         if (allCommands is null || allCommands.Count == 0)
         {
-            allCommands = _commands;
-            context.Set(FlowContextProperties.CommandInfos, allCommands);
+            allCommands = AnsiConsole
+            .Status()
+            .WithSpinner()
+            .Start("Discovering scaffolders", statusContext =>
+            {
+                return _dotnetToolService.GetAllCommandsParallel(envVars: envVars);
+            });
+
+            if (allCommands is not null)
+            {
+                context.Set(FlowContextProperties.CommandInfos, allCommands);
+            }
         }
 
         return Prompt(context);

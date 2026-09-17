@@ -8,20 +8,21 @@ using Spectre.Console.Flow;
 namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
 {
     /// <summary>
-    /// IFlowStep that deals with the selection of a scaffolding category.
+    /// IFlowStep that deals with the selection of the component (DotNetToolInfo) and the associated command (CommandInfo).
+    /// If provided by the user, verifies if the component is installed and the command is supported.
     /// </summary>
     internal class CategoryPickerFlowStep : IFlowStep
     {
         private readonly ILogger _logger;
-        private readonly ScaffolderMetadataCatalog _scaffolderCatalog;
+        private readonly IDotNetToolService _dotnetToolService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CategoryPickerFlowStep"/> class.
         /// </summary>
-        public CategoryPickerFlowStep(ILogger logger, ScaffolderMetadataCatalog scaffolderCatalog)
+        public CategoryPickerFlowStep(ILogger logger, IDotNetToolService dotnetToolService)
         {
             _logger = logger;
-            _scaffolderCatalog = scaffolderCatalog;
+            _dotnetToolService = dotnetToolService;
         }
 
         /// <inheritdoc/>
@@ -44,8 +45,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// <inheritdoc/>
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            CategoryDiscovery categoryDiscovery = new(_scaffolderCatalog.GetCommands(), componentPicked: null);
-            string? displayCategory = categoryDiscovery.Discover(context);
+            var settings = context.GetCommandSettings();
+            var componentName = settings?.ComponentName;
+            var commandName = settings?.CommandName;
+            string? displayCategory = null;
+            var dotnetTools = _dotnetToolService.GetDotNetTools();
+            var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
+
+            CategoryDiscovery categoryDiscovery = new(_dotnetToolService, dotnetToolComponent);
+            displayCategory = categoryDiscovery.Discover(context);
             if (categoryDiscovery.State.IsNavigation())
             {
                 return new ValueTask<FlowStepResult>(new FlowStepResult { State = categoryDiscovery.State });
@@ -67,23 +75,31 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         public ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             var settings = context.GetCommandSettings();
+            var envVars = context.GetTelemetryEnvironmentVariables();
             var componentName = settings?.ComponentName;
             var commandName = settings?.CommandName;
             CommandInfo? commandInfo = null;
 
-            var scaffolderComponent = _scaffolderCatalog.FindComponent(componentName);
-            if (scaffolderComponent is null)
+            // Check if user input included a component name.
+            // If included, check for a command name, and get the CommandInfo object.
+            var dotnetTools = _dotnetToolService.GetDotNetTools();
+            var dotnetToolComponent = dotnetTools.FirstOrDefault(x => x.Command.Equals(componentName, StringComparison.OrdinalIgnoreCase));
+            if (dotnetToolComponent != null)
+            {
+                var allCommands = _dotnetToolService.GetCommands(dotnetToolComponent, envVars);
+                commandInfo = allCommands.FirstOrDefault(x => x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
+            }
+            else
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure("No component (dotnet tool) provided."));
             }
 
-            commandInfo = scaffolderComponent.Commands.FirstOrDefault(command => command.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
             if (commandInfo is null)
             {
                 return new ValueTask<FlowStepResult>(FlowStepResult.Failure($"Invalid or empty command provided for component '{componentName}'"));
             }
 
-            SelectComponent(context, scaffolderComponent.Component);
+            SelectComponent(context, dotnetToolComponent);
             SelectCommand(context, commandInfo);
             SelectCategories(context, commandInfo.DisplayCategories);
             return new ValueTask<FlowStepResult>(FlowStepResult.Success);

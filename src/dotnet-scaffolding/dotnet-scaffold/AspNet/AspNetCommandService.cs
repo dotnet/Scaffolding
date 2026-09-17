@@ -26,6 +26,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(AddAspNetConnectionStringStep),
                 typeof(AddDbSetToExistingContextStep),
                 typeof(AddFileStep),
+                typeof(AddIgniteUIThemeStylesheetStep),
+                typeof(AddRazorImportsStep),
                 typeof(AreaScaffolderStep),
                 typeof(DetectBlazorWasmStep),
                 typeof(DotnetNewScaffolderStep),
@@ -38,6 +40,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(ValidateEfControllerStep),
                 typeof(ValidateEntraIdStep),
                 typeof(ValidateIdentityStep),
+                typeof(ValidateIgniteUIBlazorStep),
                 typeof(ValidateMinimalApiStep),
                 typeof(ValidateRazorPagesStep),
                 typeof(ValidateViewsStep),
@@ -371,6 +374,32 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     .WithEntraIdCodeChangeStep()
                     .WithEntraIdBlazorWasmCodeChangeStep()
                     .WithEntraIdTextTemplatingStep();
+
+            _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Blazor.IgniteUI)
+                .WithDisplayName(AspnetStrings.Blazor.IgniteUIDisplayName)
+                .WithCategory(AspnetStrings.Catagories.Blazor)
+                .WithDescription(AspnetStrings.Blazor.IgniteUIDescription)
+                .WithExample(AspnetStrings.Blazor.IgniteUIExample1, AspnetStrings.Blazor.IgniteUIExample1Description)
+                .WithExample(AspnetStrings.Blazor.IgniteUIExample2, AspnetStrings.Blazor.IgniteUIExample2Description)
+                .WithOptions([options.Project, options.IgniteUIPackage, options.IgniteUITheme, options.IgniteUIThemeVariant, options.Prerelease])
+                .WithStep<ValidateIgniteUIBlazorStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.Package = context.GetOptionResult(options.IgniteUIPackage);
+                    step.Theme = context.GetOptionResult(options.IgniteUITheme);
+                    step.ThemeVariant = context.GetOptionResult(options.IgniteUIThemeVariant);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
+                })
+                .WithIgniteUIBlazorDetectBlazorWasmStep()
+                .WithIgniteUIBlazorAddPackagesStep()
+                .WithIgniteUIBlazorWasmAddPackagesStep()
+                .WithIgniteUIBlazorCodeChangeStep()
+                .WithIgniteUIBlazorWasmCodeChangeStep()
+                .WithIgniteUIBlazorImportsStep()
+                .WithIgniteUIBlazorWasmImportsStep()
+                .WithIgniteUIBlazorThemeStylesheetStep();
         }
     }
 }

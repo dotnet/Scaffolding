@@ -79,4 +79,14 @@ internal class PackageConstants
         public static readonly Package AspNetCoreAuthenticationOpenIdConnectPackage = new("Microsoft.AspNetCore.Authentication.OpenIdConnect", IsVersionRequired: true);
         public static readonly Package MicrosoftIdentityWebPackage = new("Microsoft.Identity.Web");
     }
+
+    /// <summary>
+    /// Constants for Ignite UI for Blazor (Infragistics, MIT licensed) NuGet package names.
+    /// These packages are not versioned in lockstep with .NET, so the latest stable version is installed.
+    /// </summary>
+    public static class IgniteUIPackages
+    {
+        public static readonly Package IgniteUIBlazorLitePackage = new("IgniteUI.Blazor.Lite");
+        public static readonly Package IgniteUIBlazorGridLitePackage = new("IgniteUI.Blazor.GridLite");
+    }
 }

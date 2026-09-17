@@ -95,7 +95,7 @@ jobs:
         _Family: 'apicontroller|minimalapi'
         _FamilyLabel: API
       Blazor:
-        _Family: 'blazor-crud|blazor-empty'
+        _Family: 'blazor-crud|blazor-empty|blazor-igniteui'
         _FamilyLabel: Blazor
       MVC:
         _Family: 'mvccontroller|mvccontroller-crud|razorviews|razorview-empty|area'

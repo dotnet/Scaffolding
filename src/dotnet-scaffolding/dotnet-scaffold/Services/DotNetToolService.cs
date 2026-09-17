@@ -97,26 +97,21 @@ internal class DotNetToolService : IDotNetToolService
     }
 
     /// <summary>
-    /// Gets all commands from all .NET tools in parallel.
+    /// Gets all commands from the specified .NET tools in parallel.
     /// </summary>
     /// <param name="components">Optional list of components to query. If null, the dotnet-scaffold tool is queried.</param>
     /// <param name="envVars">Optional environment variables.</param>
     /// <returns>List of key-value pairs of tool command and <see cref="CommandInfo"/>.</returns>
     public IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null)
     {
-        IList<DotNetToolInfo> componentsToQuery = components ?? [];
-        var componentsWereProvided = componentsToQuery.Count > 0;
-        if (!componentsWereProvided)
-        {
-            componentsToQuery = GetDotNetTools(refresh: true, envVars)
-                .Where(IsDotNetScaffoldTool)
-                .ToList();
-        }
+        // A null list selects the default tool; an explicitly supplied list, including an empty one, is used as-is.
+        var componentsWereProvided = components is not null;
+        var componentsToQuery = components ?? GetDotNetTools(refresh: true, envVars)
+            .Where(IsDotNetScaffoldTool)
+            .ToList();
 
-        // Explicitly supplied local tools may need to be restored when SDKs or runtimes change.
         // The default dotnet-scaffold tool is already running and does not require restoration.
-        var anyLocalTools = componentsToQuery.FirstOrDefault(x => !x.IsGlobalTool) is not null;
-        if (componentsWereProvided && anyLocalTools)
+        if (componentsWereProvided && componentsToQuery.Any(x => !x.IsGlobalTool))
         {
             var runner = DotnetCliRunner.CreateDotNet("tool", ["restore"], envVars);
             runner.ExecuteAndCaptureOutput(out _, out _);

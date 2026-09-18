@@ -50,8 +50,8 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "g-6\">\r\n        <StatusMessage Message=\"@Message\" />\r\n        <EditForm Model=\"In" +
                     "put\" method=\"post\" OnValidSubmit=\"RegisterUser\" FormName=\"register\">\r\n          " +
                     "  <DataAnnotationsValidator />\r\n            <h2>Create a new account.</h2>\r\n    " +
-                    "        <hr />\r\n            <ValidationSummary class=\"text-danger\" role=\"alert\" " +
-                    "/>\r\n            <div class=\"form-floating mb-3\">\r\n                <InputText @bi" +
+                    "        <hr />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
+                    "            <div class=\"form-floating mb-3\">\r\n                <InputText @bi" +
                     "nd-Value=\"Input.Email\" id=\"Input.Email\" class=\"form-control\" autocomplete=\"usern" +
                     "ame\" aria-required=\"true\" placeholder=\"name@example.com\" />\r\n                <la" +
                     "bel for=\"Input.Email\">\r\n                    <DisplayName For=\"() => Input.Email\"" +
@@ -94,8 +94,8 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "i(\"Account/ConfirmEmail\").AbsoluteUri,\r\n            new Dictionary<string, objec" +
                     "t?> { [\"userId\"] = userId, [\"code\"] = code, [\"returnUrl\"] = ReturnUrl });\r\n\r\n   " +
                     "     await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder." +
-                    "Default.Encode(callbackUrl));\r\n\r\n        if (UserManager.Options.SignIn.RequireC" +
-                    "onfirmedAccount)\r\n        {\r\n            RedirectManager.RedirectTo(\r\n          " +
+                    "Default.Encode(callbackUrl));\r\n\r\n        if (!await SignInManager.CanSignInAsync(user))" +
+                    "\r\n        {\r\n            RedirectManager.RedirectTo(\r\n          " +
                     "      \"Account/RegisterConfirmation\",\r\n                new() { [\"email\"] = Input" +
                     ".Email, [\"returnUrl\"] = ReturnUrl });\r\n        }\r\n        else\r\n        {\r\n     " +
                     "       await SignInManager.SignInAsync(user, isPersistent: false);\r\n            " +

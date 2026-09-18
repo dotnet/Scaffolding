@@ -51,7 +51,9 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
     <div class=""col-xl-6"">
         <EditForm Model=""Input"" FormName=""profile"" OnValidSubmit=""OnValidSubmitAsync"" method=""post"">
             <DataAnnotationsValidator />
-            <ValidationSummary class=""text-danger"" role=""alert"" />
+            <div role=""alert"" aria-atomic=""true"">
+                <ValidationSummary class=""text-danger"" />
+            </div>
             <div class=""form-floating mb-3"">
                 <input type=""text"" value=""@username"" id=""username"" class=""form-control"" placeholder=""Choose your username."" disabled />
                 <label for=""username"" class=""form-label"">Username</label>

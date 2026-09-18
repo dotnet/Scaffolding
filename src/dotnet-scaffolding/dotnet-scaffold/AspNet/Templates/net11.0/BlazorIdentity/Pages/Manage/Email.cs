@@ -46,8 +46,8 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "lass=\"col-xl-6\">\r\n        <form @onsubmit=\"OnSendEmailVerificationAsync\" @formna" +
                     "me=\"send-verification\" id=\"send-verification-form\" method=\"post\">\r\n        </for" +
                     "m>\r\n        <EditForm Model=\"Input\" FormName=\"change-email\" OnValidSubmit=\"OnVal" +
-                    "idSubmitAsync\" method=\"post\">\r\n            <DataAnnotationsValidator />\r\n       " +
-                    "     <ValidationSummary class=\"text-danger\" role=\"alert\" />\r\n            @if (is" +
+                    "idSubmitAsync\" method=\"post\">\r\n            <DataAnnotationsValidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
+                    "            @if (is" +
                     "EmailConfirmed)\r\n            {\r\n                <div class=\"form-floating mb-3 i" +
                     "nput-group\">\r\n                    <input type=\"text\" value=\"@email\" id=\"email\" c" +
                     "lass=\"form-control\" placeholder=\"Enter your email\" disabled />\r\n                " +

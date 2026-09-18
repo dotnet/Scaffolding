@@ -133,6 +133,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             _testProjectDir, "Components", "Account", "IdentityRedirectManager.cs"));
         Assert.DoesNotContain("Append(StatusMessageCookieName", redirectManagerContent);
         Assert.DoesNotContain("RedirectToCurrentPageWithStatus", redirectManagerContent);
+        Assert.Contains("uri.StartsWith(\"//\", StringComparison.Ordinal)", redirectManagerContent);
         var changePasswordContent = File.ReadAllText(Path.Combine(accountPagesDir, "Manage", "ChangePassword.razor"));
         Assert.Contains("[SupplyParameterFromTempData(Name = IdentityRedirectManager.StatusMessageKey)]", changePasswordContent);
         Assert.Contains("<StatusMessage Message=\"@message\" />", changePasswordContent);
@@ -152,6 +153,24 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains("await editContext.ValidateAsync()", loginContent);
         Assert.Contains("<DisplayName For=\"() => Input.Email\" />", loginContent);
         Assert.Contains("[Display(Name = \"Email\")]", loginContent);
+        Assert.Contains("<div role=\"alert\" aria-atomic=\"true\">", loginContent);
+        Assert.Contains("<ValidationSummary class=\"text-danger\" />", loginContent);
+        Assert.DoesNotContain("<ValidationSummary class=\"text-danger\" role=\"alert\" />", loginContent);
+
+        var registerContent = File.ReadAllText(Path.Combine(accountPagesDir, "Register.razor"));
+        Assert.Contains("if (!await SignInManager.CanSignInAsync(user))", registerContent);
+        var externalLoginContent = File.ReadAllText(Path.Combine(accountPagesDir, "ExternalLogin.razor"));
+        Assert.Contains("if (!await SignInManager.CanSignInAsync(user))", externalLoginContent);
+        var loginWith2faContent = File.ReadAllText(Path.Combine(accountPagesDir, "LoginWith2fa.razor"));
+        Assert.Contains("<label class=\"form-label\">", loginWith2faContent);
+        Assert.DoesNotContain("for=\"remember-machine\"", loginWith2faContent);
+
+        Assert.False(File.Exists(Path.Combine(accountPagesDir, "PasskeyUpgrade.razor")));
+        Assert.False(File.Exists(Path.Combine(_testProjectDir, "Components", "Account", "PasskeyUpgradeManager.cs")));
+        Assert.False(File.Exists(Path.Combine(_testProjectDir, "Components", "Account", "PasskeyReauthentication.cs")));
+        Assert.False(File.Exists(Path.Combine(sharedDir, "AllAcceptedCredentialsSignal.razor")));
+        Assert.False(File.Exists(Path.Combine(sharedDir, "CurrentUserDetailsSignal.razor")));
+        Assert.False(File.Exists(Path.Combine(sharedDir, "ReauthenticationPrompt.razor")));
 
         var emailSenderContent = File.ReadAllText(Path.Combine(
             _testProjectDir, "Components", "Account", "IdentityNoOpEmailSender.cs"));
@@ -193,6 +212,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
     {
         var configContent = File.ReadAllText(GetBlazorIdentityChangesConfigPath());
         Assert.Contains("\"Options\": [ \"InteractiveServer\" ]", configContent);
+        Assert.DoesNotContain("ConfigureIdentityAuthenticationRefresh", configContent);
         Assert.Contains("AddAuthenticationStateSerialization()", configContent);
         Assert.Contains("\"Options\": [ \"NonInteractiveServer\" ]", configContent);
         Assert.Contains("AcceptsInteractiveRouting()", configContent);

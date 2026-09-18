@@ -46,7 +46,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "sMessage Message=\"@message\" />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n " +
                     "       <EditForm Model=\"Input\" FormName=\"resend-email-confirmation\" OnValidSubmi" +
                     "t=\"OnValidSubmitAsync\" method=\"post\">\r\n            <DataAnnotationsValidator />\r" +
-                    "\n            <ValidationSummary class=\"text-danger\" role=\"alert\" />\r\n           " +
+                    "\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n           " +
                     " <div class=\"form-floating mb-3\">\r\n                <InputText @bind-Value=\"Input" +
                     ".Email\" id=\"Input.Email\" class=\"form-control\" aria-required=\"true\" placeholder=\"" +
                     "name@example.com\" />\r\n                <label for=\"Input.Email\" class=\"form-label" +

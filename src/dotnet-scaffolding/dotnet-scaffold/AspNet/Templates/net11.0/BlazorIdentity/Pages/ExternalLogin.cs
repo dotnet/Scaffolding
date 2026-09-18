@@ -54,8 +54,8 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "lick the Register button to finish\r\n    logging in.\r\n</div>\r\n\r\n<div class=\"row\">" +
                     "\r\n    <div class=\"col-md-4\">\r\n        <EditForm Model=\"Input\" OnValidSubmit=\"OnV" +
                     "alidSubmitAsync\" FormName=\"confirmation\" method=\"post\">\r\n            <DataAnnota" +
-                    "tionsValidator />\r\n            <ValidationSummary class=\"text-danger\" role=\"aler" +
-                    "t\" />\r\n            <div class=\"form-floating mb-3\">\r\n                <InputText " +
+                    "tionsValidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
+                    "            <div class=\"form-floating mb-3\">\r\n                <InputText " +
                     "@bind-Value=\"Input.Email\" id=\"Input.Email\" class=\"form-control\" autocomplete=\"em" +
                     "ail\" placeholder=\"Please enter your email.\" />\r\n                <label for=\"Inpu" +
                     "t.Email\" class=\"form-label\">Email</label>\r\n                <ValidationMessage Fo" +
@@ -122,9 +122,9 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "nManager.ToAbsoluteUri(\"Account/ConfirmEmail\").AbsoluteUri,\r\n                   " +
                     " new Dictionary<string, object?> { [\"userId\"] = userId, [\"code\"] = code });\r\n   " +
                     "             await EmailSender.SendConfirmationLinkAsync(user, Input.Email, Html" +
-                    "Encoder.Default.Encode(callbackUrl));\r\n\r\n                // If account confirmat" +
-                    "ion is required, we need to show the link if we don\'t have a real email sender\r\n" +
-                    "                if (UserManager.Options.SignIn.RequireConfirmedAccount)\r\n       " +
+                    "Encoder.Default.Encode(callbackUrl));\r\n\r\n                // If confirmation is required" +
+                    ", we need to show the link if we don't have a real email sender\r\n" +
+                    "                if (!await SignInManager.CanSignInAsync(user))\r\n       " +
                     "         {\r\n                    RedirectManager.RedirectTo(\"Account/RegisterConf" +
                     "irmation\", new() { [\"email\"] = Input.Email });\r\n                }\r\n             " +
                     "   else\r\n                {\r\n                    await SignInManager.SignInAsync(" +

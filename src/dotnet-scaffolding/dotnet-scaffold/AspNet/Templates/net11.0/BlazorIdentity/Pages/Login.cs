@@ -45,8 +45,8 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "        <section>\r\n            <StatusMessage Message=\"@errorMessage\" />\r\n      " +
                     "      <EditForm EditContext=\"editContext\" method=\"post\" OnSubmit=\"LoginUser\" For" +
                     "mName=\"login\">\r\n                <DataAnnotationsValidator />\r\n                <h" +
-                    "2>Use a local account to log in.</h2>\r\n                <hr />\r\n                <" +
-                    "ValidationSummary class=\"text-danger\" role=\"alert\" />\r\n                <div clas" +
+                    "2>Use a local account to log in.</h2>\r\n                <hr />\r\n                <div role=\"alert\" aria-atomic=\"true\">\r\n                    <ValidationSummary class=\"text-danger\" />\r\n                </div>\r\n" +
+                    "                <div clas" +
                     "s=\"form-floating mb-3\">\r\n                    <InputText @bind-Value=\"Input.Email" +
                     "\" id=\"Input.Email\" class=\"form-control\" autocomplete=\"username webauthn\" aria-re" +
                     "quired=\"true\" placeholder=\"name@example.com\" />\r\n                    <label for=" +

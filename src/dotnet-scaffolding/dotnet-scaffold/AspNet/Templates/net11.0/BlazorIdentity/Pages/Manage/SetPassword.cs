@@ -45,8 +45,8 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     " for this site. Add a local\r\n    account so you can log in without an external l" +
                     "ogin.\r\n</p>\r\n<div class=\"row\">\r\n    <div class=\"col-xl-6\">\r\n        <EditForm Mo" +
                     "del=\"Input\" FormName=\"set-password\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"p" +
-                    "ost\">\r\n            <DataAnnotationsValidator />\r\n            <ValidationSummary " +
-                    "class=\"text-danger\" role=\"alert\" />\r\n            <div class=\"form-floating mb-3\"" +
+                    "ost\">\r\n            <DataAnnotationsValidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
+                    "            <div class=\"form-floating mb-3\"" +
                     ">\r\n                <InputText type=\"password\" @bind-Value=\"Input.NewPassword\" id" +
                     "=\"Input.NewPassword\" class=\"form-control\" autocomplete=\"new-password\" placeholde" +
                     "r=\"Enter the new password\" />\r\n                <label for=\"Input.NewPassword\" cl" +

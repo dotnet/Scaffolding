@@ -12,7 +12,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
 
@@ -324,37 +323,47 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
     private static async Task ApplyIdentityMigrationAsync(string projectDirectory, string projectPath)
     {
-        var assetsPath = Path.Combine(projectDirectory, "obj", "project.assets.json");
-        var efVersion = AddIdentityMigrationStep.GetEfDesignPackageVersion(await File.ReadAllTextAsync(assetsPath));
-        Assert.False(string.IsNullOrEmpty(efVersion));
+        var projectName = Path.GetFileNameWithoutExtension(projectPath);
+        var runnerDirectory = Path.Combine(Path.GetDirectoryName(projectDirectory)!, $"{projectName}.MigrationRunner");
+        var runnerProjectPath = Path.Combine(runnerDirectory, "MigrationRunner.csproj");
+        Directory.CreateDirectory(runnerDirectory);
+        await File.WriteAllTextAsync(
+            runnerProjectPath,
+            $"""
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="{Path.GetRelativePath(runnerDirectory, projectPath)}" />
+  </ItemGroup>
+</Project>
+""");
+        await File.WriteAllTextAsync(
+            Path.Combine(runnerDirectory, "Program.cs"),
+            $$"""
+using Microsoft.EntityFrameworkCore;
+using {{projectName}}.Data;
 
-        var toolDirectory = Path.Combine(projectDirectory, ".dotnet-tools");
-        var installResult = await RunDotNetAsync(
-            projectDirectory,
-            "tool",
-            "install",
-            "dotnet-ef",
-            "--tool-path",
-            toolDirectory,
-            "--version",
-            efVersion!);
-        Assert.True(installResult.ExitCode == 0, $"dotnet-ef installation failed.{Environment.NewLine}{installResult.Output}{Environment.NewLine}{installResult.Error}");
+var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+    .UseSqlite($"Data Source={args[0]}")
+    .Options;
+await using var context = new ApplicationDbContext(options);
+await context.Database.MigrateAsync();
+""");
 
-        var executableName = OperatingSystem.IsWindows() ? "dotnet-ef.exe" : "dotnet-ef";
-        var updateResult = await RunProcessAsync(
-            Path.Combine(toolDirectory, executableName),
+        var databasePath = Path.Combine(projectDirectory, "ApplicationDbContext.db");
+        var updateResult = await RunDotNetAsync(
             projectDirectory,
-            "database",
-            "update",
+            "run",
             "--project",
-            projectPath,
-            "--startup-project",
-            projectPath,
-            "--context",
-            "ApplicationDbContext",
-            "--no-color");
+            runnerProjectPath,
+            "--",
+            databasePath);
         Assert.True(updateResult.ExitCode == 0, $"Database update failed.{Environment.NewLine}{updateResult.Output}{Environment.NewLine}{updateResult.Error}");
-        Assert.True(File.Exists(Path.Combine(projectDirectory, "ApplicationDbContext.db")));
+        Assert.True(File.Exists(databasePath));
     }
 
     private static async Task AssertIdentityAccountLifecycleAsync(string projectPath)
@@ -527,16 +536,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
     private static async Task<(int ExitCode, string Output, string Error)> RunDotNetAsync(string workingDirectory, params string[] arguments)
     {
-        return await RunProcessAsync(ScaffoldCliHelper.GetDotNetPath(), workingDirectory, arguments);
-    }
-
-    private static async Task<(int ExitCode, string Output, string Error)> RunProcessAsync(string fileName, string workingDirectory, params string[] arguments)
-    {
         using var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = fileName,
+                FileName = ScaffoldCliHelper.GetDotNetPath(),
                 WorkingDirectory = workingDirectory,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

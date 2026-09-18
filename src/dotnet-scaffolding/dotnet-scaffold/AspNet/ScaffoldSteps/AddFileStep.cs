@@ -28,6 +28,12 @@ internal class AddFileStep : ScaffoldStep
     /// Gets or sets the base output directory where the file will be added.
     /// </summary>
     public required string BaseOutputDirectory { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether an existing file should be overwritten.
+    /// </summary>
+    public bool Overwrite { get; set; }
+
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
 
@@ -50,9 +56,9 @@ internal class AddFileStep : ScaffoldStep
         }
 
         var destinationFilePath = Path.Combine(BaseOutputDirectory, FileName);
-        if (File.Exists(destinationFilePath))
+        if (File.Exists(destinationFilePath) && !Overwrite)
         {
-            return Task.FromResult(false);
+            return Task.FromResult(true);
         }
 
         var allFiles = new TemplateFoldersUtilities().GetAllFilesForTargetFramework(["Files"], ProjectPath);
@@ -63,7 +69,7 @@ internal class AddFileStep : ScaffoldStep
             _logger.LogInformation($"Adding file '{FileName}'...");
 
             _fileSystem.CreateDirectoryIfNotExists(destinationDirectory);
-            _fileSystem.CopyFile(fileToCopy, destinationFilePath, overwrite: false);
+            _fileSystem.CopyFile(fileToCopy, destinationFilePath, Overwrite);
             _logger.LogInformation("Done");
             return Task.FromResult(true);
         }

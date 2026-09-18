@@ -49,6 +49,50 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
     }
 
     [Fact]
+    public async Task Scaffold_BlazorIdentity_Net11_OverwriteUpdatesStaticFilesAndApplicationWiring()
+    {
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        File.WriteAllText(programPath, ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
+        ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
+        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
+
+        var firstRun = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "blazor-identity",
+            "--project", _testProjectPath,
+            "--dataContext", "ApplicationDbContext",
+            "--dbProvider", "sqlite-efcore",
+            "--prerelease");
+
+        Assert.True(firstRun.ExitCode == 0, $"Initial scaffold should succeed.\nOutput: {firstRun.Output}\nError: {firstRun.Error}");
+
+        var passkeyScriptPath = Path.Combine(
+            _testProjectDir,
+            "Components",
+            "Account",
+            "Shared",
+            "PasskeySubmit.razor.js");
+        File.WriteAllText(passkeyScriptPath, "// stale");
+        File.WriteAllText(
+            programPath,
+            File.ReadAllText(programPath).Replace("app.MapAdditionalIdentityEndpoints();", string.Empty));
+
+        var overwriteRun = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "blazor-identity",
+            "--project", _testProjectPath,
+            "--dataContext", "ApplicationDbContext",
+            "--dbProvider", "sqlite-efcore",
+            "--prerelease",
+            "--overwrite");
+
+        Assert.True(overwriteRun.ExitCode == 0, $"Overwrite scaffold should succeed.\nOutput: {overwriteRun.Output}\nError: {overwriteRun.Error}");
+        Assert.DoesNotContain("// stale", File.ReadAllText(passkeyScriptPath));
+        Assert.Contains("app.MapAdditionalIdentityEndpoints();", File.ReadAllText(programPath));
+    }
+
+    [Fact]
     public async Task Scaffold_BlazorIdentity_Net11_CliInvocation()
     {
         // Arrange write project + Program.cs (allow warnings so preview-SDK warnings don't break the build)
@@ -189,7 +233,9 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.DoesNotContain("app.MapAdditionalIdentityEndpoints();;", programContent);
 
         var navMenuContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "Layout", "NavMenu.razor"));
-        Assert.Contains("href=\"auth\"", navMenuContent);
+        Assert.Contains("<AuthorizeView>", navMenuContent);
+        Assert.Contains("href=\"Account/Register\"", navMenuContent);
+        Assert.DoesNotContain("href=\"auth\"", navMenuContent);
         Assert.DoesNotContain("<AntiforgeryToken />", navMenuContent);
 
         // Assert no NuGet errors during scaffolding
@@ -281,10 +327,13 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains("HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null", appContent);
     }
 
-    [Fact]
-    public async Task Scaffold_BlazorIdentity_Net11_WebAssemblyClientWithWindowsProjectReferenceIsModified()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Scaffold_BlazorIdentity_Net11_GlobalWebAssemblyClientWithWindowsProjectReferenceIsModified(bool useAuto)
     {
-        var clientProjectDir = Path.Combine(_testProjectDir, "TestProject.Client");
+        const string aspNetCoreVersion = "11.0.0-rc.2.26455.110";
+        var clientProjectDir = Path.Combine(_testDirectory, "TestProject.Client");
         var clientProjectPath = Path.Combine(clientProjectDir, "TestProject.Client.csproj");
         Directory.CreateDirectory(Path.Combine(clientProjectDir, "Layout"));
 
@@ -297,11 +346,25 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
                 <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
               </PropertyGroup>
               <ItemGroup>
-                <ProjectReference Include="TestProject.Client\TestProject.Client.csproj" />
+                <ProjectReference Include="..\TestProject.Client\TestProject.Client.csproj" />
+                <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="{aspNetCoreVersion}" />
               </ItemGroup>
             </Project>
             """);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), """
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), useAuto ? """
+            using TestProject.Components;
+
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddRazorComponents()
+                .AddInteractiveServerComponents()
+                .AddInteractiveWebAssemblyComponents();
+
+            var app = builder.Build();
+            app.MapRazorComponents<App>()
+                .AddInteractiveServerRenderMode()
+                .AddInteractiveWebAssemblyRenderMode();
+            app.Run();
+            """ : """
             using TestProject.Components;
 
             var builder = WebApplication.CreateBuilder(args);
@@ -314,7 +377,22 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             app.Run();
             """);
         ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"), """
+        Directory.Delete(Path.Combine(_testProjectDir, "Components", "Layout"), recursive: true);
+        File.Delete(Path.Combine(_testProjectDir, "Components", "Routes.razor"));
+        File.AppendAllText(
+            Path.Combine(_testProjectDir, "Components", "_Imports.razor"),
+            "@using TestProject.Client\n@using TestProject.Client.Layout\n");
+        File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"), useAuto ? """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <HeadOutlet @rendermode="InteractiveAuto" />
+            </head>
+            <body>
+                <Routes @rendermode="InteractiveAuto" />
+            </body>
+            </html>
+            """ : """
             <!DOCTYPE html>
             <html>
             <head>
@@ -334,6 +412,9 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
                 <Nullable>enable</Nullable>
                 <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
               </PropertyGroup>
+              <ItemGroup>
+                <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="{aspNetCoreVersion}" />
+              </ItemGroup>
             </Project>
             """);
         File.WriteAllText(Path.Combine(clientProjectDir, "Program.cs"), """
@@ -342,8 +423,17 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             await builder.Build().RunAsync();
             """);
-        File.WriteAllText(Path.Combine(clientProjectDir, "_Imports.razor"), """
-            @using Microsoft.AspNetCore.Components.Forms
+        File.WriteAllText(
+            Path.Combine(clientProjectDir, "_Imports.razor"),
+            ScaffoldCliHelper.GetBlazorImportsRazor() +
+            "@using TestProject.Client\n@using TestProject.Client.Layout\n");
+        File.WriteAllText(Path.Combine(clientProjectDir, "Routes.razor"), """
+            <Router AppAssembly="typeof(Program).Assembly">
+                <Found Context="routeData">
+                    <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+                    <FocusOnNavigate RouteData="routeData" Selector="h1" />
+                </Found>
+            </Router>
             """);
         File.WriteAllText(Path.Combine(clientProjectDir, "Layout", "MainLayout.razor"), """
             @inherits LayoutComponentBase
@@ -353,7 +443,13 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
 
             @Body
             """);
-        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
+        File.WriteAllText(
+            Path.Combine(clientProjectDir, "Layout", "NavMenu.razor"),
+            ScaffoldCliHelper.GetNavMenuRazor());
+        File.WriteAllText(
+            Path.Combine(clientProjectDir, "Layout", "NavMenu.razor.css"),
+            ScaffoldCliHelper.GetNavMenuCss());
+        File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
 
         var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
@@ -377,14 +473,39 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.True(File.Exists(Path.Combine(clientProjectDir, "RedirectToLogin.razor")));
         Assert.False(File.Exists(Path.Combine(
             _testProjectDir, "Components", "Account", "Shared", "RedirectToLogin.razor")));
-        Assert.False(File.Exists(Path.Combine(
-            _testProjectDir, "Components", "Account", "IdentityRevalidatingAuthenticationStateProvider.cs")));
+        Assert.Equal(
+            useAuto,
+            File.Exists(Path.Combine(
+                _testProjectDir,
+                "Components",
+                "Account",
+                "IdentityRevalidatingAuthenticationStateProvider.cs")));
+
+        var clientRoutesContent = File.ReadAllText(Path.Combine(clientProjectDir, "Routes.razor"));
+        Assert.Contains("<AuthorizeRouteView", clientRoutesContent);
+        Assert.Contains("<RedirectToLogin />", clientRoutesContent);
+
+        var clientImportsContent = File.ReadAllText(Path.Combine(clientProjectDir, "_Imports.razor"));
+        Assert.Contains("@using Microsoft.AspNetCore.Components.Authorization", clientImportsContent);
+
+        var clientNavMenuContent = File.ReadAllText(Path.Combine(clientProjectDir, "Layout", "NavMenu.razor"));
+        Assert.Contains("<AuthorizeView>", clientNavMenuContent);
+        Assert.Contains("href=\"Account/Register\"", clientNavMenuContent);
+        Assert.DoesNotContain("href=\"auth\"", clientNavMenuContent);
 
         var appContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
         Assert.Contains("<HeadOutlet @rendermode=\"PageRenderMode\" />", appContent);
         Assert.Contains("<Routes @rendermode=\"PageRenderMode\" />", appContent);
-        Assert.Contains("HttpContext.AcceptsInteractiveRouting() ? InteractiveWebAssembly : null", appContent);
+        Assert.Contains(
+            useAuto
+                ? "HttpContext.AcceptsInteractiveRouting() ? InteractiveAuto : null"
+                : "HttpContext.AcceptsInteractiveRouting() ? InteractiveWebAssembly : null",
+            appContent);
 
+        var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(
+            postExitCode == 0,
+            $"Project should build after scaffolding.\nOutput: {postOutput}\nError: {postError}");
     }
 
     private static int CountOccurrences(string value, string substring)

@@ -28,10 +28,7 @@
             }
           ]
         }
-      },
-      "Usings": [
-        "Microsoft.AspNetCore.Components.Authorization"
-      ]
+      }
     }
   ]
 }

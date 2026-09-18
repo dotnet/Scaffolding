@@ -137,7 +137,11 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["BlazorIdentity"], blazorIdentityModel.ProjectInfo.ProjectPath);
             var applicationUserFile = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Files"], blazorIdentityModel.ProjectInfo.ProjectPath)
                 .FirstOrDefault(x => x.EndsWith("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
-            var blazorIdentityProperties = BlazorIdentityHelper.GetTextTemplatingProperties(allBlazorIdentityFiles, blazorIdentityModel);
+            context.Properties.TryGetValue("BlazorIdentityClientProjectPath", out var clientProjectPath);
+            var blazorIdentityProperties = BlazorIdentityHelper.GetTextTemplatingProperties(
+                allBlazorIdentityFiles,
+                blazorIdentityModel,
+                clientProjectPath as string);
             var applicationUserProperty = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(applicationUserFile, blazorIdentityModel);
             if (applicationUserProperty is not null)
             {

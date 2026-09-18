@@ -6,7 +6,7 @@
         "Global": {
           "CodeChanges": [
             {
-              "Block": "app.MapAdditionalIdentityEndpoints();",
+              "Block": "app.MapAdditionalIdentityEndpoints()",
               "InsertBefore": [ "app.Run();" ],
               "LeadingTrivia": {
                 "Newline": true
@@ -125,10 +125,30 @@
               "LeadingTrivia": {
                 "Newline": true
               }
+            },
+            {
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
+              "Block": "WebApplication.CreateBuilder.Services.AddDatabaseDeveloperPageExceptionFilter()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
             }
           ]
         }
-      }
+      },
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "if (!app.Environment.IsDevelopment())" ],
+          "MultiLineBlock": [
+            "if (app.Environment.IsDevelopment())",
+            "{",
+            "    app.UseMigrationsEndPoint();",
+            "}",
+            "else"
+          ],
+          "CheckBlock": "app.UseMigrationsEndPoint()"
+        }
+      ]
     },
     {
       "FileName": "Routes.razor",
@@ -211,6 +231,13 @@
             "<span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather",
             "            </NavLink>",
             "        </div>",
+            "",
+            "        <div class=\"nav-item px-3\">",
+            "            <NavLink class=\"nav-link\" href=\"auth\">",
+            "                <span class=\"bi bi-lock-nav-menu\" aria-hidden=\"true\"></span> Auth Required",
+            "            </NavLink>",
+            "        </div>",
+            "",
             "        <AuthorizeView>",
             "            <Authorized>",
             "                <div class=\"nav-item px-3\">",
@@ -220,7 +247,6 @@
             "                </div>",
             "                <div class=\"nav-item px-3\">",
             "                    <form action=\"Account/Logout\" method=\"post\">",
-            "                        <AntiforgeryToken />",
             "                        <input type=\"hidden\" name=\"ReturnUrl\" value=\"@currentUrl\" />",
             "                        <button type=\"submit\" class=\"nav-link\">",
             "                            <span class=\"bi bi-arrow-bar-left-nav-menu\" aria-hidden=\"true\"></span> Logout",

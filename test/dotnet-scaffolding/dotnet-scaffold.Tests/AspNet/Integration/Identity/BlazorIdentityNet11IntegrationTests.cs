@@ -21,7 +21,28 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             "</PropertyGroup>",
             "    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>\n  </PropertyGroup>");
         File.WriteAllText(_testProjectPath, projectContent);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), """
+            using TestProject.Components;
+
+            var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddRazorComponents();
+
+            var app = builder.Build();
+
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Error", createScopeForErrors: true);
+                app.UseHsts();
+            }
+
+            app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+            app.UseHttpsRedirection();
+            app.MapStaticAssets();
+            app.MapRazorComponents<App>();
+
+            app.Run();
+            """);
         ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
 
         // Write a NuGet.config with the dotnet11 preview feeds so the preview-only
@@ -104,8 +125,16 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
 
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("TestDbContext", programContent);
+        Assert.Contains("builder.Services.AddDatabaseDeveloperPageExceptionFilter()", programContent);
+        Assert.Contains("app.UseMigrationsEndPoint()", programContent);
         Assert.Contains("builder.Services.AddAuthorization()", programContent);
         Assert.DoesNotContain("IdentityRevalidatingAuthenticationStateProvider>()", programContent);
+        Assert.Contains("app.MapAdditionalIdentityEndpoints();", programContent);
+        Assert.DoesNotContain("app.MapAdditionalIdentityEndpoints();;", programContent);
+
+        var navMenuContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "Layout", "NavMenu.razor"));
+        Assert.Contains("href=\"auth\"", navMenuContent);
+        Assert.DoesNotContain("<AntiforgeryToken />", navMenuContent);
 
         // Assert no NuGet errors during scaffolding
         Assert.False(cliOutput.Contains("error: NU"),

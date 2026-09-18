@@ -81,6 +81,60 @@ public class IdentityEndToEndNet10Tests
         }
     }
 
+    [Theory]
+    [InlineData("mvc")]
+    [InlineData("webapp")]
+    public async Task ScaffoldIdentity_SecondRunDoesNotChangeProjectWithDefaultIdentityUi(string templateName)
+    {
+        var projectName = templateName == "mvc" ? "MvcIdentity" : "RazorIdentity";
+        var testDirectory = Path.Combine(Path.GetTempPath(), nameof(IdentityEndToEndNet10Tests), Guid.NewGuid().ToString("N"));
+        var projectDirectory = Path.Combine(testDirectory, projectName);
+        var projectPath = Path.Combine(projectDirectory, $"{projectName}.csproj");
+
+        Directory.CreateDirectory(testDirectory);
+        try
+        {
+            var createResult = await RunDotNetAsync(
+                testDirectory,
+                "new", templateName,
+                "--name", projectName,
+                "--output", projectDirectory,
+                "--framework", "net10.0",
+                "--auth", "Individual",
+                "--use-local-db", "false");
+            Assert.True(createResult.ExitCode == 0, $"Project creation failed.{Environment.NewLine}{createResult.Output}{Environment.NewLine}{createResult.Error}");
+
+            var firstScaffoldResult = await ScaffoldCliHelper.RunScaffoldAsync(
+                "net10.0",
+                "identity",
+                "--project", projectPath,
+                "--dataContext", "ApplicationDbContext",
+                "--dbProvider", "sqlite-efcore");
+            Assert.True(firstScaffoldResult.ExitCode == 0, $"Initial Identity scaffolding failed.{Environment.NewLine}{firstScaffoldResult.Output}{Environment.NewLine}{firstScaffoldResult.Error}");
+
+            var sourceHashes = GetSourceHashes(projectDirectory);
+            var secondScaffoldResult = await ScaffoldCliHelper.RunScaffoldAsync(
+                "net10.0",
+                "identity",
+                "--project", projectPath,
+                "--dataContext", "ApplicationDbContext",
+                "--dbProvider", "sqlite-efcore");
+            Assert.True(secondScaffoldResult.ExitCode == 0, $"Repeated Identity scaffolding failed.{Environment.NewLine}{secondScaffoldResult.Output}{Environment.NewLine}{secondScaffoldResult.Error}");
+            Assert.Equal(sourceHashes, GetSourceHashes(projectDirectory));
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(testDirectory, recursive: true);
+            }
+            catch
+            {
+                // Best-effort cleanup; preserve any test failure.
+            }
+        }
+    }
+
     private static void AssertConfiguredProject(string projectDirectory, string hostFolder)
     {
         var programContent = File.ReadAllText(Path.Combine(projectDirectory, "Program.cs"));

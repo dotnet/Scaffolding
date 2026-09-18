@@ -44,10 +44,10 @@
             "</head>"
           ],
           "MultiLineBlock": [
-            "    <link href=\"_content/Syncfusion.Blazor.Toolkit/Styles/fluent.css\" rel=\"stylesheet\" />",
+            "    <link href=\"_content/Syncfusion.Blazor.Toolkit/styles/fluent.min.css\" rel=\"stylesheet\" />",
             "</head>"
           ],
-          "CheckBlock": "Syncfusion.Blazor.Toolkit/Styles/fluent.css"
+          "CheckBlock": "Syncfusion.Blazor.Toolkit/styles/fluent.min.css"
         }
       ]
     },

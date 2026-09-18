@@ -24,8 +24,12 @@ internal static class BlazorIdentityHelper
     /// </summary>
     /// <param name="allT4TemplatePaths">The paths of all T4 templates.</param>
     /// <param name="blazorIdentityModel">The Blazor identity model containing project and identity information.</param>
+    /// <param name="clientProjectPath">The optional WebAssembly client project path.</param>
     /// <returns>An <see cref="IEnumerable{TextTemplatingProperty}"/> collection containing the text templating properties for the specified templates.</returns>
-    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, IdentityModel blazorIdentityModel)
+    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(
+        IEnumerable<string> allT4TemplatePaths,
+        IdentityModel blazorIdentityModel,
+        string? clientProjectPath = null)
     {
         if (blazorIdentityModel.ProjectInfo is null || string.IsNullOrEmpty(blazorIdentityModel.ProjectInfo.ProjectPath))
         {
@@ -47,11 +51,24 @@ internal static class BlazorIdentityHelper
 
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {
+                var isNet11 = blazorIdentityModel.ProjectInfo.LowestSupportedTargetFramework == TargetFramework.Net11;
+                var codeChangeOptions = blazorIdentityModel.ProjectInfo.CodeChangeOptions ?? [];
+                if (isNet11 &&
+                    typeName.Equals("IdentityRevalidatingAuthenticationStateProvider", StringComparison.Ordinal) &&
+                    !codeChangeOptions.Contains("InteractiveServer"))
+                {
+                    continue;
+                }
+
                 // Files in Pages and Shared folders are Razor components, others are C# files
                 string extension = templateFullName.StartsWith("Pages", StringComparison.OrdinalIgnoreCase) ||
                                    templateFullName.StartsWith("Shared", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
                 string relativeTemplatePath = templateFullName.Replace('.', Path.DirectorySeparatorChar);
-                string outputFileName = $"{Path.Combine(GetIdentityComponentsPath(blazorIdentityModel.BaseOutputPath), relativeTemplatePath)}{extension}";
+                string outputFileName = isNet11 &&
+                    typeName.Equals("RedirectToLogin", StringComparison.Ordinal) &&
+                    !string.IsNullOrEmpty(clientProjectPath)
+                        ? Path.Combine(Path.GetDirectoryName(clientProjectPath)!, "RedirectToLogin.razor")
+                        : $"{Path.Combine(GetIdentityComponentsPath(blazorIdentityModel.BaseOutputPath), relativeTemplatePath)}{extension}";
                 textTemplatingProperties.Add(new()
                 {
                     TemplateModel = blazorIdentityModel,

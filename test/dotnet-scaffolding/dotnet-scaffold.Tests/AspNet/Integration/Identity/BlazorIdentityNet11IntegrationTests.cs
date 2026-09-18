@@ -164,6 +164,8 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains("app.UseMigrationsEndPoint()", programContent);
         Assert.Contains("builder.Services.AddAuthorization()", programContent);
         Assert.DoesNotContain("IdentityRevalidatingAuthenticationStateProvider>()", programContent);
+        Assert.False(File.Exists(Path.Combine(
+            _testProjectDir, "Components", "Account", "IdentityRevalidatingAuthenticationStateProvider.cs")));
         Assert.Contains("app.MapAdditionalIdentityEndpoints();", programContent);
         Assert.DoesNotContain("app.MapAdditionalIdentityEndpoints();;", programContent);
 
@@ -348,9 +350,15 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains("builder.Services.AddCascadingAuthenticationState()", clientProgramContent);
         Assert.Contains("builder.Services.AddAuthenticationStateDeserialization()", clientProgramContent);
         Assert.DoesNotContain("WebAssemblyHostBuilder.CreateDefault.Services", clientProgramContent);
+        Assert.DoesNotContain("using Microsoft.AspNetCore.Components.Authorization;", clientProgramContent);
 
         var clientProjectContent = File.ReadAllText(clientProjectPath);
         Assert.Contains("Microsoft.AspNetCore.Components.WebAssembly.Authentication", clientProjectContent);
+        Assert.True(File.Exists(Path.Combine(clientProjectDir, "RedirectToLogin.razor")));
+        Assert.False(File.Exists(Path.Combine(
+            _testProjectDir, "Components", "Account", "Shared", "RedirectToLogin.razor")));
+        Assert.False(File.Exists(Path.Combine(
+            _testProjectDir, "Components", "Account", "IdentityRevalidatingAuthenticationStateProvider.cs")));
 
         var appContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
         Assert.Contains("<HeadOutlet @rendermode=\"PageRenderMode\" />", appContent);

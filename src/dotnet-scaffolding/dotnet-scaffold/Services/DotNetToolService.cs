@@ -16,6 +16,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Services;
 /// </summary>
 internal class DotNetToolService : IDotNetToolService
 {
+    private const string DotNetScaffoldPackageName = "Microsoft.dotnet-scaffold";
+
     private readonly ILogger _logger;
     private readonly IEnvironmentService _environmentService;
     private readonly IFileSystem _fileSystem;
@@ -95,22 +97,24 @@ internal class DotNetToolService : IDotNetToolService
     }
 
     /// <summary>
-    /// Gets all commands from all .NET tools in parallel.
+    /// Gets all commands from the specified .NET tools in parallel.
     /// </summary>
-    /// <param name="components">Optional list of components to query. If null, all tools are queried.</param>
+    /// <param name="components">Optional list of components to query. If null or empty, the dotnet-scaffold tool is queried.</param>
     /// <param name="envVars">Optional environment variables.</param>
     /// <returns>List of key-value pairs of tool command and <see cref="CommandInfo"/>.</returns>
     public IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null)
     {
+        var restoreLocalTools = components is { Count: > 0 };
         if (components is null || components.Count == 0)
         {
-            components = GetDotNetTools(refresh: true, envVars);
+            components = GetDotNetTools(refresh: true, envVars)
+                .Where(IsDotNetScaffoldTool)
+                .ToList();
         }
 
-        //if any local tools are present, we need to restore them first
-        //when sdks/runtimes are switched/rolled forward, local tools need to be restored before they are called
-        var anyLocalTools = components.FirstOrDefault(x => !x.IsGlobalTool) is not null;
-        if (anyLocalTools)
+        // Explicitly supplied local tools may need to be restored when SDKs or runtimes change.
+        // The default dotnet-scaffold tool is already running and does not require restoration.
+        if (restoreLocalTools && components.Any(x => !x.IsGlobalTool))
         {
             var runner = DotnetCliRunner.CreateDotNet("tool", ["restore"], envVars);
             runner.ExecuteAndCaptureOutput(out _, out _);
@@ -136,6 +140,9 @@ internal class DotNetToolService : IDotNetToolService
 
         return commands.ToList();
     }
+
+    private static bool IsDotNetScaffoldTool(DotNetToolInfo tool)
+        => tool.PackageName.Equals(DotNetScaffoldPackageName, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Installs a .NET tool using the dotnet CLI.

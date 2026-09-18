@@ -28,6 +28,12 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
+            if (BlazorIdentityHelper.ShouldSkipScaffolding(config.Context))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
             //get needed properties and cast them as needed
             config.Context.Properties.TryGetValue(nameof(IdentitySettings), out var blazorSettingsObj);
             config.Context.Properties.TryGetValue(nameof(IdentityModel), out var blazorIdentityModelObj);
@@ -71,6 +77,12 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
+            if (BlazorIdentityHelper.ShouldSkipScaffolding(config.Context))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
             if (!config.Context.Properties.TryGetValue("BlazorIdentityClientProjectPath", out var clientProjectPathObj) ||
                 clientProjectPathObj is not string clientProjectPath ||
                 string.IsNullOrEmpty(clientProjectPath))
@@ -106,6 +118,12 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
+            if (BlazorIdentityHelper.ShouldSkipScaffolding(context))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
             context.Properties.TryGetValue(nameof(IdentityModel), out var blazorIdentityModelObj);
             IdentityModel blazorIdentityModel = blazorIdentityModelObj as IdentityModel ??
                 throw new InvalidOperationException("missing 'IdentityModel' in 'ScaffolderContext.Properties'");
@@ -158,6 +176,12 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
                 return;
             }
 
+            if (BlazorIdentityHelper.ShouldSkipScaffolding(context))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
             string? projectPath = context.GetOptionResult<string>(Constants.CliOptions.ProjectCliOption);
             if (string.IsNullOrEmpty(projectPath))
             {
@@ -203,6 +227,11 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
+            if (BlazorIdentityHelper.ShouldSkipScaffolding(context))
+            {
+                step.SkipStep = true;
+                return;
+            }
 
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) &&
                 commandSettingsObj is IdentitySettings commandSettings)
@@ -244,6 +273,12 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         return builder.WithStep<WrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
+            if (BlazorIdentityHelper.ShouldSkipScaffolding(config.Context))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
             if (!config.Context.Properties.TryGetValue("BlazorIdentityClientProjectPath", out var clientProjectPathObj) ||
                 clientProjectPathObj is not string clientProjectPath ||
                 string.IsNullOrEmpty(clientProjectPath))

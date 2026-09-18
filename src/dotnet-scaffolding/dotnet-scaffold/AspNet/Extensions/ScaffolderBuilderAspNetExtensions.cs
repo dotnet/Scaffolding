@@ -5,6 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 using CliConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
@@ -28,6 +29,11 @@ internal static class ScaffolderBuilderAspNetExtensions
         {
             var step = config.Step;
             var context = config.Context;
+            if (BlazorIdentityHelper.ShouldSkipScaffolding(context))
+            {
+                step.SkipStep = true;
+                return;
+            }
 
             DbContextProperties? dbContextProperties = null;
             if (context.Properties.TryGetValue(Constants.StepConstants.DbContextProperties, out var dbContextPropertiesObj) &&
@@ -106,6 +112,11 @@ internal static class ScaffolderBuilderAspNetExtensions
         {
             var step = config.Step;
             var context = config.Context;
+            if (BlazorIdentityHelper.ShouldSkipScaffolding(context))
+            {
+                step.SkipStep = true;
+                return;
+            }
 
             DbContextProperties? dbContextProperties = null;
             if (context.Properties.TryGetValue(nameof(DbContextProperties), out var dbContextPropertiesObj) &&

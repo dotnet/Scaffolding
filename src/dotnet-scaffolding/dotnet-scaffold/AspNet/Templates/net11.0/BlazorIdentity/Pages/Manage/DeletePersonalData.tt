@@ -33,7 +33,9 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 <div>
     <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
         <DataAnnotationsValidator />
-        <ValidationSummary class="text-danger" role="alert" />
+        <div role="alert" aria-atomic="true">
+            <ValidationSummary class="text-danger" />
+        </div>
         @if (requirePassword)
         {
             <div class="form-floating mb-3">
@@ -54,17 +56,22 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
+    [SupplyParameterFromTempData(Name = IdentityRedirectManager.StatusMessageKey)]
+    private string? IdentityStatusMessage { get; set; }
+
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
+        message = IdentityStatusMessage;
+        IdentityStatusMessage = null;
         Input ??= new();
 
         user = await UserManager.GetUserAsync(HttpContext.User);
         if (user is null)
         {
-            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            RedirectManager.RedirectTo("Account/InvalidUser");
             return;
         }
         requirePassword = await UserManager.HasPasswordAsync(user);
@@ -74,7 +81,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
     {
         if (user is null)
         {
-            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            RedirectManager.RedirectTo("Account/InvalidUser");
             return;
         }
 

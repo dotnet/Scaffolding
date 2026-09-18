@@ -411,27 +411,33 @@ public class {modelName}
     /// to add authentication UI (login/logout/register links).
     /// </summary>
     public static string GetNavMenuRazor() =>
-        @"<div class=""top-row ps-3 navbar navbar-dark"">
-    <div class=""container-fluid"">
-        <a class=""navbar-brand"" href="""">TestProject</a>
-    </div>
-</div>
+                """
+                <div class="top-row ps-3 navbar navbar-dark">
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="">TestProject</a>
+                    </div>
+                </div>
 
-<nav class=""nav-scrollable"">
-    <ul class=""nav flex-column"">
-        <div class=""nav-item px-3"">
-            <NavLink class=""nav-link"" href="""" Match=""NavLinkMatch.All"">
-                <span class=""bi bi-house-door-fill-nav-menu"" aria-hidden=""true""></span> Home
-            </NavLink>
-        </div>
-        <div class=""nav-item px-3"">
-            <NavLink class=""nav-link"" href=""weather"">
-                <span class=""bi bi-list-nested-nav-menu"" aria-hidden=""true""></span> Weather
-            </NavLink>
-        </div>
-    </ul>
-</nav>
-";
+                <nav-menu>
+                    <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+                    <div class="nav-scrollable">
+                        <nav class="nav flex-column">
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                                </NavLink>
+                            </div>
+
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href="weather">
+                                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                                </NavLink>
+                            </div>
+                        </nav>
+                    </div>
+                </nav-menu>
+                """.TrimEnd() + System.Environment.NewLine;
 
     /// <summary>
     /// Gets a minimal NavMenu.razor.css matching the standard Blazor template structure.

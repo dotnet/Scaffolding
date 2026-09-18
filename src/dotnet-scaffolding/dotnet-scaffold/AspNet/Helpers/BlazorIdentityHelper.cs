@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Model;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
@@ -13,13 +14,22 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 /// </summary>
 internal static class BlazorIdentityHelper
 {
+    internal const string SkipScaffoldingProperty = "SkipBlazorIdentityScaffolding";
+
+    internal static bool ShouldSkipScaffolding(ScaffolderContext context)
+        => context.Properties.TryGetValue(SkipScaffoldingProperty, out var value) && value is true;
+
     /// <summary>
     /// Retrieves the text templating properties for the given T4 templates and Blazor identity model.
     /// </summary>
     /// <param name="allT4TemplatePaths">The paths of all T4 templates.</param>
     /// <param name="blazorIdentityModel">The Blazor identity model containing project and identity information.</param>
+    /// <param name="clientProjectPath">The optional WebAssembly client project path.</param>
     /// <returns>An <see cref="IEnumerable{TextTemplatingProperty}"/> collection containing the text templating properties for the specified templates.</returns>
-    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, IdentityModel blazorIdentityModel)
+    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(
+        IEnumerable<string> allT4TemplatePaths,
+        IdentityModel blazorIdentityModel,
+        string? clientProjectPath = null)
     {
         if (blazorIdentityModel.ProjectInfo is null || string.IsNullOrEmpty(blazorIdentityModel.ProjectInfo.ProjectPath))
         {
@@ -41,11 +51,24 @@ internal static class BlazorIdentityHelper
 
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {
+                var isNet11 = blazorIdentityModel.ProjectInfo.LowestSupportedTargetFramework == TargetFramework.Net11;
+                var codeChangeOptions = blazorIdentityModel.ProjectInfo.CodeChangeOptions ?? [];
+                if (isNet11 &&
+                    typeName.Equals("IdentityRevalidatingAuthenticationStateProvider", StringComparison.Ordinal) &&
+                    !codeChangeOptions.Contains("InteractiveServer"))
+                {
+                    continue;
+                }
+
                 // Files in Pages and Shared folders are Razor components, others are C# files
                 string extension = templateFullName.StartsWith("Pages", StringComparison.OrdinalIgnoreCase) ||
                                    templateFullName.StartsWith("Shared", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
                 string relativeTemplatePath = templateFullName.Replace('.', Path.DirectorySeparatorChar);
-                string outputFileName = $"{Path.Combine(GetIdentityComponentsPath(blazorIdentityModel.BaseOutputPath), relativeTemplatePath)}{extension}";
+                string outputFileName = isNet11 &&
+                    typeName.Equals("RedirectToLogin", StringComparison.Ordinal) &&
+                    !string.IsNullOrEmpty(clientProjectPath)
+                        ? Path.Combine(Path.GetDirectoryName(clientProjectPath)!, "RedirectToLogin.razor")
+                        : $"{Path.Combine(GetIdentityComponentsPath(blazorIdentityModel.BaseOutputPath), relativeTemplatePath)}{extension}";
                 textTemplatingProperties.Add(new()
                 {
                     TemplateModel = blazorIdentityModel,
@@ -283,6 +306,7 @@ internal static class BlazorIdentityHelper
         typeof(Templates.net11.BlazorIdentity.IdentityNoOpEmailSender),
         typeof(Templates.net11.BlazorIdentity.IdentityRedirectManager),
         typeof(Templates.net11.BlazorIdentity.IdentityRevalidatingAuthenticationStateProvider),
+        typeof(Templates.net11.BlazorIdentity.PasskeyAuthenticators),
         typeof(Templates.net11.BlazorIdentity.PasskeyInputModel),
         typeof(Templates.net11.BlazorIdentity.PasskeyOperation),
         typeof(Templates.net11.BlazorIdentity.Pages._Imports),

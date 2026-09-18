@@ -25,9 +25,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorIdentity.
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n@code {\r\n    protected override " +
+            this.Write("@inject NavigationManager NavigationManager\r\n\r\n@code {\r\n    protected override " +
                     "void OnInitialized()\r\n    {\r\n        NavigationManager.NavigateTo($\"Account/Logi" +
                     "n?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}\", forceLoad: true);\r\n " +
                     "   }\r\n}\r\n");

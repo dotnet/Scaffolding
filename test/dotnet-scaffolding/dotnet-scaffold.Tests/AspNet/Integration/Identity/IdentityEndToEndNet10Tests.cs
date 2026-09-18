@@ -232,7 +232,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             var buildResult = await ScaffoldCliHelper.RunBuildForFrameworkAsync(projectDirectory, "net10.0");
             Assert.True(buildResult.ExitCode == 0, $"Scaffolded project failed to build.{Environment.NewLine}{buildResult.Output}{Environment.NewLine}{buildResult.Error}");
 
-            await ApplyIdentityMigrationAsync(projectDirectory, projectPath);
             await AssertIdentityAccountLifecycleAsync(projectPath);
         }
         finally
@@ -321,51 +320,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         }
     }
 
-    private static async Task ApplyIdentityMigrationAsync(string projectDirectory, string projectPath)
-    {
-        var projectName = Path.GetFileNameWithoutExtension(projectPath);
-        var runnerDirectory = Path.Combine(Path.GetDirectoryName(projectDirectory)!, $"{projectName}.MigrationRunner");
-        var runnerProjectPath = Path.Combine(runnerDirectory, "MigrationRunner.csproj");
-        Directory.CreateDirectory(runnerDirectory);
-        await File.WriteAllTextAsync(
-            runnerProjectPath,
-            $"""
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="{Path.GetRelativePath(runnerDirectory, projectPath)}" />
-  </ItemGroup>
-</Project>
-""");
-        await File.WriteAllTextAsync(
-            Path.Combine(runnerDirectory, "Program.cs"),
-            $$"""
-using Microsoft.EntityFrameworkCore;
-using {{projectName}}.Data;
-
-var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-    .UseSqlite($"Data Source={args[0]}")
-    .Options;
-await using var context = new ApplicationDbContext(options);
-await context.Database.MigrateAsync();
-""");
-
-        var databasePath = Path.Combine(projectDirectory, "ApplicationDbContext.db");
-        var updateResult = await RunDotNetAsync(
-            projectDirectory,
-            "run",
-            "--project",
-            runnerProjectPath,
-            "--",
-            databasePath);
-        Assert.True(updateResult.ExitCode == 0, $"Database update failed.{Environment.NewLine}{updateResult.Output}{Environment.NewLine}{updateResult.Error}");
-        Assert.True(File.Exists(databasePath));
-    }
-
     private static async Task AssertIdentityAccountLifecycleAsync(string projectPath)
     {
         var port = GetAvailablePort();
@@ -382,6 +336,7 @@ await context.Database.MigrateAsync();
                 CreateNoWindow = true
             }
         };
+        process.StartInfo.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
         process.StartInfo.ArgumentList.Add("run");
         process.StartInfo.ArgumentList.Add("--no-build");
         process.StartInfo.ArgumentList.Add("--project");
@@ -409,7 +364,11 @@ await context.Database.MigrateAsync();
                 Timeout = TimeSpan.FromSeconds(30)
             };
 
-            var registerPage = await GetWithRetryAsync(client, "/Identity/Account/Register", process, output);
+            var migrationProbePage = await GetWithRetryAsync(client, "/Identity/Account/Register", process, output);
+            await ApplyIdentityMigrationAsync(client, migrationProbePage);
+            Assert.True(File.Exists(Path.Combine(Path.GetDirectoryName(projectPath)!, "ApplicationDbContext.db")));
+
+            var registerPage = await client.GetStringAsync("/Identity/Account/Register");
             await AssertSuccessfulGetAsync(client, "/Identity/lib/bootstrap/dist/css/bootstrap.min.css");
             await AssertSuccessfulGetAsync(client, "/Identity/lib/bootstrap/dist/js/bootstrap.bundle.min.js");
             var email = $"identity-{Guid.NewGuid():N}@example.com";
@@ -466,6 +425,29 @@ await context.Database.MigrateAsync();
         }
     }
 
+    private static async Task ApplyIdentityMigrationAsync(HttpClient client, string registerPage)
+    {
+        var formFields = new Dictionary<string, string>
+        {
+            ["Input.Email"] = $"migration-probe-{Guid.NewGuid():N}@example.com",
+            ["Input.Password"] = "Test1234!",
+            ["Input.ConfirmPassword"] = "Test1234!",
+            ["__RequestVerificationToken"] = GetAntiforgeryToken(registerPage)
+        };
+        using var failedRegistration = await client.PostAsync("/Identity/Account/Register", new FormUrlEncodedContent(formFields));
+        var errorPage = await failedRegistration.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.InternalServerError, failedRegistration.StatusCode);
+
+        var context = GetAttributeValue(errorPage, "data-assemblyname");
+        using var migrationResponse = await client.PostAsync(
+            "/ApplyDatabaseMigrations",
+            new FormUrlEncodedContent(new Dictionary<string, string> { ["context"] = context }));
+        var migrationResponseContent = await migrationResponse.Content.ReadAsStringAsync();
+        Assert.True(
+            migrationResponse.StatusCode == HttpStatusCode.NoContent,
+            $"Applying the generated migration returned {(int)migrationResponse.StatusCode}.{Environment.NewLine}{migrationResponseContent}");
+    }
+
     private static async Task<string> PostFormAsync(
         HttpClient client,
         string requestUri,
@@ -490,12 +472,25 @@ await context.Database.MigrateAsync();
     }
 
     private static string GetAntiforgeryToken(string pageContent)
+        => GetInputValue(pageContent, "__RequestVerificationToken");
+
+    private static string GetInputValue(string pageContent, string inputName)
     {
         var match = Regex.Match(
             pageContent,
-            "<input[^>]+name=\"__RequestVerificationToken\"[^>]+value=\"([^\"]+)",
+            $"<input[^>]+name=\"{Regex.Escape(inputName)}\"[^>]+value=\"([^\"]+)",
             RegexOptions.IgnoreCase);
-        Assert.True(match.Success, "The page did not contain an antiforgery token.");
+        Assert.True(match.Success, $"The page did not contain an input named '{inputName}'.");
+        return WebUtility.HtmlDecode(match.Groups[1].Value);
+    }
+
+    private static string GetAttributeValue(string pageContent, string attributeName)
+    {
+        var match = Regex.Match(
+            pageContent,
+            $"{Regex.Escape(attributeName)}=\"([^\"]+)\"",
+            RegexOptions.IgnoreCase);
+        Assert.True(match.Success, $"The page did not contain a '{attributeName}' attribute.");
         return WebUtility.HtmlDecode(match.Groups[1].Value);
     }
 

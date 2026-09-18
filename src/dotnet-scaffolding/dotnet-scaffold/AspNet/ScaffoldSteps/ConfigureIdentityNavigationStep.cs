@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.Text.RegularExpressions;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -46,9 +47,8 @@ internal class ConfigureIdentityNavigationStep(
         var openingListIndex = navbarClassIndex < 0
             ? -1
             : layoutContent.LastIndexOf("<ul", navbarClassIndex, StringComparison.OrdinalIgnoreCase);
-        var closingListIndex = openingListIndex < 0
-            ? -1
-            : layoutContent.IndexOf("</ul>", navbarClassIndex, StringComparison.OrdinalIgnoreCase);
+        var closingList = FindMatchingClosingList(layoutContent, openingListIndex);
+        var closingListIndex = closingList.Index;
         if (closingListIndex < 0)
         {
             logger.LogWarning($"Identity navigation was not added to '{layoutPath}' because no navbar navigation list was found.");
@@ -71,11 +71,34 @@ internal class ConfigureIdentityNavigationStep(
         }
 
         var newline = layoutContent.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
-        var insertionIndex = closingListIndex + "</ul>".Length;
+        var insertionIndex = closingListIndex + closingList.Length;
         layoutContent = layoutContent.Insert(insertionIndex, $"{newline}{indentation}<partial name=\"_LoginPartial\" />");
         fileSystem.WriteAllText(layoutPath, layoutContent);
 
         return Task.FromResult(true);
+    }
+
+    private static (int Index, int Length) FindMatchingClosingList(string content, int openingListIndex)
+    {
+        if (openingListIndex < 0)
+        {
+            return (-1, 0);
+        }
+
+        var depth = 0;
+        foreach (Match match in Regex.Matches(
+            content[openingListIndex..],
+            @"<\s*(/?)\s*ul\b[^>]*>",
+            RegexOptions.IgnoreCase))
+        {
+            depth += match.Groups[1].Length > 0 ? -1 : 1;
+            if (depth == 0)
+            {
+                return (openingListIndex + match.Index, match.Length);
+            }
+        }
+
+        return (-1, 0);
     }
 
     private string GetLoginPartialContent()

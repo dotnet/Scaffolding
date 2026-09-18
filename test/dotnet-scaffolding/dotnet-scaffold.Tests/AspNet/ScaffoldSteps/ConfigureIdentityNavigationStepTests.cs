@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -109,6 +110,49 @@ public class ConfigureIdentityNavigationStepTests
         Assert.True(result);
         Assert.DoesNotContain("<ul class=\"footer-links\"></ul>\n<partial", writtenFiles[layoutPath]);
         Assert.Contains("</ul>\n    <partial name=\"_LoginPartial\" />\n</nav>", writtenFiles[layoutPath]);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_AddsLoginPartialAfterNavbarWithNestedList()
+    {
+        var projectDirectory = Path.Combine("test", "project");
+        var projectPath = Path.Combine(projectDirectory, "TestProject.csproj");
+        var sharedDirectory = Path.Combine(projectDirectory, "Views", "Shared");
+        var layoutPath = Path.Combine(sharedDirectory, "_Layout.cshtml");
+        var loginPartialPath = Path.Combine(sharedDirectory, "_LoginPartial.cshtml");
+        var layoutContent = """
+<nav>
+    <ul class="navbar-nav flex-grow-1">
+        <li>
+            <ul class="dropdown-menu">
+            </ul>
+        </li>
+    </ul>
+</nav>
+""";
+        var writtenFiles = new Dictionary<string, string>();
+        var fileSystem = new Mock<IFileSystem>();
+        fileSystem.Setup(fs => fs.FileExists(layoutPath)).Returns(true);
+        fileSystem.Setup(fs => fs.FileExists(loginPartialPath)).Returns(false);
+        fileSystem.Setup(fs => fs.ReadAllText(layoutPath)).Returns(layoutContent);
+        fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<string, string>((path, content) => writtenFiles[path] = content);
+
+        var step = new ConfigureIdentityNavigationStep(
+            NullLogger<ConfigureIdentityNavigationStep>.Instance,
+            fileSystem.Object)
+        {
+            ProjectPath = projectPath,
+            UserClassName = "ApplicationUser",
+            UserClassNamespace = "TestProject.Data"
+        };
+
+        var result = await step.ExecuteAsync(new ScaffolderContext(Mock.Of<IScaffolder>()));
+
+        Assert.True(result);
+        var updatedLayout = writtenFiles[layoutPath].Replace("\r\n", "\n", StringComparison.Ordinal);
+        Assert.DoesNotContain("</ul>\n            <partial name=\"_LoginPartial\" />\n        </li>", updatedLayout);
+        Assert.Contains("</li>\n    </ul>\n    <partial name=\"_LoginPartial\" />\n</nav>", updatedLayout);
     }
 
     [Fact]

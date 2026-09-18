@@ -32,6 +32,7 @@ internal static class IdentityScaffolderBuilderExtensions
             List<Package> packages = [
                 PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackage,
                 PackageConstants.AspNetCorePackages.AspNetCoreIdentityUiPackage,
+                PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackage,
                 PackageConstants.EfConstants.EfCoreToolsPackage,
                 PackageConstants.EfConstants.EfCoreDesignPackage
             ];
@@ -154,5 +155,53 @@ internal static class IdentityScaffolderBuilderExtensions
         });
 
         return builder;
+    }
+
+    /// <summary>
+    /// Adds a step to configure Identity navigation in the host application's layout.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    public static IScaffoldBuilder WithIdentityNavigationStep(this IScaffoldBuilder builder)
+    {
+        return builder.WithStep<ConfigureIdentityNavigationStep>(config =>
+        {
+            var step = config.Step;
+            if (config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) &&
+                identityModelObj is IdentityModel identityModel)
+            {
+                step.ProjectPath = identityModel.ProjectInfo.ProjectPath ?? string.Empty;
+                step.IsRazorPages = identityModel.IsRazorPages;
+                step.UserClassName = identityModel.UserClassName;
+                step.UserClassNamespace = identityModel.UserClassNamespace;
+            }
+            else
+            {
+                step.SkipStep = true;
+            }
+        });
+    }
+
+    /// <summary>
+    /// Adds a step to generate an initial EF Core migration for Identity.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    public static IScaffoldBuilder WithIdentityMigrationStep(this IScaffoldBuilder builder)
+    {
+        return builder.WithStep<AddIdentityMigrationStep>(config =>
+        {
+            var step = config.Step;
+            if (config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) &&
+                identityModelObj is IdentityModel identityModel)
+            {
+                step.ProjectPath = identityModel.ProjectInfo.ProjectPath ?? string.Empty;
+                step.DbContextName = identityModel.DbContextInfo.DbContextClassName ?? string.Empty;
+            }
+            else
+            {
+                step.SkipStep = true;
+            }
+        });
     }
 }

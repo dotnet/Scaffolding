@@ -58,4 +58,30 @@ public class IdentityScaffolderBuilderExtensionsTests
         Assert.NotNull(result);
         mockBuilder.Verify(b => b.WithStep<WrappedCodeModificationStep>(It.IsAny<Action<ScaffoldStepConfigurator<WrappedCodeModificationStep>>>()), Times.Once);
     }
+
+    [Fact]
+    public void WithIdentityNavigationStep_ReturnsBuilder()
+    {
+        Mock<IScaffoldBuilder> mockBuilder = new Mock<IScaffoldBuilder>();
+        mockBuilder.Setup(b => b.WithStep<ConfigureIdentityNavigationStep>(It.IsAny<Action<ScaffoldStepConfigurator<ConfigureIdentityNavigationStep>>>()))
+            .Returns(mockBuilder.Object);
+
+        IScaffoldBuilder result = mockBuilder.Object.WithIdentityNavigationStep();
+
+        Assert.NotNull(result);
+        mockBuilder.Verify(b => b.WithStep<ConfigureIdentityNavigationStep>(It.IsAny<Action<ScaffoldStepConfigurator<ConfigureIdentityNavigationStep>>>()), Times.Once);
+    }
+
+    [Fact]
+    public void WithIdentityMigrationStep_ReturnsBuilder()
+    {
+        Mock<IScaffoldBuilder> mockBuilder = new Mock<IScaffoldBuilder>();
+        mockBuilder.Setup(b => b.WithStep<AddIdentityMigrationStep>(It.IsAny<Action<ScaffoldStepConfigurator<AddIdentityMigrationStep>>>()))
+            .Returns(mockBuilder.Object);
+
+        IScaffoldBuilder result = mockBuilder.Object.WithIdentityMigrationStep();
+
+        Assert.NotNull(result);
+        mockBuilder.Verify(b => b.WithStep<AddIdentityMigrationStep>(It.IsAny<Action<ScaffoldStepConfigurator<AddIdentityMigrationStep>>>()), Times.Once);
+    }
 }

@@ -1,0 +1,37 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertBefore": [ "await builder.Build().RunAsync();" ],
+              "Block": "builder.Services.AddAuthorizationCore()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertBefore": [ "await builder.Build().RunAsync();" ],
+              "Block": "builder.Services.AddCascadingAuthenticationState()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertBefore": [ "await builder.Build().RunAsync();" ],
+              "Block": "builder.Services.AddAuthenticationStateDeserialization()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Microsoft.AspNetCore.Components.Authorization"
+      ]
+    }
+  ]
+}

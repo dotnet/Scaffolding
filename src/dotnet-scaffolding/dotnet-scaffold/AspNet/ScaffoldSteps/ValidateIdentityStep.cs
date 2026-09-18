@@ -1,8 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Internal;
+using Microsoft.DotNet.Scaffolding.Internal.Extensions;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
@@ -242,12 +245,103 @@ internal class ValidateIdentityStep : ScaffoldStep
 
         if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)
         {
-            scaffoldingModel.ProjectInfo.CodeChangeOptions =
-            [
-                scaffoldingModel.DbContextInfo.EfScenario ? "EfScenario" : string.Empty
-            ];
+            var codeChangeOptions = new List<string>();
+            if (scaffoldingModel.DbContextInfo.EfScenario)
+            {
+                codeChangeOptions.Add("EfScenario");
+            }
+
+            if (settings.BlazorScenario && projectInfo.LowestSupportedTargetFramework == TargetFramework.Net11)
+            {
+                AddBlazorRenderModeOptions(projectDirectory, settings.Project, codeChangeOptions, context);
+            }
+
+            scaffoldingModel.ProjectInfo.CodeChangeOptions = codeChangeOptions;
         }
 
         return scaffoldingModel;
+    }
+
+    private void AddBlazorRenderModeOptions(
+        string projectDirectory,
+        string projectPath,
+        List<string> codeChangeOptions,
+        ScaffolderContext context)
+    {
+        var programPath = Path.Combine(projectDirectory, "Program.cs");
+        if (!_fileSystem.FileExists(programPath))
+        {
+            return;
+        }
+
+        var programContent = _fileSystem.ReadAllText(programPath);
+        var usesInteractiveServer = programContent.Contains(
+            BlazorCrudHelper.AddInteractiveServerComponentsMethod,
+            StringComparison.Ordinal);
+        var usesInteractiveWebAssembly = programContent.Contains(
+            BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod,
+            StringComparison.Ordinal);
+
+        codeChangeOptions.Add(usesInteractiveServer ? "InteractiveServer" : "NonInteractiveServer");
+        if (usesInteractiveWebAssembly)
+        {
+            codeChangeOptions.Add("InteractiveWebAssembly");
+            var clientProjectPath = FindBlazorWebAssemblyClientProject(projectDirectory, projectPath);
+            if (clientProjectPath is not null)
+            {
+                context.Properties["BlazorIdentityClientProjectPath"] = clientProjectPath;
+            }
+        }
+
+        var appPath = Path.Combine(projectDirectory, "Components", "App.razor");
+        if (!_fileSystem.FileExists(appPath))
+        {
+            return;
+        }
+
+        var appContent = _fileSystem.ReadAllText(appPath);
+        if (appContent.Contains("@rendermode=\"InteractiveAuto\"", StringComparison.Ordinal))
+        {
+            codeChangeOptions.Add("GlobalInteractiveAuto");
+        }
+        else if (appContent.Contains("@rendermode=\"InteractiveServer\"", StringComparison.Ordinal))
+        {
+            codeChangeOptions.Add("GlobalInteractiveServer");
+        }
+        else if (appContent.Contains("@rendermode=\"InteractiveWebAssembly\"", StringComparison.Ordinal))
+        {
+            codeChangeOptions.Add("GlobalInteractiveWebAssembly");
+        }
+    }
+
+    private string? FindBlazorWebAssemblyClientProject(string projectDirectory, string projectPath)
+    {
+        foreach (var line in _fileSystem.ReadAllLines(projectPath))
+        {
+            const string projectReferencePrefix = "ProjectReference Include=\"";
+            var start = line.IndexOf(projectReferencePrefix, StringComparison.OrdinalIgnoreCase);
+            if (start < 0)
+            {
+                continue;
+            }
+
+            start += projectReferencePrefix.Length;
+            var end = line.IndexOf('"', start);
+            if (end < 0)
+            {
+                continue;
+            }
+
+            var referencedProjectPath = Path.GetFullPath(line[start..end].WithOsPathSeparators(), projectDirectory);
+            if (_fileSystem.FileExists(referencedProjectPath) &&
+                _fileSystem.ReadAllText(referencedProjectPath).Contains(
+                    "Microsoft.NET.Sdk.BlazorWebAssembly",
+                    StringComparison.Ordinal))
+            {
+                return referencedProjectPath;
+            }
+        }
+
+        return null;
     }
 }

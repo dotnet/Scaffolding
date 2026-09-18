@@ -64,6 +64,40 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
     }
 
     /// <summary>
+    /// Adds authentication-state services to the client project for WebAssembly and Auto render modes.
+    /// </summary>
+    public static IScaffoldBuilder WithBlazorIdentityClientCodeChangeStep(this IScaffoldBuilder builder)
+    {
+        builder = builder.WithStep<WrappedCodeModificationStep>(config =>
+        {
+            var step = config.Step;
+            if (!config.Context.Properties.TryGetValue("BlazorIdentityClientProjectPath", out var clientProjectPathObj) ||
+                clientProjectPathObj is not string clientProjectPath ||
+                string.IsNullOrEmpty(clientProjectPath))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile(
+                "blazorIdentityClientChanges.json",
+                System.Reflection.Assembly.GetExecutingAssembly(),
+                TargetFrameworkHelpers.GetTargetFrameworkFolder(clientProjectPath));
+            if (string.IsNullOrEmpty(codeModificationFilePath))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
+            step.CodeModifierConfigPath = codeModificationFilePath;
+            step.ProjectPath = clientProjectPath;
+            step.CodeChangeOptions = [];
+        });
+
+        return builder;
+    }
+
+    /// <summary>
     /// Adds a text templating step for Blazor Identity scaffolding.
     /// </summary>
     public static IScaffoldBuilder WithBlazorIdentityTextTemplatingStep(this IScaffoldBuilder builder)
@@ -198,6 +232,36 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             {
                 step.SkipStep = true;
                 return;
+            }
+        });
+    }
+
+    /// <summary>
+    /// Adds the authentication package required by the WebAssembly client.
+    /// </summary>
+    public static IScaffoldBuilder WithBlazorIdentityClientAddPackagesStep(this IScaffoldBuilder builder)
+    {
+        return builder.WithStep<WrappedAddPackagesStep>(config =>
+        {
+            var step = config.Step;
+            if (!config.Context.Properties.TryGetValue("BlazorIdentityClientProjectPath", out var clientProjectPathObj) ||
+                clientProjectPathObj is not string clientProjectPath ||
+                string.IsNullOrEmpty(clientProjectPath))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
+            step.ProjectPath = clientProjectPath;
+            step.Packages =
+            [
+                PackageConstants.AspNetCorePackages.AspNetCoreComponentsWebAssemblyAuthenticationPackage
+            ];
+
+            if (config.Context.Properties.TryGetValue(nameof(IdentitySettings), out var identitySettingsObj) &&
+                identitySettingsObj is IdentitySettings identitySettings)
+            {
+                step.Prerelease = identitySettings.Prerelease;
             }
         });
     }

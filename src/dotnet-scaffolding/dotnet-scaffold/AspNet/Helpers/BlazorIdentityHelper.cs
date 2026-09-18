@@ -283,6 +283,7 @@ internal static class BlazorIdentityHelper
         typeof(Templates.net11.BlazorIdentity.IdentityNoOpEmailSender),
         typeof(Templates.net11.BlazorIdentity.IdentityRedirectManager),
         typeof(Templates.net11.BlazorIdentity.IdentityRevalidatingAuthenticationStateProvider),
+        typeof(Templates.net11.BlazorIdentity.PasskeyAuthenticators),
         typeof(Templates.net11.BlazorIdentity.PasskeyInputModel),
         typeof(Templates.net11.BlazorIdentity.PasskeyOperation),
         typeof(Templates.net11.BlazorIdentity.Pages._Imports),

@@ -146,12 +146,48 @@ public class AddFileStepTests
         {
             FileName = expectedFileName,
             BaseOutputDirectory = expectedOutputDirectory,
-            ProjectPath = "test.csproj"
+            ProjectPath = "test.csproj",
+            Overwrite = true
         };
 
         // Assert
         Assert.Equal(expectedFileName, step.FileName);
         Assert.Equal(expectedOutputDirectory, step.BaseOutputDirectory);
+        Assert.True(step.Overwrite);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsTrue_WhenDestinationExistsAndOverwriteIsFalse()
+    {
+        var outputDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(outputDirectory);
+        File.WriteAllText(Path.Combine(outputDirectory, "test.txt"), "existing");
+
+        try
+        {
+            AddFileStep step = new AddFileStep(
+                NullLogger<AddFileStep>.Instance,
+                _mockFileSystem.Object)
+            {
+                FileName = "test.txt",
+                BaseOutputDirectory = outputDirectory,
+                ProjectPath = "test.csproj"
+            };
+
+            bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+            Assert.True(result);
+            _mockFileSystem.Verify(
+                fileSystem => fileSystem.CopyFile(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<bool>()),
+                Times.Never);
+        }
+        finally
+        {
+            Directory.Delete(outputDirectory, recursive: true);
+        }
     }
 
     [Fact]

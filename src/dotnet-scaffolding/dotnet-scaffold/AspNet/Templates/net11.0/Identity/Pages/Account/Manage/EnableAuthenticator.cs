@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
                     "         <p>\r\n                Once you have scanned the QR code or input the key" +
                     " above, your two factor authentication app will provide you\r\n                wit" +
                     "h a unique code. Enter the code in the confirmation box below.\r\n            </p>" +
-                    "\r\n            <div class=\"row\">\r\n                <div class=\"col-md-6\">\r\n       " +
+                    "\r\n            <div class=\"row\">\r\n                <div class=\"col-xl-6\">\r\n       " +
                     "             <form id=\"send-code\" method=\"post\">\r\n                        <div c" +
                     "lass=\"form-floating mb-3\">\r\n                            <input asp-for=\"Input.Co" +
                     "de\" class=\"form-control\" autocomplete=\"off\" placeholder=\"Please enter the code.\"" +

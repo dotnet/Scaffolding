@@ -23,12 +23,17 @@ namespace <#= Model.IdentityNamespace #>.Pages.Account;
 public class RegisterConfirmationModel : PageModel
 {
     private readonly UserManager<<#= Model.UserClassName #>> _userManager;
-    private readonly IEmailSender _sender;
+    private readonly IEmailSender<<#= Model.UserClassName #>> _sender;
+    private readonly IEmailSender _legacySender;
 
-    public RegisterConfirmationModel(UserManager<<#= Model.UserClassName #>> userManager, IEmailSender sender)
+    public RegisterConfirmationModel(
+        UserManager<<#= Model.UserClassName #>> userManager,
+        IEmailSender<<#= Model.UserClassName #>> sender,
+        IEmailSender legacySender)
     {
         _userManager = userManager;
         _sender = sender;
+        _legacySender = legacySender;
     }
 
     /// <summary>
@@ -64,8 +69,8 @@ public class RegisterConfirmationModel : PageModel
         }
 
         Email = email;
-        // Once you add a real email sender, you should remove this code that lets you confirm the account
-        DisplayConfirmAccountLink = true;
+        // If the email sender is a no-op, display the confirm link in the page
+        DisplayConfirmAccountLink = IsNoOpEmailSender();
         if (DisplayConfirmAccountLink)
         {
             var userId = await _userManager.GetUserIdAsync(user);
@@ -79,5 +84,14 @@ public class RegisterConfirmationModel : PageModel
         }
 
         return Page();
+    }
+
+    private bool IsNoOpEmailSender()
+    {
+        // The default typed adapter is internal, so identify it by its stable framework type name.
+        var senderType = _sender.GetType();
+        return senderType.IsGenericType
+            && senderType.GetGenericTypeDefinition().FullName == "Microsoft.AspNetCore.Identity.UI.Services.DefaultMessageEmailSender`1"
+            && _legacySender is NoOpEmailSender;
     }
 }

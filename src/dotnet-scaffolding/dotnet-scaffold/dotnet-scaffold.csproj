@@ -62,7 +62,7 @@
       - Views\*.tt (MVC views)
       - BlazorIdentity\Pages\AccessDenied.tt
       - Files\ApplicationUser.tt, _ValidationScriptsPartial.cshtml
-      - CodeModificationConfigs (efControllerChanges.json, identityChanges.json, razorPagesChanges.json)
+      - CodeModificationConfigs (efControllerChanges.json, razorPagesChanges.json)
     -->
     <None Pack="true" Include="AspNet\Templates\net9.0\EfController\*.tt" PackagePath="AspNet\Templates\net8.0\EfController\" />
     <None Pack="true" Include="AspNet\Templates\net9.0\Identity\Pages\**\*.tt" PackagePath="AspNet\Templates\net8.0\Identity\Pages\" />
@@ -73,10 +73,9 @@
     <None Pack="true" Include="AspNet\Templates\net9.0\Files\ApplicationUser.tt" PackagePath="AspNet\Templates\net8.0\Files\" />
     <!-- _ValidationScriptsPartial.cshtml for net8.0 is handled in a later ItemGroup to avoid
          the net9.0 Update glob overriding its PackagePath (see below) -->
-    <!-- Only copy CodeModificationConfigs that don't exist in net8.0 (efControllerChanges, identityChanges, razorPagesChanges) -->
+    <!-- Only copy CodeModificationConfigs that don't exist in net8.0 (efControllerChanges, razorPagesChanges) -->
     <!-- minimalApiChanges.json, blazorWebCrudChanges.json, blazorIdentityChanges.json already exist in net8.0 -->
     <None Pack="true" Include="AspNet\Templates\net9.0\CodeModificationConfigs\efControllerChanges.json" PackagePath="AspNet\CodeModificationConfigs\net8.0\" />
-    <None Pack="true" Include="AspNet\Templates\net9.0\CodeModificationConfigs\identityChanges.json" PackagePath="AspNet\CodeModificationConfigs\net8.0\" />
     <None Pack="true" Include="AspNet\Templates\net9.0\CodeModificationConfigs\razorPagesChanges.json" PackagePath="AspNet\CodeModificationConfigs\net8.0\" />
     <None Pack="true" Include="AspNet\Templates\net9.0\CodeModificationConfigs\*.json">
       <PackagePath>AspNet\CodeModificationConfigs\net9.0</PackagePath>
@@ -146,16 +145,12 @@
     <!-- _ValidationScriptsPartial.cshtml CopyToOutputDirectory for net8.0 is handled
          in a later ItemGroup to avoid the net9.0 Update glob below adding Pack metadata -->
     <!--
-      net8.0 CodeModificationConfigs is missing efControllerChanges, identityChanges,
-      razorPagesChanges. Copy from net9.0 so CopyCodeModConfigsToPacked picks them up.
+      net8.0 CodeModificationConfigs is missing efControllerChanges and razorPagesChanges.
+      Copy from net9.0 so CopyCodeModConfigsToPacked picks them up.
     -->
     <None Include="AspNet\Templates\net9.0\CodeModificationConfigs\efControllerChanges.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net8.0\CodeModificationConfigs\efControllerChanges.json</Link>
-    </None>
-    <None Include="AspNet\Templates\net9.0\CodeModificationConfigs\identityChanges.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>AspNet\Templates\net8.0\CodeModificationConfigs\identityChanges.json</Link>
     </None>
     <None Include="AspNet\Templates\net9.0\CodeModificationConfigs\razorPagesChanges.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

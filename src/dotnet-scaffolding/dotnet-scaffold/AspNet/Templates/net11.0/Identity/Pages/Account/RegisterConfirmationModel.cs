@@ -44,11 +44,14 @@ using ");
             this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class RegisterConfirmationModel : Pag" +
                     "eModel\r\n{\r\n    private readonly UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> _userManager;\r\n    private readonly IEmailSender _sender;\r\n\r\n    public Registe" +
-                    "rConfirmationModel(UserManager<");
+            this.Write("> _userManager;\r\n    private readonly IEmailSender<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> userManager, IEmailSender sender)\r\n    {\r\n        _userManager = userManager;\r\n" +
-                    "        _sender = sender;\r\n    }\r\n\r\n    /// <summary>\r\n    ///     This API supp" +
+            this.Write("> _sender;\r\n    private readonly IEmailSender _legacySender;\r\n\r\n    public RegisterConfirmationModel(\r\n        UserManager<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> userManager,\r\n        IEmailSender<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> sender,\r\n        IEmailSender legacySender)\r\n    {\r\n        _userManager = userManager;\r\n" +
+                    "        _sender = sender;\r\n        _legacySender = legacySender;\r\n    }\r\n\r\n    /// <summary>\r\n    ///     This API supp" +
                     "orts the ASP.NET Core Identity default UI infrastructure and is not intended to " +
                     "be used\r\n    ///     directly from your code. This API may change or be removed " +
                     "in future releases.\r\n    /// </summary>\r\n    public string? Email { get; set; }\r" +
@@ -65,16 +68,15 @@ using ");
                     "\n        returnUrl = returnUrl ?? Url.Content(\"~/\");\r\n\r\n        var user = await" +
                     " _userManager.FindByEmailAsync(email);\r\n        if (user == null)\r\n        {\r\n  " +
                     "          return NotFound($\"Unable to load user with email \'{email}\'.\");\r\n      " +
-                    "  }\r\n\r\n        Email = email;\r\n        // Once you add a real email sender, you " +
-                    "should remove this code that lets you confirm the account\r\n        DisplayConfir" +
-                    "mAccountLink = true;\r\n        if (DisplayConfirmAccountLink)\r\n        {\r\n       " +
-                    "     var userId = await _userManager.GetUserIdAsync(user);\r\n            var code" +
-                    " = await _userManager.GenerateEmailConfirmationTokenAsync(user);\r\n            co" +
-                    "de = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n            Ema" +
-                    "ilConfirmationUrl = Url.Page(\r\n                \"/Account/ConfirmEmail\",\r\n       " +
-                    "         pageHandler: null,\r\n                values: new { area = \"Identity\", us" +
-                    "erId = userId, code = code, returnUrl = returnUrl },\r\n                protocol: " +
-                    "Request.Scheme);\r\n        }\r\n\r\n        return Page();\r\n    }\r\n}\r\n");
+                    "  }\r\n\r\n        Email = email;\r\n        // If the email sender is a no-op, displa" +
+                    "y the confirm link in the page\r\n        DisplayConfirmAccountLink = IsNoOpEmailSender();\r\n        if (DisplayConfirmAccountLink)\r\n        {\r\n            " +
+                    "var userId = await _userManager.GetUserIdAsync(user);\r\n            var code = aw" +
+                    "ait _userManager.GenerateEmailConfirmationTokenAsync(user);\r\n            code = " +
+                    "WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n            EmailCon" +
+                    "firmationUrl = Url.Page(\r\n                \"/Account/ConfirmEmail\",\r\n            " +
+                    "    pageHandler: null,\r\n                values: new { area = \"Identity\", userId " +
+                    "= userId, code = code, returnUrl = returnUrl },\r\n                protocol: Reque" +
+                    "st.Scheme);\r\n        }\r\n\r\n        return Page();\r\n    }\r\n\r\n    private bool IsNoOpEmailSender()\r\n    {\r\n        // The default typed adapter is internal, so identify it by its stable framework type name.\r\n        var senderType = _sender.GetType();\r\n        return senderType.IsGenericType\r\n            && senderType.GetGenericTypeDefinition().FullName == \"Microsoft.AspNetCore.Identity.UI.Services.DefaultMessageEmailSender`1\"\r\n            && _legacySender is NoOpEmailSender;\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

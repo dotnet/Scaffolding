@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using <#= Model.UserClassNamespace #>;
 namespace <#= Model.IdentityNamespace #>.Pages.Account;
 
+[AllowAnonymous]
 public class ConfirmEmailChangeModel : PageModel
 {
     private readonly UserManager<<#= Model.UserClassName #>> _userManager;

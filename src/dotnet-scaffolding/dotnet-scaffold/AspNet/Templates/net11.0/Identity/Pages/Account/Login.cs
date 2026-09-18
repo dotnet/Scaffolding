@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
         public virtual string TransformText()
         {
             this.Write("@page\r\n@model LoginModel\r\n\r\n@{\r\n    ViewData[\"Title\"] = \"Log in\";\r\n}\r\n\r\n<h1>@View" +
-                    "Data[\"Title\"]</h1>\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <sect" +
+                    "Data[\"Title\"]</h1>\r\n<div class=\"row\">\r\n    <div class=\"col-lg-6\">\r\n        <sect" +
                     "ion>\r\n            <form id=\"account\" method=\"post\">\r\n                <h2>Use a l" +
                     "ocal account to log in.</h2>\r\n                <hr />\r\n                <div asp-v" +
                     "alidation-summary=\"ModelOnly\" class=\"text-danger\" role=\"alert\"></div>\r\n         " +
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
                     "a>\r\n                    </p>\r\n                    <p>\r\n                        <" +
                     "a id=\"resend-confirmation\" asp-page=\"./ResendEmailConfirmation\">Resend email con" +
                     "firmation</a>\r\n                    </p>\r\n                </div>\r\n            </f" +
-                    "orm>\r\n        </section>\r\n    </div>\r\n    <div class=\"col-md-6 col-md-offset-2\">" +
+                    "orm>\r\n        </section>\r\n    </div>\r\n    <div class=\"col-lg-4 col-lg-offset-2\">" +
                     "\r\n        <section>\r\n            <h3>Use another service to log in.</h3>\r\n      " +
                     "      <hr />\r\n            @{\r\n                if ((Model.ExternalLogins?.Count ?" +
                     "? 0) == 0)\r\n                {\r\n                    <div>\r\n                      " +

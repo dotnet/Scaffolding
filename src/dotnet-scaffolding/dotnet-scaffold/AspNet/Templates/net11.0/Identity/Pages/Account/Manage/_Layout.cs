@@ -39,10 +39,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
     <h2>Change your account settings</h2>
     <hr />
     <div class=""row"">
-        <div class=""col-md-3"">
+        <div class=""col-lg-3"">
             <partial name=""_ManageNav"" />
         </div>
-        <div class=""col-md-9"">
+        <div class=""col-lg-9"">
             @RenderBody()
         </div>
     </div>

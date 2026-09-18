@@ -8,6 +8,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -18,6 +19,7 @@ using <#= Model.UserClassNamespace #>;
 
 namespace <#= Model.IdentityNamespace #>.Pages.Account;
 
+[AllowAnonymous]
 public class LoginWithRecoveryCodeModel : PageModel
 {
     private readonly SignInManager<<#= Model.UserClassName #>> _signInManager;
@@ -64,7 +66,7 @@ public class LoginWithRecoveryCodeModel : PageModel
         public string RecoveryCode { get; set; } = default!;
     }
 
-    public async Task<IActionResult> OnGetAsync(string? returnUrl = null)
+    public async Task<IActionResult> OnGetAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)
     {
         // Ensure the user has gone through the username & password screen first
         var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
@@ -78,7 +80,7 @@ public class LoginWithRecoveryCodeModel : PageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
+    public async Task<IActionResult> OnPostAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)
     {
         if (!ModelState.IsValid)
         {

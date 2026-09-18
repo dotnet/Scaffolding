@@ -17,6 +17,7 @@ using <#= Model.UserClassNamespace #>;
 
 namespace <#= Model.IdentityNamespace #>.Pages.Account;
 
+[AllowAnonymous]
 public class LogoutModel : PageModel
 {
     private readonly SignInManager<<#= Model.UserClassName #>> _signInManager;

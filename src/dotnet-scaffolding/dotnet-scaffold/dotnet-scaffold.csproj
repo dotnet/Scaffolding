@@ -328,6 +328,10 @@
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
+    <None Update="AspNet\Templates\net11.0\BlazorIdentity\PasskeyAuthenticators.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
     <None Update="AspNet\Templates\net11.0\BlazorIdentity\PasskeyInputModel.tt">
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
@@ -869,6 +873,11 @@
     </Compile>
     <Compile Update="AspNet\Templates\net11.0\BlazorIdentity\IdentityRevalidatingAuthenticationStateProvider.cs">
       <DependentUpon>IdentityRevalidatingAuthenticationStateProvider.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\net11.0\BlazorIdentity\PasskeyAuthenticators.cs">
+      <DependentUpon>PasskeyAuthenticators.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>

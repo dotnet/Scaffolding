@@ -29,6 +29,25 @@
             {
               "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
               "Block": "WebApplication.CreateBuilder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()",
+              "Options": [ "InteractiveServer" ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "AddAuthenticationStateSerialization()",
+              "Parent": "WebApplication.CreateBuilder.Services.AddRazorComponents()",
+              "CodeChangeType": "MemberAccess",
+              "Options": [ "InteractiveWebAssembly" ],
+              "LeadingTrivia": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
+            },
+            {
+              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthorization()",
+              "Options": [ "NonInteractiveServer" ],
               "LeadingTrivia": {
                 "Newline": true
               }
@@ -278,6 +297,93 @@
             "</body>"
           ],
           "CheckBlock": "PasskeySubmit.razor.js"
+        }
+      ]
+    },
+    {
+      "FileName": "Components\\App.razor",
+      "Options": [ "GlobalInteractiveServer" ],
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "<HeadOutlet @rendermode=\"InteractiveServer\" />" ],
+          "Block": "<HeadOutlet @rendermode=\"PageRenderMode\" />"
+        },
+        {
+          "ReplaceSnippet": [ "<Routes @rendermode=\"InteractiveServer\" />" ],
+          "Block": "<Routes @rendermode=\"PageRenderMode\" />"
+        },
+        {
+          "ReplaceSnippet": [ "</html>" ],
+          "MultiLineBlock": [
+            "</html>",
+            "",
+            "@code {",
+            "    [CascadingParameter]",
+            "    private HttpContext HttpContext { get; set; } = default!;",
+            "",
+            "    private IComponentRenderMode? PageRenderMode =>",
+            "        HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;",
+            "}"
+          ],
+          "CheckBlock": "AcceptsInteractiveRouting()"
+        }
+      ]
+    },
+    {
+      "FileName": "Components\\App.razor",
+      "Options": [ "GlobalInteractiveWebAssembly" ],
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "<HeadOutlet @rendermode=\"InteractiveWebAssembly\" />" ],
+          "Block": "<HeadOutlet @rendermode=\"PageRenderMode\" />"
+        },
+        {
+          "ReplaceSnippet": [ "<Routes @rendermode=\"InteractiveWebAssembly\" />" ],
+          "Block": "<Routes @rendermode=\"PageRenderMode\" />"
+        },
+        {
+          "ReplaceSnippet": [ "</html>" ],
+          "MultiLineBlock": [
+            "</html>",
+            "",
+            "@code {",
+            "    [CascadingParameter]",
+            "    private HttpContext HttpContext { get; set; } = default!;",
+            "",
+            "    private IComponentRenderMode? PageRenderMode =>",
+            "        HttpContext.AcceptsInteractiveRouting() ? InteractiveWebAssembly : null;",
+            "}"
+          ],
+          "CheckBlock": "AcceptsInteractiveRouting()"
+        }
+      ]
+    },
+    {
+      "FileName": "Components\\App.razor",
+      "Options": [ "GlobalInteractiveAuto" ],
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "<HeadOutlet @rendermode=\"InteractiveAuto\" />" ],
+          "Block": "<HeadOutlet @rendermode=\"PageRenderMode\" />"
+        },
+        {
+          "ReplaceSnippet": [ "<Routes @rendermode=\"InteractiveAuto\" />" ],
+          "Block": "<Routes @rendermode=\"PageRenderMode\" />"
+        },
+        {
+          "ReplaceSnippet": [ "</html>" ],
+          "MultiLineBlock": [
+            "</html>",
+            "",
+            "@code {",
+            "    [CascadingParameter]",
+            "    private HttpContext HttpContext { get; set; } = default!;",
+            "",
+            "    private IComponentRenderMode? PageRenderMode =>",
+            "        HttpContext.AcceptsInteractiveRouting() ? InteractiveAuto : null;",
+            "}"
+          ],
+          "CheckBlock": "AcceptsInteractiveRouting()"
         }
       ]
     }

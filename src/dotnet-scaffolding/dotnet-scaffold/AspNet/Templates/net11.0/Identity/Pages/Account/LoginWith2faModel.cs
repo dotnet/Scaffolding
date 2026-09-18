@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,8 +42,8 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write(".Pages.Account;\r\n\r\npublic class LoginWith2faModel : PageModel\r\n{\r\n    private rea" +
-                    "donly SignInManager<");
+            this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class LoginWith2faModel : PageModel\r\n" +
+                    "{\r\n    private readonly SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _signInManager;\r\n    private readonly UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
@@ -80,31 +81,32 @@ using ");
                     "ly from your code. This API may change or be removed in future releases.\r\n      " +
                     "  /// </summary>\r\n        [Display(Name = \"Remember this machine\")]\r\n        pub" +
                     "lic bool RememberMachine { get; set; }\r\n    }\r\n\r\n    public async Task<IActionRe" +
-                    "sult> OnGetAsync(bool rememberMe, string? returnUrl = null)\r\n    {\r\n        // E" +
-                    "nsure the user has gone through the username & password screen first\r\n        va" +
-                    "r user = await _signInManager.GetTwoFactorAuthenticationUserAsync();\r\n\r\n        " +
-                    "if (user == null)\r\n        {\r\n            throw new InvalidOperationException($\"" +
-                    "Unable to load two-factor authentication user.\");\r\n        }\r\n\r\n        ReturnUr" +
-                    "l = returnUrl;\r\n        RememberMe = rememberMe;\r\n\r\n        return Page();\r\n    " +
-                    "}\r\n\r\n    public async Task<IActionResult> OnPostAsync(bool rememberMe, string? r" +
-                    "eturnUrl = null)\r\n    {\r\n        if (!ModelState.IsValid)\r\n        {\r\n          " +
-                    "  return Page();\r\n        }\r\n\r\n        returnUrl = returnUrl ?? Url.Content(\"~/\"" +
-                    ");\r\n\r\n        var user = await _signInManager.GetTwoFactorAuthenticationUserAsyn" +
-                    "c();\r\n        if (user == null)\r\n        {\r\n            throw new InvalidOperati" +
-                    "onException($\"Unable to load two-factor authentication user.\");\r\n        }\r\n\r\n  " +
-                    "      var authenticatorCode = Input.TwoFactorCode.Replace(\" \", string.Empty).Rep" +
-                    "lace(\"-\", string.Empty);\r\n\r\n        var result = await _signInManager.TwoFactorA" +
-                    "uthenticatorSignInAsync(authenticatorCode, rememberMe, Input.RememberMachine);\r\n" +
-                    "\r\n        var userId = await _userManager.GetUserIdAsync(user);\r\n\r\n        if (r" +
-                    "esult.Succeeded)\r\n        {\r\n            _logger.LogInformation(\"User with ID \'{" +
-                    "UserId}\' logged in with 2fa.\", user.Id);\r\n            return LocalRedirect(retur" +
-                    "nUrl);\r\n        }\r\n        else if (result.IsLockedOut)\r\n        {\r\n            " +
-                    "_logger.LogWarning(\"User with ID \'{UserId}\' account locked out.\", user.Id);\r\n   " +
-                    "         return RedirectToPage(\"./Lockout\");\r\n        }\r\n        else\r\n        {" +
-                    "\r\n            _logger.LogWarning(\"Invalid authenticator code entered for user wi" +
-                    "th ID \'{UserId}\'.\", user.Id);\r\n            ModelState.AddModelError(string.Empty" +
-                    ", \"Invalid authenticator code.\");\r\n            return Page();\r\n        }\r\n    }\r" +
-                    "\n}\r\n");
+                    "sult> OnGetAsync(bool rememberMe, [StringSyntax(StringSyntaxAttribute.Uri)] stri" +
+                    "ng? returnUrl = null)\r\n    {\r\n        // Ensure the user has gone through the us" +
+                    "ername & password screen first\r\n        var user = await _signInManager.GetTwoFa" +
+                    "ctorAuthenticationUserAsync();\r\n\r\n        if (user == null)\r\n        {\r\n        " +
+                    "    throw new InvalidOperationException($\"Unable to load two-factor authenticati" +
+                    "on user.\");\r\n        }\r\n\r\n        ReturnUrl = returnUrl;\r\n        RememberMe = r" +
+                    "ememberMe;\r\n\r\n        return Page();\r\n    }\r\n\r\n    public async Task<IActionResu" +
+                    "lt> OnPostAsync(bool rememberMe, [StringSyntax(StringSyntaxAttribute.Uri)] strin" +
+                    "g? returnUrl = null)\r\n    {\r\n        if (!ModelState.IsValid)\r\n        {\r\n      " +
+                    "      return Page();\r\n        }\r\n\r\n        returnUrl = returnUrl ?? Url.Content(" +
+                    "\"~/\");\r\n\r\n        var user = await _signInManager.GetTwoFactorAuthenticationUser" +
+                    "Async();\r\n        if (user == null)\r\n        {\r\n            throw new InvalidOpe" +
+                    "rationException($\"Unable to load two-factor authentication user.\");\r\n        }\r\n" +
+                    "\r\n        var authenticatorCode = Input.TwoFactorCode.Replace(\" \", string.Empty)" +
+                    ".Replace(\"-\", string.Empty);\r\n\r\n        var result = await _signInManager.TwoFac" +
+                    "torAuthenticatorSignInAsync(authenticatorCode, rememberMe, Input.RememberMachine" +
+                    ");\r\n\r\n        var userId = await _userManager.GetUserIdAsync(user);\r\n\r\n        i" +
+                    "f (result.Succeeded)\r\n        {\r\n            _logger.LogInformation(\"User with I" +
+                    "D \'{UserId}\' logged in with 2fa.\", user.Id);\r\n            return LocalRedirect(r" +
+                    "eturnUrl);\r\n        }\r\n        else if (result.IsLockedOut)\r\n        {\r\n        " +
+                    "    _logger.LogWarning(\"User with ID \'{UserId}\' account locked out.\", user.Id);\r" +
+                    "\n            return RedirectToPage(\"./Lockout\");\r\n        }\r\n        else\r\n     " +
+                    "   {\r\n            _logger.LogWarning(\"Invalid authenticator code entered for use" +
+                    "r with ID \'{UserId}\'.\", user.Id);\r\n            ModelState.AddModelError(string.E" +
+                    "mpty, \"Invalid authenticator code.\");\r\n            return Page();\r\n        }\r\n  " +
+                    "  }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

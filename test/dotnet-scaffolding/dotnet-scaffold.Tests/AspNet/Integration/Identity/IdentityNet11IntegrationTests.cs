@@ -61,6 +61,55 @@ public class IdentityNet11IntegrationTests : IdentityIntegrationTestsBase
             $"Identity/Pages should contain .tt template files for {TargetFramework}");
     }
 
+    [Fact]
+    public void Identity_TemplatesMatchNet11DefaultUIBehavior()
+    {
+        var accountDir = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "Identity", "Pages", "Account");
+        var manageDir = Path.Combine(accountDir, "Manage");
+
+        foreach (var modelTemplate in new[]
+        {
+            "ConfirmEmailChangeModel.tt",
+            "ConfirmEmailModel.tt",
+            "ForgotPasswordModel.tt",
+            "LoginModel.tt",
+            "LoginWith2faModel.tt",
+            "LoginWithRecoveryCodeModel.tt",
+            "LogoutModel.tt",
+            "RegisterModel.tt",
+            "ResetPasswordModel.tt",
+        })
+        {
+            Assert.Contains("[AllowAnonymous]", File.ReadAllText(Path.Combine(accountDir, modelTemplate)));
+        }
+
+        var registerModel = File.ReadAllText(Path.Combine(accountDir, "RegisterModel.tt"));
+        Assert.Contains("if (!await _signInManager.CanSignInAsync(user))", registerModel);
+        Assert.Contains("[StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl", registerModel);
+        Assert.DoesNotContain("_userManager.Options.SignIn.RequireConfirmedAccount", registerModel);
+
+        var externalLoginModel = File.ReadAllText(Path.Combine(accountDir, "ExternalLoginModel.tt"));
+        Assert.Contains("if (!await _signInManager.CanSignInAsync(user))", externalLoginModel);
+        Assert.DoesNotContain("_userManager.Options.SignIn.RequireConfirmedAccount", externalLoginModel);
+
+        var registerConfirmationModel = File.ReadAllText(Path.Combine(accountDir, "RegisterConfirmationModel.tt"));
+        Assert.Contains("DisplayConfirmAccountLink = _sender is NoOpEmailSender;", registerConfirmationModel);
+
+        var manageNav = File.ReadAllText(Path.Combine(manageDir, "_ManageNav.tt"));
+        Assert.Contains("aria-current=\"@ManageNavPages.IndexAriaCurrent(ViewContext)\"", manageNav);
+        Assert.Contains("aria-current=\"@ManageNavPages.PersonalDataAriaCurrent(ViewContext)\"", manageNav);
+
+        var manageNavPagesModel = File.ReadAllText(Path.Combine(manageDir, "ManageNavPagesModel.tt"));
+        Assert.Contains("public static string? AriaCurrent(ViewContext viewContext, string page)", manageNavPagesModel);
+        Assert.Contains("return string.Equals(activePage, page, StringComparison.OrdinalIgnoreCase) ? \"page\" : null;", manageNavPagesModel);
+
+        Assert.Contains("class=\"col-lg-6\"", File.ReadAllText(Path.Combine(accountDir, "Login.tt")));
+        Assert.Contains("class=\"col-lg-6\"", File.ReadAllText(Path.Combine(accountDir, "Register.tt")));
+        Assert.Contains("class=\"col-xl-6\"", File.ReadAllText(Path.Combine(manageDir, "ChangePassword.tt")));
+        Assert.Contains("role=\"button\"", File.ReadAllText(Path.Combine(manageDir, "PersonalData.tt")));
+        Assert.Contains("&#x2713;", File.ReadAllText(Path.Combine(manageDir, "Email.tt")));
+    }
+
     [Fact(Skip = "net11.0 preview SDK not yet supported")]
     public async Task Scaffold_Identity_Net11_CliInvocation()
     {

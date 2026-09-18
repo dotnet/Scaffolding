@@ -43,8 +43,8 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write(".Pages.Account;\r\n\r\npublic class ForgotPasswordModel : PageModel\r\n{\r\n    private r" +
-                    "eadonly UserManager<");
+            this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class ForgotPasswordModel : PageModel" +
+                    "\r\n{\r\n    private readonly UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _userManager;\r\n    private readonly IEmailSender _emailSender;\r\n\r\n    public Fo" +
                     "rgotPasswordModel(UserManager<");
@@ -76,10 +76,11 @@ using ");
                     "\r\n                \"/Account/ResetPassword\",\r\n                pageHandler: null,\r" +
                     "\n                values: new { area = \"Identity\", code },\r\n                proto" +
                     "col: Request.Scheme)!;\r\n\r\n            await _emailSender.SendEmailAsync(\r\n      " +
-                    "          Input.Email,\r\n                \"Reset Password\",\r\n                $\"Ple" +
-                    "ase reset your password by <a href=\'{HtmlEncoder.Default.Encode(callbackUrl)}\'>c" +
-                    "licking here</a>.\");\r\n\r\n            return RedirectToPage(\"./ForgotPasswordConfi" +
-                    "rmation\");\r\n        }\r\n\r\n        return Page();\r\n    }\r\n}\r\n");
+                    "          Input.Email,\r\n                \"Reset your password\",\r\n                " +
+                    "$\"Please reset your password by <a href=\'{HtmlEncoder.Default.Encode(callbackUrl" +
+                    ")}\'>clicking here</a>. If you didn\'t request a password reset, you can ignore th" +
+                    "is email.\");\r\n\r\n            return RedirectToPage(\"./ForgotPasswordConfirmation\"" +
+                    ");\r\n        }\r\n\r\n        return Page();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

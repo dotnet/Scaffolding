@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -40,8 +41,8 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write(".Pages.Account;\r\n\r\npublic class LoginWithRecoveryCodeModel : PageModel\r\n{\r\n    pr" +
-                    "ivate readonly SignInManager<");
+            this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class LoginWithRecoveryCodeModel : Pa" +
+                    "geModel\r\n{\r\n    private readonly SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _signInManager;\r\n    private readonly UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
@@ -69,29 +70,30 @@ using ");
                     "ange or be removed in future releases.\r\n        /// </summary>\r\n        [BindPro" +
                     "perty]\r\n        [Required]\r\n        [DataType(DataType.Text)]\r\n        [Display(" +
                     "Name = \"Recovery Code\")]\r\n        public string RecoveryCode { get; set; } = def" +
-                    "ault!;\r\n    }\r\n\r\n    public async Task<IActionResult> OnGetAsync(string? returnU" +
-                    "rl = null)\r\n    {\r\n        // Ensure the user has gone through the username & pa" +
-                    "ssword screen first\r\n        var user = await _signInManager.GetTwoFactorAuthent" +
-                    "icationUserAsync();\r\n        if (user == null)\r\n        {\r\n            throw new" +
-                    " InvalidOperationException($\"Unable to load two-factor authentication user.\");\r\n" +
-                    "        }\r\n\r\n        ReturnUrl = returnUrl;\r\n\r\n        return Page();\r\n    }\r\n\r\n" +
-                    "    public async Task<IActionResult> OnPostAsync(string? returnUrl = null)\r\n    " +
-                    "{\r\n        if (!ModelState.IsValid)\r\n        {\r\n            return Page();\r\n    " +
-                    "    }\r\n\r\n        var user = await _signInManager.GetTwoFactorAuthenticationUserA" +
-                    "sync();\r\n        if (user == null)\r\n        {\r\n            throw new InvalidOper" +
-                    "ationException($\"Unable to load two-factor authentication user.\");\r\n        }\r\n\r" +
-                    "\n        var recoveryCode = Input.RecoveryCode.Replace(\" \", string.Empty);\r\n\r\n  " +
-                    "      var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(recover" +
-                    "yCode);\r\n\r\n        var userId = await _userManager.GetUserIdAsync(user);\r\n\r\n    " +
-                    "    if (result.Succeeded)\r\n        {\r\n            _logger.LogInformation(\"User w" +
-                    "ith ID \'{UserId}\' logged in with a recovery code.\", user.Id);\r\n            retur" +
-                    "n LocalRedirect(returnUrl ?? Url.Content(\"~/\"));\r\n        }\r\n        if (result." +
-                    "IsLockedOut)\r\n        {\r\n            _logger.LogWarning(\"User account locked out" +
-                    ".\");\r\n            return RedirectToPage(\"./Lockout\");\r\n        }\r\n        else\r\n" +
-                    "        {\r\n            _logger.LogWarning(\"Invalid recovery code entered for use" +
-                    "r with ID \'{UserId}\' \", user.Id);\r\n            ModelState.AddModelError(string.E" +
-                    "mpty, \"Invalid recovery code entered.\");\r\n            return Page();\r\n        }\r" +
-                    "\n    }\r\n}\r\n");
+                    "ault!;\r\n    }\r\n\r\n    public async Task<IActionResult> OnGetAsync([StringSyntax(S" +
+                    "tringSyntaxAttribute.Uri)] string? returnUrl = null)\r\n    {\r\n        // Ensure t" +
+                    "he user has gone through the username & password screen first\r\n        var user " +
+                    "= await _signInManager.GetTwoFactorAuthenticationUserAsync();\r\n        if (user " +
+                    "== null)\r\n        {\r\n            throw new InvalidOperationException($\"Unable to" +
+                    " load two-factor authentication user.\");\r\n        }\r\n\r\n        ReturnUrl = retur" +
+                    "nUrl;\r\n\r\n        return Page();\r\n    }\r\n\r\n    public async Task<IActionResult> O" +
+                    "nPostAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)\r\n" +
+                    "    {\r\n        if (!ModelState.IsValid)\r\n        {\r\n            return Page();\r\n" +
+                    "        }\r\n\r\n        var user = await _signInManager.GetTwoFactorAuthenticationU" +
+                    "serAsync();\r\n        if (user == null)\r\n        {\r\n            throw new Invalid" +
+                    "OperationException($\"Unable to load two-factor authentication user.\");\r\n        " +
+                    "}\r\n\r\n        var recoveryCode = Input.RecoveryCode.Replace(\" \", string.Empty);\r\n" +
+                    "\r\n        var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(rec" +
+                    "overyCode);\r\n\r\n        var userId = await _userManager.GetUserIdAsync(user);\r\n\r\n" +
+                    "        if (result.Succeeded)\r\n        {\r\n            _logger.LogInformation(\"Us" +
+                    "er with ID \'{UserId}\' logged in with a recovery code.\", user.Id);\r\n            r" +
+                    "eturn LocalRedirect(returnUrl ?? Url.Content(\"~/\"));\r\n        }\r\n        if (res" +
+                    "ult.IsLockedOut)\r\n        {\r\n            _logger.LogWarning(\"User account locked" +
+                    " out.\");\r\n            return RedirectToPage(\"./Lockout\");\r\n        }\r\n        el" +
+                    "se\r\n        {\r\n            _logger.LogWarning(\"Invalid recovery code entered for" +
+                    " user with ID \'{UserId}\' \", user.Id);\r\n            ModelState.AddModelError(stri" +
+                    "ng.Empty, \"Invalid recovery code entered.\");\r\n            return Page();\r\n      " +
+                    "  }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

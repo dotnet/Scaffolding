@@ -27,22 +27,27 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
         {
             this.Write("@inject SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@"> SignInManager
-@{
-    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
-}
-<ul class=""nav nav-pills flex-column"">
-    <li class=""nav-item""><a class=""nav-link @ManageNavPages.IndexNavClass(ViewContext)"" id=""profile"" asp-page=""./Index"">Profile</a></li>
-    <li class=""nav-item""><a class=""nav-link @ManageNavPages.EmailNavClass(ViewContext)"" id=""email"" asp-page=""./Email"">Email</a></li>
-    <li class=""nav-item""><a class=""nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)"" id=""change-password"" asp-page=""./ChangePassword"">Password</a></li>
-    @if (hasExternalLogins)
-    {
-        <li id=""external-logins"" class=""nav-item""><a id=""external-login"" class=""nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)"" asp-page=""./ExternalLogins"">External logins</a></li>
-    }
-    <li class=""nav-item""><a class=""nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)"" id=""two-factor"" asp-page=""./TwoFactorAuthentication"">Two-factor authentication</a></li>
-    <li class=""nav-item""><a class=""nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)"" id=""personal-data"" asp-page=""./PersonalData"">Personal data</a></li>
-</ul>
-");
+            this.Write("> SignInManager\r\n@{\r\n    var hasExternalLogins = (await SignInManager.GetExternal" +
+                    "AuthenticationSchemesAsync()).Any();\r\n}\r\n<ul class=\"nav nav-pills flex-column\">\r" +
+                    "\n    <li class=\"nav-item\"><a class=\"nav-link @ManageNavPages.IndexNavClass(ViewC" +
+                    "ontext)\" id=\"profile\" asp-page=\"./Index\" aria-current=\"@ManageNavPages.IndexAria" +
+                    "Current(ViewContext)\">Profile</a></li>\r\n    <li class=\"nav-item\"><a class=\"nav-l" +
+                    "ink @ManageNavPages.EmailNavClass(ViewContext)\" id=\"email\" asp-page=\"./Email\" ar" +
+                    "ia-current=\"@ManageNavPages.EmailAriaCurrent(ViewContext)\">Email</a></li>\r\n    <" +
+                    "li class=\"nav-item\"><a class=\"nav-link @ManageNavPages.ChangePasswordNavClass(Vi" +
+                    "ewContext)\" id=\"change-password\" asp-page=\"./ChangePassword\" aria-current=\"@Mana" +
+                    "geNavPages.ChangePasswordAriaCurrent(ViewContext)\">Password</a></li>\r\n    @if (h" +
+                    "asExternalLogins)\r\n    {\r\n        <li id=\"external-logins\" class=\"nav-item\"><a i" +
+                    "d=\"external-login\" class=\"nav-link @ManageNavPages.ExternalLoginsNavClass(ViewCo" +
+                    "ntext)\" asp-page=\"./ExternalLogins\" aria-current=\"@ManageNavPages.ExternalLogins" +
+                    "AriaCurrent(ViewContext)\">External logins</a></li>\r\n    }\r\n    <li class=\"nav-it" +
+                    "em\"><a class=\"nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewConte" +
+                    "xt)\" id=\"two-factor\" asp-page=\"./TwoFactorAuthentication\" aria-current=\"@ManageN" +
+                    "avPages.TwoFactorAuthenticationAriaCurrent(ViewContext)\">Two-factor authenticati" +
+                    "on</a></li>\r\n    <li class=\"nav-item\"><a class=\"nav-link @ManageNavPages.Persona" +
+                    "lDataNavClass(ViewContext)\" id=\"personal-data\" asp-page=\"./PersonalData\" aria-cu" +
+                    "rrent=\"@ManageNavPages.PersonalDataAriaCurrent(ViewContext)\">Personal data</a></" +
+                    "li>\r\n</ul>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

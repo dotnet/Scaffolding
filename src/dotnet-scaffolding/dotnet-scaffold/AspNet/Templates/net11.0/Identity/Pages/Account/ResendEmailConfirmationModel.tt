@@ -84,7 +84,7 @@ public class ResendEmailConfirmationModel : PageModel
         await _emailSender.SendEmailAsync(
             Input.Email,
             "Confirm your email",
-            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>. If you didn't request this email confirmation, you can ignore this email.");
 
         ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
         return Page();

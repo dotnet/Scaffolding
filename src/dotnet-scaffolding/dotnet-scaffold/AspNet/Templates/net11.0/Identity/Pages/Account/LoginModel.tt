@@ -10,6 +10,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -23,6 +24,7 @@ using <#= Model.UserClassNamespace #>;
 
 namespace <#= Model.IdentityNamespace #>.Pages.Account;
 
+[AllowAnonymous]
 public class LoginModel : PageModel
 {
     private readonly SignInManager<<#= Model.UserClassName #>> _signInManager;
@@ -90,7 +92,7 @@ public class LoginModel : PageModel
         public bool RememberMe { get; set; }
     }
 
-    public async Task OnGetAsync(string? returnUrl = null)
+    public async Task OnGetAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)
     {
         if (!string.IsNullOrEmpty(ErrorMessage))
         {
@@ -107,7 +109,7 @@ public class LoginModel : PageModel
         ReturnUrl = returnUrl;
     }
 
-    public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
+    public async Task<IActionResult> OnPostAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)
     {
         returnUrl ??= Url.Content("~/");
 

@@ -31,6 +31,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -48,8 +49,8 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write(".Pages.Account;\r\n\r\npublic class RegisterModel : PageModel\r\n{\r\n    private readonl" +
-                    "y SignInManager<");
+            this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class RegisterModel : PageModel\r\n{\r\n " +
+                    "   private readonly SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _signInManager;\r\n    private readonly UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
@@ -102,37 +103,39 @@ using ");
                     " /// </summary>\r\n        [DataType(DataType.Password)]\r\n        [Display(Name = " +
                     "\"Confirm password\")]\r\n        [Compare(\"Password\", ErrorMessage = \"The password " +
                     "and confirmation password do not match.\")]\r\n        public string? ConfirmPasswo" +
-                    "rd { get; set; }\r\n    }\r\n\r\n\r\n    public async Task OnGetAsync(string? returnUrl " +
-                    "= null)\r\n    {\r\n        ReturnUrl = returnUrl;\r\n        ExternalLogins = (await " +
-                    "_signInManager.GetExternalAuthenticationSchemesAsync()).ToList();\r\n    }\r\n\r\n    " +
-                    "public async Task<IActionResult> OnPostAsync(string? returnUrl = null)\r\n    {\r\n " +
-                    "       returnUrl ??= Url.Content(\"~/\");\r\n        ExternalLogins = (await _signIn" +
-                    "Manager.GetExternalAuthenticationSchemesAsync()).ToList();\r\n        if (ModelSta" +
-                    "te.IsValid)\r\n        {\r\n            var user = CreateUser();\r\n\r\n            awai" +
-                    "t _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);\r\n     " +
-                    "       await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None" +
-                    ");\r\n            var result = await _userManager.CreateAsync(user, Input.Password" +
-                    ");\r\n\r\n            if (result.Succeeded)\r\n            {\r\n                _logger." +
-                    "LogInformation(\"User created a new account with password.\");\r\n\r\n                " +
-                    "var userId = await _userManager.GetUserIdAsync(user);\r\n                var code " +
-                    "= await _userManager.GenerateEmailConfirmationTokenAsync(user);\r\n               " +
-                    " code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n            " +
-                    "    var callbackUrl = Url.Page(\r\n                    \"/Account/ConfirmEmail\",\r\n " +
-                    "                   pageHandler: null,\r\n                    values: new { area = " +
-                    "\"Identity\", userId = userId, code = code, returnUrl = returnUrl },\r\n            " +
-                    "        protocol: Request.Scheme)!;\r\n\r\n                await _emailSender.SendEm" +
-                    "ailAsync(Input.Email, \"Confirm your email\",\r\n                    $\"Please confir" +
-                    "m your account by <a href=\'{HtmlEncoder.Default.Encode(callbackUrl)}\'>clicking h" +
-                    "ere</a>.\");\r\n\r\n                if (_userManager.Options.SignIn.RequireConfirmedA" +
-                    "ccount)\r\n                {\r\n                    return RedirectToPage(\"RegisterC" +
-                    "onfirmation\", new { email = Input.Email, returnUrl = returnUrl });\r\n            " +
-                    "    }\r\n                else\r\n                {\r\n                    await _signI" +
-                    "nManager.SignInAsync(user, isPersistent: false);\r\n                    return Loc" +
-                    "alRedirect(returnUrl);\r\n                }\r\n            }\r\n            foreach (v" +
-                    "ar error in result.Errors)\r\n            {\r\n                ModelState.AddModelEr" +
-                    "ror(string.Empty, error.Description);\r\n            }\r\n        }\r\n\r\n        // If" +
-                    " we got this far, something failed, redisplay form\r\n        return Page();\r\n    " +
-                    "}\r\n\r\n    private ");
+                    "rd { get; set; }\r\n    }\r\n\r\n\r\n    public async Task OnGetAsync([StringSyntax(Stri" +
+                    "ngSyntaxAttribute.Uri)] string? returnUrl = null)\r\n    {\r\n        ReturnUrl = re" +
+                    "turnUrl;\r\n        ExternalLogins = (await _signInManager.GetExternalAuthenticati" +
+                    "onSchemesAsync()).ToList();\r\n    }\r\n\r\n    public async Task<IActionResult> OnPos" +
+                    "tAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)\r\n    " +
+                    "{\r\n        returnUrl ??= Url.Content(\"~/\");\r\n        ExternalLogins = (await _si" +
+                    "gnInManager.GetExternalAuthenticationSchemesAsync()).ToList();\r\n        if (Mode" +
+                    "lState.IsValid)\r\n        {\r\n            var user = CreateUser();\r\n\r\n            " +
+                    "await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);\r\n " +
+                    "           await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken." +
+                    "None);\r\n            var result = await _userManager.CreateAsync(user, Input.Pass" +
+                    "word);\r\n\r\n            if (result.Succeeded)\r\n            {\r\n                _log" +
+                    "ger.LogInformation(\"User created a new account with password.\");\r\n\r\n            " +
+                    "    var userId = await _userManager.GetUserIdAsync(user);\r\n                var c" +
+                    "ode = await _userManager.GenerateEmailConfirmationTokenAsync(user);\r\n           " +
+                    "     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        " +
+                    "        var callbackUrl = Url.Page(\r\n                    \"/Account/ConfirmEmail\"" +
+                    ",\r\n                    pageHandler: null,\r\n                    values: new { are" +
+                    "a = \"Identity\", userId = userId, code = code, returnUrl = returnUrl },\r\n        " +
+                    "            protocol: Request.Scheme)!;\r\n\r\n                await _emailSender.Se" +
+                    "ndEmailAsync(Input.Email, \"Confirm your email\",\r\n                    $\"Please co" +
+                    "nfirm your account by <a href=\'{HtmlEncoder.Default.Encode(callbackUrl)}\'>clicki" +
+                    "ng here</a>. If you didn\'t request this email confirmation, you can ignore this " +
+                    "email.\");\r\n\r\n                if (!await _signInManager.CanSignInAsync(user))\r\n  " +
+                    "              {\r\n                    return RedirectToPage(\"RegisterConfirmation" +
+                    "\", new { email = Input.Email, returnUrl = returnUrl });\r\n                }\r\n    " +
+                    "            else\r\n                {\r\n                    await _signInManager.Si" +
+                    "gnInAsync(user, isPersistent: false);\r\n                    return LocalRedirect(" +
+                    "returnUrl);\r\n                }\r\n            }\r\n            foreach (var error in" +
+                    " result.Errors)\r\n            {\r\n                ModelState.AddModelError(string." +
+                    "Empty, error.Description);\r\n            }\r\n        }\r\n\r\n        // If we got thi" +
+                    "s far, something failed, redisplay form\r\n        return Page();\r\n    }\r\n\r\n    pr" +
+                    "ivate ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" CreateUser()\r\n    {\r\n        try\r\n        {\r\n            return Activator.Create" +
                     "Instance<");

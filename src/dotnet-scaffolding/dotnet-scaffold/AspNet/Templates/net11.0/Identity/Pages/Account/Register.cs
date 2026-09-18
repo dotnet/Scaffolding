@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
         public virtual string TransformText()
         {
             this.Write("@page\r\n@model RegisterModel\r\n@{\r\n    ViewData[\"Title\"] = \"Register\";\r\n}\r\n\r\n<h1>@V" +
-                    "iewData[\"Title\"]</h1>\r\n\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        " +
+                    "iewData[\"Title\"]</h1>\r\n\r\n<div class=\"row\">\r\n    <div class=\"col-lg-6\">\r\n        " +
                     "<form id=\"registerForm\" asp-route-returnUrl=\"@Model.ReturnUrl\" method=\"post\">\r\n " +
                     "           <h2>Create a new account.</h2>\r\n            <hr />\r\n            <div " +
                     "asp-validation-summary=\"ModelOnly\" class=\"text-danger\" role=\"alert\"></div>\r\n    " +
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
                     "assword\">Confirm Password</label>\r\n                <span asp-validation-for=\"Inp" +
                     "ut.ConfirmPassword\" class=\"text-danger\"></span>\r\n            </div>\r\n           " +
                     " <button id=\"registerSubmit\" type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">" +
-                    "Register</button>\r\n        </form>\r\n    </div>\r\n    <div class=\"col-md-6 col-md-" +
+                    "Register</button>\r\n        </form>\r\n    </div>\r\n    <div class=\"col-lg-4 col-lg-" +
                     "offset-2\">\r\n        <section>\r\n            <h3>Use another service to register.<" +
                     "/h3>\r\n            <hr />\r\n            @{\r\n                if ((Model.ExternalLog" +
                     "ins?.Count ?? 0) == 0)\r\n                {\r\n                    <div>\r\n          " +

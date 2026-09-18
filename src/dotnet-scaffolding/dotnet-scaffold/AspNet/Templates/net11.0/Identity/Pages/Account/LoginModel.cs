@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -45,8 +46,8 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write(".Pages.Account;\r\n\r\npublic class LoginModel : PageModel\r\n{\r\n    private readonly S" +
-                    "ignInManager<");
+            this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class LoginModel : PageModel\r\n{\r\n    " +
+                    "private readonly SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _signInManager;\r\n    private readonly ILogger<LoginModel> _logger;\r\n\r\n    publi" +
                     "c LoginModel(SignInManager<");
@@ -85,31 +86,32 @@ using ");
                     "lt UI infrastructure and is not intended to be used\r\n        ///     directly fr" +
                     "om your code. This API may change or be removed in future releases.\r\n        ///" +
                     " </summary>\r\n        [Display(Name = \"Remember me?\")]\r\n        public bool Remem" +
-                    "berMe { get; set; }\r\n    }\r\n\r\n    public async Task OnGetAsync(string? returnUrl" +
-                    " = null)\r\n    {\r\n        if (!string.IsNullOrEmpty(ErrorMessage))\r\n        {\r\n  " +
-                    "          ModelState.AddModelError(string.Empty, ErrorMessage);\r\n        }\r\n\r\n  " +
-                    "      returnUrl ??= Url.Content(\"~/\");\r\n\r\n        // Clear the existing external" +
-                    " cookie to ensure a clean login process\r\n        await HttpContext.SignOutAsync(" +
-                    "IdentityConstants.ExternalScheme);\r\n\r\n        ExternalLogins = (await _signInMan" +
-                    "ager.GetExternalAuthenticationSchemesAsync()).ToList();\r\n\r\n        ReturnUrl = r" +
-                    "eturnUrl;\r\n    }\r\n\r\n    public async Task<IActionResult> OnPostAsync(string? ret" +
-                    "urnUrl = null)\r\n    {\r\n        returnUrl ??= Url.Content(\"~/\");\r\n\r\n        Exter" +
-                    "nalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToLis" +
-                    "t();\r\n\r\n        if (ModelState.IsValid)\r\n        {\r\n            // This doesn\'t " +
-                    "count login failures towards account lockout\r\n            // To enable password " +
-                    "failures to trigger account lockout, set lockoutOnFailure: true\r\n            var" +
-                    " result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, " +
-                    "Input.RememberMe, lockoutOnFailure: false);\r\n            if (result.Succeeded)\r\n" +
-                    "            {\r\n                _logger.LogInformation(\"User logged in.\");\r\n     " +
-                    "           return LocalRedirect(returnUrl);\r\n            }\r\n            if (resu" +
-                    "lt.RequiresTwoFactor)\r\n            {\r\n                return RedirectToPage(\"./L" +
-                    "oginWith2fa\", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });\r\n  " +
-                    "          }\r\n            if (result.IsLockedOut)\r\n            {\r\n               " +
-                    " _logger.LogWarning(\"User account locked out.\");\r\n                return Redirec" +
-                    "tToPage(\"./Lockout\");\r\n            }\r\n            else\r\n            {\r\n         " +
-                    "       ModelState.AddModelError(string.Empty, \"Invalid login attempt.\");\r\n      " +
-                    "          return Page();\r\n            }\r\n        }\r\n\r\n        // If we got this " +
-                    "far, something failed, redisplay form\r\n        return Page();\r\n    }\r\n}\r\n");
+                    "berMe { get; set; }\r\n    }\r\n\r\n    public async Task OnGetAsync([StringSyntax(Str" +
+                    "ingSyntaxAttribute.Uri)] string? returnUrl = null)\r\n    {\r\n        if (!string.I" +
+                    "sNullOrEmpty(ErrorMessage))\r\n        {\r\n            ModelState.AddModelError(str" +
+                    "ing.Empty, ErrorMessage);\r\n        }\r\n\r\n        returnUrl ??= Url.Content(\"~/\");" +
+                    "\r\n\r\n        // Clear the existing external cookie to ensure a clean login proces" +
+                    "s\r\n        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);\r\n\r\n" +
+                    "        ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesA" +
+                    "sync()).ToList();\r\n\r\n        ReturnUrl = returnUrl;\r\n    }\r\n\r\n    public async T" +
+                    "ask<IActionResult> OnPostAsync([StringSyntax(StringSyntaxAttribute.Uri)] string?" +
+                    " returnUrl = null)\r\n    {\r\n        returnUrl ??= Url.Content(\"~/\");\r\n\r\n        E" +
+                    "xternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).T" +
+                    "oList();\r\n\r\n        if (ModelState.IsValid)\r\n        {\r\n            // This does" +
+                    "n\'t count login failures towards account lockout\r\n            // To enable passw" +
+                    "ord failures to trigger account lockout, set lockoutOnFailure: true\r\n           " +
+                    " var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Passwo" +
+                    "rd, Input.RememberMe, lockoutOnFailure: false);\r\n            if (result.Succeede" +
+                    "d)\r\n            {\r\n                _logger.LogInformation(\"User logged in.\");\r\n " +
+                    "               return LocalRedirect(returnUrl);\r\n            }\r\n            if (" +
+                    "result.RequiresTwoFactor)\r\n            {\r\n                return RedirectToPage(" +
+                    "\"./LoginWith2fa\", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });" +
+                    "\r\n            }\r\n            if (result.IsLockedOut)\r\n            {\r\n           " +
+                    "     _logger.LogWarning(\"User account locked out.\");\r\n                return Red" +
+                    "irectToPage(\"./Lockout\");\r\n            }\r\n            else\r\n            {\r\n     " +
+                    "           ModelState.AddModelError(string.Empty, \"Invalid login attempt.\");\r\n  " +
+                    "              return Page();\r\n            }\r\n        }\r\n\r\n        // If we got t" +
+                    "his far, something failed, redisplay form\r\n        return Page();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

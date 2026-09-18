@@ -76,9 +76,10 @@ using ");
                     " code },\r\n            protocol: Request.Scheme)!;\r\n        await _emailSender.Se" +
                     "ndEmailAsync(\r\n            Input.Email,\r\n            \"Confirm your email\",\r\n    " +
                     "        $\"Please confirm your account by <a href=\'{HtmlEncoder.Default.Encode(ca" +
-                    "llbackUrl)}\'>clicking here</a>.\");\r\n\r\n        ModelState.AddModelError(string.Em" +
-                    "pty, \"Verification email sent. Please check your email.\");\r\n        return Page(" +
-                    ");\r\n    }\r\n}\r\n");
+                    "llbackUrl)}\'>clicking here</a>. If you didn\'t request this email confirmation, y" +
+                    "ou can ignore this email.\");\r\n\r\n        ModelState.AddModelError(string.Empty, \"" +
+                    "Verification email sent. Please check your email.\");\r\n        return Page();\r\n  " +
+                    "  }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

@@ -39,8 +39,8 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write(".Pages.Account;\r\n\r\npublic class LogoutModel : PageModel\r\n{\r\n    private readonly " +
-                    "SignInManager<");
+            this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class LogoutModel : PageModel\r\n{\r\n   " +
+                    " private readonly SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _signInManager;\r\n    private readonly ILogger<LogoutModel> _logger;\r\n\r\n    publ" +
                     "ic LogoutModel(SignInManager<");

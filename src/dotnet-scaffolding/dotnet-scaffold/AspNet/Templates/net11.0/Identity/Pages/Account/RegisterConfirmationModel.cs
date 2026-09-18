@@ -65,16 +65,16 @@ using ");
                     "\n        returnUrl = returnUrl ?? Url.Content(\"~/\");\r\n\r\n        var user = await" +
                     " _userManager.FindByEmailAsync(email);\r\n        if (user == null)\r\n        {\r\n  " +
                     "          return NotFound($\"Unable to load user with email \'{email}\'.\");\r\n      " +
-                    "  }\r\n\r\n        Email = email;\r\n        // Once you add a real email sender, you " +
-                    "should remove this code that lets you confirm the account\r\n        DisplayConfir" +
-                    "mAccountLink = true;\r\n        if (DisplayConfirmAccountLink)\r\n        {\r\n       " +
-                    "     var userId = await _userManager.GetUserIdAsync(user);\r\n            var code" +
-                    " = await _userManager.GenerateEmailConfirmationTokenAsync(user);\r\n            co" +
-                    "de = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n            Ema" +
-                    "ilConfirmationUrl = Url.Page(\r\n                \"/Account/ConfirmEmail\",\r\n       " +
-                    "         pageHandler: null,\r\n                values: new { area = \"Identity\", us" +
-                    "erId = userId, code = code, returnUrl = returnUrl },\r\n                protocol: " +
-                    "Request.Scheme);\r\n        }\r\n\r\n        return Page();\r\n    }\r\n}\r\n");
+                    "  }\r\n\r\n        Email = email;\r\n        // If the email sender is a no-op, displa" +
+                    "y the confirm link in the page\r\n        DisplayConfirmAccountLink = _sender is N" +
+                    "oOpEmailSender;\r\n        if (DisplayConfirmAccountLink)\r\n        {\r\n            " +
+                    "var userId = await _userManager.GetUserIdAsync(user);\r\n            var code = aw" +
+                    "ait _userManager.GenerateEmailConfirmationTokenAsync(user);\r\n            code = " +
+                    "WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n            EmailCon" +
+                    "firmationUrl = Url.Page(\r\n                \"/Account/ConfirmEmail\",\r\n            " +
+                    "    pageHandler: null,\r\n                values: new { area = \"Identity\", userId " +
+                    "= userId, code = code, returnUrl = returnUrl },\r\n                protocol: Reque" +
+                    "st.Scheme);\r\n        }\r\n\r\n        return Page();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

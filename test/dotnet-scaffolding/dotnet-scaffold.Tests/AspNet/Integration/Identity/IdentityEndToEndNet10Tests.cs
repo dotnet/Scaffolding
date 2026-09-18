@@ -10,7 +10,9 @@ using System.Net.Http;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
 
@@ -199,6 +201,54 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         }
     }
 
+    [Fact]
+    public async Task ScaffoldIdentity_SupportsCompleteAccountLifecycle()
+    {
+        const string projectName = "MvcIdentityLifecycle";
+        var testDirectory = Path.Combine(Path.GetTempPath(), nameof(IdentityEndToEndNet10Tests), Guid.NewGuid().ToString("N"));
+        var projectDirectory = Path.Combine(testDirectory, projectName);
+        var projectPath = Path.Combine(projectDirectory, $"{projectName}.csproj");
+
+        Directory.CreateDirectory(testDirectory);
+        try
+        {
+            var createResult = await RunDotNetAsync(
+                testDirectory,
+                "new", "mvc",
+                "--name", projectName,
+                "--output", projectDirectory,
+                "--framework", "net10.0",
+                "--auth", "None",
+                "--no-restore");
+            Assert.True(createResult.ExitCode == 0, $"Project creation failed.{Environment.NewLine}{createResult.Output}{Environment.NewLine}{createResult.Error}");
+
+            var scaffoldResult = await ScaffoldCliHelper.RunScaffoldAsync(
+                "net10.0",
+                "identity",
+                "--project", projectPath,
+                "--dataContext", "ApplicationDbContext",
+                "--dbProvider", "sqlite-efcore");
+            Assert.True(scaffoldResult.ExitCode == 0, $"Identity scaffolding failed.{Environment.NewLine}{scaffoldResult.Output}{Environment.NewLine}{scaffoldResult.Error}");
+
+            var buildResult = await ScaffoldCliHelper.RunBuildForFrameworkAsync(projectDirectory, "net10.0");
+            Assert.True(buildResult.ExitCode == 0, $"Scaffolded project failed to build.{Environment.NewLine}{buildResult.Output}{Environment.NewLine}{buildResult.Error}");
+
+            await ApplyIdentityMigrationAsync(projectDirectory, projectPath);
+            await AssertIdentityAccountLifecycleAsync(projectPath);
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(testDirectory, recursive: true);
+            }
+            catch
+            {
+                // Best-effort cleanup; preserve any test failure.
+            }
+        }
+    }
+
     private static void AssertConfiguredProject(string projectDirectory, string hostFolder)
     {
         var programContent = File.ReadAllText(Path.Combine(projectDirectory, "Program.cs"));
@@ -272,6 +322,184 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         }
     }
 
+    private static async Task ApplyIdentityMigrationAsync(string projectDirectory, string projectPath)
+    {
+        var assetsPath = Path.Combine(projectDirectory, "obj", "project.assets.json");
+        var efVersion = AddIdentityMigrationStep.GetEfDesignPackageVersion(await File.ReadAllTextAsync(assetsPath));
+        Assert.False(string.IsNullOrEmpty(efVersion));
+
+        var toolDirectory = Path.Combine(projectDirectory, ".dotnet-tools");
+        var installResult = await RunDotNetAsync(
+            projectDirectory,
+            "tool",
+            "install",
+            "dotnet-ef",
+            "--tool-path",
+            toolDirectory,
+            "--version",
+            efVersion!);
+        Assert.True(installResult.ExitCode == 0, $"dotnet-ef installation failed.{Environment.NewLine}{installResult.Output}{Environment.NewLine}{installResult.Error}");
+
+        var executableName = OperatingSystem.IsWindows() ? "dotnet-ef.exe" : "dotnet-ef";
+        var updateResult = await RunProcessAsync(
+            Path.Combine(toolDirectory, executableName),
+            projectDirectory,
+            "database",
+            "update",
+            "--project",
+            projectPath,
+            "--startup-project",
+            projectPath,
+            "--context",
+            "ApplicationDbContext",
+            "--no-color");
+        Assert.True(updateResult.ExitCode == 0, $"Database update failed.{Environment.NewLine}{updateResult.Output}{Environment.NewLine}{updateResult.Error}");
+        Assert.True(File.Exists(Path.Combine(projectDirectory, "ApplicationDbContext.db")));
+    }
+
+    private static async Task AssertIdentityAccountLifecycleAsync(string projectPath)
+    {
+        var port = GetAvailablePort();
+        var baseAddress = new Uri($"http://127.0.0.1:{port}");
+        using var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = ScaffoldCliHelper.GetDotNetPath(),
+                WorkingDirectory = Path.GetDirectoryName(projectPath)!,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.StartInfo.ArgumentList.Add("run");
+        process.StartInfo.ArgumentList.Add("--no-build");
+        process.StartInfo.ArgumentList.Add("--project");
+        process.StartInfo.ArgumentList.Add(projectPath);
+        process.StartInfo.ArgumentList.Add("--urls");
+        process.StartInfo.ArgumentList.Add(baseAddress.ToString());
+
+        var output = new StringBuilder();
+        process.OutputDataReceived += (_, args) => output.AppendLine(args.Data);
+        process.ErrorDataReceived += (_, args) => output.AppendLine(args.Data);
+        process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+
+        try
+        {
+            using var handler = new HttpClientHandler
+            {
+                CookieContainer = new CookieContainer(),
+                AllowAutoRedirect = true
+            };
+            using var client = new HttpClient(handler)
+            {
+                BaseAddress = baseAddress,
+                Timeout = TimeSpan.FromSeconds(30)
+            };
+
+            var registerPage = await GetWithRetryAsync(client, "/Identity/Account/Register", process, output);
+            await AssertSuccessfulGetAsync(client, "/Identity/lib/bootstrap/dist/css/bootstrap.min.css");
+            await AssertSuccessfulGetAsync(client, "/Identity/lib/bootstrap/dist/js/bootstrap.bundle.min.js");
+            var email = $"identity-{Guid.NewGuid():N}@example.com";
+            const string password = "Test1234!";
+            var registerResponse = await PostFormAsync(
+                client,
+                "/Identity/Account/Register",
+                registerPage,
+                new Dictionary<string, string>
+                {
+                    ["Input.Email"] = email,
+                    ["Input.Password"] = password,
+                    ["Input.ConfirmPassword"] = password
+                });
+            Assert.Contains("Register confirmation", registerResponse, StringComparison.OrdinalIgnoreCase);
+
+            var confirmationPage = await client.GetStringAsync(GetLink(registerResponse, "ConfirmEmail"));
+            Assert.Contains("Thank you for confirming your email", confirmationPage, StringComparison.OrdinalIgnoreCase);
+
+            var loginPage = await client.GetStringAsync("/Identity/Account/Login");
+            var loginResponse = await PostFormAsync(
+                client,
+                "/Identity/Account/Login",
+                loginPage,
+                new Dictionary<string, string>
+                {
+                    ["Input.Email"] = email,
+                    ["Input.Password"] = password,
+                    ["Input.RememberMe"] = "false"
+                });
+            Assert.Contains($"Hello {email}!", loginResponse, StringComparison.OrdinalIgnoreCase);
+
+            var managePage = await client.GetStringAsync(GetLink(loginResponse, "/Account/Manage"));
+            Assert.Contains("<h3>Profile</h3>", managePage, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains(email, managePage, StringComparison.OrdinalIgnoreCase);
+
+            var authenticatedHomePage = await client.GetStringAsync("/");
+            var logoutResponse = await PostFormAsync(
+                client,
+                "/Identity/Account/Logout?returnUrl=%2F",
+                authenticatedHomePage,
+                new Dictionary<string, string>());
+            Assert.Contains(">Login<", logoutResponse, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains(">Register<", logoutResponse, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain($"Hello {email}!", logoutResponse, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            if (!process.HasExited)
+            {
+                process.Kill(entireProcessTree: true);
+                await process.WaitForExitAsync();
+            }
+        }
+    }
+
+    private static async Task<string> PostFormAsync(
+        HttpClient client,
+        string requestUri,
+        string pageContent,
+        IReadOnlyDictionary<string, string> fields)
+    {
+        var formFields = new Dictionary<string, string>(fields)
+        {
+            ["__RequestVerificationToken"] = GetAntiforgeryToken(pageContent)
+        };
+        using var response = await client.PostAsync(requestUri, new FormUrlEncodedContent(formFields));
+        var responseContent = await response.Content.ReadAsStringAsync();
+        Assert.True(response.IsSuccessStatusCode, $"POST {requestUri} returned {(int)response.StatusCode}.{Environment.NewLine}{responseContent}");
+        return responseContent;
+    }
+
+    private static async Task AssertSuccessfulGetAsync(HttpClient client, string requestUri)
+    {
+        using var response = await client.GetAsync(requestUri);
+        Assert.True(response.IsSuccessStatusCode, $"GET {requestUri} returned {(int)response.StatusCode}.");
+        Assert.NotEmpty(await response.Content.ReadAsByteArrayAsync());
+    }
+
+    private static string GetAntiforgeryToken(string pageContent)
+    {
+        var match = Regex.Match(
+            pageContent,
+            "<input[^>]+name=\"__RequestVerificationToken\"[^>]+value=\"([^\"]+)",
+            RegexOptions.IgnoreCase);
+        Assert.True(match.Success, "The page did not contain an antiforgery token.");
+        return WebUtility.HtmlDecode(match.Groups[1].Value);
+    }
+
+    private static string GetLink(string pageContent, string hrefFragment)
+    {
+        var match = Regex.Match(
+            pageContent,
+            $"href=\"([^\"]*{Regex.Escape(hrefFragment)}[^\"]*)\"",
+            RegexOptions.IgnoreCase);
+        Assert.True(match.Success, $"The page did not contain a link with '{hrefFragment}' in its URL.");
+        return WebUtility.HtmlDecode(match.Groups[1].Value);
+    }
+
     private static async Task<string> GetWithRetryAsync(HttpClient client, string url, Process process, StringBuilder output)
     {
         for (var attempt = 0; attempt < 30; attempt++)
@@ -299,11 +527,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
     private static async Task<(int ExitCode, string Output, string Error)> RunDotNetAsync(string workingDirectory, params string[] arguments)
     {
+        return await RunProcessAsync(ScaffoldCliHelper.GetDotNetPath(), workingDirectory, arguments);
+    }
+
+    private static async Task<(int ExitCode, string Output, string Error)> RunProcessAsync(string fileName, string workingDirectory, params string[] arguments)
+    {
         using var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = ScaffoldCliHelper.GetDotNetPath(),
+                FileName = fileName,
                 WorkingDirectory = workingDirectory,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

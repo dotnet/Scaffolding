@@ -44,7 +44,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "password</h3>\r\n<StatusMessage Message=\"@message\" />\r\n<div class=\"row\">\r\n    <div" +
                     " class=\"col-xl-6\">\r\n        <EditForm Model=\"Input\" FormName=\"change-password\" O" +
                     "nValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n            <DataAnnotationsVa" +
-                    "lidator />\r\n            <ValidationSummary class=\"text-danger\" role=\"alert\" />\r\n" +
+                    "lidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
                     "            <div class=\"form-floating mb-3\">\r\n                <InputText type=\"p" +
                     "assword\" @bind-Value=\"Input.OldPassword\" id=\"Input.OldPassword\" class=\"form-cont" +
                     "rol\" autocomplete=\"current-password\" aria-required=\"true\" placeholder=\"Enter the" +

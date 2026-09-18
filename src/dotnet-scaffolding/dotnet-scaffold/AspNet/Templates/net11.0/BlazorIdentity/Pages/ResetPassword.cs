@@ -42,8 +42,8 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "\r\n<h2>Reset your password.</h2>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-" +
                     "md-4\">\r\n        <StatusMessage Message=\"@Message\" />\r\n        <EditForm Model=\"I" +
                     "nput\" FormName=\"reset-password\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"post\"" +
-                    ">\r\n            <DataAnnotationsValidator />\r\n            <ValidationSummary clas" +
-                    "s=\"text-danger\" role=\"alert\" />\r\n\r\n            <input type=\"hidden\" name=\"Input." +
+                    ">\r\n            <DataAnnotationsValidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
+                    "\r\n            <input type=\"hidden\" name=\"Input." +
                     "Code\" value=\"@Input.Code\" />\r\n            <div class=\"form-floating mb-3\">\r\n    " +
                     "            <InputText @bind-Value=\"Input.Email\" id=\"Input.Email\" class=\"form-co" +
                     "ntrol\" autocomplete=\"username\" aria-required=\"true\" placeholder=\"name@example.co" +

@@ -72,8 +72,8 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "e</label>\r\n                                <ValidationMessage For=\"() => Input.C" +
                     "ode\" class=\"text-danger\" />\r\n                            </div>\r\n               " +
                     "             <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Verify</" +
-                    "button>\r\n                            <ValidationSummary class=\"text-danger\" role" +
-                    "=\"alert\" />\r\n                        </EditForm>\r\n                    </div>\r\n  " +
+                    "button>\r\n                            <div role=\"alert\" aria-atomic=\"true\">\r\n                                <ValidationSummary class=\"text-danger\" />\r\n                            </div>\r\n" +
+                    "                        </EditForm>\r\n                    </div>\r\n  " +
                     "              </div>\r\n            </li>\r\n        </ol>\r\n    </div>\r\n}\r\n\r\n@code {" +
                     "\r\n    private const string AuthenticatorUriFormat = \"otpauth://totp/{0}:{1}?secr" +
                     "et={2}&issuer={0}&digits=6\";\r\n\r\n    private string? message;\r\n    private ");

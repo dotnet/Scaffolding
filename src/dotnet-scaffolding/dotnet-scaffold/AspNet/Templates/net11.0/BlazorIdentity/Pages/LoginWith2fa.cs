@@ -47,14 +47,14 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "del=\"Input\" FormName=\"login-with-2fa\" OnValidSubmit=\"OnValidSubmitAsync\" method=" +
                     "\"post\">\r\n            <input type=\"hidden\" name=\"ReturnUrl\" value=\"@ReturnUrl\" />" +
                     "\r\n            <input type=\"hidden\" name=\"RememberMe\" value=\"@RememberMe\" />\r\n   " +
-                    "         <DataAnnotationsValidator />\r\n            <ValidationSummary class=\"tex" +
-                    "t-danger\" role=\"alert\" />\r\n            <div class=\"form-floating mb-3\">\r\n       " +
+                    "         <DataAnnotationsValidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
+                    "            <div class=\"form-floating mb-3\">\r\n       " +
                     "         <InputText @bind-Value=\"Input.TwoFactorCode\" id=\"Input.TwoFactorCode\" c" +
                     "lass=\"form-control\" autocomplete=\"off\" />\r\n                <label for=\"Input.Two" +
                     "FactorCode\" class=\"form-label\">Authenticator code</label>\r\n                <Vali" +
                     "dationMessage For=\"() => Input.TwoFactorCode\" class=\"text-danger\" />\r\n          " +
-                    "  </div>\r\n            <div class=\"checkbox mb-3\">\r\n                <label for=\"r" +
-                    "emember-machine\" class=\"form-label\">\r\n                    <InputCheckbox @bind-V" +
+                    "  </div>\r\n            <div class=\"checkbox mb-3\">\r\n                <label class=\"form-label\">" +
+                    "\r\n                    <InputCheckbox @bind-V" +
                     "alue=\"Input.RememberMachine\" />\r\n                    Remember this machine\r\n    " +
                     "            </label>\r\n            </div>\r\n            <div>\r\n                <bu" +
                     "tton type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Log in</button>\r\n       " +

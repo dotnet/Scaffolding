@@ -25,10 +25,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@inject SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> SignInManager\r\n@{\r\n    var hasExternalLogins = (await SignInManager.GetExternal" +
-                    "AuthenticationSchemesAsync()).Any();\r\n}\r\n<ul class=\"nav nav-pills flex-column\">\r" +
+            this.Write("<ul class=\"nav nav-pills flex-column\">\r" +
                     "\n    <li class=\"nav-item\"><a class=\"nav-link @ManageNavPages.IndexNavClass(ViewC" +
                     "ontext)\" id=\"profile\" asp-page=\"./Index\" aria-current=\"@ManageNavPages.IndexAria" +
                     "Current(ViewContext)\">Profile</a></li>\r\n    <li class=\"nav-item\"><a class=\"nav-l" +
@@ -36,8 +33,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
                     "ia-current=\"@ManageNavPages.EmailAriaCurrent(ViewContext)\">Email</a></li>\r\n    <" +
                     "li class=\"nav-item\"><a class=\"nav-link @ManageNavPages.ChangePasswordNavClass(Vi" +
                     "ewContext)\" id=\"change-password\" asp-page=\"./ChangePassword\" aria-current=\"@Mana" +
-                    "geNavPages.ChangePasswordAriaCurrent(ViewContext)\">Password</a></li>\r\n    @if (h" +
-                    "asExternalLogins)\r\n    {\r\n        <li id=\"external-logins\" class=\"nav-item\"><a i" +
+                    "geNavPages.ChangePasswordAriaCurrent(ViewContext)\">Password</a></li>\r\n    @if ((" +
+                    "bool)(ViewData[\"ManageNav.HasExternalLogins\"] ?? false))\r\n    {\r\n        <li id=\"external-logins\" class=\"nav-item\"><a i" +
                     "d=\"external-login\" class=\"nav-link @ManageNavPages.ExternalLoginsNavClass(ViewCo" +
                     "ntext)\" asp-page=\"./ExternalLogins\" aria-current=\"@ManageNavPages.ExternalLogins" +
                     "AriaCurrent(ViewContext)\">External logins</a></li>\r\n    }\r\n    <li class=\"nav-it" +

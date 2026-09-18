@@ -36,24 +36,30 @@ internal class ConfigureIdentityNavigationStep(
             return Task.FromResult(true);
         }
 
-        fileSystem.CreateDirectoryIfNotExists(sharedDirectory);
-        var loginPartialPath = Path.Combine(sharedDirectory, "_LoginPartial.cshtml");
-        if (!fileSystem.FileExists(loginPartialPath))
-        {
-            fileSystem.WriteAllText(loginPartialPath, GetLoginPartialContent());
-        }
-
         var layoutContent = fileSystem.ReadAllText(layoutPath);
         if (layoutContent.Contains("_LoginPartial", StringComparison.OrdinalIgnoreCase))
         {
             return Task.FromResult(true);
         }
 
-        var closingListIndex = layoutContent.IndexOf("</ul>", StringComparison.OrdinalIgnoreCase);
+        var navbarClassIndex = layoutContent.IndexOf("navbar-nav", StringComparison.OrdinalIgnoreCase);
+        var openingListIndex = navbarClassIndex < 0
+            ? -1
+            : layoutContent.LastIndexOf("<ul", navbarClassIndex, StringComparison.OrdinalIgnoreCase);
+        var closingListIndex = openingListIndex < 0
+            ? -1
+            : layoutContent.IndexOf("</ul>", navbarClassIndex, StringComparison.OrdinalIgnoreCase);
         if (closingListIndex < 0)
         {
-            logger.LogWarning($"Identity navigation was not added to '{layoutPath}' because no navigation list was found.");
+            logger.LogWarning($"Identity navigation was not added to '{layoutPath}' because no navbar navigation list was found.");
             return Task.FromResult(true);
+        }
+
+        fileSystem.CreateDirectoryIfNotExists(sharedDirectory);
+        var loginPartialPath = Path.Combine(sharedDirectory, "_LoginPartial.cshtml");
+        if (!fileSystem.FileExists(loginPartialPath))
+        {
+            fileSystem.WriteAllText(loginPartialPath, GetLoginPartialContent());
         }
 
         var lineStartIndex = layoutContent.LastIndexOf('\n', closingListIndex);

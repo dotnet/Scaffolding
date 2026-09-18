@@ -135,13 +135,79 @@ public class IdentityEndToEndNet10Tests
         }
     }
 
+    [Theory]
+    [InlineData("builder.Services.AddIdentity<ApplicationUser, IdentityRole>()\n    .AddEntityFrameworkStores<ApplicationDbContext>()\n    .AddDefaultTokenProviders()\n    .AddDefaultUI();")]
+    [InlineData("builder.Services.AddIdentityCore<ApplicationUser>()\n    .AddRoles<IdentityRole>()\n    .AddEntityFrameworkStores<ApplicationDbContext>()\n    .AddSignInManager()\n    .AddDefaultTokenProviders()\n    .AddDefaultUI();")]
+    public async Task ScaffoldIdentity_PreservesExistingIdentityRegistration(string identityRegistration)
+    {
+        var projectName = "MvcCustomIdentity";
+        var testDirectory = Path.Combine(Path.GetTempPath(), nameof(IdentityEndToEndNet10Tests), Guid.NewGuid().ToString("N"));
+        var projectDirectory = Path.Combine(testDirectory, projectName);
+        var projectPath = Path.Combine(projectDirectory, $"{projectName}.csproj");
+
+        Directory.CreateDirectory(testDirectory);
+        try
+        {
+            var createResult = await RunDotNetAsync(
+                testDirectory,
+                "new", "mvc",
+                "--name", projectName,
+                "--output", projectDirectory,
+                "--framework", "net10.0",
+                "--auth", "None",
+                "--no-restore");
+            Assert.True(createResult.ExitCode == 0, $"Project creation failed.{Environment.NewLine}{createResult.Output}{Environment.NewLine}{createResult.Error}");
+
+            var programPath = Path.Combine(projectDirectory, "Program.cs");
+            var programContent = File.ReadAllText(programPath);
+            var customIdentitySetup = $"""
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite("Data Source=identity.db"));
+{identityRegistration}
+""";
+            programContent = programContent.Replace(
+                "builder.Services.AddControllersWithViews();",
+                $"builder.Services.AddControllersWithViews();{Environment.NewLine}{customIdentitySetup}",
+                StringComparison.Ordinal);
+            File.WriteAllText(programPath, programContent);
+
+            var scaffoldResult = await ScaffoldCliHelper.RunScaffoldAsync(
+                "net10.0",
+                "identity",
+                "--project", projectPath,
+                "--dataContext", "ApplicationDbContext",
+                "--dbProvider", "sqlite-efcore");
+            Assert.True(scaffoldResult.ExitCode == 0, $"Identity scaffolding failed.{Environment.NewLine}{scaffoldResult.Output}{Environment.NewLine}{scaffoldResult.Error}");
+
+            programContent = File.ReadAllText(programPath);
+            Assert.DoesNotContain("AddDefaultIdentity", programContent);
+            Assert.Equal(1, CountOccurrences(programContent, identityRegistration.Split('(')[0]));
+
+            var buildResult = await ScaffoldCliHelper.RunBuildForFrameworkAsync(projectDirectory, "net10.0");
+            Assert.True(buildResult.ExitCode == 0, $"Scaffolded project failed to build.{Environment.NewLine}{buildResult.Output}{Environment.NewLine}{buildResult.Error}");
+        }
+        finally
+        {
+            try
+            {
+                Directory.Delete(testDirectory, recursive: true);
+            }
+            catch
+            {
+                // Best-effort cleanup; preserve any test failure.
+            }
+        }
+    }
+
     private static void AssertConfiguredProject(string projectDirectory, string hostFolder)
     {
         var programContent = File.ReadAllText(Path.Combine(projectDirectory, "Program.cs"));
         Assert.Contains("AddDatabaseDeveloperPageExceptionFilter", programContent);
         Assert.Contains("AddRazorPages", programContent);
-        Assert.Contains("UseAuthentication", programContent);
+        Assert.Contains("UseMigrationsEndPoint", programContent);
+        Assert.DoesNotContain("UseAuthentication", programContent);
         Assert.Contains("MapRazorPages", programContent);
+        Assert.Contains("WithStaticAssets", programContent);
 
         var sharedDirectory = Path.Combine(projectDirectory, hostFolder, "Shared");
         var layoutContent = File.ReadAllText(Path.Combine(sharedDirectory, "_Layout.cshtml"));
@@ -277,5 +343,18 @@ public class IdentityEndToEndNet10Tests
         var port = ((IPEndPoint)listener.LocalEndpoint).Port;
         listener.Stop();
         return port;
+    }
+
+    private static int CountOccurrences(string source, string value)
+    {
+        var count = 0;
+        var index = 0;
+        while ((index = source.IndexOf(value, index, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            index += value.Length;
+        }
+
+        return count;
     }
 }

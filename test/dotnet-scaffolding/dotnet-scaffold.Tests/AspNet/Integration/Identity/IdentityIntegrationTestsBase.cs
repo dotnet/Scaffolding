@@ -326,6 +326,29 @@ public abstract class IdentityIntegrationTestsBase : IDisposable
         Assert.Contains("Program.cs", content);
     }
 
+    [Fact]
+    public void IdentityChangesConfig_ConfiguresIdentityHost()
+    {
+        var configPath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs", "identityChanges.json");
+        var content = File.ReadAllText(configPath);
+
+        Assert.Contains("\"CheckBlock\": \"$(IdentityRegistrationCheck)\"", content);
+        Assert.Contains("AddDatabaseDeveloperPageExceptionFilter", content);
+        Assert.Contains("UseMigrationsEndPoint", content);
+        Assert.Contains("AddRazorPages", content);
+        Assert.Contains("MapRazorPages", content);
+        Assert.DoesNotContain("UseAuthentication", content);
+
+        if (TargetFramework == "net8.0")
+        {
+            Assert.DoesNotContain("WithStaticAssets", content);
+        }
+        else
+        {
+            Assert.Contains("WithStaticAssets", content);
+        }
+    }
+
     #endregion
 
     #region Template Root — Expected Scaffolder Folders

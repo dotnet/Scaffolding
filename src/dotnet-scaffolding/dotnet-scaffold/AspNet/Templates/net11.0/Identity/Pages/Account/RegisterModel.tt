@@ -35,14 +35,14 @@ public class RegisterModel : PageModel
     private readonly IUserStore<<#= Model.UserClassName #>> _userStore;
     private readonly IUserEmailStore<<#= Model.UserClassName #>> _emailStore;
     private readonly ILogger<RegisterModel> _logger;
-    private readonly IEmailSender _emailSender;
+    private readonly IEmailSender<<#= Model.UserClassName #>> _emailSender;
 
     public RegisterModel(
         UserManager<<#= Model.UserClassName #>> userManager,
         IUserStore<<#= Model.UserClassName #>> userStore,
         SignInManager<<#= Model.UserClassName #>> signInManager,
         ILogger<RegisterModel> logger,
-        IEmailSender emailSender)
+        IEmailSender<<#= Model.UserClassName #>> emailSender)
     {
         _userManager = userManager;
         _userStore = userStore;
@@ -138,8 +138,7 @@ public class RegisterModel : PageModel
                     values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                     protocol: Request.Scheme)!;
 
-                await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>. If you didn't request this email confirmation, you can ignore this email.");
+                await _emailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
                 if (!await _signInManager.CanSignInAsync(user))
                 {

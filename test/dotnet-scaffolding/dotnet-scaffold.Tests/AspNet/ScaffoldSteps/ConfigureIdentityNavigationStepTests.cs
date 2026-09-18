@@ -24,7 +24,7 @@ public class ConfigureIdentityNavigationStepTests
         var sharedDirectory = Path.Combine(projectDirectory, hostFolder, "Shared");
         var layoutPath = Path.Combine(sharedDirectory, "_Layout.cshtml");
         var loginPartialPath = Path.Combine(sharedDirectory, "_LoginPartial.cshtml");
-        var layoutContent = "<nav>\n    <ul>\n    </ul>\n</nav>";
+        var layoutContent = "<nav>\n    <ul class=\"navbar-nav flex-grow-1\">\n    </ul>\n</nav>";
         var writtenFiles = new Dictionary<string, string>();
         var fileSystem = new Mock<IFileSystem>();
         fileSystem.Setup(fs => fs.FileExists(layoutPath)).Returns(true);
@@ -62,6 +62,65 @@ public class ConfigureIdentityNavigationStepTests
         fileSystem.Setup(fs => fs.FileExists(layoutPath)).Returns(true);
         fileSystem.Setup(fs => fs.FileExists(loginPartialPath)).Returns(true);
         fileSystem.Setup(fs => fs.ReadAllText(layoutPath)).Returns("<partial name=\"_LoginPartial\" />");
+
+        var step = new ConfigureIdentityNavigationStep(
+            NullLogger<ConfigureIdentityNavigationStep>.Instance,
+            fileSystem.Object)
+        {
+            ProjectPath = projectPath,
+            UserClassName = "ApplicationUser",
+            UserClassNamespace = "TestProject.Data"
+        };
+
+        var result = await step.ExecuteAsync(new ScaffolderContext(Mock.Of<IScaffolder>()));
+
+        Assert.True(result);
+        fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_AddsLoginPartialToNavbarList()
+    {
+        var projectDirectory = Path.Combine("test", "project");
+        var projectPath = Path.Combine(projectDirectory, "TestProject.csproj");
+        var sharedDirectory = Path.Combine(projectDirectory, "Views", "Shared");
+        var layoutPath = Path.Combine(sharedDirectory, "_Layout.cshtml");
+        var loginPartialPath = Path.Combine(sharedDirectory, "_LoginPartial.cshtml");
+        var layoutContent = "<ul class=\"footer-links\"></ul>\n<nav>\n    <ul class=\"navbar-nav flex-grow-1\">\n    </ul>\n</nav>";
+        var writtenFiles = new Dictionary<string, string>();
+        var fileSystem = new Mock<IFileSystem>();
+        fileSystem.Setup(fs => fs.FileExists(layoutPath)).Returns(true);
+        fileSystem.Setup(fs => fs.FileExists(loginPartialPath)).Returns(false);
+        fileSystem.Setup(fs => fs.ReadAllText(layoutPath)).Returns(layoutContent);
+        fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<string, string>((path, content) => writtenFiles[path] = content);
+
+        var step = new ConfigureIdentityNavigationStep(
+            NullLogger<ConfigureIdentityNavigationStep>.Instance,
+            fileSystem.Object)
+        {
+            ProjectPath = projectPath,
+            UserClassName = "ApplicationUser",
+            UserClassNamespace = "TestProject.Data"
+        };
+
+        var result = await step.ExecuteAsync(new ScaffolderContext(Mock.Of<IScaffolder>()));
+
+        Assert.True(result);
+        Assert.DoesNotContain("<ul class=\"footer-links\"></ul>\n<partial", writtenFiles[layoutPath]);
+        Assert.Contains("</ul>\n    <partial name=\"_LoginPartial\" />\n</nav>", writtenFiles[layoutPath]);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_DoesNotCreatePartialWhenNavbarListIsMissing()
+    {
+        var projectDirectory = Path.Combine("test", "project");
+        var projectPath = Path.Combine(projectDirectory, "TestProject.csproj");
+        var sharedDirectory = Path.Combine(projectDirectory, "Views", "Shared");
+        var layoutPath = Path.Combine(sharedDirectory, "_Layout.cshtml");
+        var fileSystem = new Mock<IFileSystem>();
+        fileSystem.Setup(fs => fs.FileExists(layoutPath)).Returns(true);
+        fileSystem.Setup(fs => fs.ReadAllText(layoutPath)).Returns("<main>@RenderBody()</main>");
 
         var step = new ConfigureIdentityNavigationStep(
             NullLogger<ConfigureIdentityNavigationStep>.Instance,

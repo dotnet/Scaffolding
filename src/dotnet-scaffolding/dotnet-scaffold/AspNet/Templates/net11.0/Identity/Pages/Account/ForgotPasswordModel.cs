@@ -46,10 +46,13 @@ using ");
             this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class ForgotPasswordModel : PageModel" +
                     "\r\n{\r\n    private readonly UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> _userManager;\r\n    private readonly IEmailSender _emailSender;\r\n\r\n    public Fo" +
-                    "rgotPasswordModel(UserManager<");
+            this.Write("> _userManager;\r\n    private readonly IEmailSender<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> userManager, IEmailSender emailSender)\r\n    {\r\n        _userManager = userManag" +
+            this.Write("> _emailSender;\r\n\r\n    public ForgotPasswordModel(UserManager<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> userManager, IEmailSender<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> emailSender)\r\n    {\r\n        _userManager = userManag" +
                     "er;\r\n        _emailSender = emailSender;\r\n    }\r\n\r\n    /// <summary>\r\n    ///   " +
                     "  This API supports the ASP.NET Core Identity default UI infrastructure and is n" +
                     "ot intended to be used\r\n    ///     directly from your code. This API may change" +
@@ -75,11 +78,7 @@ using ");
                     "rlEncode(Encoding.UTF8.GetBytes(code));\r\n            var callbackUrl = Url.Page(" +
                     "\r\n                \"/Account/ResetPassword\",\r\n                pageHandler: null,\r" +
                     "\n                values: new { area = \"Identity\", code },\r\n                proto" +
-                    "col: Request.Scheme)!;\r\n\r\n            await _emailSender.SendEmailAsync(\r\n      " +
-                    "          Input.Email,\r\n                \"Reset your password\",\r\n                " +
-                    "$\"Please reset your password by <a href=\'{HtmlEncoder.Default.Encode(callbackUrl" +
-                    ")}\'>clicking here</a>. If you didn\'t request a password reset, you can ignore th" +
-                    "is email.\");\r\n\r\n            return RedirectToPage(\"./ForgotPasswordConfirmation\"" +
+                    "col: Request.Scheme)!;\r\n\r\n            await _emailSender.SendPasswordResetLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n            return RedirectToPage(\"./ForgotPasswordConfirmation\"" +
                     ");\r\n        }\r\n\r\n        return Page();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }

@@ -33,7 +33,7 @@ public class ExternalLoginModel : PageModel
     private readonly UserManager<<#= Model.UserClassName #>> _userManager;
     private readonly IUserStore<<#= Model.UserClassName #>> _userStore;
     private readonly IUserEmailStore<<#= Model.UserClassName #>> _emailStore;
-    private readonly IEmailSender _emailSender;
+    private readonly IEmailSender<<#= Model.UserClassName #>> _emailSender;
     private readonly ILogger<ExternalLoginModel> _logger;
 
     public ExternalLoginModel(
@@ -41,7 +41,7 @@ public class ExternalLoginModel : PageModel
         UserManager<<#= Model.UserClassName #>> userManager,
         IUserStore<<#= Model.UserClassName #>> userStore,
         ILogger<ExternalLoginModel> logger,
-        IEmailSender emailSender)
+        IEmailSender<<#= Model.UserClassName #>> emailSender)
     {
         _signInManager = signInManager;
         _userManager = userManager;
@@ -179,8 +179,7 @@ public class ExternalLoginModel : PageModel
                         values: new { area = "Identity", userId = userId, code = code },
                         protocol: Request.Scheme)!;
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>. If you didn't request this email confirmation, you can ignore this email.");
+                    await _emailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
                     // If confirmation is required, we need to show the link if we don't have a real email sender
                     if (!await _signInManager.CanSignInAsync(user))

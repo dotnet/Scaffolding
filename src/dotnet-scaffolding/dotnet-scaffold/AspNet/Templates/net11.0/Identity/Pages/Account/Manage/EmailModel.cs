@@ -47,12 +47,15 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _userManager;\r\n    private readonly SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> _signInManager;\r\n    private readonly IEmailSender _emailSender;\r\n\r\n    public " +
-                    "EmailModel(\r\n        UserManager<");
+            this.Write("> _signInManager;\r\n    private readonly IEmailSender<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> _emailSender;\r\n\r\n    public EmailModel(\r\n        UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> userManager,\r\n        SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> signInManager,\r\n        IEmailSender emailSender)\r\n    {\r\n        _userManager " +
+            this.Write("> signInManager,\r\n        IEmailSender<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> emailSender)\r\n    {\r\n        _userManager " +
                     "= userManager;\r\n        _signInManager = signInManager;\r\n        _emailSender = " +
                     "emailSender;\r\n    }\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP." +
                     "NET Core Identity default UI infrastructure and is not intended to be used\r\n    " +
@@ -100,31 +103,24 @@ using ");
                     "      var callbackUrl = Url.Page(\r\n                \"/Account/ConfirmEmailChange\"" +
                     ",\r\n                pageHandler: null,\r\n                values: new { area = \"Ide" +
                     "ntity\", userId = userId, email = Input.NewEmail, code = code },\r\n               " +
-                    " protocol: Request.Scheme)!;\r\n            await _emailSender.SendEmailAsync(\r\n  " +
-                    "              Input.NewEmail,\r\n                \"Confirm your email\",\r\n          " +
-                    "      $\"Please confirm your account by <a href=\'{HtmlEncoder.Default.Encode(call" +
-                    "backUrl)}\'>clicking here</a>. If you didn\'t request this email confirmation, you" +
-                    " can ignore this email.\");\r\n\r\n            StatusMessage = \"Confirmation link to " +
-                    "change email sent. Please check your email.\";\r\n            return RedirectToPage" +
-                    "();\r\n        }\r\n\r\n        StatusMessage = \"Your email is unchanged.\";\r\n        r" +
-                    "eturn RedirectToPage();\r\n    }\r\n\r\n    public async Task<IActionResult> OnPostSen" +
-                    "dVerificationEmailAsync()\r\n    {\r\n        var user = await _userManager.GetUserA" +
-                    "sync(User);\r\n        if (user == null)\r\n        {\r\n            return NotFound($" +
-                    "\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n        }\r\n\r\n" +
-                    "        if (!ModelState.IsValid)\r\n        {\r\n            await LoadAsync(user);\r" +
-                    "\n            return Page();\r\n        }\r\n\r\n        var userId = await _userManage" +
-                    "r.GetUserIdAsync(user);\r\n        var email = await _userManager.GetEmailAsync(us" +
-                    "er);\r\n        var code = await _userManager.GenerateEmailConfirmationTokenAsync(" +
-                    "user);\r\n        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))" +
-                    ";\r\n        var callbackUrl = Url.Page(\r\n            \"/Account/ConfirmEmail\",\r\n  " +
-                    "          pageHandler: null,\r\n            values: new { area = \"Identity\", userI" +
-                    "d = userId, code = code },\r\n            protocol: Request.Scheme)!;\r\n        awa" +
-                    "it _emailSender.SendEmailAsync(\r\n            email!,\r\n            \"Confirm your " +
-                    "email\",\r\n            $\"Please confirm your account by <a href=\'{HtmlEncoder.Defa" +
-                    "ult.Encode(callbackUrl)}\'>clicking here</a>. If you didn\'t request this email co" +
-                    "nfirmation, you can ignore this email.\");\r\n\r\n        StatusMessage = \"Verificati" +
-                    "on email sent. Please check your email.\";\r\n        return RedirectToPage();\r\n   " +
-                    " }\r\n}\r\n");
+                    " protocol: Request.Scheme)!;\r\n            await _emailSender.SendConfirmationLinkAsync(user, Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n            StatusMessage = \"Confirmation li" +
+                    "nk to change email sent. Please check your email.\";\r\n            return Redirect" +
+                    "ToPage();\r\n        }\r\n\r\n        StatusMessage = \"Your email is unchanged.\";\r\n   " +
+                    "     return RedirectToPage();\r\n    }\r\n\r\n    public async Task<IActionResult> OnP" +
+                    "ostSendVerificationEmailAsync()\r\n    {\r\n        var user = await _userManager.Ge" +
+                    "tUserAsync(User);\r\n        if (user == null)\r\n        {\r\n            return NotF" +
+                    "ound($\"Unable to load user with ID \'{_userManager.GetUserId(User)}\'.\");\r\n       " +
+                    " }\r\n\r\n        if (!ModelState.IsValid)\r\n        {\r\n            await LoadAsync(u" +
+                    "ser);\r\n            return Page();\r\n        }\r\n\r\n        var userId = await _user" +
+                    "Manager.GetUserIdAsync(user);\r\n        var email = await _userManager.GetEmailAs" +
+                    "ync(user);\r\n        var code = await _userManager.GenerateEmailConfirmationToken" +
+                    "Async(user);\r\n        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(" +
+                    "code));\r\n        var callbackUrl = Url.Page(\r\n            \"/Account/ConfirmEmail" +
+                    "\",\r\n            pageHandler: null,\r\n            values: new { area = \"Identity\"," +
+                    " userId = userId, code = code },\r\n            protocol: Request.Scheme)!;\r\n     " +
+                    "   await _emailSender.SendConfirmationLinkAsync(user, email!, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n        StatusMessage =" +
+                    " \"Verification email sent. Please check your email.\";\r\n        return RedirectTo" +
+                    "Page();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

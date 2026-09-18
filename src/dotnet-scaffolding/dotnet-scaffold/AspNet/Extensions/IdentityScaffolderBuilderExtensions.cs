@@ -143,6 +143,7 @@ internal static class IdentityScaffolderBuilderExtensions
                 {
                     step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
                 }
+                step.CodeModifierProperties["$(IdentityRegistrationCheck)"] = GetIdentityRegistrationCheck(identitySettings.Project);
 
                 step.ProjectPath = identitySettings.Project;
                 step.CodeChangeOptions = identityModel.ProjectInfo.CodeChangeOptions ?? [];
@@ -155,6 +156,32 @@ internal static class IdentityScaffolderBuilderExtensions
         });
 
         return builder;
+    }
+
+    private static string GetIdentityRegistrationCheck(string projectPath)
+    {
+        var projectDirectory = Path.GetDirectoryName(projectPath);
+        var programPath = string.IsNullOrEmpty(projectDirectory) ? null : Path.Combine(projectDirectory, "Program.cs");
+        if (programPath is null || !File.Exists(programPath))
+        {
+            return "__IdentityRegistrationNotFound__";
+        }
+
+        var programContent = File.ReadAllText(programPath);
+        foreach (var registration in new[]
+        {
+            "builder.Services.AddDefaultIdentity",
+            "builder.Services.AddIdentityCore",
+            "builder.Services.AddIdentity"
+        })
+        {
+            if (programContent.Contains(registration, StringComparison.Ordinal))
+            {
+                return registration;
+            }
+        }
+
+        return "__IdentityRegistrationNotFound__";
     }
 
     /// <summary>

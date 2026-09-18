@@ -28,7 +28,7 @@
             },
             {
               "InsertAfter": "builder.Services.AddDbContext",
-              "CheckBlock": "builder.Services.AddDefaultIdentity",
+              "CheckBlock": "$(IdentityRegistrationCheck)",
               "Block": "builder.Services.AddDefaultIdentity<$(UserClassName)>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<$(DbContextName)>()",
               "LeadingTrivia": {
                 "Newline": true
@@ -51,16 +51,16 @@
               }
             },
             {
-              "CheckBlock": "app.UseAuthentication",
-              "Block": "app.UseAuthentication()",
-              "InsertBefore": [ "app.UseAuthorization()", "app.MapStaticAssets", "app.MapControllerRoute", "app.MapRazorPages", "app.Run();" ],
+              "CheckBlock": "app.UseMigrationsEndPoint",
+              "Block": "if (app.Environment.IsDevelopment())\r\n{\r\n    app.UseMigrationsEndPoint();\r\n}",
+              "InsertAfter": "var app = WebApplication.CreateBuilder.Build();",
               "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
               "CheckBlock": "app.MapRazorPages",
-              "Block": "app.MapRazorPages()",
+              "Block": "app.MapRazorPages().WithStaticAssets()",
               "InsertBefore": [ "app.Run();" ],
               "LeadingTrivia": {
                 "Newline": true

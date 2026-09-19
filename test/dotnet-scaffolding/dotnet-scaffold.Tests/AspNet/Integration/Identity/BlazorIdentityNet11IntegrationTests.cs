@@ -362,6 +362,113 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             $"Project should build after scaffolding.\nOutput: {postOutput}\nError: {postError}");
     }
 
+    [Fact]
+    public async Task Scaffold_BlazorIdentity_Net11_PerPageInteractiveAutoQualifiesRedirectToLogin()
+    {
+        const string aspNetCoreVersion = "11.0.0-rc.2.26455.110";
+        var clientProjectDir = Path.Combine(_testDirectory, "TestProject.Client");
+        var clientProjectPath = Path.Combine(clientProjectDir, "TestProject.Client.csproj");
+        Directory.CreateDirectory(clientProjectDir);
+
+        File.WriteAllText(_testProjectPath, $"""
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <PropertyGroup>
+                <TargetFramework>{TargetFramework}</TargetFramework>
+                <ImplicitUsings>enable</ImplicitUsings>
+                <Nullable>enable</Nullable>
+                <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+              </PropertyGroup>
+              <ItemGroup>
+                <ProjectReference Include="..\TestProject.Client\TestProject.Client.csproj" />
+                <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="{aspNetCoreVersion}" />
+              </ItemGroup>
+            </Project>
+            """);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), """
+            using TestProject.Components;
+
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddRazorComponents()
+                .AddInteractiveServerComponents()
+                .AddInteractiveWebAssemblyComponents();
+
+            var app = builder.Build();
+            app.MapRazorComponents<App>()
+                .AddInteractiveServerRenderMode()
+                .AddInteractiveWebAssemblyRenderMode();
+            app.Run();
+            """);
+        ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
+        File.AppendAllText(
+            Path.Combine(_testProjectDir, "Components", "_Imports.razor"),
+            "@using TestProject.Client\n");
+        var routesPath = Path.Combine(_testProjectDir, "Components", "Routes.razor");
+        File.WriteAllText(routesPath, """
+            @using TestProject.Components.Account.Shared
+
+            <Router AppAssembly="typeof(Program).Assembly">
+                <Found Context="routeData">
+                    <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+                        <NotAuthorized>
+                            <RedirectToLogin />
+                        </NotAuthorized>
+                    </AuthorizeRouteView>
+                    <FocusOnNavigate RouteData="routeData" Selector="h1" />
+                </Found>
+            </Router>
+            """);
+        var legacyRedirectPath = Path.Combine(
+            _testProjectDir,
+            "Components",
+            "Account",
+            "Shared",
+            "RedirectToLogin.razor");
+        Directory.CreateDirectory(Path.GetDirectoryName(legacyRedirectPath)!);
+        File.WriteAllText(legacyRedirectPath, "<p>Legacy redirect component</p>");
+
+        File.WriteAllText(clientProjectPath, $"""
+            <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+              <PropertyGroup>
+                <TargetFramework>{TargetFramework}</TargetFramework>
+                <ImplicitUsings>enable</ImplicitUsings>
+                <Nullable>enable</Nullable>
+                <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+              </PropertyGroup>
+              <ItemGroup>
+                <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="{aspNetCoreVersion}" />
+              </ItemGroup>
+            </Project>
+            """);
+        File.WriteAllText(Path.Combine(clientProjectDir, "Program.cs"), """
+            using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+
+            var builder = WebAssemblyHostBuilder.CreateDefault(args);
+            await builder.Build().RunAsync();
+            """);
+        File.WriteAllText(
+            Path.Combine(clientProjectDir, "_Imports.razor"),
+            ScaffoldCliHelper.GetBlazorImportsRazor() + "@using TestProject.Client\n");
+        File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
+
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "blazor-identity",
+            "--project", _testProjectPath,
+            "--dataContext", "TestDbContext",
+            "--dbProvider", "sqlite-efcore",
+            "--prerelease");
+
+        Assert.True(exitCode == 0, $"CLI scaffold should succeed.\nOutput: {output}\nError: {error}");
+        Assert.Contains("<TestProject.Client.RedirectToLogin />", File.ReadAllText(routesPath));
+        Assert.True(File.Exists(legacyRedirectPath));
+        Assert.True(File.Exists(Path.Combine(clientProjectDir, "RedirectToLogin.razor")));
+
+        var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(
+            postExitCode == 0,
+            $"Project should build after scaffolding.\nOutput: {postOutput}\nError: {postError}");
+    }
+
     private static int CountOccurrences(string value, string substring)
     {
         var count = 0;

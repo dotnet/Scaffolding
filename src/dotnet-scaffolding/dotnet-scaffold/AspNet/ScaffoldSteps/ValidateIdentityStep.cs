@@ -109,6 +109,12 @@ internal class ValidateIdentityStep : ScaffoldStep
             {
                 codeModifierProperties.Add($"$({nameof(IdentityModel.BlazorRenderMode)})", identityModel.BlazorRenderMode);
             }
+            if (!string.IsNullOrEmpty(identityModel.BlazorWebAssemblyClientProjectPath))
+            {
+                codeModifierProperties.Add(
+                    "$(BlazorWebAssemblyClientNamespace)",
+                    Path.GetFileNameWithoutExtension(identityModel.BlazorWebAssemblyClientProjectPath));
+            }
         }
 
         //Install packages and add a DbContext (if needed)
@@ -330,7 +336,10 @@ internal class ValidateIdentityStep : ScaffoldStep
 
     private List<string> GetReferencedBlazorWebAssemblyProjects(string projectPath, string projectDirectory)
     {
-        var runner = DotnetCliRunner.CreateDotNet("reference", ["list", "--project", projectPath]);
+        var runner = DotnetCliRunner.CreateDotNet(
+            "reference",
+            ["list", "--project", projectPath],
+            new Dictionary<string, string> { ["DOTNET_CLI_UI_LANGUAGE"] = "en-US" });
         var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
         if (exitCode != 0)
         {

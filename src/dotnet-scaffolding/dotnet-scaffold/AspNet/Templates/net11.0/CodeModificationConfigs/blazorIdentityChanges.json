@@ -175,6 +175,17 @@
       ]
     },
     {
+      "FileName": "Routes.razor",
+      "Options": [ "InteractiveWebAssembly" ],
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "<RedirectToLogin />" ],
+          "Block": "<$(BlazorWebAssemblyClientNamespace).RedirectToLogin />",
+          "CheckBlock": "<$(BlazorWebAssemblyClientNamespace).RedirectToLogin />"
+        }
+      ]
+    },
+    {
       "FileName": "NavMenu.razor.css",
       "Replacements": [
         {

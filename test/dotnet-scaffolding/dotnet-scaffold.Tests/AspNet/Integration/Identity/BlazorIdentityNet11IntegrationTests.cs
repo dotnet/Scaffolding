@@ -216,7 +216,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
     public async Task Scaffold_BlazorIdentity_Net11_GlobalInteractiveAutoUpdatesClientAndBuilds()
     {
         const string aspNetCoreVersion = "11.0.0-rc.2.26455.110";
-        var clientProjectDir = Path.Combine(_testDirectory, "TestProject.Client");
+        var clientProjectDir = Path.Combine(_testDirectory, "UnexpectedClientDirectory");
         var clientProjectPath = Path.Combine(clientProjectDir, "TestProject.Client.csproj");
         Directory.CreateDirectory(Path.Combine(clientProjectDir, "Layout"));
 
@@ -229,7 +229,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
                 <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
               </PropertyGroup>
               <ItemGroup>
-                <ProjectReference Include="..\TestProject.Client\TestProject.Client.csproj" />
+                <ProjectReference Include="..\UnexpectedClientDirectory\TestProject.Client.csproj" />
                 <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="{aspNetCoreVersion}" />
               </ItemGroup>
             </Project>

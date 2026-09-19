@@ -5,6 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
+using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
@@ -256,7 +257,10 @@ internal class ValidateIdentityStep : ScaffoldStep
 
             if (settings.BlazorScenario && projectInfo.LowestSupportedTargetFramework == TargetFramework.Net11)
             {
-                ConfigureBlazorIdentityModel(scaffoldingModel, codeChangeOptions);
+                if (!ConfigureBlazorIdentityModel(scaffoldingModel, codeChangeOptions))
+                {
+                    return null;
+                }
             }
 
             scaffoldingModel.ProjectInfo.CodeChangeOptions = codeChangeOptions;
@@ -265,13 +269,13 @@ internal class ValidateIdentityStep : ScaffoldStep
         return scaffoldingModel;
     }
 
-    private void ConfigureBlazorIdentityModel(IdentityModel identityModel, List<string> codeChangeOptions)
+    private bool ConfigureBlazorIdentityModel(IdentityModel identityModel, List<string> codeChangeOptions)
     {
         var projectDirectory = identityModel.BaseOutputPath;
         var programPath = Path.Combine(projectDirectory, "Program.cs");
         if (!_fileSystem.FileExists(programPath))
         {
-            return;
+            return true;
         }
 
         var programContent = _fileSystem.ReadAllText(programPath);
@@ -286,18 +290,31 @@ internal class ValidateIdentityStep : ScaffoldStep
         if (usesInteractiveWebAssembly)
         {
             codeChangeOptions.Add("InteractiveWebAssembly");
-            var projectName = Path.GetFileNameWithoutExtension(identityModel.ProjectInfo.ProjectPath);
-            var clientProjectPath = Path.GetFullPath(
-                Path.Combine(projectDirectory, "..", $"{projectName}.Client", $"{projectName}.Client.csproj"));
-            identityModel.BlazorWebAssemblyClientProjectPath = _fileSystem.FileExists(clientProjectPath)
-                ? clientProjectPath
-                : null;
+            var projectPath = identityModel.ProjectInfo.ProjectPath;
+            if (string.IsNullOrEmpty(projectPath))
+            {
+                _logger.LogError("Unable to resolve the Blazor WebAssembly client project because the server project path is unavailable.");
+                return false;
+            }
+
+            var clientProjectPaths = GetReferencedBlazorWebAssemblyProjects(projectPath, projectDirectory);
+            if (clientProjectPaths.Count != 1)
+            {
+                var detail = clientProjectPaths.Count == 0
+                    ? "No referenced project using the Microsoft.NET.Sdk.BlazorWebAssembly SDK was found."
+                    : $"Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK: {string.Join(", ", clientProjectPaths)}.";
+                _logger.LogError(
+                    $"Unable to resolve the Blazor WebAssembly client project for '{identityModel.ProjectInfo.ProjectPath}'. {detail} Ensure the server project has exactly one ProjectReference to its Blazor WebAssembly client.");
+                return false;
+            }
+
+            identityModel.BlazorWebAssemblyClientProjectPath = clientProjectPaths[0];
         }
 
         var appPath = Path.Combine(projectDirectory, "Components", "App.razor");
         if (!_fileSystem.FileExists(appPath))
         {
-            return;
+            return true;
         }
 
         var appContent = _fileSystem.ReadAllText(appPath);
@@ -307,5 +324,27 @@ internal class ValidateIdentityStep : ScaffoldStep
         {
             codeChangeOptions.Add("GlobalInteractive");
         }
+
+        return true;
+    }
+
+    private List<string> GetReferencedBlazorWebAssemblyProjects(string projectPath, string projectDirectory)
+    {
+        var runner = DotnetCliRunner.CreateDotNet("reference", ["list", "--project", projectPath]);
+        var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+        if (exitCode != 0)
+        {
+            _logger.LogError($"Unable to read project references for '{projectPath}'. {stdErr}");
+            return [];
+        }
+
+        return ProjectReferenceParser.ParseProjectReferences(stdOut ?? string.Empty)
+            .Select(reference => Path.GetFullPath(reference, projectDirectory))
+            .Where(_fileSystem.FileExists)
+            .Where(reference => _fileSystem.ReadAllText(reference).Contains(
+                "Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\"",
+                StringComparison.Ordinal))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
     }
 }

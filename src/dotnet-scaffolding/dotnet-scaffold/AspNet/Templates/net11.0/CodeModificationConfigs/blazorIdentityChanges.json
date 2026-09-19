@@ -321,14 +321,14 @@
     },
     {
       "FileName": "Components\\App.razor",
-      "Options": [ "GlobalInteractiveServer" ],
+      "Options": [ "GlobalInteractive" ],
       "Replacements": [
         {
-          "ReplaceSnippet": [ "<HeadOutlet @rendermode=\"InteractiveServer\" />" ],
+          "ReplaceSnippet": [ "<HeadOutlet @rendermode=\"$(BlazorRenderMode)\" />" ],
           "Block": "<HeadOutlet @rendermode=\"PageRenderMode\" />"
         },
         {
-          "ReplaceSnippet": [ "<Routes @rendermode=\"InteractiveServer\" />" ],
+          "ReplaceSnippet": [ "<Routes @rendermode=\"$(BlazorRenderMode)\" />" ],
           "Block": "<Routes @rendermode=\"PageRenderMode\" />"
         },
         {
@@ -341,65 +341,7 @@
             "    private HttpContext HttpContext { get; set; } = default!;",
             "",
             "    private IComponentRenderMode? PageRenderMode =>",
-            "        HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;",
-            "}"
-          ],
-          "CheckBlock": "AcceptsInteractiveRouting()"
-        }
-      ]
-    },
-    {
-      "FileName": "Components\\App.razor",
-      "Options": [ "GlobalInteractiveWebAssembly" ],
-      "Replacements": [
-        {
-          "ReplaceSnippet": [ "<HeadOutlet @rendermode=\"InteractiveWebAssembly\" />" ],
-          "Block": "<HeadOutlet @rendermode=\"PageRenderMode\" />"
-        },
-        {
-          "ReplaceSnippet": [ "<Routes @rendermode=\"InteractiveWebAssembly\" />" ],
-          "Block": "<Routes @rendermode=\"PageRenderMode\" />"
-        },
-        {
-          "ReplaceSnippet": [ "</html>" ],
-          "MultiLineBlock": [
-            "</html>",
-            "",
-            "@code {",
-            "    [CascadingParameter]",
-            "    private HttpContext HttpContext { get; set; } = default!;",
-            "",
-            "    private IComponentRenderMode? PageRenderMode =>",
-            "        HttpContext.AcceptsInteractiveRouting() ? InteractiveWebAssembly : null;",
-            "}"
-          ],
-          "CheckBlock": "AcceptsInteractiveRouting()"
-        }
-      ]
-    },
-    {
-      "FileName": "Components\\App.razor",
-      "Options": [ "GlobalInteractiveAuto" ],
-      "Replacements": [
-        {
-          "ReplaceSnippet": [ "<HeadOutlet @rendermode=\"InteractiveAuto\" />" ],
-          "Block": "<HeadOutlet @rendermode=\"PageRenderMode\" />"
-        },
-        {
-          "ReplaceSnippet": [ "<Routes @rendermode=\"InteractiveAuto\" />" ],
-          "Block": "<Routes @rendermode=\"PageRenderMode\" />"
-        },
-        {
-          "ReplaceSnippet": [ "</html>" ],
-          "MultiLineBlock": [
-            "</html>",
-            "",
-            "@code {",
-            "    [CascadingParameter]",
-            "    private HttpContext HttpContext { get; set; } = default!;",
-            "",
-            "    private IComponentRenderMode? PageRenderMode =>",
-            "        HttpContext.AcceptsInteractiveRouting() ? InteractiveAuto : null;",
+            "        HttpContext.AcceptsInteractiveRouting() ? $(BlazorRenderMode) : null;",
             "}"
           ],
           "CheckBlock": "AcceptsInteractiveRouting()"

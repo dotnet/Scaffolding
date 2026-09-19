@@ -50,4 +50,12 @@ internal class IdentityModel
     /// Used to determine the correct layout path in _ViewStart.cshtml.
     /// </summary>
     public bool IsRazorPages { get; set; }
+    /// <summary>
+    /// Gets or sets the Blazor WebAssembly client project path.
+    /// </summary>
+    public string? BlazorWebAssemblyClientProjectPath { get; set; }
+    /// <summary>
+    /// Gets or sets the global Blazor render mode.
+    /// </summary>
+    public string? BlazorRenderMode { get; set; }
 }

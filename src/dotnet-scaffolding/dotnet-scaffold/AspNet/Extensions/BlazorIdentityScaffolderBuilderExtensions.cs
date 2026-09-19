@@ -71,14 +71,15 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;
-            if (!config.Context.Properties.TryGetValue("BlazorIdentityClientProjectPath", out var clientProjectPathObj) ||
-                clientProjectPathObj is not string clientProjectPath ||
-                string.IsNullOrEmpty(clientProjectPath))
+            if (!config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) ||
+                identityModelObj is not IdentityModel identityModel ||
+                string.IsNullOrEmpty(identityModel.BlazorWebAssemblyClientProjectPath))
             {
                 step.SkipStep = true;
                 return;
             }
 
+            var clientProjectPath = identityModel.BlazorWebAssemblyClientProjectPath;
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile(
                 "blazorIdentityClientChanges.json",
                 System.Reflection.Assembly.GetExecutingAssembly(),
@@ -120,11 +121,9 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["BlazorIdentity"], blazorIdentityModel.ProjectInfo.ProjectPath);
             var applicationUserFile = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Files"], blazorIdentityModel.ProjectInfo.ProjectPath)
                 .FirstOrDefault(x => Path.GetFileName(x).Equals("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
-            context.Properties.TryGetValue("BlazorIdentityClientProjectPath", out var clientProjectPath);
             var blazorIdentityProperties = BlazorIdentityHelper.GetTextTemplatingProperties(
                 allBlazorIdentityFiles,
-                blazorIdentityModel,
-                clientProjectPath as string);
+                blazorIdentityModel);
             var applicationUserProperty = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(applicationUserFile, blazorIdentityModel);
             if (applicationUserProperty is not null)
             {
@@ -249,15 +248,15 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         return builder.WithStep<WrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
-            if (!config.Context.Properties.TryGetValue("BlazorIdentityClientProjectPath", out var clientProjectPathObj) ||
-                clientProjectPathObj is not string clientProjectPath ||
-                string.IsNullOrEmpty(clientProjectPath))
+            if (!config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) ||
+                identityModelObj is not IdentityModel identityModel ||
+                string.IsNullOrEmpty(identityModel.BlazorWebAssemblyClientProjectPath))
             {
                 step.SkipStep = true;
                 return;
             }
 
-            step.ProjectPath = clientProjectPath;
+            step.ProjectPath = identityModel.BlazorWebAssemblyClientProjectPath;
             step.Packages =
             [
                 PackageConstants.AspNetCorePackages.AspNetCoreComponentsWebAssemblyAuthenticationPackage

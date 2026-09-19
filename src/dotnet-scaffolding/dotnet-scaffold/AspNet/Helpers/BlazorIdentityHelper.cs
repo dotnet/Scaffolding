@@ -18,12 +18,10 @@ internal static class BlazorIdentityHelper
     /// </summary>
     /// <param name="allT4TemplatePaths">The paths of all T4 templates.</param>
     /// <param name="blazorIdentityModel">The Blazor identity model containing project and identity information.</param>
-    /// <param name="clientProjectPath">The optional WebAssembly client project path.</param>
     /// <returns>An <see cref="IEnumerable{TextTemplatingProperty}"/> collection containing the text templating properties for the specified templates.</returns>
     internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(
         IEnumerable<string> allT4TemplatePaths,
-        IdentityModel blazorIdentityModel,
-        string? clientProjectPath = null)
+        IdentityModel blazorIdentityModel)
     {
         if (blazorIdentityModel.ProjectInfo is null || string.IsNullOrEmpty(blazorIdentityModel.ProjectInfo.ProjectPath))
         {
@@ -60,8 +58,8 @@ internal static class BlazorIdentityHelper
                 string relativeTemplatePath = templateFullName.Replace('.', Path.DirectorySeparatorChar);
                 string outputFileName = isNet11 &&
                     typeName.Equals("RedirectToLogin", StringComparison.Ordinal) &&
-                    !string.IsNullOrEmpty(clientProjectPath)
-                        ? Path.Combine(Path.GetDirectoryName(clientProjectPath)!, "RedirectToLogin.razor")
+                    !string.IsNullOrEmpty(blazorIdentityModel.BlazorWebAssemblyClientProjectPath)
+                        ? Path.Combine(Path.GetDirectoryName(blazorIdentityModel.BlazorWebAssemblyClientProjectPath)!, "RedirectToLogin.razor")
                         : $"{Path.Combine(GetIdentityComponentsPath(blazorIdentityModel.BaseOutputPath), relativeTemplatePath)}{extension}";
                 textTemplatingProperties.Add(new()
                 {

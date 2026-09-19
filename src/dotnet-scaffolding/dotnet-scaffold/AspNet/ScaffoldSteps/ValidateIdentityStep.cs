@@ -5,7 +5,6 @@ using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
-using Microsoft.DotNet.Scaffolding.Internal.Extensions;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
@@ -105,6 +104,10 @@ internal class ValidateIdentityStep : ScaffoldStep
             context.Properties.Add(nameof(IdentityModel), identityModel);
             codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.IdentityNamespace, identityModel.IdentityNamespace);
             codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.UserClassNamespace, identityModel.UserClassNamespace);
+            if (!string.IsNullOrEmpty(identityModel.BlazorRenderMode))
+            {
+                codeModifierProperties.Add($"$({nameof(IdentityModel.BlazorRenderMode)})", identityModel.BlazorRenderMode);
+            }
         }
 
         //Install packages and add a DbContext (if needed)
@@ -253,7 +256,7 @@ internal class ValidateIdentityStep : ScaffoldStep
 
             if (settings.BlazorScenario && projectInfo.LowestSupportedTargetFramework == TargetFramework.Net11)
             {
-                AddBlazorRenderModeOptions(projectDirectory, settings.Project, codeChangeOptions, context);
+                ConfigureBlazorIdentityModel(scaffoldingModel, codeChangeOptions);
             }
 
             scaffoldingModel.ProjectInfo.CodeChangeOptions = codeChangeOptions;
@@ -262,12 +265,9 @@ internal class ValidateIdentityStep : ScaffoldStep
         return scaffoldingModel;
     }
 
-    private void AddBlazorRenderModeOptions(
-        string projectDirectory,
-        string projectPath,
-        List<string> codeChangeOptions,
-        ScaffolderContext context)
+    private void ConfigureBlazorIdentityModel(IdentityModel identityModel, List<string> codeChangeOptions)
     {
+        var projectDirectory = identityModel.BaseOutputPath;
         var programPath = Path.Combine(projectDirectory, "Program.cs");
         if (!_fileSystem.FileExists(programPath))
         {
@@ -286,11 +286,12 @@ internal class ValidateIdentityStep : ScaffoldStep
         if (usesInteractiveWebAssembly)
         {
             codeChangeOptions.Add("InteractiveWebAssembly");
-            var clientProjectPath = FindBlazorWebAssemblyClientProject(projectDirectory, projectPath);
-            if (clientProjectPath is not null)
-            {
-                context.Properties["BlazorIdentityClientProjectPath"] = clientProjectPath;
-            }
+            var projectName = Path.GetFileNameWithoutExtension(identityModel.ProjectInfo.ProjectPath);
+            var clientProjectPath = Path.GetFullPath(
+                Path.Combine(projectDirectory, "..", $"{projectName}.Client", $"{projectName}.Client.csproj"));
+            identityModel.BlazorWebAssemblyClientProjectPath = _fileSystem.FileExists(clientProjectPath)
+                ? clientProjectPath
+                : null;
         }
 
         var appPath = Path.Combine(projectDirectory, "Components", "App.razor");
@@ -300,48 +301,11 @@ internal class ValidateIdentityStep : ScaffoldStep
         }
 
         var appContent = _fileSystem.ReadAllText(appPath);
-        if (appContent.Contains("@rendermode=\"InteractiveAuto\"", StringComparison.Ordinal))
+        identityModel.BlazorRenderMode = new[] { "InteractiveAuto", "InteractiveServer", "InteractiveWebAssembly" }
+            .FirstOrDefault(renderMode => appContent.Contains($"@rendermode=\"{renderMode}\"", StringComparison.Ordinal));
+        if (identityModel.BlazorRenderMode is not null)
         {
-            codeChangeOptions.Add("GlobalInteractiveAuto");
+            codeChangeOptions.Add("GlobalInteractive");
         }
-        else if (appContent.Contains("@rendermode=\"InteractiveServer\"", StringComparison.Ordinal))
-        {
-            codeChangeOptions.Add("GlobalInteractiveServer");
-        }
-        else if (appContent.Contains("@rendermode=\"InteractiveWebAssembly\"", StringComparison.Ordinal))
-        {
-            codeChangeOptions.Add("GlobalInteractiveWebAssembly");
-        }
-    }
-
-    private string? FindBlazorWebAssemblyClientProject(string projectDirectory, string projectPath)
-    {
-        foreach (var line in _fileSystem.ReadAllLines(projectPath))
-        {
-            const string projectReferencePrefix = "ProjectReference Include=\"";
-            var start = line.IndexOf(projectReferencePrefix, StringComparison.OrdinalIgnoreCase);
-            if (start < 0)
-            {
-                continue;
-            }
-
-            start += projectReferencePrefix.Length;
-            var end = line.IndexOf('"', start);
-            if (end < 0)
-            {
-                continue;
-            }
-
-            var referencedProjectPath = Path.GetFullPath(line[start..end].WithOsPathSeparators(), projectDirectory);
-            if (_fileSystem.FileExists(referencedProjectPath) &&
-                _fileSystem.ReadAllText(referencedProjectPath).Contains(
-                    "Microsoft.NET.Sdk.BlazorWebAssembly",
-                    StringComparison.Ordinal))
-            {
-                return referencedProjectPath;
-            }
-        }
-
-        return null;
     }
 }

@@ -21,7 +21,8 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 /// <summary>
-/// Scaffold step to validate Identity settings and initialize the IdentityModel for scaffolding.
+/// Validates and normalizes Identity settings, analyzes the application, and prepares the model,
+/// DbContext configuration, and code-modification inputs consumed by later scaffolding steps.
 /// </summary>
 //TODO: pull all the duplicate logic from all these 'Validation' ScaffolderSteps into a common one.
 internal class ValidateIdentityStep : ScaffoldStep
@@ -72,75 +73,63 @@ internal class ValidateIdentityStep : ScaffoldStep
     }
 
     /// <summary>
-    /// Executes the step to validate Identity settings and initialize the IdentityModel.
+    /// Prepares Identity scaffolding inputs and publishes them to the context only after preparation succeeds.
     /// </summary>
     /// <param name="context">Scaffolder context.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Task that represents the asynchronous operation, with a boolean result indicating success or failure.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        var identitySettings = ValidateIdentitySettings();
-        var codeModifierProperties = new Dictionary<string, string>();
+        var identitySettings = ValidateAndNormalizeSettings();
         if (identitySettings is null)
         {
             _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, false));
             return false;
         }
-        else
-        {
-            context.Properties.Add(nameof(IdentitySettings), identitySettings);
-        }
 
-        //initialize IdentityModel
         _logger.LogInformation("Initializing scaffolding model...");
-        var identityModel = await GetIdentityModelAsync(context, identitySettings);
+        var identityModel = await PrepareIdentityModelAsync(identitySettings);
         if (identityModel is null)
         {
             _logger.LogError("An error occurred.");
             _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, false));
             return false;
         }
-        else
+
+        var codeModifierProperties = PrepareCodeModificationInputs(identitySettings, identityModel);
+        if (codeModifierProperties is null)
         {
-            context.Properties.Add(nameof(IdentityModel), identityModel);
-            codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.IdentityNamespace, identityModel.IdentityNamespace);
-            codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.UserClassNamespace, identityModel.UserClassNamespace);
-            if (!string.IsNullOrEmpty(identityModel.BlazorRenderMode))
-            {
-                codeModifierProperties.Add($"$({nameof(IdentityModel.BlazorRenderMode)})", identityModel.BlazorRenderMode);
-            }
-            if (!string.IsNullOrEmpty(identityModel.BlazorWebAssemblyClientProjectPath))
-            {
-                codeModifierProperties.Add(
-                    "$(BlazorWebAssemblyClientNamespace)",
-                    Path.GetFileNameWithoutExtension(identityModel.BlazorWebAssemblyClientProjectPath));
-            }
+            _logger.LogError("An error occurred.");
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, false));
+            return false;
         }
 
-        //Install packages and add a DbContext (if needed)
+        // Prepare configuration only; later steps install packages and create the DbContext.
+        DbContextProperties? dbContextProperties = null;
+        string? projectBasePath = null;
         if (identityModel.DbContextInfo.EfScenario)
         {
-            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(identitySettings.Project, identityModel.DbContextInfo);
+            dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(identitySettings.Project, identityModel.DbContextInfo);
             if (dbContextProperties is not null)
             {
                 dbContextProperties.IsIdentityDbContext = true;
                 dbContextProperties.FullIdentityUserName = $"{identityModel.UserClassNamespace}.{identityModel.UserClassName}";
-                context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
             }
 
-            var projectBasePath = Path.GetDirectoryName(identitySettings.Project);
-            if (!string.IsNullOrEmpty(projectBasePath))
-            {
-                context.Properties.Add(Constants.StepConstants.BaseProjectPath, projectBasePath);
-            }
+            projectBasePath = Path.GetDirectoryName(identitySettings.Project);
+        }
 
-            var dbCodeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(identityModel.DbContextInfo);
-            foreach (var kvp in dbCodeModifierProperties)
-            {
-                codeModifierProperties.TryAdd(kvp.Key, kvp.Value);
-            }
+        context.Properties.Add(nameof(IdentitySettings), identitySettings);
+        context.Properties.Add(nameof(IdentityModel), identityModel);
+        context.SetSpecifiedTargetFramework(identityModel.ProjectInfo.LowestSupportedTargetFramework);
+        if (dbContextProperties is not null)
+        {
+            context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
+        }
 
-            codeModifierProperties.TryAdd(Constants.CodeModifierPropertyConstants.UserClassName, identityModel.UserClassName);
+        if (!string.IsNullOrEmpty(projectBasePath))
+        {
+            context.Properties.Add(Constants.StepConstants.BaseProjectPath, projectBasePath);
         }
 
         context.Properties.Add(Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
@@ -149,10 +138,10 @@ internal class ValidateIdentityStep : ScaffoldStep
     }
 
     /// <summary>
-    /// Validates the Identity settings provided by the user.
+    /// Validates required options and applies the DbContext name and database provider defaults.
     /// </summary>
     /// <returns>Returns the validated IdentitySettings object, or null if validation failed.</returns>
-    private IdentitySettings? ValidateIdentitySettings()
+    private IdentitySettings? ValidateAndNormalizeSettings()
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
@@ -165,19 +154,17 @@ internal class ValidateIdentityStep : ScaffoldStep
             _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.DataContextOption} option.");
             return null;
         }
-        else
-        {
-            if (!SyntaxFacts.IsValidIdentifier(DataContext) || DataContext.Equals("DbContext", StringComparison.OrdinalIgnoreCase))
-            {
-                _logger.LogInformation($"Invalid {AspNetConstants.CliOptions.DataContextOption} option");
-                _logger.LogInformation($"Using default '{AspNetConstants.NewDbContext}'");
-                DataContext = AspNetConstants.NewDbContext;
-            }
 
-            if (string.IsNullOrEmpty(DatabaseProvider) || !PackageConstants.EfConstants.IdentityEfPackagesDict.ContainsKey(DatabaseProvider))
-            {
-                DatabaseProvider = PackageConstants.EfConstants.SqlServer;
-            }
+        if (!SyntaxFacts.IsValidIdentifier(DataContext) || DataContext.Equals("DbContext", StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogInformation($"Invalid {AspNetConstants.CliOptions.DataContextOption} option");
+            _logger.LogInformation($"Using default '{AspNetConstants.NewDbContext}'");
+            DataContext = AspNetConstants.NewDbContext;
+        }
+
+        if (string.IsNullOrEmpty(DatabaseProvider) || !PackageConstants.EfConstants.IdentityEfPackagesDict.ContainsKey(DatabaseProvider))
+        {
+            DatabaseProvider = PackageConstants.EfConstants.SqlServer;
         }
 
         return new IdentitySettings
@@ -192,15 +179,13 @@ internal class ValidateIdentityStep : ScaffoldStep
     }
 
     /// <summary>
-    /// Initializes and returns the IdentityModel for scaffolding.
+    /// Discovers project and DbContext information and infers the namespaces and layout for generated files.
     /// </summary>
-    /// <param name="context">The ScaffolderContext for the current operation.</param>
     /// <param name="settings">The IdentitySettings used to initialize the model.</param>
-    /// <returns>A task that represents the asynchronous operation, with a result of the IdentityModel.</returns>
-    private async Task<IdentityModel?> GetIdentityModelAsync(ScaffolderContext context, IdentitySettings settings)
+    /// <returns>The prepared model, or null if project analysis is unavailable.</returns>
+    private async Task<IdentityModel?> PrepareIdentityModelAsync(IdentitySettings settings)
     {
         ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
-        context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
         if (projectInfo is null || projectInfo.CodeService is null || string.IsNullOrEmpty(projectDirectory))
         {
@@ -240,7 +225,7 @@ internal class ValidateIdentityStep : ScaffoldStep
         }
 
         bool isRazorPages = Directory.Exists(Path.Combine(projectDirectory, "Pages"));
-        IdentityModel scaffoldingModel = new()
+        return new IdentityModel
         {
             ProjectInfo = projectInfo,
             DbContextInfo = dbContextInfo,
@@ -252,30 +237,53 @@ internal class ValidateIdentityStep : ScaffoldStep
             Overwrite = settings.Overwrite,
             IsRazorPages = isRazorPages
         };
-
-        if (scaffoldingModel.ProjectInfo is not null && scaffoldingModel.ProjectInfo.CodeService is not null)
-        {
-            var codeChangeOptions = new List<string>();
-            if (scaffoldingModel.DbContextInfo.EfScenario)
-            {
-                codeChangeOptions.Add("EfScenario");
-            }
-
-            if (settings.BlazorScenario && projectInfo.LowestSupportedTargetFramework == TargetFramework.Net11)
-            {
-                if (!ConfigureBlazorIdentityModel(scaffoldingModel, codeChangeOptions))
-                {
-                    return null;
-                }
-            }
-
-            scaffoldingModel.ProjectInfo.CodeChangeOptions = codeChangeOptions;
-        }
-
-        return scaffoldingModel;
     }
 
-    private bool ConfigureBlazorIdentityModel(IdentityModel identityModel, List<string> codeChangeOptions)
+    /// <summary>
+    /// Prepares JSON code-change flags and their placeholder substitutions, including Blazor application analysis.
+    /// </summary>
+    /// <returns>The substitutions, or null if a required Blazor WebAssembly client cannot be resolved.</returns>
+    private Dictionary<string, string>? PrepareCodeModificationInputs(IdentitySettings settings, IdentityModel identityModel)
+    {
+        var codeChangeOptions = new List<string>();
+        var codeModifierProperties = new Dictionary<string, string>
+        {
+            [Constants.CodeModifierPropertyConstants.IdentityNamespace] = identityModel.IdentityNamespace,
+            [Constants.CodeModifierPropertyConstants.UserClassNamespace] = identityModel.UserClassNamespace
+        };
+        if (identityModel.DbContextInfo.EfScenario)
+        {
+            codeChangeOptions.Add("EfScenario");
+        }
+
+        if (settings.BlazorScenario && identityModel.ProjectInfo.LowestSupportedTargetFramework == TargetFramework.Net11 &&
+            !TryPrepareBlazorIdentityInputs(identityModel, codeChangeOptions, codeModifierProperties))
+        {
+            return null;
+        }
+
+        if (identityModel.DbContextInfo.EfScenario)
+        {
+            foreach (var kvp in AspNetDbContextHelper.GetDbContextCodeModifierProperties(identityModel.DbContextInfo))
+            {
+                codeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+            }
+
+            codeModifierProperties.TryAdd(Constants.CodeModifierPropertyConstants.UserClassName, identityModel.UserClassName);
+        }
+
+        identityModel.ProjectInfo.CodeChangeOptions = codeChangeOptions;
+        return codeModifierProperties;
+    }
+
+    /// <summary>
+    /// Detects interactivity and the global render mode, resolves the required client, then derives generation inputs.
+    /// </summary>
+    /// <returns>False if WebAssembly support is detected but exactly one referenced client cannot be resolved.</returns>
+    private bool TryPrepareBlazorIdentityInputs(
+        IdentityModel identityModel,
+        List<string> codeChangeOptions,
+        Dictionary<string, string> codeModifierProperties)
     {
         var projectDirectory = identityModel.BaseOutputPath;
         var programPath = Path.Combine(projectDirectory, "Program.cs");
@@ -292,10 +300,8 @@ internal class ValidateIdentityStep : ScaffoldStep
             BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod,
             StringComparison.Ordinal);
 
-        codeChangeOptions.Add(usesInteractiveServer ? "InteractiveServer" : "NonInteractiveServer");
         if (usesInteractiveWebAssembly)
         {
-            codeChangeOptions.Add("InteractiveWebAssembly");
             var projectPath = identityModel.ProjectInfo.ProjectPath;
             if (string.IsNullOrEmpty(projectPath))
             {
@@ -318,17 +324,28 @@ internal class ValidateIdentityStep : ScaffoldStep
         }
 
         var appPath = Path.Combine(projectDirectory, "Components", "App.razor");
-        if (!_fileSystem.FileExists(appPath))
+        if (_fileSystem.FileExists(appPath))
         {
-            return true;
+            var appContent = _fileSystem.ReadAllText(appPath);
+            identityModel.BlazorRenderMode = new[] { "InteractiveAuto", "InteractiveServer", "InteractiveWebAssembly" }
+                .FirstOrDefault(renderMode => appContent.Contains($"@rendermode=\"{renderMode}\"", StringComparison.Ordinal));
         }
 
-        var appContent = _fileSystem.ReadAllText(appPath);
-        identityModel.BlazorRenderMode = new[] { "InteractiveAuto", "InteractiveServer", "InteractiveWebAssembly" }
-            .FirstOrDefault(renderMode => appContent.Contains($"@rendermode=\"{renderMode}\"", StringComparison.Ordinal));
+        // Keep JSON flags and substitutions together: client changes require a resolved client,
+        // and global routing changes require the same render mode used by the generated components.
+        codeChangeOptions.Add(usesInteractiveServer ? "InteractiveServer" : "NonInteractiveServer");
+        if (usesInteractiveWebAssembly)
+        {
+            codeChangeOptions.Add("InteractiveWebAssembly");
+            codeModifierProperties.Add(
+                "$(BlazorWebAssemblyClientNamespace)",
+                Path.GetFileNameWithoutExtension(identityModel.BlazorWebAssemblyClientProjectPath!));
+        }
+
         if (identityModel.BlazorRenderMode is not null)
         {
             codeChangeOptions.Add("GlobalInteractive");
+            codeModifierProperties.Add($"$({nameof(IdentityModel.BlazorRenderMode)})", identityModel.BlazorRenderMode);
         }
 
         return true;

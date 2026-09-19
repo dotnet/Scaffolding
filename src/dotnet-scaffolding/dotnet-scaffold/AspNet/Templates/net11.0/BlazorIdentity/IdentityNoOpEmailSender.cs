@@ -32,37 +32,36 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write(";\r\n");
 }
             this.Write("using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.IdentityNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
             this.Write(";\r\n\r\n// Remove the \"else if (EmailSender is IdentityNoOpEmailSender)\" block from " +
                     "RegisterConfirmation.razor after updating with a real implementation.\r\ninternal " +
                     "sealed class IdentityNoOpEmailSender : IEmailSender<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(">\r\n{\r\n    private readonly IEmailSender emailSender = new NoOpEmailSender();\r\n\r\n " +
                     "   public Task SendConfirmationLinkAsync(");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@" user, string email, string confirmationLink) =>
         emailSender.SendEmailAsync(email, ""Confirm your email"", $""Please confirm your account by <a href='{confirmationLink}'>clicking here</a>. If you didn't request this email confirmation, you can ignore this email."");
 
     public Task SendPasswordResetLinkAsync(");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@" user, string email, string resetLink) =>
         emailSender.SendEmailAsync(email, ""Reset your password"", $""Please reset your password by <a href='{resetLink}'>clicking here</a>. If you didn't request a password reset, you can ignore this email."");
 
     public Task SendPasswordResetCodeAsync(");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user, string email, string resetCode) =>\r\n        emailSender.SendEmailAsync(ema" +
                     "il, \"Reset your password\", $\"Please reset your password using the following code" +
                     ": {resetCode}. If you didn\'t request a password reset, you can ignore this email" +
                     ".\");\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

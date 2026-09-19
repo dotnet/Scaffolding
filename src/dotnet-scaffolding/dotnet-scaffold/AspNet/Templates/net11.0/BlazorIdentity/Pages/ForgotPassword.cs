@@ -33,49 +33,49 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject IEmailSender<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> EmailSender\r\n@inject NavigationManager NavigationManager\r\n@inject IdentityRedir" +
                     "ectManager RedirectManager\r\n\r\n<PageTitle>Forgot your password?</PageTitle>\r\n\r\n<h" +
                     "1>Forgot your password?</h1>\r\n<h2>Enter your email.</h2>\r\n<hr />\r\n<div class=\"ro" +
                     "w\">\r\n    <div class=\"col-md-4\">\r\n        <EditForm Model=\"Input\" FormName=\"forgo" +
                     "t-password\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n            <Data" +
-                    "AnnotationsValidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
-                    "\r\n            <div class=\"form-floating mb-3\">\r\n                <In" +
-                    "putText @bind-Value=\"Input.Email\" id=\"Input.Email\" class=\"form-control\" autocomp" +
-                    "lete=\"username\" aria-required=\"true\" placeholder=\"name@example.com\" />\r\n        " +
-                    "        <label for=\"Input.Email\" class=\"form-label\">\r\n                    <Displ" +
-                    "ayName For=\"() => Input.Email\" />\r\n                </label>\r\n                <Va" +
-                    "lidationMessage For=\"() => Input.Email\" class=\"text-danger\" />\r\n            </di" +
-                    "v>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Reset" +
-                    " password</button>\r\n        </EditForm>\r\n     </div>\r\n</div>\r\n\r\n@code {\r\n    [Su" +
-                    "pplyParameterFromForm]\r\n    private InputModel Input { get; set; } = default!;\r\n" +
-                    "\r\n    protected override void OnInitialized()\r\n    {\r\n        Input ??= new();\r\n" +
-                    "    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n    {\r\n        var user = " +
-                    "await UserManager.FindByEmailAsync(Input.Email);\r\n        if (user is null || !(" +
-                    "await UserManager.IsEmailConfirmedAsync(user)))\r\n        {\r\n            // Don\'t" +
-                    " reveal that the user does not exist or is not confirmed\r\n            RedirectMa" +
-                    "nager.RedirectTo(\"Account/ForgotPasswordConfirmation\");\r\n            return;\r\n  " +
-                    "      }\r\n\r\n        // For more information on how to enable account confirmation" +
-                    " and password reset please\r\n        // visit https://go.microsoft.com/fwlink/?Li" +
-                    "nkID=532713\r\n        var code = await UserManager.GeneratePasswordResetTokenAsyn" +
-                    "c(user);\r\n        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code" +
-                    "));\r\n        var callbackUrl = NavigationManager.GetUriWithQueryParameters(\r\n   " +
-                    "         NavigationManager.ToAbsoluteUri(\"Account/ResetPassword\").AbsoluteUri,\r\n" +
-                    "            new Dictionary<string, object?> { [\"code\"] = code });\r\n\r\n        awa" +
-                    "it EmailSender.SendPasswordResetLinkAsync(user, Input.Email, HtmlEncoder.Default" +
-                    ".Encode(callbackUrl));\r\n\r\n        RedirectManager.RedirectTo(\"Account/ForgotPass" +
-                    "wordConfirmation\");\r\n    }\r\n\r\n    private sealed class InputModel\r\n    {\r\n      " +
-                    "  [Required]\r\n        [EmailAddress]\r\n        [Display(Name = \"Email\")]\r\n       " +
-                    " public string Email { get; set; } = \"\";\r\n    }\r\n}\r\n");
+                    "AnnotationsValidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n    " +
+                    "            <ValidationSummary class=\"text-danger\" />\r\n            </div>\n\r\n    " +
+                    "        <div class=\"form-floating mb-3\">\r\n                <InputText @bind-Value" +
+                    "=\"Input.Email\" id=\"Input.Email\" class=\"form-control\" autocomplete=\"username\" ari" +
+                    "a-required=\"true\" placeholder=\"name@example.com\" />\r\n                <label for=" +
+                    "\"Input.Email\" class=\"form-label\">\r\n                    <DisplayName For=\"() => I" +
+                    "nput.Email\" />\r\n                </label>\r\n                <ValidationMessage For" +
+                    "=\"() => Input.Email\" class=\"text-danger\" />\r\n            </div>\r\n            <bu" +
+                    "tton type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Reset password</button>\r" +
+                    "\n        </EditForm>\r\n     </div>\r\n</div>\r\n\r\n@code {\r\n    [SupplyParameterFromFo" +
+                    "rm]\r\n    private InputModel Input { get; set; } = default!;\r\n\r\n    protected ove" +
+                    "rride void OnInitialized()\r\n    {\r\n        Input ??= new();\r\n    }\r\n\r\n    privat" +
+                    "e async Task OnValidSubmitAsync()\r\n    {\r\n        var user = await UserManager.F" +
+                    "indByEmailAsync(Input.Email);\r\n        if (user is null || !(await UserManager.I" +
+                    "sEmailConfirmedAsync(user)))\r\n        {\r\n            // Don\'t reveal that the us" +
+                    "er does not exist or is not confirmed\r\n            RedirectManager.RedirectTo(\"A" +
+                    "ccount/ForgotPasswordConfirmation\");\r\n            return;\r\n        }\r\n\r\n        " +
+                    "// For more information on how to enable account confirmation and password reset" +
+                    " please\r\n        // visit https://go.microsoft.com/fwlink/?LinkID=532713\r\n      " +
+                    "  var code = await UserManager.GeneratePasswordResetTokenAsync(user);\r\n        c" +
+                    "ode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        var ca" +
+                    "llbackUrl = NavigationManager.GetUriWithQueryParameters(\r\n            Navigation" +
+                    "Manager.ToAbsoluteUri(\"Account/ResetPassword\").AbsoluteUri,\r\n            new Dic" +
+                    "tionary<string, object?> { [\"code\"] = code });\r\n\r\n        await EmailSender.Send" +
+                    "PasswordResetLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl" +
+                    "));\r\n\r\n        RedirectManager.RedirectTo(\"Account/ForgotPasswordConfirmation\");" +
+                    "\r\n    }\r\n\r\n    private sealed class InputModel\r\n    {\r\n        [Required]\r\n     " +
+                    "   [EmailAddress]\r\n        [Display(Name = \"Email\")]\r\n        public string Emai" +
+                    "l { get; set; } = \"\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

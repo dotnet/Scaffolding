@@ -32,11 +32,11 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> UserManager
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<GenerateRecoveryCodes> Logger
@@ -73,7 +73,7 @@ else
 @code {
     private string? message;
     private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"? user;
     private IEnumerable<string>? recoveryCodes;
 
@@ -120,7 +120,6 @@ else
 ");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

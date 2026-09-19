@@ -32,97 +32,97 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> SignInManager\r\n@inject ILogger<Login> Logger\r\n@inject NavigationManager Navigat" +
                     "ionManager\r\n@inject IdentityRedirectManager RedirectManager\r\n\r\n<PageTitle>Log in" +
                     "</PageTitle>\r\n\r\n<h1>Log in</h1>\r\n<div class=\"row\">\r\n    <div class=\"col-lg-6\">\r\n" +
                     "        <section>\r\n            <StatusMessage Message=\"@errorMessage\" />\r\n      " +
                     "      <EditForm EditContext=\"editContext\" method=\"post\" OnSubmit=\"LoginUser\" For" +
                     "mName=\"login\">\r\n                <DataAnnotationsValidator />\r\n                <h" +
-                    "2>Use a local account to log in.</h2>\r\n                <hr />\r\n                <div role=\"alert\" aria-atomic=\"true\">\r\n                    <ValidationSummary class=\"text-danger\" />\r\n                </div>\r\n" +
-                    "                <div clas" +
-                    "s=\"form-floating mb-3\">\r\n                    <InputText @bind-Value=\"Input.Email" +
-                    "\" id=\"Input.Email\" class=\"form-control\" autocomplete=\"username webauthn\" aria-re" +
-                    "quired=\"true\" placeholder=\"name@example.com\" />\r\n                    <label for=" +
-                    "\"Input.Email\" class=\"form-label\">\r\n                        <DisplayName For=\"() " +
-                    "=> Input.Email\" />\r\n                    </label>\r\n                    <Validatio" +
-                    "nMessage For=\"() => Input.Email\" class=\"text-danger\" />\r\n                </div>\r" +
-                    "\n                <div class=\"form-floating mb-3\">\r\n                <InputText ty" +
-                    "pe=\"password\" @bind-Value=\"Input.Password\" id=\"Input.Password\" class=\"form-contr" +
-                    "ol\" autocomplete=\"current-password\" aria-required=\"true\" placeholder=\"password\" " +
-                    "/>\r\n                <label for=\"Input.Password\" class=\"form-label\">\r\n           " +
-                    "         <DisplayName For=\"() => Input.Password\" />\r\n                </label>\r\n " +
-                    "               <ValidationMessage For=\"() => Input.Password\" class=\"text-danger\"" +
-                    " />\r\n                </div>\r\n                <div class=\"checkbox mb-3\">\r\n      " +
-                    "              <label class=\"form-label\">\r\n                        <InputCheckbox" +
-                    " @bind-Value=\"Input.RememberMe\" class=\"darker-border-checkbox form-check-input\" " +
-                    "/>\r\n                        Remember me\r\n                    </label>\r\n         " +
-                    "       </div>\r\n                <div>\r\n                    <button type=\"submit\" " +
-                    "class=\"w-100 btn btn-lg btn-primary\">Log in</button>\r\n                </div>\r\n  " +
-                    "              <hr />\r\n                <div class=\"d-flex flex-column\">\r\n        " +
-                    "            <span class=\"text-secondary mx-auto mt-2\">OR</span>\r\n               " +
-                    "     <PasskeySubmit Operation=\"PasskeyOperation.Request\" Name=\"Input.Passkey\" Em" +
-                    "ailName=\"Input.Email\" class=\"btn btn-link mx-auto\">Log in with a passkey</Passke" +
-                    "ySubmit>\r\n                </div>\r\n                <hr />\r\n                <div>\r" +
-                    "\n                    <p>\r\n                        <a href=\"Account/ForgotPasswor" +
-                    "d\">Forgot your password?</a>\r\n                    </p>\r\n                    <p>\r" +
-                    "\n                        <a href=\"@(NavigationManager.GetUriWithQueryParameters(" +
-                    "\"Account/Register\", new Dictionary<string, object?> { [\"ReturnUrl\"] = ReturnUrl " +
-                    "}))\">Register as a new user</a>\r\n                    </p>\r\n                    <" +
-                    "p>\r\n                        <a href=\"Account/ResendEmailConfirmation\">Resend ema" +
-                    "il confirmation</a>\r\n                    </p>\r\n                </div>\r\n         " +
-                    "   </EditForm>\r\n        </section>\r\n    </div>\r\n    <div class=\"col-lg-4 col-lg-" +
-                    "offset-2\">\r\n        <section>\r\n            <h3>Use another service to log in.</h" +
-                    "3>\r\n            <hr />\r\n            <ExternalLoginPicker />\r\n        </section>\r" +
-                    "\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private string? errorMessage;\r\n    private E" +
-                    "ditContext editContext = default!;\r\n\r\n    [CascadingParameter]\r\n    private Http" +
-                    "Context HttpContext { get; set; } = default!;\r\n\r\n    [SupplyParameterFromTempDat" +
-                    "a(Name = IdentityRedirectManager.StatusMessageKey)]\r\n    private string? Identit" +
-                    "yStatusMessage { get; set; }\r\n\r\n    [SupplyParameterFromForm]\r\n    private Input" +
-                    "Model Input { get; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    pri" +
-                    "vate string? ReturnUrl { get; set; }\r\n\r\n    protected override async Task OnInit" +
-                    "ializedAsync()\r\n    {\r\n        errorMessage = IdentityStatusMessage;\r\n        Id" +
-                    "entityStatusMessage = null;\r\n        Input ??= new();\r\n\r\n        editContext = n" +
-                    "ew EditContext(Input);\r\n\r\n        if (HttpMethods.IsGet(HttpContext.Request.Meth" +
-                    "od))\r\n        {\r\n            // Clear the existing external cookie to ensure a c" +
-                    "lean login process\r\n            await HttpContext.SignOutAsync(IdentityConstants" +
-                    ".ExternalScheme);\r\n        }\r\n    }\r\n\r\n    public async Task LoginUser()\r\n    {\r" +
-                    "\n        if (!string.IsNullOrEmpty(Input.Passkey?.Error))\r\n        {\r\n          " +
-                    "  errorMessage = $\"Error: {Input.Passkey.Error}\";\r\n            return;\r\n        " +
-                    "}\r\n\r\n        SignInResult result;\r\n        if (!string.IsNullOrEmpty(Input.Passk" +
-                    "ey?.CredentialJson))\r\n        {\r\n            // When performing passkey sign-in," +
-                    " don\'t perform form validation.\r\n            result = await SignInManager.Passke" +
-                    "ySignInAsync(Input.Passkey.CredentialJson);\r\n        }\r\n        else\r\n        {\r" +
-                    "\n            // If doing a password sign-in, validate the form.\r\n            if " +
-                    "(!await editContext.ValidateAsync())\r\n            {\r\n                return;\r\n  " +
-                    "          }\r\n\r\n            // This doesn\'t count login failures towards account " +
-                    "lockout\r\n            // To enable password failures to trigger account lockout, " +
-                    "set lockoutOnFailure: true\r\n            result = await SignInManager.PasswordSig" +
-                    "nInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false)" +
-                    ";\r\n        }\r\n\r\n        if (result.Succeeded)\r\n        {\r\n            Logger.Log" +
-                    "Information(\"User logged in.\");\r\n            RedirectManager.RedirectTo(ReturnUr" +
-                    "l);\r\n        }\r\n        else if (result.RequiresTwoFactor)\r\n        {\r\n         " +
-                    "   RedirectManager.RedirectTo(\r\n                \"Account/LoginWith2fa\",\r\n       " +
-                    "         new() { [\"returnUrl\"] = ReturnUrl, [\"rememberMe\"] = Input.RememberMe })" +
-                    ";\r\n        }\r\n        else if (result.IsLockedOut)\r\n        {\r\n            Logge" +
-                    "r.LogWarning(\"User account locked out.\");\r\n            RedirectManager.RedirectT" +
-                    "o(\"Account/Lockout\");\r\n        }\r\n        else\r\n        {\r\n            errorMess" +
-                    "age = \"Error: Invalid login attempt.\";\r\n        }\r\n    }\r\n\r\n    private sealed c" +
-                    "lass InputModel\r\n    {\r\n        [Required]\r\n        [EmailAddress]\r\n        [Dis" +
-                    "play(Name = \"Email\")]\r\n        public string Email { get; set; } = \"\";\r\n\r\n      " +
-                    "  [Required]\r\n        [DataType(DataType.Password)]\r\n        [Display(Name = \"Pa" +
-                    "ssword\")]\r\n        public string Password { get; set; } = \"\";\r\n\r\n        [Displa" +
-                    "y(Name = \"Remember me?\")]\r\n        public bool RememberMe { get; set; }\r\n\r\n     " +
-                    "   public PasskeyInputModel? Passkey { get; set; }\r\n    }\r\n}\r\n");
+                    "2>Use a local account to log in.</h2>\r\n                <hr />\r\n                <" +
+                    "div role=\"alert\" aria-atomic=\"true\">\r\n                    <ValidationSummary cla" +
+                    "ss=\"text-danger\" />\r\n                </div>\n                <div class=\"form-flo" +
+                    "ating mb-3\">\r\n                    <InputText @bind-Value=\"Input.Email\" id=\"Input" +
+                    ".Email\" class=\"form-control\" autocomplete=\"username webauthn\" aria-required=\"tru" +
+                    "e\" placeholder=\"name@example.com\" />\r\n                    <label for=\"Input.Emai" +
+                    "l\" class=\"form-label\">\r\n                        <DisplayName For=\"() => Input.Em" +
+                    "ail\" />\r\n                    </label>\r\n                    <ValidationMessage Fo" +
+                    "r=\"() => Input.Email\" class=\"text-danger\" />\r\n                </div>\r\n          " +
+                    "      <div class=\"form-floating mb-3\">\r\n                <InputText type=\"passwor" +
+                    "d\" @bind-Value=\"Input.Password\" id=\"Input.Password\" class=\"form-control\" autocom" +
+                    "plete=\"current-password\" aria-required=\"true\" placeholder=\"password\" />\r\n       " +
+                    "         <label for=\"Input.Password\" class=\"form-label\">\r\n                    <D" +
+                    "isplayName For=\"() => Input.Password\" />\r\n                </label>\r\n            " +
+                    "    <ValidationMessage For=\"() => Input.Password\" class=\"text-danger\" />\r\n      " +
+                    "          </div>\r\n                <div class=\"checkbox mb-3\">\r\n                 " +
+                    "   <label class=\"form-label\">\r\n                        <InputCheckbox @bind-Valu" +
+                    "e=\"Input.RememberMe\" class=\"darker-border-checkbox form-check-input\" />\r\n       " +
+                    "                 Remember me\r\n                    </label>\r\n                </di" +
+                    "v>\r\n                <div>\r\n                    <button type=\"submit\" class=\"w-10" +
+                    "0 btn btn-lg btn-primary\">Log in</button>\r\n                </div>\r\n             " +
+                    "   <hr />\r\n                <div class=\"d-flex flex-column\">\r\n                   " +
+                    " <span class=\"text-secondary mx-auto mt-2\">OR</span>\r\n                    <Passk" +
+                    "eySubmit Operation=\"PasskeyOperation.Request\" Name=\"Input.Passkey\" EmailName=\"In" +
+                    "put.Email\" class=\"btn btn-link mx-auto\">Log in with a passkey</PasskeySubmit>\r\n " +
+                    "               </div>\r\n                <hr />\r\n                <div>\r\n          " +
+                    "          <p>\r\n                        <a href=\"Account/ForgotPassword\">Forgot y" +
+                    "our password?</a>\r\n                    </p>\r\n                    <p>\r\n          " +
+                    "              <a href=\"@(NavigationManager.GetUriWithQueryParameters(\"Account/Re" +
+                    "gister\", new Dictionary<string, object?> { [\"ReturnUrl\"] = ReturnUrl }))\">Regist" +
+                    "er as a new user</a>\r\n                    </p>\r\n                    <p>\r\n       " +
+                    "                 <a href=\"Account/ResendEmailConfirmation\">Resend email confirma" +
+                    "tion</a>\r\n                    </p>\r\n                </div>\r\n            </EditFo" +
+                    "rm>\r\n        </section>\r\n    </div>\r\n    <div class=\"col-lg-4 col-lg-offset-2\">\r" +
+                    "\n        <section>\r\n            <h3>Use another service to log in.</h3>\r\n       " +
+                    "     <hr />\r\n            <ExternalLoginPicker />\r\n        </section>\r\n    </div>" +
+                    "\r\n</div>\r\n\r\n@code {\r\n    private string? errorMessage;\r\n    private EditContext " +
+                    "editContext = default!;\r\n\r\n    [CascadingParameter]\r\n    private HttpContext Htt" +
+                    "pContext { get; set; } = default!;\r\n\r\n    [SupplyParameterFromTempData(Name = Id" +
+                    "entityRedirectManager.StatusMessageKey)]\r\n    private string? IdentityStatusMess" +
+                    "age { get; set; }\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Input" +
+                    " { get; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string" +
+                    "? ReturnUrl { get; set; }\r\n\r\n    protected override async Task OnInitializedAsyn" +
+                    "c()\r\n    {\r\n        errorMessage = IdentityStatusMessage;\r\n        IdentityStatu" +
+                    "sMessage = null;\r\n        Input ??= new();\r\n\r\n        editContext = new EditCont" +
+                    "ext(Input);\r\n\r\n        if (HttpMethods.IsGet(HttpContext.Request.Method))\r\n     " +
+                    "   {\r\n            // Clear the existing external cookie to ensure a clean login " +
+                    "process\r\n            await HttpContext.SignOutAsync(IdentityConstants.ExternalSc" +
+                    "heme);\r\n        }\r\n    }\r\n\r\n    public async Task LoginUser()\r\n    {\r\n        if" +
+                    " (!string.IsNullOrEmpty(Input.Passkey?.Error))\r\n        {\r\n            errorMess" +
+                    "age = $\"Error: {Input.Passkey.Error}\";\r\n            return;\r\n        }\r\n\r\n      " +
+                    "  SignInResult result;\r\n        if (!string.IsNullOrEmpty(Input.Passkey?.Credent" +
+                    "ialJson))\r\n        {\r\n            // When performing passkey sign-in, don\'t perf" +
+                    "orm form validation.\r\n            result = await SignInManager.PasskeySignInAsyn" +
+                    "c(Input.Passkey.CredentialJson);\r\n        }\r\n        else\r\n        {\r\n          " +
+                    "  // If doing a password sign-in, validate the form.\r\n            if (!await edi" +
+                    "tContext.ValidateAsync())\r\n            {\r\n                return;\r\n            }" +
+                    "\r\n\r\n            // This doesn\'t count login failures towards account lockout\r\n  " +
+                    "          // To enable password failures to trigger account lockout, set lockout" +
+                    "OnFailure: true\r\n            result = await SignInManager.PasswordSignInAsync(In" +
+                    "put.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);\r\n        " +
+                    "}\r\n\r\n        if (result.Succeeded)\r\n        {\r\n            Logger.LogInformation" +
+                    "(\"User logged in.\");\r\n            RedirectManager.RedirectTo(ReturnUrl);\r\n      " +
+                    "  }\r\n        else if (result.RequiresTwoFactor)\r\n        {\r\n            Redirect" +
+                    "Manager.RedirectTo(\r\n                \"Account/LoginWith2fa\",\r\n                ne" +
+                    "w() { [\"returnUrl\"] = ReturnUrl, [\"rememberMe\"] = Input.RememberMe });\r\n        " +
+                    "}\r\n        else if (result.IsLockedOut)\r\n        {\r\n            Logger.LogWarnin" +
+                    "g(\"User account locked out.\");\r\n            RedirectManager.RedirectTo(\"Account/" +
+                    "Lockout\");\r\n        }\r\n        else\r\n        {\r\n            errorMessage = \"Erro" +
+                    "r: Invalid login attempt.\";\r\n        }\r\n    }\r\n\r\n    private sealed class InputM" +
+                    "odel\r\n    {\r\n        [Required]\r\n        [EmailAddress]\r\n        [Display(Name =" +
+                    " \"Email\")]\r\n        public string Email { get; set; } = \"\";\r\n\r\n        [Required" +
+                    "]\r\n        [DataType(DataType.Password)]\r\n        [Display(Name = \"Password\")]\r\n" +
+                    "        public string Password { get; set; } = \"\";\r\n\r\n        [Display(Name = \"R" +
+                    "emember me?\")]\r\n        public bool RememberMe { get; set; }\r\n\r\n        public P" +
+                    "asskeyInputModel? Passkey { get; set; }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

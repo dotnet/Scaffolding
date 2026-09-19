@@ -31,11 +31,11 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> UserManager
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<Disable2fa> Logger
@@ -64,7 +64,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 @code {
     private string? message;
     private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("? user;\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpContext { get; s" +
                     "et; } = default!;\r\n\r\n    [SupplyParameterFromTempData(Name = IdentityRedirectMan" +
                     "ager.StatusMessageKey)]\r\n    private string? IdentityStatusMessage { get; set; }" +
@@ -88,7 +88,6 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "torAuthentication\");\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

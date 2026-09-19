@@ -32,13 +32,13 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> SignInManager\r\n@inject IdentityRedirectManager RedirectManager\r\n\r\n<PageTitle>Co" +
                     "nfirm email change</PageTitle>\r\n\r\n<h1>Confirm email change</h1>\r\n\r\n<StatusMessag" +
                     "e Message=\"@message\" />\r\n\r\n@code {\r\n    private string? message;\r\n\r\n    [Cascadi" +
@@ -67,7 +67,6 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "ge = \"Thank you for confirming your email change.\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

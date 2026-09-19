@@ -32,43 +32,44 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> SignInManager\r\n@inject IdentityRedirectManager RedirectManager\r\n@inject ILogger" +
                     "<ChangePassword> Logger\r\n\r\n<PageTitle>Change password</PageTitle>\r\n\r\n<h3>Change " +
                     "password</h3>\r\n<StatusMessage Message=\"@message\" />\r\n<div class=\"row\">\r\n    <div" +
                     " class=\"col-xl-6\">\r\n        <EditForm Model=\"Input\" FormName=\"change-password\" O" +
                     "nValidSubmit=\"OnValidSubmitAsync\" method=\"post\">\r\n            <DataAnnotationsVa" +
-                    "lidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
-                    "            <div class=\"form-floating mb-3\">\r\n                <InputText type=\"p" +
-                    "assword\" @bind-Value=\"Input.OldPassword\" id=\"Input.OldPassword\" class=\"form-cont" +
-                    "rol\" autocomplete=\"current-password\" aria-required=\"true\" placeholder=\"Enter the" +
-                    " old password\" />\r\n                <label for=\"Input.OldPassword\" class=\"form-la" +
-                    "bel\">\r\n                    <DisplayName For=\"() => Input.OldPassword\" />\r\n      " +
-                    "          </label>\r\n                <ValidationMessage For=\"() => Input.OldPassw" +
-                    "ord\" class=\"text-danger\" />\r\n            </div>\r\n            <div class=\"form-fl" +
-                    "oating mb-3\">\r\n                <InputText type=\"password\" @bind-Value=\"Input.New" +
-                    "Password\" id=\"Input.NewPassword\" class=\"form-control\" autocomplete=\"new-password" +
-                    "\" aria-required=\"true\" placeholder=\"Enter the new password\" />\r\n                " +
-                    "<label for=\"Input.NewPassword\" class=\"form-label\">\r\n                    <Display" +
-                    "Name For=\"() => Input.NewPassword\" />\r\n                </label>\r\n               " +
-                    " <ValidationMessage For=\"() => Input.NewPassword\" class=\"text-danger\" />\r\n      " +
-                    "      </div>\r\n            <div class=\"form-floating mb-3\">\r\n                <Inp" +
-                    "utText type=\"password\" @bind-Value=\"Input.ConfirmPassword\" id=\"Input.ConfirmPass" +
-                    "word\" class=\"form-control\" autocomplete=\"new-password\" aria-required=\"true\" plac" +
-                    "eholder=\"Enter the new password\" />\r\n                <label for=\"Input.ConfirmPa" +
-                    "ssword\" class=\"form-label\">\r\n                    <DisplayName For=\"() => Input.C" +
-                    "onfirmPassword\" />\r\n                </label>\r\n                <ValidationMessage" +
-                    " For=\"() => Input.ConfirmPassword\" class=\"text-danger\" />\r\n            </div>\r\n " +
-                    "           <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Update pas" +
-                    "sword</button>\r\n        </EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private " +
-                    "string? message;\r\n    private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+                    "lidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <" +
+                    "ValidationSummary class=\"text-danger\" />\r\n            </div>\n            <div cl" +
+                    "ass=\"form-floating mb-3\">\r\n                <InputText type=\"password\" @bind-Valu" +
+                    "e=\"Input.OldPassword\" id=\"Input.OldPassword\" class=\"form-control\" autocomplete=\"" +
+                    "current-password\" aria-required=\"true\" placeholder=\"Enter the old password\" />\r\n" +
+                    "                <label for=\"Input.OldPassword\" class=\"form-label\">\r\n            " +
+                    "        <DisplayName For=\"() => Input.OldPassword\" />\r\n                </label>\r" +
+                    "\n                <ValidationMessage For=\"() => Input.OldPassword\" class=\"text-da" +
+                    "nger\" />\r\n            </div>\r\n            <div class=\"form-floating mb-3\">\r\n    " +
+                    "            <InputText type=\"password\" @bind-Value=\"Input.NewPassword\" id=\"Input" +
+                    ".NewPassword\" class=\"form-control\" autocomplete=\"new-password\" aria-required=\"tr" +
+                    "ue\" placeholder=\"Enter the new password\" />\r\n                <label for=\"Input.N" +
+                    "ewPassword\" class=\"form-label\">\r\n                    <DisplayName For=\"() => Inp" +
+                    "ut.NewPassword\" />\r\n                </label>\r\n                <ValidationMessage" +
+                    " For=\"() => Input.NewPassword\" class=\"text-danger\" />\r\n            </div>\r\n     " +
+                    "       <div class=\"form-floating mb-3\">\r\n                <InputText type=\"passwo" +
+                    "rd\" @bind-Value=\"Input.ConfirmPassword\" id=\"Input.ConfirmPassword\" class=\"form-c" +
+                    "ontrol\" autocomplete=\"new-password\" aria-required=\"true\" placeholder=\"Enter the " +
+                    "new password\" />\r\n                <label for=\"Input.ConfirmPassword\" class=\"form" +
+                    "-label\">\r\n                    <DisplayName For=\"() => Input.ConfirmPassword\" />\r" +
+                    "\n                </label>\r\n                <ValidationMessage For=\"() => Input.C" +
+                    "onfirmPassword\" class=\"text-danger\" />\r\n            </div>\r\n            <button " +
+                    "type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Update password</button>\r\n   " +
+                    "     </EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private string? message;\r\n " +
+                    "   private ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("? user;\r\n    private bool hasPassword;\r\n\r\n    [CascadingParameter]\r\n    private H" +
                     "ttpContext HttpContext { get; set; } = default!;\r\n\r\n    [SupplyParameterFromTemp" +
                     "Data(Name = IdentityRedirectManager.StatusMessageKey)]\r\n    private string? Iden" +
@@ -102,7 +103,6 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "    public string ConfirmPassword { get; set; } = \"\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

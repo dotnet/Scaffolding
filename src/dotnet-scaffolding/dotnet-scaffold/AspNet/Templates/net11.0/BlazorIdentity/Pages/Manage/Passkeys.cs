@@ -31,14 +31,14 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("@using Microsoft.AspNetCore.Identity\r\n@using System.ComponentModel.DataAnnotation" +
                     "s\r\n@using System.Buffers.Text\r\n\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> SignInManager\r\n@inject IdentityRedirectManager RedirectManager\r\n\r\n<PageTitle>Ma" +
                     "nage your passkeys</PageTitle>\r\n\r\n<h3>Manage your passkeys</h3>\r\n\r\n<StatusMessag" +
                     "e Message=\"@message\" />\r\n\r\n@if (currentPasskeys is { Count: > 0 })\r\n{\r\n    <tabl" +
@@ -66,7 +66,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "bmit Operation=\"PasskeyOperation.Create\" Name=\"Input\" class=\"btn btn-primary\">Ad" +
                     "d a new passkey</PasskeySubmit>\r\n    }\r\n\r\n</form>\r\n\r\n@code {\r\n    private const " +
                     "int MaxPasskeyCount = 100;\r\n\r\n    private string? message;\r\n    private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("? user;\r\n    private IList<UserPasskeyInfo>? currentPasskeys;\r\n\r\n    [CascadingPa" +
                     "rameter]\r\n    private HttpContext HttpContext { get; set; } = default!;\r\n\r\n    [" +
                     "SupplyParameterFromTempData(Name = IdentityRedirectManager.StatusMessageKey)]\r\n " +
@@ -131,7 +131,6 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "essfully.\";\r\n        RedirectManager.RedirectToCurrentPage();\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

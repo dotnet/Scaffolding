@@ -33,43 +33,44 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject IEmailSender<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> EmailSender\r\n@inject NavigationManager NavigationManager\r\n@inject IdentityRedir" +
                     "ectManager RedirectManager\r\n\r\n<PageTitle>Manage email</PageTitle>\r\n\r\n<h3>Manage " +
                     "email</h3>\r\n\r\n<StatusMessage Message=\"@message\"/>\r\n<div class=\"row\">\r\n    <div c" +
                     "lass=\"col-xl-6\">\r\n        <form @onsubmit=\"OnSendEmailVerificationAsync\" @formna" +
                     "me=\"send-verification\" id=\"send-verification-form\" method=\"post\">\r\n        </for" +
                     "m>\r\n        <EditForm Model=\"Input\" FormName=\"change-email\" OnValidSubmit=\"OnVal" +
-                    "idSubmitAsync\" method=\"post\">\r\n            <DataAnnotationsValidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
-                    "            @if (is" +
-                    "EmailConfirmed)\r\n            {\r\n                <div class=\"form-floating mb-3 i" +
-                    "nput-group\">\r\n                    <input type=\"text\" value=\"@email\" id=\"email\" c" +
-                    "lass=\"form-control\" placeholder=\"Enter your email\" disabled />\r\n                " +
-                    "    <div class=\"input-group-append\">\r\n                        <span class=\"h-100" +
-                    " input-group-text text-success font-weight-bold\">✓</span>\r\n                    <" +
-                    "/div>\r\n                    <label for=\"email\" class=\"form-label\">Email</label>\r\n" +
-                    "                </div>\r\n            }\r\n            else\r\n            {\r\n        " +
-                    "        <div class=\"form-floating mb-3\">\r\n                    <input type=\"text\"" +
-                    " value=\"@email\" id=\"email\" class=\"form-control\" placeholder=\"Enter your email\" d" +
-                    "isabled />\r\n                    <label for=\"email\" class=\"form-label\">Email</lab" +
-                    "el>\r\n                    <button type=\"submit\" class=\"btn btn-link\" form=\"send-v" +
-                    "erification-form\">Send verification email</button>\r\n                </div>\r\n    " +
-                    "        }\r\n            <div class=\"form-floating mb-3\">\r\n                <InputT" +
-                    "ext @bind-Value=\"Input.NewEmail\" id=\"Input.NewEmail\" class=\"form-control\" autoco" +
-                    "mplete=\"email\" aria-required=\"true\" placeholder=\"Enter a new email\" />\r\n        " +
-                    "        <label for=\"Input.NewEmail\" class=\"form-label\">\r\n                    <Di" +
-                    "splayName For=\"() => Input.NewEmail\" />\r\n                </label>\r\n             " +
-                    "   <ValidationMessage For=\"() => Input.NewEmail\" class=\"text-danger\" />\r\n       " +
-                    "     </div>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg btn-prima" +
-                    "ry\">Change email</button>\r\n        </EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n " +
-                    "   private string? message;\r\n    private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+                    "idSubmitAsync\" method=\"post\">\r\n            <DataAnnotationsValidator />\r\n       " +
+                    "     <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary c" +
+                    "lass=\"text-danger\" />\r\n            </div>\n            @if (isEmailConfirmed)\r\n  " +
+                    "          {\r\n                <div class=\"form-floating mb-3 input-group\">\r\n     " +
+                    "               <input type=\"text\" value=\"@email\" id=\"email\" class=\"form-control\"" +
+                    " placeholder=\"Enter your email\" disabled />\r\n                    <div class=\"inp" +
+                    "ut-group-append\">\r\n                        <span class=\"h-100 input-group-text t" +
+                    "ext-success font-weight-bold\">✓</span>\r\n                    </div>\r\n            " +
+                    "        <label for=\"email\" class=\"form-label\">Email</label>\r\n                </d" +
+                    "iv>\r\n            }\r\n            else\r\n            {\r\n                <div class=" +
+                    "\"form-floating mb-3\">\r\n                    <input type=\"text\" value=\"@email\" id=" +
+                    "\"email\" class=\"form-control\" placeholder=\"Enter your email\" disabled />\r\n       " +
+                    "             <label for=\"email\" class=\"form-label\">Email</label>\r\n              " +
+                    "      <button type=\"submit\" class=\"btn btn-link\" form=\"send-verification-form\">S" +
+                    "end verification email</button>\r\n                </div>\r\n            }\r\n        " +
+                    "    <div class=\"form-floating mb-3\">\r\n                <InputText @bind-Value=\"In" +
+                    "put.NewEmail\" id=\"Input.NewEmail\" class=\"form-control\" autocomplete=\"email\" aria" +
+                    "-required=\"true\" placeholder=\"Enter a new email\" />\r\n                <label for=" +
+                    "\"Input.NewEmail\" class=\"form-label\">\r\n                    <DisplayName For=\"() =" +
+                    "> Input.NewEmail\" />\r\n                </label>\r\n                <ValidationMessa" +
+                    "ge For=\"() => Input.NewEmail\" class=\"text-danger\" />\r\n            </div>\r\n      " +
+                    "      <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Change email</b" +
+                    "utton>\r\n        </EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private string? " +
+                    "message;\r\n    private ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("? user;\r\n    private string? email;\r\n    private bool isEmailConfirmed;\r\n\r\n    [C" +
                     "ascadingParameter]\r\n    private HttpContext HttpContext { get; set; } = default!" +
                     ";\r\n\r\n    [SupplyParameterFromTempData(Name = IdentityRedirectManager.StatusMessa" +
@@ -112,7 +113,6 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "wEmail { get; set; }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

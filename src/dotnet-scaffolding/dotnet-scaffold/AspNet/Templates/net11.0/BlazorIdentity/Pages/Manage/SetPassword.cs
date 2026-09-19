@@ -32,35 +32,36 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> SignInManager\r\n@inject IdentityRedirectManager RedirectManager\r\n\r\n<PageTitle>Se" +
                     "t password</PageTitle>\r\n\r\n<h3>Set your password</h3>\r\n<StatusMessage Message=\"@m" +
                     "essage\" />\r\n<p class=\"text-info\">\r\n    You do not have a local username/password" +
                     " for this site. Add a local\r\n    account so you can log in without an external l" +
                     "ogin.\r\n</p>\r\n<div class=\"row\">\r\n    <div class=\"col-xl-6\">\r\n        <EditForm Mo" +
                     "del=\"Input\" FormName=\"set-password\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"p" +
-                    "ost\">\r\n            <DataAnnotationsValidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
-                    "            <div class=\"form-floating mb-3\"" +
-                    ">\r\n                <InputText type=\"password\" @bind-Value=\"Input.NewPassword\" id" +
-                    "=\"Input.NewPassword\" class=\"form-control\" autocomplete=\"new-password\" placeholde" +
-                    "r=\"Enter the new password\" />\r\n                <label for=\"Input.NewPassword\" cl" +
-                    "ass=\"form-label\">New password</label>\r\n                <ValidationMessage For=\"(" +
-                    ") => Input.NewPassword\" class=\"text-danger\" />\r\n            </div>\r\n            " +
-                    "<div class=\"form-floating mb-3\">\r\n                <InputText type=\"password\" @bi" +
-                    "nd-Value=\"Input.ConfirmPassword\" id=\"Input.ConfirmPassword\" class=\"form-control\"" +
-                    " autocomplete=\"new-password\" placeholder=\"Enter the new password\" />\r\n          " +
-                    "      <label for=\"Input.ConfirmPassword\" class=\"form-label\">Confirm password</la" +
-                    "bel>\r\n                <ValidationMessage For=\"() => Input.ConfirmPassword\" class" +
-                    "=\"text-danger\" />\r\n            </div>\r\n            <button type=\"submit\" class=\"" +
-                    "w-100 btn btn-lg btn-primary\">Set password</button>\r\n        </EditForm>\r\n     <" +
-                    "/div>\r\n</div>\r\n\r\n@code {\r\n    private string? message;\r\n    private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+                    "ost\">\r\n            <DataAnnotationsValidator />\r\n            <div role=\"alert\" a" +
+                    "ria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n " +
+                    "           </div>\n            <div class=\"form-floating mb-3\">\r\n                " +
+                    "<InputText type=\"password\" @bind-Value=\"Input.NewPassword\" id=\"Input.NewPassword" +
+                    "\" class=\"form-control\" autocomplete=\"new-password\" placeholder=\"Enter the new pa" +
+                    "ssword\" />\r\n                <label for=\"Input.NewPassword\" class=\"form-label\">Ne" +
+                    "w password</label>\r\n                <ValidationMessage For=\"() => Input.NewPassw" +
+                    "ord\" class=\"text-danger\" />\r\n            </div>\r\n            <div class=\"form-fl" +
+                    "oating mb-3\">\r\n                <InputText type=\"password\" @bind-Value=\"Input.Con" +
+                    "firmPassword\" id=\"Input.ConfirmPassword\" class=\"form-control\" autocomplete=\"new-" +
+                    "password\" placeholder=\"Enter the new password\" />\r\n                <label for=\"I" +
+                    "nput.ConfirmPassword\" class=\"form-label\">Confirm password</label>\r\n             " +
+                    "   <ValidationMessage For=\"() => Input.ConfirmPassword\" class=\"text-danger\" />\r\n" +
+                    "            </div>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg bt" +
+                    "n-primary\">Set password</button>\r\n        </EditForm>\r\n     </div>\r\n</div>\r\n\r\n@c" +
+                    "ode {\r\n    private string? message;\r\n    private ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("? user;\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpContext { get; s" +
                     "et; } = default!;\r\n\r\n    [SupplyParameterFromTempData(Name = IdentityRedirectMan" +
                     "ager.StatusMessageKey)]\r\n    private string? IdentityStatusMessage { get; set; }" +
@@ -90,7 +91,6 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     " match.\")]\r\n        public string? ConfirmPassword { get; set; }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

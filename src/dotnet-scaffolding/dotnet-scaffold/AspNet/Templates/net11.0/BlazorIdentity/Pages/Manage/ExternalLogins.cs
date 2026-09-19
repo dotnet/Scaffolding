@@ -32,15 +32,15 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> SignInManager\r\n@inject IUserStore<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserStore\r\n@inject IdentityRedirectManager RedirectManager\r\n\r\n<PageTitle>Manage" +
                     " your external logins</PageTitle>\r\n\r\n<StatusMessage Message=\"@message\" />\r\n@if (" +
                     "currentLogins?.Count > 0)\r\n{\r\n    <h3>Registered Logins</h3>\r\n    <table class=\"" +
@@ -68,7 +68,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "            </button>\r\n                }\r\n            </p>\r\n        </div>\r\n    " +
                     "</form>\r\n}\r\n\r\n@code {\r\n    public const string LinkLoginCallbackAction = \"LinkLo" +
                     "ginCallback\";\r\n\r\n    private string? message;\r\n    private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"? user;
     private IList<UserLoginInfo>? currentLogins;
     private IList<AuthenticationScheme>? otherLogins;
@@ -108,7 +108,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 
         string? passwordHash = null;
         if (UserStore is IUserPasswordStore<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> userPasswordStore)\r\n        {\r\n            passwordHash = await userPasswordSto" +
                     "re.GetPasswordHashAsync(user, HttpContext.RequestAborted);\r\n        }\r\n\r\n       " +
                     " showRemoveButton = passwordHash is not null || currentLogins.Count > 1;\r\n\r\n    " +
@@ -140,7 +140,6 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "directManager.RedirectToCurrentPage();\r\n        }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

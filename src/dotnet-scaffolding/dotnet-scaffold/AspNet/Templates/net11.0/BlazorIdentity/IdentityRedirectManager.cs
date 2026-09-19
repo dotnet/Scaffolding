@@ -9,6 +9,9 @@
 // ------------------------------------------------------------------------------
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorIdentity
 {
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Linq;
     using System;
 
     /// <summary>
@@ -23,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorIdentity
         public virtual string TransformText()
         {
             this.Write("using Microsoft.AspNetCore.Components;\r\n\r\nnamespace ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.IdentityNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
             this.Write(@";
 
 internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
@@ -58,7 +61,6 @@ internal sealed class IdentityRedirectManager(NavigationManager navigationManage
 ");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

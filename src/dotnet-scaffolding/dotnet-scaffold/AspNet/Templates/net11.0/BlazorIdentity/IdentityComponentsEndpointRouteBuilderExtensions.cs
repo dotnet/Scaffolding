@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorIdentity
     foreach (var usingNamespace in sortedUsings)
     {
             this.Write("using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( usingNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(usingNamespace));
             this.Write(";\r\n");
   }
 
@@ -68,7 +68,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         accountGroup.MapPost(""/PerformExternalLogin"", (
             HttpContext context,
             [FromServices] SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> signInManager,
             [FromForm] string provider,
             [FromForm] string returnUrl) =>
@@ -89,7 +89,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         accountGroup.MapPost(""/Logout"", async (
             ClaimsPrincipal user,
             [FromServices] SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> signInManager,
             [FromForm] string returnUrl) =>
         {
@@ -100,9 +100,9 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         accountGroup.MapPost(""/PasskeyCreationOptions"", [RequireAntiforgeryToken] async (
             HttpContext context,
             [FromServices] UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> userManager,\r\n            [FromServices] SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> signInManager) =>
         {
             var antiforgeryValidationFeature = context.Features.Get<IAntiforgeryValidationFeature>();
@@ -131,9 +131,9 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         accountGroup.MapPost(""/PasskeyRequestOptions"", [RequireAntiforgeryToken] async (
             HttpContext context,
             [FromServices] UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> userManager,\r\n            [FromServices] SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> signInManager,
             [FromQuery] string? username) =>
         {
@@ -153,7 +153,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         manageGroup.MapPost(""/LinkExternalLogin"", async (
             HttpContext context,
             [FromServices] SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> signInManager,
             [FromForm] string provider) =>
         {
@@ -175,7 +175,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         manageGroup.MapPost(""/DownloadPersonalData"", [RequireAntiforgeryToken] async (
             HttpContext context,
             [FromServices] UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> userManager,
             [FromServices] AuthenticationStateProvider authenticationStateProvider) =>
         {
@@ -197,7 +197,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             // Only include personal data for download
             var personalData = new Dictionary<string, string>();
             var personalDataProps = typeof(");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@").GetProperties().Where(
                 prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
             foreach (var p in personalDataProps)
@@ -224,7 +224,6 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 ");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

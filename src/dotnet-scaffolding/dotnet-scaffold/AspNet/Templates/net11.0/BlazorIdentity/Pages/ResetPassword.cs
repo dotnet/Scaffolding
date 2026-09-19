@@ -33,67 +33,67 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("\r\n@inject IdentityRedirectManager RedirectManager\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n\r\n<PageTitle>Reset password</PageTitle>\r\n\r\n<h1>Reset password</h1>" +
                     "\r\n<h2>Reset your password.</h2>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-" +
                     "md-4\">\r\n        <StatusMessage Message=\"@Message\" />\r\n        <EditForm Model=\"I" +
                     "nput\" FormName=\"reset-password\" OnValidSubmit=\"OnValidSubmitAsync\" method=\"post\"" +
-                    ">\r\n            <DataAnnotationsValidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
-                    "\r\n            <input type=\"hidden\" name=\"Input." +
-                    "Code\" value=\"@Input.Code\" />\r\n            <div class=\"form-floating mb-3\">\r\n    " +
-                    "            <InputText @bind-Value=\"Input.Email\" id=\"Input.Email\" class=\"form-co" +
-                    "ntrol\" autocomplete=\"username\" aria-required=\"true\" placeholder=\"name@example.co" +
-                    "m\" />\r\n                <label for=\"Input.Email\" class=\"form-label\">\r\n           " +
-                    "         <DisplayName For=\"() => Input.Email\" />\r\n                </label>\r\n    " +
-                    "            <ValidationMessage For=\"() => Input.Email\" class=\"text-danger\" />\r\n " +
-                    "           </div>\r\n            <div class=\"form-floating mb-3\">\r\n               " +
-                    " <InputText type=\"password\" @bind-Value=\"Input.Password\" id=\"Input.Password\" cla" +
-                    "ss=\"form-control\" autocomplete=\"new-password\" aria-required=\"true\" placeholder=\"" +
-                    "password\" />\r\n                <label for=\"Input.Password\" class=\"form-label\">\r\n " +
-                    "                   <DisplayName For=\"() => Input.Password\" />\r\n                <" +
-                    "/label>\r\n                <ValidationMessage For=\"() => Input.Password\" class=\"te" +
-                    "xt-danger\" />\r\n            </div>\r\n            <div class=\"form-floating mb-3\">\r" +
-                    "\n                <InputText type=\"password\" @bind-Value=\"Input.ConfirmPassword\" " +
-                    "id=\"Input.ConfirmPassword\" class=\"form-control\" autocomplete=\"new-password\" aria" +
-                    "-required=\"true\" placeholder=\"password\" />\r\n                <label for=\"Input.Co" +
-                    "nfirmPassword\" class=\"form-label\">\r\n                    <DisplayName For=\"() => " +
-                    "Input.ConfirmPassword\" />\r\n                </label>\r\n                <Validation" +
-                    "Message For=\"() => Input.ConfirmPassword\" class=\"text-danger\" />\r\n            </" +
-                    "div>\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Res" +
-                    "et</button>\r\n        </EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private IEn" +
-                    "umerable<IdentityError>? identityErrors;\r\n\r\n    [SupplyParameterFromForm]\r\n    p" +
-                    "rivate InputModel Input { get; set; } = default!;\r\n\r\n    [SupplyParameterFromQue" +
-                    "ry]\r\n    private string? Code { get; set; }\r\n\r\n    private string? Message => id" +
-                    "entityErrors is null ? null : $\"Error: {string.Join(\", \", identityErrors.Select(" +
-                    "error => error.Description))}\";\r\n\r\n    protected override void OnInitialized()\r\n" +
-                    "    {\r\n        Input ??= new();\r\n\r\n        if (Code is null)\r\n        {\r\n       " +
-                    "     RedirectManager.RedirectTo(\"Account/InvalidPasswordReset\");\r\n            re" +
-                    "turn;\r\n        }\r\n\r\n        Input.Code = Encoding.UTF8.GetString(WebEncoders.Bas" +
-                    "e64UrlDecode(Code));\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n    " +
-                    "{\r\n        var user = await UserManager.FindByEmailAsync(Input.Email);\r\n        " +
-                    "if (user is null)\r\n        {\r\n            // Don\'t reveal that the user does not" +
-                    " exist\r\n            RedirectManager.RedirectTo(\"Account/ResetPasswordConfirmatio" +
-                    "n\");\r\n            return;\r\n        }\r\n\r\n        var result = await UserManager.R" +
-                    "esetPasswordAsync(user, Input.Code, Input.Password);\r\n        if (result.Succeed" +
-                    "ed)\r\n        {\r\n            RedirectManager.RedirectTo(\"Account/ResetPasswordCon" +
-                    "firmation\");\r\n            return;\r\n        }\r\n\r\n        identityErrors = result." +
-                    "Errors;\r\n    }\r\n\r\n    private sealed class InputModel\r\n    {\r\n        [Required]" +
-                    "\r\n        [EmailAddress]\r\n        [Display(Name = \"Email\")]\r\n        public stri" +
-                    "ng Email { get; set; } = \"\";\r\n\r\n        [Required]\r\n        [StringLength(100, E" +
-                    "rrorMessage = \"The {0} must be at least {2} and at max {1} characters long.\", Mi" +
-                    "nimumLength = 6)]\r\n        [DataType(DataType.Password)]\r\n        [Display(Name " +
-                    "= \"Password\")]\r\n        public string Password { get; set; } = \"\";\r\n\r\n        [D" +
-                    "ataType(DataType.Password)]\r\n        [Display(Name = \"Confirm password\")]\r\n     " +
-                    "   [Compare(\"Password\", ErrorMessage = \"The password and confirmation password d" +
-                    "o not match.\")]\r\n        public string ConfirmPassword { get; set; } = \"\";\r\n\r\n  " +
-                    "      [Required]\r\n        public string Code { get; set; } = \"\";\r\n    }\r\n}\r\n");
+                    ">\r\n            <DataAnnotationsValidator />\r\n            <div role=\"alert\" aria-" +
+                    "atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n     " +
+                    "       </div>\n\r\n            <input type=\"hidden\" name=\"Input.Code\" value=\"@Input" +
+                    ".Code\" />\r\n            <div class=\"form-floating mb-3\">\r\n                <InputT" +
+                    "ext @bind-Value=\"Input.Email\" id=\"Input.Email\" class=\"form-control\" autocomplete" +
+                    "=\"username\" aria-required=\"true\" placeholder=\"name@example.com\" />\r\n            " +
+                    "    <label for=\"Input.Email\" class=\"form-label\">\r\n                    <DisplayNa" +
+                    "me For=\"() => Input.Email\" />\r\n                </label>\r\n                <Valida" +
+                    "tionMessage For=\"() => Input.Email\" class=\"text-danger\" />\r\n            </div>\r\n" +
+                    "            <div class=\"form-floating mb-3\">\r\n                <InputText type=\"p" +
+                    "assword\" @bind-Value=\"Input.Password\" id=\"Input.Password\" class=\"form-control\" a" +
+                    "utocomplete=\"new-password\" aria-required=\"true\" placeholder=\"password\" />\r\n     " +
+                    "           <label for=\"Input.Password\" class=\"form-label\">\r\n                    " +
+                    "<DisplayName For=\"() => Input.Password\" />\r\n                </label>\r\n          " +
+                    "      <ValidationMessage For=\"() => Input.Password\" class=\"text-danger\" />\r\n    " +
+                    "        </div>\r\n            <div class=\"form-floating mb-3\">\r\n                <I" +
+                    "nputText type=\"password\" @bind-Value=\"Input.ConfirmPassword\" id=\"Input.ConfirmPa" +
+                    "ssword\" class=\"form-control\" autocomplete=\"new-password\" aria-required=\"true\" pl" +
+                    "aceholder=\"password\" />\r\n                <label for=\"Input.ConfirmPassword\" clas" +
+                    "s=\"form-label\">\r\n                    <DisplayName For=\"() => Input.ConfirmPasswo" +
+                    "rd\" />\r\n                </label>\r\n                <ValidationMessage For=\"() => " +
+                    "Input.ConfirmPassword\" class=\"text-danger\" />\r\n            </div>\r\n            <" +
+                    "button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Reset</button>\r\n      " +
+                    "  </EditForm>\r\n    </div>\r\n</div>\r\n\r\n@code {\r\n    private IEnumerable<IdentityEr" +
+                    "ror>? identityErrors;\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel I" +
+                    "nput { get; set; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    private st" +
+                    "ring? Code { get; set; }\r\n\r\n    private string? Message => identityErrors is nul" +
+                    "l ? null : $\"Error: {string.Join(\", \", identityErrors.Select(error => error.Desc" +
+                    "ription))}\";\r\n\r\n    protected override void OnInitialized()\r\n    {\r\n        Inpu" +
+                    "t ??= new();\r\n\r\n        if (Code is null)\r\n        {\r\n            RedirectManage" +
+                    "r.RedirectTo(\"Account/InvalidPasswordReset\");\r\n            return;\r\n        }\r\n\r" +
+                    "\n        Input.Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code))" +
+                    ";\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n    {\r\n        var user" +
+                    " = await UserManager.FindByEmailAsync(Input.Email);\r\n        if (user is null)\r\n" +
+                    "        {\r\n            // Don\'t reveal that the user does not exist\r\n           " +
+                    " RedirectManager.RedirectTo(\"Account/ResetPasswordConfirmation\");\r\n            r" +
+                    "eturn;\r\n        }\r\n\r\n        var result = await UserManager.ResetPasswordAsync(u" +
+                    "ser, Input.Code, Input.Password);\r\n        if (result.Succeeded)\r\n        {\r\n   " +
+                    "         RedirectManager.RedirectTo(\"Account/ResetPasswordConfirmation\");\r\n     " +
+                    "       return;\r\n        }\r\n\r\n        identityErrors = result.Errors;\r\n    }\r\n\r\n " +
+                    "   private sealed class InputModel\r\n    {\r\n        [Required]\r\n        [EmailAdd" +
+                    "ress]\r\n        [Display(Name = \"Email\")]\r\n        public string Email { get; set" +
+                    "; } = \"\";\r\n\r\n        [Required]\r\n        [StringLength(100, ErrorMessage = \"The " +
+                    "{0} must be at least {2} and at max {1} characters long.\", MinimumLength = 6)]\r\n" +
+                    "        [DataType(DataType.Password)]\r\n        [Display(Name = \"Password\")]\r\n   " +
+                    "     public string Password { get; set; } = \"\";\r\n\r\n        [DataType(DataType.Pa" +
+                    "ssword)]\r\n        [Display(Name = \"Confirm password\")]\r\n        [Compare(\"Passwo" +
+                    "rd\", ErrorMessage = \"The password and confirmation password do not match.\")]\r\n  " +
+                    "      public string ConfirmPassword { get; set; } = \"\";\r\n\r\n        [Required]\r\n " +
+                    "       public string Code { get; set; } = \"\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

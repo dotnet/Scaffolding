@@ -34,17 +34,17 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("\r\n@inject SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> SignInManager\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject IUserStore<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserStore\r\n@inject IEmailSender<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> EmailSender\r\n@inject NavigationManager NavigationManager\r\n@inject IdentityRedir" +
                     "ectManager RedirectManager\r\n@inject ILogger<ExternalLogin> Logger\r\n\r\n<PageTitle>" +
                     "Register</PageTitle>\r\n\r\n<StatusMessage Message=\"@message\" />\r\n<h1>Register</h1>\r" +
@@ -54,107 +54,106 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "lick the Register button to finish\r\n    logging in.\r\n</div>\r\n\r\n<div class=\"row\">" +
                     "\r\n    <div class=\"col-md-4\">\r\n        <EditForm Model=\"Input\" OnValidSubmit=\"OnV" +
                     "alidSubmitAsync\" FormName=\"confirmation\" method=\"post\">\r\n            <DataAnnota" +
-                    "tionsValidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n                <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n" +
-                    "            <div class=\"form-floating mb-3\">\r\n                <InputText " +
-                    "@bind-Value=\"Input.Email\" id=\"Input.Email\" class=\"form-control\" autocomplete=\"em" +
-                    "ail\" placeholder=\"Please enter your email.\" />\r\n                <label for=\"Inpu" +
-                    "t.Email\" class=\"form-label\">Email</label>\r\n                <ValidationMessage Fo" +
-                    "r=\"() => Input.Email\" />\r\n            </div>\r\n            <button type=\"submit\" " +
-                    "class=\"w-100 btn btn-lg btn-primary\">Register</button>\r\n        </EditForm>\r\n   " +
-                    " </div>\r\n</div>\r\n\r\n@code {\r\n    public const string LoginCallbackAction = \"Login" +
-                    "Callback\";\r\n\r\n    private string? message;\r\n    private ExternalLoginInfo? exter" +
-                    "nalLoginInfo;\r\n\r\n    [CascadingParameter]\r\n    private HttpContext HttpContext {" +
-                    " get; set; } = default!;\r\n\r\n    [SupplyParameterFromTempData(Name = IdentityRedi" +
-                    "rectManager.StatusMessageKey)]\r\n    private string? IdentityStatusMessage { get;" +
-                    " set; }\r\n\r\n    [SupplyParameterFromForm]\r\n    private InputModel Input { get; se" +
-                    "t; } = default!;\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? RemoteEr" +
-                    "ror { get; set; }\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? ReturnU" +
-                    "rl { get; set; }\r\n\r\n    [SupplyParameterFromQuery]\r\n    private string? Action {" +
-                    " get; set; }\r\n\r\n    private string? ProviderDisplayName => externalLoginInfo?.Pr" +
-                    "oviderDisplayName;\r\n\r\n    protected override async Task OnInitializedAsync()\r\n  " +
-                    "  {\r\n        message = IdentityStatusMessage;\r\n        IdentityStatusMessage = n" +
-                    "ull;\r\n        Input ??= new();\r\n\r\n        if (RemoteError is not null)\r\n        " +
-                    "{\r\n            IdentityStatusMessage = $\"Error from external provider: {RemoteEr" +
-                    "ror}\";\r\n            RedirectManager.RedirectTo(\"Account/Login\");\r\n            re" +
-                    "turn;\r\n        }\r\n\r\n        var info = await SignInManager.GetExternalLoginInfoA" +
-                    "sync();\r\n        if (info is null)\r\n        {\r\n            IdentityStatusMessage" +
-                    " = \"Error loading external login information.\";\r\n            RedirectManager.Red" +
-                    "irectTo(\"Account/Login\");\r\n            return;\r\n        }\r\n\r\n        externalLog" +
-                    "inInfo = info;\r\n\r\n        if (HttpMethods.IsGet(HttpContext.Request.Method))\r\n  " +
-                    "      {\r\n            if (Action == LoginCallbackAction)\r\n            {\r\n        " +
-                    "        await OnLoginCallbackAsync();\r\n                return;\r\n            }\r\n\r" +
-                    "\n            // We should only reach this page via the login callback, so redire" +
-                    "ct back to\r\n            // the login page if we get here some other way.\r\n      " +
-                    "      RedirectManager.RedirectTo(\"Account/Login\");\r\n        }\r\n    }\r\n\r\n    priv" +
-                    "ate async Task OnLoginCallbackAsync()\r\n    {\r\n        if (externalLoginInfo is n" +
-                    "ull)\r\n        {\r\n            IdentityStatusMessage = \"Error loading external log" +
-                    "in information.\";\r\n            RedirectManager.RedirectTo(\"Account/Login\");\r\n   " +
-                    "         return;\r\n        }\r\n\r\n        // Sign in the user with this external lo" +
-                    "gin provider if the user already has a login.\r\n        var result = await SignIn" +
-                    "Manager.ExternalLoginSignInAsync(\r\n            externalLoginInfo.LoginProvider,\r" +
-                    "\n            externalLoginInfo.ProviderKey,\r\n            isPersistent: false,\r\n " +
-                    "           bypassTwoFactor: true);\r\n\r\n        if (result.Succeeded)\r\n        {\r\n" +
-                    "            Logger.LogInformation(\r\n                \"{Name} logged in with {Logi" +
-                    "nProvider} provider.\",\r\n                externalLoginInfo.Principal.Identity?.Na" +
-                    "me,\r\n                externalLoginInfo.LoginProvider);\r\n            RedirectMana" +
-                    "ger.RedirectTo(ReturnUrl);\r\n            return;\r\n        }\r\n        else if (res" +
-                    "ult.IsLockedOut)\r\n        {\r\n            RedirectManager.RedirectTo(\"Account/Loc" +
-                    "kout\");\r\n            return;\r\n        }\r\n\r\n        // If the user does not have " +
-                    "an account, then ask the user to create an account.\r\n        if (externalLoginIn" +
-                    "fo.Principal.HasClaim(c => c.Type == ClaimTypes.Email))\r\n        {\r\n            " +
-                    "Input.Email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email) ?? \"\"" +
-                    ";\r\n        }\r\n    }\r\n\r\n    private async Task OnValidSubmitAsync()\r\n    {\r\n     " +
-                    "   if (externalLoginInfo is null)\r\n        {\r\n            IdentityStatusMessage " +
-                    "= \"Error loading external login information during confirmation.\";\r\n            " +
-                    "RedirectManager.RedirectTo(\"Account/Login\");\r\n            return;\r\n        }\r\n\r\n" +
-                    "        var emailStore = GetEmailStore();\r\n        var user = CreateUser();\r\n\r\n " +
-                    "       await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.Non" +
-                    "e);\r\n        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken" +
-                    ".None);\r\n\r\n        var result = await UserManager.CreateAsync(user);\r\n        if" +
-                    " (result.Succeeded)\r\n        {\r\n            result = await UserManager.AddLoginA" +
-                    "sync(user, externalLoginInfo);\r\n            if (result.Succeeded)\r\n            {" +
-                    "\r\n                Logger.LogInformation(\"User created an account using {Name} pr" +
-                    "ovider.\", externalLoginInfo.LoginProvider);\r\n\r\n                var userId = awai" +
-                    "t UserManager.GetUserIdAsync(user);\r\n                var code = await UserManage" +
-                    "r.GenerateEmailConfirmationTokenAsync(user);\r\n                code = WebEncoders" +
-                    ".Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n\r\n                var callbackU" +
-                    "rl = NavigationManager.GetUriWithQueryParameters(\r\n                    Navigatio" +
-                    "nManager.ToAbsoluteUri(\"Account/ConfirmEmail\").AbsoluteUri,\r\n                   " +
-                    " new Dictionary<string, object?> { [\"userId\"] = userId, [\"code\"] = code });\r\n   " +
-                    "             await EmailSender.SendConfirmationLinkAsync(user, Input.Email, Html" +
-                    "Encoder.Default.Encode(callbackUrl));\r\n\r\n                // If confirmation is required" +
-                    ", we need to show the link if we don't have a real email sender\r\n" +
-                    "                if (!await SignInManager.CanSignInAsync(user))\r\n       " +
-                    "         {\r\n                    RedirectManager.RedirectTo(\"Account/RegisterConf" +
-                    "irmation\", new() { [\"email\"] = Input.Email });\r\n                }\r\n             " +
-                    "   else\r\n                {\r\n                    await SignInManager.SignInAsync(" +
-                    "user, isPersistent: false, externalLoginInfo.LoginProvider);\r\n                  " +
-                    "  RedirectManager.RedirectTo(ReturnUrl);\r\n                }\r\n            }\r\n    " +
-                    "    }\r\n        else\r\n        {\r\n            message = $\"Error: {string.Join(\",\"," +
-                    " result.Errors.Select(error => error.Description))}\";\r\n        }\r\n    }\r\n\r\n    p" +
-                    "rivate ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+                    "tionsValidator />\r\n            <div role=\"alert\" aria-atomic=\"true\">\r\n          " +
+                    "      <ValidationSummary class=\"text-danger\" />\r\n            </div>\r\n           " +
+                    " <div class=\"form-floating mb-3\">\r\n                <InputText @bind-Value=\"Input" +
+                    ".Email\" id=\"Input.Email\" class=\"form-control\" autocomplete=\"email\" placeholder=\"" +
+                    "Please enter your email.\" />\r\n                <label for=\"Input.Email\" class=\"fo" +
+                    "rm-label\">Email</label>\r\n                <ValidationMessage For=\"() => Input.Ema" +
+                    "il\" />\r\n            </div>\r\n            <button type=\"submit\" class=\"w-100 btn b" +
+                    "tn-lg btn-primary\">Register</button>\r\n        </EditForm>\r\n    </div>\r\n</div>\r\n\r" +
+                    "\n@code {\r\n    public const string LoginCallbackAction = \"LoginCallback\";\r\n\r\n    " +
+                    "private string? message;\r\n    private ExternalLoginInfo? externalLoginInfo;\r\n\r\n " +
+                    "   [CascadingParameter]\r\n    private HttpContext HttpContext { get; set; } = def" +
+                    "ault!;\r\n\r\n    [SupplyParameterFromTempData(Name = IdentityRedirectManager.Status" +
+                    "MessageKey)]\r\n    private string? IdentityStatusMessage { get; set; }\r\n\r\n    [Su" +
+                    "pplyParameterFromForm]\r\n    private InputModel Input { get; set; } = default!;\r\n" +
+                    "\r\n    [SupplyParameterFromQuery]\r\n    private string? RemoteError { get; set; }\r" +
+                    "\n\r\n    [SupplyParameterFromQuery]\r\n    private string? ReturnUrl { get; set; }\r\n" +
+                    "\r\n    [SupplyParameterFromQuery]\r\n    private string? Action { get; set; }\r\n\r\n  " +
+                    "  private string? ProviderDisplayName => externalLoginInfo?.ProviderDisplayName;" +
+                    "\r\n\r\n    protected override async Task OnInitializedAsync()\r\n    {\r\n        messa" +
+                    "ge = IdentityStatusMessage;\r\n        IdentityStatusMessage = null;\r\n        Inpu" +
+                    "t ??= new();\r\n\r\n        if (RemoteError is not null)\r\n        {\r\n            Ide" +
+                    "ntityStatusMessage = $\"Error from external provider: {RemoteError}\";\r\n          " +
+                    "  RedirectManager.RedirectTo(\"Account/Login\");\r\n            return;\r\n        }\r\n" +
+                    "\r\n        var info = await SignInManager.GetExternalLoginInfoAsync();\r\n        i" +
+                    "f (info is null)\r\n        {\r\n            IdentityStatusMessage = \"Error loading " +
+                    "external login information.\";\r\n            RedirectManager.RedirectTo(\"Account/L" +
+                    "ogin\");\r\n            return;\r\n        }\r\n\r\n        externalLoginInfo = info;\r\n\r\n" +
+                    "        if (HttpMethods.IsGet(HttpContext.Request.Method))\r\n        {\r\n         " +
+                    "   if (Action == LoginCallbackAction)\r\n            {\r\n                await OnLo" +
+                    "ginCallbackAsync();\r\n                return;\r\n            }\r\n\r\n            // We" +
+                    " should only reach this page via the login callback, so redirect back to\r\n      " +
+                    "      // the login page if we get here some other way.\r\n            RedirectMana" +
+                    "ger.RedirectTo(\"Account/Login\");\r\n        }\r\n    }\r\n\r\n    private async Task OnL" +
+                    "oginCallbackAsync()\r\n    {\r\n        if (externalLoginInfo is null)\r\n        {\r\n " +
+                    "           IdentityStatusMessage = \"Error loading external login information.\";\r" +
+                    "\n            RedirectManager.RedirectTo(\"Account/Login\");\r\n            return;\r\n" +
+                    "        }\r\n\r\n        // Sign in the user with this external login provider if th" +
+                    "e user already has a login.\r\n        var result = await SignInManager.ExternalLo" +
+                    "ginSignInAsync(\r\n            externalLoginInfo.LoginProvider,\r\n            exter" +
+                    "nalLoginInfo.ProviderKey,\r\n            isPersistent: false,\r\n            bypassT" +
+                    "woFactor: true);\r\n\r\n        if (result.Succeeded)\r\n        {\r\n            Logger" +
+                    ".LogInformation(\r\n                \"{Name} logged in with {LoginProvider} provide" +
+                    "r.\",\r\n                externalLoginInfo.Principal.Identity?.Name,\r\n             " +
+                    "   externalLoginInfo.LoginProvider);\r\n            RedirectManager.RedirectTo(Ret" +
+                    "urnUrl);\r\n            return;\r\n        }\r\n        else if (result.IsLockedOut)\r\n" +
+                    "        {\r\n            RedirectManager.RedirectTo(\"Account/Lockout\");\r\n         " +
+                    "   return;\r\n        }\r\n\r\n        // If the user does not have an account, then a" +
+                    "sk the user to create an account.\r\n        if (externalLoginInfo.Principal.HasCl" +
+                    "aim(c => c.Type == ClaimTypes.Email))\r\n        {\r\n            Input.Email = exte" +
+                    "rnalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email) ?? \"\";\r\n        }\r\n    " +
+                    "}\r\n\r\n    private async Task OnValidSubmitAsync()\r\n    {\r\n        if (externalLog" +
+                    "inInfo is null)\r\n        {\r\n            IdentityStatusMessage = \"Error loading e" +
+                    "xternal login information during confirmation.\";\r\n            RedirectManager.Re" +
+                    "directTo(\"Account/Login\");\r\n            return;\r\n        }\r\n\r\n        var emailS" +
+                    "tore = GetEmailStore();\r\n        var user = CreateUser();\r\n\r\n        await UserS" +
+                    "tore.SetUserNameAsync(user, Input.Email, CancellationToken.None);\r\n        await" +
+                    " emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);\r\n\r\n       " +
+                    " var result = await UserManager.CreateAsync(user);\r\n        if (result.Succeeded" +
+                    ")\r\n        {\r\n            result = await UserManager.AddLoginAsync(user, externa" +
+                    "lLoginInfo);\r\n            if (result.Succeeded)\r\n            {\r\n                " +
+                    "Logger.LogInformation(\"User created an account using {Name} provider.\", external" +
+                    "LoginInfo.LoginProvider);\r\n\r\n                var userId = await UserManager.GetU" +
+                    "serIdAsync(user);\r\n                var code = await UserManager.GenerateEmailCon" +
+                    "firmationTokenAsync(user);\r\n                code = WebEncoders.Base64UrlEncode(E" +
+                    "ncoding.UTF8.GetBytes(code));\r\n\r\n                var callbackUrl = NavigationMan" +
+                    "ager.GetUriWithQueryParameters(\r\n                    NavigationManager.ToAbsolut" +
+                    "eUri(\"Account/ConfirmEmail\").AbsoluteUri,\r\n                    new Dictionary<st" +
+                    "ring, object?> { [\"userId\"] = userId, [\"code\"] = code });\r\n                await" +
+                    " EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.En" +
+                    "code(callbackUrl));\r\n\r\n                // If confirmation is required, we need t" +
+                    "o show the link if we don\'t have a real email sender\r\n                if (!await" +
+                    " SignInManager.CanSignInAsync(user))\r\n                {\r\n                    Red" +
+                    "irectManager.RedirectTo(\"Account/RegisterConfirmation\", new() { [\"email\"] = Inpu" +
+                    "t.Email });\r\n                }\r\n                else\r\n                {\r\n       " +
+                    "             await SignInManager.SignInAsync(user, isPersistent: false, external" +
+                    "LoginInfo.LoginProvider);\r\n                    RedirectManager.RedirectTo(Return" +
+                    "Url);\r\n                }\r\n            }\r\n        }\r\n        else\r\n        {\r\n   " +
+                    "         message = $\"Error: {string.Join(\",\", result.Errors.Select(error => erro" +
+                    "r.Description))}\";\r\n        }\r\n    }\r\n\r\n    private ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" CreateUser()\r\n    {\r\n        try\r\n        {\r\n            return Activator.Create" +
                     "Instance<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(">();\r\n        }\r\n        catch\r\n        {\r\n            throw new InvalidOperation" +
                     "Exception($\"Can\'t create an instance of \'{nameof(");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(")}\'. \" +\r\n                $\"Ensure that \'{nameof(");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(")}\' is not an abstract class and has a parameterless constructor\");\r\n        }\r\n " +
                     "   }\r\n\r\n    private IUserEmailStore<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> GetEmailStore()\r\n    {\r\n        if (!UserManager.SupportsUserEmail)\r\n        {\r" +
                     "\n            throw new NotSupportedException(\"The default UI requires a user sto" +
                     "re with email support.\");\r\n        }\r\n        return (IUserEmailStore<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(">)UserStore;\r\n    }\r\n\r\n    private sealed class InputModel\r\n    {\r\n        [Requi" +
                     "red]\r\n        [EmailAddress]\r\n        public string Email { get; set; } = \"\";\r\n " +
                     "   }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

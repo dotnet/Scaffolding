@@ -33,11 +33,11 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject UrlEncoder UrlEncoder\r\n@inject IdentityRedirectManager Red" +
                     "irectManager\r\n@inject ILogger<EnableAuthenticator> Logger\r\n\r\n<PageTitle>Configur" +
                     "e authenticator app</PageTitle>\r\n\r\n@if (recoveryCodes is not null)\r\n{\r\n    <Show" +
@@ -72,12 +72,14 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "e</label>\r\n                                <ValidationMessage For=\"() => Input.C" +
                     "ode\" class=\"text-danger\" />\r\n                            </div>\r\n               " +
                     "             <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Verify</" +
-                    "button>\r\n                            <div role=\"alert\" aria-atomic=\"true\">\r\n                                <ValidationSummary class=\"text-danger\" />\r\n                            </div>\r\n" +
-                    "                        </EditForm>\r\n                    </div>\r\n  " +
-                    "              </div>\r\n            </li>\r\n        </ol>\r\n    </div>\r\n}\r\n\r\n@code {" +
-                    "\r\n    private const string AuthenticatorUriFormat = \"otpauth://totp/{0}:{1}?secr" +
-                    "et={2}&issuer={0}&digits=6\";\r\n\r\n    private string? message;\r\n    private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+                    "button>\r\n                            <div role=\"alert\" aria-atomic=\"true\">\r\n    " +
+                    "                            <ValidationSummary class=\"text-danger\" />\r\n         " +
+                    "                   </div>\n                        </EditForm>\r\n                 " +
+                    "   </div>\r\n                </div>\r\n            </li>\r\n        </ol>\r\n    </div>\r" +
+                    "\n}\r\n\r\n@code {\r\n    private const string AuthenticatorUriFormat = \"otpauth://totp" +
+                    "/{0}:{1}?secret={2}&issuer={0}&digits=6\";\r\n\r\n    private string? message;\r\n    p" +
+                    "rivate ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("? user;\r\n    private string? sharedKey;\r\n    private string? authenticatorUri;\r\n " +
                     "   private IEnumerable<string>? recoveryCodes;\r\n\r\n    [CascadingParameter]\r\n    " +
                     "private HttpContext HttpContext { get; set; } = default!;\r\n\r\n    [SupplyParamete" +
@@ -107,7 +109,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "age;\r\n            RedirectManager.RedirectTo(\"Account/Manage/TwoFactorAuthentica" +
                     "tion\");\r\n        }\r\n    }\r\n\r\n    private async ValueTask LoadSharedKeyAndQrCodeU" +
                     "riAsync(");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(" user)\r\n    {\r\n        // Load the authenticator key & QR code URI to display on " +
                     "the form\r\n        var unformattedKey = await UserManager.GetAuthenticatorKeyAsyn" +
                     "c(user);\r\n        if (string.IsNullOrEmpty(unformattedKey))\r\n        {\r\n        " +
@@ -133,7 +135,6 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     " Code { get; set; } = \"\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

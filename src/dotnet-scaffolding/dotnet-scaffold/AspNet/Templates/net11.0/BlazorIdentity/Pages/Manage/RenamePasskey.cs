@@ -31,12 +31,12 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 
             this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.DbContextNamespace ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
             this.Write("\r\n");
 }
             this.Write("@using System.ComponentModel.DataAnnotations\r\n@using Microsoft.AspNetCore.Identit" +
                     "y\r\n@using System.Buffers.Text\r\n\r\n@inject UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> UserManager
 @inject IdentityRedirectManager RedirectManager
 
@@ -66,7 +66,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 
 @code {
     private ");
-            this.Write(this.ToStringHelper.ToStringWithCulture( Model.UserClassName ));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("? user;\r\n    private UserPasskeyInfo? passkey;\r\n\r\n    [CascadingParameter]\r\n    p" +
                     "rivate HttpContext HttpContext { get; set; } = default!;\r\n\r\n    [SupplyParameter" +
                     "FromTempData(Name = IdentityRedirectManager.StatusMessageKey)]\r\n    private stri" +
@@ -97,7 +97,6 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "; set; } = \"\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
-
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
         /// <summary>
         /// The current host for the text templating engine

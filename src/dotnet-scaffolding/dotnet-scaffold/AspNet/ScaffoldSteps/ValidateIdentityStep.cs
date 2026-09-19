@@ -73,14 +73,14 @@ internal class ValidateIdentityStep : ScaffoldStep
     }
 
     /// <summary>
-    /// Prepares Identity scaffolding inputs and publishes them to the context only after preparation succeeds.
+    /// Validates settings and prepares the inputs consumed by later Identity scaffolding steps.
     /// </summary>
     /// <param name="context">Scaffolder context.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Task that represents the asynchronous operation, with a boolean result indicating success or failure.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        var identitySettings = ValidateAndNormalizeSettings();
+        var identitySettings = ValidateIdentitySettings();
         if (identitySettings is null)
         {
             _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, false));
@@ -88,7 +88,7 @@ internal class ValidateIdentityStep : ScaffoldStep
         }
 
         _logger.LogInformation("Initializing scaffolding model...");
-        var identityModel = await PrepareIdentityModelAsync(identitySettings);
+        var identityModel = await GetIdentityModelAsync(identitySettings);
         if (identityModel is null)
         {
             _logger.LogError("An error occurred.");
@@ -104,32 +104,34 @@ internal class ValidateIdentityStep : ScaffoldStep
             return false;
         }
 
+        context.Properties.Add(nameof(IdentitySettings), identitySettings);
+        context.Properties.Add(nameof(IdentityModel), identityModel);
+        context.SetSpecifiedTargetFramework(identityModel.ProjectInfo.LowestSupportedTargetFramework);
+
         // Prepare configuration only; later steps install packages and create the DbContext.
-        DbContextProperties? dbContextProperties = null;
-        string? projectBasePath = null;
         if (identityModel.DbContextInfo.EfScenario)
         {
-            dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(identitySettings.Project, identityModel.DbContextInfo);
+            var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(identitySettings.Project, identityModel.DbContextInfo);
             if (dbContextProperties is not null)
             {
                 dbContextProperties.IsIdentityDbContext = true;
                 dbContextProperties.FullIdentityUserName = $"{identityModel.UserClassNamespace}.{identityModel.UserClassName}";
+                context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
             }
 
-            projectBasePath = Path.GetDirectoryName(identitySettings.Project);
-        }
+            var projectBasePath = Path.GetDirectoryName(identitySettings.Project);
+            if (!string.IsNullOrEmpty(projectBasePath))
+            {
+                context.Properties.Add(Constants.StepConstants.BaseProjectPath, projectBasePath);
+            }
 
-        context.Properties.Add(nameof(IdentitySettings), identitySettings);
-        context.Properties.Add(nameof(IdentityModel), identityModel);
-        context.SetSpecifiedTargetFramework(identityModel.ProjectInfo.LowestSupportedTargetFramework);
-        if (dbContextProperties is not null)
-        {
-            context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
-        }
+            var dbCodeModifierProperties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(identityModel.DbContextInfo);
+            foreach (var kvp in dbCodeModifierProperties)
+            {
+                codeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+            }
 
-        if (!string.IsNullOrEmpty(projectBasePath))
-        {
-            context.Properties.Add(Constants.StepConstants.BaseProjectPath, projectBasePath);
+            codeModifierProperties.TryAdd(Constants.CodeModifierPropertyConstants.UserClassName, identityModel.UserClassName);
         }
 
         context.Properties.Add(Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
@@ -141,7 +143,7 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// Validates required options and applies the DbContext name and database provider defaults.
     /// </summary>
     /// <returns>Returns the validated IdentitySettings object, or null if validation failed.</returns>
-    private IdentitySettings? ValidateAndNormalizeSettings()
+    private IdentitySettings? ValidateIdentitySettings()
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
@@ -154,17 +156,19 @@ internal class ValidateIdentityStep : ScaffoldStep
             _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.DataContextOption} option.");
             return null;
         }
-
-        if (!SyntaxFacts.IsValidIdentifier(DataContext) || DataContext.Equals("DbContext", StringComparison.OrdinalIgnoreCase))
+        else
         {
-            _logger.LogInformation($"Invalid {AspNetConstants.CliOptions.DataContextOption} option");
-            _logger.LogInformation($"Using default '{AspNetConstants.NewDbContext}'");
-            DataContext = AspNetConstants.NewDbContext;
-        }
+            if (!SyntaxFacts.IsValidIdentifier(DataContext) || DataContext.Equals("DbContext", StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogInformation($"Invalid {AspNetConstants.CliOptions.DataContextOption} option");
+                _logger.LogInformation($"Using default '{AspNetConstants.NewDbContext}'");
+                DataContext = AspNetConstants.NewDbContext;
+            }
 
-        if (string.IsNullOrEmpty(DatabaseProvider) || !PackageConstants.EfConstants.IdentityEfPackagesDict.ContainsKey(DatabaseProvider))
-        {
-            DatabaseProvider = PackageConstants.EfConstants.SqlServer;
+            if (string.IsNullOrEmpty(DatabaseProvider) || !PackageConstants.EfConstants.IdentityEfPackagesDict.ContainsKey(DatabaseProvider))
+            {
+                DatabaseProvider = PackageConstants.EfConstants.SqlServer;
+            }
         }
 
         return new IdentitySettings
@@ -183,7 +187,7 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// </summary>
     /// <param name="settings">The IdentitySettings used to initialize the model.</param>
     /// <returns>The prepared model, or null if project analysis is unavailable.</returns>
-    private async Task<IdentityModel?> PrepareIdentityModelAsync(IdentitySettings settings)
+    private async Task<IdentityModel?> GetIdentityModelAsync(IdentitySettings settings)
     {
         ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
@@ -268,16 +272,6 @@ internal class ValidateIdentityStep : ScaffoldStep
             !TryPrepareBlazorIdentityInputs(identityModel, codeChangeOptions, codeModifierProperties))
         {
             return null;
-        }
-
-        if (identityModel.DbContextInfo.EfScenario)
-        {
-            foreach (var kvp in AspNetDbContextHelper.GetDbContextCodeModifierProperties(identityModel.DbContextInfo))
-            {
-                codeModifierProperties.TryAdd(kvp.Key, kvp.Value);
-            }
-
-            codeModifierProperties.TryAdd(Constants.CodeModifierPropertyConstants.UserClassName, identityModel.UserClassName);
         }
 
         identityModel.ProjectInfo.CodeChangeOptions = codeChangeOptions;

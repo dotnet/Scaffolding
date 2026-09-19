@@ -11,4 +11,5 @@ internal interface IMSBuildProjectService
 {
     string? GetLowestTargetFramework(bool refresh = false);
     IEnumerable<string> GetProjectCapabilities(bool refresh = false);
+    bool TryGetProjectReferences(out IReadOnlyList<string> projectReferences, out string? error);
 }

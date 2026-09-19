@@ -5,9 +5,9 @@ using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
-using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -192,6 +192,14 @@ internal class ValidateIdentityStep : ScaffoldStep
             return null;
         }
 
+        // Failed framework evaluation must not silently bypass the Net11 preparation below.
+        if (settings.BlazorScenario && projectInfo.LowestSupportedTargetFramework is null)
+        {
+            _logger.LogError(
+                $"Unable to determine a supported target framework for '{settings.Project}'. Ensure the project's SDK and imports are available and it targets .NET 8 or later. Run 'dotnet msbuild \"{settings.Project}\" -getProperty:TargetFramework,TargetFrameworks' for evaluation diagnostics.");
+            return null;
+        }
+
         var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync();
         //find DbContext info or create properties for a new one.
         var dbContextClassName = settings.DataContext;
@@ -309,7 +317,12 @@ internal class ValidateIdentityStep : ScaffoldStep
                 return false;
             }
 
-            var clientProjectPaths = GetReferencedBlazorWebAssemblyProjects(projectPath, projectDirectory);
+            var clientProjectPaths = GetReferencedBlazorWebAssemblyProjects(projectPath);
+            if (clientProjectPaths is null)
+            {
+                return false;
+            }
+
             if (clientProjectPaths.Count != 1)
             {
                 var detail = clientProjectPaths.Count == 0
@@ -351,21 +364,16 @@ internal class ValidateIdentityStep : ScaffoldStep
         return true;
     }
 
-    private List<string> GetReferencedBlazorWebAssemblyProjects(string projectPath, string projectDirectory)
+    private List<string>? GetReferencedBlazorWebAssemblyProjects(string projectPath)
     {
-        var runner = DotnetCliRunner.CreateDotNet(
-            "reference",
-            ["list", "--project", projectPath],
-            new Dictionary<string, string> { ["DOTNET_CLI_UI_LANGUAGE"] = "en-US" });
-        var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
-        if (exitCode != 0)
+        var projectService = new MSBuildProjectService(projectPath);
+        if (!projectService.TryGetProjectReferences(out var references, out var error))
         {
-            _logger.LogError($"Unable to read project references for '{projectPath}'. {stdErr}");
-            return [];
+            _logger.LogError($"Unable to evaluate project references for '{projectPath}'. {error} Ensure the project's SDK and imports are available.");
+            return null;
         }
 
-        return ProjectReferenceParser.ParseProjectReferences(stdOut ?? string.Empty)
-            .Select(reference => Path.GetFullPath(reference, projectDirectory))
+        return references
             .Where(_fileSystem.FileExists)
             .Where(reference => _fileSystem.ReadAllText(reference).Contains(
                 "Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\"",

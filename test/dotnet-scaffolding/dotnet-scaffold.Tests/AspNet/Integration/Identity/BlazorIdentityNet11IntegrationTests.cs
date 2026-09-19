@@ -227,10 +227,19 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
                 <ImplicitUsings>enable</ImplicitUsings>
                 <Nullable>enable</Nullable>
                 <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+                <ClientProject>..\UnexpectedClientDirectory\TestProject.Client.csproj</ClientProject>
               </PropertyGroup>
+              <Import Project="ClientReferences.props" />
               <ItemGroup>
-                <ProjectReference Include="..\UnexpectedClientDirectory\TestProject.Client.csproj" />
                 <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="{aspNetCoreVersion}" />
+              </ItemGroup>
+            </Project>
+            """);
+        File.WriteAllText(Path.Combine(_testProjectDir, "ClientReferences.props"), """
+            <Project>
+              <ItemGroup>
+                <ProjectReference Include="$(ClientProject)" Condition="'$(UsingMicrosoftNETSdkWeb)' == 'true'" />
+                <ProjectReference Include="Excluded.csproj" Condition="'$(UsingMicrosoftNETSdkWeb)' != 'true'" />
               </ItemGroup>
             </Project>
             """);
@@ -467,6 +476,58 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.True(
             postExitCode == 0,
             $"Project should build after scaffolding.\nOutput: {postOutput}\nError: {postError}");
+    }
+
+    [Theory]
+    [InlineData(0, false, "No referenced project using the Microsoft.NET.Sdk.BlazorWebAssembly SDK was found.")]
+    [InlineData(2, false, "Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK")]
+    [InlineData(1, true, "Unable to determine a supported target framework")]
+    public async Task Scaffold_BlazorIdentity_Net11_ClientDiscoveryFailureDoesNotMutateProject(
+        int clientCount, bool missingImport, string expectedDiagnostic)
+    {
+        var references = string.Empty;
+        for (var index = 0; index < clientCount; index++)
+        {
+            var clientProjectPath = Path.Combine(_testDirectory, $"Client{index}.csproj");
+            File.WriteAllText(clientProjectPath, $"""
+                <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+                  <PropertyGroup><TargetFramework>{TargetFramework}</TargetFramework></PropertyGroup>
+                </Project>
+                """);
+            references += $"""<ProjectReference Include="..\Client{index}.csproj" />""";
+        }
+
+        var import = missingImport ? """<Import Project="MissingClientReferences.props" />""" : string.Empty;
+        var projectContent = ProjectContent.Replace("</Project>", $"<ItemGroup>{references}</ItemGroup>{import}</Project>");
+        File.WriteAllText(_testProjectPath, projectContent);
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        const string programContent = """
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddRazorComponents().AddInteractiveWebAssemblyComponents();
+            builder.Build().Run();
+            """;
+        File.WriteAllText(programPath, programContent);
+
+        var (_, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "blazor-identity",
+            "--project", _testProjectPath,
+            "--dataContext", "TestDbContext",
+            "--dbProvider", "sqlite-efcore",
+            "--prerelease");
+
+        Assert.Contains(expectedDiagnostic, output + error);
+        if (missingImport)
+        {
+            Assert.Contains("Run 'dotnet msbuild", output + error);
+            Assert.DoesNotContain("No referenced project", output + error);
+        }
+
+        Assert.DoesNotContain("Adding package", output + error);
+        Assert.Equal(projectContent, File.ReadAllText(_testProjectPath));
+        Assert.Equal(programContent, File.ReadAllText(programPath));
+        Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Data")));
+        Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Components", "Account")));
     }
 
     private static int CountOccurrences(string value, string substring)

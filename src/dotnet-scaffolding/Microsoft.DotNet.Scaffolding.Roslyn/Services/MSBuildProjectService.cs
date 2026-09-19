@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.DotNet.Scaffolding.Roslyn.Helpers;
 
 namespace Microsoft.DotNet.Scaffolding.Roslyn.Services;
@@ -37,6 +38,31 @@ public class MSBuildProjectService : IMSBuildProjectService
         }
 
         return [];
+    }
+
+    /// <summary>
+    /// Evaluates project references with all required SDKs and imports, returning their absolute paths.
+    /// A failed evaluation returns false and a diagnostic, rather than an empty successful result.
+    /// </summary>
+    public bool TryGetProjectReferences(out IReadOnlyList<string> projectReferences, out string? error)
+    {
+        try
+        {
+            // Do not reuse the capabilities evaluation: it permits missing imports.
+            using var projects = new ProjectCollection();
+            var project = new Project(_projectPath, null, null, projects);
+            projectReferences = project.GetItems("ProjectReference")
+                .Select(reference => reference.GetMetadataValue("FullPath"))
+                .ToList();
+            error = null;
+            return true;
+        }
+        catch (InvalidProjectFileException ex)
+        {
+            projectReferences = [];
+            error = ex.Message;
+            return false;
+        }
     }
 
     private void Initialize(bool refresh = false)

@@ -14,41 +14,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
     protected override string TestClassName => nameof(BlazorIdentityNet11IntegrationTests);
 
     [Fact]
-    public async Task Scaffold_BlazorIdentity_Net11_AlreadyConfiguredDoesNotModifyProject()
-    {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-        var programPath = Path.Combine(_testProjectDir, "Program.cs");
-        var appSettingsPath = Path.Combine(_testProjectDir, "appsettings.json");
-        var loginPath = Path.Combine(_testProjectDir, "Components", "Account", "Pages", "Login.razor");
-        var endpointsPath = Path.Combine(_testProjectDir, "Components", "Account", "IdentityComponentsEndpointRouteBuilderExtensions.cs");
-        Directory.CreateDirectory(Path.GetDirectoryName(loginPath)!);
-        File.WriteAllText(programPath, ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
-        File.WriteAllText(appSettingsPath, """{"ConnectionStrings":{"DefaultConnection":"DataSource=Data/app.db;Cache=Shared"}}""");
-        File.WriteAllText(loginPath, "@page \"/Account/Login\"");
-        File.WriteAllText(endpointsPath, "namespace Microsoft.AspNetCore.Routing;");
-
-        var projectContent = File.ReadAllText(_testProjectPath);
-        var programContent = File.ReadAllText(programPath);
-        var appSettingsContent = File.ReadAllText(appSettingsPath);
-
-        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework,
-            "blazor-identity",
-            "--project", _testProjectPath,
-            "--dataContext", "ApplicationDbContext",
-            "--dbProvider", "sqlite-efcore",
-            "--prerelease");
-
-        Assert.True(exitCode == 0, $"CLI scaffold should succeed.\nOutput: {output}\nError: {error}");
-        Assert.Contains("Blazor Identity is already configured. No changes were made.", output);
-        Assert.Equal(projectContent, File.ReadAllText(_testProjectPath));
-        Assert.Equal(programContent, File.ReadAllText(programPath));
-        Assert.Equal(appSettingsContent, File.ReadAllText(appSettingsPath));
-        Assert.Equal("@page \"/Account/Login\"", File.ReadAllText(loginPath));
-        Assert.Equal("namespace Microsoft.AspNetCore.Routing;", File.ReadAllText(endpointsPath));
-    }
-
-    [Fact]
     public async Task Scaffold_BlazorIdentity_Net11_OverwriteUpdatesStaticFilesAndApplicationWiring()
     {
         File.WriteAllText(_testProjectPath, ProjectContent);

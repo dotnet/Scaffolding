@@ -91,20 +91,6 @@ internal class ValidateIdentityStep : ScaffoldStep
             context.Properties.Add(nameof(IdentitySettings), identitySettings);
         }
 
-        if (identitySettings.BlazorScenario && !identitySettings.Overwrite)
-        {
-            var projectDirectory = Path.GetDirectoryName(identitySettings.Project);
-            if (!string.IsNullOrEmpty(projectDirectory) &&
-                _fileSystem.FileExists(Path.Combine(projectDirectory, "Components", "Account", "IdentityComponentsEndpointRouteBuilderExtensions.cs")) &&
-                _fileSystem.FileExists(Path.Combine(projectDirectory, "Components", "Account", "Pages", "Login.razor")))
-            {
-                _logger.LogInformation("Blazor Identity is already configured. No changes were made.");
-                context.Properties.Add(BlazorIdentityHelper.SkipScaffoldingProperty, true);
-                _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, true));
-                return true;
-            }
-        }
-
         //initialize IdentityModel
         _logger.LogInformation("Initializing scaffolding model...");
         var identityModel = await GetIdentityModelAsync(context, identitySettings);

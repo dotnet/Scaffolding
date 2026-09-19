@@ -29,12 +29,6 @@ internal static class ScaffolderBuilderAspNetExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            if (BlazorIdentityHelper.ShouldSkipScaffolding(context))
-            {
-                step.SkipStep = true;
-                return;
-            }
-
             DbContextProperties? dbContextProperties = null;
             if (context.Properties.TryGetValue(Constants.StepConstants.DbContextProperties, out var dbContextPropertiesObj) &&
                 dbContextPropertiesObj is DbContextProperties)
@@ -112,12 +106,6 @@ internal static class ScaffolderBuilderAspNetExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            if (BlazorIdentityHelper.ShouldSkipScaffolding(context))
-            {
-                step.SkipStep = true;
-                return;
-            }
-
             DbContextProperties? dbContextProperties = null;
             if (context.Properties.TryGetValue(nameof(DbContextProperties), out var dbContextPropertiesObj) &&
                 dbContextPropertiesObj is DbContextProperties)

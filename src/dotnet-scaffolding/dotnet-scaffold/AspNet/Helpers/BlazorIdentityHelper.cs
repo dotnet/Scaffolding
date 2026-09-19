@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Model;
-using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
@@ -14,11 +13,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 /// </summary>
 internal static class BlazorIdentityHelper
 {
-    internal const string SkipScaffoldingProperty = "SkipBlazorIdentityScaffolding";
-
-    internal static bool ShouldSkipScaffolding(ScaffolderContext context)
-        => context.Properties.TryGetValue(SkipScaffoldingProperty, out var value) && value is true;
-
     /// <summary>
     /// Retrieves the text templating properties for the given T4 templates and Blazor identity model.
     /// </summary>

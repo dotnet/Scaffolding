@@ -552,11 +552,13 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains(expectedDiagnostic, output + error);
         if (missingImport)
         {
+            Assert.Contains("supported by this version of dotnet scaffold", output + error);
             Assert.Contains("Run 'dotnet msbuild", output + error);
             Assert.DoesNotContain("No referenced project", output + error);
         }
 
         Assert.DoesNotContain("Adding package", output + error);
+        Assert.DoesNotContain("An error occurred.", output + error);
         Assert.Equal(projectContent, File.ReadAllText(_testProjectPath));
         Assert.Equal(programContent, File.ReadAllText(programPath));
         Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Data")));
@@ -564,10 +566,11 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
     }
 
     [Theory]
-    [InlineData(true, "Unable to restore", "Test restore failure")]
-    [InlineData(false, "Unable to resolve Blazor registration", "AddInteractiveWebAssemblyComponents")]
-    public async Task Scaffold_BlazorIdentity_Net11_AnalysisFailureDoesNotMutateProject(
-        bool failRestore, string expectedDiagnostic, string expectedDetail)
+    [InlineData("blazor-identity", true, "Unable to restore", "Test restore failure")]
+    [InlineData("identity", true, "Unable to restore", "Test restore failure")]
+    [InlineData("blazor-identity", false, "Unable to resolve Blazor registration", "AddInteractiveWebAssemblyComponents")]
+    public async Task Scaffold_Identity_Net11_AnalysisFailureDoesNotMutateProject(
+        string scaffolder, bool failRestore, string expectedDiagnostic, string expectedDetail)
     {
         var projectContent = failRestore
             ? ProjectContent.Replace("</Project>", """
@@ -589,7 +592,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
 
         var (_, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
-            "blazor-identity",
+            scaffolder,
             "--project", _testProjectPath,
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore",
@@ -599,9 +602,11 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains(expectedDetail, output + error);
         Assert.DoesNotContain("No referenced project", output + error);
         Assert.DoesNotContain("Adding package", output + error);
+        Assert.DoesNotContain("An error occurred.", output + error);
         Assert.Equal(projectContent, File.ReadAllText(_testProjectPath));
         Assert.Equal(programContent, File.ReadAllText(programPath));
         Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Data")));
+        Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Areas", "Identity")));
         Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Components", "Account")));
     }
 

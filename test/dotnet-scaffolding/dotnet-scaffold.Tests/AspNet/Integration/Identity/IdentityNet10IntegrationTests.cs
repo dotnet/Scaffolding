@@ -67,9 +67,7 @@ public class IdentityNet10IntegrationTests : IdentityIntegrationTestsBase
         File.WriteAllText(_testProjectPath, ProjectContent);
         File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetMinimalProgramCs());
 
-        var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
-        Assert.True(preExitCode == 0,
-            $"Project should build before scaffolding.\nExit code: {preExitCode}\nOutput: {preOutput}\nError: {preError}");
+        Assert.False(File.Exists(Path.Combine(_testProjectDir, "obj", "project.assets.json")));
 
         var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
@@ -78,6 +76,7 @@ public class IdentityNet10IntegrationTests : IdentityIntegrationTestsBase
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.Contains("Restoring project dependencies for Identity analysis...", cliOutput);
 
         // Assert — expected files/directories were created
         Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),

@@ -99,7 +99,6 @@ internal class ValidateIdentityStep : ScaffoldStep
         var identityModel = await GetIdentityModelAsync(context, identitySettings);
         if (identityModel is null)
         {
-            _logger.LogError("An error occurred.");
             _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, false));
             return false;
         }
@@ -112,7 +111,6 @@ internal class ValidateIdentityStep : ScaffoldStep
 
         if (!await PrepareCodeModificationInputsAsync(identitySettings, identityModel, codeModifierProperties))
         {
-            _logger.LogError("An error occurred.");
             _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, false));
             return false;
         }
@@ -205,28 +203,26 @@ internal class ValidateIdentityStep : ScaffoldStep
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
         if (projectInfo is null || projectInfo.CodeService is null || string.IsNullOrEmpty(projectDirectory))
         {
+            _logger.LogError($"Unable to initialize Identity scaffolding for '{projectPath}': project information, code analysis, or the project directory is unavailable.");
             return null;
         }
 
         if (settings.BlazorScenario && projectInfo.LowestSupportedTargetFramework is null)
         {
             _logger.LogError(
-                $"Unable to determine a supported target framework for '{settings.Project}'. Ensure the project's SDK and imports are available and it targets .NET 8 or later. Run 'dotnet msbuild \"{settings.Project}\" -getProperty:TargetFramework,TargetFrameworks' for evaluation diagnostics.");
+                $"Unable to determine a supported target framework for '{settings.Project}'. Ensure the required .NET SDK and project imports are available and the project targets a framework supported by this version of dotnet scaffold. Run 'dotnet msbuild \"{settings.Project}\" -getProperty:TargetFramework,TargetFrameworks' for evaluation diagnostics.");
             return null;
         }
 
         // Restore existing dependencies before CodeService first loads the workspace for semantic analysis.
-        if (settings.BlazorScenario)
+        _logger.LogInformation("Restoring project dependencies for Identity analysis...");
+        var runner = DotnetCliRunner.CreateDotNet("restore", [projectPath, "--disable-build-servers"]);
+        runner._psi.WorkingDirectory = projectDirectory;
+        if (runner.ExecuteAndCaptureOutput(out var output, out var error) != 0)
         {
-            _logger.LogInformation("Restoring project dependencies for Blazor Identity analysis...");
-            var runner = DotnetCliRunner.CreateDotNet("restore", [projectPath, "--disable-build-servers"]);
-            runner._psi.WorkingDirectory = projectDirectory;
-            if (runner.ExecuteAndCaptureOutput(out var output, out var error) != 0)
-            {
-                _logger.LogError(
-                    $"Unable to restore '{settings.Project}' for Blazor Identity analysis. Run 'dotnet restore \"{projectPath}\"' and resolve the errors before scaffolding.\n{output}\n{error}");
-                return null;
-            }
+            _logger.LogError(
+                $"Unable to restore '{settings.Project}' for Identity analysis. Run 'dotnet restore \"{projectPath}\"' and resolve the errors before scaffolding.\n{output}\n{error}");
+            return null;
         }
 
         var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync();
@@ -319,65 +315,23 @@ internal class ValidateIdentityStep : ScaffoldStep
             return true;
         }
 
-        var programDocument = await identityModel.ProjectInfo.CodeService!.GetDocumentAsync("Program.cs");
-        var semanticModel = programDocument is null ? null : await programDocument.GetSemanticModelAsync();
-        var programRoot = programDocument is null ? null : await programDocument.GetSyntaxRootAsync();
-        if (programDocument is null || semanticModel is null || programRoot is null ||
-            semanticModel.Compilation.GetTypeByMetadataName(BlazorCrudHelper.IRazorComponentsBuilderType) is null)
+        var interactivity = await GetBlazorInteractivityAsync(identityModel.ProjectInfo, programPath);
+        if (interactivity is null)
         {
-            _logger.LogError(
-                $"Unable to analyze Blazor registrations in '{programPath}'. Ensure the project's SDK and references are available and 'dotnet restore' succeeds.");
             return false;
         }
 
-        // An unresolved registration is not an absent registration. Other errors (such as unavailable
-        // generated Razor component types) need not prevent analysis of these service registrations.
-        var unresolvedRegistration = programRoot.DescendantNodes().OfType<SimpleNameSyntax>()
-            .FirstOrDefault(name =>
-                name.Identifier.ValueText is BlazorCrudHelper.AddInteractiveServerComponentsMethod or BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod &&
-                (name.Parent is InvocationExpressionSyntax ||
-                 name.Parent is MemberAccessExpressionSyntax { Parent: InvocationExpressionSyntax } ||
-                 name.Parent is MemberBindingExpressionSyntax { Parent: InvocationExpressionSyntax }) &&
-                semanticModel.GetSymbolInfo(name).Symbol is null);
-        if (unresolvedRegistration is not null)
-        {
-            _logger.LogError(
-                $"Unable to resolve Blazor registration '{unresolvedRegistration}' in '{programPath}'. Check the registration's imports and package references, then run 'dotnet build \"{identityModel.ProjectInfo.ProjectPath}\"' for diagnostics.");
-            return false;
-        }
-
-        var usesInteractiveServer = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(
-            programDocument, BlazorCrudHelper.AddInteractiveServerComponentsMethod, BlazorCrudHelper.IRazorComponentsBuilderType);
-        var usesInteractiveWebAssembly = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(
-            programDocument, BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod, BlazorCrudHelper.IRazorComponentsBuilderType);
-
+        var (usesInteractiveServer, usesInteractiveWebAssembly) = interactivity.Value;
         if (usesInteractiveWebAssembly)
         {
-            var projectPath = identityModel.ProjectInfo.ProjectPath;
-            if (string.IsNullOrEmpty(projectPath))
-            {
-                _logger.LogError("Unable to resolve the Blazor WebAssembly client project because the server project path is unavailable.");
-                return false;
-            }
-
-            var clients = GetReferencedBlazorWebAssemblyProjects(projectPath);
-            if (clients is null)
+            var client = GetBlazorWebAssemblyClient(identityModel.ProjectInfo.ProjectPath);
+            if (client is null)
             {
                 return false;
             }
 
-            if (clients.Count != 1)
-            {
-                var detail = clients.Count == 0
-                    ? "No referenced project using the Microsoft.NET.Sdk.BlazorWebAssembly SDK was found."
-                    : $"Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK: {string.Join(", ", clients.Select(client => client.ProjectPath))}.";
-                _logger.LogError(
-                    $"Unable to resolve the Blazor WebAssembly client project for '{identityModel.ProjectInfo.ProjectPath}'. {detail} Ensure the server project has exactly one ProjectReference to its Blazor WebAssembly client.");
-                return false;
-            }
-
-            identityModel.BlazorWebAssemblyClientProjectPath = clients[0].ProjectPath;
-            identityModel.BlazorWebAssemblyClientNamespace = clients[0].RootNamespace;
+            identityModel.BlazorWebAssemblyClientProjectPath = client.Value.ProjectPath;
+            identityModel.BlazorWebAssemblyClientNamespace = client.Value.RootNamespace;
         }
 
         var appPath = Path.Combine(projectDirectory, "Components", "App.razor");
@@ -408,8 +362,52 @@ internal class ValidateIdentityStep : ScaffoldStep
         return true;
     }
 
-    private List<(string ProjectPath, string RootNamespace)>? GetReferencedBlazorWebAssemblyProjects(string projectPath)
+    private async Task<(bool UsesInteractiveServer, bool UsesInteractiveWebAssembly)?> GetBlazorInteractivityAsync(
+        ProjectInfo projectInfo, string programPath)
     {
+        var programDocument = await projectInfo.CodeService!.GetDocumentAsync("Program.cs");
+        var semanticModel = programDocument is null ? null : await programDocument.GetSemanticModelAsync();
+        var programRoot = programDocument is null ? null : await programDocument.GetSyntaxRootAsync();
+        if (programDocument is null || semanticModel is null || programRoot is null ||
+            semanticModel.Compilation.GetTypeByMetadataName(BlazorCrudHelper.IRazorComponentsBuilderType) is null)
+        {
+            _logger.LogError(
+                $"Unable to analyze Blazor registrations in '{programPath}'. Ensure the project's SDK and references are available and 'dotnet restore' succeeds.");
+            return null;
+        }
+
+        // An unresolved registration is not an absent registration. Other errors (such as unavailable
+        // generated Razor component types) need not prevent analysis of these service registrations.
+        var unresolvedRegistration = programRoot.DescendantNodes().OfType<SimpleNameSyntax>()
+            .FirstOrDefault(name =>
+                name.Identifier.ValueText is BlazorCrudHelper.AddInteractiveServerComponentsMethod or BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod &&
+                (name.Parent is InvocationExpressionSyntax ||
+                 name.Parent is MemberAccessExpressionSyntax { Parent: InvocationExpressionSyntax } ||
+                 name.Parent is MemberBindingExpressionSyntax { Parent: InvocationExpressionSyntax }) &&
+                semanticModel.GetSymbolInfo(name).Symbol is null);
+        if (unresolvedRegistration is not null)
+        {
+            _logger.LogError(
+                $"Unable to resolve Blazor registration '{unresolvedRegistration}' in '{programPath}'. Check the registration's imports and package references, then run 'dotnet build \"{projectInfo.ProjectPath}\"' for diagnostics.");
+            return null;
+        }
+
+        var usesInteractiveServer = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(
+            programDocument, BlazorCrudHelper.AddInteractiveServerComponentsMethod, BlazorCrudHelper.IRazorComponentsBuilderType);
+        var usesInteractiveWebAssembly = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(
+            programDocument, BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod, BlazorCrudHelper.IRazorComponentsBuilderType);
+
+        return (usesInteractiveServer, usesInteractiveWebAssembly);
+    }
+
+    private (string ProjectPath, string RootNamespace)? GetBlazorWebAssemblyClient(string? projectPath)
+    {
+        if (string.IsNullOrEmpty(projectPath))
+        {
+            _logger.LogError("Unable to resolve the Blazor WebAssembly client project because the server project path is unavailable.");
+            return null;
+        }
+
         var projectService = new MSBuildProjectService(projectPath);
         if (!projectService.TryGetProjectReferences(out var references, out var error))
         {
@@ -447,6 +445,16 @@ internal class ValidateIdentityStep : ScaffoldStep
             clients.Add((reference, rootNamespace));
         }
 
-        return clients;
+        if (clients.Count != 1)
+        {
+            var detail = clients.Count == 0
+                ? "No referenced project using the Microsoft.NET.Sdk.BlazorWebAssembly SDK was found."
+                : $"Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK: {string.Join(", ", clients.Select(client => client.ProjectPath))}.";
+            _logger.LogError(
+                $"Unable to resolve the Blazor WebAssembly client project for '{projectPath}'. {detail} Ensure the server project has exactly one ProjectReference to its Blazor WebAssembly client.");
+            return null;
+        }
+
+        return clients[0];
     }
 }

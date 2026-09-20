@@ -208,7 +208,6 @@ internal class ValidateIdentityStep : ScaffoldStep
             return null;
         }
 
-        // Failed framework evaluation must not silently bypass the Net11 preparation below.
         if (settings.BlazorScenario && projectInfo.LowestSupportedTargetFramework is null)
         {
             _logger.LogError(

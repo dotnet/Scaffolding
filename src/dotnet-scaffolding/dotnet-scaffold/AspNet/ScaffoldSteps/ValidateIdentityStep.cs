@@ -209,7 +209,7 @@ internal class ValidateIdentityStep : ScaffoldStep
         }
 
         // Restore existing dependencies before CodeService first loads the workspace for semantic analysis.
-        if (settings.BlazorScenario && projectInfo.LowestSupportedTargetFramework == TargetFramework.Net11)
+        if (settings.BlazorScenario)
         {
             _logger.LogInformation("Restoring project dependencies for Blazor Identity analysis...");
             var runner = DotnetCliRunner.CreateDotNet("restore", [projectPath, "--disable-build-servers"]);

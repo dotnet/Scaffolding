@@ -35,6 +35,7 @@ public class BlazorIdentityNet10IntegrationTests : BlazorIdentityIntegrationTest
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.Contains("Restoring project dependencies for Blazor Identity analysis...", cliOutput);
 
         // Assert expected files were created
         Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),

@@ -41,6 +41,7 @@ internal class DotNetToolService : IDotNetToolService
 
     /// <summary>
     /// Gets the list of commands provided by a specific .NET tool.
+    /// Built-in commands are queried from the running assembly.
     /// </summary>
     /// <param name="dotnetTool">The .NET tool information.</param>
     /// <param name="envVars">Optional environment variables.</param>
@@ -48,9 +49,18 @@ internal class DotNetToolService : IDotNetToolService
     public List<CommandInfo> GetCommands(DotNetToolInfo dotnetTool, IDictionary<string, string>? envVars = null)
     {
         List<CommandInfo>? commands = null;
-        var runner = dotnetTool.IsGlobalTool ?
-            DotnetCliRunner.Create(dotnetTool.Command, ["get-commands"], envVars) :
-            DotnetCliRunner.CreateDotNet(dotnetTool.Command, ["get-commands"], envVars);
+        DotnetCliRunner runner;
+        if (IsDotNetScaffoldTool(dotnetTool))
+        {
+            // Preserve support for tools installed with --allow-roll-forward.
+            runner = DotnetCliRunner.CreateDotNet("exec", ["--roll-forward", "Major", typeof(DotNetToolService).Assembly.Location, "get-commands"], envVars);
+        }
+        else
+        {
+            runner = dotnetTool.IsGlobalTool ?
+                DotnetCliRunner.Create(dotnetTool.Command, ["get-commands"], envVars) :
+                DotnetCliRunner.CreateDotNet(dotnetTool.Command, ["get-commands"], envVars);
+        }
 
         var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
         if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
@@ -113,7 +123,7 @@ internal class DotNetToolService : IDotNetToolService
         }
 
         // Explicitly supplied local tools may need to be restored when SDKs or runtimes change.
-        // The default dotnet-scaffold tool is already running and does not require restoration.
+        // Default discovery queries the running assembly, so the discovered installation need not be restored.
         if (restoreLocalTools && components.Any(x => !x.IsGlobalTool))
         {
             var runner = DotnetCliRunner.CreateDotNet("tool", ["restore"], envVars);

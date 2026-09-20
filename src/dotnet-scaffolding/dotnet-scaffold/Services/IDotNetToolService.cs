@@ -56,6 +56,7 @@ internal interface IDotNetToolService
 
     /// <summary>
     /// Gets the list of commands provided by a specific .NET tool.
+    /// Built-in commands are queried from the running assembly.
     /// </summary>
     /// <param name="dotnetTool">The tool to query for commands.</param>
     /// <param name="envVars">Optional environment variables for the command execution.</param>

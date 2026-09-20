@@ -422,7 +422,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
         File.AppendAllText(
             Path.Combine(_testProjectDir, "Components", "_Imports.razor"),
-            "@using TestProject.Client\n");
+            "@using Custom.Client.Root\n");
         var routesPath = Path.Combine(_testProjectDir, "Components", "Routes.razor");
         File.WriteAllText(routesPath, """
             @using TestProject.Components.Account.Shared
@@ -448,9 +448,11 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         File.WriteAllText(legacyRedirectPath, "<p>Legacy redirect component</p>");
 
         File.WriteAllText(clientProjectPath, $"""
-            <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+            <Project>
+              <Sdk Name="Microsoft.NET.Sdk.BlazorWebAssembly" />
               <PropertyGroup>
                 <TargetFramework>{TargetFramework}</TargetFramework>
+                <RootNamespace>Custom.Client.Root</RootNamespace>
                 <ImplicitUsings>enable</ImplicitUsings>
                 <Nullable>enable</Nullable>
                 <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
@@ -468,7 +470,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             """);
         File.WriteAllText(
             Path.Combine(clientProjectDir, "_Imports.razor"),
-            ScaffoldCliHelper.GetBlazorImportsRazor() + "@using TestProject.Client\n");
+            ScaffoldCliHelper.GetBlazorImportsRazor() + "@using Custom.Client.Root\n");
         File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
 
         Assert.False(File.Exists(Path.Combine(_testProjectDir, "obj", "project.assets.json")));
@@ -481,7 +483,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             "--prerelease");
 
         Assert.True(exitCode == 0, $"CLI scaffold should succeed.\nOutput: {output}\nError: {error}");
-        Assert.Contains("<TestProject.Client.RedirectToLogin />", File.ReadAllText(routesPath));
+        Assert.Contains("<Custom.Client.Root.RedirectToLogin />", File.ReadAllText(routesPath));
         Assert.True(File.Exists(legacyRedirectPath));
         Assert.True(File.Exists(Path.Combine(clientProjectDir, "RedirectToLogin.razor")));
 

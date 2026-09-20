@@ -55,6 +55,10 @@ internal class IdentityModel
     /// </summary>
     public string? BlazorWebAssemblyClientProjectPath { get; set; }
     /// <summary>
+    /// Gets or sets the Blazor WebAssembly client root namespace.
+    /// </summary>
+    public string? BlazorWebAssemblyClientNamespace { get; set; }
+    /// <summary>
     /// Gets or sets the global Blazor render mode.
     /// </summary>
     public string? BlazorRenderMode { get; set; }

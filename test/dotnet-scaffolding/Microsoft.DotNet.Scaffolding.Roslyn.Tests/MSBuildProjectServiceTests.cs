@@ -46,6 +46,11 @@ public class MSBuildProjectServiceTests : IDisposable
         Assert.True(service.TryGetProjectReferences(out var references, out var error), error);
         Assert.Null(error);
         Assert.Equal(Path.GetFullPath(Path.Combine(_directory, "..", "RelocatedClient", "Client.csproj")), Assert.Single(references));
+        Assert.True(
+            service.TryGetEvaluatedProperties(["ClientDirectory", "IncludeClient"], out var properties, out error),
+            error);
+        Assert.Equal("../RelocatedClient", properties["ClientDirectory"]);
+        Assert.Equal("true", properties["IncludeClient"]);
     }
 
     [Theory]
@@ -61,6 +66,9 @@ public class MSBuildProjectServiceTests : IDisposable
 
         Assert.False(service.TryGetProjectReferences(out var references, out var error));
         Assert.Empty(references);
+        Assert.Contains(expectedDiagnostic, error);
+        Assert.False(service.TryGetEvaluatedProperties(["RootNamespace"], out var properties, out error));
+        Assert.Empty(properties);
         Assert.Contains(expectedDiagnostic, error);
 
         File.WriteAllText(_projectPath, "<Project />");

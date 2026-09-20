@@ -65,6 +65,34 @@ public class MSBuildProjectService : IMSBuildProjectService
         }
     }
 
+    /// <summary>
+    /// Evaluates the requested properties with all required SDKs and imports.
+    /// A failed evaluation returns false and a diagnostic.
+    /// </summary>
+    public bool TryGetEvaluatedProperties(
+        IEnumerable<string> propertyNames,
+        out IReadOnlyDictionary<string, string> propertyValues,
+        out string? error)
+    {
+        try
+        {
+            using var projects = new ProjectCollection();
+            var project = new Project(_projectPath, null, null, projects);
+            propertyValues = propertyNames.ToDictionary(
+                propertyName => propertyName,
+                project.GetPropertyValue,
+                StringComparer.OrdinalIgnoreCase);
+            error = null;
+            return true;
+        }
+        catch (InvalidProjectFileException ex)
+        {
+            propertyValues = new Dictionary<string, string>();
+            error = ex.Message;
+            return false;
+        }
+    }
+
     private void Initialize(bool refresh = false)
     {
         lock (_initLock)

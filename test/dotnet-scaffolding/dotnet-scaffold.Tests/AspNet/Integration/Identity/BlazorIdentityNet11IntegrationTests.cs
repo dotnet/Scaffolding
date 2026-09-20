@@ -72,6 +72,9 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
 
             builder.Services.AddRazorComponents();
 
+            // .AddInteractiveServerComponents().AddInteractiveWebAssemblyComponents();
+            Console.WriteLine("AddInteractiveServerComponents() / AddInteractiveWebAssemblyComponents()");
+
             var app = builder.Build();
 
             if (!app.Environment.IsDevelopment())

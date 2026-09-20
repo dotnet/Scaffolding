@@ -7,6 +7,7 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.DotNet.Scaffolding.Roslyn;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -295,12 +296,12 @@ internal class ValidateIdentityStep : ScaffoldStep
         }
 
         var programContent = _fileSystem.ReadAllText(programPath);
-        var usesInteractiveServer = programContent.Contains(
-            BlazorCrudHelper.AddInteractiveServerComponentsMethod,
-            StringComparison.Ordinal);
-        var usesInteractiveWebAssembly = programContent.Contains(
-            BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod,
-            StringComparison.Ordinal);
+        // Registration symbols may be unresolved before restore or in the source-only workspace fallback.
+        var programRoot = CSharpSyntaxTree.ParseText(programContent).GetRoot();
+        var usesInteractiveServer = RoslynUtilities.CheckSyntaxNodeForMethodInvocation(
+            programRoot, BlazorCrudHelper.AddInteractiveServerComponentsMethod);
+        var usesInteractiveWebAssembly = RoslynUtilities.CheckSyntaxNodeForMethodInvocation(
+            programRoot, BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod);
 
         if (usesInteractiveWebAssembly)
         {

@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(DetectBlazorWasmStep),
                 typeof(DotnetNewScaffolderStep),
                 typeof(EmptyControllerScaffolderStep),
+                typeof(IdentityCodeModificationStep),
                 typeof(NuGetVersionService),
                 typeof(RegisterAppStep),
                 typeof(UpdateAppAuthorizationStep),

@@ -88,10 +88,10 @@ public class RegisterConfirmationModel : PageModel
 
     private bool IsNoOpEmailSender()
     {
-        // The default typed adapter is internal, so identify it by its stable framework type name.
+        // The framework's typed adapter is internal, so inspect its type name and legacy sender.
         var senderType = _sender.GetType();
         return senderType.IsGenericType
-            && senderType.GetGenericTypeDefinition().FullName == "Microsoft.AspNetCore.Identity.UI.Services.DefaultMessageEmailSender`1"
+            && senderType.GetGenericTypeDefinition().FullName == "Microsoft.AspNetCore.Identity.DefaultMessageEmailSender`1"
             && _legacySender is NoOpEmailSender;
     }
 }

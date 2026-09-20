@@ -28,7 +28,7 @@
             },
             {
               "InsertAfter": "builder.Services.AddDbContext",
-              "CheckBlock": "$(IdentityRegistrationCheck)",
+              "Options": [ "AddDefaultIdentity" ],
               "Block": "builder.Services.AddDefaultIdentity<$(UserClassName)>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<$(DbContextName)>()",
               "LeadingTrivia": {
                 "Newline": true

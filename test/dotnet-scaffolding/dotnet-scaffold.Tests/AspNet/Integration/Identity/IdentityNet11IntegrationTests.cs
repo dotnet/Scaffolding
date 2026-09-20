@@ -106,6 +106,7 @@ public class IdentityNet11IntegrationTests : IdentityIntegrationTestsBase
 
         var registerConfirmationModel = File.ReadAllText(Path.Combine(accountDir, "RegisterConfirmationModel.tt"));
         Assert.Contains("DisplayConfirmAccountLink = IsNoOpEmailSender();", registerConfirmationModel);
+        Assert.Contains("\"Microsoft.AspNetCore.Identity.DefaultMessageEmailSender`1\"", registerConfirmationModel);
 
         var manageNav = File.ReadAllText(Path.Combine(manageDir, "_ManageNav.tt"));
         Assert.Contains("aria-current=\"@ManageNavPages.IndexAriaCurrent(ViewContext)\"", manageNav);
@@ -151,6 +152,7 @@ public class IdentityNet11IntegrationTests : IdentityIntegrationTestsBase
         var registerConfirmationModel = RenderTemplate(new Net11RegisterConfirmationModel(), model);
         Assert.Contains("IEmailSender<ApplicationUser>", registerConfirmationModel);
         Assert.Contains("DisplayConfirmAccountLink = IsNoOpEmailSender();", registerConfirmationModel);
+        Assert.Contains("\"Microsoft.AspNetCore.Identity.DefaultMessageEmailSender`1\"", registerConfirmationModel);
 
         var manageNav = RenderTemplate(new Net11ManageNav(), model);
         Assert.Contains("ViewData[\"ManageNav.HasExternalLogins\"]", manageNav);
@@ -193,21 +195,21 @@ public class IdentityNet11IntegrationTests : IdentityIntegrationTestsBase
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("TestDbContext", programContent);
 
-        // Identity pages may not be generated if T4 template execution fails
         var identityPagesDir = Path.Combine(_testProjectDir, "Areas", "Identity", "Pages");
-        if (Directory.Exists(identityPagesDir))
-        {
-            var accountDir = Path.Combine(identityPagesDir, "Account");
-            Assert.True(Directory.Exists(accountDir), "Account directory should be created.");
-            Assert.True(File.Exists(Path.Combine(accountDir, "Login.cshtml")), "Login.cshtml should be created.");
-            Assert.True(File.Exists(Path.Combine(accountDir, "Login.cshtml.cs")), "Login.cshtml.cs should be created.");
-            Assert.True(File.Exists(Path.Combine(accountDir, "Register.cshtml")), "Register.cshtml should be created.");
-            Assert.True(File.Exists(Path.Combine(accountDir, "Register.cshtml.cs")), "Register.cshtml.cs should be created.");
-            Assert.True(File.Exists(Path.Combine(accountDir, "Logout.cshtml")), "Logout.cshtml should be created.");
-            var manageDir = Path.Combine(accountDir, "Manage");
-            Assert.True(Directory.Exists(manageDir), "Manage directory should be created.");
-            Assert.True(File.Exists(Path.Combine(manageDir, "Index.cshtml")), "Manage/Index.cshtml should be created.");
-        }
+        Assert.True(Directory.Exists(identityPagesDir), "Identity pages must be generated.");
+        var accountDir = Path.Combine(identityPagesDir, "Account");
+        Assert.True(Directory.Exists(accountDir), "Account directory should be created.");
+        Assert.True(File.Exists(Path.Combine(accountDir, "Login.cshtml")), "Login.cshtml should be created.");
+        Assert.True(File.Exists(Path.Combine(accountDir, "Login.cshtml.cs")), "Login.cshtml.cs should be created.");
+        Assert.True(File.Exists(Path.Combine(accountDir, "Register.cshtml")), "Register.cshtml should be created.");
+        Assert.True(File.Exists(Path.Combine(accountDir, "Register.cshtml.cs")), "Register.cshtml.cs should be created.");
+        Assert.True(File.Exists(Path.Combine(accountDir, "Logout.cshtml")), "Logout.cshtml should be created.");
+        var manageDir = Path.Combine(accountDir, "Manage");
+        Assert.True(Directory.Exists(manageDir), "Manage directory should be created.");
+        Assert.True(File.Exists(Path.Combine(manageDir, "Index.cshtml")), "Manage/Index.cshtml should be created.");
+        var migrationsDir = Path.Combine(_testProjectDir, "Data", "Migrations");
+        Assert.True(Directory.Exists(migrationsDir), $"Identity migration must be generated.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.NotEmpty(Directory.GetFiles(migrationsDir, "*_CreateIdentitySchema.cs"));
 
         // Assert no NuGet errors during scaffolding
         Assert.False(cliOutput.Contains("error: NU"),

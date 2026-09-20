@@ -76,7 +76,7 @@ using ");
                     "firmationUrl = Url.Page(\r\n                \"/Account/ConfirmEmail\",\r\n            " +
                     "    pageHandler: null,\r\n                values: new { area = \"Identity\", userId " +
                     "= userId, code = code, returnUrl = returnUrl },\r\n                protocol: Reque" +
-                    "st.Scheme);\r\n        }\r\n\r\n        return Page();\r\n    }\r\n\r\n    private bool IsNoOpEmailSender()\r\n    {\r\n        // The default typed adapter is internal, so identify it by its stable framework type name.\r\n        var senderType = _sender.GetType();\r\n        return senderType.IsGenericType\r\n            && senderType.GetGenericTypeDefinition().FullName == \"Microsoft.AspNetCore.Identity.UI.Services.DefaultMessageEmailSender`1\"\r\n            && _legacySender is NoOpEmailSender;\r\n    }\r\n}\r\n");
+                    "st.Scheme);\r\n        }\r\n\r\n        return Page();\r\n    }\r\n\r\n    private bool IsNoOpEmailSender()\r\n    {\r\n        // The framework's typed adapter is internal, so inspect its type name and legacy sender.\r\n        var senderType = _sender.GetType();\r\n        return senderType.IsGenericType\r\n            && senderType.GetGenericTypeDefinition().FullName == \"Microsoft.AspNetCore.Identity.DefaultMessageEmailSender`1\"\r\n            && _legacySender is NoOpEmailSender;\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

@@ -47,7 +47,7 @@ public class AddAspNetConnectionStringStepTests
             It.IsAny<string>(),
             "appsettings.json",
             SearchOption.AllDirectories))
-            .Returns(new[] { appSettingsPath });
+            .Returns(Array.Empty<string>());
 
         _mockFileSystem.Setup(fs => fs.FileExists(appSettingsPath)).Returns(false);
 

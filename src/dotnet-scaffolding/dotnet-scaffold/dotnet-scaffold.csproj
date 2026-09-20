@@ -232,6 +232,10 @@
     would override the PackagePath to net9.0 and cause a duplicate-file NU5118 error.
   -->
   <ItemGroup>
+    <!-- The host login partial is shared across supported target frameworks. -->
+    <None Include="AspNet\Templates\net10.0\Files\_LoginPartial.tt" Pack="true" PackagePath="AspNet\Templates\net8.0\Files\" CopyToOutputDirectory="PreserveNewest" Link="AspNet\Templates\net8.0\Files\_LoginPartial.tt" />
+    <None Include="AspNet\Templates\net10.0\Files\_LoginPartial.tt" Pack="true" PackagePath="AspNet\Templates\net9.0\Files\" CopyToOutputDirectory="PreserveNewest" Link="AspNet\Templates\net9.0\Files\_LoginPartial.tt" />
+    <None Include="AspNet\Templates\net10.0\Files\_LoginPartial.tt" Pack="true" PackagePath="AspNet\Templates\net11.0\Files\" CopyToOutputDirectory="PreserveNewest" Link="AspNet\Templates\net11.0\Files\_LoginPartial.tt" />
     <None Include="AspNet\Templates\net9.0\Files\_ValidationScriptsPartial.cshtml" Pack="true" PackagePath="AspNet\Templates\net8.0\Files\">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net8.0\Files\_ValidationScriptsPartial.cshtml</Link>
@@ -261,6 +265,7 @@
   </Target>
   <Target Name="CopyCodeModConfigsToPacked" AfterTargets="CreateMockToolLayout">
     <ItemGroup>
+      <None Update="AspNet\Templates\net10.0\Files\_LoginPartial.tt" Generator="TextTemplatingFilePreprocessor" LastGenOutput="_LoginPartial.cs" />
       <_AspNetConfigs_net8 Include="$(OutputPath)AspNet\Templates\net8.0\CodeModificationConfigs\*.json" />
       <_AspNetConfigs_net9 Include="$(OutputPath)AspNet\Templates\net9.0\CodeModificationConfigs\*.json" />
       <_AspNetConfigs_net10 Include="$(OutputPath)AspNet\Templates\net10.0\CodeModificationConfigs\*.json" />

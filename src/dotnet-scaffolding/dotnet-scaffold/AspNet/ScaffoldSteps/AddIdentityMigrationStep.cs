@@ -18,6 +18,7 @@ internal class AddIdentityMigrationStep(
 {
     public required string ProjectPath { get; set; }
     public required string DbContextName { get; set; }
+    public required string ProjectAssetsFile { get; set; }
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
@@ -28,19 +29,13 @@ internal class AddIdentityMigrationStep(
             return Task.FromResult(false);
         }
 
-        if (HasMigration(projectDirectory))
+        if (string.IsNullOrEmpty(ProjectAssetsFile) || !fileSystem.FileExists(ProjectAssetsFile))
         {
-            return Task.FromResult(true);
-        }
-
-        var assetsPath = Path.Combine(projectDirectory, "obj", "project.assets.json");
-        if (!fileSystem.FileExists(assetsPath))
-        {
-            logger.LogError($"Unable to generate the Identity migration because '{assetsPath}' does not exist.");
+            logger.LogError($"Unable to generate the Identity migration because the project's assets file '{ProjectAssetsFile}' does not exist.");
             return Task.FromResult(false);
         }
 
-        var efVersion = GetEfDesignPackageVersion(fileSystem.ReadAllText(assetsPath));
+        var efVersion = GetEfDesignPackageVersion(fileSystem.ReadAllText(ProjectAssetsFile));
         if (string.IsNullOrEmpty(efVersion))
         {
             logger.LogError("Unable to determine the Microsoft.EntityFrameworkCore.Design package version.");
@@ -64,7 +59,7 @@ internal class AddIdentityMigrationStep(
             {
                 Directory.Delete(toolDirectory, recursive: true);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
                 logger.LogWarning($"Unable to remove temporary EF Core tooling directory '{toolDirectory}': {ex.Message}");
             }
@@ -89,12 +84,6 @@ internal class AddIdentityMigrationStep(
         }
 
         return null;
-    }
-
-    private bool HasMigration(string projectDirectory)
-    {
-        return fileSystem.EnumerateFiles(projectDirectory, "*ModelSnapshot.cs", SearchOption.AllDirectories)
-            .Any(path => fileSystem.ReadAllText(path).Contains(DbContextName, StringComparison.Ordinal));
     }
 
     private bool InstallEfTool(string toolDirectory, string projectDirectory, string version)

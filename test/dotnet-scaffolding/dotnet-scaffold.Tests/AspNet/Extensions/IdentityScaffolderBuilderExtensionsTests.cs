@@ -48,7 +48,7 @@ public class IdentityScaffolderBuilderExtensionsTests
     {
         // Arrange
         Mock<IScaffoldBuilder> mockBuilder = new Mock<IScaffoldBuilder>();
-        mockBuilder.Setup(b => b.WithStep<WrappedCodeModificationStep>(It.IsAny<Action<ScaffoldStepConfigurator<WrappedCodeModificationStep>>>()))
+        mockBuilder.Setup(b => b.WithStep<IdentityCodeModificationStep>(It.IsAny<Action<ScaffoldStepConfigurator<IdentityCodeModificationStep>>>()))
             .Returns(mockBuilder.Object);
 
         // Act
@@ -56,7 +56,7 @@ public class IdentityScaffolderBuilderExtensionsTests
 
         // Assert
         Assert.NotNull(result);
-        mockBuilder.Verify(b => b.WithStep<WrappedCodeModificationStep>(It.IsAny<Action<ScaffoldStepConfigurator<WrappedCodeModificationStep>>>()), Times.Once);
+        mockBuilder.Verify(b => b.WithStep<IdentityCodeModificationStep>(It.IsAny<Action<ScaffoldStepConfigurator<IdentityCodeModificationStep>>>()), Times.Once);
     }
 
     [Fact]

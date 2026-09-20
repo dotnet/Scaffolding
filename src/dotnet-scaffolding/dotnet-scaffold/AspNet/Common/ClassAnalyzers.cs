@@ -206,6 +206,7 @@ internal static class ClassAnalyzers
         ProjectInfo projectInfo = new(projectPath)
         {
             CodeService = codeService,
+            ProjectAssetsFile = msBuildProject.GetPropertyValue("ProjectAssetsFile"),
             Capabilities = capabilities
         };
 

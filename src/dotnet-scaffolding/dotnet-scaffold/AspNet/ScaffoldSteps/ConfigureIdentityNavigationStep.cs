@@ -8,16 +8,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
-/// <summary>
-/// Adds the Identity login partial and references it from the host application's layout.
-/// </summary>
 internal class ConfigureIdentityNavigationStep(
     ILogger<ConfigureIdentityNavigationStep> logger,
     IFileSystem fileSystem) : ScaffoldStep
 {
     public required string ProjectPath { get; set; }
-    public required string UserClassName { get; set; }
-    public required string UserClassNamespace { get; set; }
     public bool IsRazorPages { get; set; }
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
@@ -29,112 +24,65 @@ internal class ConfigureIdentityNavigationStep(
             return Task.FromResult(false);
         }
 
-        var sharedDirectory = Path.Combine(projectDirectory, IsRazorPages ? "Pages" : "Views", "Shared");
-        var layoutPath = Path.Combine(sharedDirectory, "_Layout.cshtml");
+        var layoutPath = Path.Combine(projectDirectory, IsRazorPages ? "Pages" : "Views", "Shared", "_Layout.cshtml");
         if (!fileSystem.FileExists(layoutPath))
         {
-            logger.LogWarning($"Identity navigation was not added because '{layoutPath}' does not exist.");
+            logger.LogWarning($"Add the '_LoginPartial' partial to your layout; '{layoutPath}' does not exist.");
             return Task.FromResult(true);
         }
 
-        var layoutContent = fileSystem.ReadAllText(layoutPath);
-        if (layoutContent.Contains("_LoginPartial", StringComparison.OrdinalIgnoreCase))
+        var original = fileSystem.ReadAllText(layoutPath);
+        var updated = AddLoginPartialReference(original);
+        if (updated is null)
         {
-            return Task.FromResult(true);
+            logger.LogWarning($"Add the '_LoginPartial' partial to '{layoutPath}'; no navbar navigation list was found.");
         }
-
-        var navbarClassIndex = layoutContent.IndexOf("navbar-nav", StringComparison.OrdinalIgnoreCase);
-        var openingListIndex = navbarClassIndex < 0
-            ? -1
-            : layoutContent.LastIndexOf("<ul", navbarClassIndex, StringComparison.OrdinalIgnoreCase);
-        var closingList = FindMatchingClosingList(layoutContent, openingListIndex);
-        var closingListIndex = closingList.Index;
-        if (closingListIndex < 0)
+        else if (updated != original)
         {
-            logger.LogWarning($"Identity navigation was not added to '{layoutPath}' because no navbar navigation list was found.");
-            return Task.FromResult(true);
+            fileSystem.WriteAllText(layoutPath, updated);
         }
-
-        fileSystem.CreateDirectoryIfNotExists(sharedDirectory);
-        var loginPartialPath = Path.Combine(sharedDirectory, "_LoginPartial.cshtml");
-        if (!fileSystem.FileExists(loginPartialPath))
-        {
-            fileSystem.WriteAllText(loginPartialPath, GetLoginPartialContent());
-        }
-
-        var lineStartIndex = layoutContent.LastIndexOf('\n', closingListIndex);
-        lineStartIndex = lineStartIndex < 0 ? 0 : lineStartIndex + 1;
-        var indentation = layoutContent[lineStartIndex..closingListIndex];
-        if (indentation.Any(character => !char.IsWhiteSpace(character)))
-        {
-            indentation = string.Empty;
-        }
-
-        var newline = layoutContent.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
-        var insertionIndex = closingListIndex + closingList.Length;
-        layoutContent = layoutContent.Insert(insertionIndex, $"{newline}{indentation}<partial name=\"_LoginPartial\" />");
-        fileSystem.WriteAllText(layoutPath, layoutContent);
 
         return Task.FromResult(true);
     }
 
-    private static (int Index, int Length) FindMatchingClosingList(string content, int openingListIndex)
+    internal static string? AddLoginPartialReference(string content)
     {
-        if (openingListIndex < 0)
+        // Ignore Razor/HTML comments without changing offsets into the original layout.
+        var markup = Regex.Replace(content, @"@\*[\s\S]*?\*@|<!--[\s\S]*?-->",
+            match => new string(' ', match.Length));
+        if (Regex.IsMatch(markup, @"<partial\b[^>]*\bname\s*=\s*(['""])_LoginPartial\1|(?:Partial|RenderPartial)(?:Async)?\(\s*""_LoginPartial""",
+            RegexOptions.IgnoreCase))
         {
-            return (-1, 0);
+            return content;
         }
 
         var depth = 0;
-        foreach (Match match in Regex.Matches(
-            content[openingListIndex..],
-            @"<\s*(/?)\s*ul\b[^>]*>",
-            RegexOptions.IgnoreCase))
+        foreach (Match tag in Regex.Matches(markup, @"<\s*(/?)\s*ul\b[^>]*>", RegexOptions.IgnoreCase))
         {
-            depth += match.Groups[1].Length > 0 ? -1 : 1;
             if (depth == 0)
             {
-                return (openingListIndex + match.Index, match.Length);
+                var attribute = Regex.Match(tag.Value, @"\bclass\s*=\s*(['""])(.*?)\1", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                if (tag.Groups[1].Length != 0 ||
+                    !attribute.Groups[2].Value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Contains("navbar-nav", StringComparer.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+            }
+
+            depth += tag.Groups[1].Length == 0 ? 1 : -1;
+            if (depth == 0)
+            {
+                var lineStart = content.LastIndexOf('\n', tag.Index) + 1;
+                var indentation = content[lineStart..tag.Index];
+                if (indentation.Any(character => !char.IsWhiteSpace(character)))
+                {
+                    indentation = string.Empty;
+                }
+                var newline = content.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+                return content.Insert(tag.Index + tag.Length, $"{newline}{indentation}<partial name=\"_LoginPartial\" />");
             }
         }
 
-        return (-1, 0);
-    }
-
-    private string GetLoginPartialContent()
-    {
-        var returnUrl = IsRazorPages
-            ? "@Url.Page(\"/Index\", new { area = \"\" })"
-            : "@Url.Action(\"Index\", \"Home\", new { area = \"\" })";
-
-        return $$"""
-@using Microsoft.AspNetCore.Identity
-@using {{UserClassNamespace}}
-@inject SignInManager<{{UserClassName}}> SignInManager
-@inject UserManager<{{UserClassName}}> UserManager
-
-<ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
-    </li>
-    <li class="nav-item">
-        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="{{returnUrl}}">
-            <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-        </form>
-    </li>
-}
-else
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
-}
-</ul>
-""";
+        return null;
     }
 }

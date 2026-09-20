@@ -87,13 +87,20 @@ internal static class IdentityScaffolderBuilderExtensions
             //all the .cshtml and their model class (.cshtml.cs) templates
             var allIdentityPageFiles = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Identity"], identityModel.ProjectInfo.ProjectPath);
             //ApplicationUser.tt template
-            var applicationUserFile = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Files"], identityModel.ProjectInfo.ProjectPath)
+            var fileTemplates = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Files"], identityModel.ProjectInfo.ProjectPath).ToList();
+            var applicationUserFile = fileTemplates
                 .FirstOrDefault(x => x.EndsWith("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
             var identityFileProperties = IdentityHelper.GetTextTemplatingProperties(allIdentityPageFiles, identityModel);
             var applicationUserProperty = IdentityHelper.GetApplicationUserTextTemplatingProperty(applicationUserFile, identityModel);
             if (applicationUserProperty is not null)
             {
                 identityFileProperties = identityFileProperties.Append(applicationUserProperty);
+            }
+            var loginPartialTemplate = fileTemplates.FirstOrDefault(x => x.EndsWith("_LoginPartial.tt", StringComparison.OrdinalIgnoreCase));
+            var loginPartialProperty = IdentityHelper.GetLoginPartialTextTemplatingProperty(loginPartialTemplate, identityModel);
+            if (loginPartialProperty is not null)
+            {
+                identityFileProperties = identityFileProperties.Append(loginPartialProperty);
             }
 
             if (identityFileProperties is not null && identityFileProperties.Any())
@@ -119,7 +126,7 @@ internal static class IdentityScaffolderBuilderExtensions
     /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithIdentityCodeChangeStep(this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<WrappedCodeModificationStep>(config =>
+        builder = builder.WithStep<IdentityCodeModificationStep>(config =>
         {
             var step = config.Step;
             //get needed properties and cast them as needed
@@ -143,8 +150,7 @@ internal static class IdentityScaffolderBuilderExtensions
                 {
                     step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
                 }
-                step.CodeModifierProperties["$(IdentityRegistrationCheck)"] = GetIdentityRegistrationCheck(identitySettings.Project);
-
+                step.CodeService = identityModel.ProjectInfo.CodeService!;
                 step.ProjectPath = identitySettings.Project;
                 step.CodeChangeOptions = identityModel.ProjectInfo.CodeChangeOptions ?? [];
             }
@@ -156,32 +162,6 @@ internal static class IdentityScaffolderBuilderExtensions
         });
 
         return builder;
-    }
-
-    private static string GetIdentityRegistrationCheck(string projectPath)
-    {
-        var projectDirectory = Path.GetDirectoryName(projectPath);
-        var programPath = string.IsNullOrEmpty(projectDirectory) ? null : Path.Combine(projectDirectory, "Program.cs");
-        if (programPath is null || !File.Exists(programPath))
-        {
-            return "__IdentityRegistrationNotFound__";
-        }
-
-        var programContent = File.ReadAllText(programPath);
-        foreach (var registration in new[]
-        {
-            "builder.Services.AddDefaultIdentity",
-            "builder.Services.AddIdentityCore",
-            "builder.Services.AddIdentity"
-        })
-        {
-            if (programContent.Contains(registration, StringComparison.Ordinal))
-            {
-                return registration;
-            }
-        }
-
-        return "__IdentityRegistrationNotFound__";
     }
 
     /// <summary>
@@ -199,8 +179,6 @@ internal static class IdentityScaffolderBuilderExtensions
             {
                 step.ProjectPath = identityModel.ProjectInfo.ProjectPath ?? string.Empty;
                 step.IsRazorPages = identityModel.IsRazorPages;
-                step.UserClassName = identityModel.UserClassName;
-                step.UserClassNamespace = identityModel.UserClassNamespace;
             }
             else
             {
@@ -224,6 +202,8 @@ internal static class IdentityScaffolderBuilderExtensions
             {
                 step.ProjectPath = identityModel.ProjectInfo.ProjectPath ?? string.Empty;
                 step.DbContextName = identityModel.DbContextInfo.DbContextClassName ?? string.Empty;
+                step.ProjectAssetsFile = identityModel.ProjectInfo.ProjectAssetsFile ?? string.Empty;
+                step.SkipStep = identityModel.HasMigration;
             }
             else
             {

@@ -332,7 +332,7 @@ public abstract class IdentityIntegrationTestsBase : IDisposable
         var configPath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs", "identityChanges.json");
         var content = File.ReadAllText(configPath);
 
-        Assert.Contains("\"CheckBlock\": \"$(IdentityRegistrationCheck)\"", content);
+        Assert.Contains("\"Options\": [ \"AddDefaultIdentity\" ]", content);
         Assert.Contains("AddDatabaseDeveloperPageExceptionFilter", content);
         Assert.Contains("UseMigrationsEndPoint", content);
         Assert.Contains("AddRazorPages", content);

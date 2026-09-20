@@ -1,10 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal;
+using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.Roslyn;
@@ -97,7 +99,7 @@ internal class ValidateIdentityStep : ScaffoldStep
             return false;
         }
 
-        var codeModifierProperties = PrepareCodeModificationInputs(identitySettings, identityModel);
+        var codeModifierProperties = await PrepareCodeModificationInputsAsync(identitySettings, identityModel);
         if (codeModifierProperties is null)
         {
             _logger.LogError("An error occurred.");
@@ -190,7 +192,8 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// <returns>The prepared model, or null if project analysis is unavailable.</returns>
     private async Task<IdentityModel?> GetIdentityModelAsync(IdentitySettings settings)
     {
-        ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        var projectPath = Path.GetFullPath(settings.Project);
+        ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(projectPath, _logger);
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
         if (projectInfo is null || projectInfo.CodeService is null || string.IsNullOrEmpty(projectDirectory))
         {
@@ -203,6 +206,20 @@ internal class ValidateIdentityStep : ScaffoldStep
             _logger.LogError(
                 $"Unable to determine a supported target framework for '{settings.Project}'. Ensure the project's SDK and imports are available and it targets .NET 8 or later. Run 'dotnet msbuild \"{settings.Project}\" -getProperty:TargetFramework,TargetFrameworks' for evaluation diagnostics.");
             return null;
+        }
+
+        // Restore existing dependencies before CodeService first loads the workspace for semantic analysis.
+        if (settings.BlazorScenario && projectInfo.LowestSupportedTargetFramework == TargetFramework.Net11)
+        {
+            _logger.LogInformation("Restoring project dependencies for Blazor Identity analysis...");
+            var runner = DotnetCliRunner.CreateDotNet("restore", [projectPath, "--disable-build-servers"]);
+            runner._psi.WorkingDirectory = projectDirectory;
+            if (runner.ExecuteAndCaptureOutput(out var output, out var error) != 0)
+            {
+                _logger.LogError(
+                    $"Unable to restore '{settings.Project}' for Blazor Identity analysis. Run 'dotnet restore \"{projectPath}\"' and resolve the errors before scaffolding.\n{output}\n{error}");
+                return null;
+            }
         }
 
         var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync();
@@ -255,8 +272,8 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// <summary>
     /// Prepares JSON code-change flags and their placeholder substitutions, including Blazor application analysis.
     /// </summary>
-    /// <returns>The substitutions, or null if a required Blazor WebAssembly client cannot be resolved.</returns>
-    private Dictionary<string, string>? PrepareCodeModificationInputs(IdentitySettings settings, IdentityModel identityModel)
+    /// <returns>The substitutions, or null if Blazor analysis or required client resolution fails.</returns>
+    private async Task<Dictionary<string, string>?> PrepareCodeModificationInputsAsync(IdentitySettings settings, IdentityModel identityModel)
     {
         var codeChangeOptions = new List<string>();
         var codeModifierProperties = new Dictionary<string, string>
@@ -270,7 +287,7 @@ internal class ValidateIdentityStep : ScaffoldStep
         }
 
         if (settings.BlazorScenario && identityModel.ProjectInfo.LowestSupportedTargetFramework == TargetFramework.Net11 &&
-            !TryPrepareBlazorIdentityInputs(identityModel, codeChangeOptions, codeModifierProperties))
+            !await TryPrepareBlazorIdentityInputsAsync(identityModel, codeChangeOptions, codeModifierProperties))
         {
             return null;
         }
@@ -282,8 +299,8 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// <summary>
     /// Detects interactivity and the global render mode, resolves the required client, then derives generation inputs.
     /// </summary>
-    /// <returns>False if WebAssembly support is detected but exactly one referenced client cannot be resolved.</returns>
-    private bool TryPrepareBlazorIdentityInputs(
+    /// <returns>False if semantic analysis is unavailable or a required WebAssembly client cannot be resolved.</returns>
+    private async Task<bool> TryPrepareBlazorIdentityInputsAsync(
         IdentityModel identityModel,
         List<string> codeChangeOptions,
         Dictionary<string, string> codeModifierProperties)
@@ -295,13 +312,37 @@ internal class ValidateIdentityStep : ScaffoldStep
             return true;
         }
 
-        var programContent = _fileSystem.ReadAllText(programPath);
-        // Registration symbols may be unresolved before restore or in the source-only workspace fallback.
-        var programRoot = CSharpSyntaxTree.ParseText(programContent).GetRoot();
-        var usesInteractiveServer = RoslynUtilities.CheckSyntaxNodeForMethodInvocation(
-            programRoot, BlazorCrudHelper.AddInteractiveServerComponentsMethod);
-        var usesInteractiveWebAssembly = RoslynUtilities.CheckSyntaxNodeForMethodInvocation(
-            programRoot, BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod);
+        var programDocument = await identityModel.ProjectInfo.CodeService!.GetDocumentAsync("Program.cs");
+        var semanticModel = programDocument is null ? null : await programDocument.GetSemanticModelAsync();
+        var programRoot = programDocument is null ? null : await programDocument.GetSyntaxRootAsync();
+        if (programDocument is null || semanticModel is null || programRoot is null ||
+            semanticModel.Compilation.GetTypeByMetadataName(BlazorCrudHelper.IRazorComponentsBuilderType) is null)
+        {
+            _logger.LogError(
+                $"Unable to analyze Blazor registrations in '{programPath}'. Ensure the project's SDK and references are available and 'dotnet restore' succeeds.");
+            return false;
+        }
+
+        // An unresolved registration is not an absent registration. Other errors (such as unavailable
+        // generated Razor component types) need not prevent analysis of these service registrations.
+        var unresolvedRegistration = programRoot.DescendantNodes().OfType<SimpleNameSyntax>()
+            .FirstOrDefault(name =>
+                name.Identifier.ValueText is BlazorCrudHelper.AddInteractiveServerComponentsMethod or BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod &&
+                (name.Parent is InvocationExpressionSyntax ||
+                 name.Parent is MemberAccessExpressionSyntax { Parent: InvocationExpressionSyntax } ||
+                 name.Parent is MemberBindingExpressionSyntax { Parent: InvocationExpressionSyntax }) &&
+                semanticModel.GetSymbolInfo(name).Symbol is null);
+        if (unresolvedRegistration is not null)
+        {
+            _logger.LogError(
+                $"Unable to resolve Blazor registration '{unresolvedRegistration}' in '{programPath}'. Check the registration's imports and package references, then run 'dotnet build \"{identityModel.ProjectInfo.ProjectPath}\"' for diagnostics.");
+            return false;
+        }
+
+        var usesInteractiveServer = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(
+            programDocument, BlazorCrudHelper.AddInteractiveServerComponentsMethod, BlazorCrudHelper.IRazorComponentsBuilderType);
+        var usesInteractiveWebAssembly = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(
+            programDocument, BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod, BlazorCrudHelper.IRazorComponentsBuilderType);
 
         if (usesInteractiveWebAssembly)
         {

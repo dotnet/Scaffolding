@@ -9,26 +9,6 @@ namespace Microsoft.DotNet.Scaffolding.Roslyn;
 public static class RoslynUtilities
 {
     /// <summary>
-    /// Checks for an invocation with the exact method name without requiring resolved symbols.
-    /// This checks call syntax only, not the declaring type or whether the call executes.
-    /// </summary>
-    public static bool CheckSyntaxNodeForMethodInvocation(SyntaxNode syntaxRoot, string methodName)
-    {
-        return syntaxRoot.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(invocation =>
-        {
-            var name = invocation.Expression switch
-            {
-                MemberAccessExpressionSyntax memberAccess => memberAccess.Name,
-                MemberBindingExpressionSyntax memberBinding => memberBinding.Name,
-                SimpleNameSyntax simpleName => simpleName,
-                _ => null
-            };
-
-            return string.Equals(name?.Identifier.ValueText, methodName, StringComparison.Ordinal);
-        });
-    }
-
-    /// <summary>
     /// Given a document, checks if the document contains a method invocation with the given method name and containing type (string).
     /// </summary>
     /// <param name="document">CodeAnalysis.Document object</param>

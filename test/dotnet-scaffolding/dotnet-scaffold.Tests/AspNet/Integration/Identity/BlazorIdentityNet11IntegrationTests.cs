@@ -74,6 +74,8 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
 
             // .AddInteractiveServerComponents().AddInteractiveWebAssemblyComponents();
             Console.WriteLine("AddInteractiveServerComponents() / AddInteractiveWebAssemblyComponents()");
+            Console.WriteLine(nameof(CustomRegistrations.AddInteractiveWebAssemblyComponents));
+            CustomRegistrations.AddInteractiveWebAssemblyComponents();
 
             var app = builder.Build();
 
@@ -89,6 +91,12 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             app.MapRazorComponents<App>();
 
             app.Run();
+
+            static class CustomRegistrations
+            {
+                public static void AddInteractiveWebAssemblyComponents() { }
+                public static void AddInteractiveWebAssemblyComponents(int value) { }
+            }
             """);
         ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
 
@@ -325,6 +333,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             ScaffoldCliHelper.GetNavMenuCss());
         File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
 
+        Assert.False(File.Exists(Path.Combine(_testProjectDir, "obj", "project.assets.json")));
         var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
             "blazor-identity",
@@ -462,6 +471,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             ScaffoldCliHelper.GetBlazorImportsRazor() + "@using TestProject.Client\n");
         File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
 
+        Assert.False(File.Exists(Path.Combine(_testProjectDir, "obj", "project.assets.json")));
         var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
             "blazor-identity",
@@ -491,18 +501,36 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         var references = string.Empty;
         for (var index = 0; index < clientCount; index++)
         {
-            var clientProjectPath = Path.Combine(_testDirectory, $"Client{index}.csproj");
+            var clientDirectory = Path.Combine(_testDirectory, $"Client{index}");
+            Directory.CreateDirectory(clientDirectory);
+            var clientProjectPath = Path.Combine(clientDirectory, $"Client{index}.csproj");
             File.WriteAllText(clientProjectPath, $"""
                 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
                   <PropertyGroup><TargetFramework>{TargetFramework}</TargetFramework></PropertyGroup>
+                  <ItemGroup>
+                    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="11.0.0-rc.2.26455.110" />
+                  </ItemGroup>
                 </Project>
                 """);
-            references += $"""<ProjectReference Include="..\Client{index}.csproj" />""";
+            File.WriteAllText(Path.Combine(clientDirectory, "Program.cs"), """
+                using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+                var builder = WebAssemblyHostBuilder.CreateDefault(args);
+                await builder.Build().RunAsync();
+                """);
+            references += $"""<ProjectReference Include="..\Client{index}\Client{index}.csproj" />""";
         }
 
         var import = missingImport ? """<Import Project="MissingClientReferences.props" />""" : string.Empty;
-        var projectContent = ProjectContent.Replace("</Project>", $"<ItemGroup>{references}</ItemGroup>{import}</Project>");
+        var projectContent = ProjectContent.Replace("</Project>", $"""
+            <ItemGroup>
+              {references}
+              <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="11.0.0-rc.2.26455.110" />
+            </ItemGroup>
+            {import}
+            </Project>
+            """);
         File.WriteAllText(_testProjectPath, projectContent);
+        File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
         var programPath = Path.Combine(_testProjectDir, "Program.cs");
         const string programContent = """
             var builder = WebApplication.CreateBuilder(args);
@@ -526,6 +554,48 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             Assert.DoesNotContain("No referenced project", output + error);
         }
 
+        Assert.DoesNotContain("Adding package", output + error);
+        Assert.Equal(projectContent, File.ReadAllText(_testProjectPath));
+        Assert.Equal(programContent, File.ReadAllText(programPath));
+        Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Data")));
+        Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Components", "Account")));
+    }
+
+    [Theory]
+    [InlineData(true, "Unable to restore", "Test restore failure")]
+    [InlineData(false, "Unable to resolve Blazor registration", "AddInteractiveWebAssemblyComponents")]
+    public async Task Scaffold_BlazorIdentity_Net11_AnalysisFailureDoesNotMutateProject(
+        bool failRestore, string expectedDiagnostic, string expectedDetail)
+    {
+        var projectContent = failRestore
+            ? ProjectContent.Replace("</Project>", """
+                <Target Name="FailRestore" BeforeTargets="Restore">
+                  <Error Text="Test restore failure" />
+                </Target>
+                </Project>
+                """)
+            : ProjectContent;
+        File.WriteAllText(_testProjectPath, projectContent);
+        File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        const string programContent = """
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddRazorComponents().AddInteractiveWebAssemblyComponents();
+            builder.Build().Run();
+            """;
+        File.WriteAllText(programPath, programContent);
+
+        var (_, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "blazor-identity",
+            "--project", _testProjectPath,
+            "--dataContext", "TestDbContext",
+            "--dbProvider", "sqlite-efcore",
+            "--prerelease");
+
+        Assert.Contains(expectedDiagnostic, output + error);
+        Assert.Contains(expectedDetail, output + error);
+        Assert.DoesNotContain("No referenced project", output + error);
         Assert.DoesNotContain("Adding package", output + error);
         Assert.Equal(projectContent, File.ReadAllText(_testProjectPath));
         Assert.Equal(programContent, File.ReadAllText(programPath));

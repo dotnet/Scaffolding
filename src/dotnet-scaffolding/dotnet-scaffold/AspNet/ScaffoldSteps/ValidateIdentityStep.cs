@@ -24,8 +24,7 @@ using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 /// <summary>
-/// Validates and normalizes Identity settings, analyzes the application, and prepares the model,
-/// DbContext configuration, and code-modification inputs consumed by later scaffolding steps.
+/// Scaffold step to validate Identity settings and initialize the IdentityModel for scaffolding.
 /// </summary>
 //TODO: pull all the duplicate logic from all these 'Validation' ScaffolderSteps into a common one.
 internal class ValidateIdentityStep : ScaffoldStep
@@ -76,7 +75,7 @@ internal class ValidateIdentityStep : ScaffoldStep
     }
 
     /// <summary>
-    /// Validates settings and prepares the inputs consumed by later Identity scaffolding steps.
+    /// Executes the step to validate Identity settings and initialize the IdentityModel.
     /// </summary>
     /// <param name="context">Scaffolder context.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -84,32 +83,39 @@ internal class ValidateIdentityStep : ScaffoldStep
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var identitySettings = ValidateIdentitySettings();
+        var codeModifierProperties = new Dictionary<string, string>();
         if (identitySettings is null)
         {
             _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, false));
             return false;
         }
+        else
+        {
+            context.Properties.Add(nameof(IdentitySettings), identitySettings);
+        }
 
+        //initialize IdentityModel
         _logger.LogInformation("Initializing scaffolding model...");
-        var identityModel = await GetIdentityModelAsync(identitySettings);
+        var identityModel = await GetIdentityModelAsync(context, identitySettings);
         if (identityModel is null)
         {
             _logger.LogError("An error occurred.");
             _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, false));
             return false;
         }
+        else
+        {
+            context.Properties.Add(nameof(IdentityModel), identityModel);
+            codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.IdentityNamespace, identityModel.IdentityNamespace);
+            codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.UserClassNamespace, identityModel.UserClassNamespace);
+        }
 
-        var codeModifierProperties = await PrepareCodeModificationInputsAsync(identitySettings, identityModel);
-        if (codeModifierProperties is null)
+        if (!await PrepareCodeModificationInputsAsync(identitySettings, identityModel, codeModifierProperties))
         {
             _logger.LogError("An error occurred.");
             _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, false));
             return false;
         }
-
-        context.Properties.Add(nameof(IdentitySettings), identitySettings);
-        context.Properties.Add(nameof(IdentityModel), identityModel);
-        context.SetSpecifiedTargetFramework(identityModel.ProjectInfo.LowestSupportedTargetFramework);
 
         // Prepare configuration only; later steps install packages and create the DbContext.
         if (identityModel.DbContextInfo.EfScenario)
@@ -143,7 +149,7 @@ internal class ValidateIdentityStep : ScaffoldStep
     }
 
     /// <summary>
-    /// Validates required options and applies the DbContext name and database provider defaults.
+    /// Validates the Identity settings provided by the user.
     /// </summary>
     /// <returns>Returns the validated IdentitySettings object, or null if validation failed.</returns>
     private IdentitySettings? ValidateIdentitySettings()
@@ -186,14 +192,16 @@ internal class ValidateIdentityStep : ScaffoldStep
     }
 
     /// <summary>
-    /// Discovers project and DbContext information and infers the namespaces and layout for generated files.
+    /// Initializes and returns the IdentityModel for scaffolding.
     /// </summary>
+    /// <param name="context">The ScaffolderContext for the current operation.</param>
     /// <param name="settings">The IdentitySettings used to initialize the model.</param>
-    /// <returns>The prepared model, or null if project analysis is unavailable.</returns>
-    private async Task<IdentityModel?> GetIdentityModelAsync(IdentitySettings settings)
+    /// <returns>A task that represents the asynchronous operation, with a result of the IdentityModel.</returns>
+    private async Task<IdentityModel?> GetIdentityModelAsync(ScaffolderContext context, IdentitySettings settings)
     {
         var projectPath = Path.GetFullPath(settings.Project);
         ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(projectPath, _logger);
+        context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
         var projectDirectory = Path.GetDirectoryName(projectInfo.ProjectPath);
         if (projectInfo is null || projectInfo.CodeService is null || string.IsNullOrEmpty(projectDirectory))
         {
@@ -255,7 +263,7 @@ internal class ValidateIdentityStep : ScaffoldStep
         }
 
         bool isRazorPages = Directory.Exists(Path.Combine(projectDirectory, "Pages"));
-        return new IdentityModel
+        IdentityModel scaffoldingModel = new()
         {
             ProjectInfo = projectInfo,
             DbContextInfo = dbContextInfo,
@@ -267,20 +275,20 @@ internal class ValidateIdentityStep : ScaffoldStep
             Overwrite = settings.Overwrite,
             IsRazorPages = isRazorPages
         };
+
+        return scaffoldingModel;
     }
 
     /// <summary>
     /// Prepares JSON code-change flags and their placeholder substitutions, including Blazor application analysis.
     /// </summary>
-    /// <returns>The substitutions, or null if Blazor analysis or required client resolution fails.</returns>
-    private async Task<Dictionary<string, string>?> PrepareCodeModificationInputsAsync(IdentitySettings settings, IdentityModel identityModel)
+    /// <returns>False if Blazor analysis or required client resolution fails.</returns>
+    private async Task<bool> PrepareCodeModificationInputsAsync(
+        IdentitySettings settings,
+        IdentityModel identityModel,
+        Dictionary<string, string> codeModifierProperties)
     {
         var codeChangeOptions = new List<string>();
-        var codeModifierProperties = new Dictionary<string, string>
-        {
-            [Constants.CodeModifierPropertyConstants.IdentityNamespace] = identityModel.IdentityNamespace,
-            [Constants.CodeModifierPropertyConstants.UserClassNamespace] = identityModel.UserClassNamespace
-        };
         if (identityModel.DbContextInfo.EfScenario)
         {
             codeChangeOptions.Add("EfScenario");
@@ -289,11 +297,11 @@ internal class ValidateIdentityStep : ScaffoldStep
         if (settings.BlazorScenario && identityModel.ProjectInfo.LowestSupportedTargetFramework == TargetFramework.Net11 &&
             !await TryPrepareBlazorIdentityInputsAsync(identityModel, codeChangeOptions, codeModifierProperties))
         {
-            return null;
+            return false;
         }
 
         identityModel.ProjectInfo.CodeChangeOptions = codeChangeOptions;
-        return codeModifierProperties;
+        return true;
     }
 
     /// <summary>

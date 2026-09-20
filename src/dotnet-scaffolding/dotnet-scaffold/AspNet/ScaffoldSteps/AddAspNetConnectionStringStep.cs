@@ -48,10 +48,10 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var appSettingsFileSearch = _fileSystem.EnumerateFiles(BaseProjectPath, "appsettings.json", SearchOption.AllDirectories);
-        var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
+        var appSettingsFile = appSettingsFileSearch.FirstOrDefault() ?? Path.Combine(BaseProjectPath, "appsettings.json");
         JsonNode? content;
         bool writeContent = false;
-        if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
+        if (!_fileSystem.FileExists(appSettingsFile))
         {
             content = new JsonObject();
             writeContent = true;
@@ -97,7 +97,7 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
             content[connectionStringNodeName] = connectionStringObject;
         }
 
-        if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
+        if (writeContent)
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
             _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));

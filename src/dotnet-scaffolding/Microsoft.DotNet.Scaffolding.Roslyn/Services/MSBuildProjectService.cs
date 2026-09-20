@@ -39,6 +39,15 @@ public class MSBuildProjectService : IMSBuildProjectService
         return [];
     }
 
+    /// <summary>
+    /// Gets an evaluated project property, including values supplied by imported props and targets.
+    /// </summary>
+    public string? GetPropertyValue(string propertyName)
+    {
+        EnsureInitialized();
+        return _project?.GetPropertyValue(propertyName);
+    }
+
     private void Initialize(bool refresh = false)
     {
         lock (_initLock)

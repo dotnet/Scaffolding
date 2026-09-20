@@ -30,21 +30,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
                     "ord</h3>\r\n<partial name=\"_StatusMessage\" for=\"StatusMessage\" />\r\n<p class=\"text-" +
                     "info\">\r\n    You do not have a local username/password for this site. Add a local" +
                     "\r\n    account so you can log in without an external login.\r\n</p>\r\n<div class=\"ro" +
-                    "w\">\r\n    <div class=\"col-md-6\">\r\n        <form id=\"set-password-form\" method=\"po" +
+                    "w\">\r\n    <div class=\"col-xl-6\">\r\n        <form id=\"set-password-form\" method=\"po" +
                     "st\">\r\n            <div asp-validation-summary=\"ModelOnly\" class=\"text-danger\" ro" +
                     "le=\"alert\"></div>\r\n            <div class=\"form-floating mb-3\">\r\n               " +
                     " <input asp-for=\"Input.NewPassword\" class=\"form-control\" autocomplete=\"new-passw" +
-                    "ord\" placeholder=\"Please enter your new password.\"/>\r\n                <label asp" +
-                    "-for=\"Input.NewPassword\" class=\"form-label\"></label>\r\n                <span asp-" +
-                    "validation-for=\"Input.NewPassword\" class=\"text-danger\"></span>\r\n            </di" +
-                    "v>\r\n            <div class=\"form-floating mb-3\">\r\n                <input asp-for" +
-                    "=\"Input.ConfirmPassword\" class=\"form-control\" autocomplete=\"new-password\" placeh" +
-                    "older=\"Please confirm your new password.\"/>\r\n                <label asp-for=\"Inp" +
-                    "ut.ConfirmPassword\" class=\"form-label\"></label>\r\n                <span asp-valid" +
-                    "ation-for=\"Input.ConfirmPassword\" class=\"text-danger\"></span>\r\n            </div" +
-                    ">\r\n            <button type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Set pa" +
-                    "ssword</button>\r\n        </form>\r\n    </div>\r\n</div>\r\n\r\n@section Scripts {\r\n    " +
-                    "<partial name=\"_ValidationScriptsPartial\" />\r\n}\r\n");
+                    "ord\" placeholder=\"Enter the new password\"/>\r\n                <label asp-for=\"Inp" +
+                    "ut.NewPassword\" class=\"form-label\"></label>\r\n                <span asp-validatio" +
+                    "n-for=\"Input.NewPassword\" class=\"text-danger\"></span>\r\n            </div>\r\n     " +
+                    "       <div class=\"form-floating mb-3\">\r\n                <input asp-for=\"Input.C" +
+                    "onfirmPassword\" class=\"form-control\" autocomplete=\"new-password\" placeholder=\"En" +
+                    "ter the new password\"/>\r\n                <label asp-for=\"Input.ConfirmPassword\" " +
+                    "class=\"form-label\"></label>\r\n                <span asp-validation-for=\"Input.Con" +
+                    "firmPassword\" class=\"text-danger\"></span>\r\n            </div>\r\n            <butt" +
+                    "on type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Set password</button>\r\n   " +
+                    "     </form>\r\n    </div>\r\n</div>\r\n\r\n@section Scripts {\r\n    <partial name=\"_Vali" +
+                    "dationScriptsPartial\" />\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

@@ -26,10 +26,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(AddAspNetConnectionStringStep),
                 typeof(AddDbSetToExistingContextStep),
                 typeof(AddFileStep),
+                typeof(AddIdentityMigrationStep),
                 typeof(AreaScaffolderStep),
+                typeof(ConfigureIdentityNavigationStep),
                 typeof(DetectBlazorWasmStep),
                 typeof(DotnetNewScaffolderStep),
                 typeof(EmptyControllerScaffolderStep),
+                typeof(IdentityCodeModificationStep),
                 typeof(NuGetVersionService),
                 typeof(RegisterAppStep),
                 typeof(UpdateAppAuthorizationStep),
@@ -342,7 +345,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithIdentityDbContextStep()
                 .WithAspNetConnectionStringStep()
                 .WithIdentityTextTemplatingStep()
-                .WithIdentityCodeChangeStep();
+                .WithIdentityCodeChangeStep()
+                .WithIdentityNavigationStep()
+                .WithIdentityMigrationStep();
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.EntraId.Name)
                     .WithDisplayName(AspnetStrings.EntraId.DisplayName)

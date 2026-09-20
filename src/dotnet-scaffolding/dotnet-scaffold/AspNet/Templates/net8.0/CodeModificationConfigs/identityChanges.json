@@ -60,7 +60,7 @@
             },
             {
               "CheckBlock": "app.MapRazorPages",
-              "Block": "app.MapRazorPages().WithStaticAssets()",
+              "Block": "app.MapRazorPages()",
               "InsertBefore": [ "app.Run();" ],
               "LeadingTrivia": {
                 "Newline": true

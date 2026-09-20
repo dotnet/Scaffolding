@@ -28,27 +28,27 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
             this.Write("@page\r\n@model ChangePasswordModel\r\n@{\r\n    ViewData[\"Title\"] = \"Change password\";" +
                     "\r\n    ViewData[\"ActivePage\"] = ManageNavPages.ChangePassword;\r\n}\r\n\r\n<h3>@ViewDat" +
                     "a[\"Title\"]</h3>\r\n<partial name=\"_StatusMessage\" for=\"StatusMessage\" />\r\n<div cla" +
-                    "ss=\"row\">\r\n    <div class=\"col-md-6\">\r\n        <form id=\"change-password-form\" m" +
+                    "ss=\"row\">\r\n    <div class=\"col-xl-6\">\r\n        <form id=\"change-password-form\" m" +
                     "ethod=\"post\">\r\n            <div asp-validation-summary=\"ModelOnly\" class=\"text-d" +
                     "anger\" role=\"alert\"></div>\r\n            <div class=\"form-floating mb-3\">\r\n      " +
                     "          <input asp-for=\"Input.OldPassword\" class=\"form-control\" autocomplete=\"" +
-                    "current-password\" aria-required=\"true\" placeholder=\"Please enter your old passwo" +
-                    "rd.\" />\r\n                <label asp-for=\"Input.OldPassword\" class=\"form-label\"><" +
-                    "/label>\r\n                <span asp-validation-for=\"Input.OldPassword\" class=\"tex" +
-                    "t-danger\"></span>\r\n            </div>\r\n            <div class=\"form-floating mb-" +
-                    "3\">\r\n                <input asp-for=\"Input.NewPassword\" class=\"form-control\" aut" +
-                    "ocomplete=\"new-password\" aria-required=\"true\" placeholder=\"Please enter your new" +
-                    " password.\" />\r\n                <label asp-for=\"Input.NewPassword\" class=\"form-l" +
-                    "abel\"></label>\r\n                <span asp-validation-for=\"Input.NewPassword\" cla" +
-                    "ss=\"text-danger\"></span>\r\n            </div>\r\n            <div class=\"form-float" +
-                    "ing mb-3\">\r\n                <input asp-for=\"Input.ConfirmPassword\" class=\"form-c" +
-                    "ontrol\" autocomplete=\"new-password\" aria-required=\"true\" placeholder=\"Please con" +
-                    "firm your new password.\"/>\r\n                <label asp-for=\"Input.ConfirmPasswor" +
-                    "d\" class=\"form-label\"></label>\r\n                <span asp-validation-for=\"Input." +
-                    "ConfirmPassword\" class=\"text-danger\"></span>\r\n            </div>\r\n            <b" +
-                    "utton type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Update password</button" +
-                    ">\r\n        </form>\r\n    </div>\r\n</div>\r\n\r\n@section Scripts {\r\n    <partial name=" +
-                    "\"_ValidationScriptsPartial\" />\r\n}\r\n");
+                    "current-password\" aria-required=\"true\" placeholder=\"Enter the old password\" />\r\n" +
+                    "                <label asp-for=\"Input.OldPassword\" class=\"form-label\"></label>\r\n" +
+                    "                <span asp-validation-for=\"Input.OldPassword\" class=\"text-danger\"" +
+                    "></span>\r\n            </div>\r\n            <div class=\"form-floating mb-3\">\r\n    " +
+                    "            <input asp-for=\"Input.NewPassword\" class=\"form-control\" autocomplete" +
+                    "=\"new-password\" aria-required=\"true\" placeholder=\"Enter the new password\" />\r\n  " +
+                    "              <label asp-for=\"Input.NewPassword\" class=\"form-label\"></label>\r\n  " +
+                    "              <span asp-validation-for=\"Input.NewPassword\" class=\"text-danger\"><" +
+                    "/span>\r\n            </div>\r\n            <div class=\"form-floating mb-3\">\r\n      " +
+                    "          <input asp-for=\"Input.ConfirmPassword\" class=\"form-control\" autocomple" +
+                    "te=\"new-password\" aria-required=\"true\" placeholder=\"Enter the new password\"/>\r\n " +
+                    "               <label asp-for=\"Input.ConfirmPassword\" class=\"form-label\"></label" +
+                    ">\r\n                <span asp-validation-for=\"Input.ConfirmPassword\" class=\"text-" +
+                    "danger\"></span>\r\n            </div>\r\n            <button type=\"submit\" class=\"w-" +
+                    "100 btn btn-lg btn-primary\">Update password</button>\r\n        </form>\r\n    </div" +
+                    ">\r\n</div>\r\n\r\n@section Scripts {\r\n    <partial name=\"_ValidationScriptsPartial\" /" +
+                    ">\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

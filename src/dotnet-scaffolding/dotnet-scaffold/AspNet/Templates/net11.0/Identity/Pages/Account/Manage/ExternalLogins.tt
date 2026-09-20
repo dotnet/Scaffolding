@@ -1,4 +1,3 @@
-
 <#@  template hostSpecific="true" linePragmas="false" #>
 <#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
 <#@  import namespace="System.Collections.Generic" #>

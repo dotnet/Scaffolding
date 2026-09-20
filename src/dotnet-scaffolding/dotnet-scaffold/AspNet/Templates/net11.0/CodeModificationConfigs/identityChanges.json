@@ -28,8 +28,40 @@
             },
             {
               "InsertAfter": "builder.Services.AddDbContext",
-              "CheckBlock": "builder.Services.AddDefaultIdentity",
-              "Block": "builder.Services.AddDefaultIdentity<$(UserClassName)>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<$(DbContextName)>()\"",
+              "Options": [ "AddDefaultIdentity" ],
+              "Block": "builder.Services.AddDefaultIdentity<$(UserClassName)>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<$(DbContextName)>()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "builder.Services.AddDbContext",
+              "CheckBlock": "builder.Services.AddDatabaseDeveloperPageExceptionFilter",
+              "Block": "builder.Services.AddDatabaseDeveloperPageExceptionFilter()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "CheckBlock": "builder.Services.AddRazorPages",
+              "Block": "builder.Services.AddRazorPages()",
+              "InsertBefore": [ "builder.Build()", "WebApplication.CreateBuilder.Build()" ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "CheckBlock": "app.UseMigrationsEndPoint",
+              "Block": "if (app.Environment.IsDevelopment())\r\n{\r\n    app.UseMigrationsEndPoint();\r\n}",
+              "InsertAfter": "var app = WebApplication.CreateBuilder.Build();",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "CheckBlock": "app.MapRazorPages",
+              "Block": "app.MapRazorPages().WithStaticAssets()",
+              "InsertBefore": [ "app.Run();" ],
               "LeadingTrivia": {
                 "Newline": true
               }

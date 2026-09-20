@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -26,6 +27,7 @@ using <#= Model.UserClassNamespace #>;
 
 namespace <#= Model.IdentityNamespace #>.Pages.Account;
 
+[AllowAnonymous]
 public class RegisterModel : PageModel
 {
     private readonly SignInManager<<#= Model.UserClassName #>> _signInManager;
@@ -33,14 +35,14 @@ public class RegisterModel : PageModel
     private readonly IUserStore<<#= Model.UserClassName #>> _userStore;
     private readonly IUserEmailStore<<#= Model.UserClassName #>> _emailStore;
     private readonly ILogger<RegisterModel> _logger;
-    private readonly IEmailSender _emailSender;
+    private readonly IEmailSender<<#= Model.UserClassName #>> _emailSender;
 
     public RegisterModel(
         UserManager<<#= Model.UserClassName #>> userManager,
         IUserStore<<#= Model.UserClassName #>> userStore,
         SignInManager<<#= Model.UserClassName #>> signInManager,
         ILogger<RegisterModel> logger,
-        IEmailSender emailSender)
+        IEmailSender<<#= Model.UserClassName #>> emailSender)
     {
         _userManager = userManager;
         _userStore = userStore;
@@ -105,13 +107,13 @@ public class RegisterModel : PageModel
     }
 
 
-    public async Task OnGetAsync(string? returnUrl = null)
+    public async Task OnGetAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)
     {
         ReturnUrl = returnUrl;
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
     }
 
-    public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
+    public async Task<IActionResult> OnPostAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)
     {
         returnUrl ??= Url.Content("~/");
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -136,10 +138,9 @@ public class RegisterModel : PageModel
                     values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                     protocol: Request.Scheme)!;
 
-                await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                await _emailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
-                if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                if (!await _signInManager.CanSignInAsync(user))
                 {
                     return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
                 }

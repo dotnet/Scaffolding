@@ -46,10 +46,13 @@ using ");
             this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class ResendEmailConfirmationModel : " +
                     "PageModel\r\n{\r\n    private readonly UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> _userManager;\r\n    private readonly IEmailSender _emailSender;\r\n\r\n    public Re" +
-                    "sendEmailConfirmationModel(UserManager<");
+            this.Write("> _userManager;\r\n    private readonly IEmailSender<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> userManager, IEmailSender emailSender)\r\n    {\r\n        _userManager = userManag" +
+            this.Write("> _emailSender;\r\n\r\n    public ResendEmailConfirmationModel(UserManager<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> userManager, IEmailSender<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> emailSender)\r\n    {\r\n        _userManager = userManag" +
                     "er;\r\n        _emailSender = emailSender;\r\n    }\r\n\r\n    /// <summary>\r\n    ///   " +
                     "  This API supports the ASP.NET Core Identity default UI infrastructure and is n" +
                     "ot intended to be used\r\n    ///     directly from your code. This API may change" +
@@ -74,11 +77,9 @@ using ");
                     ");\r\n        var callbackUrl = Url.Page(\r\n            \"/Account/ConfirmEmail\",\r\n " +
                     "           pageHandler: null,\r\n            values: new { userId = userId, code =" +
                     " code },\r\n            protocol: Request.Scheme)!;\r\n        await _emailSender.Se" +
-                    "ndEmailAsync(\r\n            Input.Email,\r\n            \"Confirm your email\",\r\n    " +
-                    "        $\"Please confirm your account by <a href=\'{HtmlEncoder.Default.Encode(ca" +
-                    "llbackUrl)}\'>clicking here</a>.\");\r\n\r\n        ModelState.AddModelError(string.Em" +
-                    "pty, \"Verification email sent. Please check your email.\");\r\n        return Page(" +
-                    ");\r\n    }\r\n}\r\n");
+                    "ndConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n        ModelState.AddModelError(string.Empty, \"" +
+                    "Verification email sent. Please check your email.\");\r\n        return Page();\r\n  " +
+                    "  }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

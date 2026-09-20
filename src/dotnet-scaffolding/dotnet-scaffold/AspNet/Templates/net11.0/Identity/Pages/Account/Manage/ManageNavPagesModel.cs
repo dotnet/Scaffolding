@@ -107,7 +107,52 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
                     " viewContext, string page)\r\n    {\r\n        var activePage = viewContext.ViewData" +
                     "[\"ActivePage\"] as string\r\n            ?? Path.GetFileNameWithoutExtension(viewCo" +
                     "ntext.ActionDescriptor.DisplayName);\r\n        return string.Equals(activePage, p" +
-                    "age, StringComparison.OrdinalIgnoreCase) ? \"active\" : null;\r\n    }\r\n}\r\n");
+                    "age, StringComparison.OrdinalIgnoreCase) ? \"active\" : null;\r\n    }\r\n\r\n    /// <s" +
+                    "ummary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infr" +
+                    "astructure and is not intended to be used\r\n    ///     directly from your code. " +
+                    "This API may change or be removed in future releases.\r\n    /// </summary>\r\n    p" +
+                    "ublic static string? IndexAriaCurrent(ViewContext viewContext) => AriaCurrent(vi" +
+                    "ewContext, Index);\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.N" +
+                    "ET Core Identity default UI infrastructure and is not intended to be used\r\n    /" +
+                    "//     directly from your code. This API may change or be removed in future rele" +
+                    "ases.\r\n    /// </summary>\r\n    public static string? EmailAriaCurrent(ViewContex" +
+                    "t viewContext) => AriaCurrent(viewContext, Email);\r\n\r\n    /// <summary>\r\n    ///" +
+                    "     This API supports the ASP.NET Core Identity default UI infrastructure and i" +
+                    "s not intended to be used\r\n    ///     directly from your code. This API may cha" +
+                    "nge or be removed in future releases.\r\n    /// </summary>\r\n    public static str" +
+                    "ing? ChangePasswordAriaCurrent(ViewContext viewContext) => AriaCurrent(viewConte" +
+                    "xt, ChangePassword);\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP" +
+                    ".NET Core Identity default UI infrastructure and is not intended to be used\r\n   " +
+                    " ///     directly from your code. This API may change or be removed in future re" +
+                    "leases.\r\n    /// </summary>\r\n    public static string? DownloadPersonalDataAriaC" +
+                    "urrent(ViewContext viewContext) => AriaCurrent(viewContext, DownloadPersonalData" +
+                    ");\r\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity" +
+                    " default UI infrastructure and is not intended to be used\r\n    ///     directly " +
+                    "from your code. This API may change or be removed in future releases.\r\n    /// <" +
+                    "/summary>\r\n    public static string? DeletePersonalDataAriaCurrent(ViewContext v" +
+                    "iewContext) => AriaCurrent(viewContext, DeletePersonalData);\r\n\r\n    /// <summary" +
+                    ">\r\n    ///     This API supports the ASP.NET Core Identity default UI infrastruc" +
+                    "ture and is not intended to be used\r\n    ///     directly from your code. This A" +
+                    "PI may change or be removed in future releases.\r\n    /// </summary>\r\n    public " +
+                    "static string? ExternalLoginsAriaCurrent(ViewContext viewContext) => AriaCurrent" +
+                    "(viewContext, ExternalLogins);\r\n\r\n    /// <summary>\r\n    ///     This API suppor" +
+                    "ts the ASP.NET Core Identity default UI infrastructure and is not intended to be" +
+                    " used\r\n    ///     directly from your code. This API may change or be removed in" +
+                    " future releases.\r\n    /// </summary>\r\n    public static string? PersonalDataAri" +
+                    "aCurrent(ViewContext viewContext) => AriaCurrent(viewContext, PersonalData);\r\n\r\n" +
+                    "    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity defau" +
+                    "lt UI infrastructure and is not intended to be used\r\n    ///     directly from y" +
+                    "our code. This API may change or be removed in future releases.\r\n    /// </summa" +
+                    "ry>\r\n    public static string? TwoFactorAuthenticationAriaCurrent(ViewContext vi" +
+                    "ewContext) => AriaCurrent(viewContext, TwoFactorAuthentication);\r\n\r\n    /// <sum" +
+                    "mary>\r\n    ///     This API supports the ASP.NET Core Identity default UI infras" +
+                    "tructure and is not intended to be used\r\n    ///     directly from your code. Th" +
+                    "is API may change or be removed in future releases.\r\n    /// </summary>\r\n    pub" +
+                    "lic static string? AriaCurrent(ViewContext viewContext, string page)\r\n    {\r\n   " +
+                    "     var activePage = viewContext.ViewData[\"ActivePage\"] as string\r\n            " +
+                    "?? Path.GetFileNameWithoutExtension(viewContext.ActionDescriptor.DisplayName);\r\n" +
+                    "        return string.Equals(activePage, page, StringComparison.OrdinalIgnoreCas" +
+                    "e) ? \"page\" : null;\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

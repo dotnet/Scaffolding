@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -35,6 +36,9 @@ internal static class ScaffoldCliHelper
     {
         return Path.Combine(GetRepoRoot(), "src", "dotnet-scaffolding", "dotnet-scaffold", "dotnet-scaffold.csproj");
     }
+
+    internal static string GetScaffoldAssemblyPath(string framework)
+        => Path.Combine(GetRepoRoot(), "artifacts", "bin", "dotnet-scaffold", GetBuildConfiguration(), framework, "dotnet-scaffold.dll");
 
     /// <summary>
     /// Gets the path to the dotnet executable.
@@ -128,6 +132,46 @@ internal static class ScaffoldCliHelper
         startInfo.Environment.Remove("MSBUILD_EXE_PATH");
         startInfo.Environment.Remove("MSBuildSDKsPath");
         startInfo.Environment.Remove("MSBuildExtensionsPath");
+    }
+
+    internal static ProcessStartInfo CreateDotNetStartInfo(string workingDirectory, params string[] arguments)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            WorkingDirectory = workingDirectory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        ConfigureDotNetEnvironment(startInfo);
+        foreach (var argument in arguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+        return startInfo;
+    }
+
+    internal static async Task<(int ExitCode, string Output, string Error)> RunDotNetAsync(string workingDirectory, params string[] arguments)
+    {
+        using var process = new Process { StartInfo = CreateDotNetStartInfo(workingDirectory, arguments) };
+        using var timeout = new CancellationTokenSource(System.TimeSpan.FromMinutes(5));
+        process.Start();
+        var output = process.StandardOutput.ReadToEndAsync();
+        var error = process.StandardError.ReadToEndAsync();
+        try
+        {
+            await process.WaitForExitAsync(timeout.Token);
+            return (process.ExitCode, await output, await error);
+        }
+        finally
+        {
+            if (!process.HasExited)
+            {
+                process.Kill(entireProcessTree: true);
+                await process.WaitForExitAsync();
+            }
+        }
     }
 
     /// <summary>

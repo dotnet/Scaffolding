@@ -322,9 +322,14 @@ internal class ValidateIdentityStep : ScaffoldStep
             codeChangeOptions.Add("EfScenario");
         }
 
-        if (settings.BlazorScenario && BlazorIdentityHelper.UsesInteractivityAwareTemplates(identityModel.ProjectInfo.LowestSupportedTargetFramework))
+        // .NET 8 uses different authentication-state persistence and routing mechanisms.
+        if (settings.BlazorScenario && identityModel.ProjectInfo.LowestSupportedTargetFramework.IsNetVersionOrLater(9))
         {
-            codeChangeOptions.Add(identityModel.UsesInteractiveServer ? "InteractiveServer" : "NonInteractiveServer");
+            if (identityModel.UsesInteractiveServer)
+            {
+                codeChangeOptions.Add("InteractiveServer");
+            }
+
             if (identityModel.UsesInteractiveWebAssembly)
             {
                 codeChangeOptions.Add("InteractiveWebAssembly");

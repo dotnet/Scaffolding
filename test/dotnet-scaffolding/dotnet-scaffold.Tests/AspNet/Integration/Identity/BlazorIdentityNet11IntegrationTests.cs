@@ -372,10 +372,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains("AddAuthenticationStateSerialization()", serverProgramContent);
         Assert.Equal(usesInteractiveServer, serverProgramContent.Contains("AddInteractiveServerComponents()"));
         Assert.Equal(usesInteractiveServer, serverProgramContent.Contains("IdentityRevalidatingAuthenticationStateProvider"));
-        if (!usesInteractiveServer)
-        {
-            Assert.Contains("AddAuthorization()", serverProgramContent);
-        }
+        Assert.Contains("AddAuthorization()", serverProgramContent);
 
         var clientRoutesContent = File.ReadAllText(Path.Combine(clientProjectDir, "Routes.razor"));
         Assert.Contains("<AuthorizeRouteView", clientRoutesContent);

@@ -13,10 +13,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 /// </summary>
 internal static class BlazorIdentityHelper
 {
-    // .NET 8 uses different authentication-state persistence and routing mechanisms.
-    internal static bool UsesInteractivityAwareTemplates(TargetFramework? targetFramework)
-        => targetFramework.TryGetMajorVersion(out var majorVersion) && majorVersion >= 9;
-
     /// <summary>
     /// Retrieves the text templating properties for the given T4 templates and Blazor identity model.
     /// </summary>
@@ -47,8 +43,8 @@ internal static class BlazorIdentityHelper
 
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {
-                var usesInteractivityAwareTemplates = UsesInteractivityAwareTemplates(blazorIdentityModel.ProjectInfo.LowestSupportedTargetFramework);
-                if (usesInteractivityAwareTemplates &&
+                var isNet9OrLater = blazorIdentityModel.ProjectInfo.LowestSupportedTargetFramework.IsNetVersionOrLater(9);
+                if (isNet9OrLater &&
                     typeName.Equals("IdentityRevalidatingAuthenticationStateProvider", StringComparison.Ordinal) &&
                     !blazorIdentityModel.UsesInteractiveServer)
                 {
@@ -59,7 +55,7 @@ internal static class BlazorIdentityHelper
                 string extension = templateFullName.StartsWith("Pages", StringComparison.OrdinalIgnoreCase) ||
                                    templateFullName.StartsWith("Shared", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
                 string relativeTemplatePath = templateFullName.Replace('.', Path.DirectorySeparatorChar);
-                string outputFileName = usesInteractivityAwareTemplates &&
+                string outputFileName = isNet9OrLater &&
                     typeName.Equals("RedirectToLogin", StringComparison.Ordinal) &&
                     !string.IsNullOrEmpty(blazorIdentityModel.BlazorWebAssemblyClientProjectPath)
                         ? Path.Combine(Path.GetDirectoryName(blazorIdentityModel.BlazorWebAssemblyClientProjectPath)!, "RedirectToLogin.razor")

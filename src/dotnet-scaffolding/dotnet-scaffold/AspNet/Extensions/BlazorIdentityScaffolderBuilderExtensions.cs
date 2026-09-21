@@ -73,7 +73,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             var step = config.Step;
             if (!config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) ||
                 identityModelObj is not IdentityModel identityModel ||
-                !BlazorIdentityHelper.UsesInteractivityAwareTemplates(identityModel.ProjectInfo.LowestSupportedTargetFramework) ||
+                !identityModel.ProjectInfo.LowestSupportedTargetFramework.IsNetVersionOrLater(9) ||
                 string.IsNullOrEmpty(identityModel.BlazorWebAssemblyClientProjectPath))
             {
                 step.SkipStep = true;
@@ -122,9 +122,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["BlazorIdentity"], blazorIdentityModel.ProjectInfo.ProjectPath);
             var applicationUserFile = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Files"], blazorIdentityModel.ProjectInfo.ProjectPath)
                 .FirstOrDefault(x => Path.GetFileName(x).Equals("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
-            var blazorIdentityProperties = BlazorIdentityHelper.GetTextTemplatingProperties(
-                allBlazorIdentityFiles,
-                blazorIdentityModel);
+            var blazorIdentityProperties = BlazorIdentityHelper.GetTextTemplatingProperties(allBlazorIdentityFiles, blazorIdentityModel);
             var applicationUserProperty = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(applicationUserFile, blazorIdentityModel);
             if (applicationUserProperty is not null)
             {
@@ -156,7 +154,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            if (!context.GetSpecifiedTargetFramework().TryGetMajorVersion(out var majorVersion) || majorVersion < 10)
+            if (!context.GetSpecifiedTargetFramework().IsNetVersionOrLater(10))
             {
                 step.SkipStep = true;
                 return;
@@ -251,7 +249,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             var step = config.Step;
             if (!config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) ||
                 identityModelObj is not IdentityModel identityModel ||
-                !BlazorIdentityHelper.UsesInteractivityAwareTemplates(identityModel.ProjectInfo.LowestSupportedTargetFramework) ||
+                !identityModel.ProjectInfo.LowestSupportedTargetFramework.IsNetVersionOrLater(9) ||
                 string.IsNullOrEmpty(identityModel.BlazorWebAssemblyClientProjectPath))
             {
                 step.SkipStep = true;

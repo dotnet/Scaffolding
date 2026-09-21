@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>$(StandardTestTfms)</TargetFramework>
     <IsPackable>false</IsPackable>
+    <TestRunnerAdditionalArguments Condition="'$(ExcludeScaffoldIntegrationTests)' == 'true'">$(TestRunnerAdditionalArguments) -notrait &quot;Suite=ScaffoldIntegration&quot;</TestRunnerAdditionalArguments>
   </PropertyGroup>
 
   <ItemGroup>

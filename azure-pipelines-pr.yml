@@ -100,7 +100,7 @@ stages:
             $(_InternalBuildArgs)
             $(_PublishPackages)
             $(_ValidateSdkArgs)
-            /p:TestRunnerAdditionalArguments=-notrait%20Suite=ScaffoldIntegration
+            /p:ExcludeScaffoldIntegrationTests=true
           displayName: Windows Build / Publish
 
       - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
@@ -141,7 +141,7 @@ stages:
               --configuration $(_BuildConfig)
               --prepareMachine
               --restore --build --test --pack --ci
-              /p:TestRunnerAdditionalArguments=-notrait%20Suite=ScaffoldIntegration
+              /p:ExcludeScaffoldIntegrationTests=true
             name: Build
             displayName: Build
             condition: succeeded()
@@ -183,7 +183,7 @@ stages:
               --configuration $(_BuildConfig)
               --prepareMachine
               --restore --build --test --pack --ci
-              /p:TestRunnerAdditionalArguments=-notrait%20Suite=ScaffoldIntegration
+              /p:ExcludeScaffoldIntegrationTests=true
             name: Build
             displayName: Build
             condition: succeeded()

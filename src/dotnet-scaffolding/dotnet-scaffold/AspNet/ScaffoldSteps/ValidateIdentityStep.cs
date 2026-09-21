@@ -83,7 +83,6 @@ internal class ValidateIdentityStep : ScaffoldStep
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var identitySettings = ValidateIdentitySettings();
-        var codeModifierProperties = new Dictionary<string, string>();
         if (identitySettings is null)
         {
             _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, false));
@@ -105,11 +104,9 @@ internal class ValidateIdentityStep : ScaffoldStep
         else
         {
             context.Properties.Add(nameof(IdentityModel), identityModel);
-            codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.IdentityNamespace, identityModel.IdentityNamespace);
-            codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.UserClassNamespace, identityModel.UserClassNamespace);
         }
 
-        PrepareCodeModificationInputs(identitySettings, identityModel, codeModifierProperties);
+        var codeModifierProperties = PrepareCodeModificationInputs(identitySettings, identityModel);
 
         // Prepare configuration only; later steps install packages and create the DbContext.
         if (identityModel.DbContextInfo.EfScenario)
@@ -310,11 +307,15 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// <summary>
     /// Prepares JSON code-change flags and their placeholder substitutions from the populated Identity model.
     /// </summary>
-    private void PrepareCodeModificationInputs(
+    private Dictionary<string, string> PrepareCodeModificationInputs(
         IdentitySettings settings,
-        IdentityModel identityModel,
-        Dictionary<string, string> codeModifierProperties)
+        IdentityModel identityModel)
     {
+        var codeModifierProperties = new Dictionary<string, string>
+        {
+            { Constants.CodeModifierPropertyConstants.IdentityNamespace, identityModel.IdentityNamespace },
+            { Constants.CodeModifierPropertyConstants.UserClassNamespace, identityModel.UserClassNamespace }
+        };
         var codeChangeOptions = new List<string>();
         if (identityModel.DbContextInfo.EfScenario)
         {
@@ -338,6 +339,7 @@ internal class ValidateIdentityStep : ScaffoldStep
         }
 
         identityModel.ProjectInfo.CodeChangeOptions = codeChangeOptions;
+        return codeModifierProperties;
     }
 
     private async Task<(bool UsesInteractiveServer, bool UsesInteractiveWebAssembly)?> GetBlazorInteractivityAsync(

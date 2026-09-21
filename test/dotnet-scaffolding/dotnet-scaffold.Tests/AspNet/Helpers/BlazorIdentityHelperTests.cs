@@ -149,60 +149,102 @@ public class BlazorIdentityHelperTests
         IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
 
         // Assert
-        Assert.NotNull(result);
-        // If any properties are returned, verify the extension logic
-        TextTemplatingProperty? property = result.FirstOrDefault();
-        if (property != null)
-        {
-            Assert.EndsWith(".razor", property.OutputPath);
-        }
+        TextTemplatingProperty property = Assert.Single(result);
+        Assert.Equal(Path.Combine(identityModel.BaseOutputPath, "Components", "Account", "Pages", "Login.razor"), property.OutputPath);
     }
 
     [Fact]
     public void GetTextTemplatingProperties_WithSharedPath_UsesRazorExtension()
     {
         // Arrange
-        List<string> templatePaths = [Path.Combine("BlazorIdentity", "Shared", "Component.tt")];
+        List<string> templatePaths = [Path.Combine("BlazorIdentity", "Shared", "RedirectToLogin.tt")];
         IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
 
         // Assert
-        Assert.NotNull(result);
-        // If any properties are returned, verify the extension logic
-        TextTemplatingProperty? property = result.FirstOrDefault();
-        if (property != null)
-        {
-            Assert.EndsWith(".razor", property.OutputPath);
-        }
+        TextTemplatingProperty property = Assert.Single(result);
+        Assert.Equal(Path.Combine(identityModel.BaseOutputPath, "Components", "Account", "Shared", "RedirectToLogin.razor"), property.OutputPath);
     }
 
     [Fact]
     public void GetTextTemplatingProperties_WithNonPagesOrSharedPath_UsesCsExtension()
     {
         // Arrange
-        List<string> templatePaths = [Path.Combine("BlazorIdentity", "Data", "Context.tt")];
+        List<string> templatePaths = [Path.Combine("BlazorIdentity", "IdentityRedirectManager.tt")];
         IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
 
         // Assert
-        Assert.NotNull(result);
-        // If any properties are returned, verify the extension logic
-        TextTemplatingProperty? property = result.FirstOrDefault();
-        if (property != null)
+        TextTemplatingProperty property = Assert.Single(result);
+        Assert.Equal(Path.Combine(identityModel.BaseOutputPath, "Components", "Account", "IdentityRedirectManager.cs"), property.OutputPath);
+    }
+
+    [Theory]
+    [InlineData("net8.0", false, true, true, false)]
+    [InlineData("net9.0", false, false, false, false)]
+    [InlineData("net9.0", false, true, false, true)]
+    [InlineData("net10.0", true, false, true, false)]
+    [InlineData("net11.0", true, true, true, true)]
+    public void GetTextTemplatingProperties_SelectsProviderAndRedirectLocation(
+        string targetFramework, bool usesInteractiveServer, bool hasClient, bool expectProvider, bool expectClientRedirect)
+    {
+        string projectDirectory = Path.Combine(Path.GetTempPath(), "BlazorIdentityHelperTests", Guid.NewGuid().ToString());
+        Directory.CreateDirectory(projectDirectory);
+        try
         {
-            Assert.EndsWith(".cs", property.OutputPath);
+            string projectPath = Path.Combine(projectDirectory, "TestProject.csproj");
+            File.WriteAllText(projectPath, $"""
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup>
+                    <TargetFramework>{targetFramework}</TargetFramework>
+                  </PropertyGroup>
+                </Project>
+                """);
+            IdentityModel identityModel = CreateTestIdentityModel(projectPath);
+            Assert.NotNull(identityModel.ProjectInfo.LowestSupportedTargetFramework);
+            identityModel.BaseOutputPath = projectDirectory;
+            identityModel.UsesInteractiveServer = usesInteractiveServer;
+            string clientDirectory = Path.Combine(projectDirectory, "Client");
+            identityModel.BlazorWebAssemblyClientProjectPath = hasClient ? Path.Combine(clientDirectory, "Client.csproj") : null;
+            List<string> templatePaths = [
+                string.Empty,
+                Path.Combine("BlazorIdentity", "Unknown.tt"),
+                Path.Combine("BlazorIdentity", "IdentityRevalidatingAuthenticationStateProvider.tt"),
+                Path.Combine("BlazorIdentity", "Shared", "RedirectToLogin.tt")
+            ];
+
+            var result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel).ToList();
+
+            Assert.Equal(expectProvider ? 2 : 1, result.Count);
+            Assert.Equal(expectProvider, result.Any(property => property.TemplateType.Name == "IdentityRevalidatingAuthenticationStateProvider"));
+            var redirect = Assert.Single(result, property => property.TemplateType.Name == "RedirectToLogin");
+            Assert.Equal(
+                expectClientRedirect
+                    ? Path.Combine(clientDirectory, "RedirectToLogin.razor")
+                    : Path.Combine(projectDirectory, "Components", "Account", "Shared", "RedirectToLogin.razor"),
+                redirect.OutputPath);
+            Assert.All(result, property =>
+            {
+                Assert.Same(identityModel, property.TemplateModel);
+                Assert.Equal("Model", property.TemplateModelName);
+                Assert.Contains(property.TemplatePath, templatePaths);
+            });
+        }
+        finally
+        {
+            Directory.Delete(projectDirectory, recursive: true);
         }
     }
 
-    private IdentityModel CreateTestIdentityModel()
+    private IdentityModel CreateTestIdentityModel(string? projectPath = null)
     {
         return new IdentityModel
         {
-            ProjectInfo = new ProjectInfo(Path.Combine("test", "project", "TestProject.csproj")),
+            ProjectInfo = new ProjectInfo(projectPath ?? Path.Combine("test", "project", "TestProject.csproj")),
             IdentityNamespace = "TestNamespace",
             BaseOutputPath = Path.Combine("Components", "Account"),
             UserClassName = "ApplicationUser",

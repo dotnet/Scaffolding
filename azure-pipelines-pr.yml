@@ -100,6 +100,7 @@ stages:
             $(_InternalBuildArgs)
             $(_PublishPackages)
             $(_ValidateSdkArgs)
+            /p:TestRunnerAdditionalArguments=-notrait%20Suite=ScaffoldIntegration
           displayName: Windows Build / Publish
 
       - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
@@ -140,6 +141,7 @@ stages:
               --configuration $(_BuildConfig)
               --prepareMachine
               --restore --build --test --pack --ci
+              /p:TestRunnerAdditionalArguments=-notrait%20Suite=ScaffoldIntegration
             name: Build
             displayName: Build
             condition: succeeded()
@@ -181,6 +183,7 @@ stages:
               --configuration $(_BuildConfig)
               --prepareMachine
               --restore --build --test --pack --ci
+              /p:TestRunnerAdditionalArguments=-notrait%20Suite=ScaffoldIntegration
             name: Build
             displayName: Build
             condition: succeeded()
@@ -194,4 +197,3 @@ stages:
       parameters:
         buildConfig: Release
         poolVmImage: windows-latest
-

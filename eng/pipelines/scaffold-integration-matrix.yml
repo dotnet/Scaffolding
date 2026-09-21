@@ -110,7 +110,7 @@ jobs:
         _Family: 'entra-id'
         _FamilyLabel: EntraId
       Aspire:
-        _Family: 'aspire-caching|aspire-database|aspire-storage'
+        _Family: 'aspire-caching|Family=aspire-database|Family=aspire-storage'
         _FamilyLabel: Aspire
   steps:
   - checkout: self

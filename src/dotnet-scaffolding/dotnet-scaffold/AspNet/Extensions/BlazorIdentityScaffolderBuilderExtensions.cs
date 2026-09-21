@@ -146,9 +146,9 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
     }
 
     /// <summary>
-    /// Adds a step to add static files required for Blazor Identity scaffolding.
+    /// Adds a step to copy the JavaScript file required for Blazor Identity passkey support.
     /// </summary>
-    public static IScaffoldBuilder WithBlazorIdentityStaticFilesStep(this IScaffoldBuilder builder)
+    public static IScaffoldBuilder WithBlazorIdentityPasskeyJavaScriptStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<AddFileStep>(config =>
         {

@@ -44,7 +44,7 @@ public class BlazorIdentityScaffolderBuilderExtensionsTests
     }
 
     [Fact]
-    public void WithBlazorIdentityStaticFilesStep_ReturnsBuilder()
+    public void WithBlazorIdentityPasskeyJavaScriptStep_ReturnsBuilder()
     {
         // Arrange
         Mock<IScaffoldBuilder> mockBuilder = new Mock<IScaffoldBuilder>();
@@ -52,7 +52,7 @@ public class BlazorIdentityScaffolderBuilderExtensionsTests
             .Returns(mockBuilder.Object);
 
         // Act
-        IScaffoldBuilder result = mockBuilder.Object.WithBlazorIdentityStaticFilesStep();
+        IScaffoldBuilder result = mockBuilder.Object.WithBlazorIdentityPasskeyJavaScriptStep();
 
         // Assert
         Assert.NotNull(result);

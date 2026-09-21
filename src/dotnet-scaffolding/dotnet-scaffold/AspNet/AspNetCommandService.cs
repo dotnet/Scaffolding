@@ -319,7 +319,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithIdentityDbContextStep()
                 .WithAspNetConnectionStringStep()
                 .WithBlazorIdentityTextTemplatingStep()
-                .WithBlazorIdentityStaticFilesStep()
+                .WithBlazorIdentityPasskeyJavaScriptStep()
                 .WithBlazorIdentityCodeChangeStep()
                 .WithBlazorIdentityClientCodeChangeStep();
 

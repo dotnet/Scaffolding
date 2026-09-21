@@ -19,9 +19,7 @@ internal static class BlazorIdentityHelper
     /// <param name="allT4TemplatePaths">The paths of all T4 templates.</param>
     /// <param name="blazorIdentityModel">The Blazor identity model containing project and identity information.</param>
     /// <returns>An <see cref="IEnumerable{TextTemplatingProperty}"/> collection containing the text templating properties for the specified templates.</returns>
-    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(
-        IEnumerable<string> allT4TemplatePaths,
-        IdentityModel blazorIdentityModel)
+    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, IdentityModel blazorIdentityModel)
     {
         if (blazorIdentityModel.ProjectInfo is null || string.IsNullOrEmpty(blazorIdentityModel.ProjectInfo.ProjectPath))
         {

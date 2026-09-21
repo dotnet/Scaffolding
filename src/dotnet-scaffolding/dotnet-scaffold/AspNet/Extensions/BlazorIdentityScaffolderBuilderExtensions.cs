@@ -73,6 +73,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             var step = config.Step;
             if (!config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) ||
                 identityModelObj is not IdentityModel identityModel ||
+                !BlazorIdentityHelper.UsesInteractivityAwareTemplates(identityModel.ProjectInfo.LowestSupportedTargetFramework) ||
                 string.IsNullOrEmpty(identityModel.BlazorWebAssemblyClientProjectPath))
             {
                 step.SkipStep = true;
@@ -250,6 +251,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             var step = config.Step;
             if (!config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) ||
                 identityModelObj is not IdentityModel identityModel ||
+                !BlazorIdentityHelper.UsesInteractivityAwareTemplates(identityModel.ProjectInfo.LowestSupportedTargetFramework) ||
                 string.IsNullOrEmpty(identityModel.BlazorWebAssemblyClientProjectPath))
             {
                 step.SkipStep = true;

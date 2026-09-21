@@ -13,14 +13,30 @@ public class BlazorIdentityNet10IntegrationTests : BlazorIdentityIntegrationTest
     protected override string TargetFramework => "net10.0";
     protected override string TestClassName => nameof(BlazorIdentityNet10IntegrationTests);
 
-    [Fact]
-    public async Task Scaffold_BlazorIdentity_Net10_CliInvocation()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Scaffold_BlazorIdentity_Net10_CliInvocation(bool usesInteractiveServer)
     {
         // Arrange write project + Program.cs + Blazor project structure
         File.WriteAllText(_testProjectPath, ProjectContent);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), $"""
+            using TestProject.Components;
+
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddRazorComponents(){(usesInteractiveServer ? ".AddInteractiveServerComponents()" : "")};
+            var app = builder.Build();
+            app.MapRazorComponents<App>(){(usesInteractiveServer ? ".AddInteractiveServerRenderMode()" : "")};
+            app.Run();
+            """);
         ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"), GloballyInteractiveAppContent);
+        if (usesInteractiveServer)
+        {
+            File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"),
+                ScaffoldCliHelper.GetBlazorAppRazor()
+                    .Replace("<HeadOutlet />", "<HeadOutlet @rendermode=\"InteractiveServer\" />")
+                    .Replace("<Routes />", "<Routes @rendermode=\"InteractiveServer\" />"));
+        }
 
         // Assert project builds before scaffolding
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
@@ -51,11 +67,12 @@ public class BlazorIdentityNet10IntegrationTests : BlazorIdentityIntegrationTest
         Assert.True(File.Exists(Path.Combine(sharedDir, "ManageNavMenu.razor")), "ManageNavMenu.razor should be created.");
         Assert.True(File.Exists(Path.Combine(sharedDir, "PasskeySubmit.razor.js")), "PasskeySubmit.razor.js should be created.");
         var appContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
-        Assert.Contains("<HeadOutlet @rendermode=\"PageRenderMode\" />", appContent);
-        Assert.Contains("<Routes @rendermode=\"PageRenderMode\" />", appContent);
-        Assert.Contains("HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null", appContent);
-        Assert.Contains("AuthorizeRouteView", appContent);
-        Assert.Contains("RedirectToLogin", appContent);
+        if (usesInteractiveServer)
+        {
+            Assert.Contains("<HeadOutlet @rendermode=\"PageRenderMode\" />", appContent);
+            Assert.Contains("<Routes @rendermode=\"PageRenderMode\" />", appContent);
+            Assert.Contains("HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null", appContent);
+        }
         var accountImportsContent = File.ReadAllText(Path.Combine(accountPagesDir, "_Imports.razor"));
         Assert.Contains("@attribute [ExcludeFromInteractiveRouting]", accountImportsContent);
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
@@ -64,8 +81,18 @@ public class BlazorIdentityNet10IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains("app.UseMigrationsEndPoint()", programContent);
         Assert.Contains("AddIdentityCore<", programContent);
         Assert.Contains("AddAuthentication(", programContent);
-        Assert.Contains("AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()", programContent);
         Assert.DoesNotContain("throw new InvalidOperationException(\"Connection string", programContent);
+        Assert.Equal(usesInteractiveServer, programContent.Contains("IdentityRevalidatingAuthenticationStateProvider"));
+        Assert.Equal(usesInteractiveServer, File.Exists(Path.Combine(
+            _testProjectDir, "Components", "Account", "IdentityRevalidatingAuthenticationStateProvider.cs")));
+        Assert.DoesNotContain("AddAuthenticationStateSerialization()", programContent);
+        if (!usesInteractiveServer)
+        {
+            Assert.Contains("AddAuthorization()", programContent);
+        }
+        var navMenuContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "Layout", "NavMenu.razor"));
+        Assert.Contains("<AuthorizeView>", navMenuContent);
+        Assert.Contains("<AntiforgeryToken />", navMenuContent);
 
         // Assert — no NuGet errors and project builds after scaffolding
         Assert.False(cliOutput.Contains("error: NU"),

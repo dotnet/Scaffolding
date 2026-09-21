@@ -223,10 +223,15 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             $"Exit code: {postExitCode}\nOutput: {postOutput}\nError: {postError}");
     }
 
-    [Fact]
-    public async Task Scaffold_BlazorIdentity_Net11_GlobalInteractiveAutoUpdatesClientAndBuilds()
+    [Theory]
+    [InlineData("net9.0", "9.0.*", true)]
+    [InlineData("net10.0", "10.0.*", true)]
+    [InlineData("net10.0", "10.0.*", false)]
+    [InlineData("net11.0", "11.0.0-rc.2.26455.110", true)]
+    public async Task Scaffold_BlazorIdentity_GlobalInteractivityUpdatesClientAndBuilds(
+        string targetFramework, string aspNetCoreVersion, bool usesInteractiveServer)
     {
-        const string aspNetCoreVersion = "11.0.0-rc.2.26455.110";
+        var renderMode = usesInteractiveServer ? "InteractiveAuto" : "InteractiveWebAssembly";
         var clientProjectDir = Path.Combine(_testDirectory, "UnexpectedClientDirectory");
         var clientProjectPath = Path.Combine(clientProjectDir, "TestProject.Client.csproj");
         Directory.CreateDirectory(Path.Combine(clientProjectDir, "Layout"));
@@ -234,7 +239,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         File.WriteAllText(_testProjectPath, $"""
             <Project Sdk="Microsoft.NET.Sdk.Web">
               <PropertyGroup>
-                <TargetFramework>{TargetFramework}</TargetFramework>
+                <TargetFramework>{targetFramework}</TargetFramework>
                 <ImplicitUsings>enable</ImplicitUsings>
                 <Nullable>enable</Nullable>
                 <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
@@ -254,17 +259,17 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
               </ItemGroup>
             </Project>
             """);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), """
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), $"""
             using TestProject.Components;
 
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddRazorComponents()
-                .AddInteractiveServerComponents()
+                {(usesInteractiveServer ? ".AddInteractiveServerComponents()" : "")}
                 .AddInteractiveWebAssemblyComponents();
 
             var app = builder.Build();
             app.MapRazorComponents<App>()
-                .AddInteractiveServerRenderMode()
+                {(usesInteractiveServer ? ".AddInteractiveServerRenderMode()" : "")}
                 .AddInteractiveWebAssemblyRenderMode();
             app.Run();
             """);
@@ -274,14 +279,14 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         File.AppendAllText(
             Path.Combine(_testProjectDir, "Components", "_Imports.razor"),
             "@using TestProject.Client\n@using TestProject.Client.Layout\n");
-        File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"), """
+        File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"), $"""
             <!DOCTYPE html>
             <html>
             <head>
-                <HeadOutlet @rendermode="InteractiveAuto" />
+                <HeadOutlet @rendermode="{renderMode}" />
             </head>
             <body>
-                <Routes @rendermode="InteractiveAuto" />
+                <Routes @rendermode="{renderMode}" />
             </body>
             </html>
             """);
@@ -289,7 +294,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         File.WriteAllText(clientProjectPath, $"""
             <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
               <PropertyGroup>
-                <TargetFramework>{TargetFramework}</TargetFramework>
+                <TargetFramework>{targetFramework}</TargetFramework>
                 <ImplicitUsings>enable</ImplicitUsings>
                 <Nullable>enable</Nullable>
                 <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
@@ -334,13 +339,16 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
 
         Assert.False(File.Exists(Path.Combine(_testProjectDir, "obj", "project.assets.json")));
+        string[] prereleaseOptions = targetFramework == "net11.0" ? ["--prerelease"] : [];
         var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework,
+            targetFramework,
             "blazor-identity",
-            "--project", _testProjectPath,
-            "--dataContext", "TestDbContext",
-            "--dbProvider", "sqlite-efcore",
-            "--prerelease");
+            [
+                "--project", _testProjectPath,
+                "--dataContext", "TestDbContext",
+                "--dbProvider", "sqlite-efcore",
+                .. prereleaseOptions
+            ]);
 
         Assert.True(exitCode == 0, $"CLI scaffold should succeed.\nOutput: {output}\nError: {error}");
 
@@ -354,11 +362,20 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.True(File.Exists(Path.Combine(clientProjectDir, "RedirectToLogin.razor")));
         Assert.False(File.Exists(Path.Combine(
             _testProjectDir, "Components", "Account", "Shared", "RedirectToLogin.razor")));
-        Assert.True(File.Exists(Path.Combine(
+        Assert.Equal(usesInteractiveServer, File.Exists(Path.Combine(
             _testProjectDir,
             "Components",
             "Account",
             "IdentityRevalidatingAuthenticationStateProvider.cs")));
+
+        var serverProgramContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+        Assert.Contains("AddAuthenticationStateSerialization()", serverProgramContent);
+        Assert.Equal(usesInteractiveServer, serverProgramContent.Contains("AddInteractiveServerComponents()"));
+        Assert.Equal(usesInteractiveServer, serverProgramContent.Contains("IdentityRevalidatingAuthenticationStateProvider"));
+        if (!usesInteractiveServer)
+        {
+            Assert.Contains("AddAuthorization()", serverProgramContent);
+        }
 
         var clientRoutesContent = File.ReadAllText(Path.Combine(clientProjectDir, "Routes.razor"));
         Assert.Contains("<AuthorizeRouteView", clientRoutesContent);
@@ -371,13 +388,14 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains("<AuthorizeView>", clientNavMenuContent);
         Assert.Contains("href=\"Account/Register\"", clientNavMenuContent);
         Assert.DoesNotContain("href=\"auth\"", clientNavMenuContent);
+        Assert.Equal(targetFramework != "net11.0", clientNavMenuContent.Contains("<AntiforgeryToken />"));
 
         var appContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
         Assert.Contains("<HeadOutlet @rendermode=\"PageRenderMode\" />", appContent);
         Assert.Contains("<Routes @rendermode=\"PageRenderMode\" />", appContent);
-        Assert.Contains("HttpContext.AcceptsInteractiveRouting() ? InteractiveAuto : null", appContent);
+        Assert.Contains($"HttpContext.AcceptsInteractiveRouting() ? {renderMode} : null", appContent);
 
-        var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
+        var (postExitCode, postOutput, postError) = await ScaffoldCliHelper.RunBuildForFrameworkAsync(_testProjectDir, targetFramework);
         Assert.True(
             postExitCode == 0,
             $"Project should build after scaffolding.\nOutput: {postOutput}\nError: {postError}");
@@ -566,11 +584,12 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
     }
 
     [Theory]
-    [InlineData("blazor-identity", true, "Unable to restore", "Test restore failure")]
-    [InlineData("identity", true, "Unable to restore", "Test restore failure")]
-    [InlineData("blazor-identity", false, "Unable to resolve Blazor registration", "AddInteractiveWebAssemblyComponents")]
-    public async Task Scaffold_Identity_Net11_AnalysisFailureDoesNotMutateProject(
-        string scaffolder, bool failRestore, string expectedDiagnostic, string expectedDetail)
+    [InlineData("net11.0", "blazor-identity", true, "Unable to restore", "Test restore failure")]
+    [InlineData("net11.0", "identity", true, "Unable to restore", "Test restore failure")]
+    [InlineData("net11.0", "blazor-identity", false, "Unable to resolve Blazor registration", "AddInteractiveWebAssemblyComponents")]
+    [InlineData("net8.0", "blazor-identity", false, "Unable to resolve Blazor registration", "AddInteractiveWebAssemblyComponents")]
+    public async Task Scaffold_Identity_AnalysisFailureDoesNotMutateProject(
+        string targetFramework, string scaffolder, bool failRestore, string expectedDiagnostic, string expectedDetail)
     {
         var projectContent = failRestore
             ? ProjectContent.Replace("</Project>", """
@@ -580,6 +599,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
                 </Project>
                 """)
             : ProjectContent;
+        projectContent = projectContent.Replace(TargetFramework, targetFramework);
         File.WriteAllText(_testProjectPath, projectContent);
         File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
         var programPath = Path.Combine(_testProjectDir, "Program.cs");
@@ -591,7 +611,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         File.WriteAllText(programPath, programContent);
 
         var (_, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework,
+            targetFramework,
             scaffolder,
             "--project", _testProjectPath,
             "--dataContext", "TestDbContext",

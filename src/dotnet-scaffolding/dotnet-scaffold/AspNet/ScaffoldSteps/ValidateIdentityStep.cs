@@ -289,10 +289,28 @@ internal class ValidateIdentityStep : ScaffoldStep
             codeChangeOptions.Add("EfScenario");
         }
 
-        if (settings.BlazorScenario && identityModel.ProjectInfo.LowestSupportedTargetFramework == TargetFramework.Net11 &&
-            !await TryPrepareBlazorIdentityInputsAsync(identityModel, codeChangeOptions, codeModifierProperties))
+        if (settings.BlazorScenario)
         {
-            return false;
+            if (!await TryAnalyzeBlazorIdentityAsync(identityModel))
+            {
+                return false;
+            }
+
+            if (BlazorIdentityHelper.UsesInteractivityAwareTemplates(identityModel.ProjectInfo.LowestSupportedTargetFramework))
+            {
+                codeChangeOptions.Add(identityModel.UsesInteractiveServer ? "InteractiveServer" : "NonInteractiveServer");
+                if (identityModel.UsesInteractiveWebAssembly)
+                {
+                    codeChangeOptions.Add("InteractiveWebAssembly");
+                    codeModifierProperties.Add("$(BlazorWebAssemblyClientNamespace)", identityModel.BlazorWebAssemblyClientNamespace!);
+                }
+
+                if (identityModel.BlazorRenderMode is not null)
+                {
+                    codeChangeOptions.Add("GlobalInteractive");
+                    codeModifierProperties.Add($"$({nameof(IdentityModel.BlazorRenderMode)})", identityModel.BlazorRenderMode);
+                }
+            }
         }
 
         identityModel.ProjectInfo.CodeChangeOptions = codeChangeOptions;
@@ -300,13 +318,10 @@ internal class ValidateIdentityStep : ScaffoldStep
     }
 
     /// <summary>
-    /// Detects interactivity and the global render mode, resolves the required client, then derives generation inputs.
+    /// Detects interactivity and the global render mode and resolves the required client.
     /// </summary>
     /// <returns>False if semantic analysis is unavailable or a required WebAssembly client cannot be resolved.</returns>
-    private async Task<bool> TryPrepareBlazorIdentityInputsAsync(
-        IdentityModel identityModel,
-        List<string> codeChangeOptions,
-        Dictionary<string, string> codeModifierProperties)
+    private async Task<bool> TryAnalyzeBlazorIdentityAsync(IdentityModel identityModel)
     {
         var projectDirectory = identityModel.BaseOutputPath;
         var programPath = Path.Combine(projectDirectory, "Program.cs");
@@ -321,8 +336,9 @@ internal class ValidateIdentityStep : ScaffoldStep
             return false;
         }
 
-        var (usesInteractiveServer, usesInteractiveWebAssembly) = interactivity.Value;
-        if (usesInteractiveWebAssembly)
+        identityModel.UsesInteractiveServer = interactivity.Value.UsesInteractiveServer;
+        identityModel.UsesInteractiveWebAssembly = interactivity.Value.UsesInteractiveWebAssembly;
+        if (identityModel.UsesInteractiveWebAssembly)
         {
             var client = GetBlazorWebAssemblyClient(identityModel.ProjectInfo.ProjectPath);
             if (client is null)
@@ -340,23 +356,6 @@ internal class ValidateIdentityStep : ScaffoldStep
             var appContent = _fileSystem.ReadAllText(appPath);
             identityModel.BlazorRenderMode = new[] { "InteractiveAuto", "InteractiveServer", "InteractiveWebAssembly" }
                 .FirstOrDefault(renderMode => appContent.Contains($"@rendermode=\"{renderMode}\"", StringComparison.Ordinal));
-        }
-
-        // Keep JSON flags and substitutions together: client changes require a resolved client,
-        // and global routing changes require the same render mode used by the generated components.
-        codeChangeOptions.Add(usesInteractiveServer ? "InteractiveServer" : "NonInteractiveServer");
-        if (usesInteractiveWebAssembly)
-        {
-            codeChangeOptions.Add("InteractiveWebAssembly");
-            codeModifierProperties.Add(
-                "$(BlazorWebAssemblyClientNamespace)",
-                identityModel.BlazorWebAssemblyClientNamespace!);
-        }
-
-        if (identityModel.BlazorRenderMode is not null)
-        {
-            codeChangeOptions.Add("GlobalInteractive");
-            codeModifierProperties.Add($"$({nameof(IdentityModel.BlazorRenderMode)})", identityModel.BlazorRenderMode);
         }
 
         return true;

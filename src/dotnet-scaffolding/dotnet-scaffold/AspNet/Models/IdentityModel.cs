@@ -51,6 +51,14 @@ internal class IdentityModel
     /// </summary>
     public bool IsRazorPages { get; set; }
     /// <summary>
+    /// Gets or sets whether interactive server components are registered.
+    /// </summary>
+    public bool UsesInteractiveServer { get; set; }
+    /// <summary>
+    /// Gets or sets whether interactive WebAssembly components are registered.
+    /// </summary>
+    public bool UsesInteractiveWebAssembly { get; set; }
+    /// <summary>
     /// Gets or sets the Blazor WebAssembly client project path.
     /// </summary>
     public string? BlazorWebAssemblyClientProjectPath { get; set; }

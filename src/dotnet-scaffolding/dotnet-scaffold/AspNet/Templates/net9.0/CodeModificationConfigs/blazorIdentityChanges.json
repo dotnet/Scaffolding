@@ -51,6 +51,25 @@
             {
               "InsertBefore": [ "var app = builder.Build();" ],
               "Block": "WebApplication.CreateBuilder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()",
+              "Options": [ "InteractiveServer" ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "AddAuthenticationStateSerialization()",
+              "Parent": "WebApplication.CreateBuilder.Services.AddRazorComponents()",
+              "CodeChangeType": "MemberAccess",
+              "Options": [ "InteractiveWebAssembly" ],
+              "LeadingTrivia": {
+                "Newline": true,
+                "NumberOfSpaces": 4
+              }
+            },
+            {
+              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthorization()",
+              "Options": [ "NonInteractiveServer" ],
               "LeadingTrivia": {
                 "Newline": true
               }
@@ -156,6 +175,17 @@
       ]
     },
     {
+      "FileName": "Routes.razor",
+      "Options": [ "InteractiveWebAssembly" ],
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "<RedirectToLogin />" ],
+          "Block": "<$(BlazorWebAssemblyClientNamespace).RedirectToLogin />",
+          "CheckBlock": "<$(BlazorWebAssemblyClientNamespace).RedirectToLogin />"
+        }
+      ]
+    },
+    {
       "FileName": "NavMenu.razor.css",
       "Replacements": [
         {
@@ -205,14 +235,11 @@
         {
           "CheckBlock": "<AuthorizeView>",
           "ReplaceSnippet": [
-            "<span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather",
-            "            </NavLink>",
-            "        </div>"
+            "</div>",
+            "        </nav>"
           ],
           "MultiLineBlock": [
-            "<span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather",
-            "            </NavLink>",
-            "        </div>",
+            "</div>",
             "        <AuthorizeView>",
             "            <Authorized>",
             "                <div class=\"nav-item px-3\">",
@@ -242,7 +269,8 @@
             "                    </NavLink>",
             "                </div>",
             "            </NotAuthorized>",
-            "        </AuthorizeView>"
+            "        </AuthorizeView>",
+            "        </nav>"
           ]
         },
         {
@@ -354,6 +382,35 @@
             "</body>"
           ],
           "CheckBlock": "HttpContext.AcceptsInteractiveRouting()"
+        }
+      ]
+    },
+    {
+      "FileName": "Components\\App.razor",
+      "Options": [ "GlobalInteractive" ],
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "<HeadOutlet @rendermode=\"$(BlazorRenderMode)\" />" ],
+          "Block": "<HeadOutlet @rendermode=\"PageRenderMode\" />"
+        },
+        {
+          "ReplaceSnippet": [ "<Routes @rendermode=\"$(BlazorRenderMode)\" />" ],
+          "Block": "<Routes @rendermode=\"PageRenderMode\" />"
+        },
+        {
+          "ReplaceSnippet": [ "</html>" ],
+          "MultiLineBlock": [
+            "</html>",
+            "",
+            "@code {",
+            "    [CascadingParameter]",
+            "    private HttpContext HttpContext { get; set; } = default!;",
+            "",
+            "    private IComponentRenderMode? PageRenderMode =>",
+            "        HttpContext.AcceptsInteractiveRouting() ? $(BlazorRenderMode) : null;",
+            "}"
+          ],
+          "CheckBlock": "AcceptsInteractiveRouting()"
         }
       ]
     }

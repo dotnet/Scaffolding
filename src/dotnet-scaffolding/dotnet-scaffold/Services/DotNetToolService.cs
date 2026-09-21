@@ -62,7 +62,7 @@ internal class DotNetToolService : IDotNetToolService
                 DotnetCliRunner.CreateDotNet(dotnetTool.Command, ["get-commands"], envVars);
         }
 
-        var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
+        var exitCode = ExecuteAndCaptureOutput(runner, out var stdOut, out _);
         if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
         {
             try
@@ -127,7 +127,7 @@ internal class DotNetToolService : IDotNetToolService
         if (restoreLocalTools && components.Any(x => !x.IsGlobalTool))
         {
             var runner = DotnetCliRunner.CreateDotNet("tool", ["restore"], envVars);
-            runner.ExecuteAndCaptureOutput(out _, out _);
+            ExecuteAndCaptureOutput(runner, out _, out _);
         }
 
         var options = new ParallelOptions
@@ -150,6 +150,12 @@ internal class DotNetToolService : IDotNetToolService
 
         return commands.ToList();
     }
+
+    /// <summary>
+    /// Executes a tool discovery command and captures its output.
+    /// </summary>
+    protected virtual int ExecuteAndCaptureOutput(DotnetCliRunner runner, out string? stdOut, out string? stdErr)
+        => runner.ExecuteAndCaptureOutput(out stdOut, out stdErr);
 
     private static bool IsDotNetScaffoldTool(DotNetToolInfo tool)
         => tool.PackageName.Equals(DotNetScaffoldPackageName, StringComparison.OrdinalIgnoreCase);
@@ -250,8 +256,8 @@ internal class DotNetToolService : IDotNetToolService
             var dotnetToolList = new List<DotNetToolInfo>();
             var runner = DotnetCliRunner.CreateDotNet("tool", ["list", "-g"], envVars);
             var localRunner = DotnetCliRunner.CreateDotNet("tool", ["list"], envVars);
-            var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out _);
-            var localExitCode = localRunner.ExecuteAndCaptureOutput(out var localStdOut, out var localStdErr);
+            var exitCode = ExecuteAndCaptureOutput(runner, out var stdOut, out _);
+            var localExitCode = ExecuteAndCaptureOutput(localRunner, out var localStdOut, out var localStdErr);
             // Parse through local dotnet tools first.
             if (localExitCode == 0 && !string.IsNullOrEmpty(localStdOut))
             {

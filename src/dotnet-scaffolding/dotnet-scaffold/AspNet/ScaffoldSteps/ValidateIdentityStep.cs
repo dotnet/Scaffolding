@@ -109,11 +109,7 @@ internal class ValidateIdentityStep : ScaffoldStep
             codeModifierProperties.Add(Constants.CodeModifierPropertyConstants.UserClassNamespace, identityModel.UserClassNamespace);
         }
 
-        if (!await PrepareCodeModificationInputsAsync(identitySettings, identityModel, codeModifierProperties))
-        {
-            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIdentityStep), context.Scaffolder.DisplayName, false));
-            return false;
-        }
+        PrepareCodeModificationInputs(identitySettings, identityModel, codeModifierProperties);
 
         // Prepare configuration only; later steps install packages and create the DbContext.
         if (identityModel.DbContextInfo.EfScenario)
@@ -257,6 +253,38 @@ internal class ValidateIdentityStep : ScaffoldStep
             userClassNamespace = $"{projectName}.Data";
         }
 
+        bool usesInteractiveServer = false;
+        bool usesInteractiveWebAssembly = false;
+        (string ProjectPath, string RootNamespace)? webAssemblyClient = null;
+        string? blazorRenderMode = null;
+        var programPath = Path.Combine(projectDirectory, "Program.cs");
+        if (settings.BlazorScenario && _fileSystem.FileExists(programPath))
+        {
+            var interactivity = await GetBlazorInteractivityAsync(projectInfo, programPath);
+            if (interactivity is null)
+            {
+                return null;
+            }
+
+            (usesInteractiveServer, usesInteractiveWebAssembly) = interactivity.Value;
+            if (usesInteractiveWebAssembly)
+            {
+                webAssemblyClient = GetBlazorWebAssemblyClient(projectInfo.ProjectPath);
+                if (webAssemblyClient is null)
+                {
+                    return null;
+                }
+            }
+
+            var appPath = Path.Combine(projectDirectory, "Components", "App.razor");
+            if (_fileSystem.FileExists(appPath))
+            {
+                var appContent = _fileSystem.ReadAllText(appPath);
+                blazorRenderMode = new[] { "InteractiveAuto", "InteractiveServer", "InteractiveWebAssembly" }
+                    .FirstOrDefault(renderMode => appContent.Contains($"@rendermode=\"{renderMode}\"", StringComparison.Ordinal));
+            }
+        }
+
         bool isRazorPages = Directory.Exists(Path.Combine(projectDirectory, "Pages"));
         IdentityModel scaffoldingModel = new()
         {
@@ -268,17 +296,21 @@ internal class ValidateIdentityStep : ScaffoldStep
             IdentityLayoutNamespace = identityLayoutNamespace,
             BaseOutputPath = projectDirectory,
             Overwrite = settings.Overwrite,
-            IsRazorPages = isRazorPages
+            IsRazorPages = isRazorPages,
+            UsesInteractiveServer = usesInteractiveServer,
+            UsesInteractiveWebAssembly = usesInteractiveWebAssembly,
+            BlazorWebAssemblyClientProjectPath = webAssemblyClient?.ProjectPath,
+            BlazorWebAssemblyClientNamespace = webAssemblyClient?.RootNamespace,
+            BlazorRenderMode = blazorRenderMode
         };
 
         return scaffoldingModel;
     }
 
     /// <summary>
-    /// Prepares JSON code-change flags and their placeholder substitutions, including Blazor application analysis.
+    /// Prepares JSON code-change flags and their placeholder substitutions from the populated Identity model.
     /// </summary>
-    /// <returns>False if Blazor analysis or required client resolution fails.</returns>
-    private async Task<bool> PrepareCodeModificationInputsAsync(
+    private void PrepareCodeModificationInputs(
         IdentitySettings settings,
         IdentityModel identityModel,
         Dictionary<string, string> codeModifierProperties)
@@ -289,76 +321,23 @@ internal class ValidateIdentityStep : ScaffoldStep
             codeChangeOptions.Add("EfScenario");
         }
 
-        if (settings.BlazorScenario)
+        if (settings.BlazorScenario && BlazorIdentityHelper.UsesInteractivityAwareTemplates(identityModel.ProjectInfo.LowestSupportedTargetFramework))
         {
-            if (!await TryAnalyzeBlazorIdentityAsync(identityModel))
+            codeChangeOptions.Add(identityModel.UsesInteractiveServer ? "InteractiveServer" : "NonInteractiveServer");
+            if (identityModel.UsesInteractiveWebAssembly)
             {
-                return false;
+                codeChangeOptions.Add("InteractiveWebAssembly");
+                codeModifierProperties.Add("$(BlazorWebAssemblyClientNamespace)", identityModel.BlazorWebAssemblyClientNamespace!);
             }
 
-            if (BlazorIdentityHelper.UsesInteractivityAwareTemplates(identityModel.ProjectInfo.LowestSupportedTargetFramework))
+            if (identityModel.BlazorRenderMode is not null)
             {
-                codeChangeOptions.Add(identityModel.UsesInteractiveServer ? "InteractiveServer" : "NonInteractiveServer");
-                if (identityModel.UsesInteractiveWebAssembly)
-                {
-                    codeChangeOptions.Add("InteractiveWebAssembly");
-                    codeModifierProperties.Add("$(BlazorWebAssemblyClientNamespace)", identityModel.BlazorWebAssemblyClientNamespace!);
-                }
-
-                if (identityModel.BlazorRenderMode is not null)
-                {
-                    codeChangeOptions.Add("GlobalInteractive");
-                    codeModifierProperties.Add($"$({nameof(IdentityModel.BlazorRenderMode)})", identityModel.BlazorRenderMode);
-                }
+                codeChangeOptions.Add("GlobalInteractive");
+                codeModifierProperties.Add($"$({nameof(IdentityModel.BlazorRenderMode)})", identityModel.BlazorRenderMode);
             }
         }
 
         identityModel.ProjectInfo.CodeChangeOptions = codeChangeOptions;
-        return true;
-    }
-
-    /// <summary>
-    /// Detects interactivity and the global render mode and resolves the required client.
-    /// </summary>
-    /// <returns>False if semantic analysis is unavailable or a required WebAssembly client cannot be resolved.</returns>
-    private async Task<bool> TryAnalyzeBlazorIdentityAsync(IdentityModel identityModel)
-    {
-        var projectDirectory = identityModel.BaseOutputPath;
-        var programPath = Path.Combine(projectDirectory, "Program.cs");
-        if (!_fileSystem.FileExists(programPath))
-        {
-            return true;
-        }
-
-        var interactivity = await GetBlazorInteractivityAsync(identityModel.ProjectInfo, programPath);
-        if (interactivity is null)
-        {
-            return false;
-        }
-
-        identityModel.UsesInteractiveServer = interactivity.Value.UsesInteractiveServer;
-        identityModel.UsesInteractiveWebAssembly = interactivity.Value.UsesInteractiveWebAssembly;
-        if (identityModel.UsesInteractiveWebAssembly)
-        {
-            var client = GetBlazorWebAssemblyClient(identityModel.ProjectInfo.ProjectPath);
-            if (client is null)
-            {
-                return false;
-            }
-
-            identityModel.BlazorWebAssemblyClientProjectPath = client.Value.ProjectPath;
-            identityModel.BlazorWebAssemblyClientNamespace = client.Value.RootNamespace;
-        }
-
-        var appPath = Path.Combine(projectDirectory, "Components", "App.razor");
-        if (_fileSystem.FileExists(appPath))
-        {
-            var appContent = _fileSystem.ReadAllText(appPath);
-            identityModel.BlazorRenderMode = new[] { "InteractiveAuto", "InteractiveServer", "InteractiveWebAssembly" }
-                .FirstOrDefault(renderMode => appContent.Contains($"@rendermode=\"{renderMode}\"", StringComparison.Ordinal));
-        }
-
-        return true;
     }
 
     private async Task<(bool UsesInteractiveServer, bool UsesInteractiveWebAssembly)?> GetBlazorInteractivityAsync(

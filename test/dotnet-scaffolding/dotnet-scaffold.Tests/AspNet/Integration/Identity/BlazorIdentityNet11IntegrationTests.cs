@@ -512,11 +512,12 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
     }
 
     [Theory]
-    [InlineData(0, false, "No referenced project using the Microsoft.NET.Sdk.BlazorWebAssembly SDK was found.")]
-    [InlineData(2, false, "Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK")]
-    [InlineData(1, true, "Unable to determine a supported target framework")]
-    public async Task Scaffold_BlazorIdentity_Net11_ClientDiscoveryFailureDoesNotMutateProject(
-        int clientCount, bool missingImport, string expectedDiagnostic)
+    [InlineData("blazor-identity", 0, false, "No referenced project using the Microsoft.NET.Sdk.BlazorWebAssembly SDK was found.")]
+    [InlineData("blazor-identity", 2, false, "Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK")]
+    [InlineData("blazor-identity", 1, true, "Unable to determine a supported target framework")]
+    [InlineData("identity", 0, true, "Unable to determine a supported target framework")]
+    public async Task Scaffold_Identity_Net11_ProjectDiscoveryFailureDoesNotMutateProject(
+        string scaffolder, int clientCount, bool missingImport, string expectedDiagnostic)
     {
         var references = string.Empty;
         for (var index = 0; index < clientCount; index++)
@@ -561,7 +562,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
 
         var (_, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
-            "blazor-identity",
+            scaffolder,
             "--project", _testProjectPath,
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore",
@@ -573,6 +574,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             Assert.Contains("supported by this version of dotnet scaffold", output + error);
             Assert.Contains("Run 'dotnet msbuild", output + error);
             Assert.DoesNotContain("No referenced project", output + error);
+            Assert.DoesNotContain("Restoring project dependencies", output + error);
         }
 
         Assert.DoesNotContain("Adding package", output + error);
@@ -580,6 +582,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Equal(projectContent, File.ReadAllText(_testProjectPath));
         Assert.Equal(programContent, File.ReadAllText(programPath));
         Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Data")));
+        Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Areas", "Identity")));
         Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Components", "Account")));
     }
 

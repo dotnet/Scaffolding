@@ -207,7 +207,7 @@ internal class ValidateIdentityStep : ScaffoldStep
             return null;
         }
 
-        if (settings.BlazorScenario && projectInfo.LowestSupportedTargetFramework is null)
+        if (projectInfo.LowestSupportedTargetFramework is null)
         {
             _logger.LogError(
                 $"Unable to determine a supported target framework for '{settings.Project}'. Ensure the required .NET SDK and project imports are available and the project targets a framework supported by this version of dotnet scaffold. Run 'dotnet msbuild \"{settings.Project}\" -getProperty:TargetFramework,TargetFrameworks' for evaluation diagnostics.");

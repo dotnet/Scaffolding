@@ -77,6 +77,18 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// <summary>
     /// Executes the step to validate Identity settings and initialize the IdentityModel.
     /// </summary>
+    /// <remarks>
+    /// Populates <c>context.Properties</c> for subsequent steps:
+    /// <list type="bullet">
+    /// <item><description><c>IdentitySettings</c>: validated settings.</description></item>
+    /// <item><description><c>TargetFramework</c>: selected framework, set by GetIdentityModelAsync.</description></item>
+    /// <item><description><c>IdentityModel</c>: initialized scaffolding model.</description></item>
+    /// <item><description><c>DbContextProperties</c>: EF configuration, when available; sets IsIdentityDbContext and FullIdentityUserName.</description></item>
+    /// <item><description><c>BaseProjectPath</c>: project directory for EF scenarios, when available.</description></item>
+    /// <item><description><c>CodeModifierProperties</c>: placeholder substitutions, including DbContext and user-class substitutions for EF scenarios.</description></item>
+    /// </list>
+    /// Failure can leave the context partially populated.
+    /// </remarks>
     /// <param name="context">Scaffolder context.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Task that represents the asynchronous operation, with a boolean result indicating success or failure.</returns>
@@ -142,6 +154,9 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// <summary>
     /// Validates the Identity settings provided by the user.
     /// </summary>
+    /// <remarks>
+    /// Normalizes this step's DataContext and DatabaseProvider properties before returning the settings.
+    /// </remarks>
     /// <returns>Returns the validated IdentitySettings object, or null if validation failed.</returns>
     private IdentitySettings? ValidateIdentitySettings()
     {
@@ -185,6 +200,11 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// <summary>
     /// Initializes and returns the IdentityModel for scaffolding.
     /// </summary>
+    /// <remarks>
+    /// Sets <c>context.Properties["TargetFramework"]</c> to the project's lowest supported target framework
+    /// (which can be null), restores project dependencies, and loads the Roslyn workspace
+    /// for analysis. These effects can occur even if model creation subsequently fails.
+    /// </remarks>
     /// <param name="context">The ScaffolderContext for the current operation.</param>
     /// <param name="settings">The IdentitySettings used to initialize the model.</param>
     /// <returns>A task that represents the asynchronous operation, with a result of the IdentityModel.</returns>
@@ -307,6 +327,9 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// <summary>
     /// Prepares JSON code-change flags and their placeholder substitutions from the populated Identity model.
     /// </summary>
+    /// <remarks>
+    /// Assigns identityModel.ProjectInfo.CodeChangeOptions in addition to returning placeholder substitutions.
+    /// </remarks>
     private Dictionary<string, string> PrepareCodeModificationInputs(
         IdentitySettings settings,
         IdentityModel identityModel)

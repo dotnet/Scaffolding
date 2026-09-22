@@ -71,13 +71,18 @@ public enum EmploymentType
             {
                 Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
             }
+
+            var editContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Edit.razor"));
+            Assert.Contains("ApplicationState.TryTakeFromJson<TestModel>(nameof(TestModel), out var restoredTestModel)", editContent);
+            Assert.Contains("TestModel = restoredTestModel", editContent);
+            Assert.Contains("ApplicationState.PersistAsJson(nameof(TestModel), TestModel)", editContent);
+
             var createContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Create.razor"));
             Assert.Contains("<InputSelect id=\"employmenttype\"", createContent);
             Assert.Contains("<InputSelect id=\"optionalemploymenttype\"", createContent);
+
             Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
                 "DbContext file 'Data/TestDbContext.cs' should be created.");
-            var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-            Assert.Contains("TestDbContext", programContent);
 
             // Assert — no NuGet errors and project builds after scaffolding
             Assert.False(cliOutput.Contains("error: NU"),

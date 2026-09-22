@@ -42,7 +42,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/edit\"\r\n@using Microsoft.EntityFrameworkCore\r\n");
+            this.Write("/edit\"\r\n@using Microsoft.EntityFrameworkCore\r\n@implements IDisposable\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -54,7 +54,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
 
             this.Write("@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Edit</PageTitle>\r\n\r\n<" +
+            this.Write("\r\n@inject NavigationManager NavigationManager\r\n@inject PersistentComponentState ApplicationState\r\n\r\n<PageTitle>Edit</PageTitle>\r\n\r\n<" +
                     "h1>Edit</h1>\r\n\r\n<h2>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h2>\r\n<hr />\r\n@if (");
@@ -123,21 +123,49 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" { get; set; }\r\n\r\n    protected override async Task OnInitializedAsync()\r\n    {\r\n" +
-                    "        using var context = DbFactory.CreateDbContext();\r\n        ");
+            this.Write(" { get; set; }\r\n\r\n    private PersistingComponentStateSubscription? persistingSubscription;\r\n\r\n    protected override async Task OnInitializedAsync()\r\n    {\r\n        persistingSubscription ??= ApplicationState.RegisterOnPersisting(PersistData);\r\n\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
-            this.Write(" ??= await context.");
+            this.Write(" is null)\r\n        {\r\n            if (!ApplicationState.TryTakeFromJson<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(">(nameof(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("), out var restored");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("))\r\n            {\r\n                using var context = DbFactory.CreateDbContext();\r\n                ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(" = await context.");
             this.Write(this.ToStringHelper.ToStringWithCulture(entitySetName));
             this.Write(".FirstOrDefaultAsync(m => m.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write(" == ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write(");\r\n\r\n        if (");
+            this.Write(");\r\n            }\r\n            else\r\n            {\r\n                ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(" = restored");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(";\r\n            }\r\n        }\r\n\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(@" is null)
         {
             NavigationManager.NotFound();
+            return;
         }
+    }
+
+    private Task PersistData()
+    {
+        if (");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(@" is not null)
+        {
+            ApplicationState.PersistAsJson(nameof(");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write("), ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(@");
+        }
+
+        return Task.CompletedTask;
     }
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -172,7 +200,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write(" == ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
-            this.Write(");\r\n    }\r\n}\r\n");
+            this.Write(");\r\n    }\r\n\r\n    public void Dispose() => persistingSubscription?.Dispose();\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

@@ -19,7 +19,7 @@ public class BlazorIdentityInteractivityIntegrationTests
     public async Task Scaffold_BlazorIdentity_GlobalInteractivityUpdatesClientAndBuilds(
         string targetFramework, string aspNetCoreVersion, bool usesInteractiveServer)
     {
-        using var project = new BlazorIdentityTestProject(targetFramework);
+        using var project = new BlazorTestProject(targetFramework);
         project.AddWebAssemblyClient(aspNetCoreVersion, usesInteractiveServer);
         var renderMode = usesInteractiveServer ? "InteractiveAuto" : "InteractiveWebAssembly";
         var componentsDir = Path.Combine(project.ProjectDirectory, "Components");
@@ -92,7 +92,7 @@ public class BlazorIdentityInteractivityIntegrationTests
     [Fact]
     public async Task Scaffold_BlazorIdentity_PerPageInteractiveAutoBuilds()
     {
-        using var project = new BlazorIdentityTestProject("net11.0");
+        using var project = new BlazorTestProject("net11.0");
         project.AddWebAssemblyClient("11.0.*-*", usesInteractiveServer: true, clientNamespace: "Custom.Client.Root");
         File.WriteAllText(project.ClientProjectPath, File.ReadAllText(project.ClientProjectPath).Replace(
             """<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">""",

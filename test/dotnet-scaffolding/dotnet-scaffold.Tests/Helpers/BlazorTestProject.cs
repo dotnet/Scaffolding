@@ -6,17 +6,17 @@ using System.IO;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 
-internal sealed class BlazorIdentityTestProject : IDisposable
+internal sealed class BlazorTestProject : IDisposable
 {
     private readonly string _targetFramework;
 
-    public string DirectoryPath { get; } = Path.Combine(Path.GetTempPath(), "BlazorIdentity", Guid.NewGuid().ToString());
+    public string DirectoryPath { get; } = Path.Combine(Path.GetTempPath(), "Blazor", Guid.NewGuid().ToString());
     public string ProjectDirectory { get; }
     public string ProjectPath => Path.Combine(ProjectDirectory, "TestProject.csproj");
     public string ClientDirectory => Path.Combine(DirectoryPath, "Client");
     public string ClientProjectPath => Path.Combine(ClientDirectory, "TestProject.Client.csproj");
 
-    public BlazorIdentityTestProject(string targetFramework)
+    public BlazorTestProject(string targetFramework)
     {
         _targetFramework = targetFramework;
         ProjectDirectory = ScaffoldCliHelper.SetupTestProject(DirectoryPath, targetFramework);

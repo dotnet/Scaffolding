@@ -25,7 +25,7 @@ public class IdentityValidationIntegrationTests
     public async Task Scaffold_Identity_ProjectDiscoveryFailureDoesNotMutateProject(
         string scaffolder, int clientCount, bool missingImport, string expectedDiagnostic)
     {
-        using var project = new BlazorIdentityTestProject("net11.0");
+        using var project = new BlazorTestProject("net11.0");
         var references = string.Empty;
         for (var index = 0; index < clientCount; index++)
         {
@@ -70,7 +70,7 @@ public class IdentityValidationIntegrationTests
     public async Task Scaffold_BlazorIdentity_AnalysisFailureDoesNotMutateProject(
         string targetFramework, bool failRestore, string expectedDiagnostic, string expectedDetail)
     {
-        using var project = new BlazorIdentityTestProject(targetFramework);
+        using var project = new BlazorTestProject(targetFramework);
         var projectContent = File.ReadAllText(project.ProjectPath);
         if (failRestore)
         {
@@ -97,7 +97,7 @@ public class IdentityValidationIntegrationTests
         AssertProjectUnchanged(project, projectContent);
     }
 
-    private static void AssertProjectUnchanged(BlazorIdentityTestProject project, string projectContent)
+    private static void AssertProjectUnchanged(BlazorTestProject project, string projectContent)
     {
         Assert.Equal(projectContent, File.ReadAllText(project.ProjectPath));
         Assert.Equal(ProgramContent, File.ReadAllText(Path.Combine(project.ProjectDirectory, "Program.cs")));

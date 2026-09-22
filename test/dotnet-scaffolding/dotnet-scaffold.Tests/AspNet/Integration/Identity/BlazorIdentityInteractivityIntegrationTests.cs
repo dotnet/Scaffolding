@@ -98,6 +98,9 @@ public class BlazorIdentityInteractivityIntegrationTests
             """<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">""",
             """<Project><Sdk Name="Microsoft.NET.Sdk.BlazorWebAssembly" />"""));
         var routesPath = Path.Combine(project.ProjectDirectory, "Components", "Routes.razor");
+        File.WriteAllText(routesPath, File.ReadAllText(routesPath).Replace(
+            """<RouteView RouteData="routeData" />""",
+            """<RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />"""));
 
         Assert.False(File.Exists(Path.Combine(project.ProjectDirectory, "obj", "project.assets.json")));
         var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(

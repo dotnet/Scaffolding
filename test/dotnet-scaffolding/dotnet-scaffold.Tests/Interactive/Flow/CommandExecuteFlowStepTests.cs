@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
@@ -15,6 +17,7 @@ using Microsoft.DotNet.Tools.Scaffold.Interactive.Flow;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32.SafeHandles;
 using Moq;
 using Spectre.Console.Flow;
 using Xunit;
@@ -38,6 +41,18 @@ public class CommandExecuteFlowStepTests
         using var services = Assert.IsType<ServiceProvider>(builder.ServiceProvider);
         var telemetry = new Mock<ITelemetryService>();
         var executeStep = new CommandExecuteFlowStep(telemetry.Object, runner);
+        FlowStepResult? fallbackResult = null;
+        var observedStep = new Mock<IFlowStep>();
+        observedStep.SetupGet(s => s.Id).Returns(executeStep.Id);
+        observedStep.SetupGet(s => s.DisplayName).Returns(executeStep.DisplayName);
+        observedStep.Setup(s => s.ValidateUserInputAsync(It.IsAny<IFlowContext>(), It.IsAny<CancellationToken>()))
+            .Returns((IFlowContext context, CancellationToken token) => executeStep.ValidateUserInputAsync(context, token));
+        observedStep.Setup(s => s.RunAsync(It.IsAny<IFlowContext>(), It.IsAny<CancellationToken>()))
+            .Returns(async (IFlowContext context, CancellationToken token) =>
+            {
+                fallbackResult = await executeStep.RunAsync(context, token);
+                return fallbackResult;
+            });
         var properties = new Dictionary<string, object>
         {
             [FlowContextProperties.ComponentObj] = new DotNetToolInfo
@@ -54,16 +69,25 @@ public class CommandExecuteFlowStepTests
                 Parameters = []
             }
         };
-        var flow = new FlowRunner([executeStep], properties, nonInteractive: true)
+        var flow = new FlowRunner([observedStep.Object], properties, nonInteractive: false)
         {
             ShowSelectedOptions = false
         };
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         builder.AddHandler(async (_, _) => await flow.RunAsync(timeout.Token));
 
-        int exitCode = await runner.RunAsync([]);
+        int exitCode = await RunWithConsoleAsync(() => runner.RunAsync([]));
 
         Assert.Equal(succeeds, exitCode == 0);
+        if (succeeds)
+        {
+            Assert.Null(fallbackResult);
+        }
+        else
+        {
+            Assert.Equal(FlowStepState.Failure, Assert.IsType<FlowStepResult>(fallbackResult).State);
+            Assert.Contains("exit code: 1", fallbackResult!.Message);
+        }
         Assert.Equal(1, step.ExecutionCount);
         telemetry.Verify(t => t.TrackEvent(
             It.IsAny<string>(),
@@ -102,11 +126,78 @@ public class CommandExecuteFlowStepTests
 
         Assert.Equal(FlowStepState.Failure, result.State);
         Assert.Contains("Command exit code:", result.Message);
+        Assert.Same(result, await executeStep.RunAsync(flow.Context, CancellationToken.None));
         telemetry.Verify(t => t.TrackEvent(
             It.IsAny<string>(),
             It.Is<IReadOnlyDictionary<string, string>>(p => p["Result"] == "Failure"),
             It.IsAny<IReadOnlyDictionary<string, double>>()), Times.Once);
     }
+
+    private static async Task<int> RunWithConsoleAsync(Func<Task<int>> run)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return await run();
+        }
+
+        // FlowRunner calls Console.Clear even with redirected output. Use a private buffer, not the parent console's screen.
+        IntPtr input = GetStdHandle(-10);
+        IntPtr output = GetStdHandle(-11);
+        IntPtr error = GetStdHandle(-12);
+        bool allocated = false;
+        SafeFileHandle consoleOutput = CreateConsoleScreenBuffer(0xC0000000, 3, IntPtr.Zero, 1, IntPtr.Zero);
+        try
+        {
+            if (consoleOutput.IsInvalid)
+            {
+                consoleOutput.Dispose();
+                if (!AllocConsole())
+                {
+                    throw new Win32Exception();
+                }
+                allocated = true;
+                ShowWindow(GetConsoleWindow(), 0);
+                consoleOutput = CreateConsoleScreenBuffer(0xC0000000, 3, IntPtr.Zero, 1, IntPtr.Zero);
+            }
+            if (consoleOutput.IsInvalid || !SetStdHandle(-11, consoleOutput.DangerousGetHandle()))
+            {
+                throw new Win32Exception();
+            }
+
+            return await run();
+        }
+        finally
+        {
+            consoleOutput.Dispose();
+            bool detached = !allocated || FreeConsole();
+            bool restored = SetStdHandle(-10, input) & SetStdHandle(-11, output) & SetStdHandle(-12, error);
+            if (!detached || !restored)
+            {
+                throw new Win32Exception("Unable to restore console handles after the interactive flow test.");
+            }
+        }
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool AllocConsole();
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool FreeConsole();
+
+    [DllImport("kernel32.dll")]
+    private static extern IntPtr GetConsoleWindow();
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr window, int command);
+
+    [DllImport("kernel32.dll")]
+    private static extern IntPtr GetStdHandle(int handle);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool SetStdHandle(int handle, IntPtr value);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern SafeFileHandle CreateConsoleScreenBuffer(uint access, uint share, IntPtr security, uint flags, IntPtr data);
 
     private sealed class TestStep : ScaffoldStep
     {

@@ -257,17 +257,7 @@
         },
         {
           "ReplaceSnippet": [ "</html>" ],
-          "MultiLineBlock": [
-            "</html>",
-            "",
-            "@code {",
-            "    [CascadingParameter]",
-            "    private HttpContext HttpContext { get; set; } = default!;",
-            "",
-            "    private IComponentRenderMode? PageRenderMode =>",
-            "        HttpContext.AcceptsInteractiveRouting() ? $(BlazorRenderMode) : null;",
-            "}"
-          ],
+          "FileBlock": "..\\..\\Shared\\CodeBlocks\\IdentityPageRenderMode.razor",
           "CheckBlock": "AcceptsInteractiveRouting()"
         }
       ]

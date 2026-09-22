@@ -88,7 +88,8 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             "ApplicationUser file should be created.");
         var accountPagesDir = Path.Combine(_testProjectDir, "Components", "Account", "Pages");
         Assert.True(Directory.Exists(accountPagesDir), "Components/Account/Pages directory should be created.");
-        Assert.True(File.Exists(Path.Combine(accountPagesDir, "Login.razor")), "Login.razor should be created.");
+        var loginContent = File.ReadAllText(Path.Combine(accountPagesDir, "Login.razor"));
+        Assert.Contains("await editContext.ValidateAsync()", loginContent);
         Assert.True(File.Exists(Path.Combine(accountPagesDir, "Register.razor")), "Register.razor should be created.");
         var sharedDir = Path.Combine(_testProjectDir, "Components", "Account", "Shared");
         Assert.True(Directory.Exists(sharedDir), "Components/Account/Shared directory should be created.");
@@ -96,6 +97,15 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.True(File.Exists(Path.Combine(sharedDir, "PasskeySubmit.razor.js")), "PasskeySubmit.razor.js should be created.");
         Assert.True(File.Exists(Path.Combine(_testProjectDir, "Components", "Account", "PasskeyAuthenticators.cs")),
             "PasskeyAuthenticators.cs should be created.");
+
+        var passkeysContent = File.ReadAllText(Path.Combine(accountPagesDir, "Manage", "Passkeys.razor"));
+        Assert.Contains("@PasskeyAuthenticators.GetDisplayName(passkey)", passkeysContent);
+        Assert.Contains("@passkey.CreatedAt", passkeysContent);
+        Assert.Contains("PasskeyAuthenticators.TryGetDefaultDisplayName(attestationResult.Passkey, out var defaultName)", passkeysContent);
+        Assert.Contains("attestationResult.Passkey.Name = defaultName;", passkeysContent);
+        Assert.Contains("[SupplyParameterFromTempData(Name = IdentityRedirectManager.StatusMessageKey)]", passkeysContent);
+        Assert.Contains("message = IdentityStatusMessage;", passkeysContent);
+        Assert.Contains("IdentityStatusMessage = \"Your passkey was added successfully.\";", passkeysContent);
 
         var endpointContent = File.ReadAllText(Path.Combine(
             _testProjectDir, "Components", "Account", "IdentityComponentsEndpointRouteBuilderExtensions.cs"));

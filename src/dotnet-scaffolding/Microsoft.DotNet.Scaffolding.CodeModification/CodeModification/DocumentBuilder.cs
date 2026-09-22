@@ -127,7 +127,7 @@ internal class DocumentBuilder
                 //add code snippets/changes.
                 if (_codeFile.Methods != null)
                 {
-                    modifiedClassDeclarationSyntax = ModifyMethods(_codeFile.FileName, modifiedClassDeclarationSyntax, _codeFile.Methods, options, output);
+                    modifiedClassDeclarationSyntax = ModifyMethods(_codeFile.FileName, modifiedClassDeclarationSyntax, _codeFile.Methods, options,output);
                 }
 
                 if (root is SyntaxNode syntaxRoot)

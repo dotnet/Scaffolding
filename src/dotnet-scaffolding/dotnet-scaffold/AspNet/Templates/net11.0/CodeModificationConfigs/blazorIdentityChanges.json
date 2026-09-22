@@ -232,11 +232,9 @@
         {
           "CheckBlock": "<AuthorizeView>",
           "ReplaceSnippet": [
-            "</div>",
-            "        </nav>"
+            "</nav>"
           ],
           "MultiLineBlock": [
-            "</div>",
             "",
             "            <AuthorizeView>",
             "                <Authorized>",

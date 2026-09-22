@@ -235,11 +235,10 @@
         {
           "CheckBlock": "<AuthorizeView>",
           "ReplaceSnippet": [
-            "</div>",
-            "        </nav>"
+            "</nav>"
           ],
           "MultiLineBlock": [
-            "</div>",
+            "",
             "        <AuthorizeView>",
             "            <Authorized>",
             "                <div class=\"nav-item px-3\">",

@@ -25,20 +25,22 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorIdentity
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("using System.Security.Claims;\r\nusing System.Text.Json;\r\n");
+            this.Write(@"using System.Security.Claims;
+using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
+");
 
     var sortedUsings = new SortedSet<string>()
     {
         Model.UserClassNamespace,
         $"{Model.IdentityNamespace}.Pages",
         $"{Model.IdentityNamespace}.Pages.Manage",
-        "Microsoft.AspNetCore.Authentication",
-        "Microsoft.AspNetCore.Antiforgery",
-        "Microsoft.AspNetCore.Components.Authorization",
-        "Microsoft.AspNetCore.Http.Extensions",
-        "Microsoft.AspNetCore.Identity",
-        "Microsoft.AspNetCore.Mvc",
-        "Microsoft.Extensions.Primitives",
     };
 
     if (!string.IsNullOrEmpty(Model.DbContextNamespace))

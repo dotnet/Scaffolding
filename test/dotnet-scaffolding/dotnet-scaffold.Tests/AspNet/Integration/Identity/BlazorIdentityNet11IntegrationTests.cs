@@ -52,6 +52,21 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             """);
         ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
 
+        // An app upgraded from .NET 10 retains its navigation markup without a nav-menu wrapper.
+        var navMenuPath = Path.Combine(_testProjectDir, "Components", "Layout", "NavMenu.razor");
+        File.WriteAllText(navMenuPath, """
+            <div class="top-row ps-3 navbar navbar-dark">
+                <a class="navbar-brand" href="">TestProject</a>
+            </div>
+            <div class="nav-scrollable">
+                <nav class="nav flex-column">
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="weather">Weather</NavLink>
+                    </div>
+                </nav>
+            </div>
+            """ + System.Environment.NewLine);
+
         // Write a NuGet.config with the dotnet11 preview feeds so the preview-only
         // framework packages can be resolved during restore/build.
         File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
@@ -106,9 +121,13 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains("app.MapAdditionalIdentityEndpoints();", programContent);
         Assert.DoesNotContain("app.MapAdditionalIdentityEndpoints();;", programContent);
 
-        var navMenuContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "Layout", "NavMenu.razor"));
+        var navMenuContent = File.ReadAllText(navMenuPath);
         Assert.Contains("<AuthorizeView>", navMenuContent);
         Assert.Contains("href=\"Account/Register\"", navMenuContent);
+        Assert.Contains("href=\"Account/Login\"", navMenuContent);
+        Assert.Contains("action=\"Account/Logout\"", navMenuContent);
+        Assert.Contains("href=\"weather\"", navMenuContent);
+        Assert.DoesNotContain("<nav-menu>", navMenuContent);
         Assert.DoesNotContain("href=\"auth\"", navMenuContent);
         Assert.DoesNotContain("<AntiforgeryToken />", navMenuContent);
 
@@ -132,6 +151,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.True(overwriteRun.ExitCode == 0, $"Overwrite scaffold should succeed.\nOutput: {overwriteRun.Output}\nError: {overwriteRun.Error}");
         Assert.DoesNotContain("// stale", File.ReadAllText(passkeyScriptPath));
         Assert.Contains("app.MapAdditionalIdentityEndpoints();", File.ReadAllText(programPath));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(navMenuPath), "<AuthorizeView>"));
         var navMenuCss = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "Layout", "NavMenu.razor.css"));
         Assert.Equal(1, CountOccurrences(navMenuCss, ".bi-arrow-bar-left-nav-menu {"));
 

@@ -69,6 +69,7 @@
             {
               "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
               "Block": "WebApplication.CreateBuilder.Services.AddAuthorization()",
+              "Options": [ "!InteractiveServer" ],
               "LeadingTrivia": {
                 "Newline": true
               }

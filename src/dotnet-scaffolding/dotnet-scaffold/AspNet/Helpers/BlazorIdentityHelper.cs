@@ -66,6 +66,7 @@ internal static class BlazorIdentityHelper
                                templateFullName.StartsWith("Shared", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
             string relativeTemplatePath = templateFullName.Replace('.', Path.DirectorySeparatorChar);
             string outputFileName = $"{Path.Combine(GetIdentityComponentsPath(blazorIdentityModel.BaseOutputPath), relativeTemplatePath)}{extension}";
+
             // Place RedirectToLogin in the client project so both server and WebAssembly routing can use it.
             if (isNet9OrLater &&
                 typeName.Equals("RedirectToLogin", StringComparison.Ordinal) &&

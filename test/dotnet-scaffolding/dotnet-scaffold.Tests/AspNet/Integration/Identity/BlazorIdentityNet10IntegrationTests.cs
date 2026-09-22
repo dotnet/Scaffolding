@@ -86,7 +86,7 @@ public class BlazorIdentityNet10IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Equal(usesInteractiveServer, File.Exists(Path.Combine(
             _testProjectDir, "Components", "Account", "IdentityRevalidatingAuthenticationStateProvider.cs")));
         Assert.DoesNotContain("AddAuthenticationStateSerialization()", programContent);
-        Assert.Contains("AddAuthorization()", programContent);
+        Assert.Equal(!usesInteractiveServer, programContent.Contains("AddAuthorization()"));
         var navMenuContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "Layout", "NavMenu.razor"));
         Assert.Contains("<AuthorizeView>", navMenuContent);
         Assert.Contains("<AntiforgeryToken />", navMenuContent);

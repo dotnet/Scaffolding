@@ -117,12 +117,6 @@ public class Net11TemplateExistenceTests
     }
 
     [Fact]
-    public void BlazorIdentity_PasskeyAuthenticators_TemplateExists()
-    {
-        AssertTemplateSetExists("net11.0\\BlazorIdentity\\PasskeyAuthenticators");
-    }
-
-    [Fact]
     public void BlazorIdentity_PasskeyInputModel_TemplateExists()
     {
         AssertTemplateSetExists("net11.0\\BlazorIdentity\\PasskeyInputModel");

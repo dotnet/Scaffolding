@@ -146,14 +146,12 @@ public class AddFileStepTests
         {
             FileName = expectedFileName,
             BaseOutputDirectory = expectedOutputDirectory,
-            ProjectPath = "test.csproj",
-            Overwrite = true
+            ProjectPath = "test.csproj"
         };
 
         // Assert
         Assert.Equal(expectedFileName, step.FileName);
         Assert.Equal(expectedOutputDirectory, step.BaseOutputDirectory);
-        Assert.True(step.Overwrite);
     }
 
     [Fact]

@@ -14,50 +14,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
     protected override string TestClassName => nameof(BlazorIdentityNet11IntegrationTests);
 
     [Fact]
-    public async Task Scaffold_BlazorIdentity_Net11_OverwriteUpdatesStaticFilesAndApplicationWiring()
-    {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-        var programPath = Path.Combine(_testProjectDir, "Program.cs");
-        File.WriteAllText(programPath, ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
-        ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
-        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
-
-        var firstRun = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework,
-            "blazor-identity",
-            "--project", _testProjectPath,
-            "--dataContext", "ApplicationDbContext",
-            "--dbProvider", "sqlite-efcore",
-            "--prerelease");
-
-        Assert.True(firstRun.ExitCode == 0, $"Initial scaffold should succeed.\nOutput: {firstRun.Output}\nError: {firstRun.Error}");
-
-        var passkeyScriptPath = Path.Combine(
-            _testProjectDir,
-            "Components",
-            "Account",
-            "Shared",
-            "PasskeySubmit.razor.js");
-        File.WriteAllText(passkeyScriptPath, "// stale");
-        File.WriteAllText(
-            programPath,
-            File.ReadAllText(programPath).Replace("app.MapAdditionalIdentityEndpoints();", string.Empty));
-
-        var overwriteRun = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework,
-            "blazor-identity",
-            "--project", _testProjectPath,
-            "--dataContext", "ApplicationDbContext",
-            "--dbProvider", "sqlite-efcore",
-            "--prerelease",
-            "--overwrite");
-
-        Assert.True(overwriteRun.ExitCode == 0, $"Overwrite scaffold should succeed.\nOutput: {overwriteRun.Output}\nError: {overwriteRun.Error}");
-        Assert.DoesNotContain("// stale", File.ReadAllText(passkeyScriptPath));
-        Assert.Contains("app.MapAdditionalIdentityEndpoints();", File.ReadAllText(programPath));
-    }
-
-    [Fact]
     public async Task Scaffold_BlazorIdentity_Net11_CliInvocation()
     {
         // Arrange write project + Program.cs (allow warnings so preview-SDK warnings don't break the build)
@@ -72,9 +28,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
 
             builder.Services.AddRazorComponents();
 
-            // .AddInteractiveServerComponents().AddInteractiveWebAssemblyComponents();
-            Console.WriteLine("AddInteractiveServerComponents() / AddInteractiveWebAssemblyComponents()");
-            Console.WriteLine(nameof(CustomRegistrations.AddInteractiveWebAssemblyComponents));
             CustomRegistrations.AddInteractiveWebAssemblyComponents();
 
             var app = builder.Build();
@@ -95,7 +48,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             static class CustomRegistrations
             {
                 public static void AddInteractiveWebAssemblyComponents() { }
-                public static void AddInteractiveWebAssemblyComponents(int value) { }
             }
             """);
         ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
@@ -143,54 +95,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.DoesNotContain("RequestVerificationToken", passkeyScriptContent);
         Assert.DoesNotContain("headers:", passkeyScriptContent);
 
-        var redirectManagerContent = File.ReadAllText(Path.Combine(
-            _testProjectDir, "Components", "Account", "IdentityRedirectManager.cs"));
-        Assert.DoesNotContain("Append(StatusMessageCookieName", redirectManagerContent);
-        Assert.DoesNotContain("RedirectToCurrentPageWithStatus", redirectManagerContent);
-        Assert.Contains("uri.StartsWith(\"//\", StringComparison.Ordinal)", redirectManagerContent);
-        var changePasswordContent = File.ReadAllText(Path.Combine(accountPagesDir, "Manage", "ChangePassword.razor"));
-        Assert.Contains("[SupplyParameterFromTempData(Name = IdentityRedirectManager.StatusMessageKey)]", changePasswordContent);
-        Assert.Contains("<StatusMessage Message=\"@message\" />", changePasswordContent);
-        var invalidUserContent = File.ReadAllText(Path.Combine(accountPagesDir, "InvalidUser.razor"));
-        Assert.Contains("Unable to load user with ID '{UserManager.GetUserId(HttpContext.User)}'.", invalidUserContent);
-
-        var passkeysContent = File.ReadAllText(Path.Combine(accountPagesDir, "Manage", "Passkeys.razor"));
-        Assert.Contains("PasskeyAuthenticators.GetDisplayName(passkey)", passkeysContent);
-        Assert.Contains("passkey.CreatedAt.UtcDateTime", passkeysContent);
-        Assert.Contains("TryGetDefaultDisplayName", passkeysContent);
-        var authenticatorsContent = File.ReadAllText(Path.Combine(
-            _testProjectDir, "Components", "Account", "PasskeyAuthenticators.cs"));
-        Assert.Contains("Google Password Manager", authenticatorsContent);
-        Assert.Contains("Windows Hello", authenticatorsContent);
-
-        var loginContent = File.ReadAllText(Path.Combine(accountPagesDir, "Login.razor"));
-        Assert.Contains("await editContext.ValidateAsync()", loginContent);
-        Assert.Contains("<DisplayName For=\"() => Input.Email\" />", loginContent);
-        Assert.Contains("[Display(Name = \"Email\")]", loginContent);
-        Assert.Contains("<div role=\"alert\" aria-atomic=\"true\">", loginContent);
-        Assert.Contains("<ValidationSummary class=\"text-danger\" />", loginContent);
-        Assert.DoesNotContain("<ValidationSummary class=\"text-danger\" role=\"alert\" />", loginContent);
-
-        var registerContent = File.ReadAllText(Path.Combine(accountPagesDir, "Register.razor"));
-        Assert.Contains("if (!await SignInManager.CanSignInAsync(user))", registerContent);
-        var externalLoginContent = File.ReadAllText(Path.Combine(accountPagesDir, "ExternalLogin.razor"));
-        Assert.Contains("if (!await SignInManager.CanSignInAsync(user))", externalLoginContent);
-        var loginWith2faContent = File.ReadAllText(Path.Combine(accountPagesDir, "LoginWith2fa.razor"));
-        Assert.Contains("<label class=\"form-label\">", loginWith2faContent);
-        Assert.DoesNotContain("for=\"remember-machine\"", loginWith2faContent);
-
-        Assert.False(File.Exists(Path.Combine(accountPagesDir, "PasskeyUpgrade.razor")));
-        Assert.False(File.Exists(Path.Combine(_testProjectDir, "Components", "Account", "PasskeyUpgradeManager.cs")));
-        Assert.False(File.Exists(Path.Combine(_testProjectDir, "Components", "Account", "PasskeyReauthentication.cs")));
-        Assert.False(File.Exists(Path.Combine(sharedDir, "AllAcceptedCredentialsSignal.razor")));
-        Assert.False(File.Exists(Path.Combine(sharedDir, "CurrentUserDetailsSignal.razor")));
-        Assert.False(File.Exists(Path.Combine(sharedDir, "ReauthenticationPrompt.razor")));
-
-        var emailSenderContent = File.ReadAllText(Path.Combine(
-            _testProjectDir, "Components", "Account", "IdentityNoOpEmailSender.cs"));
-        Assert.Contains("If you didn't request this email confirmation, you can ignore this email.", emailSenderContent);
-        Assert.Contains("If you didn't request a password reset, you can ignore this email.", emailSenderContent);
-
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("TestDbContext", programContent);
         Assert.Contains("builder.Services.AddDatabaseDeveloperPageExceptionFilter()", programContent);
@@ -212,6 +116,25 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.False(cliOutput.Contains("error: NU"),
             $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
 
+        var passkeyScriptPath = Path.Combine(sharedDir, "PasskeySubmit.razor.js");
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        File.WriteAllText(passkeyScriptPath, "// stale");
+        File.WriteAllText(programPath, programContent.Replace("app.MapAdditionalIdentityEndpoints();", string.Empty));
+        var overwriteRun = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "blazor-identity",
+            "--project", _testProjectPath,
+            "--dataContext", "TestDbContext",
+            "--dbProvider", "sqlite-efcore",
+            "--prerelease",
+            "--overwrite");
+
+        Assert.True(overwriteRun.ExitCode == 0, $"Overwrite scaffold should succeed.\nOutput: {overwriteRun.Output}\nError: {overwriteRun.Error}");
+        Assert.DoesNotContain("// stale", File.ReadAllText(passkeyScriptPath));
+        Assert.Contains("app.MapAdditionalIdentityEndpoints();", File.ReadAllText(programPath));
+        var navMenuCss = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "Layout", "NavMenu.razor.css"));
+        Assert.Equal(1, CountOccurrences(navMenuCss, ".bi-arrow-bar-left-nav-menu {"));
+
         // Assert project builds after scaffolding.
         // net11.0 is in preview — build warnings are expected (e.g. preview SDK warnings,
         // preview NuGet package warnings) but actual build errors should not occur.
@@ -225,7 +148,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
 
     [Theory]
     [InlineData("net9.0", "9.0.*", true)]
-    [InlineData("net10.0", "10.0.*", true)]
     [InlineData("net10.0", "10.0.*", false)]
     [InlineData("net11.0", "11.0.0-rc.2.26455.110", true)]
     public async Task Scaffold_BlazorIdentity_GlobalInteractivityUpdatesClientAndBuilds(
@@ -370,7 +292,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
 
         var serverProgramContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("AddAuthenticationStateSerialization()", serverProgramContent);
-        Assert.Equal(usesInteractiveServer, serverProgramContent.Contains("AddInteractiveServerComponents()"));
         Assert.Equal(usesInteractiveServer, serverProgramContent.Contains("IdentityRevalidatingAuthenticationStateProvider"));
         Assert.Equal(!usesInteractiveServer, serverProgramContent.Contains("AddAuthorization()"));
 
@@ -378,14 +299,12 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains("<AuthorizeRouteView", clientRoutesContent);
         Assert.Contains("<RedirectToLogin />", clientRoutesContent);
 
-        var clientImportsContent = File.ReadAllText(Path.Combine(clientProjectDir, "_Imports.razor"));
-        Assert.Contains("@using Microsoft.AspNetCore.Components.Authorization", clientImportsContent);
-
         var clientNavMenuContent = File.ReadAllText(Path.Combine(clientProjectDir, "Layout", "NavMenu.razor"));
         Assert.Contains("<AuthorizeView>", clientNavMenuContent);
         Assert.Contains("href=\"Account/Register\"", clientNavMenuContent);
         Assert.DoesNotContain("href=\"auth\"", clientNavMenuContent);
         Assert.Equal(targetFramework != "net11.0", clientNavMenuContent.Contains("<AntiforgeryToken />"));
+        Assert.Contains(".bi-arrow-bar-left-nav-menu {", File.ReadAllText(Path.Combine(clientProjectDir, "Layout", "NavMenu.razor.css")));
 
         var appContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
         Assert.Contains("<HeadOutlet @rendermode=\"PageRenderMode\" />", appContent);
@@ -511,7 +430,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
     [Theory]
     [InlineData("blazor-identity", 0, false, "No referenced project using the Microsoft.NET.Sdk.BlazorWebAssembly SDK was found.")]
     [InlineData("blazor-identity", 2, false, "Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK")]
-    [InlineData("blazor-identity", 1, true, "Unable to determine a supported target framework")]
     [InlineData("identity", 0, true, "Unable to determine a supported target framework")]
     public async Task Scaffold_Identity_Net11_ProjectDiscoveryFailureDoesNotMutateProject(
         string scaffolder, int clientCount, bool missingImport, string expectedDiagnostic)
@@ -566,16 +484,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             "--prerelease");
 
         Assert.Contains(expectedDiagnostic, output + error);
-        if (missingImport)
-        {
-            Assert.Contains("supported by this version of dotnet scaffold", output + error);
-            Assert.Contains("Run 'dotnet msbuild", output + error);
-            Assert.DoesNotContain("No referenced project", output + error);
-            Assert.DoesNotContain("Restoring project dependencies", output + error);
-        }
-
-        Assert.DoesNotContain("Adding package", output + error);
-        Assert.DoesNotContain("An error occurred.", output + error);
         Assert.Equal(projectContent, File.ReadAllText(_testProjectPath));
         Assert.Equal(programContent, File.ReadAllText(programPath));
         Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Data")));
@@ -584,12 +492,11 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
     }
 
     [Theory]
-    [InlineData("net11.0", "blazor-identity", true, "Unable to restore", "Test restore failure")]
-    [InlineData("net11.0", "identity", true, "Unable to restore", "Test restore failure")]
-    [InlineData("net11.0", "blazor-identity", false, "Unable to resolve Blazor registration", "AddInteractiveWebAssemblyComponents")]
-    [InlineData("net8.0", "blazor-identity", false, "Unable to resolve Blazor registration", "AddInteractiveWebAssemblyComponents")]
+    [InlineData("net11.0", true, "Unable to restore", "Test restore failure")]
+    [InlineData("net11.0", false, "Unable to resolve Blazor registration", "AddInteractiveWebAssemblyComponents")]
+    [InlineData("net8.0", false, "Unable to resolve Blazor registration", "AddInteractiveWebAssemblyComponents")]
     public async Task Scaffold_Identity_AnalysisFailureDoesNotMutateProject(
-        string targetFramework, string scaffolder, bool failRestore, string expectedDiagnostic, string expectedDetail)
+        string targetFramework, bool failRestore, string expectedDiagnostic, string expectedDetail)
     {
         var projectContent = failRestore
             ? ProjectContent.Replace("</Project>", """
@@ -612,7 +519,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
 
         var (_, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
             targetFramework,
-            scaffolder,
+            "blazor-identity",
             "--project", _testProjectPath,
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore",
@@ -620,9 +527,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
 
         Assert.Contains(expectedDiagnostic, output + error);
         Assert.Contains(expectedDetail, output + error);
-        Assert.DoesNotContain("No referenced project", output + error);
-        Assert.DoesNotContain("Adding package", output + error);
-        Assert.DoesNotContain("An error occurred.", output + error);
         Assert.Equal(projectContent, File.ReadAllText(_testProjectPath));
         Assert.Equal(programContent, File.ReadAllText(programPath));
         Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Data")));

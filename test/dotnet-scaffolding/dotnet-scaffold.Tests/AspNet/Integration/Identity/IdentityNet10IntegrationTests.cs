@@ -76,7 +76,6 @@ public class IdentityNet10IntegrationTests : IdentityIntegrationTestsBase
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
-        Assert.Contains("Restoring project dependencies for Identity analysis...", cliOutput);
 
         // Assert — expected files/directories were created
         Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),

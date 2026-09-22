@@ -272,7 +272,7 @@ internal class ValidateIdentityStep : ScaffoldStep
 
         bool usesInteractiveServer = false;
         bool usesInteractiveWebAssembly = false;
-        (string ProjectPath, string RootNamespace)? webAssemblyClient = null;
+        string? webAssemblyClientProjectPath = null;
         string? blazorRenderMode = null;
         var programPath = Path.Combine(projectDirectory, "Program.cs");
         if (settings.BlazorScenario && _fileSystem.FileExists(programPath))
@@ -286,8 +286,8 @@ internal class ValidateIdentityStep : ScaffoldStep
             (usesInteractiveServer, usesInteractiveWebAssembly) = interactivity.Value;
             if (usesInteractiveWebAssembly)
             {
-                webAssemblyClient = GetBlazorWebAssemblyClient(projectInfo.ProjectPath);
-                if (webAssemblyClient is null)
+                webAssemblyClientProjectPath = GetBlazorWebAssemblyClientProjectPath(projectInfo.ProjectPath);
+                if (webAssemblyClientProjectPath is null)
                 {
                     return null;
                 }
@@ -316,8 +316,7 @@ internal class ValidateIdentityStep : ScaffoldStep
             IsRazorPages = isRazorPages,
             UsesInteractiveServer = usesInteractiveServer,
             UsesInteractiveWebAssembly = usesInteractiveWebAssembly,
-            BlazorWebAssemblyClientProjectPath = webAssemblyClient?.ProjectPath,
-            BlazorWebAssemblyClientNamespace = webAssemblyClient?.RootNamespace,
+            BlazorWebAssemblyClientProjectPath = webAssemblyClientProjectPath,
             BlazorRenderMode = blazorRenderMode
         };
 
@@ -356,7 +355,6 @@ internal class ValidateIdentityStep : ScaffoldStep
             if (identityModel.UsesInteractiveWebAssembly)
             {
                 codeChangeOptions.Add("InteractiveWebAssembly");
-                codeModifierProperties.Add("$(BlazorWebAssemblyClientNamespace)", identityModel.BlazorWebAssemblyClientNamespace!);
             }
 
             if (identityModel.BlazorRenderMode is not null)
@@ -408,7 +406,7 @@ internal class ValidateIdentityStep : ScaffoldStep
         return (usesInteractiveServer, usesInteractiveWebAssembly);
     }
 
-    private (string ProjectPath, string RootNamespace)? GetBlazorWebAssemblyClient(string? projectPath)
+    private string? GetBlazorWebAssemblyClientProjectPath(string? projectPath)
     {
         if (string.IsNullOrEmpty(projectPath))
         {
@@ -423,12 +421,12 @@ internal class ValidateIdentityStep : ScaffoldStep
             return null;
         }
 
-        var clients = new List<(string ProjectPath, string RootNamespace)>();
+        var clients = new List<string>();
         foreach (var reference in references.Where(_fileSystem.FileExists).Distinct(StringComparer.OrdinalIgnoreCase))
         {
             var clientProjectService = new MSBuildProjectService(reference);
             if (!clientProjectService.TryGetEvaluatedProperties(
-                ["UsingMicrosoftNETSdkBlazorWebAssembly", "RootNamespace"],
+                ["UsingMicrosoftNETSdkBlazorWebAssembly"],
                 out var properties,
                 out error))
             {
@@ -442,22 +440,14 @@ internal class ValidateIdentityStep : ScaffoldStep
                 continue;
             }
 
-            var rootNamespace = properties["RootNamespace"];
-            if (string.IsNullOrWhiteSpace(rootNamespace))
-            {
-                _logger.LogError(
-                    $"Unable to determine the evaluated RootNamespace for Blazor WebAssembly client project '{reference}'. Set RootNamespace or correct the project evaluation before scaffolding.");
-                return null;
-            }
-
-            clients.Add((reference, rootNamespace));
+            clients.Add(reference);
         }
 
         if (clients.Count != 1)
         {
             var detail = clients.Count == 0
                 ? "No referenced project using the Microsoft.NET.Sdk.BlazorWebAssembly SDK was found."
-                : $"Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK: {string.Join(", ", clients.Select(client => client.ProjectPath))}.";
+                : $"Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK: {string.Join(", ", clients)}.";
             _logger.LogError(
                 $"Unable to resolve the Blazor WebAssembly client project for '{projectPath}'. {detail} Ensure the server project has exactly one ProjectReference to its Blazor WebAssembly client.");
             return null;

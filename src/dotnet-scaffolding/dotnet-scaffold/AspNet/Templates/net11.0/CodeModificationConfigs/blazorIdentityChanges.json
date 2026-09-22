@@ -175,17 +175,6 @@
       ]
     },
     {
-      "FileName": "Routes.razor",
-      "Options": [ "InteractiveWebAssembly" ],
-      "Replacements": [
-        {
-          "ReplaceSnippet": [ "<RedirectToLogin />" ],
-          "Block": "<$(BlazorWebAssemblyClientNamespace).RedirectToLogin />",
-          "CheckBlock": "<$(BlazorWebAssemblyClientNamespace).RedirectToLogin />"
-        }
-      ]
-    },
-    {
       "FileName": "NavMenu.razor.css",
       "Replacements": [
         {
@@ -216,7 +205,7 @@
           "ReplaceSnippet": [
             "</nav>"
           ],
-          "FileBlock": "Blocks\\IdentityNavMenu.razor"
+          "FileBlock": "..\\..\\Shared\\CodeBlocks\\IdentityNavMenu.razor"
         },
         {
           "CheckBlock": "OnInitialized()",

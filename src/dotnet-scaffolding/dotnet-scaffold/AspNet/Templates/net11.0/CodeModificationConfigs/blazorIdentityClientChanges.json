@@ -79,7 +79,7 @@
           "ReplaceSnippet": [
             "</nav>"
           ],
-          "FileBlock": "Blocks\\IdentityNavMenu.razor"
+          "FileBlock": "..\\..\\Shared\\CodeBlocks\\IdentityNavMenu.razor"
         },
         {
           "CheckBlock": "OnInitialized()",

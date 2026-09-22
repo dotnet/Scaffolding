@@ -90,7 +90,7 @@ public class BlazorIdentityInteractivityIntegrationTests
     }
 
     [Fact]
-    public async Task Scaffold_BlazorIdentity_PerPageInteractiveAutoQualifiesRedirectToLogin()
+    public async Task Scaffold_BlazorIdentity_PerPageInteractiveAutoBuilds()
     {
         using var project = new BlazorIdentityTestProject("net11.0");
         project.AddWebAssemblyClient("11.0.*-*", usesInteractiveServer: true, clientNamespace: "Custom.Client.Root");
@@ -98,23 +98,6 @@ public class BlazorIdentityInteractivityIntegrationTests
             """<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">""",
             """<Project><Sdk Name="Microsoft.NET.Sdk.BlazorWebAssembly" />"""));
         var routesPath = Path.Combine(project.ProjectDirectory, "Components", "Routes.razor");
-        File.WriteAllText(routesPath, """
-            @using TestProject.Components.Account.Shared
-
-            <Router AppAssembly="typeof(Program).Assembly">
-                <Found Context="routeData">
-                    <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
-                        <NotAuthorized>
-                            <RedirectToLogin />
-                        </NotAuthorized>
-                    </AuthorizeRouteView>
-                    <FocusOnNavigate RouteData="routeData" Selector="h1" />
-                </Found>
-            </Router>
-            """);
-        var legacyRedirectPath = Path.Combine(project.ProjectDirectory, "Components", "Account", "Shared", "RedirectToLogin.razor");
-        Directory.CreateDirectory(Path.GetDirectoryName(legacyRedirectPath)!);
-        File.WriteAllText(legacyRedirectPath, "<p>Legacy redirect component</p>");
 
         Assert.False(File.Exists(Path.Combine(project.ProjectDirectory, "obj", "project.assets.json")));
         var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
@@ -126,8 +109,7 @@ public class BlazorIdentityInteractivityIntegrationTests
             "--prerelease");
 
         Assert.True(exitCode == 0, $"CLI scaffold should succeed.\nOutput: {output}\nError: {error}");
-        Assert.Contains("<Custom.Client.Root.RedirectToLogin />", File.ReadAllText(routesPath));
-        Assert.True(File.Exists(legacyRedirectPath));
+        Assert.Contains("<RedirectToLogin />", File.ReadAllText(routesPath));
         Assert.True(File.Exists(Path.Combine(project.ClientDirectory, "RedirectToLogin.razor")));
 
         var (postExitCode, postOutput, postError) = await ScaffoldCliHelper.RunBuildForFrameworkAsync(project.ProjectDirectory, "net11.0");

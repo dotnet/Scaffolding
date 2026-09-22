@@ -147,7 +147,10 @@ stages:
         - job: Linux
           timeoutInMinutes: 180
           pool:
-            ${{ if or(ne(variables['System.TeamProject'], 'internal'), in(variables['Build.Reason'], 'Manual', 'PullRequest', 'Schedule')) }}:
+            ${{ if eq(variables['System.TeamProject'], 'public') }}:
+              name: $(DncEngPublicBuildPool)
+              demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+            ${{ elseif or(ne(variables['System.TeamProject'], 'internal'), in(variables['Build.Reason'], 'Manual', 'PullRequest', 'Schedule')) }}:
               vmImage: ubuntu-22.04
           strategy:
             matrix:

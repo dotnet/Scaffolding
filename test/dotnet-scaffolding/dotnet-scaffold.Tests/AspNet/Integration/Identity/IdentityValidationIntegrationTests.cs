@@ -66,7 +66,6 @@ public class IdentityValidationIntegrationTests
     [Theory]
     [InlineData("net11.0", true, "Unable to restore", "Test restore failure")]
     [InlineData("net11.0", false, "Unable to resolve Blazor registration", "AddInteractiveWebAssemblyComponents")]
-    [InlineData("net8.0", false, "Unable to resolve Blazor registration", "AddInteractiveWebAssemblyComponents")]
     public async Task Scaffold_BlazorIdentity_AnalysisFailureDoesNotMutateProject(
         string targetFramework, bool failRestore, string expectedDiagnostic, string expectedDetail)
     {

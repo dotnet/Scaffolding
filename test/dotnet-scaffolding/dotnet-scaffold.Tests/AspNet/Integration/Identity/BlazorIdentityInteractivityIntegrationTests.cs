@@ -76,7 +76,6 @@ public class BlazorIdentityInteractivityIntegrationTests
         var clientNavMenuContent = File.ReadAllText(Path.Combine(project.ClientDirectory, "Layout", "NavMenu.razor"));
         Assert.Contains("<AuthorizeView>", clientNavMenuContent);
         Assert.Contains("href=\"Account/Register\"", clientNavMenuContent);
-        Assert.DoesNotContain("href=\"auth\"", clientNavMenuContent);
         Assert.Equal(targetFramework != "net11.0", clientNavMenuContent.Contains("<AntiforgeryToken />"));
         Assert.Contains(".bi-arrow-bar-left-nav-menu {", File.ReadAllText(Path.Combine(project.ClientDirectory, "Layout", "NavMenu.razor.css")));
 

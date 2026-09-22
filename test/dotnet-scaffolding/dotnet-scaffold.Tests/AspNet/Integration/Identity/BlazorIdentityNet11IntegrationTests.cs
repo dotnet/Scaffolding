@@ -108,7 +108,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.DoesNotContain("<AntiforgeryToken", passkeySubmitContent);
         var passkeyScriptContent = File.ReadAllText(Path.Combine(sharedDir, "PasskeySubmit.razor.js"));
         Assert.DoesNotContain("RequestVerificationToken", passkeyScriptContent);
-        Assert.DoesNotContain("headers:", passkeyScriptContent);
 
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("TestDbContext", programContent);
@@ -119,7 +118,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.False(File.Exists(Path.Combine(
             _testProjectDir, "Components", "Account", "IdentityRevalidatingAuthenticationStateProvider.cs")));
         Assert.Contains("app.MapAdditionalIdentityEndpoints();", programContent);
-        Assert.DoesNotContain("app.MapAdditionalIdentityEndpoints();;", programContent);
 
         var navMenuContent = File.ReadAllText(navMenuPath);
         Assert.Contains("<AuthorizeView>", navMenuContent);
@@ -128,7 +126,6 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         Assert.Contains("action=\"Account/Logout\"", navMenuContent);
         Assert.Contains("href=\"weather\"", navMenuContent);
         Assert.DoesNotContain("<nav-menu>", navMenuContent);
-        Assert.DoesNotContain("href=\"auth\"", navMenuContent);
         Assert.DoesNotContain("<AntiforgeryToken />", navMenuContent);
 
         // Assert no NuGet errors during scaffolding

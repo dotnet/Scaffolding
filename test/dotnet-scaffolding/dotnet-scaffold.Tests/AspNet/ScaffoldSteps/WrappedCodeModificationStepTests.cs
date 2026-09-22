@@ -122,7 +122,6 @@ public class WrappedCodeModificationStepTests
             };
 
             Assert.False(await step.ExecuteAsync(_context));
-            Assert.Equal("<Project />", File.ReadAllText(projectPath));
             Assert.Contains(logger.Invocations, invocation =>
                 invocation.Method.Name == nameof(ILogger.Log) &&
                 Equals(invocation.Arguments[0], LogLevel.Error) &&

@@ -18,3 +18,17 @@ newScaffolder.WithCategory("Custom")
         var step = config.Step;
         step.Property = PropertyValue;
     });
+```
+
+## Execution results
+
+`IScaffolder.ExecuteAsync` returns `false` when a required step fails. Execution stops before that step's post-execution callback and any remaining steps. Skipped steps and failures in steps with `ContinueOnError` enabled do not fail the operation.
+
+`IScaffoldRunner.RunAsync` returns the command exit code. Tool entry points should return this value so callers can detect parsing and scaffolding failures:
+
+```csharp
+var runner = builder.Build();
+return await runner.RunAsync(args);
+```
+
+A failed required step reports its name and warns that the project or external resources may have been partially modified. A nonzero exit code does not imply that earlier changes were rolled back. Custom root handlers can return `Task<int>` to propagate their own exit codes.

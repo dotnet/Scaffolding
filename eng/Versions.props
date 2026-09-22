@@ -69,6 +69,9 @@
     <MicrosoftExtensionsConfigurationCommandLinePackageVersion>11.0.0-rc.2.26470.103</MicrosoftExtensionsConfigurationCommandLinePackageVersion>
     <!-- System.Text.Json -->
     <SystemTextJsonPackageVersion>11.0.0-rc.2.26470.103</SystemTextJsonPackageVersion>
+    <!-- System.Diagnostics.DiagnosticSource runtime assets for downlevel tool targets -->
+    <SystemDiagnosticsDiagnosticSourcePackageVersion9>9.0.0</SystemDiagnosticsDiagnosticSourcePackageVersion9>
+    <SystemDiagnosticsDiagnosticSourcePackageVersion8>8.0.1</SystemDiagnosticsDiagnosticSourcePackageVersion8>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
     <MicrosoftCodeAnalysisPreviewVersion>5.3.0</MicrosoftCodeAnalysisPreviewVersion>

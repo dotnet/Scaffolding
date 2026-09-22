@@ -84,10 +84,13 @@ else
     [SupplyParameterFromForm]
     private <#= modelName #>? <#= modelName #> { get; set; }
 
+    [PersistentState]
+    public <#= modelName #>? <#= modelName #>State { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        <#= modelName #> ??= await context.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
+        <#= modelName #> ??= <#= modelName #>State ??= await context.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
 
         if (<#= modelName #> is null)
         {

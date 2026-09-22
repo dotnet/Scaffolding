@@ -163,24 +163,45 @@ stages:
           steps:
           - checkout: self
             clean: true
+          - bash: |
+              set -euo pipefail
+              bash eng/pipelines/linux-disk-usage.sh "Before SDK installation"
+              mkdir -p "$(Agent.TempDirectory)/scaffolding-sdk-staging"
+            displayName: Measure Linux disk usage before SDK installation
+          # UseDotNet downloads and extracts into Agent.TempDirectory before copying into .dotnet.
           - task: UseDotNet@2
             displayName: Install .NET 8 SDK
             inputs:
               packageType: sdk
               version: 8.x
               installationPath: $(Build.SourcesDirectory)/.dotnet
+            env:
+              AGENT_TEMPDIRECTORY: $(Agent.TempDirectory)/scaffolding-sdk-staging
           - task: UseDotNet@2
             displayName: Install .NET 9 SDK
             inputs:
               packageType: sdk
               version: 9.x
               installationPath: $(Build.SourcesDirectory)/.dotnet
+            env:
+              AGENT_TEMPDIRECTORY: $(Agent.TempDirectory)/scaffolding-sdk-staging
           - task: UseDotNet@2
             displayName: Install .NET 10 SDK
             inputs:
               packageType: sdk
               version: 10.x
               installationPath: $(Build.SourcesDirectory)/.dotnet
+            env:
+              AGENT_TEMPDIRECTORY: $(Agent.TempDirectory)/scaffolding-sdk-staging
+          - bash: bash eng/pipelines/linux-disk-usage.sh "After SDK installation"
+            displayName: Measure Linux disk usage after SDK installation
+            condition: succeededOrFailed()
+          - bash: |
+              set -euo pipefail
+              rm -rf -- "$(Agent.TempDirectory)/scaffolding-sdk-staging"
+              bash eng/pipelines/linux-disk-usage.sh "After SDK staging cleanup"
+            displayName: Clean Linux SDK download and extraction staging
+            condition: succeededOrFailed()
           - script: eng/common/build.sh
               --configuration $(_BuildConfig)
               --prepareMachine
@@ -188,6 +209,9 @@ stages:
             name: Build
             displayName: Build
             condition: succeeded()
+          - bash: bash eng/pipelines/linux-disk-usage.sh "After build"
+            displayName: Measure Linux disk usage after build
+            condition: succeededOrFailed()
 
 - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
   - stage: integration
@@ -198,4 +222,3 @@ stages:
       parameters:
         buildConfig: Release
         poolVmImage: windows-latest
-

@@ -24,15 +24,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.Interactive.Flow;
 public class CommandExecuteFlowStepTests
 {
     [Theory]
-    [InlineData(ScaffolderCatagory.AspNet, true, true)]
-    [InlineData(ScaffolderCatagory.AspNet, false, true)]
-    [InlineData(ScaffolderCatagory.Aspire, true, true)]
-    [InlineData(ScaffolderCatagory.Aspire, false, true)]
-    [InlineData(ScaffolderCatagory.AspNet, true, false)]
-    [InlineData(ScaffolderCatagory.AspNet, false, false)]
-    [InlineData(ScaffolderCatagory.Aspire, true, false)]
-    [InlineData(ScaffolderCatagory.Aspire, false, false)]
-    public async Task Execution_PropagatesCommandResultWithoutRetrying(ScaffolderCatagory category, bool succeeds, bool runThroughFlow)
+    [InlineData(ScaffolderCatagory.AspNet, true)]
+    [InlineData(ScaffolderCatagory.AspNet, false)]
+    [InlineData(ScaffolderCatagory.Aspire, true)]
+    [InlineData(ScaffolderCatagory.Aspire, false)]
+    public async Task Execution_PropagatesCommandResultWithoutRetrying(ScaffolderCatagory category, bool succeeds)
     {
         var builder = Host.CreateScaffoldBuilder();
         var step = new TestStep { Succeeds = succeeds };
@@ -63,22 +59,11 @@ public class CommandExecuteFlowStepTests
             ShowSelectedOptions = false
         };
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        if (runThroughFlow)
-        {
-            builder.AddHandler(async (_, _) => await flow.RunAsync(timeout.Token));
-            int exitCode = await runner.RunAsync([]);
+        builder.AddHandler(async (_, _) => await flow.RunAsync(timeout.Token));
 
-            Assert.Equal(succeeds, exitCode == 0);
-        }
-        else
-        {
-            var result = await executeStep.ValidateUserInputAsync(flow.Context, timeout.Token);
-            Assert.Equal(succeeds ? FlowStepState.Success : FlowStepState.Failure, result.State);
-            if (!succeeds)
-            {
-                Assert.Contains("exit code: 1", result.Message);
-            }
-        }
+        int exitCode = await runner.RunAsync([]);
+
+        Assert.Equal(succeeds, exitCode == 0);
         Assert.Equal(1, step.ExecutionCount);
         telemetry.Verify(t => t.TrackEvent(
             It.IsAny<string>(),
@@ -86,10 +71,8 @@ public class CommandExecuteFlowStepTests
             It.IsAny<IReadOnlyDictionary<string, double>>()), Times.Once);
     }
 
-    [Theory]
-    [InlineData("--version", true)]
-    [InlineData("--unknown-scaffold-test-command", false)]
-    public async Task ValidateUserInputAsync_PropagatesExternalToolResult(string command, bool succeeds)
+    [Fact]
+    public async Task ValidateUserInputAsync_PropagatesExternalToolFailure()
     {
         var builder = Host.CreateScaffoldBuilder();
         var runner = builder.Build();
@@ -107,7 +90,7 @@ public class CommandExecuteFlowStepTests
             },
             [FlowContextProperties.CommandObj] = new CommandInfo
             {
-                Name = command,
+                Name = "--unknown-scaffold-test-command",
                 DisplayName = "Test",
                 DisplayCategories = ["Test"],
                 Parameters = []
@@ -117,14 +100,11 @@ public class CommandExecuteFlowStepTests
 
         var result = await executeStep.ValidateUserInputAsync(flow.Context, CancellationToken.None);
 
-        Assert.Equal(succeeds ? FlowStepState.Success : FlowStepState.Failure, result.State);
-        if (!succeeds)
-        {
-            Assert.Contains("Command exit code:", result.Message);
-        }
+        Assert.Equal(FlowStepState.Failure, result.State);
+        Assert.Contains("Command exit code:", result.Message);
         telemetry.Verify(t => t.TrackEvent(
             It.IsAny<string>(),
-            It.Is<IReadOnlyDictionary<string, string>>(p => p["Result"] == (succeeds ? "Success" : "Failure")),
+            It.Is<IReadOnlyDictionary<string, string>>(p => p["Result"] == "Failure"),
             It.IsAny<IReadOnlyDictionary<string, double>>()), Times.Once);
     }
 

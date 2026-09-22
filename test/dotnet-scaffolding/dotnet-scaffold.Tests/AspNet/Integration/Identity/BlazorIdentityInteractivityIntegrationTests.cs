@@ -96,6 +96,13 @@ public class BlazorIdentityInteractivityIntegrationTests
         File.WriteAllText(project.ClientProjectPath, File.ReadAllText(project.ClientProjectPath).Replace(
             """<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">""",
             """<Project><Sdk Name="Microsoft.NET.Sdk.BlazorWebAssembly" />"""));
+        var clientProgramPath = Path.Combine(project.ClientDirectory, "Program.cs");
+        File.WriteAllText(clientProgramPath, File.ReadAllText(clientProgramPath).Replace(
+            "await builder.Build().RunAsync();",
+            """
+            var app = builder.Build();
+            await app.RunAsync();
+            """));
         var routesPath = Path.Combine(project.ProjectDirectory, "Components", "Routes.razor");
         File.WriteAllText(routesPath, File.ReadAllText(routesPath).Replace(
             """<RouteView RouteData="routeData" />""",
@@ -113,6 +120,13 @@ public class BlazorIdentityInteractivityIntegrationTests
         Assert.True(exitCode == 0, $"CLI scaffold should succeed.\nOutput: {output}\nError: {error}");
         Assert.Contains("<RedirectToLogin />", File.ReadAllText(routesPath));
         Assert.True(File.Exists(Path.Combine(project.ClientDirectory, "RedirectToLogin.razor")));
+
+        var clientProgramContent = File.ReadAllText(clientProgramPath);
+        Assert.Contains("var app = builder.Build();", clientProgramContent);
+        var beforeBuild = clientProgramContent[..clientProgramContent.IndexOf("builder.Build()", System.StringComparison.Ordinal)];
+        Assert.Contains("builder.Services.AddAuthorizationCore()", beforeBuild);
+        Assert.Contains("builder.Services.AddCascadingAuthenticationState()", beforeBuild);
+        Assert.Contains("builder.Services.AddAuthenticationStateDeserialization()", beforeBuild);
 
         var (postExitCode, postOutput, postError) = await ScaffoldCliHelper.RunBuildForFrameworkAsync(project.ProjectDirectory, "net11.0");
         Assert.True(postExitCode == 0, $"Project should build after scaffolding.\nOutput: {postOutput}\nError: {postError}");

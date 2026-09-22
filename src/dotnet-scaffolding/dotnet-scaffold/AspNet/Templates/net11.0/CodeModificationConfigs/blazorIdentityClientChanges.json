@@ -6,21 +6,21 @@
         "Global": {
           "CodeChanges": [
             {
-              "InsertBefore": [ "await builder.Build().RunAsync();" ],
+              "InsertBefore": [ "builder.Build()" ],
               "Block": "builder.Services.AddAuthorizationCore()",
               "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
-              "InsertBefore": [ "await builder.Build().RunAsync();" ],
+              "InsertBefore": [ "builder.Build()" ],
               "Block": "builder.Services.AddCascadingAuthenticationState()",
               "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
-              "InsertBefore": [ "await builder.Build().RunAsync();" ],
+              "InsertBefore": [ "builder.Build()" ],
               "Block": "builder.Services.AddAuthenticationStateDeserialization()",
               "LeadingTrivia": {
                 "Newline": true

@@ -17,14 +17,3 @@ newScaffolder.WithCategory("Custom")
         var step = config.Step;
         step.Property = PropertyValue;
     });
-```
-
-## Conditional edits
-
-Use `Options` on a file entry or an individual edit to require matching `CodeChangeOptions`. Names are case-insensitive, and every condition must match. Omitted or empty `Options` apply unconditionally. Prefix a name with `!` to require that option to be absent:
-
-```json
-"Options": [ "EfScenario", "!InteractiveServer" ]
-```
-
-This applies the edit only when `EfScenario` is present and `InteractiveServer` is absent. Negated names belong in the JSON conditions, not in the supplied `CodeChangeOptions`.

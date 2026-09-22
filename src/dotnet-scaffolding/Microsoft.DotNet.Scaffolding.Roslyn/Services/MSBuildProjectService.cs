@@ -7,6 +7,13 @@ using Microsoft.DotNet.Scaffolding.Roslyn.Helpers;
 
 namespace Microsoft.DotNet.Scaffolding.Roslyn.Services;
 
+/// <summary>
+/// Provides project capabilities, target frameworks, evaluated project references, and properties.
+/// </summary>
+/// <remarks>
+/// Call <see cref="MsBuildInitializer.Initialize"/> before using this service so MSBuild is registered
+/// before Microsoft.Build assemblies are loaded.
+/// </remarks>
 public class MSBuildProjectService : IMSBuildProjectService
 {
     private readonly string _projectPath;
@@ -41,9 +48,16 @@ public class MSBuildProjectService : IMSBuildProjectService
     }
 
     /// <summary>
-    /// Evaluates project references with all required SDKs and imports, returning their absolute paths.
-    /// A failed evaluation returns false and a diagnostic, rather than an empty successful result.
+    /// Gets the absolute paths of evaluated ProjectReference items.
     /// </summary>
+    /// <remarks>
+    /// Resolves imports, conditions, and property substitutions using a fresh project collection that is disposed after evaluation.
+    /// Unlike the cached capabilities evaluation, missing required SDKs or imports cause evaluation to fail.
+    /// Check the return value before treating an empty reference list as valid.
+    /// </remarks>
+    /// <param name="projectReferences">The evaluated reference paths, or an empty list on evaluation failure.</param>
+    /// <param name="error">The project evaluation diagnostic on failure, or null on success.</param>
+    /// <returns>True if evaluation succeeds, including when there are no references; otherwise, false.</returns>
     public bool TryGetProjectReferences(out IReadOnlyList<string> projectReferences, out string? error)
     {
         try
@@ -66,9 +80,19 @@ public class MSBuildProjectService : IMSBuildProjectService
     }
 
     /// <summary>
-    /// Evaluates the requested properties with all required SDKs and imports.
-    /// A failed evaluation returns false and a diagnostic.
+    /// Gets the evaluated values of the requested MSBuild properties.
     /// </summary>
+    /// <remarks>
+    /// Resolves imports, conditions, and property substitutions using a fresh project collection that is disposed after evaluation.
+    /// Missing required SDKs or imports cause evaluation to fail.
+    /// </remarks>
+    /// <param name="propertyNames">The names of the properties to evaluate.</param>
+    /// <param name="propertyValues">
+    /// A case-insensitive dictionary of requested properties, or an empty dictionary on evaluation failure.
+    /// Properties that are not defined have empty string values.
+    /// </param>
+    /// <param name="error">The project evaluation diagnostic on failure, or null on success.</param>
+    /// <returns>True if evaluation succeeds; otherwise, false.</returns>
     public bool TryGetEvaluatedProperties(
         IEnumerable<string> propertyNames,
         out IReadOnlyDictionary<string, string> propertyValues,

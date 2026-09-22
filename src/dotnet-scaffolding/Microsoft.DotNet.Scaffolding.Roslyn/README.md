@@ -1,4 +1,4 @@
 # Microsoft.DotNet.Scaffolding.Roslyn
 Microsoft.DotNet.Scaffolding.Roslyn is a library designed to assist .NET developers in need for CodeAnalysis related roslyn services.
 - ICodeService : a service that manages loading, reading, and editing a Roslyn workspace
-- MSBuildProjectService : provides project capabilities and target framework information. After initializing `MsBuildInitializer`, use `TryGetProjectReferences` to strictly evaluate imported, property-expanded, conditional `ProjectReference` items as absolute paths. It evaluates afresh in a private, disposed project collection rather than reusing the permissive capabilities evaluation. Check its success result and diagnostic before treating an empty reference list as valid; missing SDKs or required imports are evaluation failures.
+- MSBuildProjectService : a service that reads project capabilities, target frameworks, evaluated project references, and properties

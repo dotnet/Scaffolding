@@ -153,7 +153,7 @@ internal class DotnetCliRunner
         {
             foreach (var envVar in environmentVariables)
             {
-                _psi.Environment[envVar.Key] = envVar.Value;
+                _psi.Environment.Add(envVar.Key, envVar.Value);
             }
         }
     }

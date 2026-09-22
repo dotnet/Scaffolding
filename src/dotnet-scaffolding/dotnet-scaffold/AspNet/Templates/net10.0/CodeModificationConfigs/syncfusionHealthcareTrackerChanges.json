@@ -1,0 +1,119 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CheckBlock": "AddSyncfusionBlazorToolkit",
+              "Block": "builder.Services.AddSyncfusionBlazorToolkit();",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddSyncfusionBlazorToolkit",
+              "CheckBlock": "builder.Services.AddRazorComponents()",
+              "Block": "builder.Services.AddRazorComponents()\r\n    .AddInteractiveServerComponents();",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "app.MapStaticAssets",
+              "CheckBlock": "app.MapRazorComponents<App>",
+              "Block": "app.MapRazorComponents<App>()\r\n    .AddInteractiveServerRenderMode();",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Syncfusion.Blazor.Toolkit"
+      ]
+    },
+    {
+      "FileName": "Components\\_Imports.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "@using Microsoft.AspNetCore.Components.Forms"
+          ],
+          "MultiLineBlock": [
+            "@using Microsoft.AspNetCore.Components.Forms",
+            "@using Syncfusion.Blazor.Toolkit",
+            "@using Syncfusion.Blazor.Toolkit.Charts",
+            "@using Syncfusion.Blazor.Toolkit.Calendars",
+            "@using Syncfusion.Blazor.Toolkit.Buttons",
+            "@using Syncfusion.Blazor.Toolkit.Inputs",
+            "@using Syncfusion.Blazor.Toolkit.Popups"
+          ],
+          "CheckBlock": "Syncfusion.Blazor.Toolkit"
+        }
+      ]
+    },
+    {
+      "FileName": "Components\\App.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "</head>"
+          ],
+          "MultiLineBlock": [
+            "    <link href=\"_content/Syncfusion.Blazor.Toolkit/styles/fluent.min.css\" rel=\"stylesheet\" />",
+            "</head>"
+          ],
+          "CheckBlock": "Syncfusion.Blazor.Toolkit/styles/fluent.min.css"
+        }
+      ]
+    },
+    {
+      "FileName": "Components\\Layout\\NavMenu.razor",
+      "Replacements": [
+        {
+          "CheckBlock": "healthcare-tracker",
+          "ReplaceSnippet": [
+            "<span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather",
+            "            </NavLink>",
+            "        </div>"
+          ],
+          "MultiLineBlock": [
+            "<span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather",
+            "            </NavLink>",
+            "        </div>",
+            "        <div class=\"nav-item px-3\">",
+            "            <NavLink class=\"nav-link\" href=\"healthcare-tracker\">",
+            "                <span class=\"bi bi-heart-pulse-nav-menu\" aria-hidden=\"true\"></span> Healthcare Tracker",
+            "            </NavLink>",
+            "        </div>"
+          ]
+        }
+      ]
+    },
+    {
+      "FileName": "Components\\Layout\\NavMenu.razor.css",
+      "Replacements": [
+        {
+          "CheckBlock": "bi-heart-pulse-nav-menu",
+          "ReplaceSnippet": [
+            ".bi-list-nested-nav-menu {",
+            "    background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-list-nested' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M4.5 11.5A.5.5 0 0 1 5 11h10a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 1 3h10a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5z'/%3E%3C/svg%3E\");",
+            "}"
+          ],
+          "MultiLineBlock": [
+            ".bi-list-nested-nav-menu {",
+            "    background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-list-nested' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M4.5 11.5A.5.5 0 0 1 5 11h10a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 1 3h10a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5z'/%3E%3C/svg%3E\");",
+            "}",
+            "\n.bi-heart-pulse-nav-menu {",
+            "    background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ff6b81' class='bi bi-heart-pulse' viewBox='0 0 16 16'%3E%3Cpath d='m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748ZM7.614 6.094a.5.5 0 0 1 .658-.234l.347.16a.5.5 0 0 1 .167.696l-.4.6a.5.5 0 0 1-.668.191l-.5-.312V8.5h-1V6.833a.5.5 0 0 1-.668-.191l-.4-.6a.5.5 0 0 1 .167-.696l.347-.16a.5.5 0 0 1 .658.234L7 6.05l.614-.957Zm-.87 5.732a.5.5 0 0 0 .512 0l4.243-2.667a.5.5 0 0 0 0-.864L7.256 5.628a.5.5 0 0 0-.512 0L2.5 8.295a.5.5 0 0 0 0 .864l4.244 2.667Z'/%3E%3C/svg%3E\");",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+}

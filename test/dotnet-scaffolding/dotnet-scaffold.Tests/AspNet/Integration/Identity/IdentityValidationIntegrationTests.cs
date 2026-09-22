@@ -43,7 +43,7 @@ public class IdentityValidationIntegrationTests
         var projectContent = File.ReadAllText(project.ProjectPath).Replace("</Project>", $"""
             <ItemGroup>
               {references}
-              <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="11.0.0-rc.2.26455.110" />
+              <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="11.0.*-*" />
             </ItemGroup>
             {import}
             </Project>

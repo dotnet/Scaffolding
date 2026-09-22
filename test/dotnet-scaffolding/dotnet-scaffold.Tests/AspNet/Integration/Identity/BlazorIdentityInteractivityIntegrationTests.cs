@@ -15,7 +15,7 @@ public class BlazorIdentityInteractivityIntegrationTests
     [Theory]
     [InlineData("net9.0", "9.0.*", true)]
     [InlineData("net10.0", "10.0.*", false)]
-    [InlineData("net11.0", "11.0.0-rc.2.26455.110", true)]
+    [InlineData("net11.0", "11.0.*-*", true)]
     public async Task Scaffold_BlazorIdentity_GlobalInteractivityUpdatesClientAndBuilds(
         string targetFramework, string aspNetCoreVersion, bool usesInteractiveServer)
     {
@@ -93,7 +93,7 @@ public class BlazorIdentityInteractivityIntegrationTests
     public async Task Scaffold_BlazorIdentity_PerPageInteractiveAutoQualifiesRedirectToLogin()
     {
         using var project = new BlazorIdentityTestProject("net11.0");
-        project.AddWebAssemblyClient("11.0.0-rc.2.26455.110", usesInteractiveServer: true, clientNamespace: "Custom.Client.Root");
+        project.AddWebAssemblyClient("11.0.*-*", usesInteractiveServer: true, clientNamespace: "Custom.Client.Root");
         File.WriteAllText(project.ClientProjectPath, File.ReadAllText(project.ClientProjectPath).Replace(
             """<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">""",
             """<Project><Sdk Name="Microsoft.NET.Sdk.BlazorWebAssembly" />"""));

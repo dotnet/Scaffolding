@@ -34,17 +34,25 @@ public class CodeModificationStep : ScaffoldStep
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         CodeModifierConfig? codeModifierConfig = null;
-        if (!string.IsNullOrEmpty(CodeModifierConfigJsonText))
+        try
         {
-            codeModifierConfig = CodeModifierConfigHelper.GetCodeModifierConfigFromJson(CodeModifierConfigJsonText);
+            if (!string.IsNullOrEmpty(CodeModifierConfigJsonText))
+            {
+                codeModifierConfig = CodeModifierConfigHelper.GetCodeModifierConfigFromJson(CodeModifierConfigJsonText);
+            }
+            else if (!string.IsNullOrEmpty(CodeModifierConfigPath))
+            {
+                codeModifierConfig = CodeModifierConfigHelper.GetCodeModifierConfig(CodeModifierConfigPath);
+            }
+            else
+            {
+                _logger.LogError($"No {nameof(CodeModifierConfig)} provided. Provide a valid value for either '{nameof(CodeModifierConfigJsonText)}' or '{nameof(CodeModifierConfigPath)}' variable");
+                return false;
+            }
         }
-        else if(!string.IsNullOrEmpty(CodeModifierConfigPath))
+        catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException or ArgumentException)
         {
-            codeModifierConfig = CodeModifierConfigHelper.GetCodeModifierConfig(CodeModifierConfigPath);
-        }
-        else
-        {
-            _logger.LogError($"No {nameof(CodeModifierConfig)} provided. Provide a valid value for either '{nameof(CodeModifierConfigJsonText)}' or '{nameof(CodeModifierConfigPath)}' variable");
+            _logger.LogError(ex, "Unable to load code modification configuration '{ConfigPath}': {Message}", CodeModifierConfigPath, ex.Message);
             return false;
         }
         

@@ -22,6 +22,7 @@
 #>
 @page "/<#= pluralModelLowerInv #>/edit"
 @using Microsoft.EntityFrameworkCore
+@implements IDisposable
 <#
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -30,6 +31,7 @@
 #>
 @inject <#=dbContextFactory #>
 @inject NavigationManager NavigationManager
+@inject PersistentComponentState ApplicationState
 
 <PageTitle>Edit</PageTitle>
 
@@ -84,15 +86,40 @@ else
     [SupplyParameterFromForm]
     private <#= modelName #>? <#= modelName #> { get; set; }
 
+    private PersistingComponentStateSubscription? persistingSubscription;
+
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-        <#= modelName #> ??= await context.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
+        persistingSubscription ??= ApplicationState.RegisterOnPersisting(PersistData);
+
+        if (<#= modelName #> is null)
+        {
+            if (!ApplicationState.TryTakeFromJson<<#= modelName #>>(nameof(<#= modelName #>), out var restored<#= modelName #>))
+            {
+                using var context = DbFactory.CreateDbContext();
+                <#= modelName #> = await context.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
+            }
+            else
+            {
+                <#= modelName #> = restored<#= modelName #>;
+            }
+        }
 
         if (<#= modelName #> is null)
         {
             NavigationManager.NavigateTo("notfound");
+            return;
         }
+    }
+
+    private Task PersistData()
+    {
+        if (<#= modelName #> is not null)
+        {
+            ApplicationState.PersistAsJson(nameof(<#= modelName #>), <#= modelName #>);
+        }
+
+        return Task.CompletedTask;
     }
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -126,4 +153,6 @@ else
         using var context = DbFactory.CreateDbContext();
         return context.<#= entitySetName #>.Any(e => e.<#= primaryKeyName #> == <#= primaryKeyNameLowerInv #>);
     }
+
+    public void Dispose() => persistingSubscription?.Dispose();
 }

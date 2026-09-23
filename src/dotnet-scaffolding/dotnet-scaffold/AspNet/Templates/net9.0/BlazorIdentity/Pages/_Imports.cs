@@ -29,7 +29,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorIdentity.P
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
             this.Write(".Shared\r\n@using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
-            this.Write("\r\n@attribute [ExcludeFromInteractiveRouting]\r\n");
+            this.Write("\r\n");
+ if (Model.ProjectInfo.LowestSupportedTargetFramework != global::Microsoft.DotNet.Scaffolding.Core.Model.TargetFramework.Net8) {
+            this.Write("@attribute [ExcludeFromInteractiveRouting]\r\n");
+ }
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -80,7 +83,7 @@ if ((ModelValueAcquired == false))
     string parameterValue = this.Host.ResolveParameterValue("Property", "PropertyDirectiveProcessor", "Model");
     if ((string.IsNullOrEmpty(parameterValue) == false))
     {
-        global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel));
+         global::System.ComponentModel.TypeConverter tc = global::System.ComponentModel.TypeDescriptor.GetConverter(typeof(global::Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel));
         if (((tc != null) 
                     && tc.CanConvertFrom(typeof(string))))
         {

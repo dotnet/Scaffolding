@@ -84,7 +84,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
 
             var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["BlazorIdentity"], blazorIdentityModel.ProjectInfo.ProjectPath);
             var applicationUserFile = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Files"], blazorIdentityModel.ProjectInfo.ProjectPath)
-                .FirstOrDefault(x => x.EndsWith("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(x => Path.GetFileName(x).Equals("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
             var blazorIdentityProperties = BlazorIdentityHelper.GetTextTemplatingProperties(allBlazorIdentityFiles, blazorIdentityModel);
             var applicationUserProperty = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(applicationUserFile, blazorIdentityModel);
             if (applicationUserProperty is not null)
@@ -130,10 +130,20 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) && commandSettingsObj is IdentitySettings commandSettings)
             {
                 var projectDirectory = Path.GetDirectoryName(commandSettings.Project);
-                if (Directory.Exists(projectDirectory))
+                if (!string.IsNullOrEmpty(projectDirectory) && Directory.Exists(projectDirectory))
                 {
-                    step.BaseOutputDirectory = Path.Combine(BlazorIdentityHelper.GetIdentityComponentsPath(projectDirectory), "Shared");
-                    step.FileName = "PasskeySubmit.razor.js";
+                    // Determine whether the passkey static asset exists for this project's templates.
+                    var templateFiles = new TemplateFoldersUtilities().GetAllFilesForTargetFramework(new[] { "Files" }, commandSettings.Project);
+                    var passkeyFile = templateFiles.FirstOrDefault(x => x.EndsWith("PasskeySubmit.razor.js", StringComparison.OrdinalIgnoreCase));
+                    if (!string.IsNullOrEmpty(passkeyFile))
+                    {
+                        step.BaseOutputDirectory = Path.Combine(BlazorIdentityHelper.GetIdentityComponentsPath(projectDirectory), "Shared");
+                        step.FileName = "PasskeySubmit.razor.js";
+                        return;
+                    }
+
+                    // Asset not present for this framework/version; skip the static-file step instead
+                    step.SkipStep = true;
                     return;
                 }
             }

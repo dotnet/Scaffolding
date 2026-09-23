@@ -35,7 +35,12 @@ internal class DocumentBuilder
     {
         var document = _document;
         var syntaxRoot = await document.GetSyntaxRootAsync() as CompilationUnitSyntax;
-        var modifiedRoot = ModifyRoot(syntaxRoot, _options);
+        var output = new StringBuilder();
+        var modifiedRoot = ModifyRoot(syntaxRoot, _options, output);
+        if (output.Length > 0)
+        {
+            _consoleLogger.LogInformation(output.ToString());
+        }
         if (modifiedRoot != null)
         {
             return document.WithSyntaxRoot(modifiedRoot);
@@ -67,7 +72,7 @@ internal class DocumentBuilder
         return method;
     }
 
-    public CompilationUnitSyntax? ModifyRoot(CompilationUnitSyntax? root, IList<string> options)
+    public CompilationUnitSyntax? ModifyRoot(CompilationUnitSyntax? root, IList<string> options, StringBuilder output)
     {
         if (root is null)
         {
@@ -91,7 +96,7 @@ internal class DocumentBuilder
                 var mainMethod = root?.DescendantNodes().OfType<MethodDeclarationSyntax>()
                     .FirstOrDefault(n => ProjectModifierHelper.Main.Equals(n.Identifier.ToString(), StringComparison.OrdinalIgnoreCase));
                 if (mainMethod != null
-                    && ApplyChangesToMethod(mainMethod.Body, filteredChanges, _codeFile.FileName) is BlockSyntax updatedBody)
+                    && ApplyChangesToMethod(mainMethod.Body, filteredChanges, _codeFile.FileName, output) is BlockSyntax updatedBody)
                 {
                     var updatedMethod = mainMethod.WithBody(updatedBody);
                     return root?.ReplaceNode(mainMethod, updatedMethod);
@@ -99,7 +104,7 @@ internal class DocumentBuilder
             }
             else if (root.Members.Any(node => node.IsKind(SyntaxKind.GlobalStatement)))
             {
-                return ApplyChangesToMethod(root, filteredChanges, _codeFile.FileName) as CompilationUnitSyntax;
+                return ApplyChangesToMethod(root, filteredChanges, _codeFile.FileName, output) as CompilationUnitSyntax;
             }
         }
         else if (!string.IsNullOrEmpty(_codeFile.FileName))
@@ -122,7 +127,7 @@ internal class DocumentBuilder
                 //add code snippets/changes.
                 if (_codeFile.Methods != null)
                 {
-                    modifiedClassDeclarationSyntax = ModifyMethods(_codeFile.FileName, modifiedClassDeclarationSyntax, _codeFile.Methods, options);
+                    modifiedClassDeclarationSyntax = ModifyMethods(_codeFile.FileName, modifiedClassDeclarationSyntax, _codeFile.Methods, options,output);
                 }
 
                 if (root is SyntaxNode syntaxRoot)
@@ -190,7 +195,7 @@ internal class DocumentBuilder
             var memberLeadingTrivia = sampleMember?.GetLeadingTrivia() ?? SyntaxFactory.TriviaList(SyntaxFactory.Whitespace("    "));
             var memberTrailingTrivia = SyntaxFactory.TriviaList(SyntaxFactory.CarriageReturnLineFeed);
 
-            //create MemberDeclarationSyntax[] with all the Property strings. 
+            //create MemberDeclarationSyntax[] with all the Property strings.
             var classProperties = CreateClassProperties(modifiedClassDeclarationSyntax.Members, memberLeadingTrivia, memberTrailingTrivia);
 
             if (classProperties.Length > 0)
@@ -389,12 +394,14 @@ internal class DocumentBuilder
                     }
             }
         }
-        catch
+        catch (Exception exception)
         {
-            //output?.Append(value: $"Error modifying method {originalMethod}\nCodeChange:{codeChange.ToJson()}");
+            output?.AppendLine($"Error applying code change: {exception.Message}");
         }
 
-        return modifiedMethod != null ? originalMethod.ReplaceNode(originalMethod, modifiedMethod) : originalMethod;
+        return modifiedMethod is not null && !modifiedMethod.IsEquivalentTo(originalMethod)
+            ? originalMethod.ReplaceNode(originalMethod, modifiedMethod)
+            : null!;
     }
 
     internal static SyntaxNode UpdateMethod(SyntaxNode originalMethod, CodeSnippet codeChange)
@@ -784,7 +791,7 @@ internal class DocumentBuilder
             return parent;
         }
 
-        // Create a lambda parameter 
+        // Create a lambda parameter
         var parameter = SyntaxFactory.Parameter(
             SyntaxFactory.Identifier(change.Parameter))
             .WithTrailingTrivia(SyntaxFactory.Space);

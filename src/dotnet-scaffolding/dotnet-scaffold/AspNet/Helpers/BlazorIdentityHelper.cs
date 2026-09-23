@@ -100,7 +100,7 @@ internal static class BlazorIdentityHelper
         var targetFramework = blazorIdentityModel.ProjectInfo.LowestSupportedTargetFramework;
         Type appUserType = targetFramework switch
         {
-            TargetFramework.Net8 => typeof(Templates.net8.Files.IdentityApplicationUser),
+            TargetFramework.Net8 => typeof(Templates.net9.Files.ApplicationUser),
             TargetFramework.Net9 => typeof(Templates.net9.Files.ApplicationUser),
             TargetFramework.Net10 => typeof(Templates.net10.Files.ApplicationUser),
             TargetFramework.Net11 or _ => typeof(Templates.net11.Files.ApplicationUser),
@@ -123,7 +123,7 @@ internal static class BlazorIdentityHelper
         switch (targetFramework)
         {
             case TargetFramework.Net8:
-                return _blazorIdentityTemplateTypesNet8;
+                return _blazorIdentityTemplateTypesNet9;
             case TargetFramework.Net9:
                 return _blazorIdentityTemplateTypesNet9;
             case TargetFramework.Net10:

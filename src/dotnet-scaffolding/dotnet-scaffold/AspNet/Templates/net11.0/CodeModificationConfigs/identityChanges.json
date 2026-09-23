@@ -29,7 +29,7 @@
             {
               "InsertAfter": "builder.Services.AddDbContext",
               "CheckBlock": "builder.Services.AddDefaultIdentity",
-              "Block": "builder.Services.AddDefaultIdentity<$(UserClassName)>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<$(DbContextName)>()\"",
+              "Block": "builder.Services.AddDefaultIdentity<$(UserClassName)>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<$(DbContextName)>()",
               "LeadingTrivia": {
                 "Newline": true
               }

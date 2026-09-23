@@ -165,6 +165,38 @@ internal static class ScaffoldCliHelper
     /// <param name="args">CLI arguments for the command (e.g., "--project", path, "--name", "Foo").</param>
     /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
     public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAsync(string targetFramework, string command, params string[] args)
+        => await RunScaffoldCommandAsync(targetFramework, "aspnet", command, args);
+
+    /// <summary>
+    /// Runs an Aspire scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspire {command} {args}</c>.
+    /// </summary>
+    /// <param name="targetFramework">The target framework moniker to run the tool under (e.g., "net8.0", "net9.0", "net10.0", "net11.0").</param>
+    /// <param name="command">The Aspire sub-command (e.g., "caching", "database", "storage").</param>
+    /// <param name="args">CLI arguments for the command (e.g., "--type", "redis", "--apphost-project", path, "--project", path).</param>
+    /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
+    public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAspireAsync(string targetFramework, string command, params string[] args)
+        => await RunScaffoldCommandAsync(targetFramework, "aspire", command, args);
+
+    private static async Task<(int ExitCode, string Output, string Error)> RunScaffoldCommandAsync(
+        string targetFramework,
+        string category,
+        string command,
+        string[] args)
+    {
+        var result = await RunScaffoldCommandOnceAsync(targetFramework, category, command, args);
+        if (result.ExitCode != 0 && IsTransientRuntimeAssemblyLoadFailure(result.Output, result.Error))
+        {
+            result = await RunScaffoldCommandOnceAsync(targetFramework, category, command, args);
+        }
+
+        return result;
+    }
+
+    private static async Task<(int ExitCode, string Output, string Error)> RunScaffoldCommandOnceAsync(
+        string targetFramework,
+        string category,
+        string command,
+        string[] args)
     {
         var scaffoldCsproj = GetScaffoldProjectPath();
         var configuration = GetBuildConfiguration();
@@ -189,7 +221,7 @@ internal static class ScaffoldCliHelper
         process.StartInfo.ArgumentList.Add("--framework");
         process.StartInfo.ArgumentList.Add(targetFramework);
         process.StartInfo.ArgumentList.Add("--");
-        process.StartInfo.ArgumentList.Add("aspnet");
+        process.StartInfo.ArgumentList.Add(category);
         process.StartInfo.ArgumentList.Add(command);
         foreach (var arg in args)
         {
@@ -204,51 +236,11 @@ internal static class ScaffoldCliHelper
         return (process.ExitCode, stdoutTask.Result, stderrTask.Result);
     }
 
-    /// <summary>
-    /// Runs an Aspire scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspire {command} {args}</c>.
-    /// </summary>
-    /// <param name="targetFramework">The target framework moniker to run the tool under (e.g., "net8.0", "net9.0", "net10.0", "net11.0").</param>
-    /// <param name="command">The Aspire sub-command (e.g., "caching", "database", "storage").</param>
-    /// <param name="args">CLI arguments for the command (e.g., "--type", "redis", "--apphost-project", path, "--project", path).</param>
-    /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
-    public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAspireAsync(string targetFramework, string command, params string[] args)
+    private static bool IsTransientRuntimeAssemblyLoadFailure(string output, string error)
     {
-        var scaffoldCsproj = GetScaffoldProjectPath();
-        var configuration = GetBuildConfiguration();
-
-        var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-        ConfigureDotNetEnvironment(process.StartInfo);
-        process.StartInfo.ArgumentList.Add("run");
-        process.StartInfo.ArgumentList.Add("--no-build");
-        process.StartInfo.ArgumentList.Add("-c");
-        process.StartInfo.ArgumentList.Add(configuration);
-        process.StartInfo.ArgumentList.Add("--project");
-        process.StartInfo.ArgumentList.Add(scaffoldCsproj);
-        process.StartInfo.ArgumentList.Add("--framework");
-        process.StartInfo.ArgumentList.Add(targetFramework);
-        process.StartInfo.ArgumentList.Add("--");
-        process.StartInfo.ArgumentList.Add("aspire");
-        process.StartInfo.ArgumentList.Add(command);
-        foreach (var arg in args)
-        {
-            process.StartInfo.ArgumentList.Add(arg);
-        }
-
-        process.Start();
-        var aspireStdoutTask = process.StandardOutput.ReadToEndAsync();
-        var aspireStderrTask = process.StandardError.ReadToEndAsync();
-        await Task.WhenAll(aspireStdoutTask, aspireStderrTask);
-        await process.WaitForExitAsync();
-        return (process.ExitCode, aspireStdoutTask.Result, aspireStderrTask.Result);
+        var combined = output + error;
+        return combined.Contains("System.Net.Http.DiagnosticsHelper", System.StringComparison.Ordinal)
+            && combined.Contains("InstrumentAdvice", System.StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -559,4 +551,110 @@ public class {modelName}
     <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
   </packageSources>
 </configuration>";
+
+    /// <summary>
+    /// The Aspire hosting version used by the buildable Aspire test projects. Aspire packages
+    /// use major versions 8/9/13 (no 10/11), and the scaffolder installs the latest (13.x)
+    /// regardless of the project's TFM, so the pre-scaffold AppHost pins the same 13.x version
+    /// (available on both nuget.org and the repo's dnceng mirror) to keep every package unified.
+    /// </summary>
+    public const string AspireHostingVersion = "13.4.6";
+
+    /// <summary>
+    /// Generates a buildable Aspire AppHost .csproj that references the worker project. Includes the
+    /// Aspire.AppHost.Sdk (which generates the <c>Projects.*</c> metadata used by <c>AddProject&lt;&gt;</c>)
+    /// and the Aspire.Hosting.AppHost package so the project compiles before scaffolding.
+    /// </summary>
+    /// <param name="targetFramework">The target framework moniker (e.g., "net8.0").</param>
+    /// <param name="workerProjectRelativePath">Relative path from the AppHost directory to the worker .csproj.</param>
+    public static string GetAspireAppHostProjectContent(string targetFramework, string workerProjectRelativePath)
+    {
+        var treatWarnings = targetFramework == "net11.0"
+            ? "\n    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>"
+            : string.Empty;
+        return $@"<Project Sdk=""Microsoft.NET.Sdk"">
+  <Sdk Name=""Aspire.AppHost.Sdk"" Version=""{AspireHostingVersion}"" />
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>{targetFramework}</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsAspireHost>true</IsAspireHost>{treatWarnings}
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include=""Aspire.Hosting.AppHost"" Version=""{AspireHostingVersion}"" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include=""{workerProjectRelativePath}"" />
+  </ItemGroup>
+</Project>";
+    }
+
+    /// <summary>
+    /// Generates a buildable Aspire worker/web .csproj (Microsoft.NET.Sdk.Web).
+    /// </summary>
+    /// <param name="targetFramework">The target framework moniker (e.g., "net8.0").</param>
+    public static string GetAspireWorkerProjectContent(string targetFramework)
+    {
+        var treatWarnings = targetFramework == "net11.0"
+            ? "\n    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>"
+            : string.Empty;
+        return $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+  <PropertyGroup>
+    <TargetFramework>{targetFramework}</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>{treatWarnings}
+  </PropertyGroup>
+</Project>";
+    }
+
+    /// <summary>
+    /// Generates a buildable AppHost Program.cs that registers the worker project via
+    /// <c>AddProject&lt;Projects.{projectsTypeName}&gt;</c>. The <c>Projects.*</c> type is generated by
+    /// the Aspire.AppHost.Sdk from the worker ProjectReference; registering it here gives the scaffolder's
+    /// <c>.WithReference(...)</c> code change a matching <c>AddProject&lt;&gt;</c> invocation to attach to.
+    /// </summary>
+    /// <param name="projectsTypeName">The generated Projects type name (worker project name with '.'/'-' replaced by '_').</param>
+    public static string GetAspireAppHostProgramCs(string projectsTypeName) =>
+        $@"var builder = DistributedApplication.CreateBuilder(args);
+builder.AddProject<Projects.{projectsTypeName}>(""web"");
+builder.Build().Run();
+";
+
+    /// <summary>
+    /// Generates a buildable worker Program.cs. Includes a local <c>AddServiceDefaults</c> stub (Aspire's
+    /// ServiceDefaults project is not scaffolded here) so the project compiles before scaffolding, and so the
+    /// scaffolder's client-registration code change has an <c>AddServiceDefaults()</c> anchor to insert after.
+    /// </summary>
+    public static string GetAspireWorkerProgramCs() =>
+        @"var builder = WebApplication.CreateBuilder(args);
+builder.AddServiceDefaults();
+var app = builder.Build();
+app.Run();
+
+public static class HostingExtensions
+{
+    public static void AddServiceDefaults(this WebApplicationBuilder builder) { }
+}
+";
+
+    /// <summary>
+    /// Writes a NuGet.config into <paramref name="testDirectory"/> (the parent of the AppHost and worker
+    /// project directories, so both inherit it) appropriate for the target framework: nuget.org for the
+    /// stable net8.0 feed, the repo's dnceng preview feeds for net11.0, and none for net9.0/net10.0
+    /// (which resolve from the machine default feed), mirroring the AspNet integration tests.
+    /// </summary>
+    /// <param name="testDirectory">The root test directory containing the AppHost and worker projects.</param>
+    /// <param name="targetFramework">The target framework moniker (e.g., "net8.0").</param>
+    public static void WriteAspireNuGetConfig(string testDirectory, string targetFramework)
+    {
+        string? content = targetFramework switch
+        {
+            "net11.0" => PreviewNuGetConfig,
+            _ => null
+        };
+
+        if (content is not null)
+        {
+            File.WriteAllText(Path.Combine(testDirectory, "NuGet.config"), content);
+        }
+    }
 }

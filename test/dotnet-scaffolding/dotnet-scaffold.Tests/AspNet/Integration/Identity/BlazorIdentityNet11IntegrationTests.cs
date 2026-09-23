@@ -77,9 +77,10 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             "blazor-identity",
             "--project", _testProjectPath,
             "--dataContext", "TestDbContext",
-            "--dbProvider", "sqlite-efcore",
+            "--dbProvider", "sqlserver-efcore",
             "--prerelease");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.Contains("<PackageReference Include=\"Microsoft.Data.SqlClient.Extensions.Azure\"", File.ReadAllText(_testProjectPath));
 
         // Assert expected files were created
         Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
@@ -154,7 +155,7 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
             "blazor-identity",
             "--project", _testProjectPath,
             "--dataContext", "TestDbContext",
-            "--dbProvider", "sqlite-efcore",
+            "--dbProvider", "sqlserver-efcore",
             "--prerelease",
             "--overwrite");
 

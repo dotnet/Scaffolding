@@ -217,6 +217,10 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
                     {
                         packages.Add(PackageConstants.EfConstants.SqlitePclRawBundlePackage);
                     }
+                    else if (commandSettings.DatabaseProvider == PackageConstants.EfConstants.SqlServer && context.GetSpecifiedTargetFramework().IsNetVersionOrLater(11))
+                    {
+                        packages.Add(PackageConstants.EfConstants.SqlClientExtensionsAzurePackage);
+                    }
                 }
 
                 step.Packages = packages;

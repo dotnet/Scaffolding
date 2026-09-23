@@ -122,7 +122,10 @@ public class BlazorIdentityNet11IntegrationTests : BlazorIdentityIntegrationTest
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("TestDbContext", programContent);
         Assert.Contains("builder.Services.AddDatabaseDeveloperPageExceptionFilter()", programContent);
-        Assert.Contains("app.UseMigrationsEndPoint()", programContent);
+        Assert.Contains("if (app.Environment.IsDevelopment())\n{\n    app.UseMigrationsEndPoint();\n}", programContent.Replace("\r\n", "\n"));
+        Assert.Contains("throw new InvalidOperationException(\"Connection string", programContent);
+        Assert.DoesNotContain("Data Source=TestDb.db", programContent);
+        Assert.Contains("builder.Services.AddCascadingAuthenticationState()", programContent);
         Assert.Contains("builder.Services.AddAuthorization()", programContent);
         Assert.DoesNotContain("IdentityRevalidatingAuthenticationStateProvider>()", programContent);
         Assert.False(File.Exists(Path.Combine(

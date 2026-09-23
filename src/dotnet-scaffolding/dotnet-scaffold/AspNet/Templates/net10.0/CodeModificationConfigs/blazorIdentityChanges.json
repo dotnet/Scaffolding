@@ -6,22 +6,7 @@
         "Global": {
           "CodeChanges": [
             {
-              "InsertAfter": "WebApplication.CreateBuilder",
-              "CheckBlock": "builder.Configuration.GetConnectionString",
-              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? \"Data Source=TestDb.db\"",
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
-              "Block": "app.UseMigrationsEndPoint()",
-              "InsertBefore": [ "app.Run();" ],
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
-              "Block": "app.MapAdditionalIdentityEndpoints();",
+              "Block": "app.MapAdditionalIdentityEndpoints()",
               "InsertBefore": [ "app.Run();" ],
               "LeadingTrivia": {
                 "Newline": true
@@ -140,19 +125,38 @@
               "LeadingTrivia": {
                 "Newline": true
               }
-            }
-            ,
+            },
             {
-              "InsertAfter": "var builder = WebApplication.CreateBuilder(args);",
-              "CheckBlock": "builder.Services.AddDbContextFactory",
-              "Block": "builder.Services.AddDbContextFactory<$(DbContextName)>(options => options.$(UseDbMethod))",
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
+              "Block": "WebApplication.CreateBuilder.Services.AddDatabaseDeveloperPageExceptionFilter()",
               "LeadingTrivia": {
                 "Newline": true
               }
             }
           ]
         }
-      }
+      },
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "if (!app.Environment.IsDevelopment())" ],
+          "MultiLineBlock": [
+            "if (app.Environment.IsDevelopment())",
+            "{",
+            "    app.UseMigrationsEndPoint();",
+            "}",
+            "else"
+          ],
+          "CheckBlock": "app.UseMigrationsEndPoint()"
+        },
+        {
+          "ReplaceSnippet": [ "app.UseWebAssemblyDebugging();" ],
+          "MultiLineBlock": [
+            "app.UseWebAssemblyDebugging();",
+            "    app.UseMigrationsEndPoint();"
+          ],
+          "CheckBlock": "app.UseMigrationsEndPoint()"
+        }
+      ]
     },
     {
       "FileName": "Routes.razor",
@@ -232,12 +236,9 @@
           ],
           "MultiLineBlock": [
             "@using Microsoft.AspNetCore.Components.Forms",
-            "@using Microsoft.AspNetCore.Components.Authorization",
-            "@using Microsoft.AspNetCore.Components.Endpoints",
-            "@using Microsoft.AspNetCore.Components.Web",
-            "@using static Microsoft.AspNetCore.Components.Web.RenderMode"
+            "@using Microsoft.AspNetCore.Components.Authorization"
           ],
-          "CheckBlock": "Microsoft.AspNetCore.Components.Endpoints"
+          "CheckBlock": "Microsoft.AspNetCore.Components.Authorization"
         }
       ]
     },
@@ -246,63 +247,10 @@
       "Replacements": [
         {
           "ReplaceSnippet": [
-            "<HeadOutlet @rendermode=\"InteractiveServer\" />"
-          ],
-          "MultiLineBlock": [
-            "<HeadOutlet @rendermode=\"PageRenderMode\" />"
-          ]
-        },
-        {
-          "ReplaceSnippet": [
-            "<Routes @rendermode=\"InteractiveServer\" />"
-          ],
-          "MultiLineBlock": [
-            "<Routes @rendermode=\"PageRenderMode\" />"
-          ]
-        },
-        {
-          "ReplaceSnippet": [
-            "<HeadOutlet />"
-          ],
-          "MultiLineBlock": [
-            "<HeadOutlet @rendermode=\"PageRenderMode\" />"
-          ],
-          "CheckBlock": "<HeadOutlet />"
-        },
-        {
-          "ReplaceSnippet": [
-            "<Router AppAssembly=\"typeof(Program).Assembly\"",
-            "        NotFoundPage=\"typeof(Pages.NotFound)\">",
-            "    <Found Context=\"routeData\">",
-            "        <RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" />",
-            "        <FocusOnNavigate RouteData=\"routeData\" Selector=\"h1\" />",
-            "    </Found>",
-            "</Router>"
-          ],
-          "MultiLineBlock": [
-            "<Router AppAssembly=\"typeof(Program).Assembly\"",
-            "        NotFoundPage=\"typeof(Pages.NotFound)\">",
-            "    <Found Context=\"routeData\">",
-            "        <RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" @rendermode=\"PageRenderMode\" />",
-            "        <FocusOnNavigate RouteData=\"routeData\" Selector=\"h1\" />",
-            "    </Found>",
-            "</Router>"
-          ],
-          "CheckBlock": "RouteView RouteData"
-        },
-        {
-          "ReplaceSnippet": [
             "</body>"
           ],
           "MultiLineBlock": [
             "    <script src=\"@Assets[\"Components/Account/Shared/PasskeySubmit.razor.js\"]\" type=\"module\"></script>",
-            "@code {",
-            "    [CascadingParameter]",
-            "    private HttpContext HttpContext { get; set; } = default!;",
-            "",
-            "    private IComponentRenderMode? PageRenderMode =>",
-            "        HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;",
-            "}",
             "</body>"
           ],
           "CheckBlock": "PasskeySubmit.razor.js"

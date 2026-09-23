@@ -19,9 +19,28 @@ public class BlazorIdentityNet9IntegrationTests : BlazorIdentityIntegrationTests
         // Arrange write project + Program.cs + Blazor project structure
         File.WriteAllText(_testProjectPath, ProjectContent);
         File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.StableNuGetConfig);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), """
+            using TestProject.Components;
+
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+            var app = builder.Build();
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Error");
+            }
+            app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+            app.Run();
+            """);
         ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"), GloballyInteractiveAppContent);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"),
+            ScaffoldCliHelper.GetBlazorAppRazor()
+                .Replace("<HeadOutlet />", "<HeadOutlet @rendermode=\"InteractiveServer\" />")
+                .Replace("<Routes />", "<Routes @rendermode=\"InteractiveServer\" />"));
+        var routesPath = Path.Combine(_testProjectDir, "Components", "Routes.razor");
+        File.WriteAllText(routesPath, File.ReadAllText(routesPath).Replace(
+            """<RouteView RouteData="routeData" />""",
+            """<RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />"""));
 
         // Assert project builds before scaffolding
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
@@ -54,8 +73,9 @@ public class BlazorIdentityNet9IntegrationTests : BlazorIdentityIntegrationTests
             $"App.razor was not modified.\nCLI output: {cliOutput}\nCLI error: {cliError}\nApp.razor: {appContent}\nProgram.cs: {File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"))}");
         Assert.Contains("<Routes @rendermode=\"PageRenderMode\" />", appContent);
         Assert.Contains("HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null", appContent);
-        Assert.Contains("AuthorizeRouteView", appContent);
-        Assert.Contains("RedirectToLogin", appContent);
+        var routesContent = File.ReadAllText(routesPath);
+        Assert.Contains("AuthorizeRouteView", routesContent);
+        Assert.Contains("RedirectToLogin", routesContent);
         var accountImportsContent = File.ReadAllText(Path.Combine(accountPagesDir, "_Imports.razor"));
         Assert.Contains("@attribute [ExcludeFromInteractiveRouting]", accountImportsContent);
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
@@ -63,7 +83,9 @@ public class BlazorIdentityNet9IntegrationTests : BlazorIdentityIntegrationTests
         Assert.Contains("AddScoped<IdentityUserAccessor>()", programContent);
         Assert.Contains("TestDbContext", programContent);
         Assert.Contains("app.MapAdditionalIdentityEndpoints()", programContent);
-        Assert.Contains("app.UseMigrationsEndPoint()", programContent);
+        Assert.Contains("if (app.Environment.IsDevelopment())\n{\n    app.UseMigrationsEndPoint();\n}", programContent.Replace("\r\n", "\n"));
+        Assert.Contains("throw new InvalidOperationException(\"Connection string", programContent);
+        Assert.DoesNotContain("Data Source=TestDb.db", programContent);
         Assert.Contains("AddIdentityCore<", programContent);
         Assert.Contains("AddAuthentication(", programContent);
         Assert.Contains("AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()", programContent);

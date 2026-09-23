@@ -65,6 +65,8 @@ public class BlazorIdentityInteractivityIntegrationTests
             componentsDir, "Account", "IdentityRevalidatingAuthenticationStateProvider.cs")));
 
         var serverProgramContent = File.ReadAllText(Path.Combine(project.ProjectDirectory, "Program.cs"));
+        Assert.Contains("AddCascadingAuthenticationState()", serverProgramContent);
+        Assert.Contains("app.UseWebAssemblyDebugging();\n    app.UseMigrationsEndPoint();", serverProgramContent.Replace("\r\n", "\n"));
         Assert.Contains("AddAuthenticationStateSerialization()", serverProgramContent);
         Assert.Equal(usesInteractiveServer, serverProgramContent.Contains("IdentityRevalidatingAuthenticationStateProvider"));
         Assert.Equal(!usesInteractiveServer, serverProgramContent.Contains("AddAuthorization()"));

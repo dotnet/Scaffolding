@@ -356,12 +356,12 @@ internal class ValidateIdentityStep : ScaffoldStep
             {
                 codeChangeOptions.Add("InteractiveWebAssembly");
             }
+        }
 
-            if (identityModel.BlazorRenderMode is not null)
-            {
-                codeChangeOptions.Add("GlobalInteractive");
-                codeModifierProperties.Add($"$({nameof(IdentityModel.BlazorRenderMode)})", identityModel.BlazorRenderMode);
-            }
+        if (settings.BlazorScenario && identityModel.BlazorRenderMode is not null)
+        {
+            codeChangeOptions.Add("GlobalInteractive");
+            codeModifierProperties.Add($"$({nameof(IdentityModel.BlazorRenderMode)})", identityModel.BlazorRenderMode);
         }
 
         identityModel.ProjectInfo.CodeChangeOptions = codeChangeOptions;

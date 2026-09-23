@@ -35,17 +35,25 @@ internal sealed class BlazorTestProject : IDisposable
             </Project>
             """);
         File.WriteAllText(ProjectPath, projectContent);
-        File.WriteAllText(Path.Combine(ProjectDirectory, "Program.cs"), $"""
+        File.WriteAllText(Path.Combine(ProjectDirectory, "Program.cs"), $$"""
             using TestProject.Components;
 
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddRazorComponents()
-                {(usesInteractiveServer ? ".AddInteractiveServerComponents()" : "")}
+                {{(usesInteractiveServer ? ".AddInteractiveServerComponents()" : "")}}
                 .AddInteractiveWebAssemblyComponents();
 
             var app = builder.Build();
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseWebAssemblyDebugging();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+            }
             app.MapRazorComponents<App>()
-                {(usesInteractiveServer ? ".AddInteractiveServerRenderMode()" : "")}
+                {{(usesInteractiveServer ? ".AddInteractiveServerRenderMode()" : "")}}
                 .AddInteractiveWebAssemblyRenderMode();
             app.Run();
             """);

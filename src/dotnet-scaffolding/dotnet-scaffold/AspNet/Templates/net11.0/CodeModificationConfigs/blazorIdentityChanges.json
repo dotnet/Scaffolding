@@ -6,16 +6,15 @@
         "Global": {
           "CodeChanges": [
             {
-              "InsertAfter": "WebApplication.CreateBuilder",
-              "CheckBlock": "builder.Configuration.GetConnectionString",
-              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? \"Data Source=TestDb.db\"",
+              "Block": "app.MapAdditionalIdentityEndpoints()",
+              "InsertBefore": [ "app.Run();" ],
               "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
-              "Block": "app.MapAdditionalIdentityEndpoints()",
-              "InsertBefore": [ "app.Run();" ],
+              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "Block": "WebApplication.CreateBuilder.Services.AddCascadingAuthenticationState()",
               "LeadingTrivia": {
                 "Newline": true
               }
@@ -146,6 +145,14 @@
             "    app.UseMigrationsEndPoint();",
             "}",
             "else"
+          ],
+          "CheckBlock": "app.UseMigrationsEndPoint()"
+        },
+        {
+          "ReplaceSnippet": [ "app.UseWebAssemblyDebugging();" ],
+          "MultiLineBlock": [
+            "app.UseWebAssemblyDebugging();",
+            "    app.UseMigrationsEndPoint();"
           ],
           "CheckBlock": "app.UseMigrationsEndPoint()"
         }

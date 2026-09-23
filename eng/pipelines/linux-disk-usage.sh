@@ -7,8 +7,7 @@ for path in \
     "$BUILD_SOURCESDIRECTORY/.dotnet" \
     "$BUILD_SOURCESDIRECTORY/artifacts" \
     "${NUGET_PACKAGES:-$HOME/.nuget/packages}" \
-    "$AGENT_TEMPDIRECTORY" \
-    "$AGENT_TEMPDIRECTORY/scaffolding-sdk-staging"; do
+    "$AGENT_TEMPDIRECTORY"; do
     if [[ -e "$path" ]]; then
         du -sh "$path"
     fi

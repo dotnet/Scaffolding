@@ -155,5 +155,6 @@
     <NuGetProjectModelVersion>7.3.1</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0</SystemCommandLineVersion>
     <SystemSecurityCryptographyProtectedDataVersion>10.0.3</SystemSecurityCryptographyProtectedDataVersion>
+    <SyncfusionBlazorToolkitVersion>1.0.2</SyncfusionBlazorToolkitVersion>
   </PropertyGroup>
 </Project>

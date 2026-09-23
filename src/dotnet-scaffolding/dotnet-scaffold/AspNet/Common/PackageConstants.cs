@@ -78,6 +78,9 @@ internal class PackageConstants
         public static readonly Package AspNetCoreAuthenticationJwtBearerPackage = new("Microsoft.AspNetCore.Authentication.JwtBearer", IsVersionRequired: true);
         public static readonly Package AspNetCoreAuthenticationOpenIdConnectPackage = new("Microsoft.AspNetCore.Authentication.OpenIdConnect", IsVersionRequired: true);
         public static readonly Package MicrosoftIdentityWebPackage = new("Microsoft.Identity.Web");
-        public static readonly Package SyncfusionBlazorToolkitPackage = new("Syncfusion.Blazor.Toolkit");
+        public static readonly Package SyncfusionBlazorToolkitPackage = new("Syncfusion.Blazor.Toolkit", IsVersionRequired: true)
+        {
+            UseLatestVersion = true
+        };
     }
 }

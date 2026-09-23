@@ -40,7 +40,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.HealthcareTrack
 
         <div>
             <h1 class=""dashboard-title"">Healthcare Tracker</h1>
-            <p class=""text-muted mb-4"">Sample vitals dashboard built with Syncfusion Blazor Toolkit.</p>
+            <p class=""dashboard-description"">
+                Explore a healthcare management experience powered by Syncfusion Blazor Toolkit, featuring vital monitoring, appointment scheduling, and wellness tracking.
+            </p>
         </div>
 
         <div class=""header-actions"">

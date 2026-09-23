@@ -165,6 +165,38 @@ internal static class ScaffoldCliHelper
     /// <param name="args">CLI arguments for the command (e.g., "--project", path, "--name", "Foo").</param>
     /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
     public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAsync(string targetFramework, string command, params string[] args)
+        => await RunScaffoldCommandAsync(targetFramework, "aspnet", command, args);
+
+    /// <summary>
+    /// Runs an Aspire scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspire {command} {args}</c>.
+    /// </summary>
+    /// <param name="targetFramework">The target framework moniker to run the tool under (e.g., "net8.0", "net9.0", "net10.0", "net11.0").</param>
+    /// <param name="command">The Aspire sub-command (e.g., "caching", "database", "storage").</param>
+    /// <param name="args">CLI arguments for the command (e.g., "--type", "redis", "--apphost-project", path, "--project", path).</param>
+    /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
+    public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAspireAsync(string targetFramework, string command, params string[] args)
+        => await RunScaffoldCommandAsync(targetFramework, "aspire", command, args);
+
+    private static async Task<(int ExitCode, string Output, string Error)> RunScaffoldCommandAsync(
+        string targetFramework,
+        string category,
+        string command,
+        string[] args)
+    {
+        var result = await RunScaffoldCommandOnceAsync(targetFramework, category, command, args);
+        if (result.ExitCode != 0 && IsTransientRuntimeAssemblyLoadFailure(result.Output, result.Error))
+        {
+            result = await RunScaffoldCommandOnceAsync(targetFramework, category, command, args);
+        }
+
+        return result;
+    }
+
+    private static async Task<(int ExitCode, string Output, string Error)> RunScaffoldCommandOnceAsync(
+        string targetFramework,
+        string category,
+        string command,
+        string[] args)
     {
         var scaffoldCsproj = GetScaffoldProjectPath();
         var configuration = GetBuildConfiguration();
@@ -189,7 +221,7 @@ internal static class ScaffoldCliHelper
         process.StartInfo.ArgumentList.Add("--framework");
         process.StartInfo.ArgumentList.Add(targetFramework);
         process.StartInfo.ArgumentList.Add("--");
-        process.StartInfo.ArgumentList.Add("aspnet");
+        process.StartInfo.ArgumentList.Add(category);
         process.StartInfo.ArgumentList.Add(command);
         foreach (var arg in args)
         {
@@ -204,51 +236,11 @@ internal static class ScaffoldCliHelper
         return (process.ExitCode, stdoutTask.Result, stderrTask.Result);
     }
 
-    /// <summary>
-    /// Runs an Aspire scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspire {command} {args}</c>.
-    /// </summary>
-    /// <param name="targetFramework">The target framework moniker to run the tool under (e.g., "net8.0", "net9.0", "net10.0", "net11.0").</param>
-    /// <param name="command">The Aspire sub-command (e.g., "caching", "database", "storage").</param>
-    /// <param name="args">CLI arguments for the command (e.g., "--type", "redis", "--apphost-project", path, "--project", path).</param>
-    /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
-    public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAspireAsync(string targetFramework, string command, params string[] args)
+    private static bool IsTransientRuntimeAssemblyLoadFailure(string output, string error)
     {
-        var scaffoldCsproj = GetScaffoldProjectPath();
-        var configuration = GetBuildConfiguration();
-
-        var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-        ConfigureDotNetEnvironment(process.StartInfo);
-        process.StartInfo.ArgumentList.Add("run");
-        process.StartInfo.ArgumentList.Add("--no-build");
-        process.StartInfo.ArgumentList.Add("-c");
-        process.StartInfo.ArgumentList.Add(configuration);
-        process.StartInfo.ArgumentList.Add("--project");
-        process.StartInfo.ArgumentList.Add(scaffoldCsproj);
-        process.StartInfo.ArgumentList.Add("--framework");
-        process.StartInfo.ArgumentList.Add(targetFramework);
-        process.StartInfo.ArgumentList.Add("--");
-        process.StartInfo.ArgumentList.Add("aspire");
-        process.StartInfo.ArgumentList.Add(command);
-        foreach (var arg in args)
-        {
-            process.StartInfo.ArgumentList.Add(arg);
-        }
-
-        process.Start();
-        var aspireStdoutTask = process.StandardOutput.ReadToEndAsync();
-        var aspireStderrTask = process.StandardError.ReadToEndAsync();
-        await Task.WhenAll(aspireStdoutTask, aspireStderrTask);
-        await process.WaitForExitAsync();
-        return (process.ExitCode, aspireStdoutTask.Result, aspireStderrTask.Result);
+        var combined = output + error;
+        return combined.Contains("System.Net.Http.DiagnosticsHelper", System.StringComparison.Ordinal)
+            && combined.Contains("InstrumentAdvice", System.StringComparison.Ordinal);
     }
 
     /// <summary>

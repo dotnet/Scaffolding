@@ -20,9 +20,6 @@ public abstract class AspireDatabaseIntegrationTestsBase : IDisposable
     protected abstract string TargetFramework { get; }
     protected abstract string TestClassName { get; }
 
-    /// <summary>Whether to pass <c>--prerelease</c> to the scaffolder and restore preview packages (net11.0).</summary>
-    protected bool Prerelease => TargetFramework == "net11.0";
-
     protected readonly string _testDirectory;
     protected readonly string _appHostDir;
     protected readonly string _appHostProjectPath;
@@ -89,11 +86,6 @@ public abstract class AspireDatabaseIntegrationTestsBase : IDisposable
             "--apphost-project", _appHostProjectPath,
             "--project", _workerProjectPath
         };
-        if (Prerelease)
-        {
-            args.Add("--prerelease");
-        }
-
         var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAspireAsync(
             TargetFramework,
             "database",

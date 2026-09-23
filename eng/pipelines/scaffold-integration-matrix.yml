@@ -12,6 +12,9 @@ parameters:
 - name: poolImage
   type: string
   default: ''
+- name: poolDemands
+  type: string
+  default: ''
 - name: poolVmImage
   type: string
   default: ''
@@ -26,6 +29,8 @@ jobs:
       name: ${{ parameters.poolName }}
       ${{ if ne(parameters.poolImage, '') }}:
         image: ${{ parameters.poolImage }}
+      ${{ if ne(parameters.poolDemands, '') }}:
+        demands: ${{ parameters.poolDemands }}
     ${{ if ne(parameters.poolVmImage, '') }}:
       vmImage: ${{ parameters.poolVmImage }}
   steps:
@@ -87,6 +92,8 @@ jobs:
       name: ${{ parameters.poolName }}
       ${{ if ne(parameters.poolImage, '') }}:
         image: ${{ parameters.poolImage }}
+      ${{ if ne(parameters.poolDemands, '') }}:
+        demands: ${{ parameters.poolDemands }}
     ${{ if ne(parameters.poolVmImage, '') }}:
       vmImage: ${{ parameters.poolVmImage }}
   strategy:

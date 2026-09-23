@@ -197,5 +197,5 @@ stages:
     - template: /eng/pipelines/scaffold-integration-matrix.yml
       parameters:
         buildConfig: Release
-        poolVmImage: windows-latest
-
+        poolName: $(DncEngPublicBuildPool)
+        poolDemands: ImageOverride -equals 1es-windows-2022-open

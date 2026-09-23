@@ -3,6 +3,7 @@
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Model;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -117,6 +118,11 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
+            if (!context.GetSpecifiedTargetFramework().TryGetMajorVersion(out var majorVersion) || majorVersion < 10)
+            {
+                step.SkipStep = true;
+                return;
+            }
 
             string? projectPath = context.GetOptionResult<string>(Constants.CliOptions.ProjectCliOption);
             if (string.IsNullOrEmpty(projectPath))

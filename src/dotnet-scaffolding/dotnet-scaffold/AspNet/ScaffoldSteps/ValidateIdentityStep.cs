@@ -259,12 +259,7 @@ internal class ValidateIdentityStep : ScaffoldStep
             identityNamespace = settings.BlazorScenario ? $"{projectName}.Components.Account" : $"{projectName}.Areas.Identity";
             if (settings.BlazorScenario)
             {
-                // For WASM/Auto Global Blazor projects, MainLayout lives in the client project (e.g. BlazorApp1.Client).
-                // For Blazor Server projects, it lives directly under Components/Layout/ in the server project.
-                var mainLayoutInServerProject = Path.Combine(projectDirectory, "Components", "Layout", "MainLayout.razor");
-                identityLayoutNamespace = _fileSystem.FileExists(mainLayoutInServerProject)
-                    ? $"{projectName}.Components.Layout.MainLayout"
-                    : $"{projectName}.Client.Layout.MainLayout";
+                identityLayoutNamespace = $"{projectName}.Components.Layout.MainLayout";
             }
 
             userClassNamespace = $"{projectName}.Data";
@@ -286,10 +281,16 @@ internal class ValidateIdentityStep : ScaffoldStep
             (usesInteractiveServer, usesInteractiveWebAssembly) = interactivity.Value;
             if (usesInteractiveWebAssembly)
             {
-                webAssemblyClientProjectPath = GetBlazorWebAssemblyClientProjectPath(projectInfo.ProjectPath);
-                if (webAssemblyClientProjectPath is null)
+                var clientProject = GetBlazorWebAssemblyClientProject(projectInfo.ProjectPath);
+                if (clientProject is null)
                 {
                     return null;
+                }
+
+                webAssemblyClientProjectPath = clientProject.Value.ProjectPath;
+                if (!_fileSystem.FileExists(Path.Combine(projectDirectory, "Components", "Layout", "MainLayout.razor")))
+                {
+                    identityLayoutNamespace = $"{clientProject.Value.RootNamespace}.Layout.MainLayout";
                 }
             }
 
@@ -406,7 +407,7 @@ internal class ValidateIdentityStep : ScaffoldStep
         return (usesInteractiveServer, usesInteractiveWebAssembly);
     }
 
-    private string? GetBlazorWebAssemblyClientProjectPath(string? projectPath)
+    private (string ProjectPath, string RootNamespace)? GetBlazorWebAssemblyClientProject(string? projectPath)
     {
         if (string.IsNullOrEmpty(projectPath))
         {
@@ -421,12 +422,12 @@ internal class ValidateIdentityStep : ScaffoldStep
             return null;
         }
 
-        var clients = new List<string>();
+        var clients = new List<(string ProjectPath, string RootNamespace)>();
         foreach (var reference in references.Where(_fileSystem.FileExists).Distinct(StringComparer.OrdinalIgnoreCase))
         {
             var clientProjectService = new MSBuildProjectService(reference);
             if (!clientProjectService.TryGetEvaluatedProperties(
-                ["UsingMicrosoftNETSdkBlazorWebAssembly"],
+                ["UsingMicrosoftNETSdkBlazorWebAssembly", "RootNamespace"],
                 out var properties,
                 out error))
             {
@@ -440,14 +441,20 @@ internal class ValidateIdentityStep : ScaffoldStep
                 continue;
             }
 
-            clients.Add(reference);
+            var rootNamespace = properties["RootNamespace"];
+            if (string.IsNullOrEmpty(rootNamespace))
+            {
+                rootNamespace = Path.GetFileNameWithoutExtension(reference);
+            }
+
+            clients.Add((reference, rootNamespace));
         }
 
         if (clients.Count != 1)
         {
             var detail = clients.Count == 0
                 ? "No referenced project using the Microsoft.NET.Sdk.BlazorWebAssembly SDK was found."
-                : $"Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK: {string.Join(", ", clients)}.";
+                : $"Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK: {string.Join(", ", clients.Select(client => client.ProjectPath))}.";
             _logger.LogError(
                 $"Unable to resolve the Blazor WebAssembly client project for '{projectPath}'. {detail} Ensure the server project has exactly one ProjectReference to its Blazor WebAssembly client.");
             return null;

@@ -13,20 +13,20 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Identity;
 public class BlazorIdentityInteractivityIntegrationTests
 {
     [Theory]
-    [InlineData("net9.0", "9.0.*", true)]
-    [InlineData("net10.0", "10.0.*", false)]
-    [InlineData("net11.0", "11.0.*-*", true)]
+    [InlineData("net9.0", "9.0.*", true, "TestProject.Client")]
+    [InlineData("net10.0", "10.0.*", false, "Custom.Wasm.Root")]
+    [InlineData("net11.0", "11.0.*-*", true, "Custom.Auto.Root")]
     public async Task Scaffold_BlazorIdentity_GlobalInteractivityUpdatesClientAndBuilds(
-        string targetFramework, string aspNetCoreVersion, bool usesInteractiveServer)
+        string targetFramework, string aspNetCoreVersion, bool usesInteractiveServer, string clientNamespace)
     {
         using var project = new BlazorTestProject(targetFramework);
-        project.AddWebAssemblyClient(aspNetCoreVersion, usesInteractiveServer);
+        project.AddWebAssemblyClient(aspNetCoreVersion, usesInteractiveServer, clientNamespace);
         var renderMode = usesInteractiveServer ? "InteractiveAuto" : "InteractiveWebAssembly";
         var componentsDir = Path.Combine(project.ProjectDirectory, "Components");
         Directory.Move(Path.Combine(componentsDir, "Layout"), Path.Combine(project.ClientDirectory, "Layout"));
         File.Delete(Path.Combine(componentsDir, "Routes.razor"));
-        File.AppendAllText(Path.Combine(componentsDir, "_Imports.razor"), "@using TestProject.Client.Layout\n");
-        File.AppendAllText(Path.Combine(project.ClientDirectory, "_Imports.razor"), "@using TestProject.Client.Layout\n");
+        File.AppendAllText(Path.Combine(componentsDir, "_Imports.razor"), $"@using {clientNamespace}.Layout\n");
+        File.AppendAllText(Path.Combine(project.ClientDirectory, "_Imports.razor"), $"@using {clientNamespace}.Layout\n");
         File.WriteAllText(Path.Combine(project.ClientDirectory, "Routes.razor"), """
             <Router AppAssembly="typeof(Program).Assembly">
                 <Found Context="routeData">
@@ -53,6 +53,9 @@ public class BlazorIdentityInteractivityIntegrationTests
             ]);
 
         Assert.True(exitCode == 0, $"CLI scaffold should succeed.\nOutput: {output}\nError: {error}");
+        var accountLayoutFile = targetFramework == "net9.0" ? "AccountLayout.razor" : "ManageLayout.razor";
+        Assert.Contains($"@layout {clientNamespace}.Layout.MainLayout",
+            File.ReadAllText(Path.Combine(componentsDir, "Account", "Shared", accountLayoutFile)));
 
         var clientProgramContent = File.ReadAllText(Path.Combine(project.ClientDirectory, "Program.cs"));
         Assert.Contains("builder.Services.AddAuthorizationCore()", clientProgramContent);

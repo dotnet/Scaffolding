@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Text;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Model;
@@ -35,8 +36,9 @@ internal static class HealthcareTrackerScaffolderBuilderExtensions
 
             if (model.ProjectInfo is null || string.IsNullOrEmpty(model.ProjectInfo.ProjectPath))
             {
-                step.SkipStep = true;
-                return;
+                throw new InvalidOperationException(
+                    "Healthcare Tracker scaffolder requires a non-empty 'HealthcareTrackerModel.ProjectInfo.ProjectPath' to locate T4 templates. " +
+                    "The model was not initialized with a valid project path; aborting the text-templating step.");
             }
 
             var allT4TemplatePaths = new TemplateFoldersUtilities()
@@ -49,8 +51,10 @@ internal static class HealthcareTrackerScaffolderBuilderExtensions
             }
             else
             {
-                step.SkipStep = true;
-                return;
+                throw new InvalidOperationException(
+                    "Healthcare Tracker scaffolder could not find any text templates for the target project. " +
+                    "Expected T4 templates under 'Templates/net8.0|net9.0|net10.0|net11.0/HealthcareTracker' (e.g. 'HealthcareTracker.tt'). " +
+                    "Aborting the text-templating step.");
             }
         });
     }
@@ -78,8 +82,9 @@ internal static class HealthcareTrackerScaffolderBuilderExtensions
             }
             else
             {
-                step.SkipStep = true;
-                return;
+                throw new InvalidOperationException(
+                    "Healthcare Tracker scaffolder requires 'HealthcareTrackerSettings' to be present in 'ScaffolderContext.Properties' " +
+                    "before the add-packages step can run. Aborting the add-packages step.");
             }
         });
     }
@@ -105,25 +110,45 @@ internal static class HealthcareTrackerScaffolderBuilderExtensions
             var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
             var model = modelObj as HealthcareTrackerModel;
 
-            if (!string.IsNullOrEmpty(codeModificationFilePath) &&
-                settings is not null &&
-                codeModifierProperties is not null &&
-                model is not null)
+            if (string.IsNullOrEmpty(codeModificationFilePath) ||
+                settings is null ||
+                codeModifierProperties is null ||
+                model is null)
             {
-                step.CodeModifierConfigPath = codeModificationFilePath;
-                foreach (var kvp in codeModifierProperties)
+                var missing = new StringBuilder();
+                if (string.IsNullOrEmpty(codeModificationFilePath))
                 {
-                    step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+                    missing.Append("'syncfusionHealthcareTrackerChanges.json' code-modification config path (could not resolve via GlobalToolFileFinder for target framework folder '")
+                        .Append(targetFrameworkFolder)
+                        .Append("'); ");
+                }
+                if (settings is null)
+                {
+                    missing.Append("'HealthcareTrackerSettings'; ");
+                }
+                if (codeModifierProperties is null)
+                {
+                    missing.Append("CodeModifierProperties (Constants.StepConstants.CodeModifierProperties entry); ");
+                }
+                if (model is null)
+                {
+                    missing.Append("'HealthcareTrackerModel'; ");
                 }
 
-                step.ProjectPath = settings.Project;
-                step.CodeChangeOptions = model.ProjectInfo.CodeChangeOptions ?? [];
+                throw new InvalidOperationException(
+                    "Healthcare Tracker code-modification step is missing required context: "
+                    + missing.ToString().TrimEnd(' ', ';')
+                    + ". Aborting the code-modification step.");
             }
-            else
+
+            step.CodeModifierConfigPath = codeModificationFilePath;
+            foreach (var kvp in codeModifierProperties)
             {
-                step.SkipStep = true;
-                return;
+                step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
             }
+
+            step.ProjectPath = settings.Project;
+            step.CodeChangeOptions = model.ProjectInfo.CodeChangeOptions ?? [];
         });
     }
 }

@@ -12,22 +12,6 @@
               "LeadingTrivia": {
                 "Newline": true
               }
-            },
-            {
-              "InsertAfter": "WebApplication.CreateBuilder.Services.AddSyncfusionBlazorToolkit",
-              "CheckBlock": "builder.Services.AddRazorComponents()",
-              "Block": "builder.Services.AddRazorComponents()\r\n    .AddInteractiveServerComponents();",
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
-              "InsertAfter": "app.MapStaticAssets",
-              "CheckBlock": "app.MapRazorComponents<App>",
-              "Block": "app.MapRazorComponents<App>()\r\n    .AddInteractiveServerRenderMode();",
-              "LeadingTrivia": {
-                "Newline": true
-              }
             }
           ]
         }

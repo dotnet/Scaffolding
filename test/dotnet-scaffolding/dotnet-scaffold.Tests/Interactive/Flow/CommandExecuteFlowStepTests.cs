@@ -78,7 +78,7 @@ public class CommandExecuteFlowStepTests
 
         int exitCode = await RunWithConsoleAsync(() => runner.RunAsync([]));
 
-        Assert.Equal(succeeds, exitCode == 0);
+        Assert.Equal(succeeds ? 0 : 1, exitCode);
         if (succeeds)
         {
             Assert.Null(fallbackResult);

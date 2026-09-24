@@ -39,7 +39,8 @@ internal class ScaffoldRunner(ILogger<ScaffoldRunner> logger) : IScaffoldRunner
 
         // Parse and invoke the root command with the provided arguments
         ParseResult parseResult = RootCommand.Parse(args);
-        return await parseResult.InvokeAsync();
+        int exitCode = await parseResult.InvokeAsync();
+        return exitCode < 0 ? 1 : exitCode;
     }
 
     /// <summary>

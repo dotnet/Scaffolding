@@ -4,6 +4,9 @@
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 
@@ -114,7 +117,8 @@ public class ScaffoldBuilder(string name) : IScaffoldBuilder
             steps.Add((ScaffoldStep)stepInstance);    
         }
 
-        return new Scaffolder(Name, DisplayName, Categories.ToList(), Description, _options, steps, _stepPreparers, _examples);
+        var logger = serviceProvider.GetService<ILogger<Scaffolder>>() ?? NullLogger<Scaffolder>.Instance;
+        return new Scaffolder(Name, DisplayName, Categories.ToList(), Description, _options, steps, _stepPreparers, logger, _examples);
     }
 
     /// <summary>

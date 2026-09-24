@@ -6,10 +6,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Identity;
 
-public class IdentityNet9IntegrationTests : IdentityIntegrationTestsBase
+public class IdentityNet9IntegrationTests(ITestOutputHelper output) : IdentityIntegrationTestsBase
 {
     protected override string TargetFramework => "net9.0";
     protected override string TestClassName => nameof(IdentityNet9IntegrationTests);
@@ -78,6 +79,7 @@ public class IdentityNet9IntegrationTests : IdentityIntegrationTestsBase
             "--project", _testProjectPath,
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore");
+        output.WriteLine($"CLI exit code: {cliExitCode}\nStandard output:\n{cliOutput}\nStandard error:\n{cliError}");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
         // Assert — expected files/directories were created

@@ -5,10 +5,11 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.API;
 
-public class MinimalApiNet9IntegrationTests : MinimalApiIntegrationTestsBase
+public class MinimalApiNet9IntegrationTests(ITestOutputHelper output) : MinimalApiIntegrationTestsBase
 {
     protected override string TargetFramework => "net9.0";
     protected override string TestClassName => nameof(MinimalApiNet9IntegrationTests);
@@ -36,6 +37,7 @@ public class MinimalApiNet9IntegrationTests : MinimalApiIntegrationTestsBase
             "--endpoints", "TestModelEndpoints",
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore");
+        output.WriteLine($"CLI exit code: {cliExitCode}\nStandard output:\n{cliOutput}\nStandard error:\n{cliError}");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
         // Assert — expected files were created

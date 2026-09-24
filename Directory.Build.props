@@ -2,6 +2,14 @@
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
+  <!-- Extensions 11 pulls in a DiagnosticSource fallback that is incompatible with .NET 9 HTTP metrics. -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net9.0'">
+    <MicrosoftExtensionsDependencyInjectionPackageVersion>$(MicrosoftExtensionsPackageVersion10)</MicrosoftExtensionsDependencyInjectionPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>$(MicrosoftExtensionsPackageVersion10)</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftExtensionsHostingPackageVersion>$(MicrosoftExtensionsPackageVersion10)</MicrosoftExtensionsHostingPackageVersion>
+    <MicrosoftExtensionsLoggingConsolePackageVersion>$(MicrosoftExtensionsPackageVersion10)</MicrosoftExtensionsLoggingConsolePackageVersion>
+  </PropertyGroup>
+
   <PropertyGroup>
     <Copyright>$(CopyrightMicrosoft)</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

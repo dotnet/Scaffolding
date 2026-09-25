@@ -37,7 +37,8 @@ internal static class BlazorIdentityHelper
                 x.FullName.Contains(templateFullName) &&
                 x.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase));
 
-            var projectName = Path.GetFileNameWithoutExtension(blazorIdentityModel.ProjectInfo.ProjectPath);
+            var projectName = blazorIdentityModel.IdentityProjectName
+                ?? Path.GetFileNameWithoutExtension(blazorIdentityModel.ProjectInfo.ProjectPath);
 
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {

@@ -13,6 +13,79 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;
 public class BlazorCrudTemplateTests
 {
     [Theory]
+    [InlineData(9, "Create")]
+    [InlineData(9, "Edit")]
+    [InlineData(10, "Create")]
+    [InlineData(10, "Edit")]
+    [InlineData(11, "Create")]
+    [InlineData(11, "Edit")]
+    [InlineData(8, "Create")]
+    [InlineData(8, "Edit")]
+    public void FormTemplate_WithEnumProperty_GeneratesInputSelect(int frameworkVersion, string pageType)
+    {
+        // Arrange
+        BlazorCrudModel model = CreateModel(pageType);
+
+        // Act
+        string result = TransformTemplate(frameworkVersion, pageType, model);
+
+        // Assert
+        string inputSelect = GetInputSelect(result, "employeetype");
+
+        Assert.Contains("@bind-Value=\"Employee.EmployeeType\"", inputSelect);
+        Assert.Contains("aria-required=\"true\"", inputSelect);
+        Assert.Contains("Enum.GetValues<TestProject.Models.EmployeeType>()", inputSelect);
+        Assert.Contains("<option value=\"@value\">@value</option>", inputSelect);
+        Assert.Contains("</InputSelect>", inputSelect);
+        Assert.DoesNotContain("<option value=\"\">", inputSelect);
+        Assert.DoesNotContain("<InputText id=\"employeetype\"", result);
+    }
+
+    [Theory]
+    [InlineData(9, "Create")]
+    [InlineData(9, "Edit")]
+    [InlineData(10, "Create")]
+    [InlineData(10, "Edit")]
+    [InlineData(11, "Create")]
+    [InlineData(11, "Edit")]
+    [InlineData(8, "Create")]
+    [InlineData(8, "Edit")]
+    public void FormTemplate_WithNullableEnumProperty_GeneratesInputSelectWithEmptyOption(int frameworkVersion, string pageType)
+    {
+        BlazorCrudModel model = CreateModel(pageType);
+
+        string result = TransformTemplate(frameworkVersion, pageType, model);
+        string inputSelect = GetInputSelect(result, "optionalemployeetype");
+
+        Assert.Contains("@bind-Value=\"Employee.OptionalEmployeeType\"", inputSelect);
+        Assert.Contains("<option value=\"\">-- select --</option>", inputSelect);
+        Assert.Contains("Enum.GetValues<TestProject.Models.EmployeeType>()", inputSelect);
+        Assert.Contains("</InputSelect>", inputSelect);
+        Assert.DoesNotContain("<InputText id=\"optionalemployeetype\"", result);
+    }
+
+    [Theory]
+    [InlineData(9, "Create")]
+    [InlineData(9, "Edit")]
+    [InlineData(10, "Create")]
+    [InlineData(10, "Edit")]
+    [InlineData(11, "Create")]
+    [InlineData(11, "Edit")]
+    [InlineData(8, "Create")]
+    [InlineData(8, "Edit")]
+    public void FormTemplate_WithStandardProperties_PreservesInputTypes(int frameworkVersion, string pageType)
+    {
+        BlazorCrudModel model = CreateModel(pageType);
+
+        string result = TransformTemplate(frameworkVersion, pageType, model);
+
+        Assert.Contains("<InputText id=\"name\" @bind-Value=\"Employee.Name\"", result);
+        Assert.Contains("<InputNumber id=\"count\" @bind-Value=\"Employee.Count\"", result);
+        Assert.Contains("<InputCheckbox id=\"isactive\" @bind-Value=\"Employee.IsActive\"", result);
+        Assert.Contains("<InputDate id=\"startdate\" @bind-Value=\"Employee.StartDate\"", result);
+    }
+
+    [Theory]
     [InlineData(8)]
     [InlineData(9)]
     [InlineData(10)]
@@ -152,6 +225,17 @@ public class BlazorCrudTemplateTests
         return template.TransformText();
     }
 
+    private static string GetInputSelect(string result, string id)
+    {
+        int start = result.IndexOf($"<InputSelect id=\"{id}\"", System.StringComparison.Ordinal);
+        Assert.True(start >= 0, $"InputSelect with id '{id}' was not generated.");
+
+        const string closingTag = "</InputSelect>";
+        int end = result.IndexOf(closingTag, start, System.StringComparison.Ordinal);
+        Assert.True(end >= 0, $"InputSelect with id '{id}' was not closed.");
+
+        return result.Substring(start, end - start + closingTag.Length);
+    }
     private static List<IPropertySymbol> GetProperties(string source)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);

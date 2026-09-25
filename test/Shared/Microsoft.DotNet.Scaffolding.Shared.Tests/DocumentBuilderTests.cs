@@ -350,5 +350,105 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.True(formattedCodeSnippets[3].LeadingTrivia.NumberOfSpaces == 4 + whitespaceBeingAdded);
         }
 
+        [Fact]
+        public async Task WriteToClassFileAsync_UsesUtf8EncodingWithoutBom()
+        {
+            // Arrange
+            var tempFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"test_{Guid.NewGuid()}.cs");
+            var documentWithRussianComments = @"using System;
+
+namespace TestNamespace
+{
+    // Класс для тестирования
+    public class TestClass
+    {
+        // Метод с русскими комментариями
+        public void TestMethod()
+        {
+            var message = ""Привет, мир!"";
+        }
+    }
+}";
+
+            try
+            {
+                DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(documentWithRussianComments));
+                CodeFile codeFile = new CodeFile();
+                DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
+
+                // Act
+                await docBuilder.WriteToClassFileAsync(tempFile);
+
+                // Assert
+                var bytes = System.IO.File.ReadAllBytes(tempFile);
+
+                // Check that file does NOT start with UTF-8 BOM (EF BB BF)
+                Assert.False(bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF,
+                    "File should not contain UTF-8 BOM");
+
+                // Check that content can be read correctly as UTF-8
+                var readContent = System.IO.File.ReadAllText(tempFile, System.Text.Encoding.UTF8);
+                Assert.Contains("Привет, мир!", readContent);
+                Assert.Contains("Класс для тестирования", readContent);
+            }
+            finally
+            {
+                // Cleanup
+                if (System.IO.File.Exists(tempFile))
+                {
+                    System.IO.File.Delete(tempFile);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task WriteToClassFileAsync_PreservesNonAsciiCharacters()
+        {
+            // Arrange
+            var tempFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"test_{Guid.NewGuid()}.cs");
+            var documentWithMultilingualComments = @"using System;
+
+namespace TestNamespace
+{
+    // English, Русский, 中文, العربية
+    public class MultilingualClass
+    {
+        public void TestMethod()
+        {
+            var message = ""Hello мир 世界 🌍"";
+        }
+    }
+}";
+
+            try
+            {
+                DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(documentWithMultilingualComments));
+                CodeFile codeFile = new CodeFile();
+                DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
+
+                // Act
+                await docBuilder.WriteToClassFileAsync(tempFile);
+
+                // Assert
+                var readContent = System.IO.File.ReadAllText(tempFile, System.Text.Encoding.UTF8);
+                Assert.Contains("Hello мир 世界 🌍", readContent);
+                Assert.Contains("English, Русский, 中文, العربية", readContent);
+                
+                // Verify UTF-8 encoding
+                var bytes = System.IO.File.ReadAllBytes(tempFile);
+                var utf8Content = System.Text.Encoding.UTF8.GetString(bytes);
+                Assert.Contains("мир", utf8Content);
+                Assert.Contains("世界", utf8Content);
+            }
+            finally
+            {
+                // Cleanup
+                if (System.IO.File.Exists(tempFile))
+                {
+                    System.IO.File.Delete(tempFile);
+                }
+            }
+        }
+
     }
 }

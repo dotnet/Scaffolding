@@ -499,7 +499,7 @@ internal static class ProjectModifierHelper
 
         if (sourceChanged)
         {
-            File.WriteAllText(filePath, sourceFileString);
+            File.WriteAllText(filePath, sourceFileString, new UTF8Encoding(false));
         }
     }
 

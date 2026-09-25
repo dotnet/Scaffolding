@@ -563,7 +563,7 @@ namespace Microsoft.DotNet.MSIdentity
                             + updatedContent.Substring(indexCallbackPath);
                     }
                 }
-                System.IO.File.WriteAllText(filePath, updatedContent);
+                System.IO.File.WriteAllText(filePath, updatedContent, new UTF8Encoding(false));
             }
 
             if (projectSettings.ApplicationParameters.CallsMicrosoftGraph)

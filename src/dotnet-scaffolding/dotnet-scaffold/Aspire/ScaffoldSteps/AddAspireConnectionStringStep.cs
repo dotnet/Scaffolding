@@ -105,7 +105,7 @@ internal class AddAspireConnectionStringStep : ScaffoldStep
         {
             // Write the updated content to appsettings.json
             JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-            _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
+            _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options) + Environment.NewLine);
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
             _telemetryService.TrackEvent(new AddAspireConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));
         }

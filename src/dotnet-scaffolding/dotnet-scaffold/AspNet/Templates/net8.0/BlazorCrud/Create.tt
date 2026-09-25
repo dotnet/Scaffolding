@@ -23,7 +23,7 @@
 <#  }
 #>
 @inject <#=dbContextFactory #>
-@inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 
 <PageTitle>Create</PageTitle>
 
@@ -35,7 +35,7 @@
     <div class="col-md-4">
         <EditForm method="post" Model="<#= modelName #>" OnValidSubmit="Add<#= modelName #>" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
             <#
                 foreach (var property in entityProperties)
                 {
@@ -44,15 +44,15 @@
                     string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
-                    var ariaRequiredAttributeHtml = property.IsRequired ? "aria-required=\"true\"" : string.Empty;
+                    var ariaRequiredAttributeHtml = property.IsRequired ? " aria-required=\"true\"" : string.Empty;
                     var divWhitespace = new string(' ', 16);
                     var requiredSpanAttributeHtml = property.IsRequired ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
             #>
 <div class="mb-3"><#= requiredSpanAttributeHtml #>
-                <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label> 
-                <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" <#= ariaRequiredAttributeHtml #>/> 
-                <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" /> 
-            </div>        
+                <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label>
+                <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>"<#= ariaRequiredAttributeHtml #>/>
+                <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" />
+            </div>
             <#  } #>
 <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
@@ -73,6 +73,6 @@
         using var context = DbFactory.CreateDbContext();
         context.<#= Model.ModelMetadata.EntitySetName #>.Add(<#= modelName #>);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
+        Navigation.NavigateTo("/<#= pluralModelLowerInv #>");
     }
 }

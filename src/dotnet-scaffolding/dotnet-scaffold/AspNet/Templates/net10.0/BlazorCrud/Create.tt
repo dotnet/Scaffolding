@@ -25,7 +25,7 @@
 <#  }
 #>
 @inject <#=dbContextFactory #>
-@inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 
 <PageTitle>Create</PageTitle>
 
@@ -46,15 +46,15 @@
                     string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
-                    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
+                    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? " aria-required=\"true\"" : string.Empty;
                     var divWhitespace = new string(' ', 16);
                     var requiredSpanAttributeHtml = property.HasRequiredAttribute() ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
             #>
 <div class="mb-3"><#= requiredSpanAttributeHtml #>
-                <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label> 
-                <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" <#= ariaRequiredAttributeHtml #>/> 
-                <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" /> 
-            </div>        
+                <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label>
+                <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>"<#= ariaRequiredAttributeHtml #>/>
+                <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" />
+            </div>
             <#  } #>
 <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
@@ -77,6 +77,6 @@
         using var context = DbFactory.CreateDbContext();
         context.<#= Model.DbContextInfo.EntitySetVariableName ?? modelName #>.Add(<#= modelName #>);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
+        Navigation.NavigateTo("/<#= pluralModelLowerInv #>");
     }
 }

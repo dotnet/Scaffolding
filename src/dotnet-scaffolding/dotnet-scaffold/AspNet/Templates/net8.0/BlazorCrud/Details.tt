@@ -27,7 +27,7 @@
 <#  }
 #>
 @inject <#= dbContextFactory #>
-@inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 
 <PageTitle>Details</PageTitle>
 
@@ -70,7 +70,7 @@
 
         if (<#= modelNameLowerInv #> is null)
         {
-            NavigationManager.NavigateTo("notfound");
+            Navigation.NavigateTo("notfound");
         }
     }
 }

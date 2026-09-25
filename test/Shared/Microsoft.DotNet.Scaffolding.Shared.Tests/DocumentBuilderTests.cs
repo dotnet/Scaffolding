@@ -2,15 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
+using Moq;
 using Xunit;
 
 namespace Microsoft.DotNet.Scaffolding.Shared.Tests
@@ -348,6 +352,617 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.True(formattedCodeSnippets[1].LeadingTrivia.NumberOfSpaces == whitespaceBeingAdded);
             Assert.True(formattedCodeSnippets[2].LeadingTrivia.NumberOfSpaces == whitespaceBeingAdded);
             Assert.True(formattedCodeSnippets[3].LeadingTrivia.NumberOfSpaces == 4 + whitespaceBeingAdded);
+        }
+
+        [Fact]
+        public void GetUniqueUsingsTests()
+        {
+            // Test adding unique usings
+            var existingUsings = new[] { "System", "System.Linq" };
+            var newUsings = new[] { "System.Collections.Generic", "System.Linq", "System.Text" };
+            
+            var existingUsingDirectives = DocumentBuilder.CreateUsings(existingUsings);
+            var newUsingDirectives = DocumentBuilder.CreateUsings(newUsings);
+            
+            var uniqueUsings = DocumentBuilder.GetUniqueUsings(existingUsingDirectives, newUsingDirectives);
+            
+            // Should only add System.Collections.Generic and System.Text (not System.Linq as it already exists)
+            Assert.Equal(2, uniqueUsings.Count);
+            Assert.Contains(uniqueUsings, u => u.Name.ToString().Equals("System.Collections.Generic"));
+            Assert.Contains(uniqueUsings, u => u.Name.ToString().Equals("System.Text"));
+            Assert.DoesNotContain(uniqueUsings, u => u.Name.ToString().Equals("System.Linq"));
+        }
+
+        [Fact]
+        public void FilterUsingsWithOptionsTests()
+        {
+            var codeFile = new CodeFile
+            {
+                UsingsWithOptions = new[]
+                {
+                    new CodeBlock { Block = "Microsoft.Graph", Options = new[] { "MicrosoftGraph" } },
+                    new CodeBlock { Block = "System.Net.Http", Options = new[] { "DownstreamApi" } },
+                    new CodeBlock { Block = "System.Text.Json", Options = null }
+                }
+            };
+
+            var optionsWithGraph = new CodeChangeOptions { MicrosoftGraph = true, DownstreamApi = false };
+            var optionsWithApi = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = true };
+            var optionsWithNeither = new CodeChangeOptions { MicrosoftGraph = false, DownstreamApi = false };
+
+            var filteredWithGraph = DocumentBuilder.FilterUsingsWithOptions(codeFile, optionsWithGraph);
+            var filteredWithApi = DocumentBuilder.FilterUsingsWithOptions(codeFile, optionsWithApi);
+            var filteredWithNeither = DocumentBuilder.FilterUsingsWithOptions(codeFile, optionsWithNeither);
+
+            Assert.Contains("Microsoft.Graph", filteredWithGraph);
+            Assert.Contains("System.Text.Json", filteredWithGraph);
+            Assert.Equal(2, filteredWithGraph.Count);
+
+            Assert.Contains("System.Net.Http", filteredWithApi);
+            Assert.Contains("System.Text.Json", filteredWithApi);
+            Assert.Equal(2, filteredWithApi.Count);
+
+            Assert.Contains("System.Text.Json", filteredWithNeither);
+            Assert.Single(filteredWithNeither);
+        }
+
+        [Fact]
+        public async Task GetSpecifiedNodeTests()
+        {
+            var root = await CreateDocument(MinimalProgramCsFile).GetSyntaxRootAsync() as CompilationUnitSyntax;
+            var descendants = DocumentBuilder.GetDescendantNodes(root);
+
+            // Test finding a node that exists
+            var foundNode = DocumentBuilder.GetSpecifiedNode("builder.Build()", descendants);
+            Assert.NotNull(foundNode);
+            Assert.Contains("builder.Build()", foundNode.ToString());
+
+            // Test finding a node that doesn't exist
+            var notFoundNode = DocumentBuilder.GetSpecifiedNode("NonExistentCode()", descendants);
+            Assert.Null(notFoundNode);
+
+            // Test with null or empty specifier
+            var nullResult = DocumentBuilder.GetSpecifiedNode(null, descendants);
+            Assert.Null(nullResult);
+
+            var emptyResult = DocumentBuilder.GetSpecifiedNode("", descendants);
+            Assert.Null(emptyResult);
+        }
+
+        [Fact]
+        public async Task GetDescendantNodesTests()
+        {
+            // Test with BlockSyntax
+            var blockStatement = SyntaxFactory.ParseStatement("{ app.UseRouting(); }");
+            var blockSyntax = SyntaxFactory.Block(blockStatement);
+            var blockDescendants = DocumentBuilder.GetDescendantNodes(blockSyntax);
+            Assert.NotNull(blockDescendants);
+            Assert.NotEmpty(blockDescendants);
+
+            // Test with CompilationUnitSyntax
+            var root = await CreateDocument(MinimalProgramCsFile).GetSyntaxRootAsync() as CompilationUnitSyntax;
+            var compilationDescendants = DocumentBuilder.GetDescendantNodes(root);
+            Assert.NotNull(compilationDescendants);
+            Assert.NotEmpty(compilationDescendants);
+
+            // Test with other SyntaxNode types
+            var statement = SyntaxFactory.ParseStatement("var x = 10;");
+            var otherDescendants = DocumentBuilder.GetDescendantNodes(statement);
+            Assert.NotNull(otherDescendants);
+        }
+
+        [Fact]
+        public async Task GetModifiedMethodTests()
+        {
+            var editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
+            var classSyntax = await CreateClassSyntax(editor);
+            var methodNode = classSyntax.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault();
+            Assert.NotNull(methodNode);
+
+            var methodChanges = new Method
+            {
+                CodeChanges = new[]
+                {
+                    new CodeSnippet { Block = "Console.WriteLine(\"Test\");" }
+                },
+                Attributes = new[]
+                {
+                    new CodeBlock { Block = "HttpPost" }
+                }
+            };
+
+            var options = new CodeChangeOptions();
+            var output = new StringBuilder();
+
+            var modifiedMethod = DocumentBuilder.GetModifiedMethod("Test.cs", methodNode, methodChanges, options, output);
+
+            Assert.NotNull(modifiedMethod);
+            Assert.Contains(modifiedMethod.AttributeLists, al => 
+                al.Attributes.Any(attr => attr.ToString().Equals("HttpPost", StringComparison.OrdinalIgnoreCase)));
+        }
+
+        [Fact]
+        public async Task EditMethodReturnTypeTests()
+        {
+            var editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
+            var classSyntax = await CreateClassSyntax(editor);
+            var methodNode = classSyntax.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault();
+            Assert.NotNull(methodNode);
+
+            // Test changing return type
+            var methodChanges = new Method
+            {
+                EditType = new CodeBlock { Block = "Task" }
+            };
+
+            var options = new CodeChangeOptions();
+            var modifiedMethod = DocumentBuilder.EditMethodReturnType(methodNode, methodChanges, options);
+
+            Assert.NotNull(modifiedMethod);
+            Assert.IsType<MethodDeclarationSyntax>(modifiedMethod);
+            var modifiedMethodSyntax = (MethodDeclarationSyntax)modifiedMethod;
+            Assert.Contains("Task", modifiedMethodSyntax.ReturnType.ToString());
+
+            // Test with null methodChanges
+            var unchangedMethod = DocumentBuilder.EditMethodReturnType(methodNode, null, options);
+            Assert.Equal(methodNode, unchangedMethod);
+        }
+
+        [Fact]
+        public async Task AddParametersTests()
+        {
+            var editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
+            var classSyntax = await CreateClassSyntax(editor);
+            var methodNode = classSyntax.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault();
+            Assert.NotNull(methodNode);
+
+            var addParameters = new[]
+            {
+                new CodeBlock { Block = "string name" },
+                new CodeBlock { Block = "int id" }
+            };
+
+            var options = new CodeChangeOptions();
+            var modifiedMethod = DocumentBuilder.AddParameters(methodNode, addParameters, options);
+
+            Assert.NotNull(modifiedMethod);
+            Assert.Equal(2, modifiedMethod.ParameterList.Parameters.Count);
+        }
+
+        [Fact]
+        public void ModifyMethodTests()
+        {
+            var statement = SyntaxFactory.ParseStatement("{ }");
+            var blockSyntax = SyntaxFactory.Block(statement);
+            
+            var codeChange = new CodeSnippet
+            {
+                Block = "Console.WriteLine(\"Hello\");",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 },
+                TrailingTrivia = new Formatting { Newline = true }
+            };
+
+            var output = new StringBuilder();
+            var modifiedMethod = DocumentBuilder.ModifyMethod(blockSyntax, codeChange, output);
+
+            Assert.NotNull(modifiedMethod);
+            Assert.Contains("Console.WriteLine", modifiedMethod.ToString());
+        }
+
+        [Fact]
+        public void UpdateMethodTests()
+        {
+            var blockStatement = SyntaxFactory.ParseStatement("{ app.UseRouting(); }");
+            var blockSyntax = SyntaxFactory.Block(blockStatement);
+
+            var codeChange = new CodeSnippet
+            {
+                Block = "app.UseAuthentication();",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 },
+                TrailingTrivia = new Formatting { Newline = true }
+            };
+
+            var updatedMethod = DocumentBuilder.UpdateMethod(blockSyntax, codeChange);
+
+            Assert.NotNull(updatedMethod);
+            Assert.Contains("app.UseAuthentication", updatedMethod.ToString());
+            Assert.Contains("app.UseRouting", updatedMethod.ToString());
+        }
+
+        [Fact]
+        public void GetNodeWithUpdatedLambdaTests()
+        {
+            // Create a simple lambda expression for testing
+            var lambdaExpression = SyntaxFactory.SimpleLambdaExpression(
+                SyntaxFactory.Parameter(SyntaxFactory.Identifier("x")),
+                SyntaxFactory.Block()
+            );
+
+            var parentNode = SyntaxFactory.ExpressionStatement(
+                SyntaxFactory.InvocationExpression(
+                    SyntaxFactory.IdentifierName("Action"),
+                    SyntaxFactory.ArgumentList(
+                        SyntaxFactory.SingletonSeparatedList(
+                            SyntaxFactory.Argument(lambdaExpression)
+                        )
+                    )
+                )
+            );
+
+            var codeChange = new CodeSnippet
+            {
+                Block = "Console.WriteLine(x);",
+                Parameter = "y",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 }
+            };
+
+            var updatedParent = DocumentBuilder.GetNodeWithUpdatedLambda(lambdaExpression, codeChange, parentNode);
+
+            Assert.NotNull(updatedParent);
+            // The lambda should be updated within the parent
+            Assert.Contains("Console.WriteLine", updatedParent.ToString());
+        }
+
+        [Fact]
+        public async Task AddExpressionToParentTests()
+        {
+            var root = await CreateDocument(MinimalProgramCsFile).GetSyntaxRootAsync() as CompilationUnitSyntax;
+            
+            var codeChange = new CodeSnippet
+            {
+                Block = "UseHttpsRedirection()",
+                Parent = "app",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 0 }
+            };
+
+            var modifiedRoot = DocumentBuilder.AddExpressionToParent(root, codeChange);
+
+            Assert.NotNull(modifiedRoot);
+        }
+
+        [Fact]
+        public void AddMethodParametersTests()
+        {
+            var method = SyntaxFactory.MethodDeclaration(
+                SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
+                "TestMethod"
+            ).WithParameterList(SyntaxFactory.ParameterList());
+
+            var methodChanges = new Method
+            {
+                AddParameters = new[]
+                {
+                    new CodeBlock { Block = "string name" },
+                    new CodeBlock { Block = "int age" }
+                }
+            };
+
+            var options = new CodeChangeOptions();
+            var modifiedMethod = DocumentBuilder.AddMethodParameters(method, methodChanges, options);
+
+            Assert.NotNull(modifiedMethod);
+            Assert.Equal(2, modifiedMethod.ParameterList.Parameters.Count);
+
+            // Test with null or empty parameters
+            var unchangedMethod = DocumentBuilder.AddMethodParameters(method, null, options);
+            Assert.Equal(method, unchangedMethod);
+        }
+
+        [Fact]
+        public void AddCodeSnippetsToMethodTests()
+        {
+            var method = SyntaxFactory.MethodDeclaration(
+                SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
+                "TestMethod"
+            ).WithBody(SyntaxFactory.Block());
+
+            var methodChanges = new Method
+            {
+                CodeChanges = new[]
+                {
+                    new CodeSnippet
+                    {
+                        Block = "Console.WriteLine(\"Hello\");",
+                        LeadingTrivia = new Formatting { NumberOfSpaces = 4 }
+                    }
+                }
+            };
+
+            var options = new CodeChangeOptions();
+            var output = new StringBuilder();
+
+            var modifiedMethod = DocumentBuilder.AddCodeSnippetsToMethod("Test.cs", method, methodChanges, options, output);
+
+            Assert.NotNull(modifiedMethod);
+            Assert.Contains("Console.WriteLine", modifiedMethod.ToString());
+        }
+
+        [Fact]
+        public async Task ApplyChangesToMethodWithGlobalStatementsTests()
+        {
+            var root = await CreateDocument(MinimalProgramCsFile).GetSyntaxRootAsync() as CompilationUnitSyntax;
+            
+            var codeChanges = new[]
+            {
+                new CodeSnippet
+                {
+                    Block = "builder.Services.AddAuthentication();",
+                    InsertAfter = "builder.Services.AddRazorPages()",
+                    LeadingTrivia = new Formatting { NumberOfSpaces = 0, Newline = true }
+                }
+            };
+
+            var output = new StringBuilder();
+            var modifiedRoot = DocumentBuilder.ApplyChangesToMethod(root, codeChanges, "Program.cs", output) as CompilationUnitSyntax;
+
+            Assert.NotNull(modifiedRoot);
+            Assert.Contains("AddAuthentication", modifiedRoot.ToString());
+        }
+
+        [Fact]
+        public async Task ApplyChangesToMethodWithBlockSyntaxTests()
+        {
+            var blockStatement = SyntaxFactory.ParseStatement("{ app.UseRouting(); }");
+            var blockSyntax = SyntaxFactory.Block(blockStatement);
+
+            var codeChanges = new[]
+            {
+                new CodeSnippet
+                {
+                    Block = "app.UseAuthentication();",
+                    LeadingTrivia = new Formatting { NumberOfSpaces = 4, Newline = true }
+                },
+                new CodeSnippet
+                {
+                    Block = "app.UseAuthorization();",
+                    LeadingTrivia = new Formatting { NumberOfSpaces = 4, Newline = true }
+                }
+            };
+
+            var output = new StringBuilder();
+            var modifiedBlock = DocumentBuilder.ApplyChangesToMethod(blockSyntax, codeChanges, "Startup.cs", output);
+
+            Assert.NotNull(modifiedBlock);
+            Assert.Contains("UseAuthentication", modifiedBlock.ToString());
+            Assert.Contains("UseAuthorization", modifiedBlock.ToString());
+        }
+
+        [Fact]
+        public void UpdateMethodWithInsertBeforeTests()
+        {
+            var blockStatement = SyntaxFactory.ParseStatement("{ app.UseRouting(); app.Run(); }");
+            var blockSyntax = SyntaxFactory.Block(blockStatement);
+
+            var codeChange = new CodeSnippet
+            {
+                Block = "app.UseAuthentication();",
+                InsertBefore = new[] { "app.Run()" },
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 }
+            };
+
+            var updatedMethod = DocumentBuilder.UpdateMethod(blockSyntax, codeChange);
+
+            Assert.NotNull(updatedMethod);
+            Assert.Contains("UseAuthentication", updatedMethod.ToString());
+            
+            // Verify insertion order: UseRouting -> UseAuthentication -> Run
+            var methodString = updatedMethod.ToString();
+            var routingIndex = methodString.IndexOf("UseRouting");
+            var authIndex = methodString.IndexOf("UseAuthentication");
+            var runIndex = methodString.IndexOf("Run()");
+            
+            Assert.True(routingIndex < authIndex && authIndex < runIndex);
+        }
+
+        [Fact]
+        public void UpdateMethodWithInsertAfterTests()
+        {
+            var blockStatement = SyntaxFactory.ParseStatement("{ app.UseRouting(); app.Run(); }");
+            var blockSyntax = SyntaxFactory.Block(blockStatement);
+
+            var codeChange = new CodeSnippet
+            {
+                Block = "app.UseAuthentication();",
+                InsertAfter = "app.UseRouting()",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 }
+            };
+
+            var updatedMethod = DocumentBuilder.UpdateMethod(blockSyntax, codeChange);
+
+            Assert.NotNull(updatedMethod);
+            Assert.Contains("UseAuthentication", updatedMethod.ToString());
+            
+            // Verify insertion order: UseRouting -> UseAuthentication -> Run
+            var methodString = updatedMethod.ToString();
+            var routingIndex = methodString.IndexOf("UseRouting");
+            var authIndex = methodString.IndexOf("UseAuthentication");
+            var runIndex = methodString.IndexOf("Run()");
+            
+            Assert.True(routingIndex < authIndex && authIndex < runIndex);
+        }
+
+        [Fact]
+        public void UpdateMethodWithPrependTests()
+        {
+            var blockStatement = SyntaxFactory.ParseStatement("{ app.UseRouting(); }");
+            var blockSyntax = SyntaxFactory.Block(blockStatement);
+
+            var codeChange = new CodeSnippet
+            {
+                Block = "var config = builder.Configuration;",
+                Prepend = true,
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 }
+            };
+
+            var updatedMethod = DocumentBuilder.UpdateMethod(blockSyntax, codeChange);
+
+            Assert.NotNull(updatedMethod);
+            Assert.Contains("var config", updatedMethod.ToString());
+            
+            // Verify prepending: config should come before UseRouting
+            var methodString = updatedMethod.ToString();
+            var configIndex = methodString.IndexOf("var config");
+            var routingIndex = methodString.IndexOf("UseRouting");
+            
+            Assert.True(configIndex < routingIndex);
+        }
+
+        [Fact]
+        public void UpdateMethodWithCheckBlockTests()
+        {
+            var blockStatement = SyntaxFactory.ParseStatement("{ app.UseRouting(); }");
+            var blockSyntax = SyntaxFactory.Block(blockStatement);
+
+            var codeChange = new CodeSnippet
+            {
+                Block = "app.UseAuthentication();",
+                CheckBlock = "app.UseRouting()",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 }
+            };
+
+            // Should not add because CheckBlock already exists
+            var updatedMethod = DocumentBuilder.UpdateMethod(blockSyntax, codeChange);
+            Assert.Equal(blockSyntax, updatedMethod);
+
+            // Now test with a CheckBlock that doesn't exist
+            var codeChange2 = new CodeSnippet
+            {
+                Block = "app.UseAuthentication();",
+                CheckBlock = "app.UseAuthorization()",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 }
+            };
+
+            var updatedMethod2 = DocumentBuilder.UpdateMethod(blockSyntax, codeChange2);
+            Assert.NotEqual(blockSyntax, updatedMethod2);
+            Assert.Contains("UseAuthentication", updatedMethod2.ToString());
+        }
+
+        [Fact]
+        public void AddLambdaToParentTests()
+        {
+            // Create a parent node with an argument list
+            var invocation = SyntaxFactory.InvocationExpression(
+                SyntaxFactory.IdentifierName("Configure"),
+                SyntaxFactory.ArgumentList()
+            );
+
+            var codeChange = new CodeSnippet
+            {
+                Block = "Console.WriteLine(options);",
+                Parameter = "options",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 }
+            };
+
+            var children = DocumentBuilder.GetDescendantNodes(invocation);
+            var updatedParent = DocumentBuilder.AddLambdaToParent(invocation, children, codeChange);
+
+            Assert.NotNull(updatedParent);
+            Assert.Contains("options", updatedParent.ToString());
+            Assert.Contains("Console.WriteLine", updatedParent.ToString());
+        }
+
+        [Fact]
+        public void AddLambdaToParentWithExistingBlockTests()
+        {
+            // Test that it doesn't add duplicate lambda when block already exists
+            var lambdaExpression = SyntaxFactory.SimpleLambdaExpression(
+                SyntaxFactory.Parameter(SyntaxFactory.Identifier("x")),
+                SyntaxFactory.Block(
+                    SyntaxFactory.ParseStatement("Console.WriteLine(x);")
+                )
+            );
+
+            var invocation = SyntaxFactory.InvocationExpression(
+                SyntaxFactory.IdentifierName("Action"),
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.Argument(lambdaExpression)
+                    )
+                )
+            );
+
+            var codeChange = new CodeSnippet
+            {
+                Block = "Console.WriteLine(x);",
+                Parameter = "x",
+                LeadingTrivia = new Formatting { NumberOfSpaces = 4 }
+            };
+
+            var children = DocumentBuilder.GetDescendantNodes(invocation);
+            var updatedParent = DocumentBuilder.AddLambdaToParent(invocation, children, codeChange);
+
+            // Should return original parent since block already exists
+            Assert.Equal(invocation, updatedParent);
+        }
+
+        [Fact]
+        public async Task WriteToClassFileAsyncTests()
+        {
+            var tempFilePath = Path.Combine(Path.GetTempPath(), $"test_{Guid.NewGuid()}.cs");
+            try
+            {
+                DocumentEditor editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
+                CodeFile codeFile = new CodeFile
+                {
+                    Usings = new[] { "System.Threading.Tasks" }
+                };
+                DocumentBuilder docBuilder = new DocumentBuilder(editor, codeFile, new MSIdentity.Shared.ConsoleLogger());
+                docBuilder.AddUsings(new CodeChangeOptions());
+
+                await docBuilder.WriteToClassFileAsync(tempFilePath);
+
+                Assert.True(File.Exists(tempFilePath));
+                var fileContent = File.ReadAllText(tempFilePath);
+                Assert.Contains("System.Threading.Tasks", fileContent);
+            }
+            finally
+            {
+                if (File.Exists(tempFilePath))
+                {
+                    File.Delete(tempFilePath);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task ApplyTextReplacementsTests()
+        {
+            var tempFilePath = Path.Combine(Path.GetTempPath(), $"test_{Guid.NewGuid()}.txt");
+            try
+            {
+                File.WriteAllText(tempFilePath, "Original content");
+
+                var document = CreateDocument("Original content");
+                var codeFile = new CodeFile
+                {
+                    Replacements = new[]
+                    {
+                        new CodeSnippet
+                        {
+                            Block = "New content",
+                            CheckBlock = "New",
+                            ReplaceSnippet = new[] { "Original content" }
+                        }
+                    }
+                };
+
+                var fileSystem = new Mock<IFileSystem>();
+                fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+                    .Callback<string, string>((path, content) => File.WriteAllText(path, content));
+
+                var options = new CodeChangeOptions();
+                await DocumentBuilder.ApplyTextReplacements(codeFile, document, options, fileSystem.Object);
+
+                // Verify WriteAllText was called
+                fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            }
+            finally
+            {
+                if (File.Exists(tempFilePath))
+                {
+                    File.Delete(tempFilePath);
+                }
+            }
         }
 
     }

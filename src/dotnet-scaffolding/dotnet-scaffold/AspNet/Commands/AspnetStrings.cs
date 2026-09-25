@@ -139,6 +139,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string EntraIdExample2Description = "Add Microsoft Entra ID authentication by creating a new Azure application:";
         }
 
+        internal class HealthcareTracker
+        {
+            internal const string Name = "healthcare-tracker";
+            internal const string DisplayName = "Healthcare Tracker (Syncfusion Toolkit sample)";
+            internal const string Description = "Demonstration only: adds a sample Blazor Healthcare Tracker page using Syncfusion Blazor Toolkit charts (MIT). Requires a Blazor Web App with the default template layout (Components/_Imports.razor, Components/App.razor, Components/Layout/NavMenu.razor). Theme is fixed to fluent.css. Not a generic data-bound scaffolder.";
+            internal const string Example = "dotnet scaffold aspnet healthcare-tracker --project ./MyBlazorApp.csproj";
+            internal const string ExampleDescription = "Scaffold a sample Healthcare Tracker page with Syncfusion Toolkit charts:";
+        }
+
         internal class Catagories
         {
             internal const string Blazor = "Blazor";
@@ -147,6 +156,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string API = "API";
             internal const string Identity = "Identity";
             internal const string EntraId = "Entra ID";
+            internal const string Syncfusion = "Syncfusion";
         }
 
         internal static class Options

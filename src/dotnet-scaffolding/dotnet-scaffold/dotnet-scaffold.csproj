@@ -313,6 +313,26 @@
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
+    <!-- net11.0 HealthcareTracker template -->
+    <None Update="AspNet\Templates\net11.0\HealthcareTracker\HealthcareTracker.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <!-- net10.0 HealthcareTracker template -->
+    <None Update="AspNet\Templates\net10.0\HealthcareTracker\HealthcareTracker.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <!-- net9.0 HealthcareTracker template -->
+    <None Update="AspNet\Templates\net9.0\HealthcareTracker\HealthcareTracker.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <!-- net8.0 HealthcareTracker template -->
+    <None Update="AspNet\Templates\net8.0\HealthcareTracker\HealthcareTracker.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
     <!-- net11.0 Blazor identity templates-->
     <None Update="AspNet\Templates\net11.0\BlazorIdentity\IdentityComponentsEndpointRouteBuilderExtensions.tt">
       <LastGenOutput>%(Filename).cs</LastGenOutput>
@@ -850,6 +870,30 @@
     </Compile>
     <Compile Update="AspNet\Templates\net11.0\Blazor\NotFound.cs">
       <DependentUpon>NotFound.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <!-- net11.0 HealthcareTracker generated source -->
+    <Compile Update="AspNet\Templates\net11.0\HealthcareTracker\HealthcareTracker.cs">
+      <DependentUpon>HealthcareTracker.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <!-- net10.0 HealthcareTracker generated source -->
+    <Compile Update="AspNet\Templates\net10.0\HealthcareTracker\HealthcareTracker.cs">
+      <DependentUpon>HealthcareTracker.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <!-- net9.0 HealthcareTracker generated source -->
+    <Compile Update="AspNet\Templates\net9.0\HealthcareTracker\HealthcareTracker.cs">
+      <DependentUpon>HealthcareTracker.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <!-- net8.0 HealthcareTracker generated source -->
+    <Compile Update="AspNet\Templates\net8.0\HealthcareTracker\HealthcareTracker.cs">
+      <DependentUpon>HealthcareTracker.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>

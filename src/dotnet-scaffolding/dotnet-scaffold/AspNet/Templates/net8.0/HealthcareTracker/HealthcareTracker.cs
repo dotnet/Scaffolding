@@ -239,12 +239,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.HealthcareTracke
                                  YName=""Y""
                                  Type=""Syncfusion.Blazor.Toolkit.ChartSeriesType.Area""
                                  Name=""Heart Rate""
-                                 Fill=""#bad1f3""
-                                 Border=""@(new ChartSeriesBorder
-                                    {
-                                        Width = 2,
-                                        Color = ""#4373bb""
-                                    })"">
+                                 Fill=""#bad1f3"">
 
                         <ChartMarker Visible=""true""
                                      IsFilled=""true"">
@@ -455,8 +450,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.HealthcareTracke
 
     private string AppointmentMessage = """";
 
-    private string SelectedRange = ""7 Days"";
-
     private bool WaterIntake = true;
     private bool Exercise = true;
     private bool SleepTracking;
@@ -514,301 +507,112 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.HealthcareTracke
     min-height: 100vh;
     padding: 24px;
 }
-
-.schedule-card {
-    height: auto;
-}
-
-.appointment-message {
-    color: #104810;
-    background: #c4f7c4;
-}
-
 .dashboard-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 24px;
     align-items: center;
     position: relative;
-}
-
-.dashboard-title {
-    font-size: 42px;
-    font-weight: 700;
-    margin-bottom: 6px;
-    color: #0f172a;
-}
-
-.dashboard-subtitle {
-    color: #64748b;
-    font-size: 18px;
-}
-
-.metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
     margin-bottom: 24px;
 }
-
-.health-card,
-.dashboard-card {
-    background: #fff;
-    border: 1px solid #dbe4ee;
-    border-radius: 12px;
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: #0f172a;
+}
+.dashboard-description { color: #64748b; margin-bottom: 0; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.icon-btn {
+    width: 42px; min-width: 42px; height: 42px; border-radius: 8px;
+}
+.refresh-btn { min-width: 120px; height: 42px; border-radius: 8px; }
+.icon-symbol { font-size: 1.125rem; }
+.notification-popup {
+    position: absolute; top: 72px; right: 0; width: 320px;
+    background: #fff; border: 1px solid #dbe4ee; border-radius: 12px;
+    padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.12); z-index: 1000;
+}
+.popup-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; }
+.popup-item { padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+.popup-item:last-child { border-bottom: none; }
+.metrics-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 20px; margin-bottom: 24px;
+}
+.health-card, .dashboard-card {
+    background: #fff; border: 1px solid #dbe4ee; border-radius: 12px;
     box-shadow: 0 1px 2px rgba(15,23,42,.04);
 }
-
 .health-card {
-    padding: 20px 24px;
-    min-height: 140px;
-    display: flex;
-    align-items: center;
+    padding: 20px 24px; min-height: 140px;
+    display: flex; align-items: center;
 }
-
-
 .health-card-content {
-    display: flex;
-    align-items: center;
-    gap: 18px;
+    display: flex; align-items: center; gap: 18px; width: 100%;
 }
-
 .metric-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 28px;
+    width: 64px; height: 64px; border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 1.75rem; flex-shrink: 0;
 }
-
-.heart-icon {
-    background: #fef2f2;
-}
-
-.bp-icon {
-    background: #eff6ff;
-}
-
-.spo2-icon {
-    background: #ecfdf5;
-}
-
-.temp-icon {
-    background: #fff7ed;
-}
-
-.metric-label {
-    font-size: 18px;
-    color: #64748b;
-}
-
+.heart-icon { background: #fef2f2; }
+.bp-icon { background: #eff6ff; }
+.spo2-icon { background: #ecfdf5; }
+.temp-icon { background: #fff7ed; }
+.metric-label { font-size: 1rem; color: #64748b; }
 .metric-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: #0f172a;
-    margin-top: 4px;
-    margin-bottom: 4px;
+    font-size: 1.75rem; font-weight: 700; color: #0f172a; margin: 4px 0;
 }
-
-.metric-status {
-    color: #2563eb;
-    margin-top: 8px;
-}
-
-.metric-improvement {
-    color: #22c55e;
-    margin-top: 8px;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.icon-btn {
-    width: 50px;
-    height: 42px;
-    min-width: 42px;
-    border-radius: 8px;
-}
-
-.refresh-btn {
-    min-width: 120px;
-    border-radius: 8px;
-    width: 42px;
-    height: 42px;
-}
-
+.metric-status { color: #2563eb; margin-top: 4px; }
+.metric-improvement { color: #22c55e; margin-top: 4px; }
 .content-grid {
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    gap: 20px;
-    align-items: start;
-    margin-bottom: 20px;
+    display: grid; grid-template-columns: 3fr 1fr;
+    gap: 20px; align-items: start; margin-bottom: 20px;
 }
-
-.health-card {
-    display: flex;
-    align-items: center;
-}
-
-.health-card-content {
-    width: 100%;
-}
-
-.bottom-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    align-items: stretch;
-    margin-top: 20px;
-}
-
-.bottom-grid .dashboard-card {
-    height: 300px;
-}
-
-.bottom-grid .dashboard-card {
-    min-height: 300px;
-    display: flex;
-    flex-direction: column;
-}
-
-.bottom-grid .dashboard-card-body {
-    flex: 1;
-}
-
-.bottom-grid .e-textarea {
-    width: 100% !important;
-    height: 140px !important;
-}
-
-.notification-row {
-    margin-top: 24px;
-}
-
-.radio-row {
-    margin-top: 12px;
-    margin-bottom: 20px;
-}
-
 .dashboard-card-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid #f1f5f9;
-    font-weight: 600;
-    font-size: 20px;
+    padding: 20px 24px; border-bottom: 1px solid #f1f5f9;
+    font-weight: 600; font-size: 1.15rem;
 }
-
+.dashboard-card-body { padding: 24px; }
 .chart-toolbar {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
+    display: flex; justify-content: flex-end; margin-bottom: 16px;
 }
-
+.chart-card .e-chart { height: 360px !important; }
 .schedule-card .dashboard-card-body {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+    display: flex; flex-direction: column; gap: 16px;
 }
-
-.dashboard-card-body {
-    padding: 24px;
+.form-section { margin-bottom: 4px; }
+.form-section label {
+    display: block; margin-bottom: 6px; font-weight: 500;
 }
-
-.chart-card {
-    height: auto;
+.appointment-message {
+    color: #104810; background: #c4f7c4;
+    padding: 8px 12px; border-radius: 8px; margin-top: 8px;
 }
-
-.chart-card .e-chart {
-    height: 360px !important;
+.bottom-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 20px; margin-top: 20px;
 }
-
-.schedule-card .dashboard-card-body {
-    justify-content: flex-start;
+.bottom-grid .dashboard-card {
+    min-height: 300px; display: flex; flex-direction: column;
 }
-
-.schedule-card .e-btn {
-    margin-top: 12px;
-}
-
-.chart-card .dashboard-card-body {
-    height: auto;
-    overflow: visible;
-}
-
-.form-section {
-    margin-bottom: 20px;
-}
-
-.health-footer {
-    text-align: center;
-    color: #64748b;
-    margin-top: 20px;
-    padding-top: 10px;
-    font-size: 15px;
-}
-
-.radio-row {
-    display: flex;
-    gap: 24px;
-    margin-top: 8px;
-}
-
+.bottom-grid .dashboard-card-body { flex: 1; }
+.section-title { font-weight: 500; margin-bottom: 6px; }
+.section-caption { color: #64748b; font-size: 0.8rem; }
+.radio-row { display: flex; gap: 24px; margin: 12px 0 16px; }
 .notification-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex; justify-content: space-between;
+    align-items: center; margin-top: 20px;
 }
-
-.section-title {
-    font-weight: 500;
-    margin-bottom: 6px;
+.current-mode { margin-top: 8px; font-size: 0.85rem; color: #64748b; }
+.health-footer {
+    text-align: center; color: #64748b;
+    margin-top: 24px; padding-top: 12px; font-size: 0.9rem;
 }
-
-.section-caption {
-    color: #64748b;
-    font-size: 13px;
-}
-
-.icon-symbol {
-    font-size: 18px;
-}
-
-.notification-popup {
-    position: absolute;
-    top: 72px;
-    right: 0;
-    width: 320px;
-    background: #ffffff;
-    border: 1px solid #dbe4ee;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.12);
-    z-index: 1000;
-}
-
-.popup-title {
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 12px;
-}
-
-.popup-item {
-    padding: 10px 0;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.popup-item:last-child {
-    border-bottom: none;
-}
-
-.current-mode {
-    margin-top: 10px;
-    font-size: 13px;
-    color: #64748b;
+@@media (max-width: 992px) {
+    .metrics-grid,
+    .content-grid,
+    .bottom-grid { grid-template-columns: 1fr; }
 }
 </style>
 ");

@@ -43,13 +43,14 @@ builder.AddHandler(async (parseResult, cancellationToken) =>
 {
     ScaffoldCommandAppBuilder appBuilder = new(runner, [.. parseResult.Tokens.Select(t => t.Value)]);
     ScaffoldCommandApp app = appBuilder.Build();
-    await app.RunAsync();
+    return await app.RunAsync();
 });
 
 var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();
 telemetryWrapper?.ConfigureFirstTimeTelemetry();
-await runner.RunAsync(args);
+int exitCode = await runner.RunAsync(args);
 telemetryWrapper?.Flush();
+return exitCode;
 
 static void ConfigureServices(IServiceCollection services)
 {

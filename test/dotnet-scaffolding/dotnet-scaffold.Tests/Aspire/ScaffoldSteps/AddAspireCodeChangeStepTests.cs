@@ -260,9 +260,9 @@ namespace Projects
         public IEnumerable<ScaffolderOption> Options => Enumerable.Empty<ScaffolderOption>();
         public IEnumerable<(string Example, string? Description)> Examples => Enumerable.Empty<(string, string?)>();
 
-        public Task ExecuteAsync(ScaffolderContext context)
+        public Task<bool> ExecuteAsync(ScaffolderContext context)
         {
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 
@@ -280,4 +280,3 @@ namespace Projects
         }
     }
 }
-

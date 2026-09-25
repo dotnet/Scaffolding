@@ -23,12 +23,18 @@ public interface IScaffoldRunner
     IEnumerable<ScaffolderOption>? Options { get; set; }
 
     /// <summary>
-    /// Executes the scaffolders based on the provided arguments
+    /// Executes the scaffolders based on the provided arguments and returns the process exit code.
     /// </summary>
-    Task RunAsync(string[] args);
+    /// <returns>Zero on success, or a nonzero exit code when parsing or command execution fails.</returns>
+    Task<int> RunAsync(string[] args);
 
     /// <summary>
     /// Adds Action to the RootCommand doing the action passed in the handle parameter
     /// </summary>
     void AddHandler(Func<ParseResult, CancellationToken, Task> handle);
+
+    /// <summary>
+    /// Adds an action to the RootCommand that returns a process exit code.
+    /// </summary>
+    void AddHandler(Func<ParseResult, CancellationToken, Task<int>> handle);
 }

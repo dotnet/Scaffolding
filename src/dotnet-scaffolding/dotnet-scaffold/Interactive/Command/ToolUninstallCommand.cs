@@ -27,7 +27,6 @@ internal class ToolUninstallCommand(IToolManager toolManager) : Command<ToolUnin
     public override int Execute([NotNull] CommandContext context, [NotNull] ToolUninstallSettings settings)
     {
         // Remove the tool using the provided settings.
-        _toolManager.RemoveTool(settings.PackageName, settings.Global);
-        return 0;
+        return _toolManager.RemoveTool(settings.PackageName, settings.Global) ? 0 : 1;
     }
 }

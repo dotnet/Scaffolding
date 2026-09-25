@@ -66,7 +66,7 @@
               "CheckBlock": "app.MapOpenApi()",
               "Block": "if (app.Environment.IsDevelopment())\r\n{\r\n    app.MapOpenApi();\r\n}",
               "Options": [ "OpenApi" ],
-              "InsertAfter": "var app = WebApplication.CreateBuilder.Build();",
+              "InsertAfter": "var app = builder.Build();",
               "InsertBefore": [ "app.UseHttpsRedirection();" ],
               "LeadingTrivia": {
                 "Newline": true

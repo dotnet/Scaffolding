@@ -38,7 +38,6 @@ internal class AddPackagesStep : ScaffoldStep
     {
         _logger = logger;
         _nugetVersionHelper = nugetVersionHelper;
-        ContinueOnError = true;
     }
 
     /// <summary>
@@ -81,12 +80,16 @@ internal class AddPackagesStep : ScaffoldStep
             }
 
             // Add the package to the project
-            DotnetCommands.AddPackage(
+            if (!DotnetCommands.AddPackage(
                 packageName: resolvedPackage.Name,
                 logger: _logger,
                 projectFile: ProjectPath,
                 packageVersion: packageVersion,
-                includePrerelease: Prerelease);
+                includePrerelease: Prerelease))
+            {
+                _logger.LogError("Failed to add package '{PackageName}' to '{ProjectPath}'.", resolvedPackage.Name, ProjectPath);
+                return false;
+            }
         }
 
         return true;

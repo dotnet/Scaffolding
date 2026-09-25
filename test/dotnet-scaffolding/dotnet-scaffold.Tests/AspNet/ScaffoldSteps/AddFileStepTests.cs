@@ -33,9 +33,10 @@ public class AddFileStepTests
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task ExecuteAsync_ExistingFile_SucceedsOnlyWhenContentsMatch(bool modifyFile)
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task ExecuteAsync_ExistingFile_RespectsContentsAndOverwrite(bool modifyFile, bool overwrite)
     {
         string outputDirectory = Path.Combine(Path.GetTempPath(), nameof(AddFileStepTests), Guid.NewGuid().ToString("N"));
         string toolsDirectory = Path.Combine(AppContext.BaseDirectory, "tools");
@@ -53,15 +54,17 @@ public class AddFileStepTests
             Assert.True(await step.ExecuteAsync(_context));
 
             string destination = Path.Combine(outputDirectory, step.FileName);
-            byte[] contents = File.ReadAllBytes(destination);
+            byte[] templateContents = File.ReadAllBytes(destination);
+            byte[] contents = [.. templateContents];
             if (modifyFile)
             {
                 contents[0] ^= 1;
                 File.WriteAllBytes(destination, contents);
             }
 
-            Assert.Equal(!modifyFile, await step.ExecuteAsync(_context));
-            Assert.Equal(contents, File.ReadAllBytes(destination));
+            step.Overwrite = overwrite;
+            Assert.Equal(!modifyFile || overwrite, await step.ExecuteAsync(_context));
+            Assert.Equal(overwrite ? templateContents : contents, File.ReadAllBytes(destination));
         }
         finally
         {

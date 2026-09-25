@@ -89,6 +89,11 @@
     <None Pack="true" Include="AspNet\Templates\net11.0\CodeModificationConfigs\*.json">
       <PackagePath>AspNet\CodeModificationConfigs\net11.0</PackagePath>
     </None>
+    <None Include="AspNet\Templates\Shared\CodeBlocks\*" Pack="true" PackagePath="AspNet\Shared\CodeBlocks\">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+      <Link>Aspnet\Shared\CodeBlocks\%(Filename)%(Extension)</Link>
+    </None>
     <!-- Pack Aspire CodeModificationConfigs into Aspire folder -->
     <None Pack="true" Include="Aspire\CodeModificationConfigs\net8.0\**\*.json">
       <PackagePath>Aspire\net8.0\CodeModificationConfigs</PackagePath>
@@ -327,6 +332,10 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
     <None Update="AspNet\Templates\net11.0\BlazorIdentity\IdentityRevalidatingAuthenticationStateProvider.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\net11.0\BlazorIdentity\PasskeyAuthenticators.tt">
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
@@ -871,6 +880,11 @@
     </Compile>
     <Compile Update="AspNet\Templates\net11.0\BlazorIdentity\IdentityRevalidatingAuthenticationStateProvider.cs">
       <DependentUpon>IdentityRevalidatingAuthenticationStateProvider.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\net11.0\BlazorIdentity\PasskeyAuthenticators.cs">
+      <DependentUpon>PasskeyAuthenticators.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>

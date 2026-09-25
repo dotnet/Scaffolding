@@ -429,8 +429,8 @@ internal static class ProjectModifierHelper
     internal static CodeSnippet[]? FilterCodeSnippets(CodeSnippet[]? codeSnippets, IList<string> options) => codeSnippets?.Where(cs => FilterOptions(cs.Options, options)).ToArray();
 
     /// <summary>
-    /// Filter Options string array to matching CodeChangeOptions.
-    /// Primary use to filter out CodeBlocks and Files that apply in Microsoft Graph and Downstream API scenarios
+    /// Requires all options to match CodeChangeOptions, ignoring case.
+    /// Prefix an option with ! to require its absence.
     /// </summary>
     /// <param name="options">string [] in cm_*.json files for code modifications</param>
     /// <param name="codeChangeOptions">based on cli parameters</param>
@@ -445,7 +445,10 @@ internal static class ProjectModifierHelper
 
         foreach (var option in options)
         {
-            if (!codeChangeOptions.Contains(option, StringComparer.OrdinalIgnoreCase))
+            bool isNegated = option.StartsWith('!');
+            string optionName = isNegated ? option[1..] : option;
+            bool isPresent = codeChangeOptions.Contains(optionName, StringComparer.OrdinalIgnoreCase);
+            if (isNegated ? isPresent : !isPresent)
             {
                 return false;
             }

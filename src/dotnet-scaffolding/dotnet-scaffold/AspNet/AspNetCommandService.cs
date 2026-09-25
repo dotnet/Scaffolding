@@ -315,11 +315,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.BlazorScenario = true;
                 })
                 .WithBlazorIdentityAddPackagesStep()
+                .WithBlazorIdentityClientAddPackagesStep()
                 .WithIdentityDbContextStep()
                 .WithAspNetConnectionStringStep()
                 .WithBlazorIdentityTextTemplatingStep()
-                .WithBlazorIdentityStaticFilesStep()
-                .WithBlazorIdentityCodeChangeStep();
+                .WithBlazorIdentityPasskeyJavaScriptStep()
+                .WithBlazorIdentityCodeChangeStep()
+                .WithBlazorIdentityClientCodeChangeStep();
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Identity.Name)
                 .WithDisplayName(AspnetStrings.Identity.DisplayName)

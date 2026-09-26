@@ -2,6 +2,8 @@
 
 These are runnable examples of adding Identity to the default .NET 10 and .NET 11 Blazor Web App: per-page Blazor Server interactivity, SQLite, and an `ApplicationDbContext`. They are expected output, not another implementation of the templates.
 
+`Inputs\BlazorWebApp\<framework>\BaselineApp` contains the shared, checked-in starting project with no authentication. These inputs are independent of Identity and can also be copied by Blazor CRUD or other scaffolder tests. A test must copy the input before modifying it; scaffolder-specific setup belongs in that temporary copy, not in the shared input.
+
 Each `BlazorIdentity\<framework>\BaselineApp` is an ordinary application. The surrounding build files isolate it from the repository's Arcade and central package management settings. The adjacent `global.json` selects an SDK for that framework; it can roll forward within that .NET version.
 
 ## Run an application
@@ -36,10 +38,9 @@ The tests use the existing CLI process helpers and the normal `ScaffoldIntegrati
 For each application the test:
 
 1. Restores and builds a temporary copy of the expected application.
-2. Installs the exact web-template package pinned in `dotnet-scaffold.Tests.csproj` into a private template hive. It does not change your installed templates.
-3. Runs `dotnet new blazor --name BaselineApp --framework <framework> --no-restore --exclude-launch-settings`.
-4. Invokes `aspnet blazor-identity --project <project> --dataContext ApplicationDbContext --dbProvider sqlite-efcore`, adding `--prerelease` for .NET 11, and builds the generated application.
-5. Compares the result and reports missing/unexpected files and the first differing line in each changed file. Failed runs retain their temporary applications; the test output reports the path.
+2. Copies and builds the shared `Inputs\BlazorWebApp\<framework>\BaselineApp` project in a temporary directory.
+3. Invokes `aspnet blazor-identity --project <project> --dataContext ApplicationDbContext --dbProvider sqlite-efcore`, adding `--prerelease` for .NET 11, and builds the generated application.
+4. Compares the result and reports missing/unexpected files and the first differing line in each changed file. Failed runs retain their temporary applications; the test output reports the path.
 
 `scaffolded-files.txt` lists the files Identity is expected to add or modify. Their complete contents must match the runnable baseline. All other input files must remain unchanged, so an unrelated template asset update does not require updating its frozen baseline copy. New or deleted files are also checked. Only line endings are normalized; package versions, markup, namespaces, and whitespace remain significant.
 
@@ -61,6 +62,18 @@ finally {
 }
 ```
 
-This builds before replacing the baseline source and regenerating its changed-file list. It is an explicit acceptance operation, not a fix for an unexplained failure. Review the entire diff and rerun without the variable. To change dependencies, edit the baseline project's exact versions first. To change template inputs, update the pinned template package in the test project deliberately.
+This builds before replacing the baseline source and regenerating its changed-file list. It never updates the shared input. It is an explicit acceptance operation, not a fix for an unexplained failure. Review the entire diff and rerun without the variable. To change dependencies, edit the baseline project's exact versions first.
+
+## Update shared inputs
+
+Template generation is a maintenance operation, not part of test execution. The checked-in inputs were generated from `Microsoft.DotNet.Web.ProjectTemplates.10.0` version `10.0.12` and `Microsoft.DotNet.Web.ProjectTemplates.11.0` version `11.0.0-rc.2.26473.103`, using:
+
+```powershell
+dotnet new blazor --name BaselineApp --framework <framework> --no-restore --exclude-launch-settings --output <temporary-directory>
+```
+
+To refresh an input, deliberately select the template version (use an isolated template hive if necessary), generate into a temporary directory, and review the differences before replacing the checked-in source. Record the new version here and run all tests consuming that input. Keep default per-page Blazor Server interactivity and no authentication. Both inputs are runnable with `dotnet run` from their project directories.
+
+The Input and Identity output projects can be compared directly with a directory diff tool. Unrelated template-file changes need not be copied into every expected output for tests to pass: the comparator checks those files against the shared input. Refresh output copies when needed to keep the runnable examples current.
 
 The baselines replace common generated-content assertions in the .NET 10/11 Identity tests. They do not replace custom-project, failure-path, overwrite, global-interactivity, provider-specific, or browser behavior tests. Building and matching expected code is not proof that authentication flows work.

@@ -23,28 +23,25 @@ public class BlazorIdentityBaselineTests(ITestOutputHelper output)
     {
         var baselines = Path.Combine(ScaffoldCliHelper.GetRepoRoot(), "test", "dotnet-scaffolding", "baselines");
         var scenario = Path.Combine(baselines, "BlazorIdentity", framework);
+        var inputScenario = Path.Combine(baselines, "Inputs", "BlazorWebApp", framework);
         var baseline = Path.Combine(scenario, "BaselineApp");
         var workingDirectory = Path.Combine(Path.GetTempPath(), nameof(BlazorIdentityBaselineTests), Guid.NewGuid().ToString("N"));
         var expected = Path.Combine(workingDirectory, "expected");
         var actual = Path.Combine(workingDirectory, "actual");
-        var hive = Path.Combine(workingDirectory, "templates");
         var update = Environment.GetEnvironmentVariable("UPDATE_BLAZOR_IDENTITY_BASELINES") == "1";
 
         Directory.CreateDirectory(workingDirectory);
         try
         {
-            File.Copy(Path.Combine(scenario, "global.json"), Path.Combine(workingDirectory, "global.json"));
+            File.Copy(Path.Combine(inputScenario, "global.json"), Path.Combine(workingDirectory, "global.json"));
             File.Copy(Path.Combine(baselines, "NuGet.config"), Path.Combine(workingDirectory, "NuGet.config"));
             GeneratedProjectBaseline.CopyProject(baseline, expected);
             await RunAsync(expected, "restore", "--packages", Path.Combine(workingDirectory, "packages"));
             await RunAsync(expected, "build", "--no-restore");
             CreatePinnedPackageSource(workingDirectory);
 
-            var template = Path.Combine(AppContext.BaseDirectory, "BaselineTemplates", $"{framework}.nupkg");
-            await RunAsync(workingDirectory, "new", "install", template, "--debug:custom-hive", hive);
-            await RunAsync(workingDirectory, "new", "blazor", "--name", "BaselineApp", "--output", actual,
-                "--framework", framework, "--no-restore", "--exclude-launch-settings",
-                "--debug:custom-hive", hive, "--debug:disable-sdk-templates");
+            GeneratedProjectBaseline.CopyProject(Path.Combine(inputScenario, "BaselineApp"), actual);
+            await RunAsync(actual, "build");
             var input = GeneratedProjectBaseline.ReadFiles(actual);
 
             string[] prerelease = framework == "net11.0" ? ["--prerelease"] : [];

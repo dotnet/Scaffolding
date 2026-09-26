@@ -23,8 +23,8 @@ public class BlazorIdentityBaselineTests(ITestOutputHelper output)
     {
         var baselines = Path.Combine(ScaffoldCliHelper.GetRepoRoot(), "test", "dotnet-scaffolding", "baselines");
         var scenario = Path.Combine(baselines, "BlazorIdentity", framework);
-        var inputScenario = Path.Combine(baselines, "Inputs", framework, "BlazorWebApp");
-        var baseline = Path.Combine(scenario, "BaselineApp");
+        var inputScenario = Path.Combine(baselines, "Inputs", framework);
+        var baseline = Path.Combine(scenario, "BlazorWebApp");
         var workingDirectory = Path.Combine(Path.GetTempPath(), nameof(BlazorIdentityBaselineTests), Guid.NewGuid().ToString("N"));
         var expected = Path.Combine(workingDirectory, "expected");
         var actual = Path.Combine(workingDirectory, "actual");
@@ -40,14 +40,14 @@ public class BlazorIdentityBaselineTests(ITestOutputHelper output)
             await RunAsync(expected, "build", "--no-restore");
             CreatePinnedPackageSource(workingDirectory);
 
-            GeneratedProjectBaseline.CopyProject(Path.Combine(inputScenario, "BaselineApp"), actual);
+            GeneratedProjectBaseline.CopyProject(Path.Combine(inputScenario, "BlazorWebApp"), actual);
             await RunAsync(actual, "build");
             var input = GeneratedProjectBaseline.ReadFiles(actual);
 
             string[] prerelease = framework == "net11.0" ? ["--prerelease"] : [];
             var result = await ScaffoldCliHelper.RunScaffoldAsync(
                 "net11.0", "blazor-identity", [
-                    "--project", Path.Combine(actual, "BaselineApp.csproj"),
+                    "--project", Path.Combine(actual, "BlazorWebApp.csproj"),
                     "--dataContext", "ApplicationDbContext",
                     "--dbProvider", "sqlite-efcore",
                     .. prerelease

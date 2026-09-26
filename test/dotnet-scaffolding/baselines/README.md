@@ -2,13 +2,13 @@
 
 These are runnable examples of adding Identity to the default .NET 10 and .NET 11 Blazor Web App: per-page Blazor Server interactivity, SQLite, and an `ApplicationDbContext`. They are expected output, not another implementation of the templates.
 
-`Inputs\<framework>\BlazorWebApp\BaselineApp` contains the shared, checked-in starting project with no authentication. Inputs are organized by framework, then template, matching the scaffolder template layout. These inputs are independent of Identity and can also be copied by Blazor CRUD or other scaffolder tests. A test must copy the input before modifying it; scaffolder-specific setup belongs in that temporary copy, not in the shared input.
+`Inputs\<framework>\BlazorWebApp` contains the shared, checked-in starting project with no authentication. Inputs are organized by framework, then template, matching the scaffolder template layout. These inputs are independent of Identity and can also be copied by Blazor CRUD or other scaffolder tests. A test must copy the input before modifying it; scaffolder-specific setup belongs in that temporary copy, not in the shared input.
 
-Each `BlazorIdentity\<framework>\BaselineApp` is an ordinary application. The surrounding build files isolate it from the repository's Arcade and central package management settings. The adjacent `global.json` selects an SDK for that framework; it can roll forward within that .NET version.
+Each `BlazorIdentity\<framework>\BlazorWebApp` is an ordinary application. The surrounding build files isolate it from the repository's Arcade and central package management settings. The adjacent `global.json` selects an SDK for that framework; it can roll forward within that .NET version.
 
 ## Run an application
 
-From the chosen `BaselineApp` directory:
+From the chosen `BlazorWebApp` directory:
 
 ```powershell
 dotnet run -- --environment Development
@@ -38,7 +38,7 @@ The tests use the existing CLI process helpers and the normal `ScaffoldIntegrati
 For each application the test:
 
 1. Restores and builds a temporary copy of the expected application.
-2. Copies and builds the shared `Inputs\<framework>\BlazorWebApp\BaselineApp` project in a temporary directory.
+2. Copies and builds the shared `Inputs\<framework>\BlazorWebApp` project in a temporary directory.
 3. Invokes `aspnet blazor-identity --project <project> --dataContext ApplicationDbContext --dbProvider sqlite-efcore`, adding `--prerelease` for .NET 11, and builds the generated application.
 4. Compares the result and reports missing/unexpected files and the first differing line in each changed file. Failed runs retain their temporary applications; the test output reports the path.
 
@@ -69,7 +69,7 @@ This builds before replacing the baseline source and regenerating its changed-fi
 Template generation is a maintenance operation, not part of test execution. The checked-in inputs were generated from `Microsoft.DotNet.Web.ProjectTemplates.10.0` version `10.0.12` and `Microsoft.DotNet.Web.ProjectTemplates.11.0` version `11.0.0-rc.2.26473.103`, using:
 
 ```powershell
-dotnet new blazor --name BaselineApp --framework <framework> --no-restore --exclude-launch-settings --output <temporary-directory>
+dotnet new blazor --name BlazorWebApp --framework <framework> --no-restore --exclude-launch-settings --output <temporary-directory>
 ```
 
 To refresh an input, deliberately select the template version (use an isolated template hive if necessary), generate into a temporary directory, and review the differences before replacing the checked-in source. Record the new version here and run all tests consuming that input. Keep default per-page Blazor Server interactivity and no authentication. Both inputs are runnable with `dotnet run` from their project directories.

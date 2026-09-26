@@ -1,4 +1,4 @@
-BaselineApp.csproj
+BlazorWebApp.csproj
 Components/Account/IdentityComponentsEndpointRouteBuilderExtensions.cs
 Components/Account/IdentityNoOpEmailSender.cs
 Components/Account/IdentityRedirectManager.cs

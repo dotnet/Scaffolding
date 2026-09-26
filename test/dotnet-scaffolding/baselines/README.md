@@ -2,7 +2,7 @@
 
 These are runnable examples of adding Identity to the default .NET 10 and .NET 11 Blazor Web App: per-page Blazor Server interactivity, SQLite, and an `ApplicationDbContext`. They are expected output, not another implementation of the templates.
 
-`Inputs\BlazorWebApp\<framework>\BaselineApp` contains the shared, checked-in starting project with no authentication. These inputs are independent of Identity and can also be copied by Blazor CRUD or other scaffolder tests. A test must copy the input before modifying it; scaffolder-specific setup belongs in that temporary copy, not in the shared input.
+`Inputs\<framework>\BlazorWebApp\BaselineApp` contains the shared, checked-in starting project with no authentication. Inputs are organized by framework, then template, matching the scaffolder template layout. These inputs are independent of Identity and can also be copied by Blazor CRUD or other scaffolder tests. A test must copy the input before modifying it; scaffolder-specific setup belongs in that temporary copy, not in the shared input.
 
 Each `BlazorIdentity\<framework>\BaselineApp` is an ordinary application. The surrounding build files isolate it from the repository's Arcade and central package management settings. The adjacent `global.json` selects an SDK for that framework; it can roll forward within that .NET version.
 
@@ -38,7 +38,7 @@ The tests use the existing CLI process helpers and the normal `ScaffoldIntegrati
 For each application the test:
 
 1. Restores and builds a temporary copy of the expected application.
-2. Copies and builds the shared `Inputs\BlazorWebApp\<framework>\BaselineApp` project in a temporary directory.
+2. Copies and builds the shared `Inputs\<framework>\BlazorWebApp\BaselineApp` project in a temporary directory.
 3. Invokes `aspnet blazor-identity --project <project> --dataContext ApplicationDbContext --dbProvider sqlite-efcore`, adding `--prerelease` for .NET 11, and builds the generated application.
 4. Compares the result and reports missing/unexpected files and the first differing line in each changed file. Failed runs retain their temporary applications; the test output reports the path.
 

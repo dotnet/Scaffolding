@@ -23,7 +23,7 @@ public class BlazorIdentityBaselineTests(ITestOutputHelper output)
     {
         var baselines = Path.Combine(ScaffoldCliHelper.GetRepoRoot(), "test", "dotnet-scaffolding", "baselines");
         var scenario = Path.Combine(baselines, "BlazorIdentity", framework);
-        var inputScenario = Path.Combine(baselines, "Inputs", "BlazorWebApp", framework);
+        var inputScenario = Path.Combine(baselines, "Inputs", framework, "BlazorWebApp");
         var baseline = Path.Combine(scenario, "BaselineApp");
         var workingDirectory = Path.Combine(Path.GetTempPath(), nameof(BlazorIdentityBaselineTests), Guid.NewGuid().ToString("N"));
         var expected = Path.Combine(workingDirectory, "expected");

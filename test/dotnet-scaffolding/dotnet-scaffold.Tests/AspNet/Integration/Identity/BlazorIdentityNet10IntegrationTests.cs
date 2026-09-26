@@ -56,19 +56,7 @@ public class BlazorIdentityNet10IntegrationTests : BlazorIdentityIntegrationTest
             "--dbProvider", "sqlite-efcore");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
-        // Assert expected files were created
-        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
-            "DbContext file should be created.");
-        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "ApplicationUser.cs")),
-            "ApplicationUser file should be created.");
-        var accountPagesDir = Path.Combine(_testProjectDir, "Components", "Account", "Pages");
-        Assert.True(Directory.Exists(accountPagesDir), "Components/Account/Pages directory should be created.");
-        Assert.True(File.Exists(Path.Combine(accountPagesDir, "Login.razor")), "Login.razor should be created.");
-        Assert.True(File.Exists(Path.Combine(accountPagesDir, "Register.razor")), "Register.razor should be created.");
-        var sharedDir = Path.Combine(_testProjectDir, "Components", "Account", "Shared");
-        Assert.True(Directory.Exists(sharedDir), "Components/Account/Shared directory should be created.");
-        Assert.True(File.Exists(Path.Combine(sharedDir, "ManageNavMenu.razor")), "ManageNavMenu.razor should be created.");
-        Assert.True(File.Exists(Path.Combine(sharedDir, "PasskeySubmit.razor.js")), "PasskeySubmit.razor.js should be created.");
+        // The baseline covers complete default output; these cases cover static SSR and global interactivity.
         var appContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
         if (usesInteractiveServer)
         {
@@ -80,25 +68,15 @@ public class BlazorIdentityNet10IntegrationTests : BlazorIdentityIntegrationTest
         {
             Assert.DoesNotContain("PageRenderMode", appContent);
         }
-        var accountImportsContent = File.ReadAllText(Path.Combine(accountPagesDir, "_Imports.razor"));
-        Assert.Contains("@attribute [ExcludeFromInteractiveRouting]", accountImportsContent);
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("TestDbContext", programContent);
         Assert.Contains("app.MapAdditionalIdentityEndpoints()", programContent);
         Assert.Contains("if (app.Environment.IsDevelopment())\n{\n    app.UseMigrationsEndPoint();\n}", programContent.Replace("\r\n", "\n"));
-        Assert.Contains("AddIdentityCore<", programContent);
-        Assert.Contains("AddAuthentication(", programContent);
-        Assert.Contains("throw new InvalidOperationException(\"Connection string", programContent);
-        Assert.DoesNotContain("Data Source=TestDb.db", programContent);
-        Assert.DoesNotContain("AddDbContextFactory", programContent);
         Assert.Equal(usesInteractiveServer, programContent.Contains("IdentityRevalidatingAuthenticationStateProvider"));
         Assert.Equal(usesInteractiveServer, File.Exists(Path.Combine(
             _testProjectDir, "Components", "Account", "IdentityRevalidatingAuthenticationStateProvider.cs")));
         Assert.DoesNotContain("AddAuthenticationStateSerialization()", programContent);
         Assert.Equal(!usesInteractiveServer, programContent.Contains("AddAuthorization()"));
-        var navMenuContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "Layout", "NavMenu.razor"));
-        Assert.Contains("<AuthorizeView>", navMenuContent);
-        Assert.Contains("<AntiforgeryToken />", navMenuContent);
 
         // Assert — no NuGet errors and project builds after scaffolding
         Assert.False(cliOutput.Contains("error: NU"),

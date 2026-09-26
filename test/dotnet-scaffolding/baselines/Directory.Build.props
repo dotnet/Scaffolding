@@ -1,0 +1,6 @@
+<Project>
+  <!-- Baselines are ordinary applications, not Arcade test projects. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+</Project>

@@ -20,7 +20,7 @@ internal static class ScaffoldCliHelper
     /// Gets the repository root directory by navigating up from the test assembly output path.
     /// The Arcade build layout is: {repoRoot}/artifacts/bin/{project}/{Config}/{TFM}/{assembly}.dll
     /// </summary>
-    private static string GetRepoRoot()
+    internal static string GetRepoRoot()
     {
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation)!;
@@ -255,12 +255,14 @@ internal static class ScaffoldCliHelper
     /// Runs <c>dotnet build</c> in the specified working directory.
     /// </summary>
     public static async Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)
+        => await RunDotNetAsync(workingDirectory, "build");
+
+    internal static async Task<(int ExitCode, string Output, string Error)> RunDotNetAsync(string workingDirectory, params string[] arguments)
     {
-        var buildProcess = new Process
+        using var buildProcess = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                Arguments = "build",
                 WorkingDirectory = workingDirectory,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -269,11 +271,17 @@ internal static class ScaffoldCliHelper
             }
         };
         ConfigureDotNetEnvironment(buildProcess.StartInfo);
+        foreach (var argument in arguments)
+        {
+            buildProcess.StartInfo.ArgumentList.Add(argument);
+        }
+
         buildProcess.Start();
-        string output = await buildProcess.StandardOutput.ReadToEndAsync();
-        string error = await buildProcess.StandardError.ReadToEndAsync();
+        var output = buildProcess.StandardOutput.ReadToEndAsync();
+        var error = buildProcess.StandardError.ReadToEndAsync();
+        await Task.WhenAll(output, error);
         await buildProcess.WaitForExitAsync();
-        return (buildProcess.ExitCode, output, error);
+        return (buildProcess.ExitCode, output.Result, error.Result);
     }
 
     /// <summary>

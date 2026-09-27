@@ -75,6 +75,12 @@ public class TextTemplatingStep : ScaffoldStep
                 var templatedString = templateInvoker.InvokeTemplate(textTransformation, dictParams);
                 var outputFolderPath = Path.GetDirectoryName(templatingProperty.OutputPath);
 
+                if (string.IsNullOrEmpty(templatedString))
+                {
+                    _logger.LogError("Template '{TemplatePath}' produced empty output for '{OutputPath}'.", templatingProperty.TemplatePath, templatingProperty.OutputPath);
+                    return Task.FromResult(false);
+                }
+
                 if (string.IsNullOrEmpty(outputFolderPath))
                 {
                     _logger.LogError("Invalid output path '{OutputPath}' for template '{TemplatePath}'.", templatingProperty.OutputPath, templatingProperty.TemplatePath);

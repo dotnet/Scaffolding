@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Model;
@@ -51,5 +52,27 @@ public class ScaffoldRunnerExitCodeTests
         runner.AddHandler((_, _) => Task.FromResult(actionResult));
 
         Assert.Equal(expectedExitCode, await runner.RunAsync([]));
+    }
+
+    [Theory]
+    [InlineData(true, 0)]
+    [InlineData(false, 1)]
+    public async Task RunAsync_CommandActionMapsScaffolderResultToExitCode(bool stepSucceeds, int expectedExitCode)
+    {
+        var builder = Host.CreateScaffoldBuilder();
+        builder.Services.AddSingleton(new DeterministicStep(stepSucceeds));
+        builder.AddScaffolder(ScaffolderCatagory.AspNet, "result-map")
+            .WithStep<DeterministicStep>();
+        var runner = builder.Build();
+
+        int exitCode = await runner.RunAsync(["aspnet", "result-map"]);
+
+        Assert.Equal(expectedExitCode, exitCode);
+    }
+
+    private sealed class DeterministicStep(bool succeeds) : ScaffoldStep
+    {
+        public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+            => Task.FromResult(succeeds);
     }
 }

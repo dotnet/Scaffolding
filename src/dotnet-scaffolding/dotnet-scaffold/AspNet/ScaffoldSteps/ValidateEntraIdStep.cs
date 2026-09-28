@@ -45,6 +45,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// Option to use existing application.
         /// </summary>
         public bool UseExistingApplication { get; set; }
+        /// <summary>
+        /// Indicates whether existing managed AzureAd values should be overwritten.
+        /// </summary>
+        public bool Overwrite { get; set; }
 
         /// <summary>
         /// Constructor for ValidateEntraIdStep.
@@ -156,7 +160,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 Project = Project,
                 TenantId = TenantId,
                 Application = Application,
-                UseExistingApplication = UseExistingApplication
+                UseExistingApplication = UseExistingApplication,
+                Overwrite = Overwrite
             };
         }
 

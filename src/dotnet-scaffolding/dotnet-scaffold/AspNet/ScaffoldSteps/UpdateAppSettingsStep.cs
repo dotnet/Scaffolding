@@ -48,6 +48,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// Azure AD client secret.
         /// </summary>
         public string? ClientSecret { get; set; }
+        /// <summary>
+        /// Indicates whether existing managed AzureAd values should be overwritten.
+        /// </summary>
+        public bool Overwrite { get; set; }
 
         private readonly ILogger _logger;
         private readonly IFileSystem _fileSystem;
@@ -95,6 +99,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     _logger.LogError("Both ClientId and TenantId are required to write AzureAd development settings.");
                     return Task.FromResult(false);
                 }
+
+                if (string.IsNullOrWhiteSpace(Domain) && string.IsNullOrWhiteSpace(Username))
+                {
+                    _logger.LogError("Either Domain or Username is required to resolve AzureAd domain.");
+                    return Task.FromResult(false);
+                }
+
                 var devSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
                 JsonObject developmentSettings;
 
@@ -145,6 +156,26 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     ["CallbackPath"] = !string.IsNullOrWhiteSpace(CallbackPath) ? CallbackPath : defaultCallbackPath
                 };
 
+                JsonNode? existingAzureAd = developmentSettings["AzureAd"];
+
+                if (!Overwrite && existingAzureAd is JsonObject existingAzureAdObject && HasConflictingAzureAdSettings(existingAzureAdObject, azureAdConfig))
+                {
+                    _logger.LogError("Conflicting AzureAd values already exist in appsettings.Development.json. Re-run with '--overwrite' to replace existing managed settings.");
+                    return Task.FromResult(false);
+                }
+
+                if (!Overwrite && existingAzureAd is not null && existingAzureAd is not JsonObject)
+                {
+                    _logger.LogError("The existing AzureAd section in appsettings.Development.json is not a JSON object. Re-run with '--overwrite' to replace it.");
+                    return Task.FromResult(false);
+                }
+
+                if (JsonNode.DeepEquals(existingAzureAd, azureAdConfig))
+                {
+                    _logger.LogInformation("No changes needed for AzureAd configuration in appsettings.Development.json.");
+                    return Task.FromResult(true);
+                }
+
                 developmentSettings["AzureAd"] = azureAdConfig;
 
                 var options = new JsonSerializerOptions { WriteIndented = true };
@@ -159,6 +190,23 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 _logger.LogError($"Failed to update appsettings.Development.json: {ex.Message}");
                 return Task.FromResult(false);
             }
+        }
+
+        private static bool HasConflictingAzureAdSettings(JsonObject existingAzureAd, JsonObject generatedAzureAd)
+        {
+            foreach (string key in new[] { "Instance", "TenantId", "Domain", "ClientId", "CallbackPath" })
+            {
+                string? existingValue = existingAzureAd[key]?.ToString();
+                string? generatedValue = generatedAzureAd[key]?.ToString();
+
+                if (!string.IsNullOrEmpty(existingValue) &&
+                    !string.Equals(existingValue, generatedValue, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

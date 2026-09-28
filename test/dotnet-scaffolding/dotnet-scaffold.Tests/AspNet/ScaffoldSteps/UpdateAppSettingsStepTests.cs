@@ -79,7 +79,8 @@ public class UpdateAppSettingsStepTests
             Username = "devuser",
             TenantId = "new-tenant-id",
             ClientId = "new-client-id",
-            ClientSecret = "do-not-write-this"
+            ClientSecret = "do-not-write-this",
+            Overwrite = true
         };
 
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
@@ -103,6 +104,191 @@ public class UpdateAppSettingsStepTests
             Times.Never);
         _mockFileSystem.Verify(fs => fs.WriteAllText(_appSettingsPath, It.IsAny<string>()), Times.Never);
         _mockFileSystem.Verify(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsFalse_WhenAzureAdConflictsAndOverwriteIsDisabled()
+    {
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(
+            """
+            {
+              "AzureAd": {
+                "Instance": "https://login.microsoftonline.com/",
+                "TenantId": "existing-tenant-id",
+                "Domain": "existing-domain",
+                "ClientId": "existing-client-id",
+                "CallbackPath": "/signin-oidc"
+              }
+            }
+            """);
+
+        var step = new UpdateAppSettingsStep(
+            NullLogger<UpdateAppSettingsStep>.Instance,
+            _mockFileSystem.Object,
+            Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = _projectPath,
+            Username = "devuser",
+            TenantId = "new-tenant-id",
+            ClientId = "new-client-id",
+            Overwrite = false
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_OverwritesConflictingAzureAd_WhenOverwriteIsEnabled()
+    {
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(
+            """
+            {
+              "AzureAd": {
+                "Instance": "https://login.microsoftonline.com/",
+                "TenantId": "existing-tenant-id",
+                "Domain": "existing-domain",
+                "ClientId": "existing-client-id",
+                "CallbackPath": "/signin-oidc"
+              }
+            }
+            """);
+
+        string? writtenContent = null;
+        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
+            .Callback<string, string>((_, content) => writtenContent = content);
+
+        var step = new UpdateAppSettingsStep(
+            NullLogger<UpdateAppSettingsStep>.Instance,
+            _mockFileSystem.Object,
+            Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = _projectPath,
+            Username = "devuser",
+            TenantId = "new-tenant-id",
+            ClientId = "new-client-id",
+            Overwrite = true
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.True(result);
+        Assert.NotNull(writtenContent);
+        JsonNode? json = JsonNode.Parse(writtenContent);
+        Assert.NotNull(json);
+        Assert.Equal("new-tenant-id", json["AzureAd"]?["TenantId"]?.ToString());
+        Assert.Equal("new-client-id", json["AzureAd"]?["ClientId"]?.ToString());
+        Assert.Equal("devuser.onmicrosoft.com", json["AzureAd"]?["Domain"]?.ToString());
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_SucceedsWithoutWrite_WhenAzureAdAlreadyMatchesAndOverwriteIsDisabled()
+    {
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(
+            """
+            {
+              "AzureAd": {
+                "Instance": "https://login.microsoftonline.com/",
+                "TenantId": "tenant-id",
+                "Domain": "devuser.onmicrosoft.com",
+                "ClientId": "client-id",
+                "CallbackPath": "/signin-oidc"
+              }
+            }
+            """);
+
+        var step = new UpdateAppSettingsStep(
+            NullLogger<UpdateAppSettingsStep>.Instance,
+            _mockFileSystem.Object,
+            Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = _projectPath,
+            Username = "devuser",
+            TenantId = "tenant-id",
+            ClientId = "client-id",
+            Overwrite = false
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.True(result);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsFalse_WhenAzureAdSectionIsNotObjectAndOverwriteIsDisabled()
+    {
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(
+            """
+            {
+              "AzureAd": "invalid-shape"
+            }
+            """);
+
+        var step = new UpdateAppSettingsStep(
+            NullLogger<UpdateAppSettingsStep>.Instance,
+            _mockFileSystem.Object,
+            Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = _projectPath,
+            Username = "devuser",
+            TenantId = "tenant-id",
+            ClientId = "client-id",
+            Overwrite = false
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReplacesAzureAdSection_WhenItIsNotObjectAndOverwriteIsEnabled()
+    {
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(
+            """
+            {
+              "AzureAd": "invalid-shape"
+            }
+            """);
+
+        string? writtenContent = null;
+        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
+            .Callback<string, string>((_, content) => writtenContent = content);
+
+        var step = new UpdateAppSettingsStep(
+            NullLogger<UpdateAppSettingsStep>.Instance,
+            _mockFileSystem.Object,
+            Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = _projectPath,
+            Username = "devuser",
+            TenantId = "tenant-id",
+            ClientId = "client-id",
+            Overwrite = true
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.True(result);
+        Assert.NotNull(writtenContent);
+        JsonNode? json = JsonNode.Parse(writtenContent);
+        Assert.NotNull(json);
+        Assert.Equal("tenant-id", json["AzureAd"]?["TenantId"]?.ToString());
+        Assert.Equal("client-id", json["AzureAd"]?["ClientId"]?.ToString());
     }
 
     [Fact]
@@ -151,6 +337,74 @@ public class UpdateAppSettingsStepTests
         {
             ProjectPath = _projectPath,
             Username = "devuser",
+            TenantId = "tenant-id",
+            ClientId = "client-id"
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsFalse_WhenClientIdIsMissing()
+    {
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
+
+        var step = new UpdateAppSettingsStep(
+            NullLogger<UpdateAppSettingsStep>.Instance,
+            _mockFileSystem.Object,
+            Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = _projectPath,
+            Username = "devuser",
+            TenantId = "tenant-id",
+            ClientId = null
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsFalse_WhenTenantIdIsMissing()
+    {
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
+
+        var step = new UpdateAppSettingsStep(
+            NullLogger<UpdateAppSettingsStep>.Instance,
+            _mockFileSystem.Object,
+            Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = _projectPath,
+            Username = "devuser",
+            TenantId = null,
+            ClientId = "client-id"
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsFalse_WhenDomainAndUsernameAreMissing()
+    {
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(false);
+
+        var step = new UpdateAppSettingsStep(
+            NullLogger<UpdateAppSettingsStep>.Instance,
+            _mockFileSystem.Object,
+            Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = _projectPath,
+            Username = null,
+            Domain = null,
             TenantId = "tenant-id",
             ClientId = "client-id"
         };

@@ -22,7 +22,21 @@ public class BlazorCrudNet8IntegrationTests : BlazorCrudIntegrationTestsBase
         File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
         var modelsDir = Path.Combine(_testProjectDir, "Models");
         Directory.CreateDirectory(modelsDir);
-        File.WriteAllText(Path.Combine(modelsDir, "TestModel.cs"), ScaffoldCliHelper.GetModelClassContent("TestProject", "TestModel"));
+        File.WriteAllText(Path.Combine(modelsDir, "TestModel.cs"), @"namespace TestProject.Models;
+
+public class TestModel
+{
+    public int Id { get; set; }
+    public EmploymentType EmploymentType { get; set; }
+    public EmploymentType? OptionalEmploymentType { get; set; }
+}
+
+public enum EmploymentType
+{
+    Permanent,
+    Contract
+}
+");
 
         // Set up Blazor project structure required for scaffolded code to compile
         var componentsDir = Path.Combine(_testProjectDir, "Components");
@@ -51,6 +65,28 @@ public class BlazorCrudNet8IntegrationTests : BlazorCrudIntegrationTestsBase
         Assert.True(Directory.Exists(blazorPagesDir), $"Blazor pages directory '{blazorPagesDir}' should be created.");
         foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
         {
+            foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
+            {
+                Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
+            }
+
+            var editContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Edit.razor"));
+            Assert.Contains("ApplicationState.TryTakeFromJson<TestModel>(nameof(TestModel), out var restoredTestModel)", editContent);
+            Assert.Contains("TestModel = restoredTestModel", editContent);
+            Assert.Contains("ApplicationState.PersistAsJson(nameof(TestModel), TestModel)", editContent);
+
+            var createContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Create.razor"));
+            Assert.Contains("<InputSelect id=\"employmenttype\"", createContent);
+            Assert.Contains("<InputSelect id=\"optionalemploymenttype\"", createContent);
+
+            Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
+                "DbContext file 'Data/TestDbContext.cs' should be created.");
+
+            // Assert — no NuGet errors and project builds after scaffolding
+            Assert.False(cliOutput.Contains("error: NU"),
+                $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
+            var (afterExitCode, _, afterError) = await RunBuildAsync(_testProjectDir);
+            Assert.True(afterExitCode == 0, $"Project should still build after scaffolding. Error: {afterError}");
             Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
         }
         var editContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Edit.razor"));

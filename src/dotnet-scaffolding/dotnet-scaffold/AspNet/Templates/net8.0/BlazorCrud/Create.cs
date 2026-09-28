@@ -67,7 +67,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud
                     string modelPropertyName = property.Name;
                     string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
                     string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
-                    var inputTypeName = Model.GetInputType(propertyShortTypeName);
+                    var isEnum = Model.IsEnumType(property.Type);
+                    var isNullableEnum = Model.IsNullableEnumType(property.Type);
+                    var inputTypeName = Model.GetInputType(propertyShortTypeName, isEnum);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
                     var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
                     var divWhitespace = new string(' ', 16);
@@ -79,7 +81,31 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
             this.Write("\" class=\"form-label\">");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write(":</label> \r\n                <");
+                        this.Write(":</label> \r\n");
+                            if (isEnum) {
+                        this.Write("                <");
+                        this.Write(this.ToStringHelper.ToStringWithCulture(inputTypeName));
+                        this.Write(" id=\"");
+                        this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
+                        this.Write("\" @bind-Value=\"");
+                        this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+                        this.Write(".");
+                        this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+                        this.Write("\" class=\"");
+                        this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
+                        this.Write("\" ");
+                        this.Write(this.ToStringHelper.ToStringWithCulture(ariaRequiredAttributeHtml));
+                        this.Write(">\r\n");
+                                if (isNullableEnum) {
+                        this.Write("                    <option value=\"\">-- select --</option>\r\n");
+                                }
+                        this.Write("                    @foreach (var value in Enum.GetValues<");
+                        this.Write(this.ToStringHelper.ToStringWithCulture(propertyShortTypeName));
+                        this.Write(">())\r\n                    {\r\n                        <option value=\"@value\">@value</option>\r\n                    }\r\n                </");
+                        this.Write(this.ToStringHelper.ToStringWithCulture(inputTypeName));
+                        this.Write(">\r\n");
+                            } else {
+                        this.Write("                <");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputTypeName));
             this.Write(" id=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyNameLowercase));
@@ -91,7 +117,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
             this.Write("\" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(ariaRequiredAttributeHtml));
-            this.Write("/> \r\n                <ValidationMessage For=\"() => ");
+                        this.Write("/> \r\n");
+                            }
+                        this.Write("                <ValidationMessage For=\"() => ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));

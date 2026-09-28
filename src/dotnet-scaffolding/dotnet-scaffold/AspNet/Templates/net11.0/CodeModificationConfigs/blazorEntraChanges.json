@@ -66,6 +66,31 @@
             ]
         },
         {
+            "FileName": "Components\\Routes.razor",
+            "Replacements": [
+                {
+                    "ReplaceSnippet": [
+                        "<RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" />"
+                    ],
+                    "MultiLineBlock": [
+                        "<AuthorizeRouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\">",
+                        "            <NotAuthorized>",
+                        "                @if (context.User.Identity?.IsAuthenticated == true)",
+                        "                {",
+                        "                    <p>You aren't authorized to access this resource.</p>",
+                        "                }",
+                        "                else",
+                        "                {",
+                        "                    <RedirectToLogin />",
+                        "                }",
+                        "            </NotAuthorized>",
+                        "        </AuthorizeRouteView>"
+                    ],
+                    "CheckBlock": "<AuthorizeRouteView"
+                }
+            ]
+        },
+        {
             "FileName": "Components\\Layout\\MainLayout.razor",
             "Replacements": [
                 {

@@ -88,6 +88,12 @@ public class Net11TemplateExistenceTests
         AssertTemplateSetExists("net11.0\\BlazorEntraId\\LoginOrLogout");
     }
 
+    [Fact]
+    public void BlazorEntraId_RedirectToLogin_TemplateExists()
+    {
+        AssertTemplateSetExists("net11.0\\BlazorEntraId\\RedirectToLogin");
+    }
+
     #endregion
 
     #region BlazorIdentity Templates

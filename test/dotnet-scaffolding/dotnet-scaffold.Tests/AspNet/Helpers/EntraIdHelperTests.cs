@@ -124,6 +124,67 @@ public class EntraIdHelperTests
     }
 
     [Fact]
+    public void GetTextTemplatingProperties_WithRedirectToLogin_GeneratesServerRazorComponent()
+    {
+        // Arrange
+        EntraIdModel entraIdModel = CreateTestEntraIdModel();
+        List<string> templatePaths = [Path.Combine("BlazorEntraId", "RedirectToLogin.tt")];
+
+        // Act
+        TextTemplatingProperty property = Assert.Single(
+            EntraIdHelper.GetTextTemplatingProperties(templatePaths, entraIdModel));
+
+        // Assert
+        Assert.Equal(
+            Path.Combine("output", "Components", "RedirectToLogin.razor"),
+            property.OutputPath);
+        Assert.Equal(
+            typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorEntraId.RedirectToLogin),
+            property.TemplateType);
+    }
+
+    [Fact]
+    public void GetTextTemplatingProperties_WithWasmClient_GeneratesRazorComponentsInClientProject()
+    {
+        // Arrange
+        EntraIdModel entraIdModel = CreateTestEntraIdModel();
+        List<string> templatePaths =
+        [
+            Path.Combine("BlazorEntraId", "LoginOrLogout.tt"),
+            Path.Combine("BlazorEntraId", "RedirectToLogin.tt")
+        ];
+        string clientProjectPath = Path.Combine("output", "TestProject.Client", "TestProject.Client.csproj");
+
+        // Act
+        TextTemplatingProperty[] properties = EntraIdHelper
+            .GetTextTemplatingProperties(templatePaths, entraIdModel, clientProjectPath)
+            .ToArray();
+
+        // Assert
+        Assert.Equal(2, properties.Length);
+        Assert.Contains(properties, property =>
+            property.OutputPath == Path.Combine("output", "TestProject.Client", "Layout", "LoginOrLogout.razor"));
+        Assert.Contains(properties, property =>
+            property.OutputPath == Path.Combine("output", "TestProject.Client", "Pages", "RedirectToLogin.razor"));
+    }
+
+    [Fact]
+    public void RedirectToLoginTemplate_GeneratesEntraLoginRedirect()
+    {
+        // Arrange
+        var template = new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorEntraId.RedirectToLogin();
+
+        // Act
+        string output = template.TransformText();
+
+        // Assert
+        Assert.Contains("@inject NavigationManager Navigation", output);
+        Assert.Contains("authentication/login?returnUrl=", output);
+        Assert.Contains("Uri.EscapeDataString(Navigation.Uri)", output);
+        Assert.Contains("forceLoad: true", output);
+    }
+
+    [Fact]
     public void GetTextTemplatingProperties_SetsCorrectTemplateModel()
     {
         // Arrange

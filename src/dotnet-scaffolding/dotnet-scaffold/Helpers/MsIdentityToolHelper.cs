@@ -22,6 +22,8 @@ internal static class MsIdentityToolHelper
     /// </summary>
     internal const string MsIdentityCommandName = "msidentity";
 
+    private const string GlobalMsIdentityCommandName = "dotnet-msidentity";
+
     /// <summary>
     /// A clear, actionable message explaining that the msidentity tool is missing and how to install it.
     /// </summary>
@@ -106,5 +108,30 @@ internal static class MsIdentityToolHelper
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Creates a runner for the globally installed tool without relying on the parent process PATH.
+    /// Falls back to dotnet command discovery so local tool manifests continue to work.
+    /// </summary>
+    internal static DotnetCliRunner CreateMsIdentityRunner(
+        IEnumerable<string> args,
+        IDictionary<string, string>? environmentVariables = null)
+    {
+        string globalToolCommandPath = GetGlobalToolCommandPath(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            OperatingSystem.IsWindows());
+
+        return File.Exists(globalToolCommandPath)
+            ? DotnetCliRunner.Create(globalToolCommandPath, args, environmentVariables)
+            : DotnetCliRunner.CreateDotNet(MsIdentityCommandName, args, environmentVariables);
+    }
+
+    internal static string GetGlobalToolCommandPath(string userProfile, bool isWindows)
+    {
+        string commandName = isWindows
+            ? $"{GlobalMsIdentityCommandName}.exe"
+            : GlobalMsIdentityCommandName;
+        return Path.Combine(userProfile, ".dotnet", "tools", commandName);
     }
 }

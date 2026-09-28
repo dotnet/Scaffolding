@@ -17,36 +17,70 @@ internal static class EntraIdHelper
     /// </summary>
     /// <param name="allT4TemplatePaths">The collection of all T4 template paths.</param>
     /// <param name="entraIdModel">The Entra ID model containing configuration and data.</param>
+    /// <param name="blazorWasmClientProjectPath">The optional client project path for WebAssembly and Auto apps.</param>
     /// <returns>An enumerable collection of <see cref="TextTemplatingProperty"/> instances.</returns>
-    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, EntraIdModel entraIdModel)
+    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(
+        IEnumerable<string> allT4TemplatePaths,
+        EntraIdModel entraIdModel,
+        string? blazorWasmClientProjectPath = null)
     {
-        var textTemplatingProperties = new List<TextTemplatingProperty>();
         var templateTypes = GetBlazorEntraIdTemplateTypes(entraIdModel.ProjectInfo?.LowestSupportedTargetFramework);
-        foreach (var templatePath in allT4TemplatePaths)
+        var templateByName = allT4TemplatePaths
+            .Select(templatePath => new
+            {
+                TemplatePath = templatePath,
+                TemplateName = GetFormattedRelativeIdentityFile(templatePath)
+            })
+            .Where(x => !string.IsNullOrEmpty(x.TemplateName))
+            .ToDictionary(x => x.TemplateName, x => x.TemplatePath, StringComparer.OrdinalIgnoreCase);
+
+        if (templateTypes.Count == 0 || templateByName.Count == 0)
         {
-            var templateFullName = GetFormattedRelativeIdentityFile(templatePath);
-            var typeName = StringUtil.GetTypeNameFromNamespace(templateFullName);
+            return [];
+        }
+
+        string projectOutputPath = !string.IsNullOrEmpty(blazorWasmClientProjectPath)
+            ? Path.GetDirectoryName(blazorWasmClientProjectPath) ?? string.Empty
+            : entraIdModel.BaseOutputPath ?? string.Empty;
+        string componentsOutputPath = !string.IsNullOrEmpty(blazorWasmClientProjectPath)
+            ? projectOutputPath
+            : Path.Combine(projectOutputPath, "Components");
+        string redirectToLoginOutputPath = !string.IsNullOrEmpty(blazorWasmClientProjectPath)
+            ? Path.Combine(componentsOutputPath, "Pages", "RedirectToLogin.razor")
+            : Path.Combine(componentsOutputPath, "RedirectToLogin.razor");
+
+        var entries = new List<(string Name, string OutputPath)>
+        {
+            ("LoginOrLogout", Path.Combine(componentsOutputPath, "Layout", "LoginOrLogout.razor")),
+            ("RedirectToLogin", redirectToLoginOutputPath),
+        };
+
+        var textTemplatingProperties = new List<TextTemplatingProperty>();
+        foreach (var entry in entries)
+        {
+            if (!templateByName.TryGetValue(entry.Name, out var templatePath))
+            {
+                continue;
+            }
+
             var templateType = templateTypes.FirstOrDefault(x =>
                 !string.IsNullOrEmpty(x.FullName) &&
-                x.FullName.Contains(templateFullName) &&
-                x.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase));
-            var projectName = Path.GetFileNameWithoutExtension(entraIdModel.ProjectInfo?.ProjectPath);
+                x.FullName.Contains(entry.Name, StringComparison.OrdinalIgnoreCase) &&
+                x.Name.Equals(entry.Name, StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
+            if (templateType is null)
             {
-                string extension = templateFullName.StartsWith("loginor", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
-                string templateNameWithNamespace = String.Equals(extension, ".razor") ? Path.Combine(entraIdModel.BaseOutputPath ?? "", "Components", "Layout") : (entraIdModel.BaseOutputPath ?? "");
-                string outputFileName = Path.Combine(templateNameWithNamespace, templateFullName + extension);
-
-                textTemplatingProperties.Add(new()
-                {
-                    TemplateModel = entraIdModel,
-                    TemplateModelName = "Model",
-                    TemplatePath = templatePath,
-                    TemplateType = templateType,
-                    OutputPath = outputFileName
-                });
+                continue;
             }
+
+            textTemplatingProperties.Add(new()
+            {
+                TemplateModel = entraIdModel,
+                TemplateModelName = "Model",
+                TemplatePath = templatePath,
+                TemplateType = templateType,
+                OutputPath = entry.OutputPath
+            });
         }
 
         return textTemplatingProperties;
@@ -83,10 +117,12 @@ internal static class EntraIdHelper
     private static readonly IList<Type> _blazorEntraIdTemplateTypesNet10 =
     [
         typeof(Templates.net10.BlazorEntraId.LoginOrLogout),
+        typeof(Templates.net10.BlazorEntraId.RedirectToLogin),
     ];
 
     private static readonly IList<Type> _blazorEntraIdTemplateTypesNet11 =
     [
         typeof(Templates.net11.BlazorEntraId.LoginOrLogout),
+        typeof(Templates.net11.BlazorEntraId.RedirectToLogin),
     ];
 }

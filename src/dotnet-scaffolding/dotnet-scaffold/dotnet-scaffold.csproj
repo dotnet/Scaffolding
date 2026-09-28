@@ -87,6 +87,10 @@
     <None Pack="true" Include="AspNet\Templates\net11.0\CodeModificationConfigs\*.json">
       <PackagePath>AspNet\CodeModificationConfigs\net11.0</PackagePath>
     </None>
+    <!-- BlazorEntraId templates for net10.0 -->
+    <None Pack="true" Include="AspNet\Templates\net10.0\BlazorEntraId\*.tt" PackagePath="AspNet\Templates\net10.0\BlazorEntraId\" />
+    <!-- BlazorEntraId templates for net11.0 -->
+    <None Pack="true" Include="AspNet\Templates\net11.0\BlazorEntraId\*.tt" PackagePath="AspNet\Templates\net11.0\BlazorEntraId\" />
     <!-- Pack Aspire CodeModificationConfigs into Aspire folder -->
     <None Pack="true" Include="Aspire\CodeModificationConfigs\net8.0\**\*.json">
       <PackagePath>Aspire\net8.0\CodeModificationConfigs</PackagePath>

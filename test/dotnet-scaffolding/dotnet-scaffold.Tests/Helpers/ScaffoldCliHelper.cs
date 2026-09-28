@@ -386,7 +386,7 @@ public class {modelName}
 
 <Router AppAssembly=""typeof(Program).Assembly"">
     <Found Context=""routeData"">
-        <RouteView RouteData=""routeData"" />
+        <RouteView RouteData=""routeData"" DefaultLayout=""typeof(Layout.MainLayout)"" />
     </Found>
 </Router>
 ";

@@ -6,6 +6,21 @@
         "Global": {
           "CodeChanges": [
             {
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CheckBlock": "builder.Configuration.GetConnectionString",
+              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? \"Data Source=TestDb.db\"",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "Block": "app.UseMigrationsEndPoint()",
+              "InsertBefore": [ "app.Run();" ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
               "Block": "app.MapAdditionalIdentityEndpoints();",
               "InsertBefore": [ "app.Run();" ],
               "LeadingTrivia": {
@@ -13,28 +28,28 @@
               }
             },
             {
-              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "InsertBefore": [ "var app = builder.Build();" ],
               "Block": "WebApplication.CreateBuilder.Services.AddCascadingAuthenticationState()",
               "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
-              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "InsertBefore": [ "var app = builder.Build();" ],
               "Block": "WebApplication.CreateBuilder.Services.AddScoped<IdentityRedirectManager>()",
               "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
-              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "InsertBefore": [ "var app = builder.Build();" ],
               "Block": "WebApplication.CreateBuilder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()",
               "LeadingTrivia": {
                 "Newline": true
               }
             },
             {
-              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "InsertBefore": [ "var app = builder.Build();" ],
               "MultiLineBlock": [
                 "WebApplication.CreateBuilder.Services.AddAuthentication(options =>",
                 "    {",
@@ -48,7 +63,7 @@
               }
             },
             {
-              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "InsertBefore": [ "var app = builder.Build();" ],
               "CheckBlock": "builder.Services.AddIdentityCore",
               "MultiLineBlock": [
                 "builder.Services.AddIdentityCore<ApplicationUser>(options =>",
@@ -103,6 +118,15 @@
               "InsertAfter": "builder.Configuration.GetConnectionString",
               "CheckBlock": "builder.Services.AddDbContext",
               "Block": "builder.Services.AddDbContext<$(DbContextName)>(options => options.$(UseDbMethod))",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+            ,
+            {
+              "InsertAfter": "var builder = WebApplication.CreateBuilder(args);",
+              "CheckBlock": "builder.Services.AddDbContextFactory",
+              "Block": "builder.Services.AddDbContextFactory<$(DbContextName)>(options => options.$(UseDbMethod))",
               "LeadingTrivia": {
                 "Newline": true
               }
@@ -260,9 +284,12 @@
           ],
           "MultiLineBlock": [
             "@using Microsoft.AspNetCore.Components.Forms",
-            "@using Microsoft.AspNetCore.Components.Authorization"
+            "@using Microsoft.AspNetCore.Components.Authorization",
+            "@using Microsoft.AspNetCore.Components.Endpoints",
+            "@using Microsoft.AspNetCore.Components.Web",
+            "@using static Microsoft.AspNetCore.Components.Web.RenderMode"
           ],
-          "CheckBlock": "Microsoft.AspNetCore.Components.Authorization"
+          "CheckBlock": "Microsoft.AspNetCore.Components.Endpoints"
         }
       ]
     },
@@ -271,10 +298,63 @@
       "Replacements": [
         {
           "ReplaceSnippet": [
+            "<HeadOutlet @rendermode=\"InteractiveServer\" />"
+          ],
+          "MultiLineBlock": [
+            "<HeadOutlet @rendermode=\"PageRenderMode\" />"
+          ]
+        },
+        {
+          "ReplaceSnippet": [
+            "<Routes @rendermode=\"InteractiveServer\" />"
+          ],
+          "MultiLineBlock": [
+            "<Routes @rendermode=\"PageRenderMode\" />"
+          ]
+        },
+        {
+          "ReplaceSnippet": [
+            "<HeadOutlet />"
+          ],
+          "MultiLineBlock": [
+            "<HeadOutlet @rendermode=\"PageRenderMode\" />"
+          ],
+          "CheckBlock": "<HeadOutlet />"
+        },
+        {
+          "ReplaceSnippet": [
+            "<Router AppAssembly=\"typeof(Program).Assembly\"",
+            "        NotFoundPage=\"typeof(Pages.NotFound)\">",
+            "    <Found Context=\"routeData\">",
+            "        <RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" />",
+            "        <FocusOnNavigate RouteData=\"routeData\" Selector=\"h1\" />",
+            "    </Found>",
+            "</Router>"
+          ],
+          "MultiLineBlock": [
+            "<Router AppAssembly=\"typeof(Program).Assembly\"",
+            "        NotFoundPage=\"typeof(Pages.NotFound)\">",
+            "    <Found Context=\"routeData\">",
+            "        <RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" @rendermode=\"PageRenderMode\" />",
+            "        <FocusOnNavigate RouteData=\"routeData\" Selector=\"h1\" />",
+            "    </Found>",
+            "</Router>"
+          ],
+          "CheckBlock": "RouteView RouteData"
+        },
+        {
+          "ReplaceSnippet": [
             "</body>"
           ],
           "MultiLineBlock": [
             "    <script src=\"@Assets[\"Components/Account/Shared/PasskeySubmit.razor.js\"]\" type=\"module\"></script>",
+            "@code {",
+            "    [CascadingParameter]",
+            "    private HttpContext HttpContext { get; set; } = default!;",
+            "",
+            "    private IComponentRenderMode? PageRenderMode =>",
+            "        HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;",
+            "}",
             "</body>"
           ],
           "CheckBlock": "PasskeySubmit.razor.js"

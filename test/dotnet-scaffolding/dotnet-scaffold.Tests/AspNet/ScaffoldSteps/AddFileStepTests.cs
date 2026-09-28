@@ -32,6 +32,47 @@ public class AddFileStepTests
         _context = new ScaffolderContext(_mockScaffolder.Object);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_ExistingFile_SucceedsOnlyWhenContentsMatch(bool modifyFile)
+    {
+        string outputDirectory = Path.Combine(Path.GetTempPath(), nameof(AddFileStepTests), Guid.NewGuid().ToString("N"));
+        string toolsDirectory = Path.Combine(AppContext.BaseDirectory, "tools");
+        bool createdToolsDirectory = !Directory.Exists(toolsDirectory);
+        Directory.CreateDirectory(outputDirectory);
+        Directory.CreateDirectory(toolsDirectory);
+        try
+        {
+            var step = new AddFileStep(NullLogger<AddFileStep>.Instance, new FileSystem())
+            {
+                FileName = "PasskeySubmit.razor.js",
+                BaseOutputDirectory = outputDirectory,
+                ProjectPath = string.Empty
+            };
+            Assert.True(await step.ExecuteAsync(_context));
+
+            string destination = Path.Combine(outputDirectory, step.FileName);
+            byte[] contents = File.ReadAllBytes(destination);
+            if (modifyFile)
+            {
+                contents[0] ^= 1;
+                File.WriteAllBytes(destination, contents);
+            }
+
+            Assert.Equal(!modifyFile, await step.ExecuteAsync(_context));
+            Assert.Equal(contents, File.ReadAllBytes(destination));
+        }
+        finally
+        {
+            Directory.Delete(outputDirectory, recursive: true);
+            if (createdToolsDirectory)
+            {
+                Directory.Delete(toolsDirectory);
+            }
+        }
+    }
+
     [Fact]
     public async Task ExecuteAsync_ReturnsFalse_WhenFileNameIsEmpty()
     {

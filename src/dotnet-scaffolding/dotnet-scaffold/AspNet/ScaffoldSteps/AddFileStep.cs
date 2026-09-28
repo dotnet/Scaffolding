@@ -50,16 +50,25 @@ internal class AddFileStep : ScaffoldStep
         }
 
         var destinationFilePath = Path.Combine(BaseOutputDirectory, FileName);
-        if (File.Exists(destinationFilePath))
-        {
-            return Task.FromResult(false);
-        }
-
         var allFiles = new TemplateFoldersUtilities().GetAllFilesForTargetFramework(["Files"], ProjectPath);
         var fileToCopy = allFiles.FirstOrDefault(x => x.EndsWith(FileName, StringComparison.OrdinalIgnoreCase));
         var destinationDirectory = Path.GetDirectoryName(destinationFilePath);
         if (!string.IsNullOrEmpty(fileToCopy) && !string.IsNullOrEmpty(destinationDirectory))
         {
+            if (_fileSystem.FileExists(destinationFilePath))
+            {
+                using var source = _fileSystem.OpenFileStream(fileToCopy, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var destination = _fileSystem.OpenFileStream(destinationFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                if (!FilesMatch(source, destination))
+                {
+                    _logger.LogError("Existing file '{FileName}' differs from the template. It was not overwritten.", destinationFilePath);
+                    return Task.FromResult(false);
+                }
+
+                _logger.LogInformation("File '{FileName}' already matches the template.", destinationFilePath);
+                return Task.FromResult(true);
+            }
+
             _logger.LogInformation($"Adding file '{FileName}'...");
 
             _fileSystem.CreateDirectoryIfNotExists(destinationDirectory);
@@ -69,5 +78,24 @@ internal class AddFileStep : ScaffoldStep
         }
 
         return Task.FromResult(false);
+    }
+
+    private static bool FilesMatch(Stream source, Stream destination)
+    {
+        if (source.Length != destination.Length)
+        {
+            return false;
+        }
+
+        int nextByte;
+        while ((nextByte = source.ReadByte()) != -1)
+        {
+            if (nextByte != destination.ReadByte())
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

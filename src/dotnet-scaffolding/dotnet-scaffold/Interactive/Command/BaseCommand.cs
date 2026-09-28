@@ -53,20 +53,15 @@ internal abstract class BaseCommand<TSettings> : AsyncCommand<TSettings>
             { FlowContextProperties.CommandSettings, settings }
         };
 
-        IFlow? flow = null;
-        Exception? exception = null;
-
         try
         {
-            // Create and run the flow.
-            flow = FlowProvider.GetFlow(flowSteps, properties, nonInteractive, showSelectedOptions);
+            IFlow flow = FlowProvider.GetFlow(flowSteps, properties, nonInteractive, showSelectedOptions);
             return await flow.RunAsync(CancellationToken.None);
         }
-        catch (Exception) {}
-
-        // If an exception was captured, throw it; otherwise, return int.MinValue.
-        return exception is not null
-            ? throw exception
-            : int.MinValue;
+        catch (Exception exception)
+        {
+            Console.Error.WriteLine($"Scaffolding failed: {exception}");
+            return 1;
+        }
     }
 }

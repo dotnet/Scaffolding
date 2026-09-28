@@ -259,20 +259,28 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
     }
 
     [Theory]
-    [InlineData("builder.Services.AddRazorComponents()\r\n    .AddInteractiveWebAssemblyComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveWebAssemblyComponents()\n    .AddAuthenticationStateSerialization();")]
-    [InlineData("builder.Services.AddRazorComponents()\r\n    .AddInteractiveServerComponents()\r\n    .AddInteractiveWebAssemblyComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents()\n    .AddInteractiveWebAssemblyComponents()\n    .AddAuthenticationStateSerialization();")]
-    [InlineData("builder.Services.AddRazorComponents()\r\n    .AddInteractiveServerComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents();")]
+    [InlineData("builder.Services.AddRazorComponents()\n    .AddInteractiveWebAssemblyComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveWebAssemblyComponents()\n    .AddAuthenticationStateSerialization();")]
+    [InlineData("builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents()\n    .AddInteractiveWebAssemblyComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents()\n    .AddInteractiveWebAssemblyComponents()\n    .AddAuthenticationStateSerialization();")]
+    [InlineData("builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents();")]
     public async Task BlazorEntraChangesConfig_AddsAuthenticationStateSerializationForWasmProjects(string programContent, string expectedRegistration)
     {
+        var isServerOnly = !programContent.Contains("AddInteractiveWebAssemblyComponents", StringComparison.Ordinal);
+        programContent = programContent.Replace("\n", Environment.NewLine, StringComparison.Ordinal);
+        expectedRegistration = expectedRegistration.Replace("\n", Environment.NewLine, StringComparison.Ordinal);
         var updatedProgramContent = await ApplyBlazorEntraChangesConfigAsync(programContent);
 
-        Assert.Contains(expectedRegistration, updatedProgramContent.Replace("\r\n", "\n"), StringComparison.Ordinal);
+        Assert.Contains(expectedRegistration, updatedProgramContent, StringComparison.Ordinal);
+        if (isServerOnly)
+        {
+            Assert.DoesNotContain("AddAuthenticationStateSerialization", updatedProgramContent, StringComparison.Ordinal);
+        }
     }
 
     [Fact]
     public async Task BlazorEntraChangesConfig_DoesNotDuplicateAuthenticationStateSerialization()
     {
-        var programContent = "builder.Services.AddRazorComponents()\r\n" + "    .AddInteractiveWebAssemblyComponents()\r\n" + "    .AddAuthenticationStateSerialization();";
+        var programContent = "builder.Services.AddRazorComponents()\n    .AddInteractiveWebAssemblyComponents()\n    .AddAuthenticationStateSerialization();"
+            .Replace("\n", Environment.NewLine, StringComparison.Ordinal);
 
         var updatedProgramContent = await ApplyBlazorEntraChangesConfigAsync(programContent);
 

@@ -100,4 +100,3 @@ internal class ScaffoldCommand : BaseCommand<ScaffoldCommand.Settings>
         return flowResult;
     }
 }
-

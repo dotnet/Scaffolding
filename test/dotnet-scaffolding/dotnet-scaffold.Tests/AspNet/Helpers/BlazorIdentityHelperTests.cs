@@ -149,53 +149,38 @@ public class BlazorIdentityHelperTests
         IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
 
         // Assert
-        Assert.NotNull(result);
-        // If any properties are returned, verify the extension logic
-        TextTemplatingProperty? property = result.FirstOrDefault();
-        if (property != null)
-        {
-            Assert.EndsWith(".razor", property.OutputPath);
-        }
+        TextTemplatingProperty property = Assert.Single(result);
+        Assert.Equal(Path.Combine(identityModel.BaseOutputPath, "Components", "Account", "Pages", "Login.razor"), property.OutputPath);
     }
 
     [Fact]
     public void GetTextTemplatingProperties_WithSharedPath_UsesRazorExtension()
     {
         // Arrange
-        List<string> templatePaths = [Path.Combine("BlazorIdentity", "Shared", "Component.tt")];
+        List<string> templatePaths = [Path.Combine("BlazorIdentity", "Shared", "ManageNavMenu.tt")];
         IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
 
         // Assert
-        Assert.NotNull(result);
-        // If any properties are returned, verify the extension logic
-        TextTemplatingProperty? property = result.FirstOrDefault();
-        if (property != null)
-        {
-            Assert.EndsWith(".razor", property.OutputPath);
-        }
+        TextTemplatingProperty property = Assert.Single(result);
+        Assert.Equal(Path.Combine(identityModel.BaseOutputPath, "Components", "Account", "Shared", "ManageNavMenu.razor"), property.OutputPath);
     }
 
     [Fact]
     public void GetTextTemplatingProperties_WithNonPagesOrSharedPath_UsesCsExtension()
     {
         // Arrange
-        List<string> templatePaths = [Path.Combine("BlazorIdentity", "Data", "Context.tt")];
+        List<string> templatePaths = [Path.Combine("BlazorIdentity", "IdentityRedirectManager.tt")];
         IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
 
         // Assert
-        Assert.NotNull(result);
-        // If any properties are returned, verify the extension logic
-        TextTemplatingProperty? property = result.FirstOrDefault();
-        if (property != null)
-        {
-            Assert.EndsWith(".cs", property.OutputPath);
-        }
+        TextTemplatingProperty property = Assert.Single(result);
+        Assert.Equal(Path.Combine(identityModel.BaseOutputPath, "Components", "Account", "IdentityRedirectManager.cs"), property.OutputPath);
     }
 
     private IdentityModel CreateTestIdentityModel()

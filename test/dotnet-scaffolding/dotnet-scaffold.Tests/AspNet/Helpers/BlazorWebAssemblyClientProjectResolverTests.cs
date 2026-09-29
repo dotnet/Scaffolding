@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.IO;
+using Microsoft.Build.Locator;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
-using Moq;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
@@ -12,45 +12,52 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
 public class BlazorWebAssemblyClientProjectResolverTests : IDisposable
 {
     private readonly string _directory = Path.Combine(Path.GetTempPath(), nameof(BlazorWebAssemblyClientProjectResolverTests), Guid.NewGuid().ToString());
-    private readonly IFileSystem _fileSystem;
+    private readonly IFileSystem _fileSystem = FileSystem.Instance;
 
     public BlazorWebAssemblyClientProjectResolverTests()
     {
+        if (!MSBuildLocator.IsRegistered)
+        {
+            MSBuildLocator.RegisterDefaults();
+        }
+
         Directory.CreateDirectory(_directory);
-        var fileSystem = new Mock<IFileSystem>();
-        fileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns((string path) => File.Exists(path));
-        _fileSystem = fileSystem.Object;
     }
 
     [Fact]
-    public void TryGetClient_ResolvesEvaluatedReferencesAndClientNamespaceWithoutRestore()
+    public void TryGetClient_ResolvesWebAssemblySdkClientWithoutRestore()
     {
         var server = WriteProject("Server.csproj", """
-            <Project>
-              <PropertyGroup><ClientName>Client</ClientName></PropertyGroup>
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
               <ItemGroup>
-                <ProjectReference Include="$(ClientName)/Client.csproj" />
-                <ProjectReference Include="$(ClientName)/Client.csproj" />
+                <ProjectReference Include="Client/Client.csproj" />
+                <ProjectReference Include="Client/Client.csproj" />
                 <ProjectReference Include="Library/Library.csproj" />
               </ItemGroup>
             </Project>
             """);
         var client = WriteProject(Path.Combine("Client", "Client.csproj"), """
-            <Project>
+            <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
               <PropertyGroup>
-                <UsingMicrosoftNETSdkBlazorWebAssembly>true</UsingMicrosoftNETSdkBlazorWebAssembly>
+                <TargetFramework>net10.0</TargetFramework>
                 <RootNamespace>Custom.Client.Root</RootNamespace>
               </PropertyGroup>
             </Project>
             """);
         WriteProject(Path.Combine("Library", "Library.csproj"), "<Project />");
 
-        Assert.False(File.Exists(Path.Combine(_directory, "Client", "obj", "project.assets.json")));
+        var serverAssetsPath = Path.Combine(_directory, "obj", "project.assets.json");
+        var clientAssetsPath = Path.Combine(_directory, "Client", "obj", "project.assets.json");
+        Assert.False(File.Exists(serverAssetsPath));
+        Assert.False(File.Exists(clientAssetsPath));
         Assert.True(BlazorWebAssemblyClientProjectResolver.TryGetClient(server, _fileSystem, out var clientProject, out var error), error);
         Assert.Null(error);
         Assert.NotNull(clientProject);
         Assert.Equal(client, clientProject.Value.ProjectPath);
         Assert.Equal("Custom.Client.Root", clientProject.Value.RootNamespace);
+        Assert.False(File.Exists(serverAssetsPath));
+        Assert.False(File.Exists(clientAssetsPath));
     }
 
     [Fact]

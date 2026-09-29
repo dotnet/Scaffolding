@@ -12,7 +12,8 @@ internal static class BlazorWebAssemblyClientProjectResolver
 {
     /// <summary>
     /// Resolves the single referenced WebAssembly client. Returns true with a null client when none is present;
-    /// returns false with a diagnostic when project evaluation fails or multiple clients are found.
+    /// Returns false with a diagnostic when a referenced project is missing, project evaluation fails,
+    /// or multiple clients are found.
     /// The caller decides whether a missing client is an error.
     /// </summary>
     internal static bool TryGetClient(
@@ -36,8 +37,14 @@ internal static class BlazorWebAssemblyClientProjectResolver
         }
 
         var matches = new List<(string ProjectPath, string RootNamespace)>();
-        foreach (var reference in references.Where(fileSystem.FileExists).Distinct(StringComparer.OrdinalIgnoreCase))
+        foreach (var reference in references.Distinct(StringComparer.OrdinalIgnoreCase))
         {
+            if (!fileSystem.FileExists(reference))
+            {
+                error = $"Unable to resolve the Blazor WebAssembly client project for '{projectPath}'. Referenced project '{reference}' was not found. Check the server project's ProjectReference paths.";
+                return false;
+            }
+
             var clientProjectService = new MSBuildProjectService(reference);
             if (!clientProjectService.TryGetEvaluatedProperties(
                 ["UsingMicrosoftNETSdkBlazorWebAssembly", "RootNamespace"],

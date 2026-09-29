@@ -74,6 +74,19 @@ public class BlazorWebAssemblyClientProjectResolverTests : IDisposable
     }
 
     [Fact]
+    public void TryGetClient_ReportsMissingReferencedProject()
+    {
+        var server = WriteProject("Server.csproj", """
+            <Project><ItemGroup><ProjectReference Include="Missing.Client.csproj" /></ItemGroup></Project>
+            """);
+
+        Assert.False(BlazorWebAssemblyClientProjectResolver.TryGetClient(server, _fileSystem, out var client, out var error));
+        Assert.Null(client);
+        Assert.Contains("Missing.Client.csproj", error);
+        Assert.Contains("was not found", error);
+    }
+
+    [Fact]
     public void TryGetClient_UsesProjectNameWhenRootNamespaceIsUnset()
     {
         var server = WriteProject("Server.csproj", """

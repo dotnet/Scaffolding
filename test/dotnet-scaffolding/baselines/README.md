@@ -37,11 +37,11 @@ To add an input instead, run `.\New-InputBaseline.ps1 -Framework net11.0 -Name E
 
 Comparison includes every file except files under `bin` and `obj` directories. Common source and text formats use line-ending normalization, and `.csproj` comparisons ignore `PackageReference` version values. Other files are compared byte-for-byte; database files and `.vs` files are not excluded.
 
-To add coverage, reuse or add a shared input, check in a runnable expected project, and call `ScaffolderBaselineRunner.RunAsync` with the scaffolder directory, framework, input template, scaffolder-specific refresh variable, and callback that runs the scaffolder on the copied input. The runner handles setup, builds, comparison, and cleanup.
+To add coverage, reuse or add a shared input, check in a runnable expected project, and call `ScaffolderBaselineRunner.RunAsync` with named arguments for the scaffolder directory, framework, input template, and callback that runs the scaffolder on the copied input. The runner handles setup, builds, comparison, and cleanup.
 
 Baseline tests live under `test\dotnet-scaffolding\dotnet-scaffold.Tests\AspNet\Integration`; their shared runner is `dotnet-scaffold.Tests\Helpers\ScaffolderBaselineRunner.cs`. A scaffolder that needs additional input files can supply the runner's `prepareInput` callback without changing the checked-in template.
 
-Edit and run the expected project before updating a scaffolder, then run its baseline test. If a generated-output refresh is deliberately needed, set that test's update variable to `1`, run only the intended test case, and review the entire output diff before accepting it. Never refresh just to make a failing comparison pass; clear the variable and rerun the test normally.
+Update the expected project first and run it to verify the desired behavior, then update the scaffolder to match and run its baseline test. Tests never rewrite checked-in baselines. On failure, the runner reports the retained artifact directory; inspect or selectively copy generated files when useful, and review any baseline changes rather than replacing expected output just to make a failing comparison pass.
 
 ## Build isolation
 

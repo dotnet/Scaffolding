@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -17,7 +16,6 @@ internal static class ScaffolderBaselineRunner
         string scaffolder,
         string framework,
         string template,
-        string updateEnvironmentVariable,
         Func<string, Task<(int ExitCode, string Output, string Error)>> scaffold,
         Action<string, string>? prepareInput = null)
     {
@@ -28,7 +26,6 @@ internal static class ScaffolderBaselineRunner
         var workingDirectory = Path.Combine(Path.GetTempPath(), nameof(ScaffolderBaselineRunner), Guid.NewGuid().ToString("N"));
         var expected = Path.Combine(workingDirectory, "expected");
         var actual = Path.Combine(workingDirectory, "actual");
-        var update = Environment.GetEnvironmentVariable(updateEnvironmentVariable) == "1";
 
         Directory.CreateDirectory(workingDirectory);
         try
@@ -47,17 +44,6 @@ internal static class ScaffolderBaselineRunner
             Assert.True(result.ExitCode == 0, $"Scaffolding failed.\n{result.Output}\n{result.Error}");
             var build = await ScaffoldCliHelper.RunBuildAsync(actual);
             Assert.True(build.ExitCode == 0, $"Generated project build failed.\n{build.Output}\n{build.Error}");
-
-            if (update)
-            {
-                foreach (var path in GeneratedProjectBaseline.EnumerateFiles(baseline).ToArray())
-                {
-                    File.Delete(path);
-                }
-
-                GeneratedProjectBaseline.CopyProject(actual, baseline);
-                output.WriteLine($"Updated {baseline}. Review the source diff before accepting.");
-            }
 
             GeneratedProjectBaseline.AssertMatches(
                 GeneratedProjectBaseline.ReadFiles(baseline), GeneratedProjectBaseline.ReadFiles(actual));

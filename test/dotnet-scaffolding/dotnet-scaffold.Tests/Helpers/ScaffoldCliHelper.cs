@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -26,6 +27,14 @@ internal static class ScaffoldCliHelper
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation)!;
         // Navigate from artifacts/bin/dotnet-scaffold.Tests/{Config}/{TFM}/ up to repo root
         return Path.GetFullPath(Path.Combine(assemblyDirectory, "..", "..", "..", "..", ".."));
+    }
+
+    internal static string GetTestTargetFramework()
+    {
+        var framework = Assembly.GetExecutingAssembly().GetCustomAttribute<TargetFrameworkAttribute>()
+            ?? throw new System.InvalidOperationException("The test assembly has no target framework attribute.");
+        var version = new FrameworkName(framework.FrameworkName).Version;
+        return $"net{version.Major}.{version.Minor}";
     }
 
     /// <summary>

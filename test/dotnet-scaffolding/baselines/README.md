@@ -33,7 +33,7 @@ To add an input instead, run `.\New-InputBaseline.ps1 -Framework net11.0 -Name E
 
 ## Output baselines
 
-`<scaffolder>\<framework>\<template>` contains runnable expected output for a representative default path. Baseline tests build and compare the generated app with this expected project; focused integration tests cover configuration variations.
+`<scaffolder>\<framework>\<template>` contains runnable expected output for a representative default path. Baseline tests run the tool on the test assembly's target framework and build and compare projects targeting each input's framework. Focused integration tests cover configuration variations and other tool-host versions.
 
 Comparison includes every file except files under `bin` and `obj` directories. Common source and text formats use line-ending normalization, and `.csproj` comparisons ignore `PackageReference` version values. Other files are compared byte-for-byte; database files and `.vs` files are not excluded.
 

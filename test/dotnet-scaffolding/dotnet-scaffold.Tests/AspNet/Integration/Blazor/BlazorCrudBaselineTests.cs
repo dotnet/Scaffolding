@@ -23,7 +23,7 @@ public class BlazorCrudBaselineTests(ITestOutputHelper output)
             scaffolder: "BlazorCrud",
             framework: framework,
             template: "BlazorWebApp",
-            scaffold: actual => ScaffoldCliHelper.RunScaffoldAsync(framework, "blazor-crud", [
+            scaffold: actual => ScaffoldCliHelper.RunScaffoldAsync(ScaffoldCliHelper.GetTestTargetFramework(), "blazor-crud", [
                 "--project", Path.Combine(actual, "BlazorWebApp.csproj"),
                 "--model", "Product",
                 "--dataContext", "ApplicationDbContext",

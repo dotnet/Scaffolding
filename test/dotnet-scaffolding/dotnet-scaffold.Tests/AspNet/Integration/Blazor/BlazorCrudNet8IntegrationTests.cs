@@ -65,34 +65,18 @@ public enum EmploymentType
         Assert.True(Directory.Exists(blazorPagesDir), $"Blazor pages directory '{blazorPagesDir}' should be created.");
         foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
         {
-            foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
-            {
-                Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
-            }
-
-            var editContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Edit.razor"));
-            Assert.Contains("ApplicationState.TryTakeFromJson<TestModel>(nameof(TestModel), out var restoredTestModel)", editContent);
-            Assert.Contains("TestModel = restoredTestModel", editContent);
-            Assert.Contains("ApplicationState.PersistAsJson(nameof(TestModel), TestModel)", editContent);
-
-            var createContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Create.razor"));
-            Assert.Contains("<InputSelect id=\"employmenttype\"", createContent);
-            Assert.Contains("<InputSelect id=\"optionalemploymenttype\"", createContent);
-
-            Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
-                "DbContext file 'Data/TestDbContext.cs' should be created.");
-
-            // Assert — no NuGet errors and project builds after scaffolding
-            Assert.False(cliOutput.Contains("error: NU"),
-                $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
-            var (afterExitCode, _, afterError) = await RunBuildAsync(_testProjectDir);
-            Assert.True(afterExitCode == 0, $"Project should still build after scaffolding. Error: {afterError}");
             Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
         }
+
         var editContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Edit.razor"));
         Assert.Contains("ApplicationState.TryTakeFromJson<TestModel>(nameof(TestModel), out var restoredTestModel)", editContent);
         Assert.Contains("TestModel = restoredTestModel", editContent);
         Assert.Contains("ApplicationState.PersistAsJson(nameof(TestModel), TestModel)", editContent);
+
+        var createContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Create.razor"));
+        Assert.Contains("<InputSelect id=\"employmenttype\"", createContent);
+        Assert.Contains("<InputSelect id=\"optionalemploymenttype\"", createContent);
+
         Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
             "DbContext file 'Data/TestDbContext.cs' should be created.");
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));

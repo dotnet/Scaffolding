@@ -10,7 +10,6 @@ using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.Roslyn;
-using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -415,51 +414,19 @@ internal class ValidateIdentityStep : ScaffoldStep
             return null;
         }
 
-        var projectService = new MSBuildProjectService(projectPath);
-        if (!projectService.TryGetProjectReferences(out var references, out var error))
+        if (!BlazorWebAssemblyClientProjectResolver.TryGetClient(projectPath, _fileSystem, out var client, out var error))
         {
-            _logger.LogError($"Unable to evaluate project references for '{projectPath}'. {error} Ensure the project's SDK and imports are available.");
+            _logger.LogError(error);
             return null;
         }
 
-        var clients = new List<(string ProjectPath, string RootNamespace)>();
-        foreach (var reference in references.Where(_fileSystem.FileExists).Distinct(StringComparer.OrdinalIgnoreCase))
+        if (client is null)
         {
-            var clientProjectService = new MSBuildProjectService(reference);
-            if (!clientProjectService.TryGetEvaluatedProperties(
-                ["UsingMicrosoftNETSdkBlazorWebAssembly", "RootNamespace"],
-                out var properties,
-                out error))
-            {
-                _logger.LogError(
-                    $"Unable to evaluate referenced project '{reference}' while resolving the Blazor WebAssembly client for '{projectPath}'. {error} Ensure the referenced project's SDK and imports are available.");
-                return null;
-            }
-
-            if (!string.Equals(properties["UsingMicrosoftNETSdkBlazorWebAssembly"], "true", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            var rootNamespace = properties["RootNamespace"];
-            if (string.IsNullOrEmpty(rootNamespace))
-            {
-                rootNamespace = Path.GetFileNameWithoutExtension(reference);
-            }
-
-            clients.Add((reference, rootNamespace));
-        }
-
-        if (clients.Count != 1)
-        {
-            var detail = clients.Count == 0
-                ? "No referenced project using the Microsoft.NET.Sdk.BlazorWebAssembly SDK was found."
-                : $"Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK: {string.Join(", ", clients.Select(client => client.ProjectPath))}.";
             _logger.LogError(
-                $"Unable to resolve the Blazor WebAssembly client project for '{projectPath}'. {detail} Ensure the server project has exactly one ProjectReference to its Blazor WebAssembly client.");
+                $"Unable to resolve the Blazor WebAssembly client project for '{projectPath}'. No referenced project using the Microsoft.NET.Sdk.BlazorWebAssembly SDK was found. Ensure the server project has exactly one ProjectReference to its Blazor WebAssembly client.");
             return null;
         }
 
-        return clients[0];
+        return client;
     }
 }

@@ -14,6 +14,23 @@ The script uses the registered template and arguments, skips inputs already gene
 
 To add an input instead, run `.\New-InputBaseline.ps1 -Framework net11.0 -Name EmptyWebApp -Template web` (optionally with `-SdkVersion` or `-TemplateArguments`). It generates the checked-in input, registers it, and prints the README row to add. Use `New-InputCandidate.ps1` to inspect a template without changing any checked-in inputs.
 
+### Input registry
+
+`Inputs\input-baselines.json` contains an array of entries:
+
+```json
+[
+  {
+    "path": "net11.0/BlazorWebApp",
+    "template": "blazor",
+    "arguments": ["--name", "BlazorWebApp", "--framework", "net11.0"],
+    "sdkVersion": "11.0.100-rc.2.26475.136"
+  }
+]
+```
+
+`path` is the unique project directory relative to `Inputs`, using `/` separators. `template` is the `dotnet new` template name. `arguments` contains individual template argument tokens; omit `--output` and `--no-restore`, which the scripts supply. `sdkVersion` is the exact SDK version used to generate the input. Normally use the generation scripts rather than edit this registry manually.
+
 ## Output baselines
 
 `<scaffolder>\<framework>\<template>` contains runnable expected output for a representative default path. Baseline tests build and compare the generated app with this expected project; focused integration tests cover configuration variations.

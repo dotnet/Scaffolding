@@ -18,7 +18,6 @@ public class BlazorIdentityBaselineTests(ITestOutputHelper output)
     [InlineData("net11.0")]
     public Task Scaffold_DefaultBlazorWebApp_MatchesBaseline(string framework)
     {
-        string[] prerelease = framework == "net11.0" ? ["--prerelease"] : [];
         return ScaffolderBaselineRunner.RunAsync(
             output: output,
             scaffolder: "BlazorIdentity",
@@ -28,7 +27,7 @@ public class BlazorIdentityBaselineTests(ITestOutputHelper output)
                 "--project", Path.Combine(actual, "BlazorWebApp.csproj"),
                 "--dataContext", "ApplicationDbContext",
                 "--dbProvider", "sqlite-efcore",
-                .. prerelease
+                .. ScaffoldCliHelper.GetPrereleaseArguments(framework)
             ]));
     }
 }

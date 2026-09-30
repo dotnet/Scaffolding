@@ -44,7 +44,7 @@ Comparison includes every file except files under `bin` and `obj` directories. C
 
 To add coverage, reuse or add a shared input, check in a runnable expected project, and call `ScaffolderBaselineRunner.RunAsync` with named arguments for the scaffolder directory, framework, input template, and callback that runs the scaffolder on the copied input. The runner handles setup, builds, comparison, and cleanup.
 
-Baseline tests live under `test\dotnet-scaffolding\dotnet-scaffold.Tests\AspNet\Integration` (starting with `Identity\BlazorIdentityBaselineTests.cs`); their shared runner is `dotnet-scaffold.Tests\Helpers\ScaffolderBaselineRunner.cs`. A scaffolder that needs additional input files can supply the runner's `prepareInput` callback without changing the checked-in template.
+Baseline tests live under `test\dotnet-scaffolding\dotnet-scaffold.Tests\AspNet\Integration`; their shared runner is `dotnet-scaffold.Tests\Helpers\ScaffolderBaselineRunner.cs`. A scaffolder that needs additional input files can supply the runner's `prepareInput` callback without changing the checked-in template.
 
 Update the expected project first and run it to verify the desired behavior, then update the scaffolder to match and run its baseline test. Tests never rewrite checked-in baselines. On failure, the runner reports the retained artifact directory; inspect or selectively copy generated files when useful, and review any baseline changes rather than replacing expected output just to make a failing comparison pass.
 

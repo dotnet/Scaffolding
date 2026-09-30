@@ -2,7 +2,7 @@
 
 ## Input baselines
 
-`Inputs\<framework>\<template>` contains checked-in snapshots of basic ASP.NET Core and Blazor project templates targeting each represented major .NET version. Scaffolders share these starting projects. Tests copy an input before modifying it; never scaffold into the checked-in project.
+`Inputs\<framework>\<template>` holds checked-in snapshots of basic ASP.NET Core and Blazor project templates targeting each represented major .NET version. Scaffolders share these starting projects. Tests copy an input before modifying it; never scaffold into the checked-in project. Register each input in `Inputs\input-baselines.json` and list its template, arguments, and generating SDK version here.
 
 | Input | Template | Template arguments | SDK version |
 | --- | --- | --- | --- |
@@ -15,7 +15,7 @@ From this directory, update all existing inputs with the currently active SDK (o
 .\UpdateInputBaselines.ps1
 ```
 
-The script uses the template and arguments registered in `Inputs\input-baselines.json`, skips inputs already generated with that SDK unless `-Force` is specified, and updates the SDK versions in the table above. It does not update output baselines: review the complete input diff and reevaluate corresponding outputs whenever an input changes.
+The script uses the registered template and arguments, skips inputs already generated with that SDK unless `-Force` is specified, and updates the SDK versions in the README. It does not update output baselines: review the complete input diff and reevaluate corresponding outputs whenever an input changes.
 
 To add an input instead, run `.\New-InputBaseline.ps1 -Framework net11.0 -Name EmptyWebApp -Template web` (optionally with `-SdkVersion` or `-TemplateArguments`). It generates the checked-in input, registers it, and prints the README row to add. Use `New-InputCandidate.ps1` to inspect a template without changing any checked-in inputs.
 

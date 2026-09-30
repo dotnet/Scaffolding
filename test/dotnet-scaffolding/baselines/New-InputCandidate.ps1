@@ -8,6 +8,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+if ($TemplateArguments | Where-Object { $_ -match '^(--output|-o)([=:]|$)' }) {
+    throw 'The output directory is supplied by the script; do not include --output or -o in TemplateArguments.'
+}
 if ($TemplateArguments -notcontains '--no-restore') {
     $TemplateArguments += '--no-restore'
 }

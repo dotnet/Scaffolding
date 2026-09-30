@@ -152,6 +152,9 @@ internal static class ScaffoldCliHelper
         return "Debug";
     }
 
+    internal static string[] GetPrereleaseArguments(string projectTargetFramework)
+        => projectTargetFramework == "net11.0" ? ["--prerelease"] : [];
+
     /// <summary>
     /// Runs a dotnet-scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspnet {command} {args}</c>.
     /// Uses <c>--no-build</c> because the solution must already be built before running tests.

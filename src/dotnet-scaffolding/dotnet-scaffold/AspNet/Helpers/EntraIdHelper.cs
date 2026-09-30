@@ -17,11 +17,18 @@ internal static class EntraIdHelper
     /// </summary>
     /// <param name="allT4TemplatePaths">The collection of all T4 template paths.</param>
     /// <param name="entraIdModel">The Entra ID model containing configuration and data.</param>
+    /// <param name="blazorWasmClientProjectPath">The optional Blazor WebAssembly client project path.</param>
     /// <returns>An enumerable collection of <see cref="TextTemplatingProperty"/> instances.</returns>
-    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, EntraIdModel entraIdModel)
+    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, EntraIdModel entraIdModel, string? blazorWasmClientProjectPath = null)
     {
         var textTemplatingProperties = new List<TextTemplatingProperty>();
         var templateTypes = GetBlazorEntraIdTemplateTypes(entraIdModel.ProjectInfo?.LowestSupportedTargetFramework);
+        var serverLayoutPath = Path.Combine(entraIdModel.BaseOutputPath ?? string.Empty, "Components", "Layout");
+        var clientProjectDirectory = string.IsNullOrEmpty(blazorWasmClientProjectPath) ? null : Path.GetDirectoryName(blazorWasmClientProjectPath);
+        var clientLayoutPath = string.IsNullOrEmpty(clientProjectDirectory) ? null : Path.Combine(clientProjectDirectory, "Layout");
+        var clientNavMenuPath = string.IsNullOrEmpty(clientLayoutPath) ? null : Path.Combine(clientLayoutPath, "NavMenu.razor");
+        var layoutOutputPath = !string.IsNullOrEmpty(clientNavMenuPath) && File.Exists(clientNavMenuPath) ? clientLayoutPath! : serverLayoutPath;
+
         foreach (var templatePath in allT4TemplatePaths)
         {
             var templateFullName = GetFormattedRelativeIdentityFile(templatePath);
@@ -35,7 +42,7 @@ internal static class EntraIdHelper
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {
                 string extension = templateFullName.StartsWith("loginor", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
-                string templateNameWithNamespace = String.Equals(extension, ".razor") ? Path.Combine(entraIdModel.BaseOutputPath ?? "", "Components", "Layout") : (entraIdModel.BaseOutputPath ?? "");
+                string templateNameWithNamespace = String.Equals(extension, ".razor", StringComparison.Ordinal) ? layoutOutputPath : entraIdModel.BaseOutputPath ?? string.Empty;
                 string outputFileName = Path.Combine(templateNameWithNamespace, templateFullName + extension);
 
                 textTemplatingProperties.Add(new()

@@ -8,6 +8,7 @@ using System.IO;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
@@ -257,6 +258,22 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
             $"blazorWasmEntraChanges.json should exist for {TargetFramework}");
     }
 
+    [Fact]
+    public void BlazorEntraChangesConfig_AddsLoginOrLogoutToServerNavMenu()
+    {
+        AssertNavMenuModification(
+            "blazorEntraChanges.json",
+            Path.Combine("Components", "Layout", "NavMenu.razor"));
+    }
+
+    [Fact]
+    public void BlazorWasmEntraChangesConfig_AddsLoginOrLogoutToClientNavMenu()
+    {
+        AssertNavMenuModification(
+            "blazorWasmEntraChanges.json",
+            Path.Combine("Layout", "NavMenu.razor"));
+    }
+
     #endregion
 
     #region Validation Combination Tests
@@ -314,6 +331,18 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
         var basePath = Path.Combine(assemblyDirectory!, "..", "..", "..", "..", "..", "src", "dotnet-scaffolding", "dotnet-scaffold", "AspNet", "Templates");
         return Path.GetFullPath(basePath);
+    }
+
+    private void AssertNavMenuModification(string configFileName, string navMenuPath)
+    {
+        var configPath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs", configFileName);
+        using var config = JsonDocument.Parse(File.ReadAllText(configPath));
+        var navMenuConfig = Assert.Single(config.RootElement.GetProperty("Files").EnumerateArray(), file => file.GetProperty("FileName").GetString() == navMenuPath);
+        var replacement = Assert.Single(navMenuConfig.GetProperty("Replacements").EnumerateArray());
+
+        Assert.Equal("<LoginOrLogout />", replacement.GetProperty("CheckBlock").GetString());
+        Assert.Equal(["</nav>"], replacement.GetProperty("ReplaceSnippet").EnumerateArray().Select(line => line.GetString()));
+        Assert.Equal(["    <LoginOrLogout />", "    </nav>"], replacement.GetProperty("MultiLineBlock").EnumerateArray().Select(line => line.GetString()));
     }
 
     protected Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)

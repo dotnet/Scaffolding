@@ -25,7 +25,7 @@ if (Test-Path -LiteralPath $destination) {
 if ($entries.path -contains $relative) {
     throw "Input baseline already registered: $relative"
 }
-if ($TemplateArguments | Where-Object { $_ -in @('--name', '--framework', '--no-restore') }) {
+if ($TemplateArguments | Where-Object { $_ -match '^(--name|-n|--framework|-f|--no-restore)([=:]|$)' }) {
     throw 'Name, framework, and --no-restore are supplied by the script; do not repeat them in TemplateArguments.'
 }
 

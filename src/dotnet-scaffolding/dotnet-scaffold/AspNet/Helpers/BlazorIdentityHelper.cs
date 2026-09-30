@@ -151,7 +151,7 @@ internal static class BlazorIdentityHelper
         switch (targetFramework)
         {
             case TargetFramework.Net8:
-                return _blazorIdentityTemplateTypesNet9;
+                return _blazorIdentityTemplateTypesNet8;
             case TargetFramework.Net9:
                 return _blazorIdentityTemplateTypesNet9;
             case TargetFramework.Net10:

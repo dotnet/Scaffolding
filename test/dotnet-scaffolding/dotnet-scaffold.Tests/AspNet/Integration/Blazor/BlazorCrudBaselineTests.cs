@@ -31,11 +31,11 @@ public class BlazorCrudBaselineTests(ITestOutputHelper output)
                 "--page", "CRUD",
                 .. ScaffoldCliHelper.GetPrereleaseArguments(framework)
             ]),
-            prepareInput: (expected, actual) =>
+            prepareInput: (expectedProjectDirectory, inputProjectDirectory) =>
             {
-                var models = Path.Combine(actual, "Models");
+                var models = Path.Combine(inputProjectDirectory, "Models");
                 Directory.CreateDirectory(models);
-                File.Copy(Path.Combine(expected, "Models", "Product.cs"), Path.Combine(models, "Product.cs"));
+                File.Copy(Path.Combine(expectedProjectDirectory, "Models", "Product.cs"), Path.Combine(models, "Product.cs"));
             });
     }
 }

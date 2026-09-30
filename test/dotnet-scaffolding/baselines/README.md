@@ -4,6 +4,11 @@
 
 `Inputs\<framework>\<template>` holds checked-in snapshots of basic ASP.NET Core and Blazor project templates targeting each represented major .NET version. Scaffolders share these starting projects. Tests copy an input before modifying it; never scaffold into the checked-in project. Register each input in `Inputs\input-baselines.json` and list its template, arguments, and generating SDK version here.
 
+| Input | Template | Template arguments | SDK version |
+| --- | --- | --- | --- |
+| `net10.0\BlazorWebApp` | `blazor` | `--name BlazorWebApp --framework net10.0 --no-restore` | `11.0.100-rc.2.26475.136` |
+| `net11.0\BlazorWebApp` | `blazor` | `--name BlazorWebApp --framework net11.0 --no-restore` | `11.0.100-rc.2.26475.136` |
+
 From this directory, update all existing inputs with the currently active SDK (or pass `-SdkVersion` to select another installed SDK):
 
 ```powershell

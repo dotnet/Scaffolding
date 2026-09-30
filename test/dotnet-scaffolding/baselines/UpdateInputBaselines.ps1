@@ -84,6 +84,6 @@ if ($pending.Count -eq 0) {
     Write-Host "All input baselines already use SDK $SdkVersion."
 }
 else {
-    $entries | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $manifestPath -Encoding utf8
+    ConvertTo-Json -InputObject @($entries) -Depth 5 | Set-Content -LiteralPath $manifestPath -Encoding utf8
     [IO.File]::WriteAllText($readmePath, $readme, [Text.UTF8Encoding]::new($false))
 }

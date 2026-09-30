@@ -39,7 +39,7 @@ $entries += [pscustomobject]@{
     arguments = $arguments
     sdkVersion = $SdkVersion
 }
-$entries | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $manifestPath -Encoding utf8
+ConvertTo-Json -InputObject @($entries) -Depth 5 | Set-Content -LiteralPath $manifestPath -Encoding utf8
 
 Write-Host "Added $destination. Add this row to README.md and review the input:"
 Write-Host ('| `{0}` | `{1}` | `{2} --no-restore` | `{3}` |' -f ($relative.Replace('/', '\')), $Template, ($arguments -join ' '), $SdkVersion)

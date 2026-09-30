@@ -18,6 +18,8 @@ To add an input instead, run `.\New-InputBaseline.ps1 -Framework net11.0 -Name E
 
 `<scaffolder>\<framework>\<template>` contains runnable expected output for a representative default path. Baseline tests build and compare the generated app with this expected project; focused integration tests cover configuration variations.
 
+Comparison includes every file except files under `bin` and `obj` directories. Common source and text formats use line-ending normalization, and `.csproj` comparisons ignore `PackageReference` version values. Other files are compared byte-for-byte; database files and `.vs` files are not excluded.
+
 To add coverage, reuse or add a shared input, check in a runnable expected project, and call `ScaffolderBaselineRunner.RunAsync` with the scaffolder directory, framework, input template, scaffolder-specific refresh variable, and callback that runs the scaffolder on the copied input. The runner handles setup, builds, comparison, and cleanup.
 
 Baseline tests live under `test\dotnet-scaffolding\dotnet-scaffold.Tests\AspNet\Integration`; their shared runner is `dotnet-scaffold.Tests\Helpers\ScaffolderBaselineRunner.cs`. A scaffolder that needs additional input files can supply the runner's `prepareInput` callback without changing the checked-in template.

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 using Xunit;
 
@@ -15,18 +16,33 @@ internal static class GeneratedProjectBaseline
     public static Dictionary<string, string> ReadFiles(string directory) =>
         EnumerateFiles(directory).ToDictionary(
             path => Path.GetRelativePath(directory, path).Replace(Path.DirectorySeparatorChar, '/'),
-            path => Path.GetExtension(path) is ".png" or ".ico"
-                ? Convert.ToBase64String(File.ReadAllBytes(path))
-                : File.ReadAllText(path).Replace("\r\n", "\n"),
+            path => IsTextFile(path)
+                ? ReadText(path)
+                : Convert.ToBase64String(File.ReadAllBytes(path)),
             StringComparer.Ordinal);
 
     public static IEnumerable<string> EnumerateFiles(string directory) =>
         Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories)
-            .Where(path => !Path.GetRelativePath(directory, path).Split(Path.DirectorySeparatorChar)
-                .Any(part => part is "bin" or "obj" or ".vs"))
-            .Where(path => !path.EndsWith(".db", StringComparison.Ordinal) &&
-                !path.EndsWith(".db-shm", StringComparison.Ordinal) &&
-                !path.EndsWith(".db-wal", StringComparison.Ordinal));
+            .Where(path => !Path.GetRelativePath(directory, path).Split(Path.DirectorySeparatorChar).SkipLast(1)
+                .Any(part => part.Equals("bin", StringComparison.OrdinalIgnoreCase) || part.Equals("obj", StringComparison.OrdinalIgnoreCase)));
+
+    private static bool IsTextFile(string path) =>
+        Path.GetExtension(path).ToLowerInvariant() is
+            ".cs" or ".razor" or ".cshtml" or ".csproj" or ".json" or ".css" or ".js" or ".map" or
+            ".html" or ".htm" or ".svg" or ".txt" or ".xml" or ".config" or ".props" or ".targets" or
+            ".md" or ".yml" or ".yaml" or ".sln" or ".resx";
+
+    private static string ReadText(string path)
+    {
+        try
+        {
+            return File.ReadAllText(path, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true)).Replace("\r\n", "\n");
+        }
+        catch (DecoderFallbackException exception)
+        {
+            throw new InvalidDataException($"Cannot decode baseline text file: {path}", exception);
+        }
+    }
 
     public static void AssertMatches(
         IReadOnlyDictionary<string, string> expected,
@@ -56,6 +72,12 @@ internal static class GeneratedProjectBaseline
 
                 if (expectedContent == actualContent)
                 {
+                    continue;
+                }
+
+                if (!IsTextFile(path))
+                {
+                    differences.Add($"{path} (byte mismatch)");
                     continue;
                 }
 

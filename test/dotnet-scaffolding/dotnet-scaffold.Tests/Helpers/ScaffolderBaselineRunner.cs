@@ -9,6 +9,8 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 
+internal delegate void PrepareBaselineInput(string expectedProjectDirectory, string inputProjectDirectory);
+
 internal static class ScaffolderBaselineRunner
 {
     public static async Task RunAsync(
@@ -17,7 +19,7 @@ internal static class ScaffolderBaselineRunner
         string framework,
         string template,
         Func<string, Task<(int ExitCode, string Output, string Error)>> scaffold,
-        Action<string, string>? prepareInput = null)
+        PrepareBaselineInput? prepareInput = null)
     {
         var repoRoot = ScaffoldCliHelper.GetRepoRoot();
         var baselines = Path.Combine(repoRoot, "test", "dotnet-scaffolding", "baselines");

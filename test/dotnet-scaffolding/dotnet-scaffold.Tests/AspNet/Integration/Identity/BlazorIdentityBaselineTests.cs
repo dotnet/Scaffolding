@@ -23,7 +23,7 @@ public class BlazorIdentityBaselineTests(ITestOutputHelper output)
             scaffolder: "BlazorIdentity",
             framework: framework,
             template: "BlazorWebApp",
-            scaffold: actual => ScaffoldCliHelper.RunScaffoldAsync("net11.0", "blazor-identity", [
+            scaffold: actual => ScaffoldCliHelper.RunScaffoldAsync(ScaffoldCliHelper.GetTestTargetFramework(), "blazor-identity", [
                 "--project", Path.Combine(actual, "BlazorWebApp.csproj"),
                 "--dataContext", "ApplicationDbContext",
                 "--dbProvider", "sqlite-efcore",

@@ -25,6 +25,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.S
         /// </summary>
         public virtual string TransformText()
         {
+            this.Write("@using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
+            this.Write("\r\n");
             this.Write("@using Microsoft.AspNetCore.Identity\r\n@using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.DbContextNamespace));
             this.Write("\r\n\r\n@inject SignInManager<");

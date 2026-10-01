@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.Shared
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.Pages
 {
     using System.Collections.Generic;
     using System.Text;
@@ -18,61 +18,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.S
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class ExternalLoginPicker : ExternalLoginPickerBase
+    public partial class AccessDenied : AccessDeniedBase
     {
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
-            this.Write("\r\n");
-            this.Write("@using Microsoft.AspNetCore.Authentication\r\n@using Microsoft.AspNetCore.Identity\r" +
-                    "\n@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.DbContextNamespace));
-            this.Write("\r\n\r\n@inject SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@"> SignInManager
-@inject IdentityRedirectManager RedirectManager
-
-@if (externalLogins.Length == 0)
-{
-    <div>
-        <p>
-            There are no external authentication services configured. See this <a href=""https://go.microsoft.com/fwlink/?LinkID=532715"">article
-            about setting up this ASP.NET application to support logging in via external services</a>.
-        </p>
-    </div>
-}
-else
-{
-    <form class=""form-horizontal"" action=""Account/PerformExternalLogin"" method=""post"">
-        <div>
-            <AntiforgeryToken />
-            <input type=""hidden"" name=""ReturnUrl"" value=""@ReturnUrl"" />
-            <p>
-                @foreach (var provider in externalLogins)
-                {
-                    <button type=""submit"" class=""btn btn-primary"" name=""provider"" value=""@provider.Name"" title=""Log in using your @provider.DisplayName account"">@provider.DisplayName</button>
-                }
-            </p>
-        </div>
-    </form>
-}
-
-@code {
-    private AuthenticationScheme[] externalLogins = [];
-
-    [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        externalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToArray();
-    }
-}
-");
+            this.Write("@page \"/Account/AccessDenied\"\r\n\r\n<PageTitle>Access denied</PageTitle>\r\n\r\n<header>" +
+                    "\r\n    <h1 class=\"text-danger\">Access denied</h1>\r\n    <p class=\"text-danger\">You" +
+                    " do not have access to this resource.</p>\r\n</header>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -132,8 +87,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the parameter \'Model\' did not match the type of the data passed to" +
-                    " the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }
@@ -157,7 +112,7 @@ if ((ModelValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class ExternalLoginPickerBase
+    public class AccessDeniedBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

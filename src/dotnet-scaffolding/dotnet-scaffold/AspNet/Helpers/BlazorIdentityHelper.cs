@@ -170,6 +170,7 @@ internal static class BlazorIdentityHelper
         typeof(Templates.net8.BlazorIdentity.IdentityRevalidatingAuthenticationStateProvider),
         typeof(Templates.net8.BlazorIdentity.IdentityUserAccessor),
         typeof(Templates.net8.BlazorIdentity.Pages._Imports),
+        typeof(Templates.net8.BlazorIdentity.Pages.AccessDenied),
         typeof(Templates.net8.BlazorIdentity.Pages.ConfirmEmail),
         typeof(Templates.net8.BlazorIdentity.Pages.ConfirmEmailChange),
         typeof(Templates.net8.BlazorIdentity.Pages.ExternalLogin),

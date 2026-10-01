@@ -91,6 +91,15 @@
     {
       "FileName": "Program.cs",
       "Usings": [
+        "$(DbContextNamespace)"
+      ],
+      "Options": [
+        "DbContextNamespace"
+      ]
+    },
+    {
+      "FileName": "Program.cs",
+      "Usings": [
         "Microsoft.EntityFrameworkCore",
         "$(UserClassNamespace)"
       ],

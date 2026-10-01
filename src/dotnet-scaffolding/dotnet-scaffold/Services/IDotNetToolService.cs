@@ -13,7 +13,7 @@ internal interface IDotNetToolService
     /// <summary>
     /// Gets all commands for the specified tools in parallel.
     /// </summary>
-    /// <param name="components">The list of tool components to query. If null, all tools are used.</param>
+    /// <param name="components">The list of tool components to query. If null or empty, the dotnet-scaffold tool is used.</param>
     /// <param name="envVars">Optional environment variables for the command execution.</param>
     /// <returns>A list of key-value pairs mapping tool command names to their command info.</returns>
     IList<KeyValuePair<string, CommandInfo>> GetAllCommandsParallel(IList<DotNetToolInfo>? components = null, IDictionary<string, string>? envVars = null);
@@ -56,6 +56,7 @@ internal interface IDotNetToolService
 
     /// <summary>
     /// Gets the list of commands provided by a specific .NET tool.
+    /// Built-in commands are queried from the running assembly.
     /// </summary>
     /// <param name="dotnetTool">The tool to query for commands.</param>
     /// <param name="envVars">Optional environment variables for the command execution.</param>

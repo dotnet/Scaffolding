@@ -6,10 +6,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.RazorPages;
 
-public class RazorPagesCrudNet9IntegrationTests : RazorPagesCrudIntegrationTestsBase
+public class RazorPagesCrudNet9IntegrationTests(ITestOutputHelper output) : RazorPagesCrudIntegrationTestsBase
 {
     protected override string TargetFramework => "net9.0";
     protected override string TestClassName => nameof(RazorPagesCrudNet9IntegrationTests);
@@ -67,6 +68,7 @@ public class RazorPagesCrudNet9IntegrationTests : RazorPagesCrudIntegrationTests
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore",
             "--page", "CRUD");
+        output.WriteLine($"CLI exit code: {cliExitCode}\nStandard output:\n{cliOutput}\nStandard error:\n{cliError}");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
         // Assert — expected files were created (skip if scaffolding encountered errors)

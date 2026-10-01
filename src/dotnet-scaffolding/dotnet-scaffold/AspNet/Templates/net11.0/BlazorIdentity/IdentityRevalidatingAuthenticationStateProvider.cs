@@ -22,6 +22,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorIdentity
         /// </summary>
         public virtual string TransformText()
         {
+            this.Write("using System.Security.Claims;\r\nusing Microsoft.AspNetCore.Components.Authorizatio" +
+                    "n;\r\nusing Microsoft.AspNetCore.Components.Server;\r\nusing Microsoft.AspNetCore.Id" +
+                    "entity;\r\nusing Microsoft.Extensions.Options;\r\n");
 
 if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
@@ -32,50 +35,47 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 } 
             this.Write("using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
-            this.Write(";\r\nusing Microsoft.AspNetCore.Components.Authorization;\r\nusing Microsoft.AspNetCo" +
-                    "re.Components.Server;\r\nusing Microsoft.AspNetCore.Identity;\r\nusing Microsoft.Ext" +
-                    "ensions.Options;\r\nusing System.Security.Claims;\r\n\r\nnamespace ");
+            this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write(@"
-{
-    // This is a server-side AuthenticationStateProvider that revalidates the security stamp for the connected user
-    // every 30 minutes an interactive circuit is connected.
-    internal sealed class IdentityRevalidatingAuthenticationStateProvider(
-            ILoggerFactory loggerFactory,
-            IServiceScopeFactory scopeFactory,
-            IOptions<IdentityOptions> options)
-        : RevalidatingServerAuthenticationStateProvider(loggerFactory)
-    {
-        protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
+            this.Write(@";
 
-        protected override async Task<bool> ValidateAuthenticationStateAsync(
-            AuthenticationState authenticationState, CancellationToken cancellationToken)
-        {
-            // Get the user manager from a new scope to ensure it fetches fresh data
-            await using var scope = scopeFactory.CreateAsyncScope();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<");
+// This is a server-side AuthenticationStateProvider that revalidates the security stamp for the connected user
+// every 30 minutes an interactive circuit is connected.
+internal sealed class IdentityRevalidatingAuthenticationStateProvider(
+        ILoggerFactory loggerFactory,
+        IServiceScopeFactory scopeFactory,
+        IOptions<IdentityOptions> options)
+    : RevalidatingServerAuthenticationStateProvider(loggerFactory)
+{
+    protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
+
+    protected override async Task<bool> ValidateAuthenticationStateAsync(
+        AuthenticationState authenticationState, CancellationToken cancellationToken)
+    {
+        // Get the user manager from a new scope to ensure it fetches fresh data
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(">>();\r\n            return await ValidateSecurityStampAsync(userManager, authentic" +
-                    "ationState.User);\r\n        }\r\n\r\n        private async Task<bool> ValidateSecurit" +
-                    "yStampAsync(UserManager<");
+            this.Write(">>();\r\n        return await ValidateSecurityStampAsync(userManager, authenticatio" +
+                    "nState.User);\r\n    }\r\n\r\n    private async Task<bool> ValidateSecurityStampAsync(" +
+                    "UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> userManager, ClaimsPrincipal principal)
+    {
+        var user = await userManager.GetUserAsync(principal);
+        if (user is null)
         {
-            var user = await userManager.GetUserAsync(principal);
-            if (user is null)
-            {
-                return false;
-            }
-            else if (!userManager.SupportsUserSecurityStamp)
-            {
-                return true;
-            }
-            else
-            {
-                var principalStamp = principal.FindFirstValue(options.Value.ClaimsIdentity.SecurityStampClaimType);
-                var userStamp = await userManager.GetSecurityStampAsync(user);
-                return principalStamp == userStamp;
-            }
+            return false;
+        }
+        else if (!userManager.SupportsUserSecurityStamp)
+        {
+            return true;
+        }
+        else
+        {
+            var principalStamp = principal.FindFirstValue(options.Value.ClaimsIdentity.SecurityStampClaimType);
+            var userStamp = await userManager.GetSecurityStampAsync(user);
+            return principalStamp == userStamp;
         }
     }
 }

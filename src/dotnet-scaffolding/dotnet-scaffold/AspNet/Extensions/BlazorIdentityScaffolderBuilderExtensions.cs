@@ -3,6 +3,7 @@
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Model;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -63,6 +64,42 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
     }
 
     /// <summary>
+    /// Adds authentication-state services to the client project for WebAssembly and Auto render modes.
+    /// </summary>
+    public static IScaffoldBuilder WithBlazorIdentityClientCodeChangeStep(this IScaffoldBuilder builder)
+    {
+        builder = builder.WithStep<WrappedCodeModificationStep>(config =>
+        {
+            var step = config.Step;
+            if (!config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) ||
+                identityModelObj is not IdentityModel identityModel ||
+                !identityModel.ProjectInfo.LowestSupportedTargetFramework.IsNetVersionOrLater(9) ||
+                string.IsNullOrEmpty(identityModel.BlazorWebAssemblyClientProjectPath))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
+            var clientProjectPath = identityModel.BlazorWebAssemblyClientProjectPath;
+            var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile(
+                "blazorIdentityClientChanges.json",
+                System.Reflection.Assembly.GetExecutingAssembly(),
+                TargetFrameworkHelpers.GetTargetFrameworkFolder(clientProjectPath));
+            if (string.IsNullOrEmpty(codeModificationFilePath))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
+            step.CodeModifierConfigPath = codeModificationFilePath;
+            step.ProjectPath = clientProjectPath;
+            step.CodeChangeOptions = [];
+        });
+
+        return builder;
+    }
+
+    /// <summary>
     /// Adds a text templating step for Blazor Identity scaffolding.
     /// </summary>
     public static IScaffoldBuilder WithBlazorIdentityTextTemplatingStep(this IScaffoldBuilder builder)
@@ -84,7 +121,7 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
 
             var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["BlazorIdentity"], blazorIdentityModel.ProjectInfo.ProjectPath);
             var applicationUserFile = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Files"], blazorIdentityModel.ProjectInfo.ProjectPath)
-                .FirstOrDefault(x => x.EndsWith("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(x => Path.GetFileName(x).Equals("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
             var blazorIdentityProperties = BlazorIdentityHelper.GetTextTemplatingProperties(allBlazorIdentityFiles, blazorIdentityModel);
             var applicationUserProperty = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(applicationUserFile, blazorIdentityModel);
             if (applicationUserProperty is not null)
@@ -109,14 +146,19 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
     }
 
     /// <summary>
-    /// Adds a step to add static files required for Blazor Identity scaffolding.
+    /// Adds a step to copy the JavaScript file required for Blazor Identity passkey support.
     /// </summary>
-    public static IScaffoldBuilder WithBlazorIdentityStaticFilesStep(this IScaffoldBuilder builder)
+    public static IScaffoldBuilder WithBlazorIdentityPasskeyJavaScriptStep(this IScaffoldBuilder builder)
     {
         builder = builder.WithStep<AddFileStep>(config =>
         {
             var step = config.Step;
             var context = config.Context;
+            if (!context.GetSpecifiedTargetFramework().IsNetVersionOrLater(10))
+            {
+                step.SkipStep = true;
+                return;
+            }
 
             string? projectPath = context.GetOptionResult<string>(Constants.CliOptions.ProjectCliOption);
             if (string.IsNullOrEmpty(projectPath))
@@ -130,10 +172,11 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) && commandSettingsObj is IdentitySettings commandSettings)
             {
                 var projectDirectory = Path.GetDirectoryName(commandSettings.Project);
-                if (Directory.Exists(projectDirectory))
+                if (!string.IsNullOrEmpty(projectDirectory) && Directory.Exists(projectDirectory))
                 {
                     step.BaseOutputDirectory = Path.Combine(BlazorIdentityHelper.GetIdentityComponentsPath(projectDirectory), "Shared");
                     step.FileName = "PasskeySubmit.razor.js";
+                    step.Overwrite = commandSettings.Overwrite;
                     return;
                 }
             }
@@ -174,6 +217,10 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
                     {
                         packages.Add(PackageConstants.EfConstants.SqlitePclRawBundlePackage);
                     }
+                    else if (commandSettings.DatabaseProvider == PackageConstants.EfConstants.SqlServer && context.GetSpecifiedTargetFramework().IsNetVersionOrLater(11))
+                    {
+                        packages.Add(PackageConstants.EfConstants.SqlClientExtensionsAzurePackage);
+                    }
                 }
 
                 step.Packages = packages;
@@ -182,6 +229,37 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
             {
                 step.SkipStep = true;
                 return;
+            }
+        });
+    }
+
+    /// <summary>
+    /// Adds the authentication package required by the WebAssembly client.
+    /// </summary>
+    public static IScaffoldBuilder WithBlazorIdentityClientAddPackagesStep(this IScaffoldBuilder builder)
+    {
+        return builder.WithStep<WrappedAddPackagesStep>(config =>
+        {
+            var step = config.Step;
+            if (!config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) ||
+                identityModelObj is not IdentityModel identityModel ||
+                !identityModel.ProjectInfo.LowestSupportedTargetFramework.IsNetVersionOrLater(9) ||
+                string.IsNullOrEmpty(identityModel.BlazorWebAssemblyClientProjectPath))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
+            step.ProjectPath = identityModel.BlazorWebAssemblyClientProjectPath;
+            step.Packages =
+            [
+                PackageConstants.AspNetCorePackages.AspNetCoreComponentsWebAssemblyAuthenticationPackage
+            ];
+
+            if (config.Context.Properties.TryGetValue(nameof(IdentitySettings), out var identitySettingsObj) &&
+                identitySettingsObj is IdentitySettings identitySettings)
+            {
+                step.Prerelease = identitySettings.Prerelease;
             }
         });
     }

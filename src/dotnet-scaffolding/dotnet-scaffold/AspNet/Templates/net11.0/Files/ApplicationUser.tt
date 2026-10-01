@@ -6,7 +6,9 @@
 using Microsoft.AspNetCore.Identity;
 <# if (!string.IsNullOrEmpty(Model.UserClassNamespace))
 {#>
-namespace <#= Model.UserClassNamespace #>;<#
+
+namespace <#= Model.UserClassNamespace #>;
+<#
 }
 #>
 

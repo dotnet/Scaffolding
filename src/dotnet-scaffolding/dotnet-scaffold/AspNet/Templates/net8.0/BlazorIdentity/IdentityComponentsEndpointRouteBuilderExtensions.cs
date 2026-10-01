@@ -30,7 +30,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity
     var sortedUsings = new SortedSet<string>()
     {
         Model.UserClassNamespace,
-        Model.DbContextInfo.DbContextNamespace,
         $"{Model.IdentityNamespace}.Pages",
         $"{Model.IdentityNamespace}.Pages.Manage",
         "Microsoft.AspNetCore.Authentication",
@@ -40,6 +39,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity
         "Microsoft.AspNetCore.Mvc",
         "Microsoft.Extensions.Primitives",
     };
+
+    if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+    {
+        sortedUsings.Add(Model.DbContextNamespace);
+    }
 
     foreach (var usingNamespace in sortedUsings)
     {

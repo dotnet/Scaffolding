@@ -6,22 +6,7 @@
         "Global": {
           "CodeChanges": [
             {
-              "InsertAfter": "WebApplication.CreateBuilder",
-              "CheckBlock": "builder.Configuration.GetConnectionString",
-              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? \"Data Source=TestDb.db\"",
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
-              "Block": "app.UseMigrationsEndPoint()",
-              "InsertBefore": [ "app.Run();" ],
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
-              "Block": "app.MapAdditionalIdentityEndpoints();",
+              "Block": "app.MapAdditionalIdentityEndpoints()",
               "InsertBefore": [ "app.Run();" ],
               "LeadingTrivia": {
                 "Newline": true
@@ -127,10 +112,38 @@
               "LeadingTrivia": {
                 "Newline": true
               }
+            },
+            {
+              "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
+              "Block": "WebApplication.CreateBuilder.Services.AddDatabaseDeveloperPageExceptionFilter()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
             }
           ]
         }
-      }
+      },
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "if (!app.Environment.IsDevelopment())" ],
+          "MultiLineBlock": [
+            "if (app.Environment.IsDevelopment())",
+            "{",
+            "    app.UseMigrationsEndPoint();",
+            "}",
+            "else"
+          ],
+          "CheckBlock": "app.UseMigrationsEndPoint()"
+        },
+        {
+          "ReplaceSnippet": [ "app.UseWebAssemblyDebugging();" ],
+          "MultiLineBlock": [
+            "app.UseWebAssemblyDebugging();",
+            "    app.UseMigrationsEndPoint();"
+          ],
+          "CheckBlock": "app.UseMigrationsEndPoint()"
+        }
+      ]
     },
     {
       "FileName": "Routes.razor",
@@ -205,14 +218,9 @@
         {
           "CheckBlock": "<AuthorizeView>",
           "ReplaceSnippet": [
-            "<span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather",
-            "            </NavLink>",
-            "        </div>"
+            "</nav>"
           ],
           "MultiLineBlock": [
-            "<span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather",
-            "            </NavLink>",
-            "        </div>",
             "        <AuthorizeView>",
             "            <Authorized>",
             "                <div class=\"nav-item px-3\">",
@@ -242,7 +250,8 @@
             "                    </a>",
             "                </div>",
             "            </NotAuthorized>",
-            "        </AuthorizeView>"
+            "        </AuthorizeView>",
+            "</nav>"
           ]
         },
         {
@@ -287,21 +296,19 @@
           ],
           "MultiLineBlock": [
             "@using Microsoft.AspNetCore.Components.Forms",
-            "@using Microsoft.AspNetCore.Components.Authorization",
-            "@using Microsoft.AspNetCore.Components.Endpoints",
-            "@using Microsoft.AspNetCore.Components.Web",
-            "@using static Microsoft.AspNetCore.Components.Web.RenderMode"
+            "@using Microsoft.AspNetCore.Components.Authorization"
           ],
-          "CheckBlock": "Microsoft.AspNetCore.Components.Endpoints"
+          "CheckBlock": "Microsoft.AspNetCore.Components.Authorization"
         }
       ]
     },
     {
       "FileName": "Components\\App.razor",
+      "Options": [ "GlobalInteractive" ],
       "Replacements": [
         {
           "ReplaceSnippet": [
-            "<HeadOutlet @rendermode=\"InteractiveServer\" />"
+            "<HeadOutlet @rendermode=\"$(BlazorRenderMode)\" />"
           ],
           "MultiLineBlock": [
             "<HeadOutlet @rendermode=\"PageRenderMode\" />"
@@ -309,7 +316,7 @@
         },
         {
           "ReplaceSnippet": [
-            "<Routes @rendermode=\"InteractiveServer\" />"
+            "<Routes @rendermode=\"$(BlazorRenderMode)\" />"
           ],
           "MultiLineBlock": [
             "<Routes @rendermode=\"PageRenderMode\" />"
@@ -317,47 +324,18 @@
         },
         {
           "ReplaceSnippet": [
-            "<HeadOutlet />"
+            "</html>"
           ],
           "MultiLineBlock": [
-            "<HeadOutlet @rendermode=\"PageRenderMode\" />"
-          ],
-          "CheckBlock": "<HeadOutlet />"
-        },
-        {
-          "ReplaceSnippet": [
-            "<Router AppAssembly=\"typeof(Program).Assembly\"",
-            "        NotFoundPage=\"typeof(Pages.NotFound)\">",
-            "    <Found Context=\"routeData\">",
-            "        <RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" />",
-            "        <FocusOnNavigate RouteData=\"routeData\" Selector=\"h1\" />",
-            "    </Found>",
-            "</Router>"
-          ],
-          "MultiLineBlock": [
-            "<Router AppAssembly=\"typeof(Program).Assembly\"",
-            "        NotFoundPage=\"typeof(Pages.NotFound)\">",
-            "    <Found Context=\"routeData\">",
-            "        <RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" @rendermode=\"PageRenderMode\" />",
-            "        <FocusOnNavigate RouteData=\"routeData\" Selector=\"h1\" />",
-            "    </Found>",
-            "</Router>"
-          ],
-          "CheckBlock": "RouteView RouteData"
-        },
-        {
-          "ReplaceSnippet": [
-            "</body>"
-          ],
-          "MultiLineBlock": [
+            "</html>",
+            "",
             "@code {",
             "    [CascadingParameter]",
             "    private HttpContext HttpContext { get; set; } = default!;",
             "",
             "    private IComponentRenderMode? PageRenderMode =>",
-            "        HttpContext.Request.Path.StartsWithSegments(\"/Account\") ? null : InteractiveServer;",
-            "}",
-            "</body>"
+            "        HttpContext.Request.Path.StartsWithSegments(\"/Account\") ? null : $(BlazorRenderMode);",
+            "}"
           ],
           "CheckBlock": "HttpContext.Request.Path.StartsWithSegments(\"/Account\")"
         }

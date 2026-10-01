@@ -31,6 +31,16 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" VersionOverride="$(SystemDiagnosticsDiagnosticSourcePackageVersion9)" NoWarn="NU1510" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <!-- Force Microsoft.Extensions package versions for net10 builds to avoid central downgrade warnings when net11 artifacts are present in project graph -->
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="$(MicrosoftExtensionsPackageVersion10)" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" VersionOverride="$(MicrosoftExtensionsPackageVersion10)" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
+    <!-- Ensure explicit net11 package versions when building net11 TFM -->
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" VersionOverride="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" VersionOverride="$(MicrosoftExtensionsHostingPackageVersion)" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Internal\Microsoft.DotNet.Scaffolding.Internal.csproj" />
     <ProjectReference Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.Roslyn\Microsoft.DotNet.Scaffolding.Roslyn.csproj" />
@@ -834,7 +844,7 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
     <!-- net11.0 Blazor CRUD templates -->
     <Compile Update="AspNet\Templates\net11.0\Blazor\Create.cs">
       <DependentUpon>Create.tt</DependentUpon>

@@ -16,12 +16,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.EntraId;
 
 public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
 {
+    private const string RunExternalE2EEnvVar = "DOTNET_SCAFFOLD_RUN_ENTRA_E2E";
+    private const string UsernameEnvVar = "DOTNET_SCAFFOLD_ENTRA_USERNAME";
+    private const string TenantIdEnvVar = "DOTNET_SCAFFOLD_ENTRA_TENANT_ID";
+    private const string ApplicationIdEnvVar = "DOTNET_SCAFFOLD_ENTRA_APPLICATION_ID";
+
     protected override string TargetFramework => "net10.0";
     protected override string TestClassName => nameof(EntraIdInteractiveE2ETests);
 
-    [Fact]
+    [SkippableFact]
     public async Task Scaffold_Interactive_Server_Builds()
     {
+        var entraSettings = GetRequiredExternalEntraSettings();
+
         // Arrange — minimal ASP.NET Web project
         File.WriteAllText(_testProjectPath, ProjectContent);
         File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetMinimalProgramCs());
@@ -29,15 +36,15 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
         Assert.True(preExitCode == 0, $"Project should build before scaffolding. Error: {preError}");
 
-        // Act — invoke CLI: dotnet scaffold aspnet entra-id using existing application to avoid Azure calls
+        // Act — invoke CLI: dotnet scaffold aspnet entra-id using a real existing application.
         var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
             "entra-id",
             "--project", _testProjectPath,
-            "--username", "test@example.com",
-            "--tenantId", "test-tenant-id",
+            "--username", entraSettings.Username,
+            "--tenantId", entraSettings.TenantId,
             "--use-existing-application",
-            "--applicationId", "00000000-0000-0000-0000-000000000000");
+            "--applicationId", entraSettings.ApplicationId);
 
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
@@ -46,9 +53,11 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
         Assert.True(postExitCode == 0, $"Project should build after scaffolding. Error: {postError}");
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task Scaffold_Interactive_BlazorWasm_Builds()
     {
+        var entraSettings = GetRequiredExternalEntraSettings();
+
         // Arrange — Blazor WebAssembly project structure
         File.WriteAllText(_testProjectPath, ProjectContent);
         File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
@@ -57,15 +66,15 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
         Assert.True(preExitCode == 0, $"Project should build before scaffolding. Error: {preError}");
 
-        // Act — invoke CLI with UseExistingApplication to avoid Azure calls
+        // Act — invoke CLI with a real existing application.
         var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
             "entra-id",
             "--project", _testProjectPath,
-            "--username", "test@example.com",
-            "--tenantId", "test-tenant-id",
+            "--username", entraSettings.Username,
+            "--tenantId", entraSettings.TenantId,
             "--use-existing-application",
-            "--applicationId", "00000000-0000-0000-0000-000000000000");
+            "--applicationId", entraSettings.ApplicationId);
 
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
@@ -75,9 +84,11 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
         Assert.True(postExitCode == 0, $"Project should build after scaffolding. Error: {postError}");
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task Scaffold_Interactive_Auto_Hosted_Builds()
     {
+        var entraSettings = GetRequiredExternalEntraSettings();
+
         // Arrange — create a server project that references a client project (Auto hosted layout)
         var serverDir = _testProjectDir;
         var clientDir = Path.Combine(_testDirectory, "TestProject.Client");
@@ -87,7 +98,13 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
         var clientProjPath = Path.Combine(clientDir, "TestProject.Client.csproj");
 
         // Server project references the client project
-        var serverProjectContent = @"<Project Sdk=\"Microsoft.NET.Sdk.Web\">\n  <ItemGroup>\n    <ProjectReference Include=\"TestProject.Client\" />\n  </ItemGroup>\n</Project>";
+        var serverProjectContent = """
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <ItemGroup>
+                <ProjectReference Include="..\TestProject.Client\TestProject.Client.csproj" />
+              </ItemGroup>
+            </Project>
+            """;
         File.WriteAllText(serverProjPath, serverProjectContent);
 
         // Client project is a Blazor WASM project
@@ -106,10 +123,10 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
             TargetFramework,
             "entra-id",
             "--project", serverProjPath,
-            "--username", "test@example.com",
-            "--tenantId", "test-tenant-id",
+            "--username", entraSettings.Username,
+            "--tenantId", entraSettings.TenantId,
             "--use-existing-application",
-            "--applicationId", "00000000-0000-0000-0000-000000000000");
+            "--applicationId", entraSettings.ApplicationId);
 
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
@@ -145,5 +162,28 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
         {
             Environment.SetEnvironmentVariable("PATH", originalPath);
         }
+    }
+
+    private static (string Username, string TenantId, string ApplicationId) GetRequiredExternalEntraSettings()
+    {
+        if (!string.Equals(Environment.GetEnvironmentVariable(RunExternalE2EEnvVar), "1", StringComparison.Ordinal))
+        {
+            throw new Xunit.SkipException(
+                $"Set {RunExternalE2EEnvVar}=1 and provide {UsernameEnvVar}, {TenantIdEnvVar}, and {ApplicationIdEnvVar} to run external Entra ID E2E tests.");
+        }
+
+        var username = Environment.GetEnvironmentVariable(UsernameEnvVar);
+        var tenantId = Environment.GetEnvironmentVariable(TenantIdEnvVar);
+        var applicationId = Environment.GetEnvironmentVariable(ApplicationIdEnvVar);
+
+        if (string.IsNullOrWhiteSpace(username) ||
+            string.IsNullOrWhiteSpace(tenantId) ||
+            string.IsNullOrWhiteSpace(applicationId))
+        {
+            throw new Xunit.SkipException(
+                $"External Entra ID E2E tests require {UsernameEnvVar}, {TenantIdEnvVar}, and {ApplicationIdEnvVar}.");
+        }
+
+        return (username, tenantId, applicationId);
     }
 }

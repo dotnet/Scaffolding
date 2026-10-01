@@ -12,7 +12,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 
 /// <summary>
 /// Shared helper for invoking the dotnet-scaffold CLI tool from integration tests.
-/// Uses <c>dotnet run --project</c> to invoke the tool from source, avoiding global tool installation.
+/// Uses the already-built tool DLL from the Arcade artifacts layout, avoiding global tool installation
+/// and avoiding <c>dotnet run --no-build</c> assumptions about the output path.
 /// </summary>
 internal static class ScaffoldCliHelper
 {
@@ -34,6 +35,22 @@ internal static class ScaffoldCliHelper
     public static string GetScaffoldProjectPath()
     {
         return Path.Combine(GetRepoRoot(), "src", "dotnet-scaffolding", "dotnet-scaffold", "dotnet-scaffold.csproj");
+    }
+
+    /// <summary>
+    /// Gets the absolute path to the built dotnet-scaffold DLL for the specified target framework.
+    /// The Arcade build layout is: {repoRoot}/artifacts/bin/dotnet-scaffold/{Config}/{TFM}/dotnet-scaffold.dll
+    /// </summary>
+    public static string GetScaffoldDllPath(string targetFramework)
+    {
+        return Path.Combine(
+            GetRepoRoot(),
+            "artifacts",
+            "bin",
+            "dotnet-scaffold",
+            GetBuildConfiguration(),
+            targetFramework,
+            "dotnet-scaffold.dll");
     }
 
     /// <summary>
@@ -153,12 +170,11 @@ internal static class ScaffoldCliHelper
     }
 
     /// <summary>
-    /// Runs a dotnet-scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspnet {command} {args}</c>.
-    /// Uses <c>--no-build</c> because the solution must already be built before running tests.
+    /// Runs a dotnet-scaffold CLI command by invoking the already-built tool DLL:
+    /// <c>dotnet {artifacts/bin/dotnet-scaffold/{config}/{framework}/dotnet-scaffold.dll} aspnet {command} {args}</c>.
     /// The build configuration is auto-detected from the test assembly output path so the correct
-    /// Debug or Release build of the tool is used.
-    /// The <paramref name="targetFramework"/> controls which TFM of the multi-targeted dotnet-scaffold tool is executed,
-    /// simulating a machine that only has that .NET version installed.
+    /// Debug or Release build of the tool is used. The <paramref name="targetFramework"/> controls
+    /// which TFM-specific output of the multi-targeted tool is executed.
     /// </summary>
     /// <param name="targetFramework">The target framework moniker to run the tool under (e.g., "net8.0", "net9.0", "net10.0", "net11.0").</param>
     /// <param name="command">The scaffold sub-command (e.g., "minimalapi", "mvccontroller", "blazor-empty").</param>
@@ -166,8 +182,7 @@ internal static class ScaffoldCliHelper
     /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
     public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAsync(string targetFramework, string command, params string[] args)
     {
-        var scaffoldCsproj = GetScaffoldProjectPath();
-        var configuration = GetBuildConfiguration();
+        var scaffoldDll = GetScaffoldDllPath(targetFramework);
 
         var process = new Process
         {
@@ -180,15 +195,7 @@ internal static class ScaffoldCliHelper
             }
         };
         ConfigureDotNetEnvironment(process.StartInfo);
-        process.StartInfo.ArgumentList.Add("run");
-        process.StartInfo.ArgumentList.Add("--no-build");
-        process.StartInfo.ArgumentList.Add("-c");
-        process.StartInfo.ArgumentList.Add(configuration);
-        process.StartInfo.ArgumentList.Add("--project");
-        process.StartInfo.ArgumentList.Add(scaffoldCsproj);
-        process.StartInfo.ArgumentList.Add("--framework");
-        process.StartInfo.ArgumentList.Add(targetFramework);
-        process.StartInfo.ArgumentList.Add("--");
+        process.StartInfo.ArgumentList.Add(scaffoldDll);
         process.StartInfo.ArgumentList.Add("aspnet");
         process.StartInfo.ArgumentList.Add(command);
         foreach (var arg in args)
@@ -205,7 +212,8 @@ internal static class ScaffoldCliHelper
     }
 
     /// <summary>
-    /// Runs an Aspire scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspire {command} {args}</c>.
+    /// Runs an Aspire scaffold CLI command by invoking the already-built tool DLL:
+    /// <c>dotnet {artifacts/bin/dotnet-scaffold/{config}/{framework}/dotnet-scaffold.dll} aspire {command} {args}</c>.
     /// </summary>
     /// <param name="targetFramework">The target framework moniker to run the tool under (e.g., "net8.0", "net9.0", "net10.0", "net11.0").</param>
     /// <param name="command">The Aspire sub-command (e.g., "caching", "database", "storage").</param>
@@ -213,8 +221,7 @@ internal static class ScaffoldCliHelper
     /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
     public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAspireAsync(string targetFramework, string command, params string[] args)
     {
-        var scaffoldCsproj = GetScaffoldProjectPath();
-        var configuration = GetBuildConfiguration();
+        var scaffoldDll = GetScaffoldDllPath(targetFramework);
 
         var process = new Process
         {
@@ -227,15 +234,7 @@ internal static class ScaffoldCliHelper
             }
         };
         ConfigureDotNetEnvironment(process.StartInfo);
-        process.StartInfo.ArgumentList.Add("run");
-        process.StartInfo.ArgumentList.Add("--no-build");
-        process.StartInfo.ArgumentList.Add("-c");
-        process.StartInfo.ArgumentList.Add(configuration);
-        process.StartInfo.ArgumentList.Add("--project");
-        process.StartInfo.ArgumentList.Add(scaffoldCsproj);
-        process.StartInfo.ArgumentList.Add("--framework");
-        process.StartInfo.ArgumentList.Add(targetFramework);
-        process.StartInfo.ArgumentList.Add("--");
+        process.StartInfo.ArgumentList.Add(scaffoldDll);
         process.StartInfo.ArgumentList.Add("aspire");
         process.StartInfo.ArgumentList.Add(command);
         foreach (var arg in args)

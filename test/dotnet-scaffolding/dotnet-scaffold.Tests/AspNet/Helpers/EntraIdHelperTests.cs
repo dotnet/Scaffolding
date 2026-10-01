@@ -17,11 +17,14 @@ public class EntraIdHelperTests
     [Fact]
     public void GetTextTemplatingProperties_WithEmptyTemplatePaths_ReturnsEmpty()
     {
+        // Arrange
         List<string> templatePaths = [];
         EntraIdModel entraIdModel = CreateTestEntraIdModel();
 
+        // Act
         IEnumerable<TextTemplatingProperty> result = EntraIdHelper.GetTextTemplatingProperties(templatePaths, entraIdModel);
 
+        // Assert
         Assert.NotNull(result);
         Assert.Empty(result);
     }
@@ -29,6 +32,7 @@ public class EntraIdHelperTests
     [Fact]
     public void GetTextTemplatingProperties_WithNullProjectInfo_ReturnsEmpty()
     {
+        // Arrange
         List<string> templatePaths = [Path.Combine("BlazorEntraId", "Test.tt")];
         EntraIdModel entraIdModel = new EntraIdModel
         {
@@ -36,8 +40,10 @@ public class EntraIdHelperTests
             BaseOutputPath = "output"
         };
 
+        // Act
         IEnumerable<TextTemplatingProperty> result = EntraIdHelper.GetTextTemplatingProperties(templatePaths, entraIdModel);
 
+        // Assert
         Assert.NotNull(result);
         Assert.Empty(result);
     }
@@ -45,6 +51,7 @@ public class EntraIdHelperTests
     [Fact]
     public void GetTextTemplatingProperties_WithNullProjectPath_ReturnsEmpty()
     {
+        // Arrange
         List<string> templatePaths = [Path.Combine("BlazorEntraId", "Test.tt")];
         EntraIdModel entraIdModel = new EntraIdModel
         {
@@ -52,8 +59,10 @@ public class EntraIdHelperTests
             BaseOutputPath = "output"
         };
 
+        // Act
         IEnumerable<TextTemplatingProperty> result = EntraIdHelper.GetTextTemplatingProperties(templatePaths, entraIdModel);
 
+        // Assert
         Assert.NotNull(result);
         Assert.Empty(result);
     }
@@ -61,23 +70,32 @@ public class EntraIdHelperTests
     [Fact]
     public void GetTextTemplatingProperties_WithValidInputs_ReturnsProperties()
     {
+        // Arrange
         List<string> templatePaths = [Path.Combine("BlazorEntraId", "TestFile.tt")];
         EntraIdModel entraIdModel = CreateTestEntraIdModel();
 
+        // Act
         IEnumerable<TextTemplatingProperty> result = EntraIdHelper.GetTextTemplatingProperties(templatePaths, entraIdModel);
 
+        // Assert
         Assert.NotNull(result);
+        // Result may be empty if template type cannot be matched from reflection
+        // This is expected behavior when testing without actual template types
     }
 
     [Fact]
     public void GetTextTemplatingProperties_WithLoginOrPrefix_UsesRazorExtension()
     {
+        // Arrange
         List<string> templatePaths = [Path.Combine("BlazorEntraId", "LoginOrRegister.tt")];
         EntraIdModel entraIdModel = CreateTestEntraIdModel();
 
+        // Act
         IEnumerable<TextTemplatingProperty> result = EntraIdHelper.GetTextTemplatingProperties(templatePaths, entraIdModel);
 
+        // Assert
         Assert.NotNull(result);
+        // If any properties are returned, verify the extension logic
         TextTemplatingProperty? property = result.FirstOrDefault();
         if (property != null)
         {
@@ -88,12 +106,16 @@ public class EntraIdHelperTests
     [Fact]
     public void GetTextTemplatingProperties_WithoutLoginOrPrefix_UsesCsExtension()
     {
+        // Arrange
         List<string> templatePaths = [Path.Combine("BlazorEntraId", "SomeClass.tt")];
         EntraIdModel entraIdModel = CreateTestEntraIdModel();
 
+        // Act
         IEnumerable<TextTemplatingProperty> result = EntraIdHelper.GetTextTemplatingProperties(templatePaths, entraIdModel);
 
+        // Assert
         Assert.NotNull(result);
+        // If any properties are returned, verify the extension logic
         TextTemplatingProperty? property = result.FirstOrDefault();
         if (property != null)
         {
@@ -104,12 +126,15 @@ public class EntraIdHelperTests
     [Fact]
     public void GetTextTemplatingProperties_WithRedirectToLogin_GeneratesServerRazorComponent()
     {
+        // Arrange
         EntraIdModel entraIdModel = CreateTestEntraIdModel();
         List<string> templatePaths = [Path.Combine("BlazorEntraId", "RedirectToLogin.tt")];
 
+        // Act
         TextTemplatingProperty property = Assert.Single(
             EntraIdHelper.GetTextTemplatingProperties(templatePaths, entraIdModel));
 
+        // Assert
         Assert.Equal(
             Path.Combine("output", "Components", "RedirectToLogin.razor"),
             property.OutputPath);
@@ -121,6 +146,7 @@ public class EntraIdHelperTests
     [Fact]
     public void GetTextTemplatingProperties_WithHostedWasmClient_GeneratesRazorComponentsInHostProject()
     {
+        // Arrange
         EntraIdModel entraIdModel = CreateTestEntraIdModel();
         List<string> templatePaths =
         [
@@ -129,10 +155,12 @@ public class EntraIdHelperTests
         ];
         string clientProjectPath = Path.Combine("output", "TestProject.Client", "TestProject.Client.csproj");
 
+        // Act
         TextTemplatingProperty[] properties = EntraIdHelper
             .GetTextTemplatingProperties(templatePaths, entraIdModel, clientProjectPath)
             .ToArray();
 
+        // Assert
         Assert.Equal(2, properties.Length);
         Assert.Contains(properties, property =>
             property.OutputPath == Path.Combine("output", "Components", "Layout", "LoginOrLogout.razor"));
@@ -189,11 +217,14 @@ public class EntraIdHelperTests
     [Fact]
     public void GetTextTemplatingProperties_SetsCorrectTemplateModel()
     {
+        // Arrange
         List<string> templatePaths = [Path.Combine("BlazorEntraId", "Test.tt")];
         EntraIdModel entraIdModel = CreateTestEntraIdModel();
 
+        // Act
         IEnumerable<TextTemplatingProperty> result = EntraIdHelper.GetTextTemplatingProperties(templatePaths, entraIdModel);
 
+        // Assert
         Assert.NotNull(result);
         TextTemplatingProperty? property = result.FirstOrDefault();
         if (property != null)

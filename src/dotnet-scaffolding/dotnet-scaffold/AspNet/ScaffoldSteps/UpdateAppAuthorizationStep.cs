@@ -62,10 +62,8 @@
                 var exitCode = runner.RunAzCli(command, out var stdOut, out var stdErr);
                 if (exitCode != 0 || !string.IsNullOrEmpty(stdErr))
                 {
-                    _logger.LogWarning($"Warning: Failed to update app registration: {stdErr}");
-                    // Don't fail the entire scaffolding pipeline if app registration update fails
-                    // This allows Entra components to still be generated
-                    return Task.FromResult(true);
+                    _logger.LogError($"Failed to update app registration: {stdErr}");
+                    return Task.FromResult(false);
                 }
 
                 _logger.LogInformation($"Updated App registration with ID token configuration and redirect URIs");

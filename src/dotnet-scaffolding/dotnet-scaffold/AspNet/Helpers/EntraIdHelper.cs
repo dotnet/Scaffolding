@@ -39,15 +39,19 @@ internal static class EntraIdHelper
             return [];
         }
 
-        string projectOutputPath = !string.IsNullOrEmpty(blazorWasmClientProjectPath)
+        bool isStandaloneWasmProject =
+            !string.IsNullOrEmpty(blazorWasmClientProjectPath) &&
+            !string.IsNullOrEmpty(entraIdModel.ProjectInfo?.ProjectPath) &&
+            Path.GetFullPath(blazorWasmClientProjectPath).Equals(
+                Path.GetFullPath(entraIdModel.ProjectInfo.ProjectPath),
+                StringComparison.OrdinalIgnoreCase);
+        string projectOutputPath = isStandaloneWasmProject
             ? Path.GetDirectoryName(blazorWasmClientProjectPath) ?? string.Empty
             : entraIdModel.BaseOutputPath ?? string.Empty;
-        string componentsOutputPath = !string.IsNullOrEmpty(blazorWasmClientProjectPath)
+        string componentsOutputPath = isStandaloneWasmProject
             ? projectOutputPath
             : Path.Combine(projectOutputPath, "Components");
-        string redirectToLoginOutputPath = !string.IsNullOrEmpty(blazorWasmClientProjectPath)
-            ? Path.Combine(componentsOutputPath, "Pages", "RedirectToLogin.razor")
-            : Path.Combine(componentsOutputPath, "RedirectToLogin.razor");
+        string redirectToLoginOutputPath = Path.Combine(componentsOutputPath, "RedirectToLogin.razor");
 
         var entries = new List<(string Name, string OutputPath)>
         {

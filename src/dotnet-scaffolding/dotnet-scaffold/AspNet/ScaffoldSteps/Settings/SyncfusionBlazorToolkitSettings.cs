@@ -4,9 +4,9 @@
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
 /// <summary>
-/// Settings for Healthcare Tracker scaffolding.
+/// Settings for Syncfusion Blazor Toolkit setup scaffolding.
 /// </summary>
-internal class HealthcareTrackerSettings : BaseSettings
+internal class SyncfusionBlazorToolkitSettings : BaseSettings
 {
     /// <summary>
     /// Indicates if prerelease packages should be used.

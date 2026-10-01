@@ -74,7 +74,7 @@ public class BlazorCrudTemplateTests
 
         Assert.Contains("ApplicationState.TryTakeFromJson<Employee>(nameof(Employee), out var restoredEmployee)", result);
         Assert.Contains("Employee = restoredEmployee", result);
-        Assert.Contains("NavigationManager.NavigateTo(\"notfound\");\n            return;", result);
+        Assert.Contains("Navigation.NavigateTo(\"notfound\");\n            return;", result);
     }
 
     private static BlazorCrudModel CreateModel(string pageType)

@@ -14,10 +14,18 @@ public class BlazorIdentityNet8IntegrationTests : BlazorIdentityIntegrationTests
     protected override string TestClassName => nameof(BlazorIdentityNet8IntegrationTests);
 
     [Fact]
-    public async Task Scaffold_BlazorIdentity_Net8_CliInvocation()
+    public async Task Scaffold_BlazorIdentity_Net8_ExistingContextInDifferentNamespace()
     {
         // Arrange write project + Program.cs + Blazor project structure
-        File.WriteAllText(_testProjectPath, ProjectContent);
+        File.WriteAllText(_testProjectPath, ProjectContent.Replace(
+            "</Project>",
+            """
+              <ItemGroup>
+                <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.27" />
+                <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.27" />
+              </ItemGroup>
+            </Project>
+            """));
         File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.StableNuGetConfig);
         File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), """
             using TestProject.Components;
@@ -31,6 +39,29 @@ public class BlazorIdentityNet8IntegrationTests : BlazorIdentityIntegrationTests
             }
             app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
             app.Run();
+            """);
+        var dataDirectory = Directory.CreateDirectory(Path.Combine(_testProjectDir, "Data"));
+        File.WriteAllText(Path.Combine(dataDirectory.FullName, "ApplicationUser.cs"), """
+            using Microsoft.AspNetCore.Identity;
+
+            namespace TestProject.Data;
+
+            public class ApplicationUser : IdentityUser
+            {
+            }
+            """);
+        var persistenceDirectory = Directory.CreateDirectory(Path.Combine(_testProjectDir, "Persistence"));
+        File.WriteAllText(Path.Combine(persistenceDirectory.FullName, "TestDbContext.cs"), """
+            using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+            using Microsoft.EntityFrameworkCore;
+            using TestProject.Data;
+
+            namespace TestProject.Persistence;
+
+            public class TestDbContext(DbContextOptions<TestDbContext> options)
+                : IdentityDbContext<ApplicationUser>(options)
+            {
+            }
             """);
         ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
         File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"),
@@ -59,16 +90,28 @@ public class BlazorIdentityNet8IntegrationTests : BlazorIdentityIntegrationTests
         // Assert expected files were created
         Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "ApplicationUser.cs")),
             $"ApplicationUser file should be created.\nOutput: {cliOutput}\nError: {cliError}");
-        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
-            "DbContext file should be created.");
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Persistence", "TestDbContext.cs")),
+            "Existing DbContext file should remain in its original namespace.");
         var accountPagesDir = Path.Combine(_testProjectDir, "Components", "Account", "Pages");
         Assert.True(Directory.Exists(accountPagesDir),
             $"Components/Account/Pages directory should be created.\nGenerated files:\n{string.Join(System.Environment.NewLine, Directory.GetFiles(_testProjectDir, "*", SearchOption.AllDirectories))}");
+        Assert.True(File.Exists(Path.Combine(accountPagesDir, "AccessDenied.razor")), "AccessDenied.razor should be created.");
         Assert.True(File.Exists(Path.Combine(accountPagesDir, "Login.razor")), "Login.razor should be created.");
         Assert.True(File.Exists(Path.Combine(accountPagesDir, "Register.razor")), "Register.razor should be created.");
         var sharedDir = Path.Combine(_testProjectDir, "Components", "Account", "Shared");
         Assert.True(Directory.Exists(sharedDir), "Components/Account/Shared directory should be created.");
         Assert.True(File.Exists(Path.Combine(sharedDir, "ManageNavMenu.razor")), "ManageNavMenu.razor should be created.");
+        foreach (var serviceFile in new[]
+        {
+            "IdentityNoOpEmailSender.cs",
+            "IdentityRevalidatingAuthenticationStateProvider.cs",
+            "IdentityUserAccessor.cs"
+        })
+        {
+            var serviceContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "Account", serviceFile));
+            Assert.Contains("using TestProject.Persistence;", serviceContent);
+            Assert.Contains("using TestProject.Data;", serviceContent);
+        }
         var appContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
         Assert.Contains("<HeadOutlet @rendermode=\"PageRenderMode\" />", appContent);
         Assert.Contains("<Routes @rendermode=\"PageRenderMode\" />", appContent);

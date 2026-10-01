@@ -279,7 +279,10 @@ public class AspNetOptionCoverageTests
 
     [Fact]
     public void TenantId_AcceptsLegacyCamelCaseAlias()
-        => Assert.Contains("--tenantId", _options.TenantId.Aliases);
+    {
+        Assert.NotNull(_options.TenantId.Aliases);
+        Assert.Contains("--tenantId", _options.TenantId.Aliases);
+    }
 
     #endregion
 
@@ -295,7 +298,10 @@ public class AspNetOptionCoverageTests
 
     [Fact]
     public void ApplicationId_AcceptsLegacyCamelCaseAlias()
-        => Assert.Contains("--applicationId", _options.ApplicationId.Aliases);
+    {
+        Assert.NotNull(_options.ApplicationId.Aliases);
+        Assert.Contains("--applicationId", _options.ApplicationId.Aliases);
+    }
 
     #endregion
 }

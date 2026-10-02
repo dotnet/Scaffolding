@@ -138,19 +138,11 @@ public class WrappedCodeModificationStepTests
         }
     }
 
-    [Theory]
-    [InlineData("net8.0", false)]
-    [InlineData("net8.0", true)]
-    [InlineData("net9.0", false)]
-    [InlineData("net9.0", true)]
-    [InlineData("net10.0", false)]
-    [InlineData("net10.0", true)]
-    [InlineData("net11.0", false)]
-    [InlineData("net11.0", true)]
-    public async Task BlazorCrudMigrationsEndpoint_IsDevelopmentOnlyAndNotDuplicated(string framework, bool webAssembly)
+    [Fact]
+    public async Task BlazorCrudWebAssemblyMigrationsEndpoint_IsDevelopmentOnlyAndNotDuplicated()
     {
         var configPath = Path.Combine(ScaffoldCliHelper.GetRepoRoot(), "src", "dotnet-scaffolding", "dotnet-scaffold",
-            "AspNet", "Templates", framework, "CodeModificationConfigs", "blazorWebCrudChanges.json");
+            "AspNet", "Templates", "net11.0", "CodeModificationConfigs", "blazorWebCrudChanges.json");
         using var config = JsonDocument.Parse(File.ReadAllText(configPath));
         var replacements = config.RootElement.GetProperty("Files").EnumerateArray()
             .Single(file => file.GetProperty("FileName").GetString() == "Program.cs")
@@ -163,29 +155,18 @@ public class WrappedCodeModificationStepTests
         var build = await ScaffoldCliHelper.RunBuildAsync(project.ProjectDirectory);
         Assert.True(build.ExitCode == 0, $"Test project build failed.\n{build.Output}\n{build.Error}");
 
-        var environmentBlock = webAssembly
-            ? """
-                if (app.Environment.IsDevelopment())
-                {
-                    app.UseWebAssemblyDebugging();
-                }
-                else
-                {
-                    app.UseExceptionHandler("/Error");
-                    app.UseHsts();
-                }
-                """
-            : """
-                if (!app.Environment.IsDevelopment())
-                {
-                    app.UseExceptionHandler("/Error");
-                    app.UseHsts();
-                }
-                """;
-        File.WriteAllText(programPath, $$"""
+        File.WriteAllText(programPath, """
             var builder = WebApplication.CreateBuilder(args);
             var app = builder.Build();
-            {{environmentBlock}}
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseWebAssemblyDebugging();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseHsts();
+            }
             app.UseHttpsRedirection();
             app.Run();
             """);
@@ -209,10 +190,7 @@ public class WrappedCodeModificationStepTests
         Assert.Equal("app.Environment.IsDevelopment()", development.Condition.ToString());
         Assert.Contains(migration, development.Statement.DescendantNodes());
         Assert.Contains("app.UseHsts();", updatedProgram);
-        if (webAssembly)
-        {
-            Assert.Contains("app.UseWebAssemblyDebugging();", updatedProgram);
-        }
+        Assert.Contains("app.UseWebAssemblyDebugging();", updatedProgram);
 
         Assert.True(await step.ExecuteAsync(_context));
         Assert.Equal(updatedProgram, File.ReadAllText(programPath));

@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.Aspire.Command;
@@ -26,8 +27,11 @@ public class CliOptionInventoryTests
     /// <summary>
     /// All CLI option flags declared in <see cref="Constants.CliOptions"/>.
     /// This is the canonical list — when you add a new option, add its flag here.
+    /// Alias flags declared on each <see cref="ScaffolderOption"/> (e.g. legacy camelCase forms)
+    /// are appended automatically via <see cref="AppendDeclaredAliases"/> so the manifest stays
+    /// in lockstep with <see cref="AspNetOptions"/> source.
     /// </summary>
-    private static readonly HashSet<string> AllAspNetCliFlags = new()
+    private static readonly HashSet<string> AllAspNetCliFlags = AppendDeclaredAliases(new HashSet<string>
     {
         Constants.CliOptions.ProjectCliOption,         // --project
         Constants.CliOptions.PrereleaseCliOption,      // --prerelease
@@ -44,10 +48,65 @@ public class CliOptionInventoryTests
         Constants.CliOptions.ActionsOption,             // --actions
         Constants.CliOptions.ControllerNameOption,      // --controller
         Constants.CliOptions.UsernameOption,            // --username
-        Constants.CliOptions.TenantIdOption,            // --tenantId
+        Constants.CliOptions.TenantIdOption,            // --tenant-id
         Constants.CliOptions.UseExistingApplicationOption, // --use-existing-application
-        Constants.CliOptions.ApplicationIdOption,       // --applicationId
-    };
+        Constants.CliOptions.ApplicationIdOption,       // --application-id
+    });
+
+    /// <summary>
+    /// Appends every alias declared on the live <see cref="AspNetOptions"/> properties
+    /// (e.g. <c>--tenantId</c> → canonical <c>--tenant-id</c>) to the manifest so the
+    /// coverage gate tracks alias registration without hand-edits.
+    /// </summary>
+    private static HashSet<string> AppendDeclaredAliases(HashSet<string> flags)
+    {
+        foreach (var option in EnumerateAspNetOptions(new AspNetOptions()))
+        {
+            if (option.Aliases is null)
+            {
+                continue;
+            }
+            foreach (var alias in option.Aliases)
+            {
+                if (!string.IsNullOrEmpty(alias))
+                {
+                    flags.Add(alias);
+                }
+            }
+        }
+        return flags;
+    }
+
+    /// <summary>
+    /// Yield every <see cref="ScaffolderOption"/> exposed by <see cref="AspNetOptions"/>.
+    /// The generic <c>ScaffolderOption&lt;T&gt;</c> inherits the non-generic base, so its
+    /// <see cref="ScaffolderOption.Aliases"/> property is reachable without a cast.
+    /// </summary>
+    private static IEnumerable<ScaffolderOption> EnumerateAspNetOptions(AspNetOptions options)
+    {
+        yield return options.Project;
+        yield return options.Prerelease;
+        yield return options.FileName;
+        yield return options.Actions;
+        yield return options.AreaName;
+        yield return options.ModelName;
+        yield return options.EndpointsClass;
+        yield return options.DatabaseProvider;
+        yield return options.DatabaseProviderRequired;
+        yield return options.IdentityDbProviderRequired;
+        yield return options.DataContextClass;
+        yield return options.DataContextClassRequired;
+        yield return options.OpenApi;
+        yield return options.TypedResults;
+        yield return options.PageType;
+        yield return options.ControllerName;
+        yield return options.Views;
+        yield return options.Overwrite;
+        yield return options.UseExistingApplication;
+        yield return options.Username;
+        yield return options.TenantId;
+        yield return options.ApplicationId;
+    }
 
     /// <summary>
     /// All CLI option flags declared in Aspire's <see cref="AspireCliStrings"/>.
@@ -84,7 +143,8 @@ public class CliOptionInventoryTests
         ["area"] = new() { "--project", "--name" },
         ["blazor-identity"] = new() { "--project", "--dataContext", "--dbProvider", "--overwrite", "--prerelease" },
         ["identity"] = new() { "--project", "--dataContext", "--dbProvider", "--overwrite", "--prerelease" },
-        ["entra-id"] = new() { "--username", "--project", "--tenantId", "--use-existing-application", "--applicationId" },
+        // entra-id options — kebab-case is canonical; camelCase forms are legacy aliases.
+        ["entra-id"] = new() { "--username", "--project", "--tenant-id", "--use-existing-application", "--tenantId", "--application-id", "--applicationId" },
     };
 
     /// <summary>
@@ -105,38 +165,28 @@ public class CliOptionInventoryTests
     [Fact]
     public void AllAspNetCliFlagsAreInventoried()
     {
-        // Verify every flag in the Constants.CliOptions class appears in AllAspNetCliFlags.
-        // If a new constant is added, this test will not catch it directly (since it uses the set),
-        // but the per-command mapping test below will fail if the command is registered with a flag
-        // not in the manifest.
-        var options = new AspNetOptions();
-
-        // Collect all distinct CliOption values from every property on AspNetOptions
-        var declaredFlags = new HashSet<string>
+        // Verify every canonical flag AND every declared alias appears in AllAspNetCliFlags.
+        // Reading both sides from live source-of-truth keeps the manifest synchronized with
+        // constants.cs and any new ScaffolderOption.Aliases entries.
+        var declaredFlags = new HashSet<string>();
+        foreach (var option in EnumerateAspNetOptions(new AspNetOptions()))
         {
-            options.Project.CliOption!,
-            options.Prerelease.CliOption!,
-            options.FileName.CliOption!,
-            options.Actions.CliOption!,
-            options.AreaName.CliOption!,
-            options.ModelName.CliOption!,
-            options.EndpointsClass.CliOption!,
-            options.DatabaseProvider.CliOption!,
-            options.DatabaseProviderRequired.CliOption!,
-            options.IdentityDbProviderRequired.CliOption!,
-            options.DataContextClass.CliOption!,
-            options.DataContextClassRequired.CliOption!,
-            options.OpenApi.CliOption!,
-            options.TypedResults.CliOption!,
-            options.PageType.CliOption!,
-            options.ControllerName.CliOption!,
-            options.Views.CliOption!,
-            options.Overwrite.CliOption!,
-            options.UseExistingApplication.CliOption!,
-            options.Username.CliOption!,
-            options.TenantId.CliOption!,
-            options.ApplicationId.CliOption!,
-        };
+            if (!string.IsNullOrEmpty(option.CliOption))
+            {
+                declaredFlags.Add(option.CliOption);
+            }
+            if (option.Aliases is null)
+            {
+                continue;
+            }
+            foreach (var alias in option.Aliases)
+            {
+                if (!string.IsNullOrEmpty(alias))
+                {
+                    declaredFlags.Add(alias);
+                }
+            }
+        }
 
         var missingFromManifest = declaredFlags.Except(AllAspNetCliFlags).ToList();
         Assert.True(missingFromManifest.Count == 0,
@@ -165,33 +215,27 @@ public class CliOptionInventoryTests
     [Fact]
     public void ManifestDoesNotReferenceRemovedAspNetFlags()
     {
-        // Detect stale entries: manifest flags that no longer appear in source code
-        var options = new AspNetOptions();
-        var declaredFlags = new HashSet<string>
+        // Detect stale entries: every entry in the manifest must still map to a canonical
+        // flag or registered alias on AspNetOptions.
+        var declaredFlags = new HashSet<string>();
+        foreach (var option in EnumerateAspNetOptions(new AspNetOptions()))
         {
-            options.Project.CliOption!,
-            options.Prerelease.CliOption!,
-            options.FileName.CliOption!,
-            options.Actions.CliOption!,
-            options.AreaName.CliOption!,
-            options.ModelName.CliOption!,
-            options.EndpointsClass.CliOption!,
-            options.DatabaseProvider.CliOption!,
-            options.DatabaseProviderRequired.CliOption!,
-            options.IdentityDbProviderRequired.CliOption!,
-            options.DataContextClass.CliOption!,
-            options.DataContextClassRequired.CliOption!,
-            options.OpenApi.CliOption!,
-            options.TypedResults.CliOption!,
-            options.PageType.CliOption!,
-            options.ControllerName.CliOption!,
-            options.Views.CliOption!,
-            options.Overwrite.CliOption!,
-            options.UseExistingApplication.CliOption!,
-            options.Username.CliOption!,
-            options.TenantId.CliOption!,
-            options.ApplicationId.CliOption!,
-        };
+            if (!string.IsNullOrEmpty(option.CliOption))
+            {
+                declaredFlags.Add(option.CliOption);
+            }
+            if (option.Aliases is null)
+            {
+                continue;
+            }
+            foreach (var alias in option.Aliases)
+            {
+                if (!string.IsNullOrEmpty(alias))
+                {
+                    declaredFlags.Add(alias);
+                }
+            }
+        }
 
         var staleFlags = AllAspNetCliFlags.Except(declaredFlags).ToList();
         Assert.True(staleFlags.Count == 0,

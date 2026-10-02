@@ -217,6 +217,7 @@ internal class AspNetOptions
     {
         DisplayName = AspnetStrings.Options.TenantId.DisplayName,
         CliOption = Constants.CliOptions.TenantIdOption,
+        Aliases = ["--tenantId"], // legacy camelCase alias for backward compatibility
         Description = AspnetStrings.Options.TenantId.Description,
         Required = true,
         PickerType = InteractivePickerType.DynamicPicker,
@@ -226,6 +227,7 @@ internal class AspNetOptions
     {
         DisplayName = AspnetStrings.Options.SelectApplication.DisplayName,
         CliOption = Constants.CliOptions.ApplicationIdOption,
+        Aliases = ["--applicationId"], // legacy camelCase alias for backward compatibility
         Description = AspnetStrings.Options.SelectApplication.Description,
         Required = false,
         PickerType = InteractivePickerType.DynamicPicker,

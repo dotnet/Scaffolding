@@ -42,9 +42,9 @@ internal class Constants
         public const string ActionsOption = "--actions";
         public const string ControllerNameOption = "--controller";
         public const string UsernameOption = "--username";
-        public const string TenantIdOption = "--tenantId";
+        public const string TenantIdOption = "--tenant-id";
         public const string UseExistingApplicationOption = "--use-existing-application";
-        public const string ApplicationIdOption = "--applicationId";
+        public const string ApplicationIdOption = "--application-id";
     }
 
     /// <summary>

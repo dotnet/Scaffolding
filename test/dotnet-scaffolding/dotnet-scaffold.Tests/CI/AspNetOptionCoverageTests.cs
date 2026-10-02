@@ -267,7 +267,7 @@ public class AspNetOptionCoverageTests
 
     #endregion
 
-    #region --tenantId
+    #region --tenant-id (alias: --tenantId)
 
     [Fact]
     public void TenantId_HasCorrectCliOption()
@@ -277,9 +277,16 @@ public class AspNetOptionCoverageTests
     public void TenantId_IsRequired()
         => Assert.True(_options.TenantId.Required);
 
+    [Fact]
+    public void TenantId_AcceptsLegacyCamelCaseAlias()
+    {
+        Assert.NotNull(_options.TenantId.Aliases);
+        Assert.Contains("--tenantId", _options.TenantId.Aliases);
+    }
+
     #endregion
 
-    #region --applicationId
+    #region --application-id (alias: --applicationId)
 
     [Fact]
     public void ApplicationId_HasCorrectCliOption()
@@ -288,6 +295,13 @@ public class AspNetOptionCoverageTests
     [Fact]
     public void ApplicationId_IsNotRequired()
         => Assert.False(_options.ApplicationId.Required);
+
+    [Fact]
+    public void ApplicationId_AcceptsLegacyCamelCaseAlias()
+    {
+        Assert.NotNull(_options.ApplicationId.Aliases);
+        Assert.Contains("--applicationId", _options.ApplicationId.Aliases);
+    }
 
     #endregion
 }

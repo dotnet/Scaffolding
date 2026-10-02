@@ -27,6 +27,20 @@ public class ScaffolderOption<T> : ScaffolderOption
                 Required = Required
             };
 
+            // Register any additional CLI aliases (e.g. legacy camelCase names).
+            // System.CommandLine exposes Aliases as a mutable List on the constructed
+            // Option<T>, so we append after creation rather than via initializer syntax.
+            if (Aliases is not null)
+            {
+                foreach (var alias in Aliases)
+                {
+                    if (!string.IsNullOrEmpty(alias))
+                    {
+                        _cliOption.Aliases.Add(alias);
+                    }
+                }
+            }
+
             // Add accepted values hint for custom picker options
             if (CustomPickerValues is not null && CustomPickerValues.Any())
             {

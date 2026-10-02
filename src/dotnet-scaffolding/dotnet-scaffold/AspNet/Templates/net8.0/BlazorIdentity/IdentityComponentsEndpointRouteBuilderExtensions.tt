@@ -9,7 +9,6 @@ using System.Text.Json;
     var sortedUsings = new SortedSet<string>()
     {
         Model.UserClassNamespace,
-        Model.DbContextNamespace,
         $"{Model.BlazorIdentityNamespace}.Pages",
         $"{Model.BlazorIdentityNamespace}.Pages.Manage",
         "Microsoft.AspNetCore.Authentication",
@@ -19,6 +18,11 @@ using System.Text.Json;
         "Microsoft.AspNetCore.Mvc",
         "Microsoft.Extensions.Primitives",
     };
+
+    if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+    {
+        sortedUsings.Add(Model.DbContextNamespace);
+    }
 
     foreach (var usingNamespace in sortedUsings)
     {#>

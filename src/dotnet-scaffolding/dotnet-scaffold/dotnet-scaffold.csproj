@@ -62,7 +62,6 @@
       - MinimalApi\*.tt (MinimalApi, MinimalApiEf)
       - RazorPages\*.tt (CRUD pages)
       - Views\*.tt (MVC views)
-      - BlazorIdentity\Pages\AccessDenied.tt
       - Files\ApplicationUser.tt, _ValidationScriptsPartial.cshtml
       - CodeModificationConfigs (efControllerChanges.json, identityChanges.json, razorPagesChanges.json)
     -->
@@ -71,7 +70,6 @@
     <None Pack="true" Include="AspNet\Templates\net9.0\MinimalApi\*.tt" PackagePath="AspNet\Templates\net8.0\MinimalApi\" />
     <None Pack="true" Include="AspNet\Templates\net9.0\RazorPages\*.tt" PackagePath="AspNet\Templates\net8.0\RazorPages\" />
     <None Pack="true" Include="AspNet\Templates\net9.0\Views\*.tt" PackagePath="AspNet\Templates\net8.0\Views\" />
-    <None Pack="true" Include="AspNet\Templates\net9.0\BlazorIdentity\Pages\AccessDenied.tt" PackagePath="AspNet\Templates\net8.0\BlazorIdentity\Pages\" />
     <None Pack="true" Include="AspNet\Templates\net9.0\Files\ApplicationUser.tt" PackagePath="AspNet\Templates\net8.0\Files\" />
     <!-- _ValidationScriptsPartial.cshtml for net8.0 is handled in a later ItemGroup to avoid
          the net9.0 Update glob overriding its PackagePath (see below) -->
@@ -141,10 +139,6 @@
     <None Include="AspNet\Templates\net9.0\Identity\Pages\**\*.tt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net8.0\Identity\Pages\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </None>
-    <None Include="AspNet\Templates\net9.0\BlazorIdentity\Pages\AccessDenied.tt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>AspNet\Templates\net8.0\BlazorIdentity\Pages\AccessDenied.tt</Link>
     </None>
     <None Include="AspNet\Templates\net9.0\Files\ApplicationUser.tt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

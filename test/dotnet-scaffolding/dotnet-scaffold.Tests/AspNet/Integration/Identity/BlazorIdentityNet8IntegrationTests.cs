@@ -14,6 +14,137 @@ public class BlazorIdentityNet8IntegrationTests : BlazorIdentityIntegrationTests
     protected override string TestClassName => nameof(BlazorIdentityNet8IntegrationTests);
 
     [Fact]
+    public async Task Scaffold_BlazorIdentity_Net8_ExistingContextInDifferentNamespace()
+    {
+        // Arrange write project + Program.cs + Blazor project structure
+        File.WriteAllText(_testProjectPath, ProjectContent.Replace(
+            "</Project>",
+            """
+              <ItemGroup>
+                <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.27" />
+                <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.27" />
+              </ItemGroup>
+            </Project>
+            """));
+        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.StableNuGetConfig);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), """
+            using TestProject.Components;
+
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+            var app = builder.Build();
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Error");
+            }
+            app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+            app.Run();
+            """);
+        var dataDirectory = Directory.CreateDirectory(Path.Combine(_testProjectDir, "Data"));
+        File.WriteAllText(Path.Combine(dataDirectory.FullName, "ApplicationUser.cs"), """
+            using Microsoft.AspNetCore.Identity;
+
+            namespace TestProject.Data;
+
+            public class ApplicationUser : IdentityUser
+            {
+            }
+            """);
+        var persistenceDirectory = Directory.CreateDirectory(Path.Combine(_testProjectDir, "Persistence"));
+        File.WriteAllText(Path.Combine(persistenceDirectory.FullName, "TestDbContext.cs"), """
+            using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+            using Microsoft.EntityFrameworkCore;
+            using TestProject.Data;
+
+            namespace TestProject.Persistence;
+
+            public class TestDbContext(DbContextOptions<TestDbContext> options)
+                : IdentityDbContext<ApplicationUser>(options)
+            {
+            }
+            """);
+        ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"),
+            ScaffoldCliHelper.GetBlazorAppRazor()
+                .Replace("<HeadOutlet />", "<HeadOutlet @rendermode=\"InteractiveServer\" />")
+                .Replace("<Routes />", "<Routes @rendermode=\"InteractiveServer\" />"));
+        var routesPath = Path.Combine(_testProjectDir, "Components", "Routes.razor");
+        File.WriteAllText(routesPath, File.ReadAllText(routesPath).Replace(
+            """<RouteView RouteData="routeData" />""",
+            """<RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />"""));
+
+        // Assert project builds before scaffolding
+        var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(preExitCode == 0,
+            $"Project should build before scaffolding.\nExit code: {preExitCode}\nOutput: {preOutput}\nError: {preError}");
+
+        // Act invoke CLI: dotnet scaffold aspnet blazor-identity
+        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "blazor-identity",
+            "--project", _testProjectPath,
+            "--dataContext", "TestDbContext",
+            "--dbProvider", "sqlite-efcore");
+        Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
+
+        // Assert expected files were created
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "ApplicationUser.cs")),
+            $"ApplicationUser file should be created.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Persistence", "TestDbContext.cs")),
+            "Existing DbContext file should remain in its original namespace.");
+        var accountPagesDir = Path.Combine(_testProjectDir, "Components", "Account", "Pages");
+        Assert.True(Directory.Exists(accountPagesDir),
+            $"Components/Account/Pages directory should be created.\nGenerated files:\n{string.Join(System.Environment.NewLine, Directory.GetFiles(_testProjectDir, "*", SearchOption.AllDirectories))}");
+        Assert.True(File.Exists(Path.Combine(accountPagesDir, "AccessDenied.razor")), "AccessDenied.razor should be created.");
+        Assert.True(File.Exists(Path.Combine(accountPagesDir, "Login.razor")), "Login.razor should be created.");
+        Assert.True(File.Exists(Path.Combine(accountPagesDir, "Register.razor")), "Register.razor should be created.");
+        var sharedDir = Path.Combine(_testProjectDir, "Components", "Account", "Shared");
+        Assert.True(Directory.Exists(sharedDir), "Components/Account/Shared directory should be created.");
+        Assert.True(File.Exists(Path.Combine(sharedDir, "ManageNavMenu.razor")), "ManageNavMenu.razor should be created.");
+        foreach (var serviceFile in new[]
+        {
+            "IdentityNoOpEmailSender.cs",
+            "IdentityRevalidatingAuthenticationStateProvider.cs",
+            "IdentityUserAccessor.cs"
+        })
+        {
+            var serviceContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "Account", serviceFile));
+            Assert.Contains("using TestProject.Persistence;", serviceContent);
+            Assert.Contains("using TestProject.Data;", serviceContent);
+        }
+        var appContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
+        Assert.Contains("<HeadOutlet @rendermode=\"PageRenderMode\" />", appContent);
+        Assert.Contains("<Routes @rendermode=\"PageRenderMode\" />", appContent);
+        Assert.Contains("HttpContext.Request.Path.StartsWithSegments(\"/Account\") ? null : InteractiveServer", appContent);
+        var routesContent = File.ReadAllText(routesPath);
+        Assert.Contains("AuthorizeRouteView", routesContent);
+        Assert.Contains("RedirectToLogin", routesContent);
+        var navMenuContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "Layout", "NavMenu.razor"));
+        Assert.Contains("href=\"Account/Login\" @onclick=\"NavigateToLogin\" @onclick:preventDefault=\"true\"", navMenuContent);
+        Assert.Contains("NavigateTo(\"Account/Manage\", forceLoad: true)", navMenuContent);
+        Assert.Contains("NavigateTo(\"Account/Register\", forceLoad: true)", navMenuContent);
+        Assert.Contains("NavigateTo(\"Account/Login\", forceLoad: true)", navMenuContent);
+        var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+        Assert.Contains("AddScoped<IdentityRedirectManager>()", programContent);
+        Assert.Contains("AddScoped<IdentityUserAccessor>()", programContent);
+        Assert.Contains("TestDbContext", programContent);
+        Assert.Contains("app.MapAdditionalIdentityEndpoints()", programContent);
+        Assert.Contains("AddIdentityCore<", programContent);
+        Assert.Contains("AddAuthentication(", programContent);
+        Assert.Contains("AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>()", programContent);
+        Assert.Contains("throw new InvalidOperationException(\"Connection string", programContent);
+        Assert.DoesNotContain("Data Source=TestDb.db", programContent);
+        Assert.Contains("if (app.Environment.IsDevelopment())\n{\n    app.UseMigrationsEndPoint();\n}", programContent.Replace("\r\n", "\n"));
+
+        // Assert — no NuGet errors and project builds after scaffolding
+        Assert.False(cliOutput.Contains("error: NU"),
+            $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
+        var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(postExitCode == 0,
+            $"Project should build after scaffolding.\nExit code: {postExitCode}\nOutput: {postOutput}\nError: {postError}");
+    }
+
+    [Fact]
     public async Task Scaffold_BlazorIdentity_Net8_CliInvocation()
     {
         // Arrange write project + Program.cs + Blazor project structure

@@ -37,6 +37,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(ValidateBlazorCrudStep),
                 typeof(ValidateEfControllerStep),
                 typeof(ValidateEntraIdStep),
+                typeof(ValidateHealthcareTrackerStep),
                 typeof(ValidateIdentityStep),
                 typeof(ValidateMinimalApiStep),
                 typeof(ValidateRazorPagesStep),
@@ -211,6 +212,23 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithAspNetConnectionStringStep()
                 .WithBlazorCrudTextTemplatingStep()
                 .WithBlazorCrudCodeChangeStep();
+
+            _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.HealthcareTracker.Name)
+                .WithDisplayName(AspnetStrings.HealthcareTracker.DisplayName)
+                .WithCategory(AspnetStrings.Catagories.Syncfusion)
+                .WithDescription(AspnetStrings.HealthcareTracker.Description)
+                .WithExample(AspnetStrings.HealthcareTracker.Example, AspnetStrings.HealthcareTracker.ExampleDescription)
+                .WithOptions([options.Project, options.Prerelease])
+                .WithStep<ValidateHealthcareTrackerStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
+                })
+                .WithHealthcareTrackerAddPackagesStep()
+                .WithHealthcareTrackerTextTemplatingStep()
+                .WithHealthcareTrackerCodeChangeStep();
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorPage.Crud)
                 .WithDisplayName(AspnetStrings.RazorPage.CrudDisplayName)

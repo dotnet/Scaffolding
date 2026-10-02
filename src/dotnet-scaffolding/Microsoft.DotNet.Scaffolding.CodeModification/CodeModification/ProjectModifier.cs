@@ -69,8 +69,9 @@ internal class ProjectModifier
             switch (file.Extension)
             {
                 case "cs":
-                    //get CodeAnalysis.Document
-                    var document = project.GetDocument(file.FileName);
+                    // Prefer workspace document; fall back to loading from disk when
+                    // MSBuildWorkspace returned an empty/partial project.
+                    var document = project.GetDocument(file.FileName) ?? project.GetDocumentFromName(file.FileName);
                     document = await ModifyCsFile(file, document, options);
                     //replace simple CodeFile.Replacements
                     document = await ApplyTextReplacements(file, document, options);
@@ -82,15 +83,18 @@ internal class ProjectModifier
                 case "razor":
                 case "html":
                     textDoc = project.GetAdditionalDocument(file.FileName);
-                    textDoc = await ApplyTextReplacements(file, textDoc, options);
-                    return textDoc?.Project ?? project;
-                case "css":
-                    var filePathOnDisk = project.GetFilePath(file.FileName);
-                    if (!string.IsNullOrEmpty(filePathOnDisk))
+                    if (textDoc is not null)
                     {
-                        ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(filePathOnDisk, file.Replacements);
+                        textDoc = await ApplyTextReplacements(file, textDoc, options);
+                        return textDoc?.Project ?? project;
                     }
 
+                    // Disk fallback when AdditionalDocuments were not loaded (empty MSBuild
+                    // project or incomplete Adhoc fallback). Mirrors css handling.
+                    ApplyDiskReplacements(project, file, options);
+                    break;
+                case "css":
+                    ApplyDiskReplacements(project, file, options);
                     break;
             }
         }
@@ -150,5 +154,21 @@ internal class ProjectModifier
 
         DocumentBuilder documentBuilder = new(fileDoc, file, options, _consoleLogger);
         return await documentBuilder.RunAsync();
+    }
+
+    /// <summary>
+    /// Applies filtered replacements by resolving the file on disk when the Roslyn
+    /// workspace has no AdditionalDocument for it (empty MSBuild load / incomplete fallback).
+    /// </summary>
+    private static void ApplyDiskReplacements(Project project, CodeFile file, IList<string> options)
+    {
+        var filePathOnDisk = project.GetFilePath(file.FileName);
+        if (string.IsNullOrEmpty(filePathOnDisk))
+        {
+            return;
+        }
+
+        var replacements = file.Replacements?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
+        ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(filePathOnDisk, replacements);
     }
 }

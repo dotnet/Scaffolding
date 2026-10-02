@@ -501,6 +501,11 @@ internal static class ProjectModifierHelper
                 }
 
             }
+            else if (requireAllChanges && change.Prepend)
+            {
+                sourceFileString = change.Block + sourceFileString;
+                sourceChanged = true;
+            }
             else
             {
                 sourceFileString += change.Block; // Otherwise appending block to end of file

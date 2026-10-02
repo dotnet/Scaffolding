@@ -77,6 +77,111 @@ public class HtmlRecipeTests : IDisposable
         Assert.Equal($"{Link}{Environment.NewLine}</head>", File.ReadAllText(_htmlPath));
     }
 
+    [Theory]
+    [InlineData("bin", "wwwroot\\index.html")]
+    [InlineData("obj", "wwwroot\\index.html")]
+    [InlineData("NestedProject", "wwwroot\\index.html")]
+    [InlineData("bin", "index.html")]
+    [InlineData("obj", "index.html")]
+    public async Task RunAsync_MissingHostDoesNotEditOtherMatchingFiles(string directory, string fileName)
+    {
+        var otherPath = Path.Combine(_directory, directory, "Debug", "net10.0", "wwwroot", "index.html");
+        Directory.CreateDirectory(Path.GetDirectoryName(otherPath)!);
+        File.WriteAllText(otherPath, "</head>");
+        var file = CreateFile();
+        file.FileName = fileName;
+
+        Assert.False(await CreateModifier(file).RunAsync());
+        AssertError(fileName);
+        Assert.False(File.Exists(_htmlPath));
+        Assert.Equal("</head>", File.ReadAllText(otherPath));
+    }
+
+    [Theory]
+    [InlineData("wwwroot\\index.html")]
+    [InlineData("index.html")]
+    public async Task RunAsync_EditsSourceHostWithoutEditingBuildArtifacts(string fileName)
+    {
+        var artifactPath = Path.Combine(_directory, "bin", "Debug", "net10.0", "wwwroot", "index.html");
+        Directory.CreateDirectory(Path.GetDirectoryName(artifactPath)!);
+        File.WriteAllText(artifactPath, "</head>");
+        File.WriteAllText(_htmlPath, "</head>");
+        var file = CreateFile();
+        file.FileName = fileName;
+
+        Assert.True(await CreateModifier(file).RunAsync());
+        Assert.Equal($"{Link}{Environment.NewLine}</head>", File.ReadAllText(_htmlPath));
+        Assert.Equal("</head>", File.ReadAllText(artifactPath));
+    }
+
+    [Fact]
+    public async Task RunAsync_RejectsHtmlPathOutsideProject()
+    {
+        var outsidePath = _directory + "-outside.html";
+        File.WriteAllText(outsidePath, "</head>");
+        try
+        {
+            var file = CreateFile();
+            file.FileName = Path.GetRelativePath(_directory, outsidePath);
+
+            Assert.False(await CreateModifier(file).RunAsync());
+            AssertError(file.FileName);
+            Assert.Equal("</head>", File.ReadAllText(outsidePath));
+        }
+        finally
+        {
+            File.Delete(outsidePath);
+        }
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public async Task RunAsync_PreservesPrependAndAppendSemantics(bool prepend, bool additionalDocument)
+    {
+        const string original = "<html></html>";
+        const string block = "<!-- inserted -->";
+        File.WriteAllText(_htmlPath, original);
+        TextDocument? document = null;
+        if (additionalDocument)
+        {
+            var project = _workspace.CurrentSolution.Projects.Single();
+            document = project.AddAdditionalDocument("index.html", SourceText.From(original), filePath: _htmlPath);
+            Assert.True(_workspace.TryApplyChanges(document.Project.Solution));
+        }
+        var file = CreateFile();
+        file.Replacements = [new CodeSnippet { Block = block, Prepend = prepend }];
+        var modifier = CreateModifier(file);
+        var expected = prepend ? block + original : original + block;
+
+        for (var run = 0; run < 2; run++)
+        {
+            Assert.True(await modifier.RunAsync());
+            var actual = document is null
+                ? File.ReadAllText(_htmlPath)
+                : (await _workspace.CurrentSolution.GetAdditionalDocument(document.Id)!.GetTextAsync()).ToString();
+            Assert.Equal(expected, actual);
+        }
+        if (additionalDocument)
+        {
+            Assert.Equal(original, File.ReadAllText(_htmlPath));
+        }
+    }
+
+    [Fact]
+    public void ApplyReplacementsOnFileOnDisk_PreservesLegacyCssAppendBehavior()
+    {
+        var cssPath = Path.Combine(_directory, "app.css");
+        File.WriteAllText(cssPath, "original");
+
+        ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(cssPath,
+            [new CodeSnippet { Block = "new", Prepend = true }]);
+
+        Assert.Equal("originalnew", File.ReadAllText(cssPath));
+    }
+
     [Fact]
     public async Task RunAsync_FiltersReplacementOptions()
     {

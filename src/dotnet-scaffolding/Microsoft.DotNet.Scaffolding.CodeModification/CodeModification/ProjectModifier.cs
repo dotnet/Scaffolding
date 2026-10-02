@@ -101,8 +101,8 @@ internal class ProjectModifier
                         break;
                     }
 
-                    var htmlPath = project.GetFilePath(file.FileName);
-                    if (string.IsNullOrEmpty(htmlPath))
+                    var htmlPath = GetHtmlFilePath(project, file.FileName);
+                    if (string.IsNullOrEmpty(htmlPath) || !File.Exists(htmlPath))
                     {
                         throw new FileNotFoundException($"HTML file '{file.FileName}' was not found in the project.");
                     }
@@ -129,6 +129,34 @@ internal class ProjectModifier
         }
 
         return project;
+    }
+
+    private static string? GetHtmlFilePath(Project project, string? fileName)
+    {
+        var projectDirectory = Path.GetDirectoryName(project.FilePath);
+        if (string.IsNullOrEmpty(projectDirectory) || string.IsNullOrEmpty(fileName))
+        {
+            return null;
+        }
+
+        projectDirectory = Path.GetFullPath(projectDirectory);
+        var normalizedFileName = fileName.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+        if (Path.GetFileName(normalizedFileName) != normalizedFileName)
+        {
+            var filePath = Path.GetFullPath(normalizedFileName, projectDirectory);
+            var relativePath = Path.GetRelativePath(projectDirectory, filePath);
+            if (Path.IsPathRooted(relativePath) || relativePath == ".." || relativePath.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            {
+                return null;
+            }
+
+            return filePath;
+        }
+
+        return project.GetFilesOfExtension(normalizedFileName)?.FirstOrDefault(path =>
+            Path.GetFileName(path).Equals(normalizedFileName, StringComparison.OrdinalIgnoreCase) &&
+            !Path.GetRelativePath(projectDirectory, path).Split(Path.DirectorySeparatorChar).Any(part =>
+                part.Equals("bin", StringComparison.OrdinalIgnoreCase) || part.Equals("obj", StringComparison.OrdinalIgnoreCase)));
     }
 
     internal static async Task<TextDocument?> ModifyCshtmlFile(CodeFile file, TextDocument? fileDoc, IList<string> options)

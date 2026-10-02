@@ -41,4 +41,6 @@ HTML recipes use Roslyn additional documents when available. Otherwise, `Replace
 }
 ```
 
-For on-disk HTML edits, a missing target, an unmatched required replacement snippet, or a file read/write error is logged and causes the step to return `false`. Replacements already present (including those recognized by `CheckBlock`) and edits excluded by options are successful no-ops.
+For on-disk HTML edits, paths are resolved relative to the project directory and cannot target files outside it. Bare filenames are searched within the project, excluding `bin` and `obj` directories. Without `ReplaceSnippet`, a block is prepended when `Prepend` is `true` and appended otherwise, matching the workspace-based HTML path.
+
+A missing target, an unmatched required replacement snippet, or a file read/write error is logged and causes the step to return `false`. Replacements already present (including those recognized by `CheckBlock`) and edits excluded by options are successful no-ops.

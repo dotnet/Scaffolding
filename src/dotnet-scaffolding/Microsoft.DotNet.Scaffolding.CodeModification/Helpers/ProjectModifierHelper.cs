@@ -458,9 +458,12 @@ internal static class ProjectModifierHelper
     }
 
     internal static void ApplyReplacementsOnFileOnDisk(string filePath, IEnumerable<CodeSnippet>? codeChanges)
-        => TryApplyReplacementsOnFileOnDisk(filePath, codeChanges, out _, requireAllChanges: false);
+        => TryApplyReplacementsOnFileOnDiskCore(filePath, codeChanges, out _, preserveLegacyCssBehavior: true);
 
-    internal static bool TryApplyReplacementsOnFileOnDisk(string filePath, IEnumerable<CodeSnippet>? codeChanges, out string? error, bool requireAllChanges = true)
+    internal static bool TryApplyReplacementsOnFileOnDisk(string filePath, IEnumerable<CodeSnippet>? codeChanges, out string? error)
+        => TryApplyReplacementsOnFileOnDiskCore(filePath, codeChanges, out error, preserveLegacyCssBehavior: false);
+
+    private static bool TryApplyReplacementsOnFileOnDiskCore(string filePath, IEnumerable<CodeSnippet>? codeChanges, out string? error, bool preserveLegacyCssBehavior)
     {
         error = null;
         if (codeChanges is null)
@@ -470,7 +473,7 @@ internal static class ProjectModifierHelper
 
         bool sourceChanged = false;
         var sourceFileString = File.ReadAllText(filePath);
-        if (string.IsNullOrEmpty(sourceFileString) && !requireAllChanges)
+        if (string.IsNullOrEmpty(sourceFileString) && preserveLegacyCssBehavior)
         {
             return true;
         }
@@ -487,26 +490,29 @@ internal static class ProjectModifierHelper
             // If doing a code replacement, replace ReplaceSnippet in source with Block
             if (change.ReplaceSnippet != null)
             {
-                var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                if (requireAllChanges &&
-                    (string.IsNullOrEmpty(change.CheckBlock) || !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)) &&
-                    (string.IsNullOrEmpty(replaceSnippet) || !sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase)))
+                if (!string.IsNullOrEmpty(change.CheckBlock) && sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase))
                 {
+                    continue;
+                }
+
+                var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
+                if ((string.IsNullOrEmpty(replaceSnippet) && !preserveLegacyCssBehavior) ||
+                    !sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (preserveLegacyCssBehavior)
+                    {
+                        continue;
+                    }
+
                     error = $"Replacement snippet '{replaceSnippet}' was not found in '{filePath}'.";
                     return false;
                 }
 
-                if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
-                    (string.IsNullOrEmpty(change.CheckBlock) ||
-                     !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)))
-                {
-                    sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block,
-                        requireAllChanges ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
-                    sourceChanged = true;
-                }
-
+                sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block,
+                    preserveLegacyCssBehavior ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
+                sourceChanged = true;
             }
-            else if (requireAllChanges && change.Prepend)
+            else if (!preserveLegacyCssBehavior && change.Prepend)
             {
                 sourceFileString = change.Block + sourceFileString;
                 sourceChanged = true;

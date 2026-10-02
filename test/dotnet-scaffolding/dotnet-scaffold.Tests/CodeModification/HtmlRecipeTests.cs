@@ -43,6 +43,19 @@ public class HtmlRecipeTests : IDisposable
     }
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task RunAsync_MissingWorkspaceOrProjectFailsAndLogs(bool missingWorkspace)
+    {
+        using var emptyWorkspace = new AdhocWorkspace();
+        _codeService.Setup(service => service.GetWorkspaceAsync()).ReturnsAsync(missingWorkspace ? null : emptyWorkspace);
+
+        Assert.False(await CreateModifier(CreateFile()).RunAsync());
+        AssertError(_projectPath);
+        _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
+    }
+
+    [Theory]
     [InlineData("</head>", true)]
     [InlineData("</HEAD>", true)]
     [InlineData("</head>", false)]
@@ -303,6 +316,7 @@ public class HtmlRecipeTests : IDisposable
     [Theory]
     [InlineData("")]
     [InlineData("unrelated content")]
+    [InlineData("ANCHOR")]
     public void ApplyReplacementsOnFileOnDisk_PreservesLegacyCssNoOp(string content)
     {
         var cssPath = Path.Combine(_directory, "app.css");

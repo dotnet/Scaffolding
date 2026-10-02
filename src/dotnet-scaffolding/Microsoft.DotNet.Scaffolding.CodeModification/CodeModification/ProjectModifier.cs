@@ -44,28 +44,30 @@ internal class ProjectModifier
 
         var solution = (await _codeService.GetWorkspaceAsync())?.CurrentSolution;
         var roslynProject = solution?.GetProject(_projectPath);
+        if (roslynProject is null)
+        {
+            _consoleLogger.LogError($"Project '{_projectPath}' was not found in the workspace.");
+            return false;
+        }
 
         var filteredFiles = _codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, _codeChangeOptions));
         foreach (var file in filteredFiles)
         {
-            if (roslynProject  is not null)
+            if (file.Extension == "html" && roslynProject.GetAdditionalDocument(file.FileName) is null)
             {
-                if (file.Extension == "html" && roslynProject.GetAdditionalDocument(file.FileName) is null)
+                if (!TryModifyHtmlFileOnDisk(file, _codeChangeOptions, roslynProject, out var error))
                 {
-                    if (!TryModifyHtmlFileOnDisk(file, _codeChangeOptions, roslynProject, out var error))
-                    {
-                        _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {error}");
-                        return false;
-                    }
+                    _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {error}");
+                    return false;
                 }
-                else
-                {
-                    roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject);
-                }
+
+                continue;
             }
+
+            roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject);
         }
 
-        return _codeService.TryApplyChanges(roslynProject?.Solution);
+        return _codeService.TryApplyChanges(roslynProject.Solution);
     }
 
     public string GetOutput()

@@ -457,25 +457,29 @@ internal static class ProjectModifierHelper
         return true;
     }
 
-    internal static void ApplyReplacementsOnFileOnDisk(string filePath, IEnumerable<CodeSnippet>? codeChanges, bool requireAllChanges = false)
+    internal static void ApplyReplacementsOnFileOnDisk(string filePath, IEnumerable<CodeSnippet>? codeChanges)
+        => TryApplyReplacementsOnFileOnDisk(filePath, codeChanges, out _, requireAllChanges: false);
+
+    internal static bool TryApplyReplacementsOnFileOnDisk(string filePath, IEnumerable<CodeSnippet>? codeChanges, out string? error, bool requireAllChanges = true)
     {
+        error = null;
         if (codeChanges is null)
         {
-            return;    
+            return true;
         }
 
         bool sourceChanged = false;
         var sourceFileString = File.ReadAllText(filePath);
         if (string.IsNullOrEmpty(sourceFileString) && !requireAllChanges)
         {
-            return;
+            return true;
         }
 
         var trimmedSourceFile = TrimStatement(sourceFileString);
         var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(TrimStatement(c.Block)));
         if (!applicableCodeChanges.Any())
         {
-            return;
+            return true;
         }
 
         foreach (var change in applicableCodeChanges)
@@ -488,7 +492,8 @@ internal static class ProjectModifierHelper
                     (string.IsNullOrEmpty(change.CheckBlock) || !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)) &&
                     (string.IsNullOrEmpty(replaceSnippet) || !sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase)))
                 {
-                    throw new InvalidOperationException($"Replacement snippet '{replaceSnippet}' was not found in '{filePath}'.");
+                    error = $"Replacement snippet '{replaceSnippet}' was not found in '{filePath}'.";
+                    return false;
                 }
 
                 if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
@@ -517,6 +522,8 @@ internal static class ProjectModifierHelper
         {
             File.WriteAllText(filePath, sourceFileString);
         }
+
+        return true;
     }
 
     /// <summary>

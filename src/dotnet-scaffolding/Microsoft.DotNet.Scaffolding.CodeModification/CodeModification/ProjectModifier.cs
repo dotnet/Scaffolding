@@ -50,10 +50,17 @@ internal class ProjectModifier
         {
             if (roslynProject  is not null)
             {
-                roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject);
-                if (roslynProject is null)
+                if (file.Extension == "html" && roslynProject.GetAdditionalDocument(file.FileName) is null)
                 {
-                    return false;
+                    if (!TryModifyHtmlFileOnDisk(file, _codeChangeOptions, roslynProject, out var error))
+                    {
+                        _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {error}");
+                        return false;
+                    }
+                }
+                else
+                {
+                    roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject);
                 }
             }
         }
@@ -66,7 +73,7 @@ internal class ProjectModifier
         return _output.ToString();
     }
 
-    private async Task<Project?> HandleCodeFileAsync(CodeFile file, IList<string> options, Project project)
+    private async Task<Project> HandleCodeFileAsync(CodeFile file, IList<string> options, Project project)
     {
         try
         {
@@ -84,31 +91,10 @@ internal class ProjectModifier
                     textDoc = await ModifyCshtmlFile(file, textDoc, options);
                     return textDoc?.Project ?? project;
                 case "razor":
+                case "html":
                     textDoc = project.GetAdditionalDocument(file.FileName);
                     textDoc = await ApplyTextReplacements(file, textDoc, options);
                     return textDoc?.Project ?? project;
-                case "html":
-                    textDoc = project.GetAdditionalDocument(file.FileName);
-                    if (textDoc is not null)
-                    {
-                        textDoc = await ApplyTextReplacements(file, textDoc, options);
-                        return textDoc?.Project ?? project;
-                    }
-
-                    var replacements = file.Replacements?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options)).ToArray();
-                    if (replacements is null || replacements.Length == 0)
-                    {
-                        break;
-                    }
-
-                    var htmlPath = GetHtmlFilePath(project, file.FileName);
-                    if (string.IsNullOrEmpty(htmlPath) || !File.Exists(htmlPath))
-                    {
-                        throw new FileNotFoundException($"HTML file '{file.FileName}' was not found in the project.");
-                    }
-
-                    ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(htmlPath, replacements, requireAllChanges: true);
-                    break;
                 case "css":
                     var filePathOnDisk = project.GetFilePath(file.FileName);
                     if (!string.IsNullOrEmpty(filePathOnDisk))
@@ -122,13 +108,36 @@ internal class ProjectModifier
         catch (Exception e)
         {
             _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {e.Message}");
-            if (file.Extension == "html")
-            {
-                return null;
-            }
         }
 
         return project;
+    }
+
+    private static bool TryModifyHtmlFileOnDisk(CodeFile file, IList<string> options, Project project, out string? error)
+    {
+        error = null;
+        var replacements = file.Replacements?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options)).ToArray();
+        if (replacements is null || replacements.Length == 0)
+        {
+            return true;
+        }
+
+        try
+        {
+            var htmlPath = GetHtmlFilePath(project, file.FileName);
+            if (string.IsNullOrEmpty(htmlPath) || !File.Exists(htmlPath))
+            {
+                error = $"HTML file '{file.FileName}' was not found in the project.";
+                return false;
+            }
+
+            return ProjectModifierHelper.TryApplyReplacementsOnFileOnDisk(htmlPath, replacements, out error);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
+            error = ex.Message;
+            return false;
+        }
     }
 
     private static string? GetHtmlFilePath(Project project, string? fileName)

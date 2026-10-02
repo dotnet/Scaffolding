@@ -314,6 +314,52 @@ public class HtmlRecipeTests : IDisposable
         Assert.Equal(content, File.ReadAllText(cssPath));
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("<body>No head anchor</body>")]
+    public void TryApplyReplacementsOnFileOnDisk_ReportsMissingAnchorWithoutThrowing(string content)
+    {
+        File.WriteAllText(_htmlPath, content);
+
+        Assert.False(ProjectModifierHelper.TryApplyReplacementsOnFileOnDisk(_htmlPath, [CreateReplacement()], out var error));
+        Assert.Contains("</head>", error);
+        Assert.Equal(content, File.ReadAllText(_htmlPath));
+    }
+
+    [Fact]
+    public void TryApplyReplacementsOnFileOnDisk_FailedLaterReplacementDoesNotWrite()
+    {
+        File.WriteAllText(_htmlPath, "</head>");
+        CodeSnippet[] replacements = [CreateReplacement(), new CodeSnippet { ReplaceSnippet = ["missing"], Block = "new" }];
+
+        Assert.False(ProjectModifierHelper.TryApplyReplacementsOnFileOnDisk(_htmlPath, replacements, out var error));
+        Assert.Contains("missing", error);
+        Assert.Equal("</head>", File.ReadAllText(_htmlPath));
+    }
+
+    [Fact]
+    public void TryApplyReplacementsOnFileOnDisk_ClearsDiagnosticOnSuccessAndRerun()
+    {
+        File.WriteAllText(_htmlPath, "</head>");
+        string? error = "previous error";
+        var expected = $"{Link}{Environment.NewLine}</head>";
+
+        for (var run = 0; run < 2; run++)
+        {
+            Assert.True(ProjectModifierHelper.TryApplyReplacementsOnFileOnDisk(_htmlPath, [CreateReplacement()], out error));
+            Assert.Null(error);
+            Assert.Equal(expected, File.ReadAllText(_htmlPath));
+        }
+    }
+
+    [Fact]
+    public void TryApplyReplacementsOnFileOnDisk_NoReplacementsIsSuccessfulNoOp()
+    {
+        Assert.True(ProjectModifierHelper.TryApplyReplacementsOnFileOnDisk(_htmlPath, null, out var error));
+        Assert.Null(error);
+        Assert.False(File.Exists(_htmlPath));
+    }
+
     [Fact]
     [Trait("Suite", "ScaffoldIntegration")]
     public async Task ExecuteAsync_StandaloneBlazorWebAssemblyRecipeSupportsSubstitutionsAndReruns()

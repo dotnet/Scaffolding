@@ -457,7 +457,7 @@ internal static class ProjectModifierHelper
         return true;
     }
 
-    internal static void ApplyReplacementsOnFileOnDisk(string filePath, IEnumerable<CodeSnippet>? codeChanges)
+    internal static void ApplyReplacementsOnFileOnDisk(string filePath, IEnumerable<CodeSnippet>? codeChanges, bool requireAllChanges = false)
     {
         if (codeChanges is null)
         {
@@ -466,7 +466,7 @@ internal static class ProjectModifierHelper
 
         bool sourceChanged = false;
         var sourceFileString = File.ReadAllText(filePath);
-        if (string.IsNullOrEmpty(sourceFileString))
+        if (string.IsNullOrEmpty(sourceFileString) && !requireAllChanges)
         {
             return;
         }
@@ -484,11 +484,19 @@ internal static class ProjectModifierHelper
             if (change.ReplaceSnippet != null)
             {
                 var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
+                if (requireAllChanges &&
+                    (string.IsNullOrEmpty(change.CheckBlock) || !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)) &&
+                    (string.IsNullOrEmpty(replaceSnippet) || !sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase)))
+                {
+                    throw new InvalidOperationException($"Replacement snippet '{replaceSnippet}' was not found in '{filePath}'.");
+                }
+
                 if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
                     (string.IsNullOrEmpty(change.CheckBlock) ||
                      !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)))
                 {
-                    sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
+                    sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block,
+                        requireAllChanges ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
                     sourceChanged = true;
                 }
 

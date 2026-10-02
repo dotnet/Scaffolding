@@ -51,6 +51,10 @@ internal class ProjectModifier
             if (roslynProject  is not null)
             {
                 roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject);
+                if (roslynProject is null)
+                {
+                    return false;
+                }
             }
         }
 
@@ -62,7 +66,7 @@ internal class ProjectModifier
         return _output.ToString();
     }
 
-    private async Task<Project> HandleCodeFileAsync(CodeFile file, IList<string> options, Project project)
+    private async Task<Project?> HandleCodeFileAsync(CodeFile file, IList<string> options, Project project)
     {
         try
         {
@@ -80,10 +84,31 @@ internal class ProjectModifier
                     textDoc = await ModifyCshtmlFile(file, textDoc, options);
                     return textDoc?.Project ?? project;
                 case "razor":
-                case "html":
                     textDoc = project.GetAdditionalDocument(file.FileName);
                     textDoc = await ApplyTextReplacements(file, textDoc, options);
                     return textDoc?.Project ?? project;
+                case "html":
+                    textDoc = project.GetAdditionalDocument(file.FileName);
+                    if (textDoc is not null)
+                    {
+                        textDoc = await ApplyTextReplacements(file, textDoc, options);
+                        return textDoc?.Project ?? project;
+                    }
+
+                    var replacements = file.Replacements?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options)).ToArray();
+                    if (replacements is null || replacements.Length == 0)
+                    {
+                        break;
+                    }
+
+                    var htmlPath = project.GetFilePath(file.FileName);
+                    if (string.IsNullOrEmpty(htmlPath))
+                    {
+                        throw new FileNotFoundException($"HTML file '{file.FileName}' was not found in the project.");
+                    }
+
+                    ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(htmlPath, replacements, requireAllChanges: true);
+                    break;
                 case "css":
                     var filePathOnDisk = project.GetFilePath(file.FileName);
                     if (!string.IsNullOrEmpty(filePathOnDisk))
@@ -97,6 +122,10 @@ internal class ProjectModifier
         catch (Exception e)
         {
             _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {e.Message}");
+            if (file.Extension == "html")
+            {
+                return null;
+            }
         }
 
         return project;

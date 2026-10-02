@@ -53,18 +53,32 @@ internal class ProjectModifier
         var filteredFiles = _codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, _codeChangeOptions));
         foreach (var file in filteredFiles)
         {
-            if (file.Extension == "html" && roslynProject.GetAdditionalDocument(file.FileName) is null)
+            TextDocument? htmlDocument = null;
+            if (file.Extension == "html")
             {
-                if (!TryModifyHtmlFileOnDisk(file, _codeChangeOptions, roslynProject, out var error))
+                try
                 {
-                    _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {error}");
+                    htmlDocument = GetHtmlAdditionalDocument(roslynProject, file.FileName);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+                {
+                    _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {ex.Message}");
                     return false;
                 }
 
-                continue;
+                if (htmlDocument is null)
+                {
+                    if (!TryModifyHtmlFileOnDisk(file, _codeChangeOptions, roslynProject, out var error))
+                    {
+                        _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {error}");
+                        return false;
+                    }
+
+                    continue;
+                }
             }
 
-            roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject);
+            roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject, htmlDocument);
         }
 
         return _codeService.TryApplyChanges(roslynProject.Solution);
@@ -75,7 +89,7 @@ internal class ProjectModifier
         return _output.ToString();
     }
 
-    private async Task<Project> HandleCodeFileAsync(CodeFile file, IList<string> options, Project project)
+    private async Task<Project> HandleCodeFileAsync(CodeFile file, IList<string> options, Project project, TextDocument? htmlDocument)
     {
         try
         {
@@ -94,7 +108,7 @@ internal class ProjectModifier
                     return textDoc?.Project ?? project;
                 case "razor":
                 case "html":
-                    textDoc = project.GetAdditionalDocument(file.FileName);
+                    textDoc = file.Extension == "html" ? htmlDocument : project.GetAdditionalDocument(file.FileName);
                     textDoc = await ApplyTextReplacements(file, textDoc, options);
                     return textDoc?.Project ?? project;
                 case "css":
@@ -113,6 +127,32 @@ internal class ProjectModifier
         }
 
         return project;
+    }
+
+    private static TextDocument? GetHtmlAdditionalDocument(Project project, string? fileName)
+    {
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return null;
+        }
+
+        var normalizedFileName = fileName.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+        if (Path.GetFileName(normalizedFileName) == normalizedFileName)
+        {
+            return project.GetAdditionalDocument(fileName);
+        }
+
+        var filePath = GetHtmlFilePath(project, normalizedFileName);
+        if (filePath is null)
+        {
+            return null;
+        }
+
+        var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        return project.AdditionalDocuments.FirstOrDefault(document =>
+            !string.IsNullOrEmpty(document.FilePath) &&
+            Path.GetFullPath(document.FilePath.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))
+                .Equals(filePath, comparison));
     }
 
     private static bool TryModifyHtmlFileOnDisk(CodeFile file, IList<string> options, Project project, out string? error)

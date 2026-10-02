@@ -72,14 +72,25 @@ public class HtmlRecipeTests : IDisposable
     }
 
     [Theory]
-    [InlineData("bin", "wwwroot\\index.html")]
-    [InlineData("bin", "index.html")]
-    [InlineData("obj", "index.html")]
-    public async Task RunAsync_MissingHostDoesNotEditOtherMatchingFiles(string directory, string fileName)
+    [InlineData("bin", "wwwroot\\index.html", false)]
+    [InlineData("bin", "index.html", false)]
+    [InlineData("obj", "index.html", false)]
+    [InlineData("bin", "wwwroot\\index.html", true)]
+    [InlineData("obj", "wwwroot\\index.html", true)]
+    [InlineData("nested", "wwwroot\\index.html", true)]
+    public async Task RunAsync_MissingHostDoesNotEditOtherMatchingFiles(string directory, string fileName, bool inWorkspace)
     {
         var otherPath = Path.Combine(_directory, directory, "Debug", "net10.0", "wwwroot", "index.html");
         Directory.CreateDirectory(Path.GetDirectoryName(otherPath)!);
         File.WriteAllText(otherPath, "</head>");
+        TextDocument? otherDocument = null;
+        if (inWorkspace)
+        {
+            var project = _workspace.CurrentSolution.Projects.Single();
+            otherDocument = project.AddAdditionalDocument("index.html", SourceText.From("</head>"), filePath: otherPath);
+            Assert.True(_workspace.TryApplyChanges(otherDocument.Project.Solution));
+        }
+
         var file = CreateFile();
         file.FileName = fileName;
 
@@ -87,6 +98,12 @@ public class HtmlRecipeTests : IDisposable
         AssertError(fileName);
         Assert.False(File.Exists(_htmlPath));
         Assert.Equal("</head>", File.ReadAllText(otherPath));
+        if (otherDocument is not null)
+        {
+            var unchanged = _workspace.CurrentSolution.GetAdditionalDocument(otherDocument.Id)!;
+            Assert.Equal("</head>", (await unchanged.GetTextAsync()).ToString());
+        }
+
         _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
     }
 
@@ -107,19 +124,26 @@ public class HtmlRecipeTests : IDisposable
         Assert.Equal("</head>", File.ReadAllText(artifactPath));
     }
 
-    [Fact]
-    public async Task RunAsync_RejectsHtmlPathOutsideProject()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task RunAsync_RejectsHtmlPathOutsideProject(bool absolutePath)
     {
         var outsidePath = _directory + "-outside.html";
         File.WriteAllText(outsidePath, "</head>");
         try
         {
+            var project = _workspace.CurrentSolution.Projects.Single();
+            var document = project.AddAdditionalDocument("outside.html", SourceText.From("</head>"), filePath: outsidePath);
+            Assert.True(_workspace.TryApplyChanges(document.Project.Solution));
             var file = CreateFile();
-            file.FileName = Path.GetRelativePath(_directory, outsidePath);
+            file.FileName = absolutePath ? outsidePath : Path.GetRelativePath(_directory, outsidePath);
 
             Assert.False(await CreateModifier(file).RunAsync());
             AssertError(file.FileName);
             Assert.Equal("</head>", File.ReadAllText(outsidePath));
+            var unchanged = _workspace.CurrentSolution.GetAdditionalDocument(document.Id)!;
+            Assert.Equal("</head>", (await unchanged.GetTextAsync()).ToString());
         }
         finally
         {
@@ -247,21 +271,37 @@ public class HtmlRecipeTests : IDisposable
         _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
     }
 
-    [Fact]
-    public async Task RunAsync_PreservesHtmlAdditionalDocumentPath()
+    [Theory]
+    [InlineData("Host.html")]
+    [InlineData("wwwroot\\index.html")]
+    [InlineData("wwwroot/index.html")]
+    public async Task RunAsync_PreservesHtmlAdditionalDocumentPath(string fileName)
     {
-        var path = Path.Combine(_directory, "Host.html");
+        var path = Path.Combine(_directory, fileName.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar));
         File.WriteAllText(path, "disk content without an anchor");
         var project = _workspace.CurrentSolution.Projects.Single();
+        TextDocument? otherDocument = null;
+        if (fileName != "Host.html")
+        {
+            var otherPath = Path.Combine(_directory, "obj", "wwwroot", "index.html");
+            otherDocument = project.AddAdditionalDocument("index.html", SourceText.From("</head>"), filePath: otherPath);
+            project = otherDocument.Project;
+        }
+
         var document = project.AddAdditionalDocument("Host.html", SourceText.From("</head>"), filePath: path);
         Assert.True(_workspace.TryApplyChanges(document.Project.Solution));
         var file = CreateFile();
-        file.FileName = "Host.html";
+        file.FileName = fileName;
 
         Assert.True(await CreateModifier(file).RunAsync());
         var updated = _workspace.CurrentSolution.GetAdditionalDocument(document.Id)!;
         Assert.Equal($"{Link}{Environment.NewLine}</head>", (await updated.GetTextAsync()).ToString());
         Assert.Equal("disk content without an anchor", File.ReadAllText(path));
+        if (otherDocument is not null)
+        {
+            var unchanged = _workspace.CurrentSolution.GetAdditionalDocument(otherDocument.Id)!;
+            Assert.Equal("</head>", (await unchanged.GetTextAsync()).ToString());
+        }
     }
 
     [Theory]

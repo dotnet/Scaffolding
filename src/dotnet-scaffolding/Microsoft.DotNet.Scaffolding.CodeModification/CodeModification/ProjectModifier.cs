@@ -53,32 +53,19 @@ internal class ProjectModifier
         var filteredFiles = _codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, _codeChangeOptions));
         foreach (var file in filteredFiles)
         {
-            TextDocument? htmlDocument = null;
             if (file.Extension == "html")
             {
-                try
+                var result = await HandleHtmlFileAsync(file, _codeChangeOptions, roslynProject);
+                if (!result.Success)
                 {
-                    htmlDocument = GetHtmlAdditionalDocument(roslynProject, file.FileName);
-                }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
-                {
-                    _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {ex.Message}");
                     return false;
                 }
 
-                if (htmlDocument is null)
-                {
-                    if (!TryModifyHtmlFileOnDisk(file, _codeChangeOptions, roslynProject, out var error))
-                    {
-                        _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {error}");
-                        return false;
-                    }
-
-                    continue;
-                }
+                roslynProject = result.Project;
+                continue;
             }
 
-            roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject, htmlDocument);
+            roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject);
         }
 
         return _codeService.TryApplyChanges(roslynProject.Solution);
@@ -89,7 +76,7 @@ internal class ProjectModifier
         return _output.ToString();
     }
 
-    private async Task<Project> HandleCodeFileAsync(CodeFile file, IList<string> options, Project project, TextDocument? htmlDocument)
+    private async Task<Project> HandleCodeFileAsync(CodeFile file, IList<string> options, Project project)
     {
         try
         {
@@ -107,8 +94,7 @@ internal class ProjectModifier
                     textDoc = await ModifyCshtmlFile(file, textDoc, options);
                     return textDoc?.Project ?? project;
                 case "razor":
-                case "html":
-                    textDoc = file.Extension == "html" ? htmlDocument : project.GetAdditionalDocument(file.FileName);
+                    textDoc = project.GetAdditionalDocument(file.FileName);
                     textDoc = await ApplyTextReplacements(file, textDoc, options);
                     return textDoc?.Project ?? project;
                 case "css":
@@ -129,6 +115,46 @@ internal class ProjectModifier
         return project;
     }
 
+    private async Task<(Project Project, bool Success)> HandleHtmlFileAsync(CodeFile file, IList<string> options, Project project)
+    {
+        TextDocument? document;
+        try
+        {
+            document = GetHtmlAdditionalDocument(project, file.FileName);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
+            _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {ex.Message}");
+            return (project, false);
+        }
+
+        if (document is null)
+        {
+            var success = TryModifyHtmlFileOnDisk(file, options, project, out var error);
+            if (!success)
+            {
+                _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {error}");
+            }
+
+            return (project, success);
+        }
+
+        try
+        {
+            document = await ApplyTextReplacements(file, document, options);
+            return (document?.Project ?? project, true);
+        }
+        catch (Exception ex)
+        {
+            _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {ex.Message}");
+        }
+
+        return (project, true);
+    }
+
+    private static string NormalizePathSeparators(string path)
+        => path.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+
     private static TextDocument? GetHtmlAdditionalDocument(Project project, string? fileName)
     {
         if (string.IsNullOrEmpty(fileName))
@@ -136,7 +162,7 @@ internal class ProjectModifier
             return null;
         }
 
-        var normalizedFileName = fileName.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+        var normalizedFileName = NormalizePathSeparators(fileName);
         if (Path.GetFileName(normalizedFileName) == normalizedFileName)
         {
             return project.GetAdditionalDocument(fileName);
@@ -151,8 +177,7 @@ internal class ProjectModifier
         var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
         return project.AdditionalDocuments.FirstOrDefault(document =>
             !string.IsNullOrEmpty(document.FilePath) &&
-            Path.GetFullPath(document.FilePath.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar))
-                .Equals(filePath, comparison));
+            Path.GetFullPath(NormalizePathSeparators(document.FilePath)).Equals(filePath, comparison));
     }
 
     private static bool TryModifyHtmlFileOnDisk(CodeFile file, IList<string> options, Project project, out string? error)
@@ -191,7 +216,7 @@ internal class ProjectModifier
         }
 
         projectDirectory = Path.GetFullPath(projectDirectory);
-        var normalizedFileName = fileName.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+        var normalizedFileName = NormalizePathSeparators(fileName);
         if (Path.GetFileName(normalizedFileName) != normalizedFileName)
         {
             var filePath = Path.GetFullPath(normalizedFileName, projectDirectory);

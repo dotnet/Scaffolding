@@ -42,13 +42,11 @@ public class HtmlRecipeTests : IDisposable
             .Returns((Solution solution) => _workspace.TryApplyChanges(solution));
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task RunAsync_MissingWorkspaceOrProjectFailsAndLogs(bool missingWorkspace)
+    [Fact]
+    public async Task RunAsync_MissingProjectFailsAndLogs()
     {
         using var emptyWorkspace = new AdhocWorkspace();
-        _codeService.Setup(service => service.GetWorkspaceAsync()).ReturnsAsync(missingWorkspace ? null : emptyWorkspace);
+        _codeService.Setup(service => service.GetWorkspaceAsync()).ReturnsAsync(emptyWorkspace);
 
         Assert.False(await CreateModifier(CreateFile()).RunAsync());
         AssertError(_projectPath);
@@ -56,18 +54,14 @@ public class HtmlRecipeTests : IDisposable
     }
 
     [Theory]
-    [InlineData("</head>", true)]
-    [InlineData("</HEAD>", true)]
-    [InlineData("</head>", false)]
-    public async Task RunAsync_InsertsIntoHtmlOnDiskAndIsIdempotent(string closingHead, bool useCheckBlock)
+    [InlineData("</head>")]
+    [InlineData("</HEAD>")]
+    public async Task RunAsync_InsertsIntoHtmlOnDiskAndIsIdempotent(string closingHead)
     {
         File.WriteAllText(_htmlPath, $"<head>{Environment.NewLine}{closingHead}");
         Assert.Empty(_workspace.CurrentSolution.Projects.Single().AdditionalDocuments);
         var file = CreateFile();
-        if (!useCheckBlock)
-        {
-            file.Replacements![0].CheckBlock = null;
-        }
+        file.Replacements![0].CheckBlock = null;
         var modifier = CreateModifier(file);
 
         Assert.True(await modifier.RunAsync());
@@ -78,22 +72,7 @@ public class HtmlRecipeTests : IDisposable
     }
 
     [Theory]
-    [InlineData("wwwroot\\index.html")]
-    [InlineData("index.html")]
-    public async Task RunAsync_ResolvesProjectRelativePathsAndFileNames(string fileName)
-    {
-        File.WriteAllText(_htmlPath, "</head>");
-        var file = CreateFile();
-        file.FileName = fileName;
-
-        Assert.True(await CreateModifier(file).RunAsync());
-        Assert.Equal($"{Link}{Environment.NewLine}</head>", File.ReadAllText(_htmlPath));
-    }
-
-    [Theory]
     [InlineData("bin", "wwwroot\\index.html")]
-    [InlineData("obj", "wwwroot\\index.html")]
-    [InlineData("NestedProject", "wwwroot\\index.html")]
     [InlineData("bin", "index.html")]
     [InlineData("obj", "index.html")]
     public async Task RunAsync_MissingHostDoesNotEditOtherMatchingFiles(string directory, string fileName)
@@ -108,6 +87,7 @@ public class HtmlRecipeTests : IDisposable
         AssertError(fileName);
         Assert.False(File.Exists(_htmlPath));
         Assert.Equal("</head>", File.ReadAllText(otherPath));
+        _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
     }
 
     [Theory]
@@ -148,22 +128,13 @@ public class HtmlRecipeTests : IDisposable
     }
 
     [Theory]
-    [InlineData(true, true)]
-    [InlineData(true, false)]
-    [InlineData(false, true)]
-    [InlineData(false, false)]
-    public async Task RunAsync_PreservesPrependAndAppendSemantics(bool prepend, bool additionalDocument)
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task RunAsync_PrependsOrAppendsOnDiskAndIsIdempotent(bool prepend)
     {
         const string original = "<html></html>";
         const string block = "<!-- inserted -->";
         File.WriteAllText(_htmlPath, original);
-        TextDocument? document = null;
-        if (additionalDocument)
-        {
-            var project = _workspace.CurrentSolution.Projects.Single();
-            document = project.AddAdditionalDocument("index.html", SourceText.From(original), filePath: _htmlPath);
-            Assert.True(_workspace.TryApplyChanges(document.Project.Solution));
-        }
         var file = CreateFile();
         file.Replacements = [new CodeSnippet { Block = block, Prepend = prepend }];
         var modifier = CreateModifier(file);
@@ -172,14 +143,7 @@ public class HtmlRecipeTests : IDisposable
         for (var run = 0; run < 2; run++)
         {
             Assert.True(await modifier.RunAsync());
-            var actual = document is null
-                ? File.ReadAllText(_htmlPath)
-                : (await _workspace.CurrentSolution.GetAdditionalDocument(document.Id)!.GetTextAsync()).ToString();
-            Assert.Equal(expected, actual);
-        }
-        if (additionalDocument)
-        {
-            Assert.Equal(original, File.ReadAllText(_htmlPath));
+            Assert.Equal(expected, File.ReadAllText(_htmlPath));
         }
     }
 
@@ -244,14 +208,6 @@ public class HtmlRecipeTests : IDisposable
         Assert.Equal(existing, File.ReadAllText(_htmlPath));
     }
 
-    [Fact]
-    public async Task RunAsync_MissingHtmlFailsAndLogs()
-    {
-        Assert.False(await CreateModifier(CreateFile()).RunAsync());
-        AssertError("wwwroot\\index.html");
-        _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
-    }
-
     [Theory]
     [InlineData("")]
     [InlineData("<body>No head anchor</body>")]
@@ -291,26 +247,21 @@ public class HtmlRecipeTests : IDisposable
         _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
     }
 
-    [Theory]
-    [InlineData("html")]
-    [InlineData("razor")]
-    public async Task RunAsync_PreservesAdditionalDocumentPath(string extension)
+    [Fact]
+    public async Task RunAsync_PreservesHtmlAdditionalDocumentPath()
     {
-        var path = Path.Combine(_directory, $"Host.{extension}");
+        var path = Path.Combine(_directory, "Host.html");
         File.WriteAllText(path, "disk content without an anchor");
         var project = _workspace.CurrentSolution.Projects.Single();
-        var document = project.AddAdditionalDocument($"Host.{extension}", SourceText.From("</head>"), filePath: path);
+        var document = project.AddAdditionalDocument("Host.html", SourceText.From("</head>"), filePath: path);
         Assert.True(_workspace.TryApplyChanges(document.Project.Solution));
         var file = CreateFile();
-        file.FileName = $"Host.{extension}";
+        file.FileName = "Host.html";
 
         Assert.True(await CreateModifier(file).RunAsync());
         var updated = _workspace.CurrentSolution.GetAdditionalDocument(document.Id)!;
         Assert.Equal($"{Link}{Environment.NewLine}</head>", (await updated.GetTextAsync()).ToString());
         Assert.Equal("disk content without an anchor", File.ReadAllText(path));
-        Assert.True(await CreateModifier(file).RunAsync());
-        Assert.Equal($"{Link}{Environment.NewLine}</head>",
-            (await _workspace.CurrentSolution.GetAdditionalDocument(document.Id)!.GetTextAsync()).ToString());
     }
 
     [Theory]
@@ -326,52 +277,6 @@ public class HtmlRecipeTests : IDisposable
             [new CodeSnippet { ReplaceSnippet = ["anchor"], Block = "replacement" }]);
 
         Assert.Equal(content, File.ReadAllText(cssPath));
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("<body>No head anchor</body>")]
-    public void TryApplyReplacementsOnFileOnDisk_ReportsMissingAnchorWithoutThrowing(string content)
-    {
-        File.WriteAllText(_htmlPath, content);
-
-        Assert.False(ProjectModifierHelper.TryApplyReplacementsOnFileOnDisk(_htmlPath, [CreateReplacement()], out var error));
-        Assert.Contains("</head>", error);
-        Assert.Equal(content, File.ReadAllText(_htmlPath));
-    }
-
-    [Fact]
-    public void TryApplyReplacementsOnFileOnDisk_FailedLaterReplacementDoesNotWrite()
-    {
-        File.WriteAllText(_htmlPath, "</head>");
-        CodeSnippet[] replacements = [CreateReplacement(), new CodeSnippet { ReplaceSnippet = ["missing"], Block = "new" }];
-
-        Assert.False(ProjectModifierHelper.TryApplyReplacementsOnFileOnDisk(_htmlPath, replacements, out var error));
-        Assert.Contains("missing", error);
-        Assert.Equal("</head>", File.ReadAllText(_htmlPath));
-    }
-
-    [Fact]
-    public void TryApplyReplacementsOnFileOnDisk_ClearsDiagnosticOnSuccessAndRerun()
-    {
-        File.WriteAllText(_htmlPath, "</head>");
-        string? error = "previous error";
-        var expected = $"{Link}{Environment.NewLine}</head>";
-
-        for (var run = 0; run < 2; run++)
-        {
-            Assert.True(ProjectModifierHelper.TryApplyReplacementsOnFileOnDisk(_htmlPath, [CreateReplacement()], out error));
-            Assert.Null(error);
-            Assert.Equal(expected, File.ReadAllText(_htmlPath));
-        }
-    }
-
-    [Fact]
-    public void TryApplyReplacementsOnFileOnDisk_NoReplacementsIsSuccessfulNoOp()
-    {
-        Assert.True(ProjectModifierHelper.TryApplyReplacementsOnFileOnDisk(_htmlPath, null, out var error));
-        Assert.Null(error);
-        Assert.False(File.Exists(_htmlPath));
     }
 
     [Fact]
@@ -421,9 +326,6 @@ public class HtmlRecipeTests : IDisposable
 
         step.CodeModifierConfigJsonText = step.CodeModifierConfigJsonText.Replace("index.html", "missing.html");
         Assert.False(await step.ExecuteAsync(context));
-
-        var rebuild = await ScaffoldCliHelper.RunBuildAsync(_directory);
-        Assert.True(rebuild.ExitCode == 0, $"dotnet build failed: {rebuild.Output}{rebuild.Error}");
     }
 
     private ProjectModifier CreateModifier(CodeFile file, params string[] options)

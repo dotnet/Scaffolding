@@ -483,13 +483,12 @@ internal static class ProjectModifierHelper
             // If doing a code replacement, replace ReplaceSnippet in source with Block
             if (change.ReplaceSnippet != null)
             {
-                var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
-                    (string.IsNullOrEmpty(change.CheckBlock) ||
-                     !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)))
+                if (string.IsNullOrEmpty(change.CheckBlock) ||
+                    !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase))
                 {
-                    sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
-                    sourceChanged = true;
+                    var updatedSource = ReplaceSnippet(sourceFileString, change.ReplaceSnippet, change.Block);
+                    sourceChanged |= updatedSource != sourceFileString;
+                    sourceFileString = updatedSource;
                 }
 
             }
@@ -539,12 +538,10 @@ internal static class ProjectModifierHelper
             // If doing a code replacement, replace ReplaceSnippet in source with Block
             if (change.ReplaceSnippet != null)
             {
-                var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
-                    (string.IsNullOrEmpty(change.CheckBlock) ||
-                     !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)))
+                if (string.IsNullOrEmpty(change.CheckBlock) ||
+                    !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase))
                 {
-                    sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
+                    sourceFileString = ReplaceSnippet(sourceFileString, change.ReplaceSnippet, change.Block);
                 }
 
             }
@@ -574,6 +571,18 @@ internal static class ProjectModifierHelper
         }
 
         return null;
+    }
+
+    private static string ReplaceSnippet(string source, string[] snippet, string replacement)
+    {
+        var text = string.Join("\n", snippet).Replace("\r\n", "\n");
+        if (!text.Contains('\n'))
+        {
+            return source.Replace(text, replacement);
+        }
+
+        var pattern = string.Join(@"\r?\n", text.Split('\n').Select(Regex.Escape));
+        return Regex.Replace(source, pattern, _ => replacement);
     }
 
     internal static async Task UpdateDocument(Document document)

@@ -97,6 +97,25 @@ public class CustomUser : IdentityUser {}
     }
 
     [Fact]
+    public async Task ScaffoldIdentity_RebuildsPrebuiltProjectWithoutDependencyManifest()
+    {
+        using var project = new IdentityTestProject("net10.0", "mvc");
+        await project.CreateAsync();
+        await project.BuildAsync();
+        var manifests = System.IO.Directory.GetFiles(Path.Combine(project.Directory, "bin"), "*.deps.json", SearchOption.AllDirectories);
+        Assert.NotEmpty(manifests);
+        foreach (var manifest in manifests)
+        {
+            File.Delete(manifest);
+        }
+
+        await project.ScaffoldAsync();
+        AssertConfiguredProject(project);
+        Assert.NotEmpty(System.IO.Directory.GetFiles(Path.Combine(project.Directory, "bin"), "*.deps.json", SearchOption.AllDirectories));
+        await project.AssertUnchangedSecondRunAsync();
+    }
+
+    [Fact]
     public async Task ScaffoldIdentity_ResolvesRelativeProjectPath()
     {
         using var project = new IdentityTestProject("net10.0", "mvc");

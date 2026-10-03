@@ -42,6 +42,15 @@ internal class AddIdentityMigrationStep(
             return Task.FromResult(false);
         }
 
+        logger.LogInformation("Building the project for Identity migration generation...");
+        var build = DotnetCliRunner.CreateDotNet("build", [ProjectPath, "--no-incremental", "--nologo"]);
+        build._psi.WorkingDirectory = projectDirectory;
+        if (build.ExecuteAndCaptureOutput(out var buildOutput, out var buildError) != 0)
+        {
+            logger.LogError($"Unable to build the project for Identity migration generation.{Environment.NewLine}{buildOutput}{Environment.NewLine}{buildError}");
+            return Task.FromResult(false);
+        }
+
         var toolDirectory = Path.Combine(fileSystem.GetTempPath(), "dotnet-scaffold", Guid.NewGuid().ToString("N"));
         try
         {
@@ -113,7 +122,20 @@ internal class AddIdentityMigrationStep(
     {
         logger.LogInformation("Generating initial Identity migration...");
         var executableName = OperatingSystem.IsWindows() ? "dotnet-ef.exe" : "dotnet-ef";
-        var runner = DotnetCliRunner.Create(Path.Combine(toolDirectory, executableName),
+        var runner = DotnetCliRunner.Create(Path.Combine(toolDirectory, executableName), GetMigrationArguments());
+        runner._psi.WorkingDirectory = projectDirectory;
+        var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+        if (exitCode == 0)
+        {
+            logger.LogInformation("Done");
+            return true;
+        }
+
+        logger.LogError($"Unable to generate the initial Identity migration.{Environment.NewLine}{stdOut}{Environment.NewLine}{stdErr}");
+        return false;
+    }
+
+    internal string[] GetMigrationArguments() =>
         [
             "migrations",
             "add",
@@ -126,17 +148,8 @@ internal class AddIdentityMigrationStep(
             DbContextName,
             "--output-dir",
             Path.Combine("Data", "Migrations"),
-            "--no-color"
-        ]);
-        runner._psi.WorkingDirectory = projectDirectory;
-        var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
-        if (exitCode == 0)
-        {
-            logger.LogInformation("Done");
-            return true;
-        }
-
-        logger.LogError($"Unable to generate the initial Identity migration.{Environment.NewLine}{stdOut}{Environment.NewLine}{stdErr}");
-        return false;
-    }
+            "--no-build",
+            "--no-color",
+            "--verbose"
+        ];
 }

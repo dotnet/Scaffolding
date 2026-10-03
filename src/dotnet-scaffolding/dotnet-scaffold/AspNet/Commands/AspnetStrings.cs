@@ -26,6 +26,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string CrudExample1Description = "Generate all CRUD pages for Product model:";
             internal const string CrudExample2 = "dotnet scaffold aspnet blazor-crud --project C:/MyApp/MyApp.csproj --model Customer --data-context ShopContext --database-provider PostgreSQL --page List,Edit";
             internal const string CrudExample2Description = "Generate only List and Edit pages with PostgreSQL:";
+
+            internal const string IgniteUI = "blazor-igniteui";
+            internal const string IgniteUIDisplayName = "Ignite UI for Blazor";
+            internal const string IgniteUIDescription = "Add Ignite UI for Blazor (IgniteUI.Blazor.Lite and/or IgniteUI.Blazor.GridLite, MIT licensed) to a Blazor project: installs the NuGet package(s), registers the services, imports the IgniteUI.Blazor.Controls namespace and links a theme stylesheet in the host page.";
+            internal const string IgniteUIExample1 = "dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp.csproj --package All";
+            internal const string IgniteUIExample1Description = "Add IgniteUI.Blazor.Lite and IgniteUI.Blazor.GridLite with the default light bootstrap theme:";
+            internal const string IgniteUIExample2 = "dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp.csproj --package GridLite --theme material --theme-variant dark";
+            internal const string IgniteUIExample2Description = "Add only the IgniteUI.Blazor.GridLite grid with the dark material theme:";
         }
 
         internal class RazorView
@@ -263,6 +271,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             {
                 internal const string DisplayName = "Select Existing Application";
                 internal const string Description = "Select existing application";
+            }
+
+            internal static class IgniteUIPackage
+            {
+                internal const string DisplayName = "Ignite UI package(s)";
+                internal const string Description = "Ignite UI for Blazor package(s) to add: 'Lite' (IgniteUI.Blazor.Lite core UI components), 'GridLite' (IgniteUI.Blazor.GridLite lightweight grid) or 'All' (both).";
+            }
+
+            internal static class IgniteUITheme
+            {
+                internal const string DisplayName = "Ignite UI theme";
+                internal const string Description = "Ignite UI theme stylesheet to link in the host page: bootstrap (default), material, fluent or indigo.";
+            }
+
+            internal static class IgniteUIThemeVariant
+            {
+                internal const string DisplayName = "Ignite UI theme variant";
+                internal const string Description = "Variant of the Ignite UI theme stylesheet to link: light (default) or dark.";
             }
         }
     }

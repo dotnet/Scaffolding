@@ -654,6 +654,7 @@ For feature requests:
 - **Getting Started**: [docs/Getting-Started.md](docs/Getting-Started.md)
 - **Known Flaky/Skipped Tests**: [docs/KNOWN_FLAKY_TESTS.md](docs/KNOWN_FLAKY_TESTS.md)
 - **Entra ID Scaffolder**: [docs/ENTRA_ID_SCAFFOLDER_DOCUMENTATION.md](docs/ENTRA_ID_SCAFFOLDER_DOCUMENTATION.md)
+- **Ignite UI for Blazor Scaffolder**: [docs/IGNITEUI_BLAZOR_SCAFFOLDER_DOCUMENTATION.md](docs/IGNITEUI_BLAZOR_SCAFFOLDER_DOCUMENTATION.md)
 - **Main README**: [README.md](README.md)
 
 ### Related Projects

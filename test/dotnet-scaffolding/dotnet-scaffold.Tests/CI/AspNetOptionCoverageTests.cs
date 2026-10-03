@@ -290,4 +290,68 @@ public class AspNetOptionCoverageTests
         => Assert.False(_options.ApplicationId.Required);
 
     #endregion
+
+    #region --package (IgniteUIPackage)
+
+    [Fact]
+    public void IgniteUIPackage_HasCorrectCliOption()
+        => Assert.Equal(Constants.CliOptions.IgniteUIPackageOption, _options.IgniteUIPackage.CliOption);
+
+    [Fact]
+    public void IgniteUIPackage_IsRequired()
+        => Assert.True(_options.IgniteUIPackage.Required);
+
+    [Fact]
+    public void IgniteUIPackage_HasCustomPickerValues()
+        => Assert.Equal(new[] { "Lite", "GridLite", "All" }, _options.IgniteUIPackage.CustomPickerValues!);
+
+    [Fact]
+    public void IgniteUIPackage_HasNonEmptyDescription()
+        => Assert.False(string.IsNullOrWhiteSpace(_options.IgniteUIPackage.Description));
+
+    [Fact]
+    public void IgniteUIPackage_HasNonEmptyDisplayName()
+        => Assert.False(string.IsNullOrWhiteSpace(_options.IgniteUIPackage.DisplayName));
+
+    #endregion
+
+    #region --theme (IgniteUITheme)
+
+    [Fact]
+    public void IgniteUITheme_HasCorrectCliOption()
+        => Assert.Equal(Constants.CliOptions.IgniteUIThemeOption, _options.IgniteUITheme.CliOption);
+
+    [Fact]
+    public void IgniteUITheme_IsNotRequired()
+        => Assert.False(_options.IgniteUITheme.Required);
+
+    [Fact]
+    public void IgniteUITheme_HasCustomPickerValues()
+        => Assert.Equal(new[] { "bootstrap", "material", "fluent", "indigo" }, _options.IgniteUITheme.CustomPickerValues!);
+
+    [Fact]
+    public void IgniteUITheme_HasNonEmptyDescription()
+        => Assert.False(string.IsNullOrWhiteSpace(_options.IgniteUITheme.Description));
+
+    #endregion
+
+    #region --theme-variant (IgniteUIThemeVariant)
+
+    [Fact]
+    public void IgniteUIThemeVariant_HasCorrectCliOption()
+        => Assert.Equal(Constants.CliOptions.IgniteUIThemeVariantOption, _options.IgniteUIThemeVariant.CliOption);
+
+    [Fact]
+    public void IgniteUIThemeVariant_IsNotRequired()
+        => Assert.False(_options.IgniteUIThemeVariant.Required);
+
+    [Fact]
+    public void IgniteUIThemeVariant_HasCustomPickerValues()
+        => Assert.Equal(new[] { "light", "dark" }, _options.IgniteUIThemeVariant.CustomPickerValues!);
+
+    [Fact]
+    public void IgniteUIThemeVariant_HasNonEmptyDescription()
+        => Assert.False(string.IsNullOrWhiteSpace(_options.IgniteUIThemeVariant.Description));
+
+    #endregion
 }

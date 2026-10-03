@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.ScaffoldSteps;
 public class AddIdentityMigrationStepTests
 {
     [Fact]
-    public void GetMigrationArguments_UsesCompletedProjectBuild()
+    public void GetMigrationArguments_DelegatesStartupBuildToEf()
     {
         var step = new AddIdentityMigrationStep(NullLogger<AddIdentityMigrationStep>.Instance, new FileSystem())
         {
@@ -19,7 +19,7 @@ public class AddIdentityMigrationStepTests
             ProjectAssetsFile = "project.assets.json"
         };
         var arguments = step.GetMigrationArguments();
-        Assert.Contains("--no-build", arguments);
+        Assert.DoesNotContain("--no-build", arguments);
         Assert.Contains("--verbose", arguments);
         Assert.Contains("TestProject.csproj", arguments);
         Assert.Contains("ApplicationDbContext", arguments);

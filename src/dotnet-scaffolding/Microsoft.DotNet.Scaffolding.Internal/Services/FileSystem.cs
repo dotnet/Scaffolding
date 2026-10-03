@@ -26,7 +26,8 @@ public class FileSystem : IFileSystem
         foreach (var segment in segments)
         {
             var directory = new DirectoryInfo(Path.Combine(resolvedPath, segment));
-            resolvedPath = directory.ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? directory.FullName;
+            var target = directory.ResolveLinkTarget(returnFinalTarget: true);
+            resolvedPath = target is null ? directory.FullName : ResolveDirectoryPath(target.FullName);
         }
         return resolvedPath;
     }

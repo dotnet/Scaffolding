@@ -140,9 +140,8 @@ stages:
               --configuration $(_BuildConfig)
               --prepareMachine
               --restore --build --test --pack --ci
-              '/p:TestRunnerAdditionalArguments=-method *Scaffold_Identity_*_CliInvocation -method *ScaffoldIdentity_RebuildsPrebuiltProjectWithoutDependencyManifest -method *ScaffoldIdentity_ResolvesDirectorySymlinks -method *ResolveDirectoryPath_*'
             name: Build
-            displayName: Build and focused Identity migration diagnostics
+            displayName: Build
             condition: succeeded()
 
         - job: Linux

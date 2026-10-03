@@ -187,9 +187,12 @@ internal class ValidateIdentityStep : ScaffoldStep
             }
         }
 
+        var projectPath = Path.GetFullPath(Project);
+        // MSBuild must not mix a directory link with its physical path when tracking build outputs.
+        var projectDirectory = FileSystem.ResolveDirectoryPath(Path.GetDirectoryName(projectPath)!);
         return new IdentitySettings
         {
-            Project = Path.GetFullPath(Project),
+            Project = Path.Combine(projectDirectory, Path.GetFileName(projectPath)),
             DataContext = DataContext,
             DatabaseProvider = DatabaseProvider,
             Prerelease = Prerelease,

@@ -115,6 +115,31 @@ public class CustomUser : IdentityUser {}
         await project.AssertUnchangedSecondRunAsync();
     }
 
+    [UnixFact]
+    public async Task ScaffoldIdentity_ResolvesDirectorySymlinks()
+    {
+        using var project = new IdentityTestProject("net10.0", "mvc");
+        await project.CreateAsync();
+        await project.BuildAsync();
+        var actual = Microsoft.DotNet.Scaffolding.Internal.Services.FileSystem.ResolveDirectoryPath(project.Directory);
+        var alias = Path.Combine(Path.GetDirectoryName(actual)!, $"alias-{Guid.NewGuid():N}");
+        try
+        {
+            Directory.CreateSymbolicLink(alias, actual);
+            var linkedProject = Path.Combine(alias, "IdentityApp.csproj");
+            await project.ScaffoldAsync(projectPath: linkedProject);
+            AssertConfiguredProject(project);
+            await project.AssertUnchangedSecondRunAsync(projectPath: linkedProject);
+        }
+        finally
+        {
+            if (Directory.Exists(alias))
+            {
+                Directory.Delete(alias);
+            }
+        }
+    }
+
     [Fact]
     public async Task ScaffoldIdentity_ResolvesRelativeProjectPath()
     {
@@ -344,9 +369,9 @@ public class CustomUser : IdentityUser {}
             AssertSuccess(await ScaffoldCliHelper.RunDotNetAsync(Directory, [.. arguments]));
         }
 
-        public async Task ScaffoldAsync(bool relativeProjectPath = false)
+        public async Task ScaffoldAsync(bool relativeProjectPath = false, string? projectPath = null)
         {
-            var arguments = new List<string> { "--project", relativeProjectPath ? "IdentityApp.csproj" : Path, "--dataContext", "ApplicationDbContext", "--dbProvider", "sqlite-efcore" };
+            var arguments = new List<string> { "--project", relativeProjectPath ? "IdentityApp.csproj" : projectPath ?? Path, "--dataContext", "ApplicationDbContext", "--dbProvider", "sqlite-efcore" };
             if (Framework == "net11.0")
             {
                 arguments.Add("--prerelease");
@@ -369,11 +394,11 @@ public class CustomUser : IdentityUser {}
         public async Task BuildAsync()
             => AssertSuccess(await ScaffoldCliHelper.RunBuildForFrameworkAsync(Directory, Framework));
 
-        public async Task AssertUnchangedSecondRunAsync(bool relativeProjectPath = false)
+        public async Task AssertUnchangedSecondRunAsync(bool relativeProjectPath = false, string? projectPath = null)
         {
             var before = GetSourceHashes();
             var projectBefore = File.ReadAllText(Path);
-            await ScaffoldAsync(relativeProjectPath);
+            await ScaffoldAsync(relativeProjectPath, projectPath);
             var after = GetSourceHashes();
             var changed = before.Keys.Union(after.Keys).Where(path => before.GetValueOrDefault(path) != after.GetValueOrDefault(path)).ToList();
             Assert.True(changed.Count == 0,

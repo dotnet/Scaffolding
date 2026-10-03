@@ -14,6 +14,23 @@ public class FileSystem : IFileSystem
     private static IFileSystem? _fileSystem;
     public static IFileSystem Instance => _fileSystem ??= new FileSystem();
 
+    /// <summary>
+    /// Resolves directory links, including links in parent directories, to one physical path.
+    /// </summary>
+    public static string ResolveDirectoryPath(string path)
+    {
+        var fullPath = Path.GetFullPath(path);
+        var resolvedPath = Path.GetPathRoot(fullPath)!;
+        var segments = fullPath[resolvedPath.Length..]
+            .Split([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries);
+        foreach (var segment in segments)
+        {
+            var directory = new DirectoryInfo(Path.Combine(resolvedPath, segment));
+            resolvedPath = directory.ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? directory.FullName;
+        }
+        return resolvedPath;
+    }
+
     /// <inheritdoc />
     public bool FileExists(string path)
     {

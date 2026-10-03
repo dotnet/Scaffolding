@@ -172,13 +172,23 @@ public class WrappedCodeModificationStepTests
             app.UseHttpsRedirection();
             app.Run();
             """;
+        File.WriteAllText(programPath, program.Replace("\r\n", "\n"));
         if (previouslyScaffolded)
         {
-            program = program.Replace("    app.UseHsts();",
-                $"    app.UseHsts();{Environment.NewLine}    app.UseMigrationsEndPoint();");
+            var previousStep = new WrappedCodeModificationStep(NullLogger<WrappedCodeModificationStep>.Instance, Mock.Of<ITelemetryService>())
+            {
+                ProjectPath = project.ProjectPath,
+                CodeChangeOptions = [],
+                CodeModifierConfigJsonText = """
+                    {"Files":[{"FileName":"Program.cs","Replacements":[{
+                        "ReplaceSnippet":["app.UseHsts()"],
+                        "MultiLineBlock":["app.UseHsts();","    app.UseMigrationsEndPoint()"]
+                    }]}]}
+                    """
+            };
+            Assert.True(await previousStep.ExecuteAsync(_context));
+            Assert.Contains($"app.UseHsts();{Environment.NewLine}    app.UseMigrationsEndPoint();\n}}", File.ReadAllText(programPath));
         }
-
-        File.WriteAllText(programPath, program);
 
         var step = new WrappedCodeModificationStep(NullLogger<WrappedCodeModificationStep>.Instance, Mock.Of<ITelemetryService>())
         {

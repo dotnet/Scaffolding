@@ -138,8 +138,10 @@ public class WrappedCodeModificationStepTests
         }
     }
 
-    [Fact]
-    public async Task BlazorCrudWebAssemblyMigrationsEndpoint_IsDevelopmentOnlyAndNotDuplicated()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task BlazorCrudWebAssemblyMigrationsEndpoint_IsDevelopmentOnlyAndNotDuplicated(bool previouslyScaffolded)
     {
         var configPath = Path.Combine(ScaffoldCliHelper.GetRepoRoot(), "src", "dotnet-scaffolding", "dotnet-scaffold",
             "AspNet", "Templates", "net11.0", "CodeModificationConfigs", "blazorWebCrudChanges.json");
@@ -155,7 +157,7 @@ public class WrappedCodeModificationStepTests
         var build = await ScaffoldCliHelper.RunBuildAsync(project.ProjectDirectory);
         Assert.True(build.ExitCode == 0, $"Test project build failed.\n{build.Output}\n{build.Error}");
 
-        File.WriteAllText(programPath, """
+        var program = """
             var builder = WebApplication.CreateBuilder(args);
             var app = builder.Build();
             if (app.Environment.IsDevelopment())
@@ -169,7 +171,14 @@ public class WrappedCodeModificationStepTests
             }
             app.UseHttpsRedirection();
             app.Run();
-            """);
+            """;
+        if (previouslyScaffolded)
+        {
+            program = program.Replace("    app.UseHsts();",
+                $"    app.UseHsts();{Environment.NewLine}    app.UseMigrationsEndPoint();");
+        }
+
+        File.WriteAllText(programPath, program);
 
         var step = new WrappedCodeModificationStep(NullLogger<WrappedCodeModificationStep>.Instance, Mock.Of<ITelemetryService>())
         {
@@ -184,12 +193,14 @@ public class WrappedCodeModificationStepTests
         Assert.True(await step.ExecuteAsync(_context));
         var updatedProgram = File.ReadAllText(programPath);
         var root = CSharpSyntaxTree.ParseText(updatedProgram).GetRoot();
+        Assert.Empty(root.GetDiagnostics());
         var migration = Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(),
             invocation => invocation.Expression.ToString() == "app.UseMigrationsEndPoint");
         var development = Assert.Single(migration.Ancestors().OfType<IfStatementSyntax>());
         Assert.Equal("app.Environment.IsDevelopment()", development.Condition.ToString());
         Assert.Contains(migration, development.Statement.DescendantNodes());
         Assert.Contains("app.UseHsts();", updatedProgram);
+        Assert.Contains("app.UseExceptionHandler(\"/Error\");", updatedProgram);
         Assert.Contains("app.UseWebAssemblyDebugging();", updatedProgram);
 
         Assert.True(await step.ExecuteAsync(_context));

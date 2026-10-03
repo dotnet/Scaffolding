@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
             <button class=""btn btn-primary"" type=""submit"">Download</button>
         </form>
         <p>
-            <a id=""delete"" asp-page=""DeletePersonalData"" class=""btn btn-danger"">Delete</a>
+            <a id=""delete"" role=""button"" asp-page=""DeletePersonalData"" class=""btn btn-danger"">Delete</a>
         </p>
     </div>
 </div>

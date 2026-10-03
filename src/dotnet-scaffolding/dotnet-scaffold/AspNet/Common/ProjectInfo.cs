@@ -25,6 +25,7 @@ internal class ProjectInfo
     /// Gets or sets the code service for the project.
     /// </summary>
     public CodeService? CodeService { get; set; }
+    public string? ProjectAssetsFile { get; set; }
     /// <summary>
     /// Gets or sets the list of code change options for the project.
     /// </summary>

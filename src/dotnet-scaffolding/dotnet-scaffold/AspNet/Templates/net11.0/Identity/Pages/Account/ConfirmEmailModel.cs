@@ -41,8 +41,8 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write(".Pages.Account;\r\n\r\npublic class ConfirmEmailModel : PageModel\r\n{\r\n    private rea" +
-                    "donly UserManager<");
+            this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class ConfirmEmailModel : PageModel\r\n" +
+                    "{\r\n    private readonly UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _userManager;\r\n\r\n    public ConfirmEmailModel(UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));

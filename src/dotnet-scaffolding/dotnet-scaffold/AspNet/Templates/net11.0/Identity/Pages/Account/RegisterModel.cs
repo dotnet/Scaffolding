@@ -31,6 +31,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -48,7 +49,7 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write(".Pages.Account;\r\n\r\npublic class RegisterModel : PageModel\r\n{\r\n    private readonl" +
+            this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class RegisterModel : PageModel\r\n{\r\n    private readonl" +
                     "y SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _signInManager;\r\n    private readonly UserManager<");
@@ -57,16 +58,18 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _userStore;\r\n    private readonly IUserEmailStore<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> _emailStore;\r\n    private readonly ILogger<RegisterModel> _logger;\r\n    private" +
-                    " readonly IEmailSender _emailSender;\r\n\r\n    public RegisterModel(\r\n        UserM" +
+            this.Write("> _emailStore;\r\n    private readonly ILogger<RegisterModel> _logger;\r\n    private readonly IEmailSender<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> _emailSender;\r\n\r\n    public RegisterModel(\r\n        UserM" +
                     "anager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> userManager,\r\n        IUserStore<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> userStore,\r\n        SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> signInManager,\r\n        ILogger<RegisterModel> logger,\r\n        IEmailSender em" +
-                    "ailSender)\r\n    {\r\n        _userManager = userManager;\r\n        _userStore = use" +
+            this.Write("> signInManager,\r\n        ILogger<RegisterModel> logger,\r\n        IEmailSender<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> emailSender)\r\n    {\r\n        _userManager = userManager;\r\n        _userStore = use" +
                     "rStore;\r\n        _emailStore = GetEmailStore();\r\n        _signInManager = signIn" +
                     "Manager;\r\n        _logger = logger;\r\n        _emailSender = emailSender;\r\n    }\r" +
                     "\n\r\n    /// <summary>\r\n    ///     This API supports the ASP.NET Core Identity de" +
@@ -102,10 +105,10 @@ using ");
                     " /// </summary>\r\n        [DataType(DataType.Password)]\r\n        [Display(Name = " +
                     "\"Confirm password\")]\r\n        [Compare(\"Password\", ErrorMessage = \"The password " +
                     "and confirmation password do not match.\")]\r\n        public string? ConfirmPasswo" +
-                    "rd { get; set; }\r\n    }\r\n\r\n\r\n    public async Task OnGetAsync(string? returnUrl " +
+                    "rd { get; set; }\r\n    }\r\n\r\n\r\n    public async Task OnGetAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl " +
                     "= null)\r\n    {\r\n        ReturnUrl = returnUrl;\r\n        ExternalLogins = (await " +
                     "_signInManager.GetExternalAuthenticationSchemesAsync()).ToList();\r\n    }\r\n\r\n    " +
-                    "public async Task<IActionResult> OnPostAsync(string? returnUrl = null)\r\n    {\r\n " +
+                    "public async Task<IActionResult> OnPostAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)\r\n    {\r\n " +
                     "       returnUrl ??= Url.Content(\"~/\");\r\n        ExternalLogins = (await _signIn" +
                     "Manager.GetExternalAuthenticationSchemesAsync()).ToList();\r\n        if (ModelSta" +
                     "te.IsValid)\r\n        {\r\n            var user = CreateUser();\r\n\r\n            awai" +
@@ -120,11 +123,7 @@ using ");
                     "    var callbackUrl = Url.Page(\r\n                    \"/Account/ConfirmEmail\",\r\n " +
                     "                   pageHandler: null,\r\n                    values: new { area = " +
                     "\"Identity\", userId = userId, code = code, returnUrl = returnUrl },\r\n            " +
-                    "        protocol: Request.Scheme)!;\r\n\r\n                await _emailSender.SendEm" +
-                    "ailAsync(Input.Email, \"Confirm your email\",\r\n                    $\"Please confir" +
-                    "m your account by <a href=\'{HtmlEncoder.Default.Encode(callbackUrl)}\'>clicking h" +
-                    "ere</a>.\");\r\n\r\n                if (_userManager.Options.SignIn.RequireConfirmedA" +
-                    "ccount)\r\n                {\r\n                    return RedirectToPage(\"RegisterC" +
+                    "        protocol: Request.Scheme)!;\r\n\r\n                await _emailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n                if (!await _signInManager.CanSignInAsync(user))\r\n                {\r\n                    return RedirectToPage(\"RegisterC" +
                     "onfirmation\", new { email = Input.Email, returnUrl = returnUrl });\r\n            " +
                     "    }\r\n                else\r\n                {\r\n                    await _signI" +
                     "nManager.SignInAsync(user, isPersistent: false);\r\n                    return Loc" +

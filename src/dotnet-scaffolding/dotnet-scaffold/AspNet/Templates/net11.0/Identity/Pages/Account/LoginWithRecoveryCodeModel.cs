@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -40,7 +41,7 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write(".Pages.Account;\r\n\r\npublic class LoginWithRecoveryCodeModel : PageModel\r\n{\r\n    pr" +
+            this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class LoginWithRecoveryCodeModel : PageModel\r\n{\r\n    pr" +
                     "ivate readonly SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _signInManager;\r\n    private readonly UserManager<");
@@ -69,13 +70,13 @@ using ");
                     "ange or be removed in future releases.\r\n        /// </summary>\r\n        [BindPro" +
                     "perty]\r\n        [Required]\r\n        [DataType(DataType.Text)]\r\n        [Display(" +
                     "Name = \"Recovery Code\")]\r\n        public string RecoveryCode { get; set; } = def" +
-                    "ault!;\r\n    }\r\n\r\n    public async Task<IActionResult> OnGetAsync(string? returnU" +
+                    "ault!;\r\n    }\r\n\r\n    public async Task<IActionResult> OnGetAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnU" +
                     "rl = null)\r\n    {\r\n        // Ensure the user has gone through the username & pa" +
                     "ssword screen first\r\n        var user = await _signInManager.GetTwoFactorAuthent" +
                     "icationUserAsync();\r\n        if (user == null)\r\n        {\r\n            throw new" +
                     " InvalidOperationException($\"Unable to load two-factor authentication user.\");\r\n" +
                     "        }\r\n\r\n        ReturnUrl = returnUrl;\r\n\r\n        return Page();\r\n    }\r\n\r\n" +
-                    "    public async Task<IActionResult> OnPostAsync(string? returnUrl = null)\r\n    " +
+                    "    public async Task<IActionResult> OnPostAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)\r\n    " +
                     "{\r\n        if (!ModelState.IsValid)\r\n        {\r\n            return Page();\r\n    " +
                     "    }\r\n\r\n        var user = await _signInManager.GetTwoFactorAuthenticationUserA" +
                     "sync();\r\n        if (user == null)\r\n        {\r\n            throw new InvalidOper" +

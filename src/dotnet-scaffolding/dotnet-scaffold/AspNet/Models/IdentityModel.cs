@@ -50,6 +50,8 @@ internal class IdentityModel
     /// Used to determine the correct layout path in _ViewStart.cshtml.
     /// </summary>
     public bool IsRazorPages { get; set; }
+    public bool HasMigration { get; set; }
+    public bool HasExistingUser { get; set; }
     /// <summary>
     /// Gets or sets whether interactive server components are registered.
     /// </summary>

@@ -25,7 +25,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("\r\n");
             this.Write("@page\r\n@model ExternalLoginsModel\r\n@{\r\n    ViewData[\"Title\"] = \"Manage your exter" +
                     "nal logins\";\r\n    ViewData[\"ActivePage\"] = ManageNavPages.ExternalLogins;\r\n}\r\n\r\n" +
                     "<partial name=\"_StatusMessage\" for=\"StatusMessage\" />\r\n@if (Model.CurrentLogins?" +

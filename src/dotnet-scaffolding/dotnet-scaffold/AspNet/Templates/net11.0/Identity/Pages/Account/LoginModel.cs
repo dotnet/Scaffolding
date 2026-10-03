@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -45,7 +46,7 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write(".Pages.Account;\r\n\r\npublic class LoginModel : PageModel\r\n{\r\n    private readonly S" +
+            this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class LoginModel : PageModel\r\n{\r\n    private readonly S" +
                     "ignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _signInManager;\r\n    private readonly ILogger<LoginModel> _logger;\r\n\r\n    publi" +
@@ -85,14 +86,14 @@ using ");
                     "lt UI infrastructure and is not intended to be used\r\n        ///     directly fr" +
                     "om your code. This API may change or be removed in future releases.\r\n        ///" +
                     " </summary>\r\n        [Display(Name = \"Remember me?\")]\r\n        public bool Remem" +
-                    "berMe { get; set; }\r\n    }\r\n\r\n    public async Task OnGetAsync(string? returnUrl" +
+                    "berMe { get; set; }\r\n    }\r\n\r\n    public async Task OnGetAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl" +
                     " = null)\r\n    {\r\n        if (!string.IsNullOrEmpty(ErrorMessage))\r\n        {\r\n  " +
                     "          ModelState.AddModelError(string.Empty, ErrorMessage);\r\n        }\r\n\r\n  " +
                     "      returnUrl ??= Url.Content(\"~/\");\r\n\r\n        // Clear the existing external" +
                     " cookie to ensure a clean login process\r\n        await HttpContext.SignOutAsync(" +
                     "IdentityConstants.ExternalScheme);\r\n\r\n        ExternalLogins = (await _signInMan" +
                     "ager.GetExternalAuthenticationSchemesAsync()).ToList();\r\n\r\n        ReturnUrl = r" +
-                    "eturnUrl;\r\n    }\r\n\r\n    public async Task<IActionResult> OnPostAsync(string? ret" +
+                    "eturnUrl;\r\n    }\r\n\r\n    public async Task<IActionResult> OnPostAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? ret" +
                     "urnUrl = null)\r\n    {\r\n        returnUrl ??= Url.Content(\"~/\");\r\n\r\n        Exter" +
                     "nalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToLis" +
                     "t();\r\n\r\n        if (ModelState.IsValid)\r\n        {\r\n            // This doesn\'t " +

@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Core.Model;
@@ -19,6 +20,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
 using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
+using ProjectInfo = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.ProjectInfo;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -185,9 +187,12 @@ internal class ValidateIdentityStep : ScaffoldStep
             }
         }
 
+        var projectPath = Path.GetFullPath(Project);
+        // MSBuild must not mix a directory link with its physical path when tracking build outputs.
+        var projectDirectory = FileSystem.ResolveDirectoryPath(Path.GetDirectoryName(projectPath)!);
         return new IdentitySettings
         {
-            Project = Project,
+            Project = Path.Combine(projectDirectory, Path.GetFileName(projectPath)),
             DataContext = DataContext,
             DatabaseProvider = DatabaseProvider,
             Prerelease = Prerelease,
@@ -224,6 +229,17 @@ internal class ValidateIdentityStep : ScaffoldStep
             _logger.LogError(
                 $"Unable to determine a supported target framework for '{settings.Project}'. Ensure the required .NET SDK and project imports are available and the project targets a framework supported by this version of dotnet scaffold. Run 'dotnet msbuild \"{settings.Project}\" -getProperty:TargetFramework,TargetFrameworks' for evaluation diagnostics.");
             return null;
+        }
+
+        if (!settings.BlazorScenario)
+        {
+            var msBuildProject = new Microsoft.DotNet.Scaffolding.Roslyn.Services.MSBuildProjectService(projectPath);
+            if (!msBuildProject.TryGetEvaluatedProperties(["ProjectAssetsFile"], out var properties, out var evaluationError))
+            {
+                _logger.LogError($"Unable to evaluate Identity project '{projectPath}': {evaluationError}");
+                return null;
+            }
+            projectInfo.ProjectAssetsFile = properties["ProjectAssetsFile"];
         }
 
         // Restore existing dependencies before CodeService first loads the workspace for semantic analysis.
@@ -319,6 +335,32 @@ internal class ValidateIdentityStep : ScaffoldStep
             BlazorWebAssemblyClientProjectPath = webAssemblyClientProjectPath,
             BlazorRenderMode = blazorRenderMode
         };
+
+        if (!settings.BlazorScenario)
+        {
+            scaffoldingModel.HasMigration = IdentityHelper.HasMigration(allClasses, dbContextInfo);
+            var existingContext = allClasses.OfType<INamedTypeSymbol>().FirstOrDefault(type =>
+                type.Name == dbContextInfo.DbContextClassName &&
+                type.ContainingNamespace.ToDisplayString() == dbContextInfo.DbContextNamespace);
+            var userType = IdentityHelper.GetIdentityUserType(existingContext);
+            if (userType is null or { TypeKind: TypeKind.Error })
+            {
+                var program = await projectInfo.CodeService.GetDocumentAsync("Program.cs");
+                if (program is not null &&
+                    await program.GetSyntaxRootAsync() is { } root &&
+                    IdentityHelper.FindIdentityRegistration(root)?.Expression is MemberAccessExpressionSyntax { Name: GenericNameSyntax name } &&
+                    await program.GetSemanticModelAsync() is { } semanticModel)
+                {
+                    userType = semanticModel.GetTypeInfo(name.TypeArgumentList.Arguments[0]).Type;
+                }
+            }
+            if (userType is { TypeKind: TypeKind.Class })
+            {
+                scaffoldingModel.UserClassName = userType.Name;
+                scaffoldingModel.UserClassNamespace = userType.ContainingNamespace.ToDisplayString();
+                scaffoldingModel.HasExistingUser = true;
+            }
+        }
 
         return scaffoldingModel;
     }

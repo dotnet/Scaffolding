@@ -28,29 +28,29 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
             this.Write("@page\r\n@model EmailModel\r\n@{\r\n    ViewData[\"Title\"] = \"Manage Email\";\r\n    ViewDa" +
                     "ta[\"ActivePage\"] = ManageNavPages.Email;\r\n}\r\n\r\n<h3>@ViewData[\"Title\"]</h3>\r\n<par" +
                     "tial name=\"_StatusMessage\" for=\"StatusMessage\" />\r\n<div class=\"row\">\r\n    <div c" +
-                    "lass=\"col-md-6\">\r\n        <form id=\"email-form\" method=\"post\">\r\n            <div" +
+                    "lass=\"col-xl-6\">\r\n        <form id=\"email-form\" method=\"post\">\r\n            <div" +
                     " asp-validation-summary=\"All\" class=\"text-danger\" role=\"alert\"></div>\r\n         " +
                     "   @if (Model.IsEmailConfirmed)\r\n            {\r\n                <div class=\"form" +
                     "-floating mb-3 input-group\">\r\n                    <input asp-for=\"Email\" class=\"" +
-                    "form-control\" placeholder=\"Please enter your email.\" disabled />\r\n              " +
-                    "          <div class=\"input-group-append\">\r\n                            <span cl" +
-                    "ass=\"h-100 input-group-text text-success font-weight-bold\">?</span>\r\n           " +
-                    "             </div>\r\n                    <label asp-for=\"Email\" class=\"form-labe" +
-                    "l\"></label>\r\n                </div>\r\n            }\r\n            else\r\n          " +
-                    "  {\r\n                <div class=\"form-floating mb-3\">\r\n                    <inpu" +
-                    "t asp-for=\"Email\" class=\"form-control\" placeholder=\"Please enter your email.\" di" +
-                    "sabled />\r\n                    <label asp-for=\"Email\" class=\"form-label\"></label" +
-                    ">\r\n                    <button id=\"email-verification\" type=\"submit\" asp-page-ha" +
-                    "ndler=\"SendVerificationEmail\" class=\"btn btn-link\">Send verification email</butt" +
-                    "on>\r\n                </div>\r\n            }\r\n            <div class=\"form-floatin" +
-                    "g mb-3\">\r\n                <input asp-for=\"Input.NewEmail\" class=\"form-control\" a" +
-                    "utocomplete=\"email\" aria-required=\"true\" placeholder=\"Please enter new email.\" /" +
-                    ">\r\n                <label asp-for=\"Input.NewEmail\" class=\"form-label\"></label>\r\n" +
-                    "                <span asp-validation-for=\"Input.NewEmail\" class=\"text-danger\"></" +
-                    "span>\r\n            </div>\r\n            <button id=\"change-email-button\" type=\"su" +
-                    "bmit\" asp-page-handler=\"ChangeEmail\" class=\"w-100 btn btn-lg btn-primary\">Change" +
-                    " email</button>\r\n        </form>\r\n    </div>\r\n</div>\r\n\r\n@section Scripts {\r\n    " +
-                    "<partial name=\"_ValidationScriptsPartial\" />\r\n}\r\n");
+                    "form-control\" placeholder=\"Enter your email\" disabled />\r\n                      " +
+                    "  <div class=\"input-group-append\">\r\n                            <span class=\"h-1" +
+                    "00 input-group-text text-success font-weight-bold\">&#x2713;</span>\r\n            " +
+                    "            </div>\r\n                    <label asp-for=\"Email\" class=\"form-label" +
+                    "\"></label>\r\n                </div>\r\n            }\r\n            else\r\n           " +
+                    " {\r\n                <div class=\"form-floating mb-3\">\r\n                    <input" +
+                    " asp-for=\"Email\" class=\"form-control\" placeholder=\"Enter your email\" disabled />" +
+                    "\r\n                    <label asp-for=\"Email\" class=\"form-label\"></label>\r\n      " +
+                    "              <button id=\"email-verification\" type=\"submit\" asp-page-handler=\"Se" +
+                    "ndVerificationEmail\" class=\"btn btn-link\">Send verification email</button>\r\n    " +
+                    "            </div>\r\n            }\r\n            <div class=\"form-floating mb-3\">\r" +
+                    "\n                <input asp-for=\"Input.NewEmail\" class=\"form-control\" autocomple" +
+                    "te=\"email\" aria-required=\"true\" placeholder=\"Enter new email\" />\r\n              " +
+                    "  <label asp-for=\"Input.NewEmail\" class=\"form-label\"></label>\r\n                <" +
+                    "span asp-validation-for=\"Input.NewEmail\" class=\"text-danger\"></span>\r\n          " +
+                    "  </div>\r\n            <button id=\"change-email-button\" type=\"submit\" asp-page-ha" +
+                    "ndler=\"ChangeEmail\" class=\"w-100 btn btn-lg btn-primary\">Change email</button>\r\n" +
+                    "        </form>\r\n    </div>\r\n</div>\r\n\r\n@section Scripts {\r\n    <partial name=\"_V" +
+                    "alidationScriptsPartial\" />\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

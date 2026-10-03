@@ -31,6 +31,21 @@
       },
       "Replacements": [
         {
+          "ReplaceSnippet": [
+            "app.UseHsts();",
+            "    app.UseMigrationsEndPoint();",
+            "}"
+          ],
+          "MultiLineBlock": [
+            "app.UseHsts();",
+            "}",
+            "if (app.Environment.IsDevelopment())",
+            "{",
+            "    app.UseMigrationsEndPoint();",
+            "}"
+          ]
+        },
+        {
           "ReplaceSnippet": [ "if (!app.Environment.IsDevelopment())" ],
           "MultiLineBlock": [
             "if (app.Environment.IsDevelopment())",

@@ -52,4 +52,20 @@ internal class IdentityModel
     public bool IsRazorPages { get; set; }
     public bool HasMigration { get; set; }
     public bool HasExistingUser { get; set; }
+    /// <summary>
+    /// Gets or sets whether interactive server components are registered.
+    /// </summary>
+    public bool UsesInteractiveServer { get; set; }
+    /// <summary>
+    /// Gets or sets whether interactive WebAssembly components are registered.
+    /// </summary>
+    public bool UsesInteractiveWebAssembly { get; set; }
+    /// <summary>
+    /// Gets or sets the Blazor WebAssembly client project path.
+    /// </summary>
+    public string? BlazorWebAssemblyClientProjectPath { get; set; }
+    /// <summary>
+    /// Gets or sets the global Blazor render mode.
+    /// </summary>
+    public string? BlazorRenderMode { get; set; }
 }

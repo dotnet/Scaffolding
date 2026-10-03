@@ -334,8 +334,8 @@ public class CustomUser : IdentityUser {}
             }
             var result = relativeProjectPath
                 ? await ScaffoldCliHelper.RunDotNetAsync(Directory,
-                    ["exec", ScaffoldCliHelper.GetScaffoldAssemblyPath(Framework), "aspnet", "identity", .. arguments])
-                : await ScaffoldCliHelper.RunScaffoldAsync(Framework, "identity", [.. arguments]);
+                    ["exec", ScaffoldCliHelper.GetScaffoldAssemblyPath(ScaffoldCliHelper.GetTestTargetFramework()), "aspnet", "identity", .. arguments])
+                : await ScaffoldCliHelper.RunScaffoldAsync(ScaffoldCliHelper.GetTestTargetFramework(), "identity", [.. arguments]);
             _scaffoldOutput = result.Output + Environment.NewLine + result.Error;
             AssertSuccess(result);
             Assert.True(string.IsNullOrWhiteSpace(result.Error), _scaffoldOutput);

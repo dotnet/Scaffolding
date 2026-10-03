@@ -101,8 +101,8 @@ internal static class CommandLineExtensions
         command.SetAction(async (ParseResult parseResult, CancellationToken cancellationToken) =>
         {
             var context = scaffolder.CreateContext(parseResult);
-            await scaffolder.ExecuteAsync(context);
-            return 0;
+            bool succeeded = await scaffolder.ExecuteAsync(context);
+            return succeeded ? 0 : 1;
         });
 
         return command;

@@ -23,7 +23,21 @@ public class BlazorCrudNet11IntegrationTests : BlazorCrudIntegrationTestsBase
         File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
         var modelsDir = Path.Combine(_testProjectDir, "Models");
         Directory.CreateDirectory(modelsDir);
-        File.WriteAllText(Path.Combine(modelsDir, "TestModel.cs"), ScaffoldCliHelper.GetModelClassContent("TestProject", "TestModel"));
+        File.WriteAllText(Path.Combine(modelsDir, "TestModel.cs"), @"namespace TestProject.Models;
+
+public class TestModel
+{
+    public int Id { get; set; }
+    public EmploymentType EmploymentType { get; set; }
+    public EmploymentType? OptionalEmploymentType { get; set; }
+}
+
+public enum EmploymentType
+{
+    Permanent,
+    Contract
+}
+");
 
         // Set up Blazor project structure required for scaffolded code to compile
         var componentsDir = Path.Combine(_testProjectDir, "Components");
@@ -49,30 +63,37 @@ public class BlazorCrudNet11IntegrationTests : BlazorCrudIntegrationTestsBase
             "--prerelease");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
-        // Assert — expected files were created (only if model resolution succeeded)
-        bool scaffoldingSucceeded = !cliOutput.Contains("An error occurred");
-        if (scaffoldingSucceeded)
+        // Assert — expected files were created.
+        var blazorPagesDir = Path.Combine(_testProjectDir, "Components", "Pages", "TestModelPages");
+        Assert.True(Directory.Exists(blazorPagesDir),
+            $"Components/Pages/TestModelPages directory should be created.\nOutput: {cliOutput}\nError: {cliError}");
+        foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
         {
-            var blazorPagesDir = Path.Combine(_testProjectDir, "Components", "Pages", "TestModelPages");
-            Assert.True(Directory.Exists(blazorPagesDir), "Components/Pages/TestModelPages directory should be created.");
-            foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
-            {
-                Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
-            }
-            Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
-                "DbContext file 'Data/TestDbContext.cs' should be created.");
-            var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-            Assert.Contains("TestDbContext", programContent);
-
-            // Assert no NuGet errors during scaffolding
-            Assert.False(cliOutput.Contains("error: NU"),
-                $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
-            Assert.False(cliOutput.Contains("Failed"),
-                $"Scaffolding should not contain failures for {TargetFramework}.\nOutput: {cliOutput}");
-
-            // Verify project builds after scaffolding
-            var (afterExitCode, _, afterError) = await RunBuildAsync(_testProjectDir);
-            Assert.True(afterExitCode == 0, $"Project should still build after scaffolding. Error: {afterError}");
+            Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
         }
+
+        var createContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Create.razor"));
+        Assert.Contains("<InputSelect id=\"employmenttype\"", createContent);
+        Assert.Contains("<InputSelect id=\"optionalemploymenttype\"", createContent);
+
+        var editContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Edit.razor")).Replace("\r\n", "\n");
+        Assert.Contains("[SupplyParameterFromForm]\n    private TestModel? TestModel", editContent);
+        Assert.Contains("[PersistentState]\n    public TestModel? TestModelState", editContent);
+        Assert.Contains("TestModel ??= TestModelState ??= await context.", editContent);
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
+            "DbContext file 'Data/TestDbContext.cs' should be created.");
+        var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+        Assert.Contains("TestDbContext", programContent);
+
+        // Assert no NuGet errors during scaffolding
+        var combinedOutput = cliOutput + cliError;
+        Assert.False(combinedOutput.Contains("error: NU"),
+            $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.False(combinedOutput.Contains("Failed"),
+            $"Scaffolding should not contain failures for {TargetFramework}.\nOutput: {cliOutput}\nError: {cliError}");
+
+        // Verify project builds after scaffolding
+        var (afterExitCode, _, afterError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(afterExitCode == 0, $"Project should still build after scaffolding. Error: {afterError}");
     }
 }

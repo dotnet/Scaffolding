@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -21,12 +22,20 @@ internal static class ScaffoldCliHelper
     /// Gets the repository root directory by navigating up from the test assembly output path.
     /// The Arcade build layout is: {repoRoot}/artifacts/bin/{project}/{Config}/{TFM}/{assembly}.dll
     /// </summary>
-    private static string GetRepoRoot()
+    internal static string GetRepoRoot()
     {
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation)!;
         // Navigate from artifacts/bin/dotnet-scaffold.Tests/{Config}/{TFM}/ up to repo root
         return Path.GetFullPath(Path.Combine(assemblyDirectory, "..", "..", "..", "..", ".."));
+    }
+
+    internal static string GetTestTargetFramework()
+    {
+        var framework = Assembly.GetExecutingAssembly().GetCustomAttribute<TargetFrameworkAttribute>()
+            ?? throw new System.InvalidOperationException("The test assembly has no target framework attribute.");
+        var version = new FrameworkName(framework.FrameworkName).Version;
+        return $"net{version.Major}.{version.Minor}";
     }
 
     /// <summary>
@@ -196,6 +205,9 @@ internal static class ScaffoldCliHelper
         return "Debug";
     }
 
+    internal static string[] GetPrereleaseArguments(string projectTargetFramework)
+        => projectTargetFramework == "net11.0" ? ["--prerelease"] : [];
+
     /// <summary>
     /// Runs a dotnet-scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspnet {command} {args}</c>.
     /// Uses <c>--no-build</c> because the solution must already be built before running tests.
@@ -299,26 +311,7 @@ internal static class ScaffoldCliHelper
     /// Runs <c>dotnet build</c> in the specified working directory.
     /// </summary>
     public static async Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)
-    {
-        var buildProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                Arguments = "build",
-                WorkingDirectory = workingDirectory,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-        ConfigureDotNetEnvironment(buildProcess.StartInfo);
-        buildProcess.Start();
-        string output = await buildProcess.StandardOutput.ReadToEndAsync();
-        string error = await buildProcess.StandardError.ReadToEndAsync();
-        await buildProcess.WaitForExitAsync();
-        return (buildProcess.ExitCode, output, error);
-    }
+        => await RunDotNetAsync(workingDirectory, "build");
 
     /// <summary>
     /// Runs <c>dotnet build -f {targetFramework}</c> in the specified working directory.
@@ -326,26 +319,7 @@ internal static class ScaffoldCliHelper
     /// Uses the Arcade dotnet installation when available.
     /// </summary>
     public static async Task<(int ExitCode, string Output, string Error)> RunBuildForFrameworkAsync(string workingDirectory, string targetFramework)
-    {
-        var buildProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                Arguments = $"build -f {targetFramework}",
-                WorkingDirectory = workingDirectory,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-        ConfigureDotNetEnvironment(buildProcess.StartInfo);
-        buildProcess.Start();
-        string output = await buildProcess.StandardOutput.ReadToEndAsync();
-        string error = await buildProcess.StandardError.ReadToEndAsync();
-        await buildProcess.WaitForExitAsync();
-        return (buildProcess.ExitCode, output, error);
-    }
+        => await RunDotNetAsync(workingDirectory, "build", "--framework", targetFramework);
 
     /// <summary>
     /// Generates a minimal .csproj file content for a Web SDK project targeting the specified framework.
@@ -455,27 +429,33 @@ public class {modelName}
     /// to add authentication UI (login/logout/register links).
     /// </summary>
     public static string GetNavMenuRazor() =>
-        @"<div class=""top-row ps-3 navbar navbar-dark"">
-    <div class=""container-fluid"">
-        <a class=""navbar-brand"" href="""">TestProject</a>
-    </div>
-</div>
+                """
+                <div class="top-row ps-3 navbar navbar-dark">
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="">TestProject</a>
+                    </div>
+                </div>
 
-<nav class=""nav-scrollable"">
-    <ul class=""nav flex-column"">
-        <div class=""nav-item px-3"">
-            <NavLink class=""nav-link"" href="""" Match=""NavLinkMatch.All"">
-                <span class=""bi bi-house-door-fill-nav-menu"" aria-hidden=""true""></span> Home
-            </NavLink>
-        </div>
-        <div class=""nav-item px-3"">
-            <NavLink class=""nav-link"" href=""weather"">
-                <span class=""bi bi-list-nested-nav-menu"" aria-hidden=""true""></span> Weather
-            </NavLink>
-        </div>
-    </ul>
-</nav>
-";
+                <nav-menu>
+                    <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+                    <div class="nav-scrollable">
+                        <nav class="nav flex-column">
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                                </NavLink>
+                            </div>
+
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href="weather">
+                                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                                </NavLink>
+                            </div>
+                        </nav>
+                    </div>
+                </nav-menu>
+                """.TrimEnd() + System.Environment.NewLine;
 
     /// <summary>
     /// Gets a minimal NavMenu.razor.css matching the standard Blazor template structure.
@@ -485,6 +465,10 @@ public class {modelName}
     public static string GetNavMenuCss() =>
         @".bi-list-nested-nav-menu {
     background-image: url(""data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-list-nested' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M4.5 11.5A.5.5 0 0 1 5 11h10a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 1 3h10a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5z'/%3E%3C/svg%3E"");
+}
+
+.nav-item {
+    font-size: 0.9rem;
 }
 ";
 

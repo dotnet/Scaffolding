@@ -51,7 +51,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
         var user = await UserManager.FindByIdAsync(UserId);
         if (user is null)
         {
-            message = "Unable to find user with Id '{userId}'";
+            message = $"Error: Unable to find user with Id '{UserId}'";
             return;
         }
 

@@ -45,7 +45,8 @@ internal class CategoryDiscovery
             .WithSpinner()
             .Start("Discovering scaffolders", statusContext =>
             {
-                return _dotnetToolService.GetAllCommandsParallel(envVars: envVars);
+                IList<DotNetToolInfo>? components = _componentPicked is null ? null : [_componentPicked];
+                return _dotnetToolService.GetAllCommandsParallel(components, envVars);
             });
 
             if (allCommands is not null)

@@ -1,0 +1,46 @@
+[
+  {
+    "path": "net10.0/BlazorWebApp",
+    "template": "blazor",
+    "arguments": [
+      "--name",
+      "BlazorWebApp",
+      "--framework",
+      "net10.0"
+    ],
+    "sdkVersion": "11.0.100-rc.2.26475.136"
+  },
+  {
+    "path": "net11.0/BlazorWebApp",
+    "template": "blazor",
+    "arguments": [
+      "--name",
+      "BlazorWebApp",
+      "--framework",
+      "net11.0"
+    ],
+    "sdkVersion": "11.0.100-rc.2.26475.136"
+  },
+  {
+    "path": "net10.0/Mvc",
+    "template": "mvc",
+    "arguments": [
+      "--name",
+      "Mvc",
+      "--framework",
+      "net10.0"
+    ],
+    "sdkVersion": "10.0.401"
+  },
+  {
+    "path": "net11.0/RazorPages",
+    "template": "webapp",
+    "arguments": [
+      "--name",
+      "RazorPages",
+      "--framework",
+      "net11.0"
+    ],
+    "sdkVersion": "11.0.100-rc.2.26478.115"
+  }
+]

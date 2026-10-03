@@ -496,8 +496,15 @@ internal static class ProjectModifierHelper
                 }
 
                 var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                if ((string.IsNullOrEmpty(replaceSnippet) && !preserveLegacyCssBehavior) ||
-                    !sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase))
+                if (string.IsNullOrEmpty(replaceSnippet) && !preserveLegacyCssBehavior)
+                {
+                    error = $"Replacement snippet '{replaceSnippet}' was not found in '{filePath}'.";
+                    return false;
+                }
+
+                var updatedSource = ReplaceSnippet(sourceFileString, change.ReplaceSnippet, change.Block,
+                    out var matched, ignoreCase: !preserveLegacyCssBehavior);
+                if (!matched)
                 {
                     if (preserveLegacyCssBehavior)
                     {
@@ -508,9 +515,8 @@ internal static class ProjectModifierHelper
                     return false;
                 }
 
-                sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block,
-                    preserveLegacyCssBehavior ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
-                sourceChanged = true;
+                sourceChanged |= updatedSource != sourceFileString;
+                sourceFileString = updatedSource;
             }
             else if (!preserveLegacyCssBehavior && change.Prepend)
             {
@@ -565,12 +571,10 @@ internal static class ProjectModifierHelper
             // If doing a code replacement, replace ReplaceSnippet in source with Block
             if (change.ReplaceSnippet != null)
             {
-                var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
-                    (string.IsNullOrEmpty(change.CheckBlock) ||
-                     !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)))
+                if (string.IsNullOrEmpty(change.CheckBlock) ||
+                    !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase))
                 {
-                    sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
+                    sourceFileString = ReplaceSnippet(sourceFileString, change.ReplaceSnippet, change.Block, out _);
                 }
 
             }
@@ -600,6 +604,71 @@ internal static class ProjectModifierHelper
         }
 
         return null;
+    }
+
+    private static string ReplaceSnippet(string source, string[] snippet, string replacement, out bool matched, bool ignoreCase = false)
+    {
+        var text = string.Join("\n", snippet).Replace("\r\n", "\n");
+        var comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        if (!text.Contains('\n'))
+        {
+            matched = source.Contains(text, comparison);
+            return source.Replace(text, replacement, comparison);
+        }
+
+        var lines = text.Split('\n');
+        var result = new StringBuilder();
+        var searchStart = 0;
+        var copyStart = 0;
+        matched = false;
+        while (searchStart <= source.Length)
+        {
+            var start = source.IndexOf(lines[0], searchStart, comparison);
+            if (start < 0)
+            {
+                break;
+            }
+
+            var end = start + lines[0].Length;
+            var matches = true;
+            foreach (var line in lines.Skip(1))
+            {
+                if (source.AsSpan(end).StartsWith("\r\n"))
+                {
+                    end += 2;
+                }
+                else if (source.AsSpan(end).StartsWith("\n"))
+                {
+                    end++;
+                }
+                else
+                {
+                    matches = false;
+                    break;
+                }
+
+                if (!source.AsSpan(end).StartsWith(line, comparison))
+                {
+                    matches = false;
+                    break;
+                }
+
+                end += line.Length;
+            }
+
+            if (!matches)
+            {
+                searchStart = start + 1;
+                continue;
+            }
+
+            result.Append(source, copyStart, start - copyStart).Append(replacement);
+            copyStart = end;
+            searchStart = end;
+            matched = true;
+        }
+
+        return matched ? result.Append(source, copyStart, source.Length - copyStart).ToString() : source;
     }
 
     internal static async Task UpdateDocument(Document document)

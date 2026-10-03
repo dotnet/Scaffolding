@@ -42,6 +42,7 @@ internal class AddIdentityMigrationStep(
             return Task.FromResult(false);
         }
 
+        LogBuildDiagnostics("Before startup build", projectDirectory);
         logger.LogInformation("Building the project for Identity migration generation...");
         var build = DotnetCliRunner.CreateDotNet("build", [ProjectPath, "--no-incremental", "--nologo"]);
         build._psi.WorkingDirectory = projectDirectory;
@@ -50,6 +51,8 @@ internal class AddIdentityMigrationStep(
             logger.LogError($"Unable to build the project for Identity migration generation.{Environment.NewLine}{buildOutput}{Environment.NewLine}{buildError}");
             return Task.FromResult(false);
         }
+        logger.LogInformation($"Identity startup build output:{Environment.NewLine}{buildOutput}{Environment.NewLine}{buildError}");
+        LogBuildDiagnostics("After startup build", projectDirectory);
 
         var toolDirectory = Path.Combine(fileSystem.GetTempPath(), "dotnet-scaffold", Guid.NewGuid().ToString("N"));
         try
@@ -124,7 +127,9 @@ internal class AddIdentityMigrationStep(
         var executableName = OperatingSystem.IsWindows() ? "dotnet-ef.exe" : "dotnet-ef";
         var runner = DotnetCliRunner.Create(Path.Combine(toolDirectory, executableName), GetMigrationArguments());
         runner._psi.WorkingDirectory = projectDirectory;
+        LogBuildDiagnostics("Before EF metadata and execution", projectDirectory);
         var exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+        LogBuildDiagnostics("After EF metadata and execution", projectDirectory);
         if (exitCode == 0)
         {
             logger.LogInformation("Done");
@@ -133,6 +138,22 @@ internal class AddIdentityMigrationStep(
 
         logger.LogError($"Unable to generate the initial Identity migration.{Environment.NewLine}{stdOut}{Environment.NewLine}{stdErr}");
         return false;
+    }
+
+    private void LogBuildDiagnostics(string phase, string projectDirectory)
+    {
+        var metadata = DotnetCliRunner.CreateDotNet("msbuild",
+        [
+            ProjectPath,
+            "-getProperty:TargetPath,ProjectDepsFilePath,OutputPath,TargetFramework,Configuration,RuntimeIdentifier,GenerateDependencyFile,MSBuildProjectDirectory"
+        ]);
+        metadata._psi.WorkingDirectory = projectDirectory;
+        var exitCode = metadata.ExecuteAndCaptureOutput(out var output, out var error);
+        logger.LogInformation($"Identity migration diagnostics - {phase}. Metadata exit code: {exitCode}.{Environment.NewLine}{output}{Environment.NewLine}{error}");
+        var manifests = fileSystem.EnumerateFiles(projectDirectory, "*.deps.json", SearchOption.AllDirectories)
+            .Order(StringComparer.Ordinal)
+            .ToList();
+        logger.LogInformation($"Dependency manifests - {phase}: {manifests.Count}{Environment.NewLine}{string.Join(Environment.NewLine, manifests)}");
     }
 
     internal string[] GetMigrationArguments() =>

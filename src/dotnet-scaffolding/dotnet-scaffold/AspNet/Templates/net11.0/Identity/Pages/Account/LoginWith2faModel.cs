@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,7 +42,7 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\n\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
-            this.Write(".Pages.Account;\r\n\r\npublic class LoginWith2faModel : PageModel\r\n{\r\n    private rea" +
+            this.Write(".Pages.Account;\r\n\r\n[AllowAnonymous]\r\npublic class LoginWith2faModel : PageModel\r\n{\r\n    private rea" +
                     "donly SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _signInManager;\r\n    private readonly UserManager<");
@@ -80,13 +81,13 @@ using ");
                     "ly from your code. This API may change or be removed in future releases.\r\n      " +
                     "  /// </summary>\r\n        [Display(Name = \"Remember this machine\")]\r\n        pub" +
                     "lic bool RememberMachine { get; set; }\r\n    }\r\n\r\n    public async Task<IActionRe" +
-                    "sult> OnGetAsync(bool rememberMe, string? returnUrl = null)\r\n    {\r\n        // E" +
+                    "sult> OnGetAsync(bool rememberMe, [StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)\r\n    {\r\n        // E" +
                     "nsure the user has gone through the username & password screen first\r\n        va" +
                     "r user = await _signInManager.GetTwoFactorAuthenticationUserAsync();\r\n\r\n        " +
                     "if (user == null)\r\n        {\r\n            throw new InvalidOperationException($\"" +
                     "Unable to load two-factor authentication user.\");\r\n        }\r\n\r\n        ReturnUr" +
                     "l = returnUrl;\r\n        RememberMe = rememberMe;\r\n\r\n        return Page();\r\n    " +
-                    "}\r\n\r\n    public async Task<IActionResult> OnPostAsync(bool rememberMe, string? r" +
+                    "}\r\n\r\n    public async Task<IActionResult> OnPostAsync(bool rememberMe, [StringSyntax(StringSyntaxAttribute.Uri)] string? r" +
                     "eturnUrl = null)\r\n    {\r\n        if (!ModelState.IsValid)\r\n        {\r\n          " +
                     "  return Page();\r\n        }\r\n\r\n        returnUrl = returnUrl ?? Url.Content(\"~/\"" +
                     ");\r\n\r\n        var user = await _signInManager.GetTwoFactorAuthenticationUserAsyn" +

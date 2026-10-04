@@ -36,7 +36,7 @@ internal static class IdentityScaffolderBuilderExtensions
                 List<Package> packages = [
                     PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackage,
                     PackageConstants.AspNetCorePackages.AspNetCoreIdentityUiPackage,
-                    PackageConstants.EfConstants.EfCoreToolsPackage,
+                    PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackage,
                     PackageConstants.EfConstants.EfCoreDesignPackage
                 ];
 
@@ -87,13 +87,20 @@ internal static class IdentityScaffolderBuilderExtensions
             //all the .cshtml and their model class (.cshtml.cs) templates
             var allIdentityPageFiles = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Identity"], identityModel.ProjectInfo.ProjectPath);
             //ApplicationUser.tt template
-            var applicationUserFile = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Files"], identityModel.ProjectInfo.ProjectPath)
+            var fileTemplates = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["Files"], identityModel.ProjectInfo.ProjectPath).ToList();
+            var applicationUserFile = fileTemplates
                 .FirstOrDefault(x => x.EndsWith("ApplicationUser.tt", StringComparison.OrdinalIgnoreCase));
             var identityFileProperties = IdentityHelper.GetTextTemplatingProperties(allIdentityPageFiles, identityModel);
             var applicationUserProperty = IdentityHelper.GetApplicationUserTextTemplatingProperty(applicationUserFile, identityModel);
             if (applicationUserProperty is not null)
             {
                 identityFileProperties = identityFileProperties.Append(applicationUserProperty);
+            }
+            var loginPartialTemplate = fileTemplates.FirstOrDefault(x => x.EndsWith("_LoginPartial.tt", StringComparison.OrdinalIgnoreCase));
+            var loginPartialProperty = IdentityHelper.GetLoginPartialTextTemplatingProperty(loginPartialTemplate, identityModel);
+            if (loginPartialProperty is not null)
+            {
+                identityFileProperties = identityFileProperties.Append(loginPartialProperty);
             }
 
             if (identityFileProperties is not null && identityFileProperties.Any())
@@ -119,7 +126,7 @@ internal static class IdentityScaffolderBuilderExtensions
     /// <returns>The updated scaffold builder.</returns>
     public static IScaffoldBuilder WithIdentityCodeChangeStep(this IScaffoldBuilder builder)
     {
-        builder = builder.WithStep<WrappedCodeModificationStep>(config =>
+        builder = builder.WithStep<IdentityCodeModificationStep>(config =>
         {
             var step = config.Step;
             //get needed properties and cast them as needed
@@ -143,7 +150,7 @@ internal static class IdentityScaffolderBuilderExtensions
                 {
                     step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
                 }
-
+                step.CodeService = identityModel.ProjectInfo.CodeService!;
                 step.ProjectPath = identitySettings.Project;
                 step.CodeChangeOptions = identityModel.ProjectInfo.CodeChangeOptions ?? [];
             }
@@ -155,5 +162,51 @@ internal static class IdentityScaffolderBuilderExtensions
         });
 
         return builder;
+    }
+
+    /// <summary>
+    /// Adds a step to configure Identity navigation in the host application's layout.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    public static IScaffoldBuilder WithIdentityNavigationStep(this IScaffoldBuilder builder)
+    {
+        return builder.WithStep<ConfigureIdentityNavigationStep>(config =>
+        {
+            var step = config.Step;
+            if (config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) &&
+                identityModelObj is IdentityModel identityModel)
+            {
+                step.ProjectPath = identityModel.ProjectInfo.ProjectPath ?? string.Empty;
+                step.IsRazorPages = identityModel.IsRazorPages;
+            }
+            else
+            {
+                step.SkipStep = true;
+            }
+        });
+    }
+
+    /// <summary>
+    /// Adds shared database setup guidance after Identity scaffolding succeeds.
+    /// </summary>
+    /// <param name="builder">The scaffold builder.</param>
+    /// <returns>The updated scaffold builder.</returns>
+    public static IScaffoldBuilder WithIdentityDatabaseGuidanceStep(this IScaffoldBuilder builder)
+    {
+        return builder.WithStep<IdentityDatabaseGuidanceStep>(config =>
+        {
+            var step = config.Step;
+            if (config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) &&
+                identityModelObj is IdentityModel identityModel)
+            {
+                step.ProjectPath = identityModel.ProjectInfo.ProjectPath ?? string.Empty;
+                step.DbContextName = identityModel.DbContextInfo.DbContextClassName ?? string.Empty;
+            }
+            else
+            {
+                step.SkipStep = true;
+            }
+        });
     }
 }

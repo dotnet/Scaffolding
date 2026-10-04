@@ -1,5 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
@@ -12,6 +14,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 /// </summary>
 internal static class IdentityHelper
 {
+    internal static InvocationExpressionSyntax? FindIdentityRegistration(SyntaxNode root)
+        => root.DescendantNodes().OfType<InvocationExpressionSyntax>().FirstOrDefault(call =>
+            call.Expression is MemberAccessExpressionSyntax { Name: GenericNameSyntax name } &&
+            name.Identifier.ValueText is "AddDefaultIdentity" or "AddIdentity" or "AddIdentityCore");
+
     /// <summary>
     /// Use the template paths and IdentityModel to create valid 'TextTemplateProperty' objects.
     /// </summary>
@@ -36,8 +43,7 @@ internal static class IdentityHelper
                 x.FullName.Contains(templateFullName) &&
                 x.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase));
 
-            var projectName = Path.GetFileNameWithoutExtension(identityModel.ProjectInfo.ProjectPath);
-            if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
+            if (!string.IsNullOrEmpty(templatePath) && templateType is not null)
             {
                 string extension = string.Empty;
                 //the 'ManageNavPagesModel.tt' only should have .cs extension (only exception)
@@ -50,9 +56,11 @@ internal static class IdentityHelper
                     extension = templateFullName.EndsWith("Model", StringComparison.OrdinalIgnoreCase) ? ".cshtml.cs" : ".cshtml";
                 }
                 
-                string formattedTemplateName = templateFullName.Replace("Model", string.Empty, StringComparison.OrdinalIgnoreCase);
-                string templateNameWithNamespace = $"{identityModel.IdentityNamespace}.{formattedTemplateName}";
-                string outputFileName = $"{StringUtil.ToPath(templateNameWithNamespace, identityModel.BaseOutputPath, projectName)}{extension}";
+                var name = templateFullName.EndsWith("Model", StringComparison.OrdinalIgnoreCase)
+                    ? templateFullName[..^"Model".Length]
+                    : templateFullName;
+                var outputFileName = Path.Combine(identityModel.BaseOutputPath, "Areas", "Identity",
+                    name.Replace('.', Path.DirectorySeparatorChar)) + extension;
                 textTemplatingProperties.Add(new()
                 {
                     TemplateModel = identityModel,
@@ -75,7 +83,7 @@ internal static class IdentityHelper
     private static string GetFormattedRelativeIdentityFile(string fullFileName)
     {
         string identifier = $"Identity{Path.DirectorySeparatorChar}";
-        int index = fullFileName.IndexOf(identifier);
+        int index = fullFileName.LastIndexOf(identifier, StringComparison.Ordinal);
         if (index != -1)
         {
             string pathAfterIdentifier = fullFileName.Substring(index + identifier.Length);
@@ -95,7 +103,7 @@ internal static class IdentityHelper
     internal static TextTemplatingProperty? GetApplicationUserTextTemplatingProperty(string? applicationUserTemplate, IdentityModel identityModel)
     {
         var projectDirectory = Path.GetDirectoryName(identityModel.ProjectInfo.ProjectPath);
-        if (string.IsNullOrEmpty(applicationUserTemplate) || string.IsNullOrEmpty(projectDirectory))
+        if (identityModel.HasExistingUser || string.IsNullOrEmpty(applicationUserTemplate) || string.IsNullOrEmpty(projectDirectory))
         {
             return null;
         }
@@ -115,6 +123,42 @@ internal static class IdentityHelper
             TemplateType = appUserType,
             OutputPath = userClassOutputPath
         };
+    }
+
+    internal static TextTemplatingProperty? GetLoginPartialTextTemplatingProperty(string? templatePath, IdentityModel model)
+    {
+        var projectDirectory = Path.GetDirectoryName(model.ProjectInfo.ProjectPath);
+        if (string.IsNullOrEmpty(templatePath) || string.IsNullOrEmpty(projectDirectory))
+        {
+            return null;
+        }
+
+        var outputPath = Path.Combine(projectDirectory, model.IsRazorPages ? "Pages" : "Views", "Shared", "_LoginPartial.cshtml");
+        if (File.Exists(outputPath))
+        {
+            return null;
+        }
+
+        return new TextTemplatingProperty
+        {
+            TemplatePath = templatePath,
+            TemplateType = typeof(Templates.net10.Files._LoginPartial),
+            TemplateModel = model,
+            TemplateModelName = "Model",
+            OutputPath = outputPath
+        };
+    }
+
+    internal static ITypeSymbol? GetIdentityUserType(INamedTypeSymbol? dbContext)
+    {
+        for (var type = dbContext; type is not null; type = type.BaseType)
+        {
+            if (type.Name is "IdentityDbContext" or "IdentityUserContext" && type.TypeArguments.Length > 0)
+            {
+                return type.TypeArguments[0];
+            }
+        }
+        return null;
     }
 
     private static IList<Type> GetIdentityTemplateTypes(TargetFramework? targetFramework)

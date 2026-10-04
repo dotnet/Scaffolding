@@ -8,6 +8,8 @@
 | --- | --- | --- | --- |
 | `net10.0\BlazorWebApp` | `blazor` | `--name BlazorWebApp --framework net10.0 --no-restore` | `11.0.100-rc.2.26475.136` |
 | `net11.0\BlazorWebApp` | `blazor` | `--name BlazorWebApp --framework net11.0 --no-restore` | `11.0.100-rc.2.26475.136` |
+| `net10.0\Mvc` | `mvc` | `--name Mvc --framework net10.0 --no-restore` | `10.0.401` |
+| `net11.0\RazorPages` | `webapp` | `--name RazorPages --framework net11.0 --no-restore` | `11.0.100-rc.2.26478.115` |
 
 From this directory, update all existing inputs with the currently active SDK (or pass `-SdkVersion` to select another installed SDK):
 
@@ -45,6 +47,8 @@ Comparison includes every file except files under `bin` and `obj` directories. C
 To add coverage, reuse or add a shared input, check in a runnable expected project, and call `ScaffolderBaselineRunner.RunAsync` with named arguments for the scaffolder directory, framework, input template, and callback that runs the scaffolder on the copied input. The runner handles setup, builds, comparison, and cleanup.
 
 Baseline tests live under `test\dotnet-scaffolding\dotnet-scaffold.Tests\AspNet\Integration`; their shared runner is `dotnet-scaffold.Tests\Helpers\ScaffolderBaselineRunner.cs`. A scaffolder that needs additional input files can supply the runner's `prepareInput` callback without changing the checked-in template.
+
+The regular Identity baselines cover MVC in .NET 10 and Razor Pages in .NET 11 with an existing Identity data layer. Their preparation callback supplies the expected user, DbContext, developer-owned migration, and package references before scaffolding. These files must remain unchanged: neither regular nor Blazor Identity scaffolding generates migrations or modifies the database. The comparison checks host wiring, every generated page, preservation of existing data files, and byte-for-byte unchanged second runs. The Identity end-to-end matrix separately verifies database-free scaffolding and initializes its temporary test database explicitly before exercising the account lifecycle.
 
 Update the expected project first and run it to verify the desired behavior, then update the scaffolder to match and run its baseline test. Tests never rewrite checked-in baselines. On failure, the runner reports the retained artifact directory; inspect or selectively copy generated files when useful, and review any baseline changes rather than replacing expected output just to make a failing comparison pass.
 

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -44,6 +45,9 @@ internal static class ScaffoldCliHelper
     {
         return Path.Combine(GetRepoRoot(), "src", "dotnet-scaffolding", "dotnet-scaffold", "dotnet-scaffold.csproj");
     }
+
+    internal static string GetScaffoldAssemblyPath(string framework)
+        => Path.Combine(GetRepoRoot(), "artifacts", "bin", "dotnet-scaffold", GetBuildConfiguration(), framework, "dotnet-scaffold.dll");
 
     /// <summary>
     /// Gets the path to the dotnet executable.
@@ -137,6 +141,46 @@ internal static class ScaffoldCliHelper
         startInfo.Environment.Remove("MSBUILD_EXE_PATH");
         startInfo.Environment.Remove("MSBuildSDKsPath");
         startInfo.Environment.Remove("MSBuildExtensionsPath");
+    }
+
+    internal static ProcessStartInfo CreateDotNetStartInfo(string workingDirectory, params string[] arguments)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            WorkingDirectory = workingDirectory,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        ConfigureDotNetEnvironment(startInfo);
+        foreach (var argument in arguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+        return startInfo;
+    }
+
+    internal static async Task<(int ExitCode, string Output, string Error)> RunDotNetAsync(string workingDirectory, params string[] arguments)
+    {
+        using var process = new Process { StartInfo = CreateDotNetStartInfo(workingDirectory, arguments) };
+        using var timeout = new CancellationTokenSource(System.TimeSpan.FromMinutes(5));
+        process.Start();
+        var output = process.StandardOutput.ReadToEndAsync();
+        var error = process.StandardError.ReadToEndAsync();
+        try
+        {
+            await process.WaitForExitAsync(timeout.Token);
+            return (process.ExitCode, await output, await error);
+        }
+        finally
+        {
+            if (!process.HasExited)
+            {
+                process.Kill(entireProcessTree: true);
+                await process.WaitForExitAsync();
+            }
+        }
     }
 
     /// <summary>
@@ -269,58 +313,13 @@ internal static class ScaffoldCliHelper
     public static async Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)
         => await RunDotNetAsync(workingDirectory, "build");
 
-    internal static async Task<(int ExitCode, string Output, string Error)> RunDotNetAsync(string workingDirectory, params string[] arguments)
-    {
-        using var buildProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                WorkingDirectory = workingDirectory,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-        ConfigureDotNetEnvironment(buildProcess.StartInfo);
-        foreach (var argument in arguments)
-        {
-            buildProcess.StartInfo.ArgumentList.Add(argument);
-        }
-
-        buildProcess.Start();
-        var outputTask = buildProcess.StandardOutput.ReadToEndAsync();
-        var errorTask = buildProcess.StandardError.ReadToEndAsync();
-        await buildProcess.WaitForExitAsync();
-        return (buildProcess.ExitCode, await outputTask, await errorTask);
-    }
-
     /// <summary>
     /// Runs <c>dotnet build -f {targetFramework}</c> in the specified working directory.
     /// Used by integration test base classes to build test projects targeting a specific framework.
     /// Uses the Arcade dotnet installation when available.
     /// </summary>
     public static async Task<(int ExitCode, string Output, string Error)> RunBuildForFrameworkAsync(string workingDirectory, string targetFramework)
-    {
-        var buildProcess = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                Arguments = $"build -f {targetFramework}",
-                WorkingDirectory = workingDirectory,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-        ConfigureDotNetEnvironment(buildProcess.StartInfo);
-        buildProcess.Start();
-        string output = await buildProcess.StandardOutput.ReadToEndAsync();
-        string error = await buildProcess.StandardError.ReadToEndAsync();
-        await buildProcess.WaitForExitAsync();
-        return (buildProcess.ExitCode, output, error);
-    }
+        => await RunDotNetAsync(workingDirectory, "build", "--framework", targetFramework);
 
     /// <summary>
     /// Generates a minimal .csproj file content for a Web SDK project targeting the specified framework.

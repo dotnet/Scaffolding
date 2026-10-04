@@ -1,0 +1,74 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Usings": [
+        "Microsoft.AspNetCore.Identity",
+        "Microsoft.EntityFrameworkCore",
+        "$(UserClassNamespace)"
+      ],
+      "Options": [
+        "EfScenario"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CheckBlock": "builder.Configuration.GetConnectionString",
+              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '$(ConnectionStringName)' not found.\")"
+            },
+            {
+              "InsertAfter": "builder.Configuration.GetConnectionString",
+              "CheckBlock": "builder.Services.AddDbContext",
+              "Block": "builder.Services.AddDbContext<$(DbContextName)>(options => options.$(UseDbMethod))",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "builder.Services.AddDbContext",
+              "Options": [ "AddDefaultIdentity" ],
+              "Block": "builder.Services.AddDefaultIdentity<$(UserClassName)>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<$(DbContextName)>()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "builder.Services.AddDbContext",
+              "CheckBlock": "builder.Services.AddDatabaseDeveloperPageExceptionFilter",
+              "Block": "builder.Services.AddDatabaseDeveloperPageExceptionFilter()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "CheckBlock": "builder.Services.AddRazorPages",
+              "Block": "builder.Services.AddRazorPages()",
+              "InsertBefore": [ "builder.Build()", "WebApplication.CreateBuilder.Build()" ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "CheckBlock": "app.UseMigrationsEndPoint",
+              "Block": "if (app.Environment.IsDevelopment())\r\n{\r\n    app.UseMigrationsEndPoint();\r\n}",
+              "InsertAfter": "var app = WebApplication.CreateBuilder.Build();",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "CheckBlock": "app.MapRazorPages",
+              "Block": "app.MapRazorPages()",
+              "InsertBefore": [ "app.Run();" ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

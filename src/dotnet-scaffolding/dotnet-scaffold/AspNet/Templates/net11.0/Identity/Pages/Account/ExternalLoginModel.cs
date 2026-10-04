@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Identity.Pages.
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -56,7 +57,9 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> _userStore;\r\n    private readonly IUserEmailStore<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> _emailStore;\r\n    private readonly IEmailSender _emailSender;\r\n    private read" +
+            this.Write("> _emailStore;\r\n    private readonly IEmailSender<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> _emailSender;\r\n    private read" +
                     "only ILogger<ExternalLoginModel> _logger;\r\n\r\n    public ExternalLoginModel(\r\n   " +
                     "     SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
@@ -64,7 +67,9 @@ using ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> userManager,\r\n        IUserStore<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write("> userStore,\r\n        ILogger<ExternalLoginModel> logger,\r\n        IEmailSender e" +
+            this.Write("> userStore,\r\n        ILogger<ExternalLoginModel> logger,\r\n        IEmailSender<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
+            this.Write("> e" +
                     "mailSender)\r\n    {\r\n        _signInManager = signInManager;\r\n        _userManage" +
                     "r = userManager;\r\n        _userStore = userStore;\r\n        _emailStore = GetEmai" +
                     "lStore();\r\n        _logger = logger;\r\n        _emailSender = emailSender;\r\n    }" +
@@ -93,12 +98,12 @@ using ");
                     "summary>\r\n        [Required]\r\n        [EmailAddress]\r\n        public string Emai" +
                     "l { get; set; } = default!;\r\n    }\r\n        \r\n    public IActionResult OnGet() =" +
                     "> RedirectToPage(\"./Login\");\r\n\r\n    public IActionResult OnPost(string provider," +
-                    " string? returnUrl = null)\r\n    {\r\n        // Request a redirect to the external" +
+                    " [StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)\r\n    {\r\n        // Request a redirect to the external" +
                     " login provider.\r\n        var redirectUrl = Url.Page(\"./ExternalLogin\", pageHand" +
                     "ler: \"Callback\", values: new { returnUrl });\r\n        var properties = _signInMa" +
                     "nager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);\r\n       " +
                     " return new ChallengeResult(provider, properties);\r\n    }\r\n\r\n    public async Ta" +
-                    "sk<IActionResult> OnGetCallbackAsync(string? returnUrl = null, string? remoteErr" +
+                    "sk<IActionResult> OnGetCallbackAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null, string? remoteErr" +
                     "or = null)\r\n    {\r\n        returnUrl = returnUrl ?? Url.Content(\"~/\");\r\n        " +
                     "if (remoteError != null)\r\n        {\r\n            ErrorMessage = $\"Error from ext" +
                     "ernal provider: {remoteError}\";\r\n            return RedirectToPage(\"./Login\", ne" +
@@ -120,7 +125,7 @@ using ");
                     "      {\r\n                Input = new InputModel\r\n                {\r\n            " +
                     "        Email = info.Principal.FindFirstValue(ClaimTypes.Email)!\r\n              " +
                     "  };\r\n            }\r\n            return Page();\r\n        }\r\n    }\r\n\r\n    public " +
-                    "async Task<IActionResult> OnPostConfirmationAsync(string? returnUrl = null)\r\n   " +
+                    "async Task<IActionResult> OnPostConfirmationAsync([StringSyntax(StringSyntaxAttribute.Uri)] string? returnUrl = null)\r\n   " +
                     " {\r\n        returnUrl = returnUrl ?? Url.Content(\"~/\");\r\n        // Get the info" +
                     "rmation about the user from the external login provider\r\n        var info = awai" +
                     "t _signInManager.GetExternalLoginInfoAsync();\r\n        if (info == null)\r\n      " +
@@ -141,12 +146,9 @@ using ");
                     "\n                        \"/Account/ConfirmEmail\",\r\n                        pageH" +
                     "andler: null,\r\n                        values: new { area = \"Identity\", userId =" +
                     " userId, code = code },\r\n                        protocol: Request.Scheme)!;\r\n\r\n" +
-                    "                    await _emailSender.SendEmailAsync(Input.Email, \"Confirm your" +
-                    " email\",\r\n                        $\"Please confirm your account by <a href=\'{Htm" +
-                    "lEncoder.Default.Encode(callbackUrl)}\'>clicking here</a>.\");\r\n\r\n                " +
-                    "    // If account confirmation is required, we need to show the link if we don\'t" +
-                    " have a real email sender\r\n                    if (_userManager.Options.SignIn.R" +
-                    "equireConfirmedAccount)\r\n                    {\r\n                        return R" +
+                    "                    await _emailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n                " +
+                    "    // If confirmation is required, we need to show the link if we don\'t" +
+                    " have a real email sender\r\n                    if (!await _signInManager.CanSignInAsync(user))\r\n                    {\r\n                        return R" +
                     "edirectToPage(\"./RegisterConfirmation\", new { Email = Input.Email });\r\n         " +
                     "           }\r\n\r\n                    await _signInManager.SignInAsync(user, isPer" +
                     "sistent: false, info.LoginProvider);\r\n                    return LocalRedirect(r" +

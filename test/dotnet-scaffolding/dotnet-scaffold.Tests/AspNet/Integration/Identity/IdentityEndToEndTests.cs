@@ -54,7 +54,7 @@ public class IdentityEndToEndTests
         Assert.False(File.Exists(Path.Combine(project.Directory, "Data", "ApplicationUser.cs")));
         await project.BuildAsync();
         await project.AssertUnchangedSecondRunAsync();
-        await AssertAccountLifecycleAsync(project, applyMigration: false);
+        await AssertAccountLifecycleAsync(project);
     }
 
     [Theory]
@@ -96,25 +96,6 @@ public class CustomUser : IdentityUser {}
         await AssertAccountLifecycleAsync(project);
     }
 
-    [Fact]
-    public async Task ScaffoldIdentity_RebuildsPrebuiltProjectWithoutDependencyManifest()
-    {
-        using var project = new IdentityTestProject("net10.0", "mvc");
-        await project.CreateAsync();
-        await project.BuildAsync();
-        var manifests = System.IO.Directory.GetFiles(Path.Combine(project.Directory, "bin"), "*.deps.json", SearchOption.AllDirectories);
-        Assert.NotEmpty(manifests);
-        foreach (var manifest in manifests)
-        {
-            File.Delete(manifest);
-        }
-
-        await project.ScaffoldAsync();
-        AssertConfiguredProject(project);
-        Assert.NotEmpty(System.IO.Directory.GetFiles(Path.Combine(project.Directory, "bin"), "*.deps.json", SearchOption.AllDirectories));
-        await project.AssertUnchangedSecondRunAsync();
-    }
-
     [UnixFact]
     public async Task ScaffoldIdentity_ResolvesDirectorySymlinks()
     {
@@ -129,6 +110,7 @@ public class CustomUser : IdentityUser {}
             var linkedProject = Path.Combine(alias, "IdentityApp.csproj");
             await project.ScaffoldAsync(projectPath: linkedProject);
             AssertConfiguredProject(project);
+            await project.BuildAsync();
             await project.AssertUnchangedSecondRunAsync(projectPath: linkedProject);
         }
         finally
@@ -183,14 +165,25 @@ public class CustomUser : IdentityUser {}
         var partial = File.ReadAllText(Path.Combine(shared, "_LoginPartial.cshtml"));
         Assert.Contains("asp-page=\"/Account/Login\"", partial);
         Assert.Contains("asp-page=\"/Account/Register\"", partial);
-        var migrations = Path.Combine(project.Directory, "Data", "Migrations");
-        Assert.NotEmpty(System.IO.Directory.GetFiles(migrations, "*_CreateIdentitySchema.cs"));
-        Assert.NotEmpty(System.IO.Directory.GetFiles(migrations, "*ModelSnapshot.cs"));
+        Assert.False(System.IO.Directory.Exists(Path.Combine(project.Directory, "Data", "Migrations")));
         Assert.Empty(System.IO.Directory.GetFiles(project.Directory, "*.db", SearchOption.AllDirectories));
     }
 
-    private static async Task AssertAccountLifecycleAsync(IdentityTestProject project, bool applyMigration = true)
+    private static async Task AssertAccountLifecycleAsync(IdentityTestProject project)
     {
+        // Initialize only this test's database, after validating scaffolding's database-free behavior.
+        var programPath = Path.Combine(project.Directory, "Program.cs");
+        var program = File.ReadAllText(programPath);
+        const string appBuilder = "var app = builder.Build();";
+        Assert.Contains(appBuilder, program);
+        File.WriteAllText(programPath, program.Replace(appBuilder, appBuilder + """
+
+using (var scope = app.Services.CreateScope())
+{
+    scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.EnsureCreated();
+}
+""", StringComparison.Ordinal));
+        await project.BuildAsync();
         var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
         var port = ((IPEndPoint)listener.LocalEndpoint).Port;
@@ -210,16 +203,11 @@ public class CustomUser : IdentityUser {}
         {
             using var handler = new HttpClientHandler { CookieContainer = new CookieContainer() };
             using var client = new HttpClient(handler) { BaseAddress = baseAddress, Timeout = TimeSpan.FromSeconds(30) };
-            var registerPage = await WaitForPageAsync(client, "/Identity/Account/Register", process, output, error);
+            await WaitForPageAsync(client, "/Identity/Account/Register", process, output, error);
             var homePage = await client.GetStringAsync("/");
             Assert.Contains("/Identity/Account/Login", homePage);
             Assert.Contains("/Identity/Account/Register", homePage);
-            if (applyMigration)
-            {
-                await ApplyMigrationAsync(client, registerPage);
-            }
-
-            registerPage = await client.GetStringAsync("/Identity/Account/Register");
+            var registerPage = await client.GetStringAsync("/Identity/Account/Register");
             Assert.NotEmpty(await client.GetByteArrayAsync("/Identity/lib/bootstrap/dist/css/bootstrap.min.css"));
             Assert.NotEmpty(await client.GetByteArrayAsync("/Identity/lib/bootstrap/dist/js/bootstrap.bundle.min.js"));
             var email = $"identity-{Guid.NewGuid():N}@example.com";
@@ -261,24 +249,6 @@ public class CustomUser : IdentityUser {}
             await process.WaitForExitAsync();
             await Task.WhenAll(output, error);
         }
-    }
-
-    private static async Task ApplyMigrationAsync(HttpClient client, string registerPage)
-    {
-        using var failedRegistration = await client.PostAsync("/Identity/Account/Register", new FormUrlEncodedContent(new Dictionary<string, string>
-        {
-            ["Input.Email"] = $"migration-probe-{Guid.NewGuid():N}@example.com",
-            ["Input.Password"] = "Test1234!",
-            ["Input.ConfirmPassword"] = "Test1234!",
-            ["__RequestVerificationToken"] = GetAntiforgeryToken(registerPage)
-        }));
-        var errorPage = await failedRegistration.Content.ReadAsStringAsync();
-        Assert.Equal(HttpStatusCode.InternalServerError, failedRegistration.StatusCode);
-        var context = MatchHtml(errorPage, "data-assemblyname=\"([^\"]+)\"");
-        using var migration = await client.PostAsync("/ApplyDatabaseMigrations",
-            new FormUrlEncodedContent(new Dictionary<string, string> { ["context"] = context }));
-        Assert.True(migration.StatusCode == HttpStatusCode.NoContent,
-            $"Applying the migration returned {(int)migration.StatusCode}.\n{await migration.Content.ReadAsStringAsync()}");
     }
 
     private static async Task<string> PostFormAsync(HttpClient client, string uri, string page, Dictionary<string, string> fields)
@@ -371,6 +341,7 @@ public class CustomUser : IdentityUser {}
 
         public async Task ScaffoldAsync(bool relativeProjectPath = false, string? projectPath = null)
         {
+            var databaseState = GetDatabaseState();
             var arguments = new List<string> { "--project", relativeProjectPath ? "IdentityApp.csproj" : projectPath ?? Path, "--dataContext", "ApplicationDbContext", "--dbProvider", "sqlite-efcore" };
             if (Framework == "net11.0")
             {
@@ -382,13 +353,13 @@ public class CustomUser : IdentityUser {}
                 : await ScaffoldCliHelper.RunScaffoldAsync(ScaffoldCliHelper.GetTestTargetFramework(), "identity", [.. arguments]);
             _scaffoldOutput = result.Output + Environment.NewLine + result.Error;
             AssertSuccess(result);
+            Assert.Equal(databaseState, GetDatabaseState());
             Assert.True(string.IsNullOrWhiteSpace(result.Error), _scaffoldOutput);
             Assert.DoesNotContain("Unable to", result.Output, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("Failed", result.Output, StringComparison.OrdinalIgnoreCase);
             Assert.True(File.Exists(System.IO.Path.Combine(Directory, "Areas", "Identity", "Pages", "Account", "Login.cshtml")),
                 $"Identity pages were not generated.\n{_scaffoldOutput}");
-            Assert.True(System.IO.Directory.Exists(System.IO.Path.Combine(Directory, "Data", "Migrations")),
-                $"Identity migrations were not generated.\n{result.Output}\n{result.Error}");
+            Assert.Contains("Identity scaffolding does not create migrations or update the database.", result.Output);
         }
 
         public async Task BuildAsync()
@@ -409,6 +380,14 @@ public class CustomUser : IdentityUser {}
             => new(System.IO.Directory.GetFiles(Directory, "*", SearchOption.AllDirectories)
                 .Where(path => !System.IO.Path.GetRelativePath(Directory, path).Split(System.IO.Path.DirectorySeparatorChar)
                     .Any(segment => segment is "bin" or "obj" or "artifacts"))
+                .ToDictionary(path => System.IO.Path.GetRelativePath(Directory, path),
+                    path => Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)))), StringComparer.Ordinal);
+
+        private SortedDictionary<string, string> GetDatabaseState()
+            => new(System.IO.Directory.GetFiles(Directory, "*", SearchOption.AllDirectories)
+                .Where(path => System.IO.Path.GetRelativePath(Directory, path).Split(System.IO.Path.DirectorySeparatorChar).Contains("Migrations")
+                    || path.EndsWith("ModelSnapshot.cs", StringComparison.Ordinal)
+                    || System.IO.Path.GetExtension(path) is ".db" or ".sqlite" or ".sqlite3")
                 .ToDictionary(path => System.IO.Path.GetRelativePath(Directory, path),
                     path => Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)))), StringComparer.Ordinal);
 

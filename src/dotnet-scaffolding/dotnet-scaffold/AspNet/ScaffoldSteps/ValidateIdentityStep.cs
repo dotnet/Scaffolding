@@ -231,17 +231,6 @@ internal class ValidateIdentityStep : ScaffoldStep
             return null;
         }
 
-        if (!settings.BlazorScenario)
-        {
-            var msBuildProject = new Microsoft.DotNet.Scaffolding.Roslyn.Services.MSBuildProjectService(projectPath);
-            if (!msBuildProject.TryGetEvaluatedProperties(["ProjectAssetsFile"], out var properties, out var evaluationError))
-            {
-                _logger.LogError($"Unable to evaluate Identity project '{projectPath}': {evaluationError}");
-                return null;
-            }
-            projectInfo.ProjectAssetsFile = properties["ProjectAssetsFile"];
-        }
-
         // Restore existing dependencies before CodeService first loads the workspace for semantic analysis.
         _logger.LogInformation("Restoring project dependencies for Identity analysis...");
         var runner = DotnetCliRunner.CreateDotNet("restore", [projectPath, "--disable-build-servers"]);
@@ -338,7 +327,6 @@ internal class ValidateIdentityStep : ScaffoldStep
 
         if (!settings.BlazorScenario)
         {
-            scaffoldingModel.HasMigration = IdentityHelper.HasMigration(allClasses, dbContextInfo);
             var existingContext = allClasses.OfType<INamedTypeSymbol>().FirstOrDefault(type =>
                 type.Name == dbContextInfo.DbContextClassName &&
                 type.ContainingNamespace.ToDisplayString() == dbContextInfo.DbContextNamespace);

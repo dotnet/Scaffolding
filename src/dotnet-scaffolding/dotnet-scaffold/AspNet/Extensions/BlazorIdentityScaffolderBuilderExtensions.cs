@@ -203,7 +203,6 @@ internal static class BlazorIdentityScaffolderBuilderExtensions
                 List<Package> packages = [
                     PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackage,
                     PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackage,
-                    PackageConstants.EfConstants.EfCoreToolsPackage,
                     PackageConstants.EfConstants.EfCoreDesignPackage
                 ];
 

@@ -207,9 +207,9 @@ public class IdentityNet11IntegrationTests : IdentityIntegrationTestsBase
         var manageDir = Path.Combine(accountDir, "Manage");
         Assert.True(Directory.Exists(manageDir), "Manage directory should be created.");
         Assert.True(File.Exists(Path.Combine(manageDir, "Index.cshtml")), "Manage/Index.cshtml should be created.");
-        var migrationsDir = Path.Combine(_testProjectDir, "Data", "Migrations");
-        Assert.True(Directory.Exists(migrationsDir), $"Identity migration must be generated.\nOutput: {cliOutput}\nError: {cliError}");
-        Assert.NotEmpty(Directory.GetFiles(migrationsDir, "*_CreateIdentitySchema.cs"));
+        Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Data", "Migrations")));
+        Assert.Empty(Directory.GetFiles(_testProjectDir, "*.db", SearchOption.AllDirectories));
+        Assert.Contains("Identity scaffolding does not create migrations or update the database.", cliOutput);
 
         // Assert no NuGet errors during scaffolding
         Assert.False(cliOutput.Contains("error: NU"),

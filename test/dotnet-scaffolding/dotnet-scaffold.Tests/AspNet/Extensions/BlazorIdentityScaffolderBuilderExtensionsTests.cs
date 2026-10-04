@@ -19,6 +19,45 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Extensions;
 
 public class BlazorIdentityScaffolderBuilderExtensionsTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void WithIdentityAddPackagesSteps_KeepDesignButNotConsoleTools(bool blazor)
+    {
+        var context = new ScaffolderContext(Mock.Of<IScaffolder>());
+        context.SetSpecifiedTargetFramework(TargetFramework.Net11);
+        context.Properties[nameof(IdentitySettings)] = new IdentitySettings
+        {
+            Project = "TestProject.csproj",
+            DataContext = "ApplicationDbContext",
+            DatabaseProvider = PackageConstants.EfConstants.SQLite
+        };
+        var environment = Mock.Of<IEnvironmentService>(service => service.CurrentDirectory == Directory.GetCurrentDirectory());
+        var step = new WrappedAddPackagesStep(NullLogger<WrappedAddPackagesStep>.Instance,
+            Mock.Of<ITelemetryService>(), new NuGetVersionService(environment))
+        {
+            Packages = [],
+            ProjectPath = string.Empty
+        };
+        var builder = new Mock<IScaffoldBuilder>();
+        builder.Setup(value => value.WithStep<WrappedAddPackagesStep>(It.IsAny<Action<ScaffoldStepConfigurator<WrappedAddPackagesStep>>>()))
+            .Callback<Action<ScaffoldStepConfigurator<WrappedAddPackagesStep>>, Action<ScaffoldStepConfigurator<WrappedAddPackagesStep>>?>((configure, _) =>
+                configure(new ScaffoldStepConfigurator<WrappedAddPackagesStep> { Step = step, Context = context }))
+            .Returns(builder.Object);
+
+        if (blazor)
+        {
+            builder.Object.WithBlazorIdentityAddPackagesStep();
+        }
+        else
+        {
+            builder.Object.WithIdentityAddPackagesStep();
+        }
+
+        Assert.Contains(step.Packages, package => package.Name == "Microsoft.EntityFrameworkCore.Design");
+        Assert.DoesNotContain(step.Packages, package => package.Name == "Microsoft.EntityFrameworkCore.Tools");
+    }
+
     [Fact]
     public void WithBlazorIdentityCodeChangeStep_ReturnsBuilder()
     {
@@ -99,6 +138,8 @@ public class BlazorIdentityScaffolderBuilderExtensionsTests
         IScaffoldBuilder result = mockBuilder.Object.WithBlazorIdentityAddPackagesStep();
 
         Assert.Same(mockBuilder.Object, result);
+        Assert.Contains(step.Packages, package => package.Name == "Microsoft.EntityFrameworkCore.Design");
+        Assert.DoesNotContain(step.Packages, package => package.Name == "Microsoft.EntityFrameworkCore.Tools");
         mockBuilder.Verify(b => b.WithStep<WrappedAddPackagesStep>(It.IsAny<Action<ScaffoldStepConfigurator<WrappedAddPackagesStep>>>()), Times.Once);
         var azurePackage = step.Packages.SingleOrDefault(p => p.Name == "Microsoft.Data.SqlClient.Extensions.Azure");
         Assert.Equal(includeAzurePackage, azurePackage is not null);

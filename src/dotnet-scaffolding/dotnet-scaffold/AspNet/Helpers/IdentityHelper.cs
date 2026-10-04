@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -149,15 +148,6 @@ internal static class IdentityHelper
             OutputPath = outputPath
         };
     }
-
-    internal static bool HasMigration(IEnumerable<ISymbol> classes, DbContextInfo context)
-        => classes.OfType<INamedTypeSymbol>().Any(type =>
-            type.BaseType?.Name == "ModelSnapshot" &&
-            type.GetAttributes().Any(attribute =>
-                attribute.AttributeClass?.Name == "DbContextAttribute" &&
-                attribute.ConstructorArguments.FirstOrDefault().Value is INamedTypeSymbol dbContext &&
-                dbContext.Name == context.DbContextClassName &&
-                (dbContext.ContainingNamespace.IsGlobalNamespace ? string.Empty : dbContext.ContainingNamespace.ToDisplayString()) == context.DbContextNamespace));
 
     internal static ITypeSymbol? GetIdentityUserType(INamedTypeSymbol? dbContext)
     {

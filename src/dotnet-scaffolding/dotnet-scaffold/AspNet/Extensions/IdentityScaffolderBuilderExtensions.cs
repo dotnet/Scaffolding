@@ -37,7 +37,6 @@ internal static class IdentityScaffolderBuilderExtensions
                     PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackage,
                     PackageConstants.AspNetCorePackages.AspNetCoreIdentityUiPackage,
                     PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackage,
-                    PackageConstants.EfConstants.EfCoreToolsPackage,
                     PackageConstants.EfConstants.EfCoreDesignPackage
                 ];
 
@@ -189,13 +188,13 @@ internal static class IdentityScaffolderBuilderExtensions
     }
 
     /// <summary>
-    /// Adds a step to generate an initial EF Core migration for Identity.
+    /// Adds shared database setup guidance after Identity scaffolding succeeds.
     /// </summary>
     /// <param name="builder">The scaffold builder.</param>
     /// <returns>The updated scaffold builder.</returns>
-    public static IScaffoldBuilder WithIdentityMigrationStep(this IScaffoldBuilder builder)
+    public static IScaffoldBuilder WithIdentityDatabaseGuidanceStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<AddIdentityMigrationStep>(config =>
+        return builder.WithStep<IdentityDatabaseGuidanceStep>(config =>
         {
             var step = config.Step;
             if (config.Context.Properties.TryGetValue(nameof(IdentityModel), out var identityModelObj) &&
@@ -203,8 +202,6 @@ internal static class IdentityScaffolderBuilderExtensions
             {
                 step.ProjectPath = identityModel.ProjectInfo.ProjectPath ?? string.Empty;
                 step.DbContextName = identityModel.DbContextInfo.DbContextClassName ?? string.Empty;
-                step.ProjectAssetsFile = identityModel.ProjectInfo.ProjectAssetsFile ?? string.Empty;
-                step.SkipStep = identityModel.HasMigration;
             }
             else
             {

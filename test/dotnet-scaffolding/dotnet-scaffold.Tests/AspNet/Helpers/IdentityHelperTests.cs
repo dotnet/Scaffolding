@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -153,33 +151,6 @@ public class IdentityHelperTests
         var property = Assert.Single(IdentityHelper.GetTextTemplatingProperties([templatePath], model));
 
         Assert.Equal(Path.Combine(model.BaseOutputPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml"), property.OutputPath);
-    }
-
-    [Theory]
-    [InlineData("ApplicationDbContext", "App", true)]
-    [InlineData("OldApplicationDbContext", "App", false)]
-    [InlineData("ApplicationDbContext", "Other", false)]
-    public void HasMigration_MatchesExactContext(string name, string ns, bool expected)
-    {
-        var compilation = CSharpCompilation.Create("Snapshots",
-            [CSharpSyntaxTree.ParseText($$"""
-using System;
-public class DbContextAttribute(Type context) : Attribute {}
-public class ModelSnapshot {}
-namespace {{ns}}
-{
-    public class {{name}} {}
-    // ApplicationDbContext may also appear in unrelated snapshots.
-    [DbContext(typeof({{name}}))]
-    public class Snapshot : ModelSnapshot {}
-}
-""")], [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)]);
-        var snapshot = compilation.GetTypeByMetadataName($"{ns}.Snapshot")!;
-        Assert.Equal(expected, IdentityHelper.HasMigration([snapshot], new DbContextInfo
-        {
-            DbContextClassName = "ApplicationDbContext",
-            DbContextNamespace = "App"
-        }));
     }
 
     [Fact]

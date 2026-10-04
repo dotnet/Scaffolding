@@ -73,15 +73,15 @@ public class IdentityScaffolderBuilderExtensionsTests
     }
 
     [Fact]
-    public void WithIdentityMigrationStep_ReturnsBuilder()
+    public void WithIdentityDatabaseGuidanceStep_ReturnsBuilder()
     {
         Mock<IScaffoldBuilder> mockBuilder = new Mock<IScaffoldBuilder>();
-        mockBuilder.Setup(b => b.WithStep<AddIdentityMigrationStep>(It.IsAny<Action<ScaffoldStepConfigurator<AddIdentityMigrationStep>>>()))
+        mockBuilder.Setup(b => b.WithStep<IdentityDatabaseGuidanceStep>(It.IsAny<Action<ScaffoldStepConfigurator<IdentityDatabaseGuidanceStep>>>()))
             .Returns(mockBuilder.Object);
 
-        IScaffoldBuilder result = mockBuilder.Object.WithIdentityMigrationStep();
+        IScaffoldBuilder result = mockBuilder.Object.WithIdentityDatabaseGuidanceStep();
 
         Assert.NotNull(result);
-        mockBuilder.Verify(b => b.WithStep<AddIdentityMigrationStep>(It.IsAny<Action<ScaffoldStepConfigurator<AddIdentityMigrationStep>>>()), Times.Once);
+        mockBuilder.Verify(b => b.WithStep<IdentityDatabaseGuidanceStep>(It.IsAny<Action<ScaffoldStepConfigurator<IdentityDatabaseGuidanceStep>>>()), Times.Once);
     }
 }

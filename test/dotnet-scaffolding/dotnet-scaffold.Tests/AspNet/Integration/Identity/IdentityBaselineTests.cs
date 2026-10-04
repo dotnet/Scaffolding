@@ -35,6 +35,7 @@ public class IdentityBaselineTests(ITestOutputHelper output)
                 ];
                 var result = await ScaffoldCliHelper.RunScaffoldAsync(ScaffoldCliHelper.GetTestTargetFramework(), "identity", arguments);
                 Assert.True(result.ExitCode == 0, $"Scaffolding failed.\n{result.Output}\n{result.Error}");
+                Assert.Contains("Identity scaffolding does not create migrations or update the database.", result.Output);
 
                 var before = GeneratedProjectBaseline.EnumerateFiles(actual)
                     .ToDictionary(path => Path.GetRelativePath(actual, path), File.ReadAllBytes);

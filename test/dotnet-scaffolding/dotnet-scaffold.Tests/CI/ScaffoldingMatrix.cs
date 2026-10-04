@@ -37,6 +37,7 @@ public static class ScaffoldingMatrix
         "area",
         "blazor-identity",
         "identity",
+        "identity-api",
         "entra-id"
     ];
 
@@ -60,6 +61,8 @@ public static class ScaffoldingMatrix
         // EntraID scaffolder only supports net10.0+
         ("entra-id", "net8.0"),
         ("entra-id", "net9.0"),
+        ("identity-api", "net8.0"),
+        ("identity-api", "net9.0"),
     };
 
     /// <summary>

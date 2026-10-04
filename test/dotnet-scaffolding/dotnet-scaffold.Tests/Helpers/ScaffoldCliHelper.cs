@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -105,7 +106,7 @@ internal static class ScaffoldCliHelper
     /// MSBUILD_EXE_PATH to prevent the test host's MSBuild context from leaking
     /// into the child build process.
     /// </summary>
-    private static void ConfigureDotNetEnvironment(ProcessStartInfo startInfo)
+    internal static void ConfigureDotNetEnvironment(ProcessStartInfo startInfo)
     {
         var dotnetPath = GetDotNetPath();
         startInfo.FileName = dotnetPath;
@@ -163,6 +164,24 @@ internal static class ScaffoldCliHelper
 
     internal static string[] GetPrereleaseArguments(string projectTargetFramework)
         => projectTargetFramework == "net11.0" ? ["--prerelease"] : [];
+
+    internal static string GetScaffoldAssemblyPath() =>
+        Path.Combine(GetRepoRoot(), "artifacts", "bin", "dotnet-scaffold", GetBuildConfiguration(),
+            GetTestTargetFramework(), "dotnet-scaffold.dll");
+
+    internal static async Task UseInstalledSdkAsync(string workingDirectory, string targetFramework)
+    {
+        var result = await RunDotNetAsync(workingDirectory, "--list-sdks");
+        Assert.True(result.ExitCode == 0, result.Error);
+        var major = System.Version.Parse(targetFramework.Substring(3)).Major;
+        var versions = result.Output.Split('\n', System.StringSplitOptions.RemoveEmptyEntries)
+            .Select(line => line.Split(' ')[0]).ToArray();
+        var sdk = versions.LastOrDefault(version => version.StartsWith($"{major}.", System.StringComparison.Ordinal))
+            ?? versions.LastOrDefault(version => int.TryParse(version.Split('.')[0], out var installedMajor) && installedMajor >= major);
+        Assert.True(sdk is not null, $"An SDK supporting {targetFramework} is required. Installed SDKs:\n{result.Output}");
+        File.WriteAllText(Path.Combine(workingDirectory, "global.json"),
+            JsonSerializer.Serialize(new { sdk = new { version = sdk, allowPrerelease = true, rollForward = "disable" } }));
+    }
 
     /// <summary>
     /// Runs a dotnet-scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspnet {command} {args}</c>.

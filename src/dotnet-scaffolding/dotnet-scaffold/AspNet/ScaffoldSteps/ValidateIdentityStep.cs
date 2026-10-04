@@ -1,7 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.DotNet.Scaffolding.Core.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
@@ -19,6 +21,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
 using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
+using ProjectInfo = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.ProjectInfo;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -40,6 +43,7 @@ internal class ValidateIdentityStep : ScaffoldStep
     /// Indicates whether the scenario is for Blazor.
     /// </summary>
     public bool BlazorScenario { get; set; }
+    public bool IdentityApiScenario { get; set; }
     /// <summary>
     /// Path to the project file.
     /// </summary>
@@ -125,8 +129,20 @@ internal class ValidateIdentityStep : ScaffoldStep
             var dbContextProperties = AspNetDbContextHelper.GetDbContextProperties(identitySettings.Project, identityModel.DbContextInfo);
             if (dbContextProperties is not null)
             {
+                if (IdentityApiScenario)
+                {
+                    dbContextProperties = new DbContextProperties
+                    {
+                        DbContextName = dbContextProperties.DbContextName,
+                        DbContextPath = dbContextProperties.DbContextPath,
+                        DbSetStatement = dbContextProperties.DbSetStatement,
+                        NewDbConnectionString = identityModel.ConfigureDbContext ? dbContextProperties.NewDbConnectionString : null
+                    };
+                }
                 dbContextProperties.IsIdentityDbContext = true;
-                dbContextProperties.FullIdentityUserName = $"{identityModel.UserClassNamespace}.{identityModel.UserClassName}";
+                dbContextProperties.FullIdentityUserName = string.IsNullOrEmpty(identityModel.UserClassNamespace)
+                    ? identityModel.UserClassName
+                    : $"{identityModel.UserClassNamespace}.{identityModel.UserClassName}";
                 context.Properties.Add(nameof(DbContextProperties), dbContextProperties);
             }
 
@@ -143,6 +159,18 @@ internal class ValidateIdentityStep : ScaffoldStep
             }
 
             codeModifierProperties.TryAdd(Constants.CodeModifierPropertyConstants.UserClassName, identityModel.UserClassName);
+        }
+
+        if (IdentityApiScenario)
+        {
+            codeModifierProperties[Constants.CodeModifierPropertyConstants.UserClassName] = string.IsNullOrEmpty(identityModel.UserClassNamespace)
+                ? $"global::{identityModel.UserClassName}"
+                : $"global::{identityModel.UserClassNamespace}.{identityModel.UserClassName}";
+            codeModifierProperties[Constants.CodeModifierPropertyConstants.DbContextName] = string.IsNullOrEmpty(identityModel.DbContextInfo.DbContextNamespace)
+                ? $"global::{identityModel.DbContextInfo.DbContextClassName}"
+                : $"global::{identityModel.DbContextInfo.DbContextNamespace}.{identityModel.DbContextInfo.DbContextClassName}";
+            codeModifierProperties[Constants.CodeModifierPropertyConstants.UseDbMethod] =
+                codeModifierProperties[Constants.CodeModifierPropertyConstants.UseDbMethod].Replace("connectionString", "identityConnectionString");
         }
 
         context.Properties.Add(Constants.StepConstants.CodeModifierProperties, codeModifierProperties);
@@ -163,6 +191,54 @@ internal class ValidateIdentityStep : ScaffoldStep
         {
             _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.ProjectCliOption} option.");
             return null;
+        }
+
+        if (IdentityApiScenario)
+        {
+            Project = Path.GetFullPath(Project);
+        }
+
+        if (IdentityApiScenario && TargetFrameworkHelpers.GetTargetFrameworkForProject(Project) is not (TargetFramework.Net10 or TargetFramework.Net11))
+        {
+            _logger.LogError("The Identity API scaffolder requires a project targeting .NET 10 or .NET 11.");
+            return null;
+        }
+
+        var projectName = Path.GetFileNameWithoutExtension(Project);
+        if (IdentityApiScenario && (string.IsNullOrEmpty(projectName) || !projectName.Split('.').All(SyntaxFacts.IsValidIdentifier)))
+        {
+            _logger.LogError("The Identity API scaffolder requires a project name that can be used as a C# namespace.");
+            return null;
+        }
+
+        if (IdentityApiScenario)
+        {
+            var programPath = Path.Combine(Path.GetDirectoryName(Project)!, "Program.cs");
+            if (!File.Exists(programPath))
+            {
+                _logger.LogError("The Identity API scaffolder requires a Program.cs file.");
+                return null;
+            }
+
+            var program = CSharpSyntaxTree.ParseText(File.ReadAllText(programPath)).GetRoot();
+            var methods = program.DescendantNodes().OfType<InvocationExpressionSyntax>()
+                .Select(invocation => invocation.Expression)
+                .OfType<MemberAccessExpressionSyntax>()
+                .Select(access => access.Name.Identifier.ValueText)
+                .ToHashSet();
+            if (program is not CompilationUnitSyntax root || !root.Members.OfType<GlobalStatementSyntax>().Any() ||
+                !methods.Contains("CreateBuilder") || !methods.Contains("Build") || !methods.Overlaps(["Run", "RunAsync"]))
+            {
+                _logger.LogError("The Identity API scaffolder requires top-level WebApplication startup in Program.cs.");
+                return null;
+            }
+            if (methods.Contains("MapIdentityApi") ||
+                methods.Overlaps(["AddIdentity", "AddDefaultIdentity", "AddIdentityCore"]) ||
+                (methods.Contains("AddIdentityApiEndpoints") && !methods.Contains("MapScaffoldedIdentityApi")))
+            {
+                _logger.LogError("Program.cs already configures Identity. Remove the existing Identity service registration and MapIdentityApi calls before scaffolding to avoid duplicate routes and services.");
+                return null;
+            }
         }
 
         if (string.IsNullOrEmpty(DataContext))
@@ -241,11 +317,48 @@ internal class ValidateIdentityStep : ScaffoldStep
         //find DbContext info or create properties for a new one.
         var dbContextClassName = settings.DataContext;
         DbContextInfo dbContextInfo = new();
+        INamedTypeSymbol? existingUser = null;
 
         if (!string.IsNullOrEmpty(dbContextClassName) && !string.IsNullOrEmpty(settings.DatabaseProvider))
         {
+            if (IdentityApiScenario && allClasses.Count(type => type.Name.Equals(dbContextClassName, StringComparison.OrdinalIgnoreCase)) > 1)
+            {
+                _logger.LogError("Multiple contexts named '{DataContext}' were found. Use a unique context class name.", dbContextClassName);
+                return null;
+            }
             var dbContextClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(dbContextClassName, StringComparison.OrdinalIgnoreCase));
+            if (IdentityApiScenario && dbContextClassSymbol is INamedTypeSymbol existingContext)
+            {
+                if (existingContext.Arity != 0 || existingContext.ContainingType is not null || existingContext.IsAbstract)
+                {
+                    _logger.LogError("The existing context '{DataContext}' must be a concrete, non-generic, top-level IdentityDbContext.", dbContextClassName);
+                    return null;
+                }
+
+                for (var type = existingContext; type is not null; type = type.BaseType)
+                {
+                    if (type.Name == "IdentityDbContext" &&
+                        type.ContainingNamespace.ToDisplayString() == "Microsoft.AspNetCore.Identity.EntityFrameworkCore" &&
+                        type.TypeArguments.FirstOrDefault() is INamedTypeSymbol user)
+                    {
+                        existingUser = user;
+                        break;
+                    }
+                }
+
+                if (existingUser is null)
+                {
+                    _logger.LogError("The existing context '{DataContext}' must derive from IdentityDbContext<TUser>.", dbContextClassName);
+                    return null;
+                }
+            }
+
             dbContextInfo = ClassAnalyzers.GetIdentityDbContextInfo(settings.Project, dbContextClassSymbol, dbContextClassName, settings.DatabaseProvider);
+            if (IdentityApiScenario && dbContextClassSymbol is null)
+            {
+                // NewDbContext emits a class in the global namespace.
+                dbContextInfo.DbContextNamespace = string.Empty;
+            }
             dbContextInfo.EfScenario = true;
         }
 
@@ -320,6 +433,63 @@ internal class ValidateIdentityStep : ScaffoldStep
             BlazorRenderMode = blazorRenderMode
         };
 
+        if (IdentityApiScenario)
+        {
+            var programDocument = await projectInfo.CodeService.GetDocumentAsync("Program.cs");
+            var program = programDocument is null ? null : await programDocument.GetSyntaxRootAsync();
+            var semanticModel = programDocument is null ? null : await programDocument.GetSemanticModelAsync();
+            if (program is null || semanticModel is null)
+            {
+                _logger.LogError("Unable to analyze Program.cs for Identity API database registration.");
+                return null;
+            }
+
+            var contextName = string.IsNullOrEmpty(dbContextInfo.DbContextNamespace)
+                ? dbContextInfo.DbContextClassName
+                : $"{dbContextInfo.DbContextNamespace}.{dbContextInfo.DbContextClassName}";
+            scaffoldingModel.ConfigureDbContext = !program.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(invocation =>
+                invocation.Expression is MemberAccessExpressionSyntax { Name: GenericNameSyntax name } &&
+                name.Identifier.ValueText == "AddDbContext" &&
+                name.TypeArgumentList.Arguments.Count == 1 &&
+                semanticModel.GetTypeInfo(name.TypeArgumentList.Arguments[0]).Type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == $"global::{contextName}");
+            if (existingUser is null)
+            {
+                var users = allClasses.OfType<INamedTypeSymbol>()
+                    .Where(type => type.Name == AspNetConstants.Identity.UserClassName).ToArray();
+                if (users.Length > 1)
+                {
+                    _logger.LogError("Multiple ApplicationUser classes were found. Specify an existing IdentityDbContext to identify the user type.");
+                    return null;
+                }
+                existingUser = users.SingleOrDefault();
+            }
+            if (existingUser is not null)
+            {
+                var isIdentityUser = false;
+                for (var type = existingUser; type is not null; type = type.BaseType)
+                {
+                    if (type.Name == "IdentityUser" && type.ContainingNamespace.ToDisplayString() == "Microsoft.AspNetCore.Identity")
+                    {
+                        isIdentityUser = true;
+                        break;
+                    }
+                }
+
+                if (!isIdentityUser || existingUser.IsAbstract || existingUser.Arity != 0 || existingUser.ContainingType is not null ||
+                    !existingUser.InstanceConstructors.Any(ctor => ctor.Parameters.Length == 0 && ctor.DeclaredAccessibility == Accessibility.Public))
+                {
+                    _logger.LogError("The existing user '{User}' must be a concrete, non-generic, top-level IdentityUser with a public parameterless constructor.", existingUser.Name);
+                    return null;
+                }
+
+                scaffoldingModel.UserClassName = existingUser.Name;
+                scaffoldingModel.UserClassNamespace = existingUser.ContainingNamespace.IsGlobalNamespace
+                    ? string.Empty
+                    : existingUser.ContainingNamespace.ToDisplayString();
+                scaffoldingModel.GenerateUser = false;
+            }
+        }
+
         return scaffoldingModel;
     }
 
@@ -342,6 +512,11 @@ internal class ValidateIdentityStep : ScaffoldStep
         if (identityModel.DbContextInfo.EfScenario)
         {
             codeChangeOptions.Add("EfScenario");
+        }
+
+        if (IdentityApiScenario && identityModel.ConfigureDbContext)
+        {
+            codeChangeOptions.Add("IdentityApiAddDbContext");
         }
 
         // .NET 8 uses different authentication-state persistence and routing mechanisms.

@@ -48,7 +48,7 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var appSettingsFileSearch = _fileSystem.EnumerateFiles(BaseProjectPath, "appsettings.json", SearchOption.AllDirectories);
-        var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
+        var appSettingsFile = appSettingsFileSearch.FirstOrDefault() ?? Path.Combine(BaseProjectPath, "appsettings.json");
         JsonNode? content;
         bool writeContent = false;
         if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))

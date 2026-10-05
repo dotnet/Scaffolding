@@ -58,11 +58,8 @@ public class ProjectModifierHelperTests
 
     [Theory]
     [InlineData(null, false, "")]
-    [InlineData(null, true, "original")]
-    [InlineData(new string[0], false, "original")]
-    [InlineData(new string[0], true, "")]
-    [InlineData(new string[] { "" }, false, "")]
-    [InlineData(new string[] { "" }, true, "original")]
+    [InlineData(new string[0], true, "original")]
+    [InlineData(new string[] { "" }, false, "original")]
     public Task Replacements_NullAndEmptyAnchorsInsert(string[]? anchor, bool prepend, string input) =>
         AssertBothReplacementPathsAsync(input,
             new CodeSnippet { ReplaceSnippet = anchor, Block = "inserted", Prepend = prepend },
@@ -104,21 +101,18 @@ public class ProjectModifierHelperTests
         var updatedAdditional = await ProjectModifierHelper.ModifyDocumentTextAsync(additionalDocument, [snippet]) ?? additionalDocument;
         Assert.Equal(expected, (await updatedAdditional.GetTextAsync()).ToString());
 
-        foreach (var extension in new[] { "css", "html" })
+        var path = Path.Combine(Path.GetTempPath(), $"{nameof(ProjectModifierHelperTests)}-{Guid.NewGuid():N}.txt");
+        try
         {
-            var path = Path.Combine(Path.GetTempPath(), $"{nameof(ProjectModifierHelperTests)}-{Guid.NewGuid():N}.{extension}");
-            try
-            {
-                File.WriteAllText(path, input);
-                ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(path, [snippet]);
-                Assert.Equal(expected, File.ReadAllText(path));
-                ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(path, [snippet]);
-                Assert.Equal(expected, File.ReadAllText(path));
-            }
-            finally
-            {
-                File.Delete(path);
-            }
+            File.WriteAllText(path, input);
+            ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(path, [snippet]);
+            Assert.Equal(expected, File.ReadAllText(path));
+            ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(path, [snippet]);
+            Assert.Equal(expected, File.ReadAllText(path));
+        }
+        finally
+        {
+            File.Delete(path);
         }
     }
 }

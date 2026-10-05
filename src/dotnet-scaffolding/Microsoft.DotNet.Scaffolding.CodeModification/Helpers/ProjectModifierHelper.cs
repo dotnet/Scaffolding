@@ -464,7 +464,16 @@ internal static class ProjectModifierHelper
             return;
         }
 
-        var source = File.ReadAllText(filePath);
+        string source;
+        try
+        {
+            source = File.ReadAllText(filePath);
+        }
+        catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
+        {
+            return;
+        }
+
         var updatedSource = ApplyTextReplacements(source, codeChanges);
         if (updatedSource != source)
         {

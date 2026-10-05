@@ -90,20 +90,17 @@ internal class ProjectModifier
             {
                 case "cs":
                     //get CodeAnalysis.Document
-                    var document = project.GetDocument(file.FileName) ??
-                        throw new FileNotFoundException($"File '{file.FileName}' was not found in the project.");
+                    var document = project.GetDocument(file.FileName);
                     document = await ModifyCsFile(file, document, options);
                     //replace simple CodeFile.Replacements
                     document = await ApplyTextReplacements(file, document, options);
                     return document?.Project ?? project;
                 case "cshtml":
-                    var textDoc = project.GetAdditionalDocument(file.FileName) ??
-                        throw new FileNotFoundException($"File '{file.FileName}' was not found in the project.");
+                    var textDoc = project.GetAdditionalDocument(file.FileName);
                     textDoc = await ModifyCshtmlFile(file, textDoc, options);
                     return textDoc?.Project ?? project;
                 case "razor":
-                    textDoc = project.GetAdditionalDocument(file.FileName) ??
-                        throw new FileNotFoundException($"File '{file.FileName}' was not found in the project.");
+                    textDoc = project.GetAdditionalDocument(file.FileName);
                     textDoc = await ApplyTextReplacements(file, textDoc, options);
                     return textDoc?.Project ?? project;
                 case "css":
@@ -116,7 +113,7 @@ internal class ProjectModifier
                     var filePathOnDisk = project.GetFilePath(file.FileName);
                     if (string.IsNullOrEmpty(filePathOnDisk))
                     {
-                        throw new FileNotFoundException($"File '{file.FileName}' was not found in the project.");
+                        break;
                     }
 
                     ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(filePathOnDisk, replacements);
@@ -208,9 +205,9 @@ internal class ProjectModifier
         try
         {
             var htmlPath = GetHtmlFilePath(project, file.FileName);
-            if (string.IsNullOrEmpty(htmlPath) || !File.Exists(htmlPath))
+            if (string.IsNullOrEmpty(htmlPath))
             {
-                error = $"HTML file '{file.FileName}' was not found in the project.";
+                error = $"HTML file '{file.FileName}' could not be resolved within the project.";
                 return false;
             }
 
@@ -249,7 +246,8 @@ internal class ProjectModifier
         return project.GetFilesOfExtension(normalizedFileName)?.FirstOrDefault(path =>
             Path.GetFileName(path).Equals(normalizedFileName, StringComparison.OrdinalIgnoreCase) &&
             !Path.GetRelativePath(projectDirectory, path).Split(Path.DirectorySeparatorChar).Any(part =>
-                part.Equals("bin", StringComparison.OrdinalIgnoreCase) || part.Equals("obj", StringComparison.OrdinalIgnoreCase)));
+                part.Equals("bin", StringComparison.OrdinalIgnoreCase) || part.Equals("obj", StringComparison.OrdinalIgnoreCase)))
+            ?? Path.Combine(projectDirectory, normalizedFileName);
     }
 
     internal static async Task<TextDocument?> ModifyCshtmlFile(CodeFile file, TextDocument? fileDoc, IList<string> options)

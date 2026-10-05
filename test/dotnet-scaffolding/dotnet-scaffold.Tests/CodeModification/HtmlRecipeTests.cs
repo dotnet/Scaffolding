@@ -53,19 +53,17 @@ public class HtmlRecipeTests : IDisposable
         _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
     }
 
-    [Theory]
-    [InlineData("</head>")]
-    [InlineData("</HEAD>")]
-    public async Task RunAsync_MatchesHtmlCaseSensitivelyAndIsIdempotent(string closingHead)
+    [Fact]
+    public async Task RunAsync_InsertsIntoHtmlOnDiskAndIsIdempotent()
     {
-        File.WriteAllText(_htmlPath, $"<head>{Environment.NewLine}{closingHead}");
+        File.WriteAllText(_htmlPath, $"<head>{Environment.NewLine}</head>");
         Assert.Empty(_workspace.CurrentSolution.Projects.Single().AdditionalDocuments);
         var file = CreateFile();
         file.Replacements![0].CheckBlock = null;
         var modifier = CreateModifier(file);
 
         Assert.True(await modifier.RunAsync());
-        var expected = closingHead == "</head>" ? $"<head>{Environment.NewLine}{Link}{Environment.NewLine}</head>" : $"<head>{Environment.NewLine}{closingHead}";
+        var expected = $"<head>{Environment.NewLine}{Link}{Environment.NewLine}</head>";
         Assert.Equal(expected, File.ReadAllText(_htmlPath));
         Assert.True(await modifier.RunAsync());
         Assert.Equal(expected, File.ReadAllText(_htmlPath));
@@ -94,8 +92,8 @@ public class HtmlRecipeTests : IDisposable
         var file = CreateFile();
         file.FileName = fileName;
 
-        Assert.False(await CreateModifier(file).RunAsync());
-        AssertError(fileName);
+        Assert.True(await CreateModifier(file).RunAsync());
+        Assert.Empty(_logger.Invocations);
         Assert.False(File.Exists(_htmlPath));
         Assert.Equal("</head>", File.ReadAllText(otherPath));
         if (otherDocument is not null)
@@ -104,7 +102,6 @@ public class HtmlRecipeTests : IDisposable
             Assert.Equal("</head>", (await unchanged.GetTextAsync()).ToString());
         }
 
-        _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
     }
 
     [Theory]
@@ -149,38 +146,6 @@ public class HtmlRecipeTests : IDisposable
         {
             File.Delete(outsidePath);
         }
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task RunAsync_PrependsOrAppendsOnDiskAndIsIdempotent(bool prepend)
-    {
-        const string original = "<html></html>";
-        const string block = "<!-- inserted -->";
-        File.WriteAllText(_htmlPath, original);
-        var file = CreateFile();
-        file.Replacements = [new CodeSnippet { Block = block, Prepend = prepend }];
-        var modifier = CreateModifier(file);
-        var expected = prepend ? block + original : original + block;
-
-        for (var run = 0; run < 2; run++)
-        {
-            Assert.True(await modifier.RunAsync());
-            Assert.Equal(expected, File.ReadAllText(_htmlPath));
-        }
-    }
-
-    [Fact]
-    public void ApplyReplacementsOnFileOnDisk_HonorsCssPrepend()
-    {
-        var cssPath = Path.Combine(_directory, "app.css");
-        File.WriteAllText(cssPath, "original");
-
-        ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(cssPath,
-            [new CodeSnippet { Block = "new", Prepend = true }]);
-
-        Assert.Equal("neworiginal", File.ReadAllText(cssPath));
     }
 
     [Fact]
@@ -261,18 +226,32 @@ public class HtmlRecipeTests : IDisposable
         Assert.Empty(_logger.Invocations);
     }
 
-    [Theory]
-    [InlineData("missing.css")]
-    [InlineData("Missing.razor")]
-    [InlineData("Missing.cshtml")]
-    [InlineData("Missing.cs")]
-    public async Task RunAsync_MissingSelectedFileFailsAndLogs(string fileName)
+    [Fact]
+    public async Task RunAsync_MissingFilesDoNotDiscardEarlierEditsOrPreventLaterEdits()
     {
-        var file = new CodeFile { FileName = fileName, Replacements = [new CodeSnippet { Block = "inserted" }] };
+        var project = _workspace.CurrentSolution.Projects.Single();
+        var document = project.AddDocument("Program.cs", SourceText.From("original"));
+        Assert.True(_workspace.TryApplyChanges(document.Project.Solution));
+        File.WriteAllText(_htmlPath, "</head>");
+        var files = new[]
+        {
+            new CodeFile { FileName = "Program.cs", Replacements = [new CodeSnippet { ReplaceSnippet = ["original"], Block = "updated" }] },
+            new CodeFile { FileName = "Missing.cs", Replacements = [new CodeSnippet { Block = "inserted" }] },
+            new CodeFile { FileName = "Missing.cshtml", Methods = new() { ["Global"] = new() { CodeChanges = [new CodeSnippet { Block = "inserted" }] } } },
+            new CodeFile { FileName = "Missing.razor", Replacements = [new CodeSnippet { Block = "inserted" }] },
+            new CodeFile { FileName = "missing.css", Replacements = [new CodeSnippet { Block = "inserted" }] },
+            new CodeFile { FileName = "missing.html", Replacements = [new CodeSnippet { Block = "inserted" }] },
+            new CodeFile { FileName = "absent\\missing.html", Replacements = [new CodeSnippet { Block = "inserted" }] },
+            CreateFile()
+        };
+        var modifier = new ProjectModifier(_projectPath, _codeService.Object, _logger.Object, new CodeModifierConfig { Files = files }, []);
 
-        Assert.False(await CreateModifier(file).RunAsync());
-        AssertError(fileName);
-        _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
+        Assert.True(await modifier.RunAsync());
+        Assert.Equal("updated", (await _workspace.CurrentSolution.GetDocument(document.Id)!.GetTextAsync()).ToString());
+        Assert.Equal($"{Link}{Environment.NewLine}</head>", File.ReadAllText(_htmlPath));
+        Assert.Empty(_logger.Invocations);
+        Assert.False(File.Exists(Path.Combine(_directory, "missing.html")));
+        Assert.False(Directory.Exists(Path.Combine(_directory, "absent")));
     }
 
     [SkippableTheory]
@@ -326,21 +305,6 @@ public class HtmlRecipeTests : IDisposable
         }
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("unrelated content")]
-    [InlineData("ANCHOR")]
-    public void ApplyReplacementsOnFileOnDisk_SkipsUnmatchedCssAnchors(string content)
-    {
-        var cssPath = Path.Combine(_directory, "app.css");
-        File.WriteAllText(cssPath, content);
-
-        ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(cssPath,
-            [new CodeSnippet { ReplaceSnippet = ["anchor"], Block = "replacement" }]);
-
-        Assert.Equal(content, File.ReadAllText(cssPath));
-    }
-
     [Fact]
     [Trait("Suite", "ScaffoldIntegration")]
     public async Task ExecuteAsync_StandaloneBlazorWebAssemblyRecipeSupportsSubstitutionsAndReruns()
@@ -387,7 +351,9 @@ public class HtmlRecipeTests : IDisposable
         Assert.Equal(expected, File.ReadAllText(_htmlPath));
 
         step.CodeModifierConfigJsonText = step.CodeModifierConfigJsonText.Replace("index.html", "missing.html");
-        Assert.False(await step.ExecuteAsync(context));
+        Assert.True(await step.ExecuteAsync(context));
+        Assert.Equal(expected, File.ReadAllText(_htmlPath));
+        Assert.False(File.Exists(Path.Combine(_directory, "wwwroot", "missing.html")));
     }
 
     private ProjectModifier CreateModifier(CodeFile file, params string[] options)

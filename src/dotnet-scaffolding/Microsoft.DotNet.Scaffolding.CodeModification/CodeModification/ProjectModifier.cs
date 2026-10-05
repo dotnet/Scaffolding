@@ -44,17 +44,31 @@ internal class ProjectModifier
 
         var solution = (await _codeService.GetWorkspaceAsync())?.CurrentSolution;
         var roslynProject = solution?.GetProject(_projectPath);
+        if (roslynProject is null)
+        {
+            _consoleLogger.LogError($"Project '{_projectPath}' was not found in the workspace.");
+            return false;
+        }
 
         var filteredFiles = _codeModifierConfig.Files.Where(f => ProjectModifierHelper.FilterOptions(f.Options, _codeChangeOptions));
         foreach (var file in filteredFiles)
         {
-            if (roslynProject  is not null)
+            if (file.Extension == "html")
             {
-                roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject);
+                var result = await HandleHtmlFileAsync(file, _codeChangeOptions, roslynProject);
+                if (!result.Success)
+                {
+                    return false;
+                }
+
+                roslynProject = result.Project;
+                continue;
             }
+
+            roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject);
         }
 
-        return _codeService.TryApplyChanges(roslynProject?.Solution);
+        return _codeService.TryApplyChanges(roslynProject.Solution);
     }
 
     public string GetOutput()
@@ -80,7 +94,6 @@ internal class ProjectModifier
                     textDoc = await ModifyCshtmlFile(file, textDoc, options);
                     return textDoc?.Project ?? project;
                 case "razor":
-                case "html":
                     textDoc = project.GetAdditionalDocument(file.FileName);
                     textDoc = await ApplyTextReplacements(file, textDoc, options);
                     return textDoc?.Project ?? project;
@@ -100,6 +113,126 @@ internal class ProjectModifier
         }
 
         return project;
+    }
+
+    private async Task<(Project Project, bool Success)> HandleHtmlFileAsync(CodeFile file, IList<string> options, Project project)
+    {
+        TextDocument? document;
+        try
+        {
+            document = GetHtmlAdditionalDocument(project, file.FileName);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
+            _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {ex.Message}");
+            return (project, false);
+        }
+
+        if (document is null)
+        {
+            var success = TryModifyHtmlFileOnDisk(file, options, project, out var error);
+            if (!success)
+            {
+                _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {error}");
+            }
+
+            return (project, success);
+        }
+
+        try
+        {
+            document = await ApplyTextReplacements(file, document, options);
+            return (document?.Project ?? project, true);
+        }
+        catch (Exception ex)
+        {
+            _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {ex.Message}");
+        }
+
+        return (project, true);
+    }
+
+    private static string NormalizePathSeparators(string path)
+        => path.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+
+    private static TextDocument? GetHtmlAdditionalDocument(Project project, string? fileName)
+    {
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return null;
+        }
+
+        var normalizedFileName = NormalizePathSeparators(fileName);
+        if (Path.GetFileName(normalizedFileName) == normalizedFileName)
+        {
+            return project.GetAdditionalDocument(fileName);
+        }
+
+        var filePath = GetHtmlFilePath(project, normalizedFileName);
+        if (filePath is null)
+        {
+            return null;
+        }
+
+        var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        return project.AdditionalDocuments.FirstOrDefault(document =>
+            !string.IsNullOrEmpty(document.FilePath) &&
+            Path.GetFullPath(NormalizePathSeparators(document.FilePath)).Equals(filePath, comparison));
+    }
+
+    private static bool TryModifyHtmlFileOnDisk(CodeFile file, IList<string> options, Project project, out string? error)
+    {
+        error = null;
+        var replacements = file.Replacements?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options)).ToArray();
+        if (replacements is null || replacements.Length == 0)
+        {
+            return true;
+        }
+
+        try
+        {
+            var htmlPath = GetHtmlFilePath(project, file.FileName);
+            if (string.IsNullOrEmpty(htmlPath) || !File.Exists(htmlPath))
+            {
+                error = $"HTML file '{file.FileName}' was not found in the project.";
+                return false;
+            }
+
+            return ProjectModifierHelper.TryApplyReplacementsOnFileOnDisk(htmlPath, replacements, out error);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
+            error = ex.Message;
+            return false;
+        }
+    }
+
+    private static string? GetHtmlFilePath(Project project, string? fileName)
+    {
+        var projectDirectory = Path.GetDirectoryName(project.FilePath);
+        if (string.IsNullOrEmpty(projectDirectory) || string.IsNullOrEmpty(fileName))
+        {
+            return null;
+        }
+
+        projectDirectory = Path.GetFullPath(projectDirectory);
+        var normalizedFileName = NormalizePathSeparators(fileName);
+        if (Path.GetFileName(normalizedFileName) != normalizedFileName)
+        {
+            var filePath = Path.GetFullPath(normalizedFileName, projectDirectory);
+            var relativePath = Path.GetRelativePath(projectDirectory, filePath);
+            if (Path.IsPathRooted(relativePath) || relativePath == ".." || relativePath.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            {
+                return null;
+            }
+
+            return filePath;
+        }
+
+        return project.GetFilesOfExtension(normalizedFileName)?.FirstOrDefault(path =>
+            Path.GetFileName(path).Equals(normalizedFileName, StringComparison.OrdinalIgnoreCase) &&
+            !Path.GetRelativePath(projectDirectory, path).Split(Path.DirectorySeparatorChar).Any(part =>
+                part.Equals("bin", StringComparison.OrdinalIgnoreCase) || part.Equals("obj", StringComparison.OrdinalIgnoreCase)));
     }
 
     internal static async Task<TextDocument?> ModifyCshtmlFile(CodeFile file, TextDocument? fileDoc, IList<string> options)

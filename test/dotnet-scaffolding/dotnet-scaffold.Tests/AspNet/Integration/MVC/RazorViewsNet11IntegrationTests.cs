@@ -13,7 +13,7 @@ public class RazorViewsNet11IntegrationTests : RazorViewsIntegrationTestsBase
     protected override string TargetFramework => "net11.0";
     protected override string TestClassName => nameof(RazorViewsNet11IntegrationTests);
 
-    [Fact(Skip = "net11.0 preview SDK silently no-ops the views templating step; re-enable once root cause is fixed.")]
+    [Fact]
     public async Task Scaffold_Views_Net11_CliInvocation()
     {
         var projectContent = ProjectContent.Replace(

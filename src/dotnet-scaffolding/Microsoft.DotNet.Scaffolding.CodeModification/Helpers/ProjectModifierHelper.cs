@@ -502,8 +502,8 @@ internal static class ProjectModifierHelper
                     return false;
                 }
 
-                var updatedSource = ReplaceSnippet(sourceFileString, change.ReplaceSnippet, change.Block,
-                    out var matched, ignoreCase: !preserveLegacyCssBehavior);
+                var comparison = preserveLegacyCssBehavior ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+                var updatedSource = ReplaceSnippet(sourceFileString, change.ReplaceSnippet, change.Block, comparison, out var matched);
                 if (!matched)
                 {
                     if (preserveLegacyCssBehavior)
@@ -574,7 +574,7 @@ internal static class ProjectModifierHelper
                 if (string.IsNullOrEmpty(change.CheckBlock) ||
                     !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase))
                 {
-                    sourceFileString = ReplaceSnippet(sourceFileString, change.ReplaceSnippet, change.Block, out _);
+                    sourceFileString = ReplaceSnippet(sourceFileString, change.ReplaceSnippet, change.Block, StringComparison.Ordinal, out _);
                 }
 
             }
@@ -606,17 +606,16 @@ internal static class ProjectModifierHelper
         return null;
     }
 
-    private static string ReplaceSnippet(string source, string[] snippet, string replacement, out bool matched, bool ignoreCase = false)
+    private static string ReplaceSnippet(string source, string[] snippet, string replacement, StringComparison comparison, out bool matched)
     {
-        var text = string.Join("\n", snippet).Replace("\r\n", "\n");
-        var comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-        if (!text.Contains('\n'))
+        var snippetText = string.Join("\n", snippet).Replace("\r\n", "\n");
+        if (!snippetText.Contains('\n'))
         {
-            matched = source.Contains(text, comparison);
-            return source.Replace(text, replacement, comparison);
+            matched = source.Contains(snippetText, comparison);
+            return source.Replace(snippetText, replacement, comparison);
         }
 
-        var lines = text.Split('\n');
+        var lines = snippetText.Split('\n');
         var result = new StringBuilder();
         var searchStart = 0;
         var copyStart = 0;
@@ -629,34 +628,7 @@ internal static class ProjectModifierHelper
                 break;
             }
 
-            var end = start + lines[0].Length;
-            var matches = true;
-            foreach (var line in lines.Skip(1))
-            {
-                if (source.AsSpan(end).StartsWith("\r\n"))
-                {
-                    end += 2;
-                }
-                else if (source.AsSpan(end).StartsWith("\n"))
-                {
-                    end++;
-                }
-                else
-                {
-                    matches = false;
-                    break;
-                }
-
-                if (!source.AsSpan(end).StartsWith(line, comparison))
-                {
-                    matches = false;
-                    break;
-                }
-
-                end += line.Length;
-            }
-
-            if (!matches)
+            if (!TryMatchSnippetAt(source, start, lines, comparison, out var end))
             {
                 searchStart = start + 1;
                 continue;
@@ -669,6 +641,38 @@ internal static class ProjectModifierHelper
         }
 
         return matched ? result.Append(source, copyStart, source.Length - copyStart).ToString() : source;
+    }
+
+    private static bool TryMatchSnippetAt(string source, int start, string[] lines, StringComparison comparison, out int end)
+    {
+        end = start;
+        for (var index = 0; index < lines.Length; index++)
+        {
+            if (index > 0)
+            {
+                if (source.AsSpan(end).StartsWith("\r\n"))
+                {
+                    end += 2;
+                }
+                else if (source.AsSpan(end).StartsWith("\n"))
+                {
+                    end++;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            if (!source.AsSpan(end).StartsWith(lines[index], comparison))
+            {
+                return false;
+            }
+
+            end += lines[index].Length;
+        }
+
+        return true;
     }
 
     internal static async Task UpdateDocument(Document document)

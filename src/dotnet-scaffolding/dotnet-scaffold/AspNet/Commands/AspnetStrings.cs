@@ -14,8 +14,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string EmptyExampleDescription = "Create an empty Razor component named ProductCard:";
 
             internal const string Identity = "blazor-identity";
-            internal const string IdentityDisplayName = "Blazor Identity";
-            internal const string IdentityDescription = "Add blazor identity to a project.";
+            internal const string IdentityDisplayName = "Blazor Identity UI";
+            internal const string IdentityDescription = "Add Blazor Identity UI to a project.";
             internal const string IdentityExample = "dotnet scaffold aspnet blazor-identity --project C:/MyBlazorApp/MyBlazorApp.csproj --database-provider SqlServer";
             internal const string IdentityExampleDescription = "Add Identity with SQL Server to a Blazor app:";
 
@@ -120,12 +120,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
         internal class Identity
         {
             internal const string Name = "identity";
-            internal const string DisplayName = "ASP.NET Core Identity";
-            internal const string Description = "Add ASP.NET Core identity to a project.";
+            internal const string DisplayName = "Razor Pages Identity UI";
+            internal const string Description = "Add Razor Pages Identity UI to a project.";
             internal const string IdentityExample1 = "dotnet scaffold aspnet identity --project C:/MyWebApp/MyWebApp.csproj --database-provider SqlServer";
             internal const string IdentityExample1Description = "Add Identity with SQL Server:";
             internal const string IdentityExample2 = "dotnet scaffold aspnet identity --project C:/MyApp/MyApp.csproj --database-provider SQLite --overwrite";
             internal const string IdentityExample2Description = "Add Identity with SQLite, overwriting existing files:";
+
+            internal const string ApiName = "identity-api";
+            internal const string ApiDisplayName = "Identity API";
+            internal const string ApiDescription = "Add customizable ASP.NET Core Identity API endpoints to a .NET 10 or .NET 11 web project.";
+            internal const string ApiExample = "dotnet scaffold aspnet identity-api --project C:/MyApi/MyApi.csproj --dataContext ApplicationDbContext --dbProvider sqlite-efcore";
+            internal const string ApiExampleDescription = "Add Identity API endpoints backed by SQLite:";
         }
 
         internal class EntraId
@@ -160,7 +166,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal static class Prerelease
             {
                 internal const string DisplayName = "Include Prerelease packages?";
-                internal const string Description = "Include prerelease package versions when installing latest Aspire components";
+                internal const string Description = "Include prerelease package versions when installing dependencies";
             }
 
             internal static class FileName

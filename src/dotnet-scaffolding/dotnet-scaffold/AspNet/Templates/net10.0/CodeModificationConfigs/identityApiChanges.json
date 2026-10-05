@@ -1,0 +1,48 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Usings": [
+        "Microsoft.AspNetCore.Identity",
+        "Microsoft.EntityFrameworkCore"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "Options": [ "IdentityApiAddDbContext" ],
+              "CheckBlock": "var identityConnectionString",
+              "Block": "\nvar identityConnectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '$(ConnectionStringName)' not found.\")"
+            },
+            {
+              "InsertBefore": [ "var app = builder.Build();" ],
+              "Options": [ "IdentityApiAddDbContext" ],
+              "CheckBlock": "builder.Services.AddDbContext<$(DbContextName)>",
+              "Block": "builder.Services.AddDbContext<$(DbContextName)>(options => options.$(UseDbMethod))",
+              "LeadingTrivia": { "Newline": true }
+            },
+            {
+              "InsertBefore": [ "var app = builder.Build();" ],
+              "CheckBlock": "builder.Services.AddIdentityApiEndpoints",
+              "Block": "builder.Services.AddIdentityApiEndpoints<$(UserClassName)>().AddEntityFrameworkStores<$(DbContextName)>()",
+              "LeadingTrivia": { "Newline": true }
+            },
+            {
+              "InsertBefore": [ "var app = builder.Build();" ],
+              "CheckBlock": "builder.Services.AddAuthorization",
+              "Block": "builder.Services.AddAuthorization()",
+              "LeadingTrivia": { "Newline": true }
+            },
+            {
+              "InsertBefore": [ "app.Run();", "await app.RunAsync();" ],
+              "CheckBlock": "app.MapGroup(\"/identity\").MapScaffoldedIdentityApi",
+              "Block": "app.MapGroup(\"/identity\").MapScaffoldedIdentityApi<$(UserClassName)>()",
+              "LeadingTrivia": { "Newline": true }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

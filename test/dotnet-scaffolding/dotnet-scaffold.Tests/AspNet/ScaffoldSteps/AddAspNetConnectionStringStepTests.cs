@@ -35,8 +35,10 @@ public class AddAspNetConnectionStringStepTests
         _context = new ScaffolderContext(_mockScaffolder.Object);
     }
 
-    [Fact]
-    public async Task ExecuteAsync_CreatesNewAppSettingsFile_WhenFileDoesNotExist()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task ExecuteAsync_CreatesNewAppSettingsFile_WhenFileDoesNotExist(bool fileDiscovered)
     {
         // Arrange
         string expectedConnectionStringName = "DefaultConnection";
@@ -47,7 +49,7 @@ public class AddAspNetConnectionStringStepTests
             It.IsAny<string>(),
             "appsettings.json",
             SearchOption.AllDirectories))
-            .Returns(new[] { appSettingsPath });
+            .Returns(fileDiscovered ? new[] { appSettingsPath } : Array.Empty<string>());
 
         _mockFileSystem.Setup(fs => fs.FileExists(appSettingsPath)).Returns(false);
 

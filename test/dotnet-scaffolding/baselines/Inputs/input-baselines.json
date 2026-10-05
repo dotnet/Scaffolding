@@ -20,5 +20,27 @@
       "net11.0"
     ],
     "sdkVersion": "11.0.100-rc.2.26475.136"
+  },
+  {
+    "path": "net10.0/EmptyWebApp",
+    "template": "web",
+    "arguments": [
+      "--name",
+      "EmptyWebApp",
+      "--framework",
+      "net10.0"
+    ],
+    "sdkVersion": "11.0.100-rc.2.26478.115"
+  },
+  {
+    "path": "net11.0/EmptyWebApp",
+    "template": "web",
+    "arguments": [
+      "--name",
+      "EmptyWebApp",
+      "--framework",
+      "net11.0"
+    ],
+    "sdkVersion": "11.0.100-rc.2.26478.115"
   }
 ]

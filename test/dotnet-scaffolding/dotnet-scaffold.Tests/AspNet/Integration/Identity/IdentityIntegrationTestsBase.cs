@@ -160,6 +160,90 @@ public abstract class IdentityIntegrationTestsBase : IDisposable
     }
 
     [Fact]
+    public async Task ValidateIdentityStep_ApiScenarioRejectsOlderFrameworks()
+    {
+        if (TargetFramework is "net10.0" or "net11.0")
+        {
+            return;
+        }
+
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        var step = CreateValidateIdentityStep();
+        step.Project = _testProjectPath;
+        step.DataContext = "AppDbContext";
+        step.DatabaseProvider = PackageConstants.EfConstants.SQLite;
+        step.IdentityApiScenario = true;
+
+        Assert.False(await step.ExecuteAsync(_context));
+    }
+
+    [Fact]
+    public async Task ValidateIdentityStep_ApiScenarioRejectsExistingFrameworkMapping()
+    {
+        if (TargetFramework is not ("net10.0" or "net11.0"))
+        {
+            return;
+        }
+
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"),
+            "var app = WebApplication.CreateBuilder(args).Build(); app.MapGroup(\"/identity\").MapIdentityApi<ApplicationUser>(); app.Run();");
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        var step = CreateValidateIdentityStep();
+        step.Project = _testProjectPath;
+        step.DataContext = "AppDbContext";
+        step.DatabaseProvider = PackageConstants.EfConstants.SQLite;
+        step.IdentityApiScenario = true;
+
+        Assert.False(await step.ExecuteAsync(_context));
+    }
+
+    [Theory]
+    [InlineData("AddIdentityCore<Microsoft.AspNetCore.Identity.IdentityUser>()")]
+    [InlineData("AddDefaultIdentity<Microsoft.AspNetCore.Identity.IdentityUser>()")]
+    [InlineData("AddIdentity<Microsoft.AspNetCore.Identity.IdentityUser, Microsoft.AspNetCore.Identity.IdentityRole>()")]
+    public async Task ValidateIdentityStep_ApiScenarioRejectsExistingIdentityServices(string registration)
+    {
+        if (TargetFramework is not ("net10.0" or "net11.0"))
+        {
+            return;
+        }
+
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"),
+            $"var builder = WebApplication.CreateBuilder(args); builder.Services.{registration}; var app = builder.Build(); app.Run();");
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        var step = CreateValidateIdentityStep();
+        step.Project = _testProjectPath;
+        step.DataContext = "AppDbContext";
+        step.DatabaseProvider = PackageConstants.EfConstants.SQLite;
+        step.IdentityApiScenario = true;
+
+        Assert.False(await step.ExecuteAsync(_context));
+    }
+
+    [Fact]
+    public async Task ValidateIdentityStep_ApiScenarioRejectsUnsupportedStartup()
+    {
+        if (TargetFramework is not ("net10.0" or "net11.0"))
+        {
+            return;
+        }
+
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), "Host.CreateDefaultBuilder(args).Build().Run();");
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        var step = CreateValidateIdentityStep();
+        step.Project = _testProjectPath;
+        step.DataContext = "AppDbContext";
+        step.DatabaseProvider = PackageConstants.EfConstants.SQLite;
+        step.IdentityApiScenario = true;
+
+        Assert.False(await step.ExecuteAsync(_context));
+    }
+
+    [Fact]
     public void ValidateIdentityStep_HasPrereleaseProperty()
     {
         var step = CreateValidateIdentityStep();

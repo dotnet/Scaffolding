@@ -272,6 +272,29 @@ public class HtmlRecipeTests : IDisposable
         _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
     }
 
+    [Fact]
+    public async Task RunAsync_WorkspaceSaveFailureIsReportedAtTheBoundary()
+    {
+        var failure = new IOException("Unable to save the workspace.");
+        _codeService.Setup(service => service.TryApplyChanges(It.IsAny<Solution>())).Throws(failure);
+
+        Assert.False(await CreateModifier(CreateFile()).RunAsync());
+        AssertError(_projectPath);
+        Assert.Same(failure, Assert.Single(_logger.Invocations).Arguments[3]);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task RunAsync_DoesNotSwallowCancellationOrUnexpectedFailures(bool cancellation)
+    {
+        Exception failure = cancellation ? new OperationCanceledException() : new InvalidOperationException();
+        _codeService.Setup(service => service.GetWorkspaceAsync()).ThrowsAsync(failure);
+
+        Assert.Same(failure, await Record.ExceptionAsync(() => CreateModifier(CreateFile()).RunAsync()));
+        Assert.Empty(_logger.Invocations);
+    }
+
     [Theory]
     [InlineData("Host.html")]
     [InlineData("wwwroot\\index.html")]
@@ -372,10 +395,12 @@ public class HtmlRecipeTests : IDisposable
         };
 
     private void AssertError(string diagnostic)
-        => Assert.Contains(_logger.Invocations, invocation =>
+    {
+        var invocation = Assert.Single(_logger.Invocations, invocation =>
             invocation.Method.Name == nameof(ILogger.Log) &&
-            Equals(invocation.Arguments[0], LogLevel.Error) &&
-            invocation.Arguments[2].ToString()!.Contains(diagnostic));
+            Equals(invocation.Arguments[0], LogLevel.Error));
+        Assert.Contains(diagnostic, invocation.Arguments[2].ToString());
+    }
 
     public void Dispose()
     {

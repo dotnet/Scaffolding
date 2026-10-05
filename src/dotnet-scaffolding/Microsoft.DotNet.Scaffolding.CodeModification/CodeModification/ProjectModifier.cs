@@ -65,7 +65,13 @@ internal class ProjectModifier
                 continue;
             }
 
-            roslynProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject);
+            var updatedProject = await HandleCodeFileAsync(file, _codeChangeOptions, roslynProject);
+            if (updatedProject is null)
+            {
+                return false;
+            }
+
+            roslynProject = updatedProject;
         }
 
         return _codeService.TryApplyChanges(roslynProject.Solution);
@@ -76,7 +82,7 @@ internal class ProjectModifier
         return _output.ToString();
     }
 
-    private async Task<Project> HandleCodeFileAsync(CodeFile file, IList<string> options, Project project)
+    private async Task<Project?> HandleCodeFileAsync(CodeFile file, IList<string> options, Project project)
     {
         try
         {
@@ -84,32 +90,43 @@ internal class ProjectModifier
             {
                 case "cs":
                     //get CodeAnalysis.Document
-                    var document = project.GetDocument(file.FileName);
+                    var document = project.GetDocument(file.FileName) ??
+                        throw new FileNotFoundException($"File '{file.FileName}' was not found in the project.");
                     document = await ModifyCsFile(file, document, options);
                     //replace simple CodeFile.Replacements
                     document = await ApplyTextReplacements(file, document, options);
                     return document?.Project ?? project;
                 case "cshtml":
-                    var textDoc = project.GetAdditionalDocument(file.FileName);
+                    var textDoc = project.GetAdditionalDocument(file.FileName) ??
+                        throw new FileNotFoundException($"File '{file.FileName}' was not found in the project.");
                     textDoc = await ModifyCshtmlFile(file, textDoc, options);
                     return textDoc?.Project ?? project;
                 case "razor":
-                    textDoc = project.GetAdditionalDocument(file.FileName);
+                    textDoc = project.GetAdditionalDocument(file.FileName) ??
+                        throw new FileNotFoundException($"File '{file.FileName}' was not found in the project.");
                     textDoc = await ApplyTextReplacements(file, textDoc, options);
                     return textDoc?.Project ?? project;
                 case "css":
-                    var filePathOnDisk = project.GetFilePath(file.FileName);
-                    if (!string.IsNullOrEmpty(filePathOnDisk))
+                    var replacements = file.Replacements?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options)).ToArray();
+                    if (replacements is null || replacements.Length == 0)
                     {
-                        ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(filePathOnDisk, file.Replacements);
+                        break;
                     }
 
+                    var filePathOnDisk = project.GetFilePath(file.FileName);
+                    if (string.IsNullOrEmpty(filePathOnDisk))
+                    {
+                        throw new FileNotFoundException($"File '{file.FileName}' was not found in the project.");
+                    }
+
+                    ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(filePathOnDisk, replacements);
                     break;
             }
         }
         catch (Exception e)
         {
             _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {e.Message}");
+            return null;
         }
 
         return project;
@@ -147,9 +164,8 @@ internal class ProjectModifier
         catch (Exception ex)
         {
             _consoleLogger.LogError($"Failed to modify file '{file.FileName}', {ex.Message}");
+            return (project, false);
         }
-
-        return (project, true);
     }
 
     private static string NormalizePathSeparators(string path)
@@ -198,7 +214,8 @@ internal class ProjectModifier
                 return false;
             }
 
-            return ProjectModifierHelper.TryApplyReplacementsOnFileOnDisk(htmlPath, replacements, out error);
+            ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(htmlPath, replacements);
+            return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
@@ -249,7 +266,7 @@ internal class ProjectModifier
         }
 
         // add code snippets/changes.
-        return await ProjectModifierHelper.ModifyDocumentTextAsync(fileDoc, filteredCodeChanges);
+        return await ProjectModifierHelper.ModifyDocumentTextAsync(fileDoc, filteredCodeChanges) ?? fileDoc;
     }
 
     /// <summary>
@@ -271,7 +288,7 @@ internal class ProjectModifier
             return document;
         }
 
-        return await ProjectModifierHelper.ModifyDocumentTextAsync(document, replacements);
+        return await ProjectModifierHelper.ModifyDocumentTextAsync(document, replacements) ?? document;
     }
 
     internal async Task<Document?> ModifyCsFile(CodeFile file, Document? fileDoc, IList<string> options)

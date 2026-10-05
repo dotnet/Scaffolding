@@ -56,7 +56,7 @@ public class HtmlRecipeTests : IDisposable
     [Theory]
     [InlineData("</head>")]
     [InlineData("</HEAD>")]
-    public async Task RunAsync_InsertsIntoHtmlOnDiskAndIsIdempotent(string closingHead)
+    public async Task RunAsync_MatchesHtmlCaseSensitivelyAndIsIdempotent(string closingHead)
     {
         File.WriteAllText(_htmlPath, $"<head>{Environment.NewLine}{closingHead}");
         Assert.Empty(_workspace.CurrentSolution.Projects.Single().AdditionalDocuments);
@@ -65,7 +65,7 @@ public class HtmlRecipeTests : IDisposable
         var modifier = CreateModifier(file);
 
         Assert.True(await modifier.RunAsync());
-        var expected = $"<head>{Environment.NewLine}{Link}{Environment.NewLine}</head>";
+        var expected = closingHead == "</head>" ? $"<head>{Environment.NewLine}{Link}{Environment.NewLine}</head>" : $"<head>{Environment.NewLine}{closingHead}";
         Assert.Equal(expected, File.ReadAllText(_htmlPath));
         Assert.True(await modifier.RunAsync());
         Assert.Equal(expected, File.ReadAllText(_htmlPath));
@@ -172,7 +172,7 @@ public class HtmlRecipeTests : IDisposable
     }
 
     [Fact]
-    public void ApplyReplacementsOnFileOnDisk_PreservesLegacyCssAppendBehavior()
+    public void ApplyReplacementsOnFileOnDisk_HonorsCssPrepend()
     {
         var cssPath = Path.Combine(_directory, "app.css");
         File.WriteAllText(cssPath, "original");
@@ -180,7 +180,7 @@ public class HtmlRecipeTests : IDisposable
         ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(cssPath,
             [new CodeSnippet { Block = "new", Prepend = true }]);
 
-        Assert.Equal("originalnew", File.ReadAllText(cssPath));
+        Assert.Equal("neworiginal", File.ReadAllText(cssPath));
     }
 
     [Fact]
@@ -235,39 +235,61 @@ public class HtmlRecipeTests : IDisposable
     [Theory]
     [InlineData("")]
     [InlineData("<body>No head anchor</body>")]
-    public async Task RunAsync_MissingReplacementAnchorFailsWithoutWriting(string content)
+    public async Task RunAsync_MissingReplacementAnchorSucceedsWithoutWriting(string content)
     {
         File.WriteAllText(_htmlPath, content);
 
-        Assert.False(await CreateModifier(CreateFile()).RunAsync());
+        Assert.True(await CreateModifier(CreateFile()).RunAsync());
         Assert.Equal(content, File.ReadAllText(_htmlPath));
-        AssertError("</head>");
-        _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
+        Assert.Empty(_logger.Invocations);
     }
 
     [Fact]
-    public async Task RunAsync_FailedLaterReplacementDoesNotWritePartialHtml()
+    public async Task RunAsync_MissingReplacementDoesNotPreventOtherEdits()
     {
         File.WriteAllText(_htmlPath, "</head>");
         var file = CreateFile();
-        file.Replacements = [CreateReplacement(), new CodeSnippet { ReplaceSnippet = ["missing"], Block = "new" }];
+        file.Replacements =
+        [
+            new CodeSnippet { ReplaceSnippet = ["missing"], Block = "before" },
+            CreateReplacement(),
+            new CodeSnippet { ReplaceSnippet = ["missing"], Block = "after" }
+        ];
+
+        Assert.True(await CreateModifier(file).RunAsync());
+        Assert.Equal($"{Link}{Environment.NewLine}</head>", File.ReadAllText(_htmlPath));
+        Assert.Empty(_logger.Invocations);
+    }
+
+    [Theory]
+    [InlineData("missing.css")]
+    [InlineData("Missing.razor")]
+    [InlineData("Missing.cshtml")]
+    [InlineData("Missing.cs")]
+    public async Task RunAsync_MissingSelectedFileFailsAndLogs(string fileName)
+    {
+        var file = new CodeFile { FileName = fileName, Replacements = [new CodeSnippet { Block = "inserted" }] };
 
         Assert.False(await CreateModifier(file).RunAsync());
-        Assert.Equal("</head>", File.ReadAllText(_htmlPath));
-        AssertError("missing");
+        AssertError(fileName);
+        _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
     }
 
     [SkippableTheory]
-    [InlineData(FileShare.None)]
-    [InlineData(FileShare.Read)]
-    public async Task RunAsync_HtmlReadOrWriteFailureFailsAndLogs(FileShare fileShare)
+    [InlineData("html", FileShare.None)]
+    [InlineData("html", FileShare.Read)]
+    [InlineData("css", FileShare.None)]
+    public async Task RunAsync_FileReadOrWriteFailureFailsAndLogs(string extension, FileShare fileShare)
     {
         Skip.If(fileShare == FileShare.Read && !OperatingSystem.IsWindows(), "Denying writes while permitting reads requires Windows file sharing.");
-        File.WriteAllText(_htmlPath, "</head>");
-        using var lockedFile = new FileStream(_htmlPath, FileMode.Open, FileAccess.Read, fileShare);
+        var path = extension == "html" ? _htmlPath : Path.Combine(_directory, "app.css");
+        File.WriteAllText(path, "</head>");
+        using var lockedFile = new FileStream(path, FileMode.Open, FileAccess.Read, fileShare);
+        var file = CreateFile();
+        file.FileName = Path.GetRelativePath(_directory, path);
 
-        Assert.False(await CreateModifier(CreateFile()).RunAsync());
-        AssertError("wwwroot\\index.html");
+        Assert.False(await CreateModifier(file).RunAsync());
+        AssertError(file.FileName);
         _codeService.Verify(service => service.TryApplyChanges(It.IsAny<Solution>()), Times.Never);
     }
 
@@ -308,7 +330,7 @@ public class HtmlRecipeTests : IDisposable
     [InlineData("")]
     [InlineData("unrelated content")]
     [InlineData("ANCHOR")]
-    public void ApplyReplacementsOnFileOnDisk_PreservesLegacyCssNoOp(string content)
+    public void ApplyReplacementsOnFileOnDisk_SkipsUnmatchedCssAnchors(string content)
     {
         var cssPath = Path.Combine(_directory, "app.css");
         File.WriteAllText(cssPath, content);

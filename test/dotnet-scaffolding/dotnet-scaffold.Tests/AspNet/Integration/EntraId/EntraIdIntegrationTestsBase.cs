@@ -267,6 +267,106 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
     }
 
     [Fact]
+    public void BlazorEntraChangesConfig_AddsAntiforgeryMiddlewareOnlyForNet11()
+    {
+        var configPath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs", "blazorEntraChanges.json");
+        using var config = JsonDocument.Parse(File.ReadAllText(configPath));
+        var programConfig = Assert.Single(
+            config.RootElement.GetProperty("Files").EnumerateArray(),
+            file => file.GetProperty("FileName").GetString() == "Program.cs");
+        var codeChanges = programConfig
+            .GetProperty("Methods")
+            .GetProperty("Global")
+            .GetProperty("CodeChanges")
+            .EnumerateArray()
+            .ToArray();
+        var antiforgeryChanges = codeChanges.Where(
+            change => change.TryGetProperty("CheckBlock", out var checkBlock) &&
+                checkBlock.GetString() == "app.UseAntiforgery()").ToArray();
+
+        if (TargetFramework == "net10.0")
+        {
+            Assert.Empty(antiforgeryChanges);
+            return;
+        }
+
+        var antiforgeryChange = Assert.Single(
+            antiforgeryChanges);
+
+        Assert.Equal(
+            ["app.MapStaticAssets()"],
+            antiforgeryChange.GetProperty("InsertBefore").EnumerateArray().Select(line => line.GetString()));
+        Assert.Equal(
+            "app.UseAntiforgery()",
+            antiforgeryChange.GetProperty("Block").GetString());
+
+        var antiforgeryIndex = Array.IndexOf(codeChanges, antiforgeryChange);
+        var logoutEndpointIndex = Array.FindIndex(
+            codeChanges,
+            change => change.TryGetProperty("Block", out var block) &&
+                block.GetString() == "app.MapGroup(\"/authentication\").MapLoginAndLogout()");
+
+        Assert.True(antiforgeryIndex < logoutEndpointIndex);
+    }
+
+    [Fact]
+    public void LoginOrLogoutTemplate_EmitsAntiforgeryToken()
+    {
+        var templatePath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "BlazorEntraId", "LoginOrLogout.tt");
+
+        var template = File.ReadAllText(templatePath);
+        Assert.Contains("""<form action="authentication/logout" method="post">""", template);
+        Assert.Contains("<AntiforgeryToken />", template);
+        if (TargetFramework == "net11.0")
+        {
+            Assert.Contains("https://github.com/AzureAD/microsoft-identity-web/issues/4057", template);
+        }
+    }
+
+    [Fact]
+    public async Task BlazorEntraChangesConfig_GeneratesAntiforgeryMiddlewareOnce()
+    {
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        var antiforgeryMiddleware = TargetFramework == "net10.0"
+            ? "app.UseAntiforgery();"
+            : string.Empty;
+        File.WriteAllText(programPath, $$"""
+            var builder = WebApplication.CreateBuilder(args);
+            var app = builder.Build();
+
+            {{antiforgeryMiddleware}}
+            app.MapStaticAssets();
+            app.MapRazorComponents<App>();
+
+            app.Run();
+            """);
+        var step = new WrappedCodeModificationStep(
+            NullLogger<WrappedCodeModificationStep>.Instance,
+            _testTelemetryService)
+        {
+            CodeModifierConfigPath = Path.Combine(
+                GetActualTemplatesBasePath(),
+                TargetFramework,
+                "CodeModificationConfigs",
+                "blazorEntraChanges.json"),
+            CodeChangeOptions = [],
+            ProjectPath = _testProjectPath
+        };
+
+        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
+
+        var program = File.ReadAllText(programPath);
+        Assert.Equal(1, CountOccurrences(program, "app.UseAntiforgery();"));
+        Assert.True(
+            program.IndexOf("app.UseAntiforgery();", StringComparison.Ordinal) <
+            program.IndexOf("app.MapStaticAssets();", StringComparison.Ordinal));
+
+        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(programPath), "app.UseAntiforgery();"));
+    }
+
+    [Fact]
     public void BlazorWasmEntraChangesConfig_AddsLoginOrLogoutToClientNavMenu()
     {
         AssertNavMenuModification(
@@ -343,6 +443,19 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         Assert.Equal("<LoginOrLogout />", replacement.GetProperty("CheckBlock").GetString());
         Assert.Equal(["</nav>"], replacement.GetProperty("ReplaceSnippet").EnumerateArray().Select(line => line.GetString()));
         Assert.Equal(["    <LoginOrLogout />", "    </nav>"], replacement.GetProperty("MultiLineBlock").EnumerateArray().Select(line => line.GetString()));
+    }
+
+    private static int CountOccurrences(string value, string searchValue)
+    {
+        var count = 0;
+        var index = 0;
+        while ((index = value.IndexOf(searchValue, index, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            index += searchValue.Length;
+        }
+
+        return count;
     }
 
     protected Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)

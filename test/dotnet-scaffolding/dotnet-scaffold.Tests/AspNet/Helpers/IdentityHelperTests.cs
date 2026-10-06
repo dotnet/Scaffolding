@@ -8,6 +8,7 @@ using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
+using ScaffoldIdentityModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Files;
 using Xunit;
 
@@ -20,7 +21,7 @@ public class IdentityHelperTests
     {
         // Arrange
         List<string> filePaths = [];
-        IdentityModel identityModel = CreateTestIdentityModel();
+        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         IEnumerable<TextTemplatingProperty> result = IdentityHelper.GetTextTemplatingProperties(filePaths, identityModel);
@@ -35,7 +36,7 @@ public class IdentityHelperTests
     {
         // Arrange
         List<string> filePaths = [Path.Combine("Identity", "Test.tt")];
-        IdentityModel identityModel = new IdentityModel
+        ScaffoldIdentityModel identityModel = new ScaffoldIdentityModel
         {
             ProjectInfo = new ProjectInfo(null),
             IdentityNamespace = "TestNamespace",
@@ -58,7 +59,7 @@ public class IdentityHelperTests
     {
         // Arrange
         string templatePath = Path.Combine("templates", "ApplicationUser.tt");
-        IdentityModel identityModel = CreateTestIdentityModel();
+        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         TextTemplatingProperty? result = IdentityHelper.GetApplicationUserTextTemplatingProperty(templatePath, identityModel);
@@ -78,7 +79,7 @@ public class IdentityHelperTests
     public void GetApplicationUserTextTemplatingProperty_WithNullTemplatePath_ReturnsNull()
     {
         // Arrange
-        IdentityModel identityModel = CreateTestIdentityModel();
+        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         TextTemplatingProperty? result = IdentityHelper.GetApplicationUserTextTemplatingProperty(null, identityModel);
@@ -91,7 +92,7 @@ public class IdentityHelperTests
     public void GetApplicationUserTextTemplatingProperty_WithEmptyTemplatePath_ReturnsNull()
     {
         // Arrange
-        IdentityModel identityModel = CreateTestIdentityModel();
+        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         TextTemplatingProperty? result = IdentityHelper.GetApplicationUserTextTemplatingProperty(string.Empty, identityModel);
@@ -105,7 +106,7 @@ public class IdentityHelperTests
     {
         // Arrange
         string templatePath = Path.Combine("templates", "ApplicationUser.tt");
-        IdentityModel identityModel = new IdentityModel
+        ScaffoldIdentityModel identityModel = new ScaffoldIdentityModel
         {
             ProjectInfo = new ProjectInfo(null),
             IdentityNamespace = "TestNamespace",
@@ -127,7 +128,7 @@ public class IdentityHelperTests
     {
         // Arrange
         string templatePath = Path.Combine("templates", "ApplicationUser.tt");
-        IdentityModel identityModel = CreateTestIdentityModel();
+        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
         identityModel.UserClassName = "CustomUser";
 
         // Act
@@ -138,9 +139,9 @@ public class IdentityHelperTests
         Assert.Contains("CustomUser", result.OutputPath);
     }
 
-    private IdentityModel CreateTestIdentityModel()
+    private ScaffoldIdentityModel CreateTestIdentityModel()
     {
-        return new IdentityModel
+        return new ScaffoldIdentityModel
         {
             ProjectInfo = new ProjectInfo(Path.Combine("test", "project", "TestProject.csproj")),
             IdentityNamespace = "TestNamespace",

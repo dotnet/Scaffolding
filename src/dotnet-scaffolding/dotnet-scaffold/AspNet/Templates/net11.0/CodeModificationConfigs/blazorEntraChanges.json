@@ -36,6 +36,14 @@
                       }
                     },
                     {
+                      "InsertBefore": [ "app.MapStaticAssets()" ],
+                      "CheckBlock": "app.UseAntiforgery()",
+                      "Block": "app.UseAntiforgery()",
+                      "LeadingTrivia": {
+                        "Newline": true
+                      }
+                    },
+                    {
                       "InsertBefore": [ "app.MapRazorComponents<App>()" ],
                       "Block": "app.MapGroup(\"/authentication\").MapLoginAndLogout()",
                       "LeadingTrivia": {

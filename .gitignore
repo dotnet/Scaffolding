@@ -26,6 +26,7 @@ nuget.exe
 project.lock.json
 /.vs
 launchsettings.json
+!test/dotnet-scaffolding/baselines/**/Properties/launchSettings.json
 test/*/Properties
 .build/
 .testpublish

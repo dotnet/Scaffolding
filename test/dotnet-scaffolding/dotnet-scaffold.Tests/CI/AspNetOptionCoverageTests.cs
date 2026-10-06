@@ -304,4 +304,64 @@ public class AspNetOptionCoverageTests
     }
 
     #endregion
+
+    #region Entra ID option parsing
+
+    [Theory]
+    [InlineData("--tenant-id", "--application-id")]
+    [InlineData("--tenantId", "--applicationId")]
+    [InlineData("--tenant-id", "--applicationId")]
+    [InlineData("--tenantId", "--application-id")]
+    public void EntraIdOptionSpellings_ParseAndBindValues(string tenantOption, string applicationOption)
+    {
+        const string tenantId = "test-tenant-id";
+        const string applicationId = "test-application-id";
+        var command = CreateEntraIdParserCommand();
+
+        var parseResult = command.Parse([tenantOption, tenantId, applicationOption, applicationId]);
+
+        Assert.Empty(parseResult.Errors);
+        Assert.Equal(tenantId, _options.TenantId.GetValue(parseResult));
+        Assert.Equal(applicationId, _options.ApplicationId.GetValue(parseResult));
+    }
+
+    [Fact]
+    public void InvalidTenantIdOptionSpelling_IsRejected()
+    {
+        const string invalidOption = "--tenant_id";
+        const string applicationId = "test-application-id";
+        var command = CreateEntraIdParserCommand();
+
+        var parseResult = command.Parse([invalidOption, "test-tenant-id", "--application-id", applicationId]);
+
+        Assert.NotEmpty(parseResult.Errors);
+        Assert.Contains(parseResult.Errors, error => error.Message.Contains(invalidOption, System.StringComparison.Ordinal));
+        Assert.Throws<System.InvalidOperationException>(() => _options.TenantId.GetValue(parseResult));
+        Assert.Equal(applicationId, _options.ApplicationId.GetValue(parseResult));
+    }
+
+    [Fact]
+    public void InvalidApplicationIdOptionSpelling_IsRejected()
+    {
+        const string invalidOption = "--application_id";
+        const string tenantId = "test-tenant-id";
+        var command = CreateEntraIdParserCommand();
+
+        var parseResult = command.Parse(["--tenant-id", tenantId, invalidOption, "test-application-id"]);
+
+        Assert.NotEmpty(parseResult.Errors);
+        Assert.Contains(parseResult.Errors, error => error.Message.Contains(invalidOption, System.StringComparison.Ordinal));
+        Assert.Equal(tenantId, _options.TenantId.GetValue(parseResult));
+        Assert.Null(_options.ApplicationId.GetValue(parseResult));
+    }
+
+    private System.CommandLine.Command CreateEntraIdParserCommand()
+    {
+        var command = new System.CommandLine.Command("entra-id");
+        command.Options.Add(_options.TenantId.ToCliOption());
+        command.Options.Add(_options.ApplicationId.ToCliOption());
+        return command;
+    }
+
+    #endregion
 }

@@ -259,9 +259,9 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
     }
 
     [Fact]
-    public void BlazorEntraChangesConfig_AddsLoginOrLogoutToServerNavMenu()
+    public async Task BlazorEntraChangesConfig_AddsLoginOrLogoutToServerNavMenu()
     {
-        AssertNavMenuModification(
+        await AssertNavMenuModificationAsync(
             "blazorEntraChanges.json",
             Path.Combine("Components", "Layout", "NavMenu.razor"));
     }
@@ -367,11 +367,9 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
     }
 
     [Fact]
-    public void BlazorWasmEntraChangesConfig_AddsLoginOrLogoutToClientNavMenu()
+    public async Task BlazorWasmEntraChangesConfig_AddsLoginOrLogoutToClientNavMenu()
     {
-        AssertNavMenuModification(
-            "blazorWasmEntraChanges.json",
-            Path.Combine("Layout", "NavMenu.razor"));
+        await AssertNavMenuModificationAsync("blazorWasmEntraChanges.json", Path.Combine("Layout", "NavMenu.razor"));
     }
 
     #endregion
@@ -433,7 +431,7 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         return Path.GetFullPath(basePath);
     }
 
-    private void AssertNavMenuModification(string configFileName, string navMenuPath)
+    private async Task AssertNavMenuModificationAsync(string configFileName, string navMenuPath)
     {
         var configPath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs", configFileName);
         using var config = JsonDocument.Parse(File.ReadAllText(configPath));
@@ -443,6 +441,39 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         Assert.Equal("<LoginOrLogout />", replacement.GetProperty("CheckBlock").GetString());
         Assert.Equal(["</nav>"], replacement.GetProperty("ReplaceSnippet").EnumerateArray().Select(line => line.GetString()));
         Assert.Equal(["    <LoginOrLogout />", "    </nav>"], replacement.GetProperty("MultiLineBlock").EnumerateArray().Select(line => line.GetString()));
+
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        var navMenuOutputPath = Path.Combine(_testProjectDir, navMenuPath);
+        Directory.CreateDirectory(Path.GetDirectoryName(navMenuOutputPath)!);
+        File.WriteAllText(navMenuOutputPath, """
+            <div class="top-row ps-3 navbar navbar-dark">
+                <a class="navbar-brand" href="">TestProject</a>
+            </div>
+
+            <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+            <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+                <nav class="nav flex-column">
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">Home</NavLink>
+                    </div>
+                </nav>
+            </div>
+            """);
+        var step = new WrappedCodeModificationStep(
+            NullLogger<WrappedCodeModificationStep>.Instance,
+            _testTelemetryService)
+        {
+            CodeModifierConfigPath = configPath,
+            CodeChangeOptions = [],
+            ProjectPath = _testProjectPath
+        };
+
+        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(navMenuOutputPath), "<LoginOrLogout />"));
+
+        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(navMenuOutputPath), "<LoginOrLogout />"));
     }
 
     private static int CountOccurrences(string value, string searchValue)

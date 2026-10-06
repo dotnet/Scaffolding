@@ -24,10 +24,10 @@ internal static class EntraIdHelper
         var textTemplatingProperties = new List<TextTemplatingProperty>();
         var templateTypes = GetBlazorEntraIdTemplateTypes(entraIdModel.ProjectInfo?.LowestSupportedTargetFramework);
         var serverLayoutPath = Path.Combine(entraIdModel.BaseOutputPath ?? string.Empty, "Components", "Layout");
+        var serverNavMenuPath = Path.Combine(serverLayoutPath, "NavMenu.razor");
         var clientProjectDirectory = string.IsNullOrEmpty(blazorWasmClientProjectPath) ? null : Path.GetDirectoryName(blazorWasmClientProjectPath);
         var clientLayoutPath = string.IsNullOrEmpty(clientProjectDirectory) ? null : Path.Combine(clientProjectDirectory, "Layout");
         var clientNavMenuPath = string.IsNullOrEmpty(clientLayoutPath) ? null : Path.Combine(clientLayoutPath, "NavMenu.razor");
-        var layoutOutputPath = !string.IsNullOrEmpty(clientNavMenuPath) && File.Exists(clientNavMenuPath) ? clientLayoutPath! : serverLayoutPath;
 
         foreach (var templatePath in allT4TemplatePaths)
         {
@@ -42,7 +42,9 @@ internal static class EntraIdHelper
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {
                 string extension = templateFullName.StartsWith("loginor", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
-                string templateNameWithNamespace = String.Equals(extension, ".razor", StringComparison.Ordinal) ? layoutOutputPath : entraIdModel.BaseOutputPath ?? string.Empty;
+                string templateNameWithNamespace = String.Equals(extension, ".razor", StringComparison.Ordinal)
+                    ? GetLayoutOutputPath(serverLayoutPath, serverNavMenuPath, clientLayoutPath, clientNavMenuPath)
+                    : entraIdModel.BaseOutputPath ?? string.Empty;
                 string outputFileName = Path.Combine(templateNameWithNamespace, templateFullName + extension);
 
                 textTemplatingProperties.Add(new()
@@ -57,6 +59,22 @@ internal static class EntraIdHelper
         }
 
         return textTemplatingProperties;
+    }
+
+    private static string GetLayoutOutputPath(string serverLayoutPath, string serverNavMenuPath, string? clientLayoutPath, string? clientNavMenuPath)
+    {
+        if (!string.IsNullOrEmpty(clientNavMenuPath) && File.Exists(clientNavMenuPath))
+        {
+            return clientLayoutPath!;
+        }
+
+        if (File.Exists(serverNavMenuPath))
+        {
+            return serverLayoutPath;
+        }
+
+        string expectedPaths = string.IsNullOrEmpty(clientNavMenuPath) ? $"'{serverNavMenuPath}'" : $"'{serverNavMenuPath}' or '{clientNavMenuPath}'";
+        throw new InvalidOperationException($"Could not locate the Blazor navigation component. Expected {expectedPaths}.");
     }
 
     /// <summary>

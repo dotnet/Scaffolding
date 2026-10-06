@@ -4,10 +4,13 @@
 extern alias MicrosoftIdentityWeb;
 
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
@@ -29,27 +32,33 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
 [Trait("Family", "entra-id")]
 public class EntraIdLogoutRuntimeTests
 {
-    [Fact]
-    public async Task Logout_WithAntiforgeryToken_ClearsCookieAndSignsOutOpenIdConnect()
+    [Theory]
+    [InlineData("net10.0")]
+    [InlineData("net11.0")]
+    public async Task GeneratedLogoutForm_ClearsCookieAndSignsOutOpenIdConnect(string targetFramework)
     {
-        await using var app = await CreateAppAsync();
+        var generatedForm = GetGeneratedFormContract(targetFramework);
+        await using var app = await CreateAppAsync(generatedForm);
         using var client = app.GetTestClient();
 
         var signInResponse = await client.PostAsync("/test/signin", content: null);
         var authCookie = GetCookie(signInResponse, CookieAuthenticationDefaults.CookiePrefix);
-        var tokenResponse = await SendAsync(client, HttpMethod.Get, "/test/antiforgery", authCookie);
-        var antiforgeryCookie = GetCookie(tokenResponse, ".AspNetCore.Antiforgery.");
-        var requestToken = await tokenResponse.Content.ReadAsStringAsync();
+        var formResponse = await SendAsync(client, HttpMethod.Get, "/test/logout-form", authCookie);
+        var formHtml = await formResponse.Content.ReadAsStringAsync();
+        var antiforgeryCookie = GetCookie(formResponse, ".AspNetCore.Antiforgery.");
+        var action = GetHtmlAttribute(formHtml, "form", "action");
+        var requestToken = GetInputValue(formHtml, "__RequestVerificationToken");
+        var returnUrl = GetInputValue(formHtml, "ReturnUrl");
 
         using var logoutContent = new FormUrlEncodedContent(
         [
             new("__RequestVerificationToken", requestToken),
-            new("ReturnUrl", "/")
+            new("ReturnUrl", returnUrl)
         ]);
         var logoutResponse = await SendAsync(
             client,
             HttpMethod.Post,
-            "/authentication/logout",
+            action,
             $"{authCookie}; {antiforgeryCookie}",
             logoutContent);
 
@@ -81,8 +90,9 @@ public class EntraIdLogoutRuntimeTests
         Assert.False(app.Services.GetRequiredService<OpenIdConnectSignOutState>().WasSignedOut);
     }
 
-    private static async Task<WebApplication> CreateAppAsync()
+    private static async Task<WebApplication> CreateAppAsync(GeneratedFormContract? generatedForm = null)
     {
+        generatedForm ??= new("/authentication/logout", "ReturnUrl");
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.Services.AddAntiforgery();
@@ -105,10 +115,17 @@ public class EntraIdLogoutRuntimeTests
                 new ClaimsIdentity([new Claim(ClaimTypes.Name, "Test User")], CookieAuthenticationDefaults.AuthenticationScheme));
             await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
         });
-        app.MapGet("/test/antiforgery", (HttpContext context, IAntiforgery antiforgery) =>
+        app.MapGet("/test/logout-form", async (HttpContext context, IAntiforgery antiforgery) =>
         {
             var tokens = antiforgery.GetAndStoreTokens(context);
-            return tokens.RequestToken!;
+            context.Response.ContentType = "text/html";
+            await context.Response.WriteAsync($$"""
+                <form action="{{generatedForm.Action}}" method="post">
+                    <input type="hidden" name="{{tokens.FormFieldName}}" value="{{HtmlEncoder.Default.Encode(tokens.RequestToken!)}}" />
+                    <input type="hidden" name="{{generatedForm.ReturnUrlFieldName}}" value="/" />
+                    <button type="submit">Logout</button>
+                </form>
+                """);
         });
         app.MapGroup("/authentication").MapLoginAndLogout();
         await app.StartAsync();
@@ -134,6 +151,59 @@ public class EntraIdLogoutRuntimeTests
             value => value.StartsWith(namePrefix, StringComparison.Ordinal));
         return setCookie[..setCookie.IndexOf(';')];
     }
+
+    private static string GetHtmlAttribute(string html, string element, string attribute)
+    {
+        var match = Regex.Match(
+            html,
+            $"<{element}\\b[^>]*\\b{attribute}=\"([^\"]+)\"",
+            RegexOptions.IgnoreCase);
+        Assert.True(match.Success, $"Could not find the '{attribute}' attribute on the '{element}' element.");
+        return WebUtility.HtmlDecode(match.Groups[1].Value);
+    }
+
+    private static string GetInputValue(string html, string name)
+    {
+        var match = Regex.Match(
+            html,
+            $"""<input\b(?=[^>]*\bname="{Regex.Escape(name)}")(?=[^>]*\bvalue="([^"]*)")[^>]*>""",
+            RegexOptions.IgnoreCase);
+        Assert.True(match.Success, $"Could not find the '{name}' form field.");
+        return WebUtility.HtmlDecode(match.Groups[1].Value);
+    }
+
+    private static GeneratedFormContract GetGeneratedFormContract(string targetFramework)
+    {
+        var assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        var templatePath = Path.GetFullPath(Path.Combine(
+            assemblyDirectory,
+            "..",
+            "..",
+            "..",
+            "..",
+            "..",
+            "src",
+            "dotnet-scaffolding",
+            "dotnet-scaffold",
+            "AspNet",
+            "Templates",
+            targetFramework,
+            "BlazorEntraId",
+            "LoginOrLogout.tt"));
+        var template = File.ReadAllText(templatePath);
+
+        var action = GetHtmlAttribute(template, "form", "action");
+        Assert.Contains("<AntiforgeryToken />", template);
+        var returnUrlFieldName = Regex.Match(
+            template,
+            """<input\b(?=[^>]*\btype="hidden")(?=[^>]*\bname="([^"]+)")(?=[^>]*\bvalue="@currentUrl")[^>]*>""",
+            RegexOptions.IgnoreCase);
+        Assert.True(returnUrlFieldName.Success, "Could not find the generated return URL field.");
+
+        return new($"/{action.TrimStart('/')}", returnUrlFieldName.Groups[1].Value);
+    }
+
+    private sealed record GeneratedFormContract(string Action, string ReturnUrlFieldName);
 
     private sealed class OpenIdConnectSignOutState
     {

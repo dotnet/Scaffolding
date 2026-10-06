@@ -144,16 +144,20 @@ public class EntraIdHelperTests
     }
 
     [Fact]
-    public void GetTextTemplatingProperties_ClientWithoutNavMenu_UsesServerLayout()
+    public void GetTextTemplatingProperties_ClientWithoutNavMenu_ServerNavMenuExists_UsesServerLayout()
     {
         string testDirectory = Path.Combine(Path.GetTempPath(), nameof(EntraIdHelperTests), Guid.NewGuid().ToString());
         string serverDirectory = Path.Combine(testDirectory, "Server");
         string clientDirectory = Path.Combine(testDirectory, "Client");
         string clientProjectPath = Path.Combine(clientDirectory, "Client.csproj");
+        string serverLayoutDirectory = Path.Combine(serverDirectory, "Components", "Layout");
 
         try
         {
             Directory.CreateDirectory(clientDirectory);
+            Directory.CreateDirectory(serverLayoutDirectory);
+            File.WriteAllText(Path.Combine(serverLayoutDirectory, "NavMenu.razor"), string.Empty);
+
             EntraIdModel entraIdModel = new()
             {
                 ProjectInfo = new ProjectInfo(Path.Combine(serverDirectory, "Server.csproj")),
@@ -165,9 +169,7 @@ public class EntraIdHelperTests
                 entraIdModel,
                 clientProjectPath));
 
-            Assert.Equal(
-                Path.Combine(serverDirectory, "Components", "Layout", "LoginOrLogout.razor"),
-                property.OutputPath);
+            Assert.Equal(Path.Combine(serverLayoutDirectory, "LoginOrLogout.razor"), property.OutputPath);
         }
         finally
         {
@@ -176,6 +178,28 @@ public class EntraIdHelperTests
                 Directory.Delete(testDirectory, recursive: true);
             }
         }
+    }
+
+    [Fact]
+    public void GetTextTemplatingProperties_WithoutNavMenu_Throws()
+    {
+        string testDirectory = Path.Combine(Path.GetTempPath(), nameof(EntraIdHelperTests), Guid.NewGuid().ToString());
+        string serverDirectory = Path.Combine(testDirectory, "Server");
+        string clientProjectPath = Path.Combine(testDirectory, "Client", "Client.csproj");
+        EntraIdModel entraIdModel = new()
+        {
+            ProjectInfo = new ProjectInfo(Path.Combine(serverDirectory, "Server.csproj")),
+            BaseOutputPath = serverDirectory
+        };
+
+        InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
+            EntraIdHelper.GetTextTemplatingProperties(
+                [Path.Combine("BlazorEntraId", "LoginOrLogout.tt")],
+                entraIdModel,
+                clientProjectPath).ToArray());
+
+        Assert.Contains(Path.Combine(serverDirectory, "Components", "Layout", "NavMenu.razor"), exception.Message);
+        Assert.Contains(Path.Combine(testDirectory, "Client", "Layout", "NavMenu.razor"), exception.Message);
     }
 
     [Fact]

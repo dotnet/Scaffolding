@@ -8,6 +8,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.DotNet.Tools.Scaffold.Command;
@@ -38,6 +39,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(ValidateEfControllerStep),
                 typeof(ValidateEntraIdStep),
                 typeof(ValidateSyncfusionBlazorToolkitStep),
+                typeof(ResolveSyncfusionBlazorToolkitThemeStep),
+                typeof(SummarizeSyncfusionBlazorToolkitStep),
                 typeof(ValidateIdentityStep),
                 typeof(ValidateMinimalApiStep),
                 typeof(ValidateRazorPagesStep),
@@ -226,8 +229,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.Project = context.GetOptionResult(options.Project);
                     step.Prerelease = context.GetOptionResult(options.Prerelease);
                 })
+                .WithStep<ResolveSyncfusionBlazorToolkitThemeStep>()
                 .WithSyncfusionBlazorToolkitAddPackagesStep()
-                .WithSyncfusionBlazorToolkitCodeChangeStep();
+                .WithSyncfusionBlazorToolkitCodeChangeStep()
+                .WithStep<SummarizeSyncfusionBlazorToolkitStep>();
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorPage.Crud)
                 .WithDisplayName(AspnetStrings.RazorPage.CrudDisplayName)

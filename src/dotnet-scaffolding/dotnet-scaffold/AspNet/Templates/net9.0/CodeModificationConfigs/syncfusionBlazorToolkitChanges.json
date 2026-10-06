@@ -36,7 +36,7 @@
       ]
     },
     {
-      "FileName": "Components\\App.razor",
+      "FileName": "$(ThemeFile)",
       "Replacements": [
         {
           "ReplaceSnippet": [

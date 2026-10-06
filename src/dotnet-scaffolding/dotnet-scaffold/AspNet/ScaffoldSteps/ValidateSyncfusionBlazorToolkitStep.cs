@@ -23,8 +23,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 ///   - A Components/_Imports.razor file (used as a safe anchor for inserting using
 ///     directives via the code-modification step).
 ///
-/// It does not require a MainLayout, App.razor, or NavMenu.razor: the code-modification
-/// step targets Program.cs, Components/_Imports.razor, and Components/App.razor only.
+/// The theme stylesheet host (Components/App.razor for Blazor Web App, or
+/// wwwroot/index.html for standalone Blazor WASM) is NOT required for
+/// validation to succeed. If neither is present the theme step is skipped
+/// and the rest of the setup (package, Program.cs registration,
+/// Components/_Imports.razor) still applies.
+///
+/// It does not require a MainLayout, App.razor, or NavMenu.razor: the
+/// code-modification step targets Program.cs, Components/_Imports.razor,
+/// and (when present) the resolved theme host file.
 /// </summary>
 internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
 {

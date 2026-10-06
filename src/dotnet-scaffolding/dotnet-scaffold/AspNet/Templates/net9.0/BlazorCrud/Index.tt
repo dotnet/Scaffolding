@@ -36,7 +36,7 @@
 #>
 @implements IAsyncDisposable
 @inject <#=dbContextFactory #>
-@inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 
 <PageTitle>Index</PageTitle>
 

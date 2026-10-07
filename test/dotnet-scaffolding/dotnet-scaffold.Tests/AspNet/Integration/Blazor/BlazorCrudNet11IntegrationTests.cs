@@ -13,7 +13,7 @@ public class BlazorCrudNet11IntegrationTests : BlazorCrudIntegrationTestsBase
     protected override string TargetFramework => "net11.0";
     protected override string TestClassName => nameof(BlazorCrudNet11IntegrationTests);
 
-    [Fact(Skip = "net11.0 preview SDK not yet supported")]
+    [Fact]
     public async Task Scaffold_BlazorCrud_Net11_CliInvocation()
     {
         var projectContent = ProjectContent.Replace(

@@ -46,8 +46,8 @@ public enum EmploymentType
         File.WriteAllText(Path.Combine(componentsDir, "Routes.razor"), ScaffoldCliHelper.GetBlazorRoutesRazor());
 
         // Verify project builds before scaffolding
-        var (beforeExitCode, _, beforeError) = await RunBuildAsync(_testProjectDir);
-        Assert.True(beforeExitCode == 0, $"Project should build before scaffolding. Error: {beforeError}");
+        var (beforeExitCode, beforeOutput, beforeError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(beforeExitCode == 0, $"Project should build before scaffolding.\nOutput: {beforeOutput}\nError: {beforeError}");
 
         // Act — invoke CLI: dotnet scaffold aspnet blazor-crud
         var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
@@ -87,8 +87,8 @@ public enum EmploymentType
             // Assert — no NuGet errors and project builds after scaffolding
             Assert.False(cliOutput.Contains("error: NU"),
                 $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
-            var (afterExitCode, _, afterError) = await RunBuildAsync(_testProjectDir);
-            Assert.True(afterExitCode == 0, $"Project should still build after scaffolding. Error: {afterError}");
+            var (afterExitCode, afterOutput, afterError) = await RunBuildAsync(_testProjectDir);
+            Assert.True(afterExitCode == 0, $"Project should still build after scaffolding.\nOutput: {afterOutput}\nError: {afterError}");
         }
     }
 }

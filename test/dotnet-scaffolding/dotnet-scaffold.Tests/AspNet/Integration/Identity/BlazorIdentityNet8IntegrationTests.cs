@@ -145,6 +145,102 @@ public class BlazorIdentityNet8IntegrationTests : BlazorIdentityIntegrationTests
     }
 
     [Fact]
+    public async Task Scaffold_BlazorIdentity_Net8_ExistingContextInGlobalNamespace()
+    {
+        // Arrange write project + Program.cs + Blazor project structure
+        File.WriteAllText(_testProjectPath, ProjectContent.Replace(
+            "</Project>",
+            """
+              <ItemGroup>
+                <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.27" />
+                <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.27" />
+              </ItemGroup>
+            </Project>
+            """));
+        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.StableNuGetConfig);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), """
+            using TestProject.Components;
+
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+            var app = builder.Build();
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Error");
+            }
+            app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+            app.Run();
+            """);
+        var dataDirectory = Directory.CreateDirectory(Path.Combine(_testProjectDir, "Data"));
+        File.WriteAllText(Path.Combine(dataDirectory.FullName, "ApplicationUser.cs"), """
+            using Microsoft.AspNetCore.Identity;
+
+            namespace TestProject.Data;
+
+            public class ApplicationUser : IdentityUser
+            {
+            }
+            """);
+        File.WriteAllText(Path.Combine(_testProjectDir, "TestDbContext.cs"), """
+            using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+            using Microsoft.EntityFrameworkCore;
+            using TestProject.Data;
+
+            public class TestDbContext(DbContextOptions<TestDbContext> options)
+                : IdentityDbContext<ApplicationUser>(options)
+            {
+            }
+            """);
+        ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"),
+            ScaffoldCliHelper.GetBlazorAppRazor()
+                .Replace("<HeadOutlet />", "<HeadOutlet @rendermode=\"InteractiveServer\" />")
+                .Replace("<Routes />", "<Routes @rendermode=\"InteractiveServer\" />"));
+        var routesPath = Path.Combine(_testProjectDir, "Components", "Routes.razor");
+        File.WriteAllText(routesPath, File.ReadAllText(routesPath).Replace(
+            """<RouteView RouteData="routeData" />""",
+            """<RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />"""));
+
+        // Assert project builds before scaffolding
+        var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(preExitCode == 0,
+            $"Project should build before scaffolding.\nExit code: {preExitCode}\nOutput: {preOutput}\nError: {preError}");
+
+        // Act invoke CLI: dotnet scaffold aspnet blazor-identity
+        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "blazor-identity",
+            "--project", _testProjectPath,
+            "--dataContext", "TestDbContext",
+            "--dbProvider", "sqlite-efcore");
+        Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
+
+        // Assert no empty namespace imports were generated
+        var accountDirectory = Path.Combine(_testProjectDir, "Components", "Account");
+        Assert.True(Directory.Exists(accountDirectory),
+            $"Components/Account directory should be created.\nGenerated files:\n{string.Join(System.Environment.NewLine, Directory.GetFiles(_testProjectDir, "*", SearchOption.AllDirectories))}");
+        foreach (var generatedFile in Directory.GetFiles(accountDirectory, "*", SearchOption.AllDirectories))
+        {
+            var generatedContent = File.ReadAllText(generatedFile);
+            Assert.DoesNotContain("using ;", generatedContent);
+            foreach (var line in File.ReadLines(generatedFile))
+            {
+                Assert.NotEqual("@using", line.Trim());
+            }
+        }
+
+        var endpointExtensions = File.ReadAllText(Path.Combine(accountDirectory, "IdentityComponentsEndpointRouteBuilderExtensions.cs"));
+        Assert.Contains("using TestProject.Data;", endpointExtensions);
+
+        // Assert the generated project builds
+        Assert.False(cliOutput.Contains("error: NU"),
+            $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
+        var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(postExitCode == 0,
+            $"Project should build after scaffolding.\nExit code: {postExitCode}\nOutput: {postOutput}\nError: {postError}");
+    }
+
+    [Fact]
     public async Task Scaffold_BlazorIdentity_Net8_CliInvocation()
     {
         // Arrange write project + Program.cs + Blazor project structure

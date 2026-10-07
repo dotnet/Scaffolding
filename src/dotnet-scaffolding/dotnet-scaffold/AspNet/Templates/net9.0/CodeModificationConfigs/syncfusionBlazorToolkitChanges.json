@@ -19,36 +19,6 @@
       "Usings": [
         "Syncfusion.Blazor.Toolkit"
       ]
-    },
-    {
-      "FileName": "Components\\_Imports.razor",
-      "Replacements": [
-        {
-          "ReplaceSnippet": [
-            "@using Microsoft.AspNetCore.Components.Forms"
-          ],
-          "MultiLineBlock": [
-            "@using Microsoft.AspNetCore.Components.Forms",
-            "@using Syncfusion.Blazor.Toolkit"
-          ],
-          "CheckBlock": "Syncfusion.Blazor.Toolkit"
-        }
-      ]
-    },
-    {
-      "FileName": "$(ThemeFile)",
-      "Replacements": [
-        {
-          "ReplaceSnippet": [
-            "</head>"
-          ],
-          "MultiLineBlock": [
-            "    <link href=\"_content/Syncfusion.Blazor.Toolkit/styles/fluent.min.css\" rel=\"stylesheet\" />",
-            "</head>"
-          ],
-          "CheckBlock": "Syncfusion.Blazor.Toolkit/styles/fluent.min.css"
-        }
-      ]
     }
   ]
 }

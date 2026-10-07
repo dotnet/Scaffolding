@@ -10,7 +10,6 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
-using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
 
@@ -59,6 +58,9 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
     /// match the host file resolved by <c>ResolveSyncfusionBlazorToolkitThemeStep</c>
     /// (Components/App.razor for Blazor Web App, wwwroot/index.html for
     /// standalone Blazor WASM), or removed when no host file was found.
+    /// The Components/_Imports.razor anchor entry is rewritten to a
+    /// concrete, anchor-free Block-only entry when an _Imports.razor file
+    /// was discovered, or removed when none was found.
     /// </summary>
     public static IScaffoldBuilder WithSyncfusionBlazorToolkitCodeChangeStep(this IScaffoldBuilder builder)
     {
@@ -80,12 +82,7 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
                     targetFrameworkFolder);
             }
 
-            context.Properties.TryGetValue(Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj);
-            var codeModifierProperties = codeModifierPropertiesObj as Dictionary<string, string>;
-
-            if (string.IsNullOrEmpty(codeModificationFilePath) ||
-                settings is null ||
-                codeModifierProperties is null)
+            if (string.IsNullOrEmpty(codeModificationFilePath) || settings is null)
             {
                 var missing = new System.Text.StringBuilder();
                 if (string.IsNullOrEmpty(codeModificationFilePath))
@@ -96,10 +93,6 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
                 {
                     missing.Append("'SyncfusionBlazorToolkitSettings'; ");
                 }
-                if (codeModifierProperties is null)
-                {
-                    missing.Append("CodeModifierProperties (Constants.StepConstants.CodeModifierProperties entry); ");
-                }
 
                 throw new InvalidOperationException(
                     "Syncfusion Blazor Toolkit code-modification step is missing required context: "
@@ -109,11 +102,21 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
 
             // Resolve the JSON in memory so the theme file can be set per project
             // (Components/App.razor vs wwwroot/index.html) or dropped when no
-            // host file is available. CodeModifierConfigJsonText takes priority
-            // over CodeModifierConfigPath in CodeModificationStep.
+            // host file is available, and so the Components/_Imports.razor
+            // anchor entry can be replaced with a discovered path or dropped
+            // when no _Imports.razor was found. CodeModifierConfigJsonText
+            // takes priority over CodeModifierConfigPath in
+            // CodeModificationStep.
+            //
+            // We pass a NullLogger to the helper because the configuration
+            // lambda does not have access to the DI container. The
+            // downstream WrappedCodeModificationStep has its own logger
+            // and will surface any errors it encounters.
             string? resolvedJson = SyncfusionBlazorToolkitHelper.BuildResolvedCodeModifierConfigJson(
                 codeModificationFilePath!,
-                settings.ThemeFile);
+                settings.ThemeFile,
+                settings.ImportsFile,
+                logger: null);
 
             if (!string.IsNullOrEmpty(resolvedJson))
             {
@@ -121,12 +124,16 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
             }
             else
             {
-                step.CodeModifierConfigPath = codeModificationFilePath;
-            }
-
-            foreach (var kvp in codeModifierProperties)
-            {
-                step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
+                // Defensive: never pass the unresolved $(ThemeFile)
+                // placeholder configuration to the downstream step. If
+                // the helper returned null, the source JSON is missing
+                // or invalid; fail the step with a clear, actionable
+                // message instead of silently corrupting the project.
+                step.SkipStep = true;
+                throw new InvalidOperationException(
+                    "Syncfusion Blazor Toolkit code-modification JSON could not be resolved. " +
+                    "Aborting the code-modification step to avoid writing the unresolved '$(ThemeFile)' placeholder to the project. " +
+                    "Verify the embedded 'syncfusionBlazorToolkitChanges.json' is present and valid.");
             }
 
             step.ProjectPath = settings.Project;

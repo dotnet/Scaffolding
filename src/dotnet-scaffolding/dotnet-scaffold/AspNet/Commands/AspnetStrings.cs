@@ -10,19 +10,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string Empty = "blazor-empty";
             internal const string EmptyDisplayName = "Razor Component";
             internal const string EmptyDescription = "Add an empty razor component to a given project";
-            internal const string EmptyExample = "dotnet scaffold aspnet blazor-empty --project ./MyBlazorApp/MyBlazorApp.csproj --file-name ProductCard";
+            internal const string EmptyExample = "dotnet scaffold aspnet blazor-empty --project C:/MyBlazorApp/MyBlazorApp.csproj --file-name ProductCard";
             internal const string EmptyExampleDescription = "Create an empty Razor component named ProductCard:";
 
             internal const string Identity = "blazor-identity";
             internal const string IdentityDisplayName = "Blazor Identity";
             internal const string IdentityDescription = "Add blazor identity to a project.";
-            internal const string IdentityExample = "dotnet scaffold aspnet blazor-identity --project ./MyBlazorApp/MyBlazorApp.csproj --database-provider SqlServer";
+            internal const string IdentityExample = "dotnet scaffold aspnet blazor-identity --project C:/MyBlazorApp/MyBlazorApp.csproj --database-provider SqlServer";
             internal const string IdentityExampleDescription = "Add Identity with SQL Server to a Blazor app:";
 
             internal const string Crud = "blazor-crud";
             internal const string CrudDisplayName = "Razor Components with EntityFrameworkCore (CRUD)";
             internal const string CrudDescription = "Generates Razor Components using Entity Framework for Create, Delete, Details, Edit and List operations for the given model";
-            internal const string CrudExample1 = "dotnet scaffold aspnet blazor-crud --project ./MyBlazorApp/MyBlazorApp.csproj --model Product --data-context AppDbContext --database-provider SqlServer --page All";
+            internal const string CrudExample1 = "dotnet scaffold aspnet blazor-crud --project C:/MyBlazorApp/MyBlazorApp.csproj --model Product --data-context AppDbContext --database-provider SqlServer --page All";
             internal const string CrudExample1Description = "Generate all CRUD pages for Product model:";
             internal const string CrudExample2 = "dotnet scaffold aspnet blazor-crud --project C:/MyApp/MyApp.csproj --model Customer --data-context ShopContext --database-provider PostgreSQL --page List,Edit";
             internal const string CrudExample2Description = "Generate only List and Edit pages with PostgreSQL:";
@@ -143,7 +143,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
         {
             internal const string Name = "syncfusion-blazor-toolkit";
             internal const string DisplayName = "Syncfusion Blazor Toolkit";
-            internal const string Description = "Configure Syncfusion Blazor Toolkit in an existing Blazor application. Adds the Syncfusion.Blazor.Toolkit package reference, service registration, using directives, and theme stylesheet. Primary target: Blazor Web App with Components/_Imports.razor and Components/App.razor. Standalone Blazor WASM is also supported; when Components/App.razor is absent the theme stylesheet is added to wwwroot/index.html instead, or skipped with a warning if neither file is present. The scaffolder operates on a single --project; for multi-project (Auto/WASM client+server) solutions, run it on the project that hosts interactive components and static assets.";
+            // Short display description, suitable for CLI UIs and tight layouts.
+            internal const string Description = "Configure Syncfusion Blazor Toolkit in an existing Blazor application.";
+            // Extended guidance (target layouts, soft-fail behavior, render-mode reminder)
+            // shown in the scaffolder summary and any detailed help output.
+            internal const string ExtendedDescription = "Adds the Syncfusion.Blazor.Toolkit package reference, service registration, using directives, and theme stylesheet. " +
+                "Primary target: Blazor Web App with Components/_Imports.razor and Components/App.razor. " +
+                "Standalone Blazor WASM is also supported; when Components/App.razor is absent the theme stylesheet is added to wwwroot/index.html instead, " +
+                "or skipped with a warning if neither file is present. " +
+                "The scaffolder operates on a single --project; for multi-project (Auto/WASM client+server) solutions, " +
+                "run it on the project that hosts interactive components and static assets. " +
+                "Syncfusion Blazor Toolkit components require an interactive render mode (@rendermode InteractiveServer / InteractiveAuto / InteractiveWebAssembly) " +
+                "and do not work under static SSR.";
             internal const string Example = "dotnet scaffold aspnet syncfusion-blazor-toolkit --project ./MyBlazorApp/MyBlazorApp.csproj";
             internal const string ExampleDescription = "Set up Syncfusion Blazor Toolkit in an existing Blazor app:";
         }

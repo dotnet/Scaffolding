@@ -70,11 +70,14 @@ internal class ResolveSyncfusionBlazorToolkitThemeStep : ScaffoldStep
             var fullPath = Path.Combine(projectDirectory, relativePath);
             if (_fileSystem.FileExists(fullPath))
             {
-                settings.ThemeFile = relativePath;
+                // Always store the path in canonical forward-slash form so
+                // that downstream steps (code-mod JSON serialization) and
+                // tests produce identical output on Windows and Linux.
+                settings.ThemeFile = Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.SyncfusionBlazorToolkitHelper.CanonicalizePath(relativePath);
                 settings.ThemeFileSkipped = false;
                 _logger.LogInformation(
                     "Syncfusion Blazor Toolkit theme stylesheet will be added to '{ThemeFile}' ({Kind}).",
-                    relativePath,
+                    settings.ThemeFile,
                     kind);
                 return Task.FromResult(true);
             }

@@ -170,6 +170,29 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         Assert.True(step.SkipStep);
     }
 
+    [Theory]
+    [InlineData(false, false, "igniteUIBlazorChanges.json")]
+    [InlineData(true, false, "igniteUIBlazorWasmChanges.json")]
+    [InlineData(false, true, "igniteUIBlazorMauiChanges.json")]
+    public void GetCodeModificationConfigFileName_MatchesProjectType(bool isWebAssemblyProject, bool isMauiBlazorHybridProject, string expected)
+    {
+        var baseModel = CreateModel();
+        var model = new IgniteUIBlazorModel
+        {
+            ProjectInfo = baseModel.ProjectInfo,
+            ProjectPath = baseModel.ProjectPath,
+            BaseOutputPath = baseModel.BaseOutputPath,
+            Theme = baseModel.Theme,
+            ThemeVariant = baseModel.ThemeVariant,
+            StylesheetPath = baseModel.StylesheetPath,
+            IsWebAssemblyProject = isWebAssemblyProject,
+            IsMauiBlazorHybridProject = isMauiBlazorHybridProject,
+            ImportsFilePath = baseModel.ImportsFilePath
+        };
+
+        Assert.Equal(expected, IgniteUIBlazorScaffolderBuilderExtensions.GetCodeModificationConfigFileName(model));
+    }
+
     [Fact]
     public void GetPackages_ReturnsBothPackages()
     {

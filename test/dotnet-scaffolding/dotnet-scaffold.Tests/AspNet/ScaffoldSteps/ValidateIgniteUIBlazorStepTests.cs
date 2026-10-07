@@ -64,6 +64,29 @@ public class ValidateIgniteUIBlazorStepTests
         Assert.Single(_testTelemetryService.TrackedEvents);
     }
 
+    [Theory]
+    [InlineData("neon", null, "--theme option 'neon'. Supported values: bootstrap, material, fluent, indigo (default: bootstrap).")]
+    [InlineData(null, "night", "--theme-variant option 'night'. Supported values: light, dark (default: light).")]
+    [InlineData("material", "dim", "--theme-variant option 'dim'. Supported values: light, dark (default: light).")]
+    public async Task ExecuteAsync_ReturnsFalse_WhenThemeOrVariantIsUnsupported(string? theme, string? themeVariant, string expectedError)
+    {
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        var step = CreateStep();
+        step.Project = _testProjectPath;
+        step.Theme = theme;
+        step.ThemeVariant = themeVariant;
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        Assert.False(_context.Properties.ContainsKey("IgniteUIBlazorSettings"));
+        Assert.Equal("Failure", Assert.Single(_testTelemetryService.TrackedEvents).Properties["Result"]);
+        Assert.Contains(_mockLogger.Invocations, invocation =>
+            invocation.Method.Name == nameof(ILogger.Log) &&
+            Equals(invocation.Arguments[0], LogLevel.Error) &&
+            invocation.Arguments[2].ToString()!.Contains(expectedError));
+    }
+
     [Fact]
     public void Properties_CanBeSet()
     {

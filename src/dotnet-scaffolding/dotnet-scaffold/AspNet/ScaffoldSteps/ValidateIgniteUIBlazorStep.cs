@@ -104,16 +104,17 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             return null;
         }
 
-        var theme = IgniteUIBlazorHelper.NormalizeTheme(Theme);
-        if (!string.IsNullOrEmpty(Theme) && !theme.Equals(Theme, StringComparison.OrdinalIgnoreCase))
+        // Omitted options fall back to the defaults; a value that is given must be one of the supported values.
+        if (!IgniteUIBlazorHelper.TryNormalizeTheme(Theme, out var theme))
         {
-            _logger.LogInformation($"Invalid {AspNetConstants.CliOptions.IgniteUIThemeOption} option '{Theme}'. Using default '{theme}'.");
+            _logger.LogError($"Invalid {AspNetConstants.CliOptions.IgniteUIThemeOption} option '{Theme}'. Supported values: {string.Join(", ", IgniteUIBlazorHelper.Themes)} (default: {IgniteUIBlazorHelper.DefaultTheme}).");
+            return null;
         }
 
-        var themeVariant = IgniteUIBlazorHelper.NormalizeThemeVariant(ThemeVariant);
-        if (!string.IsNullOrEmpty(ThemeVariant) && !themeVariant.Equals(ThemeVariant, StringComparison.OrdinalIgnoreCase))
+        if (!IgniteUIBlazorHelper.TryNormalizeThemeVariant(ThemeVariant, out var themeVariant))
         {
-            _logger.LogInformation($"Invalid {AspNetConstants.CliOptions.IgniteUIThemeVariantOption} option '{ThemeVariant}'. Using default '{themeVariant}'.");
+            _logger.LogError($"Invalid {AspNetConstants.CliOptions.IgniteUIThemeVariantOption} option '{ThemeVariant}'. Supported values: {string.Join(", ", IgniteUIBlazorHelper.ThemeVariants)} (default: {IgniteUIBlazorHelper.DefaultThemeVariant}).");
+            return null;
         }
 
         // '--project' may be relative to the current directory; every later step (host page, _Imports.razor,
@@ -140,18 +141,32 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             return null;
         }
 
-        var projectFileContent = _fileSystem.ReadAllText(settings.Project);
-        var programFilePath = Path.Combine(projectDirectory, "Program.cs");
-        var programFileContent = _fileSystem.FileExists(programFilePath) ? _fileSystem.ReadAllText(programFilePath) : null;
-        bool isWebAssemblyProject = IgniteUIBlazorHelper.IsWebAssemblyProject(projectFileContent, programFileContent);
+        // Everything below inspects evaluated MSBuild projects, before any changes are made, so that an unsupported
+        // project, a broken client reference or a package conflict stops the scaffolder without partial edits.
+        // ClassAnalyzers.GetProjectInfo above has registered MSBuild.
+        if (!IgniteUIBlazorProjectInspector.TryEvaluate(settings.Project, out var projectEvaluation, out var evaluationError))
+        {
+            _logger.LogError(evaluationError);
+            return null;
+        }
+
+        bool isWebAssemblyProject = projectEvaluation!.UsesBlazorWebAssemblySdk;
+        bool isMauiBlazorHybridProject = !isWebAssemblyProject && projectEvaluation.IsMauiBlazorHybrid;
+        if (!isWebAssemblyProject && !isMauiBlazorHybridProject && !projectEvaluation.UsesWebSdk)
+        {
+            _logger.LogError(IgniteUIBlazorProjectInspector.GetUnsupportedProjectError(projectEvaluation, hasWebAssemblyClient: false));
+            return null;
+        }
 
         // A Blazor Web App server project may reference a WebAssembly client project that needs the same packages,
-        // services and imports. Resolve it here, before any changes are made, so that a broken reference, an evaluation
-        // failure or an ambiguous client stops the scaffolder instead of leaving the client silently unconfigured.
-        // A standalone WebAssembly project is the client itself and has no client project to discover.
+        // services and imports. Resolve it so that a broken reference, an evaluation failure or an ambiguous client
+        // stops the scaffolder instead of leaving the client silently unconfigured.
+        // A standalone WebAssembly project is the client itself, and a MAUI Blazor Hybrid app runs its components in
+        // the app's own BlazorWebView, so neither has a client project to discover.
         string? clientProjectPath = null;
         string? clientImportsFilePath = null;
-        if (!isWebAssemblyProject)
+        IgniteUIBlazorProjectInspector.ProjectEvaluation? clientEvaluation = null;
+        if (!isWebAssemblyProject && !isMauiBlazorHybridProject)
         {
             if (!BlazorWebAssemblyClientProjectResolver.TryGetClient(settings.Project, _fileSystem, out var client, out var error))
             {
@@ -165,7 +180,31 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
                 clientProjectPath = client.Value.ProjectPath;
                 clientImportsFilePath = IgniteUIBlazorHelper.GetClientImportsFilePath(_fileSystem, Path.GetDirectoryName(clientProjectPath)!);
                 _logger.LogInformation($"Found Blazor WebAssembly client project '{clientProjectPath}'; it will be configured as well.");
+                if (!IgniteUIBlazorProjectInspector.TryEvaluate(clientProjectPath, out clientEvaluation, out evaluationError))
+                {
+                    _logger.LogError(evaluationError);
+                    return null;
+                }
             }
+        }
+
+        var unsupportedProjectError = IgniteUIBlazorProjectInspector.GetUnsupportedProjectError(projectEvaluation, hasWebAssemblyClient: clientEvaluation is not null);
+        if (unsupportedProjectError is not null)
+        {
+            _logger.LogError(unsupportedProjectError);
+            return null;
+        }
+
+        // IgniteUI.Blazor.Lite is installed in the server and in the client, so both must be free of the commercial package.
+        var packageConflictErrors = new[] { projectEvaluation, clientEvaluation }
+            .OfType<IgniteUIBlazorProjectInspector.ProjectEvaluation>()
+            .Select(IgniteUIBlazorProjectInspector.GetCommercialPackageConflictError)
+            .OfType<string>()
+            .ToList();
+        if (packageConflictErrors.Count > 0)
+        {
+            packageConflictErrors.ForEach(error => _logger.LogError(error));
+            return null;
         }
 
         var hostPagePath = IgniteUIBlazorHelper.FindHostPage(_fileSystem, projectDirectory);
@@ -189,6 +228,7 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             ThemeVariant = settings.ThemeVariant,
             StylesheetPath = stylesheetPath,
             IsWebAssemblyProject = isWebAssemblyProject,
+            IsMauiBlazorHybridProject = isMauiBlazorHybridProject,
             HostPagePath = hostPagePath,
             ImportsFilePath = IgniteUIBlazorHelper.GetImportsFilePath(_fileSystem, projectDirectory),
             ClientProjectPath = clientProjectPath,
@@ -199,11 +239,12 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
     /// <summary>
     /// Ignite UI components need an interactive render mode; static server-side rendering renders nothing usable.
     /// Logs guidance for Blazor Web Apps that do not register or declare an interactive render mode.
-    /// Blazor WebAssembly and Blazor Server applications are always interactive, so nothing is logged for them.
+    /// Blazor WebAssembly, Blazor Server and Blazor Hybrid applications are always interactive, so nothing is logged for them.
     /// </summary>
     private void LogRenderModeGuidance(IgniteUIBlazorModel model)
     {
         if (model.IsWebAssemblyProject ||
+            model.IsMauiBlazorHybridProject ||
             model.HostPagePath is null ||
             !model.HostPagePath.EndsWith("App.razor", StringComparison.OrdinalIgnoreCase))
         {

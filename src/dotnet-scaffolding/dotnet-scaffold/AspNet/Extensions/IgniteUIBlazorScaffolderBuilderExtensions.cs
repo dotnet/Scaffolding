@@ -24,6 +24,8 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     internal const string CodeModificationConfigFileName = "igniteUIBlazorChanges.json";
     /// <summary>Code modification config for Blazor WebAssembly projects (standalone or the Web App client project).</summary>
     internal const string WasmCodeModificationConfigFileName = "igniteUIBlazorWasmChanges.json";
+    /// <summary>Code modification config for .NET MAUI Blazor Hybrid apps (MauiProgram.cs).</summary>
+    internal const string MauiCodeModificationConfigFileName = "igniteUIBlazorMauiChanges.json";
 
     /// <summary>
     /// Adds a step that installs the IgniteUI.Blazor.Lite and IgniteUI.Blazor.GridLite NuGet packages into the project.
@@ -73,7 +75,7 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
         {
             var step = config.Step;
             var model = GetModel(config.Context);
-            var configFileName = model.IsWebAssemblyProject ? WasmCodeModificationConfigFileName : CodeModificationConfigFileName;
+            var configFileName = GetCodeModificationConfigFileName(model);
             if (!TryConfigureCodeModificationStep(step, config.Context, model.ProjectPath, configFileName, model.ProjectInfo.CodeChangeOptions))
             {
                 step.SkipStep = true;
@@ -158,6 +160,14 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
             step.StylesheetPath = model.StylesheetPath;
         });
     }
+
+    /// <summary>
+    /// Returns the code modification config that registers the Ignite UI services for the model's project type.
+    /// </summary>
+    internal static string GetCodeModificationConfigFileName(IgniteUIBlazorModel model)
+        => model.IsMauiBlazorHybridProject ? MauiCodeModificationConfigFileName
+            : model.IsWebAssemblyProject ? WasmCodeModificationConfigFileName
+            : CodeModificationConfigFileName;
 
     /// <summary>
     /// Returns the NuGet packages to install: IgniteUI.Blazor.Lite (core components) and IgniteUI.Blazor.GridLite (grid).

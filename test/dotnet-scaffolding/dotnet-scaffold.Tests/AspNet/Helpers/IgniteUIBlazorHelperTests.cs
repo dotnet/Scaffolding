@@ -18,21 +18,37 @@ public class IgniteUIBlazorHelperTests
     [InlineData("bootstrap", "bootstrap")]
     [InlineData("Material", "material")]
     [InlineData("FLUENT", "fluent")]
-    [InlineData("indigo", "indigo")]
+    [InlineData(" indigo ", "indigo")]
     [InlineData(null, "bootstrap")]
     [InlineData("", "bootstrap")]
-    [InlineData("unknown", "bootstrap")]
-    public void NormalizeTheme_ReturnsKnownThemeOrDefault(string? theme, string expected)
-        => Assert.Equal(expected, IgniteUIBlazorHelper.NormalizeTheme(theme));
+    public void TryNormalizeTheme_ReturnsSupportedThemeOrDefaultWhenOmitted(string? theme, string expected)
+    {
+        Assert.True(IgniteUIBlazorHelper.TryNormalizeTheme(theme, out var normalized));
+        Assert.Equal(expected, normalized);
+    }
+
+    [Theory]
+    [InlineData("unknown")]
+    [InlineData("bootstrap-dark")]
+    public void TryNormalizeTheme_RejectsUnsupportedTheme(string theme)
+        => Assert.False(IgniteUIBlazorHelper.TryNormalizeTheme(theme, out _));
 
     [Theory]
     [InlineData("light", "light")]
     [InlineData("Dark", "dark")]
     [InlineData(null, "light")]
     [InlineData("", "light")]
-    [InlineData("night", "light")]
-    public void NormalizeThemeVariant_ReturnsKnownVariantOrDefault(string? variant, string expected)
-        => Assert.Equal(expected, IgniteUIBlazorHelper.NormalizeThemeVariant(variant));
+    public void TryNormalizeThemeVariant_ReturnsSupportedVariantOrDefaultWhenOmitted(string? variant, string expected)
+    {
+        Assert.True(IgniteUIBlazorHelper.TryNormalizeThemeVariant(variant, out var normalized));
+        Assert.Equal(expected, normalized);
+    }
+
+    [Theory]
+    [InlineData("night")]
+    [InlineData("darker")]
+    public void TryNormalizeThemeVariant_RejectsUnsupportedVariant(string variant)
+        => Assert.False(IgniteUIBlazorHelper.TryNormalizeThemeVariant(variant, out _));
 
     [Fact]
     public void Themes_ContainAllShippedThemes()
@@ -50,11 +66,6 @@ public class IgniteUIBlazorHelperTests
     [InlineData("material", "dark", "_content/IgniteUI.Blazor/themes/dark/material.css")]
     public void GetThemeStylesheetPath_UsesIgniteUIBlazorTheme(string theme, string variant, string expected)
         => Assert.Equal(expected, IgniteUIBlazorHelper.GetThemeStylesheetPath(theme, variant));
-
-    [Fact]
-    public void GetThemeStylesheetPath_NormalizesThemeAndVariant()
-        => Assert.Equal("_content/IgniteUI.Blazor/themes/light/bootstrap.css",
-            IgniteUIBlazorHelper.GetThemeStylesheetPath("not-a-theme", null));
 
     [Theory]
     [InlineData("_content/IgniteUI.Blazor/themes/light/bootstrap.css")]
@@ -84,28 +95,6 @@ public class IgniteUIBlazorHelperTests
     #endregion
 
     #region Project inspection
-
-    [Fact]
-    public void IsWebAssemblyProject_TrueForBlazorWebAssemblySdkAttribute()
-        => Assert.True(IgniteUIBlazorHelper.IsWebAssemblyProject("<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\"></Project>", null));
-
-    [Fact]
-    public void IsWebAssemblyProject_TrueForBlazorWebAssemblySdkElement()
-        => Assert.True(IgniteUIBlazorHelper.IsWebAssemblyProject("<Project>\n  <Sdk Name=\"Microsoft.NET.Sdk.BlazorWebAssembly\" />\n</Project>", null));
-
-    [Fact]
-    public void IsWebAssemblyProject_TrueWhenProgramUsesWebAssemblyHostBuilder()
-        => Assert.True(IgniteUIBlazorHelper.IsWebAssemblyProject("<Project Sdk=\"Microsoft.NET.Sdk.Web\"></Project>",
-            "var builder = WebAssemblyHostBuilder.CreateDefault(args);"));
-
-    [Fact]
-    public void IsWebAssemblyProject_FalseForWebSdkWithWebApplicationBuilder()
-        => Assert.False(IgniteUIBlazorHelper.IsWebAssemblyProject("<Project Sdk=\"Microsoft.NET.Sdk.Web\"></Project>",
-            "var builder = WebApplication.CreateBuilder(args);"));
-
-    [Fact]
-    public void IsWebAssemblyProject_FalseForNullInputs()
-        => Assert.False(IgniteUIBlazorHelper.IsWebAssemblyProject(null, null));
 
     [Theory]
     [InlineData("builder.Services.AddRazorComponents().AddInteractiveServerComponents();", true)]

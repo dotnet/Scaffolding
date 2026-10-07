@@ -40,6 +40,11 @@ internal class IgniteUIBlazorModel
     /// </summary>
     public required bool IsWebAssemblyProject { get; init; }
     /// <summary>
+    /// Gets a value indicating whether the target project is a .NET MAUI Blazor Hybrid app, whose services are
+    /// registered in MauiProgram.cs and whose host page is wwwroot/index.html.
+    /// </summary>
+    public bool IsMauiBlazorHybridProject { get; init; }
+    /// <summary>
     /// Gets the resolved host page that contains the &lt;head&gt; element (Components/App.razor,
     /// Pages/_Host.cshtml, Pages/_Layout.cshtml or wwwroot/index.html), or null when none was found.
     /// </summary>

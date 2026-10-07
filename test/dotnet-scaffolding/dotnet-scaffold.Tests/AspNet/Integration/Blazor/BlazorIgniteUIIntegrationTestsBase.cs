@@ -3,9 +3,18 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
+using Microsoft.DotNet.Scaffolding.CodeModification;
+using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
@@ -61,6 +70,7 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
     [Theory]
     [InlineData("igniteUIBlazorChanges.json")]
     [InlineData("igniteUIBlazorWasmChanges.json")]
+    [InlineData("igniteUIBlazorMauiChanges.json")]
     public void CodeModificationConfig_ExistsForTargetFramework(string configFileName)
     {
         var configPath = GetCodeModificationConfigPath(configFileName);
@@ -94,6 +104,45 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
         var content = File.ReadAllText(GetCodeModificationConfigPath("igniteUIBlazorWasmChanges.json"));
         Assert.Contains("await builder.Build().RunAsync();", content);
         Assert.Contains("builder.Services.AddIgniteUIBlazor()", content);
+    }
+
+    [Fact]
+    public async Task MauiConfig_RegistersServicesAfterBlazorWebViewOutsideDebugBlock()
+    {
+        // MauiProgram.cs of the 'maui-blazor' template: the registration must not land in the '#if DEBUG' block,
+        // whose '#endif' is attached to 'return builder.Build();'.
+        const string mauiProgram = "using Microsoft.Extensions.Logging;\n\nnamespace MauiApp1;\n\npublic static class MauiProgram\n{\n\tpublic static MauiApp CreateMauiApp()\n\t{\n\t\tvar builder = MauiApp.CreateBuilder();\n\t\tbuilder\n\t\t\t.UseMauiApp<App>()\n\t\t\t.ConfigureFonts(fonts =>\n\t\t\t{\n\t\t\t\tfonts.AddFont(\"OpenSans-Regular.ttf\", \"OpenSansRegular\");\n\t\t\t});\n\n\t\tbuilder.Services.AddMauiBlazorWebView();\n\n#if DEBUG\n\t\tbuilder.Services.AddBlazorWebViewDeveloperTools();\n\t\tbuilder.Logging.AddDebug();\n#endif\n\n\t\treturn builder.Build();\n\t}\n}\n";
+        var projectPath = Path.Combine(_testProjectDir, "MauiApp1.csproj");
+        using var workspace = new AdhocWorkspace();
+        var project = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Create(),
+            "MauiApp1", "MauiApp1", LanguageNames.CSharp, filePath: projectPath));
+        var document = workspace.AddDocument(DocumentInfo.Create(DocumentId.CreateNewId(project.Id), "MauiProgram.cs",
+            loader: TextLoader.From(TextAndVersion.Create(SourceText.From(mauiProgram), VersionStamp.Create())),
+            filePath: Path.Combine(_testProjectDir, "MauiProgram.cs")));
+        var codeService = new Mock<ICodeService>();
+        codeService.Setup(service => service.GetWorkspaceAsync()).ReturnsAsync(workspace);
+        codeService.Setup(service => service.TryApplyChanges(It.IsAny<Solution>()))
+            .Returns((Solution solution) => workspace.TryApplyChanges(solution));
+
+        async Task<string> ApplyConfigAsync()
+        {
+            var config = CodeModifierConfigHelper.GetCodeModifierConfig(GetCodeModificationConfigPath("igniteUIBlazorMauiChanges.json"));
+            Assert.NotNull(config);
+            Assert.True(await new ProjectModifier(projectPath, codeService.Object, Mock.Of<ILogger>(), config, []).RunAsync());
+            return (await workspace.CurrentSolution.GetDocument(document.Id)!.GetTextAsync()).ToString();
+        }
+
+        var updated = await ApplyConfigAsync();
+
+        Assert.Contains("using IgniteUI.Blazor.Controls;", updated);
+        var webViewIndex = updated.IndexOf("builder.Services.AddMauiBlazorWebView();", StringComparison.Ordinal);
+        var registrationIndex = updated.IndexOf("builder.Services.AddIgniteUIBlazor();", StringComparison.Ordinal);
+        var debugIndex = updated.IndexOf("#if DEBUG", StringComparison.Ordinal);
+        Assert.True(webViewIndex >= 0 && webViewIndex < registrationIndex && registrationIndex < debugIndex,
+            $"AddIgniteUIBlazor() should follow AddMauiBlazorWebView() and precede the '#if DEBUG' block.\n{updated}");
+
+        // Re-running the scaffolder must not register the services twice.
+        Assert.Single(Regex.Matches(await ApplyConfigAsync(), Regex.Escape("AddIgniteUIBlazor")));
     }
 
     #endregion

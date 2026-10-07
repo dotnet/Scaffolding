@@ -37,44 +37,41 @@ internal static class IgniteUIBlazorHelper
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     /// <summary>
-    /// Normalizes the theme name; falls back to <see cref="DefaultTheme"/> when null, empty or unknown.
+    /// Normalizes the '--theme' value: <see cref="DefaultTheme"/> when it is omitted, otherwise the matching entry of
+    /// <see cref="Themes"/> (case-insensitive).
     /// </summary>
-    internal static string NormalizeTheme(string? theme)
-        => Themes.FirstOrDefault(t => t.Equals(theme, StringComparison.OrdinalIgnoreCase)) ?? DefaultTheme;
+    /// <returns>False when a value is given that is not a supported theme.</returns>
+    internal static bool TryNormalizeTheme(string? theme, out string normalizedTheme)
+        => TryNormalize(theme, Themes, DefaultTheme, out normalizedTheme);
 
     /// <summary>
-    /// Normalizes the theme variant; falls back to <see cref="DefaultThemeVariant"/> when null, empty or unknown.
+    /// Normalizes the '--theme-variant' value: <see cref="DefaultThemeVariant"/> when it is omitted, otherwise the
+    /// matching entry of <see cref="ThemeVariants"/> (case-insensitive).
     /// </summary>
-    internal static string NormalizeThemeVariant(string? variant)
-        => ThemeVariants.FirstOrDefault(v => v.Equals(variant, StringComparison.OrdinalIgnoreCase)) ?? DefaultThemeVariant;
+    /// <returns>False when a value is given that is not a supported theme variant.</returns>
+    internal static bool TryNormalizeThemeVariant(string? variant, out string normalizedVariant)
+        => TryNormalize(variant, ThemeVariants, DefaultThemeVariant, out normalizedVariant);
 
     /// <summary>
     /// Builds the project-relative path of the IgniteUI.Blazor theme stylesheet to link. Both packages are always
     /// installed, so the IgniteUI.Blazor.Lite theme is used: it styles the core components and the GridLite grid.
     /// </summary>
-    /// <param name="theme">Theme name (see <see cref="Themes"/>).</param>
-    /// <param name="variant">Theme variant (see <see cref="ThemeVariants"/>).</param>
-    internal static string GetThemeStylesheetPath(string? theme, string? variant)
-        => $"{LiteStaticAssetsRoot}/themes/{NormalizeThemeVariant(variant)}/{NormalizeTheme(theme)}.css";
+    /// <param name="theme">A normalized theme name (see <see cref="TryNormalizeTheme"/>).</param>
+    /// <param name="variant">A normalized theme variant (see <see cref="TryNormalizeThemeVariant"/>).</param>
+    internal static string GetThemeStylesheetPath(string theme, string variant)
+        => $"{LiteStaticAssetsRoot}/themes/{variant}/{theme}.css";
 
-    /// <summary>
-    /// Detects whether the project is a standalone Blazor WebAssembly project, i.e. uses the
-    /// 'Microsoft.NET.Sdk.BlazorWebAssembly' SDK or bootstraps with 'WebAssemblyHostBuilder'.
-    /// </summary>
-    /// <param name="projectFileContent">The .csproj content.</param>
-    /// <param name="programFileContent">The Program.cs content, or null when the file does not exist.</param>
-    internal static bool IsWebAssemblyProject(string? projectFileContent, string? programFileContent)
+    private static bool TryNormalize(string? value, List<string> supportedValues, string defaultValue, out string normalizedValue)
     {
-        if (!string.IsNullOrEmpty(projectFileContent) &&
-            Regex.IsMatch(projectFileContent,
-                @"Sdk\s*=\s*""Microsoft\.NET\.Sdk\.BlazorWebAssembly""|<Sdk\s+Name\s*=\s*""Microsoft\.NET\.Sdk\.BlazorWebAssembly""",
-                RegexOptions.IgnoreCase))
+        if (string.IsNullOrWhiteSpace(value))
         {
+            normalizedValue = defaultValue;
             return true;
         }
 
-        return !string.IsNullOrEmpty(programFileContent) &&
-               programFileContent.Contains("WebAssemblyHostBuilder", StringComparison.Ordinal);
+        var match = supportedValues.FirstOrDefault(supported => supported.Equals(value.Trim(), StringComparison.OrdinalIgnoreCase));
+        normalizedValue = match ?? defaultValue;
+        return match is not null;
     }
 
     /// <summary>

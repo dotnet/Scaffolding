@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -97,7 +98,7 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
     public async Task Scaffold_BlazorIgniteUI_Net10_SplitWebApp_MultipleClients_FailsBeforeChanges()
     {
         // Arrange — the server references two Blazor WebAssembly projects, so the client to configure is ambiguous
-        var clientProjectDir = SetupSplitWebApp();
+        SetupSplitWebApp();
         var secondClientProjectDir = Path.Combine(_testDirectory, "TestProject.Client2");
         Directory.CreateDirectory(secondClientProjectDir);
         File.WriteAllText(Path.Combine(secondClientProjectDir, "TestProject.Client2.csproj"), GetSplitClientProjectContent());
@@ -107,7 +108,7 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         Assert.Contains("TestProject.Client2.csproj", File.ReadAllText(_testProjectPath));
 
         // Act + Assert
-        var cliOutput = await ScaffoldAndAssertFailsWithoutChangesAsync(clientProjectDir);
+        var cliOutput = await ScaffoldAndAssertFailsWithoutChangesAsync();
         Assert.Contains("Multiple referenced projects use the Microsoft.NET.Sdk.BlazorWebAssembly SDK", cliOutput);
         Assert.Contains("TestProject.Client.csproj", cliOutput);
         Assert.Contains("TestProject.Client2.csproj", cliOutput);
@@ -117,12 +118,12 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
     public async Task Scaffold_BlazorIgniteUI_Net10_SplitWebApp_MissingClientProject_FailsBeforeChanges()
     {
         // Arrange — the server references a client project that does not exist on disk
-        var clientProjectDir = SetupSplitWebApp();
+        SetupSplitWebApp();
         File.WriteAllText(_testProjectPath, File.ReadAllText(_testProjectPath).Replace(
             "TestProject.Client\\TestProject.Client.csproj", "TestProject.Missing\\TestProject.Missing.csproj"));
 
         // Act + Assert
-        var cliOutput = await ScaffoldAndAssertFailsWithoutChangesAsync(clientProjectDir);
+        var cliOutput = await ScaffoldAndAssertFailsWithoutChangesAsync();
         Assert.Contains("TestProject.Missing.csproj", cliOutput);
         Assert.Contains("was not found", cliOutput);
     }
@@ -138,10 +139,104 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         Assert.Contains("Missing.Client.props", File.ReadAllText(clientProjectPath));
 
         // Act + Assert
-        var cliOutput = await ScaffoldAndAssertFailsWithoutChangesAsync(clientProjectDir);
+        var cliOutput = await ScaffoldAndAssertFailsWithoutChangesAsync();
         Assert.Contains("Unable to evaluate referenced project", cliOutput);
         Assert.Contains("TestProject.Client.csproj", cliOutput);
         Assert.Contains("Missing.Client.props", cliOutput);
+    }
+
+    [Fact]
+    public async Task Scaffold_BlazorIgniteUI_Net10_RazorPagesApp_FailsBeforeChanges()
+    {
+        // Arrange — an ASP.NET Core Razor Pages app: Web SDK, but no Razor components and no WebAssembly client
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorPages();\nvar app = builder.Build();\napp.MapRazorPages();\napp.Run();\n");
+        Directory.CreateDirectory(Path.Combine(_testProjectDir, "Pages"));
+        File.WriteAllText(Path.Combine(_testProjectDir, "Pages", "Index.cshtml"), "@page\n<h1>Hello</h1>\n");
+
+        // Act + Assert
+        var cliOutput = await ScaffoldAndAssertFailsWithoutChangesAsync();
+        Assert.Contains("is not a supported Blazor app", cliOutput);
+        Assert.Contains("includes no Razor components", cliOutput);
+    }
+
+    [Fact]
+    public async Task Scaffold_BlazorIgniteUI_Net10_CommercialPackageImportedInServer_FailsBeforeChanges()
+    {
+        // Arrange — the commercial package is referenced from Directory.Build.props, not from the project file
+        SetupBlazorWebAppProject();
+        var directoryBuildProps = Path.Combine(_testProjectDir, "Directory.Build.props");
+        File.WriteAllText(directoryBuildProps, """
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="IgniteUI.Blazor" Version="25.1.0" />
+              </ItemGroup>
+            </Project>
+            """);
+        Assert.DoesNotContain("IgniteUI", File.ReadAllText(_testProjectPath));
+
+        // Act + Assert
+        var cliOutput = await ScaffoldAndAssertFailsWithoutChangesAsync();
+        Assert.Contains("references the commercial IgniteUI.Blazor package", cliOutput);
+        Assert.Contains(directoryBuildProps, cliOutput);
+    }
+
+    [Fact]
+    public async Task Scaffold_BlazorIgniteUI_Net10_SplitWebApp_CommercialPackageInClient_FailsBeforeChanges()
+    {
+        // Arrange — only the WebAssembly client references the commercial trial package, behind a condition
+        var clientProjectDir = SetupSplitWebApp();
+        var clientProjectPath = Path.Combine(clientProjectDir, "TestProject.Client.csproj");
+        File.WriteAllText(clientProjectPath, File.ReadAllText(clientProjectPath).Replace(
+            "</Project>",
+            "  <ItemGroup>\n    <PackageReference Include=\"IgniteUI.Blazor.Trial\" Version=\"25.1.0\" Condition=\"'$(Configuration)' == 'Debug'\" />\n  </ItemGroup>\n</Project>"));
+
+        // Act + Assert
+        var cliOutput = await ScaffoldAndAssertFailsWithoutChangesAsync();
+        Assert.Contains($"'{clientProjectPath}' references the commercial IgniteUI.Blazor.Trial package", cliOutput);
+    }
+
+    [Theory]
+    [InlineData("--theme", "neon", new[] { "bootstrap", "material", "fluent", "indigo" })]
+    [InlineData("--theme-variant", "night", new[] { "light", "dark" })]
+    public async Task Scaffold_BlazorIgniteUI_Net10_UnsupportedThemeOption_FailsBeforeChanges(string option, string value, string[] supportedValues)
+    {
+        // Arrange
+        SetupBlazorWebAppProject();
+
+        // Act + Assert — the command line rejects the value and lists the supported ones before any step runs
+        // (ValidateIgniteUIBlazorStep rejects it as well when the step is driven without the command-line parser)
+        var cliOutput = await ScaffoldAndAssertFailsWithoutChangesAsync(option, value);
+        Assert.Contains($"Argument '{value}' not recognized. Must be one of:", cliOutput);
+        Assert.All(supportedValues, supportedValue => Assert.Contains($"'{supportedValue}'", cliOutput));
+    }
+
+    [Fact]
+    public async Task Scaffold_BlazorIgniteUI_Net10_WebAppWithoutTemplateLayout()
+    {
+        // Arrange — a Blazor Web App whose components live in 'UI/' instead of the template's 'Components/'
+        SetupBlazorWebAppProject();
+        Directory.Move(Path.Combine(_testProjectDir, "Components"), Path.Combine(_testProjectDir, "UI"));
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        File.WriteAllText(programPath, File.ReadAllText(programPath).Replace("using TestProject.Components;", "using TestProject.UI;"));
+        await AssertBuildsAsync("before scaffolding");
+
+        // Act
+        var cliOutput = await RunScaffoldAndAssertSuccessAsync();
+
+        // Assert — the project is accepted; packages, services and the root _Imports.razor are set up
+        var projectContent = File.ReadAllText(_testProjectPath);
+        Assert.Contains(LitePackageName, projectContent);
+        Assert.Contains(GridLitePackageName, projectContent);
+        Assert.Contains("builder.Services.AddIgniteUIBlazor();", File.ReadAllText(programPath));
+        Assert.Contains(ControlsUsing, File.ReadAllText(Path.Combine(_testProjectDir, "_Imports.razor")));
+
+        // Assert — no known host page exists, so the stylesheet link is printed for manual addition instead
+        Assert.Contains("Could not find a host page", cliOutput);
+        Assert.Contains(LiteBootstrapLightStylesheet, cliOutput);
+        Assert.DoesNotContain("_content/IgniteUI", File.ReadAllText(Path.Combine(_testProjectDir, "UI", "App.razor")));
+
+        await AssertBuildsAsync("after scaffolding");
     }
 
     [Fact]
@@ -370,30 +465,37 @@ app.Run();
     }
 
     /// <summary>
-    /// Runs the scaffolder and asserts that it fails without modifying the server or the client project.
+    /// Runs the scaffolder and asserts that it fails without creating or modifying any source file in the test
+    /// directory (build output under obj/ and bin/ is ignored).
     /// </summary>
     /// <returns>The scaffolder's combined console output.</returns>
-    private async Task<string> ScaffoldAndAssertFailsWithoutChangesAsync(string clientProjectDir)
+    private async Task<string> ScaffoldAndAssertFailsWithoutChangesAsync(params string[] extraCliArgs)
     {
-        string[] trackedFiles =
-        [
-            _testProjectPath,
-            Path.Combine(_testProjectDir, "Program.cs"),
-            Path.Combine(_testProjectDir, "Components", "App.razor"),
-            Path.Combine(_testProjectDir, "Components", "_Imports.razor"),
-            Path.Combine(clientProjectDir, "TestProject.Client.csproj"),
-            Path.Combine(clientProjectDir, "Program.cs"),
-            Path.Combine(clientProjectDir, "_Imports.razor"),
-        ];
-        var before = Array.ConvertAll(trackedFiles, path => File.ReadAllText(path));
+        var before = SnapshotSourceFiles();
 
-        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework, "blazor-igniteui", "--project", _testProjectPath);
+        string[] args = ["--project", _testProjectPath, .. extraCliArgs];
+        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(TargetFramework, "blazor-igniteui", args);
 
         Assert.True(cliExitCode != 0, $"CLI scaffold should fail.\nOutput: {cliOutput}\nError: {cliError}");
         Assert.DoesNotContain("Unhandled exception", cliOutput + cliError);
-        Assert.Equal(before, Array.ConvertAll(trackedFiles, path => File.ReadAllText(path)));
+        Assert.Equal(before, SnapshotSourceFiles());
         return cliOutput + cliError;
+    }
+
+    private SortedDictionary<string, string> SnapshotSourceFiles()
+    {
+        var snapshot = new SortedDictionary<string, string>(StringComparer.Ordinal);
+        foreach (var file in Directory.EnumerateFiles(_testDirectory, "*", SearchOption.AllDirectories))
+        {
+            var relativePath = Path.GetRelativePath(_testDirectory, file);
+            var segments = relativePath.Split(Path.DirectorySeparatorChar);
+            if (!Array.Exists(segments, segment => segment is "obj" or "bin"))
+            {
+                snapshot[relativePath] = File.ReadAllText(file);
+            }
+        }
+
+        return snapshot;
     }
 
     /// <summary>

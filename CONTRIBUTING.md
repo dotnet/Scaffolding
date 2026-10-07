@@ -351,6 +351,14 @@ Consistent code makes review faster and the codebase easier to maintain.
 - Add XML documentation comments (`///`) to public APIs.
 - Keep methods focused and avoid unrelated changes in the same PR.
 
+### Error Handling
+
+Follow the [.NET exception guidelines](https://learn.microsoft.com/dotnet/standard/design-guidelines/exception-throwing): return ordinary results for successful work and throw appropriate standard exceptions for execution failures. Do not encode general failures as null results, success tuples, or custom result types. Reserve `Try` methods for narrowly defined expected outcomes, not catch-all exception conversion.
+
+Catch expected operational exceptions at the boundary that can report the failure, such as a scaffolding step or command. Log the exception once with useful context and translate it into the boundary's existing failure result or exit code. Helpers should propagate failures rather than logging and returning success-shaped fallbacks. Avoid blanket catches that swallow programming errors or cancellation.
+
+Define normal no-op outcomes explicitly and handle them without treating them as errors. For text-modification recipes, absent optional targets and unmatched anchors are successful skips. A storage adapter may narrowly handle file-not-found exceptions to implement that contract; access failures and invalid paths remain errors. Apply this pattern to new and modified code without unrelated repository-wide rewrites.
+
 ### Commit Messages
 
 - Write clear, imperative-mood subject lines (e.g., "Add Entra ID logout template" rather than "Added" or "Adds").

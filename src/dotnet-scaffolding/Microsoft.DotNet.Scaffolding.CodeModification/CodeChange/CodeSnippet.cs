@@ -31,5 +31,6 @@ internal class CodeSnippet
     public string? Parameter { get; set; }
     public CodeChangeType? CodeChangeType { get; set; } = CodeChange.CodeChangeType.Default;
     public string[]? MultiLineBlock { get; set; }
+    public string? FileBlock { get; set; }
     public string[]? ReplaceSnippet { get; set; }
 }

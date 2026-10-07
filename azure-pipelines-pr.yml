@@ -147,8 +147,12 @@ stages:
         - job: Linux
           timeoutInMinutes: 180
           pool:
-            ${{ if or(ne(variables['System.TeamProject'], 'internal'), in(variables['Build.Reason'], 'Manual', 'PullRequest', 'Schedule')) }}:
-              vmImage: ubuntu-22.04
+            ${{ if eq(variables['System.TeamProject'], 'public') }}:
+              name: $(DncEngPublicBuildPool)
+              demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+            ${{ else }}:
+              name: $(DncEngInternalBuildPool)
+              demands: ImageOverride -equals Build.Ubuntu.2204.Amd64
           strategy:
             matrix:
               release_configuration:
@@ -193,5 +197,5 @@ stages:
     - template: /eng/pipelines/scaffold-integration-matrix.yml
       parameters:
         buildConfig: Release
-        poolVmImage: windows-latest
-
+        poolName: $(DncEngPublicBuildPool)
+        poolDemands: ImageOverride -equals 1es-windows-2022-open

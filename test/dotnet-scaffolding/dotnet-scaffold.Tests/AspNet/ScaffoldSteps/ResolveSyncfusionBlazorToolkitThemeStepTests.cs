@@ -53,6 +53,11 @@ public class ResolveSyncfusionBlazorToolkitThemeStepTests : IDisposable
         };
     }
 
+    private static readonly string OsAppRazor =
+        "Components" + System.IO.Path.DirectorySeparatorChar + "App.razor";
+    private static readonly string OsIndexHtml =
+        "wwwroot" + System.IO.Path.DirectorySeparatorChar + "index.html";
+
     [Fact]
     public async Task ExecuteAsync_ResolvesAppRazor_WhenPresent()
     {
@@ -66,7 +71,11 @@ public class ResolveSyncfusionBlazorToolkitThemeStepTests : IDisposable
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
         Assert.True(result);
         var settings = (SyncfusionBlazorToolkitSettings)_context.Properties[nameof(SyncfusionBlazorToolkitSettings)]!;
-        Assert.Equal("Components/App.razor", settings.ThemeFile);
+        // The stored path uses OS-native separators (backslash on
+        // Windows, forward slash on Linux) so the CodeModifier's
+        // EndsWith lookup against MSBuildWorkspace's AdditionalDocument
+        // paths succeeds.
+        Assert.Equal(OsAppRazor, settings.ThemeFile);
         Assert.False(settings.ThemeFileSkipped);
     }
 
@@ -83,12 +92,12 @@ public class ResolveSyncfusionBlazorToolkitThemeStepTests : IDisposable
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
         Assert.True(result);
         var settings = (SyncfusionBlazorToolkitSettings)_context.Properties[nameof(SyncfusionBlazorToolkitSettings)]!;
-        Assert.Equal("wwwroot/index.html", settings.ThemeFile);
+        Assert.Equal(OsIndexHtml, settings.ThemeFile);
         Assert.False(settings.ThemeFileSkipped);
     }
 
     [Fact]
-    public async Task ExecuteAsync_StoresPathInCanonicalForm()
+    public async Task ExecuteAsync_StoresPathInOsNativeForm()
     {
         Directory.CreateDirectory(Path.Combine(_tempDir, "Components"));
         File.WriteAllText(Path.Combine(_tempDir, "Components", "App.razor"), "<html></html>");
@@ -99,9 +108,22 @@ public class ResolveSyncfusionBlazorToolkitThemeStepTests : IDisposable
 
         await step.ExecuteAsync(_context, CancellationToken.None);
         var settings = (SyncfusionBlazorToolkitSettings)_context.Properties[nameof(SyncfusionBlazorToolkitSettings)]!;
-        // Always forward slashes regardless of host OS.
-        Assert.DoesNotContain("\\", settings.ThemeFile);
-        Assert.Equal("Components/App.razor", settings.ThemeFile);
+        // The path uses the OS-native directory separator (backslash on
+        // Windows, forward slash on Linux). Canonical forward-slash paths
+        // were a bug: the CodeModifier's EndsWith lookup would fail to
+        // match MSBuildWorkspace's AdditionalDocument paths on Windows
+        // and silently skip the theme stylesheet injection.
+        if (Path.DirectorySeparatorChar == '\\')
+        {
+            Assert.Contains("\\", settings.ThemeFile);
+            Assert.DoesNotContain("/", settings.ThemeFile);
+        }
+        else
+        {
+            Assert.Contains("/", settings.ThemeFile);
+            Assert.DoesNotContain("\\", settings.ThemeFile);
+        }
+        Assert.Equal(OsAppRazor, settings.ThemeFile);
     }
 
     [Fact]

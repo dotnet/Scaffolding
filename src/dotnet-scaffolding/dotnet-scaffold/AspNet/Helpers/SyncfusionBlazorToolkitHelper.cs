@@ -61,9 +61,16 @@ internal static class SyncfusionBlazorToolkitHelper
 
     /// <summary>
     /// Canonicalizes a project-relative file path so that all forward slashes
-    /// are used regardless of host OS. Avoids path-separator drift between
-    /// Windows and Linux/macOS environments.
+    /// are used regardless of host OS. Useful for log messages and unit-test
+    /// assertions where platform-neutral output is desired.
     /// </summary>
+    /// <remarks>
+    /// Do <b>not</b> use this for the FileName emitted in the code-modification
+    /// JSON. The CodeModifier looks the file up by EndsWith against the
+    /// AdditionalDocument.FilePath recorded by MSBuildWorkspace, which always
+    /// uses OS-native separators. Use <see cref="ToOsNativePath"/> for that
+    /// case instead.
+    /// </remarks>
     public static string CanonicalizePath(string path)
     {
         if (string.IsNullOrEmpty(path))
@@ -72,6 +79,34 @@ internal static class SyncfusionBlazorToolkitHelper
         }
 
         return path.Replace('\\', '/');
+    }
+
+    /// <summary>
+    /// Converts a path to one that uses the OS-native directory separator
+    /// (backslash on Windows, forward slash on Linux/macOS). This is the
+    /// form that <c>MSBuildWorkspace</c> records in
+    /// <c>AdditionalDocument.FilePath</c> and that the CodeModifier matches
+    /// via <c>EndsWith</c>. Using canonical (forward-slash) paths here
+    /// causes the CodeModifier to silently skip files on Windows, which is
+    /// why the theme stylesheet and the <c>@using</c> directive were not
+    /// being injected.
+    /// </summary>
+    public static string ToOsNativePath(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return path;
+        }
+
+        char native = Path.DirectorySeparatorChar;
+        if (native == '/')
+        {
+            return path.Replace('\\', '/');
+        }
+        else
+        {
+            return path.Replace('/', '\\');
+        }
     }
 
     /// <summary>
@@ -89,17 +124,24 @@ internal static class SyncfusionBlazorToolkitHelper
     /// null/empty (so the scaffolder still succeeds in projects that don't
     /// host a _Imports.razor file under Components/ or anywhere else).</para>
     ///
-    /// <para>Both file paths are normalized to forward-slash form before
-    /// being emitted, ensuring identical configuration across Windows and
-    /// Linux.</para>
+    /// <para>The emitted file paths use OS-native directory separators
+    /// (backslash on Windows, forward slash on Linux/macOS). This is what
+    /// <c>MSBuildWorkspace</c> records in <c>AdditionalDocument.FilePath</c>
+    /// and is what the CodeModifier matches via <c>EndsWith</c>. Canonical
+    /// (forward-slash) paths would silently fail to match on Windows and
+    /// cause the entire theme and using-directive change set to be
+    /// skipped. This is the bug behind the missing theme stylesheet and
+    /// missing <c>@using</c> directive in the generated project.</para>
     /// </summary>
     /// <param name="codeModificationFilePath">Absolute path of the source JSON file.</param>
     /// <param name="themeFile">Project-relative theme host file path
     /// (e.g. "Components/App.razor", "wwwroot/index.html") or null to drop
-    /// the theme entry.</param>
+    /// the theme entry. Separators are normalized to OS-native form
+    /// before emission.</param>
     /// <param name="importsFile">Project-relative path of the discovered
     /// _Imports.razor file (e.g. "Components/_Imports.razor" or
-    /// "_Imports.razor") or null to drop the imports entry.</param>
+    /// "_Imports.razor") or null to drop the imports entry. Separators
+    /// are normalized to OS-native form before emission.</param>
     /// <param name="logger">Optional logger for structured diagnostic
     /// output. When null, logging is skipped.</param>
     public static string? BuildResolvedCodeModifierConfigJson(
@@ -206,16 +248,27 @@ internal static class SyncfusionBlazorToolkitHelper
 
                 if (!string.IsNullOrEmpty(themeFile))
                 {
-                    string canonicalThemeFile = CanonicalizePath(themeFile);
-                    string themeEntryJson = ThemeBlockJson.Replace("THEMEFILE", EscapeForJson(canonicalThemeFile));
+                    // IMPORTANT: Use OS-native separators in the JSON
+                    // output. The CodeModifier resolves FileName values
+                    // against MSBuildWorkspace's AdditionalDocument list
+                    // using EndsWith(OSNativePath). Forward slashes only
+                    // would silently fail to match the actual
+                    // AdditionalDocument paths on Windows (which use
+                    // backslashes) and vice versa on Linux (where the
+                    // file system *does* use forward slashes). Using
+                    // Path.GetRelativePath's OS-native output here keeps
+                    // the lookup working on every platform.
+                    string osThemeFile = ToOsNativePath(themeFile);
+                    string themeEntryJson = ThemeBlockJson.Replace("THEMEFILE", EscapeForJson(osThemeFile));
                     using JsonDocument themeEntryDoc = JsonDocument.Parse(themeEntryJson);
                     themeEntryDoc.RootElement.WriteTo(writer);
                 }
 
                 if (!string.IsNullOrEmpty(importsFile))
                 {
-                    string canonicalImportsFile = CanonicalizePath(importsFile);
-                    string importsEntryJson = ImportsBlockJson.Replace("IMPORTSFILE", EscapeForJson(canonicalImportsFile));
+                    // Same OS-native separator rule as for themeFile above.
+                    string osImportsFile = ToOsNativePath(importsFile);
+                    string importsEntryJson = ImportsBlockJson.Replace("IMPORTSFILE", EscapeForJson(osImportsFile));
                     using JsonDocument importsEntryDoc = JsonDocument.Parse(importsEntryJson);
                     importsEntryDoc.RootElement.WriteTo(writer);
                 }

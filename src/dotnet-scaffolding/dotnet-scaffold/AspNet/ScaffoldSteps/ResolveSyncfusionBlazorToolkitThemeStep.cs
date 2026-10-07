@@ -70,10 +70,13 @@ internal class ResolveSyncfusionBlazorToolkitThemeStep : ScaffoldStep
             var fullPath = Path.Combine(projectDirectory, relativePath);
             if (_fileSystem.FileExists(fullPath))
             {
-                // Always store the path in canonical forward-slash form so
-                // that downstream steps (code-mod JSON serialization) and
-                // tests produce identical output on Windows and Linux.
-                settings.ThemeFile = Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.SyncfusionBlazorToolkitHelper.CanonicalizePath(relativePath);
+                // Store the path in OS-native separator form (backslash on
+                // Windows, forward slash on Linux). The CodeModifier looks
+                // the file up via EndsWith against AdditionalDocument
+                // paths, which are always OS-native. Canonicalizing to
+                // forward slashes here would silently break the lookup on
+                // Windows and cause the theme stylesheet to be skipped.
+                settings.ThemeFile = Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.SyncfusionBlazorToolkitHelper.ToOsNativePath(relativePath);
                 settings.ThemeFileSkipped = false;
                 _logger.LogInformation(
                     "Syncfusion Blazor Toolkit theme stylesheet will be added to '{ThemeFile}' ({Kind}).",
@@ -92,8 +95,8 @@ internal class ResolveSyncfusionBlazorToolkitThemeStep : ScaffoldStep
             "Syncfusion Blazor Toolkit theme stylesheet was skipped: neither '{AppRazor}' nor '{IndexHtml}' was found in the project. " +
             "The package, Program.cs registration, and Components/_Imports.razor @using directive were still applied; " +
             "add the theme <link> manually if your project uses a different host file.",
-            Path.Combine("Components", "App.razor"),
-            Path.Combine("wwwroot", "index.html"));
+            Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.SyncfusionBlazorToolkitHelper.ToOsNativePath(Path.Combine("Components", "App.razor")),
+            Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.SyncfusionBlazorToolkitHelper.ToOsNativePath(Path.Combine("wwwroot", "index.html")));
         return Task.FromResult(true);
     }
 }

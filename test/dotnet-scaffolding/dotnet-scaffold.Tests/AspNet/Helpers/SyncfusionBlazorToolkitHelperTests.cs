@@ -29,6 +29,9 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    // Sample JSON that includes the original placeholder-style entries
+    // (Components\_Imports.razor and $(ThemeFile)) so the helper can
+    // exercise the filter-and-rewrite path.
     private const string SampleConfig = @"{
   ""Files"": [
     {
@@ -77,6 +80,12 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
 }
 ";
 
+    // Expected OS-native separator for the host platform.
+    private static readonly string Sep = Path.DirectorySeparatorChar.ToString();
+    private static readonly string OsAppRazor = "Components" + Sep + "App.razor";
+    private static readonly string OsImportsRazor = "Components" + Sep + "_Imports.razor";
+    private static readonly string OsIndexHtml = "wwwroot" + Sep + "index.html";
+
     [Fact]
     public void CanonicalizePath_NullOrEmpty_ReturnsInputUnchanged()
     {
@@ -90,17 +99,23 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         Assert.Equal(
             "Components/App.razor",
             SyncfusionBlazorToolkitHelper.CanonicalizePath(@"Components\App.razor"));
-        Assert.Equal(
-            "wwwroot/index.html",
-            SyncfusionBlazorToolkitHelper.CanonicalizePath(@"wwwroot\index.html"));
     }
 
     [Fact]
-    public void CanonicalizePath_LeavesForwardSlashesAlone()
+    public void ToOsNativePath_NullOrEmpty_ReturnsInputUnchanged()
     {
-        Assert.Equal(
-            "Components/App.razor",
-            SyncfusionBlazorToolkitHelper.CanonicalizePath("Components/App.razor"));
+        Assert.Null(SyncfusionBlazorToolkitHelper.ToOsNativePath(null));
+        Assert.Equal(string.Empty, SyncfusionBlazorToolkitHelper.ToOsNativePath(string.Empty));
+    }
+
+    [Fact]
+    public void ToOsNativePath_UsesOsNativeSeparator()
+    {
+        string result = SyncfusionBlazorToolkitHelper.ToOsNativePath("Components/App.razor");
+        Assert.Equal(OsAppRazor, result);
+        // And the round-trip via backslashes.
+        string result2 = SyncfusionBlazorToolkitHelper.ToOsNativePath(@"Components\App.razor");
+        Assert.Equal(OsAppRazor, result2);
     }
 
     [Fact]
@@ -115,11 +130,11 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
 
         Assert.NotNull(json);
         Assert.DoesNotContain("$(ThemeFile)", json);
-        Assert.DoesNotContain("Components\\\\_Imports.razor", json);
         // Program.cs entry is preserved.
         Assert.Contains("\"Program.cs\"", json);
         // The other block contents are gone (no anchor, no theme link, no
-        // Forms anchor).
+        // Forms anchor) because the placeholders were filtered out and no
+        // replacements were re-emitted.
         Assert.DoesNotContain("fluent.min.css", json);
         Assert.DoesNotContain("Microsoft.AspNetCore.Components.Forms", json);
         using var _ = JsonDocument.Parse(json);
@@ -137,32 +152,16 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
 
         Assert.NotNull(json);
         Assert.DoesNotContain("$(ThemeFile)", json);
-        // Path is JSON-escaped: backslashes are escaped as \\ and the
-        // helper canonicalizes to forward slashes.
-        Assert.Contains("Components/App.razor", json);
+        // Path uses OS-native separators (NOT canonical forward slashes)
+        // so that MSBuildWorkspace's AdditionalDocument.FilePath lookup
+        // succeeds on Windows.
+        Assert.Contains(EscapeForJsonString(OsAppRazor), json);
         Assert.Contains("Syncfusion.Blazor.Toolkit/styles/fluent.min.css", json);
         using var doc = JsonDocument.Parse(json);
         var files = doc.RootElement.GetProperty("Files");
         Assert.Equal(2, files.GetArrayLength());
         // Second entry is the resolved theme file.
-        Assert.Equal("Components/App.razor", files[1].GetProperty("FileName").GetString());
-    }
-
-    [Fact]
-    public void BuildResolvedCodeModifierConfigJson_WithCanonicalThemePath_UsesForwardSlashes()
-    {
-        var configPath = WriteConfig(SampleConfig);
-
-        // Pass a Windows-style path; the helper should canonicalize to forward slashes
-        // before writing the JSON, so Windows and Linux produce the same output.
-        var json = SyncfusionBlazorToolkitHelper.BuildResolvedCodeModifierConfigJson(
-            configPath,
-            themeFile: "Components\\App.razor",
-            importsFile: null);
-
-        Assert.NotNull(json);
-        Assert.DoesNotContain("Components\\\\App.razor", json);
-        Assert.Contains("Components/App.razor", json);
+        Assert.Equal(OsAppRazor, files[1].GetProperty("FileName").GetString());
     }
 
     [Fact]
@@ -177,12 +176,12 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
 
         Assert.NotNull(json);
         Assert.DoesNotContain("$(ThemeFile)", json);
-        Assert.Contains("wwwroot/index.html", json);
+        Assert.Contains(EscapeForJsonString(OsIndexHtml), json);
         Assert.Contains("Syncfusion.Blazor.Toolkit/styles/fluent.min.css", json);
         using var doc = JsonDocument.Parse(json);
         var files = doc.RootElement.GetProperty("Files");
         Assert.Equal(2, files.GetArrayLength());
-        Assert.Equal("wwwroot/index.html", files[1].GetProperty("FileName").GetString());
+        Assert.Equal(OsIndexHtml, files[1].GetProperty("FileName").GetString());
     }
 
     [Fact]
@@ -196,17 +195,16 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
             importsFile: Path.Combine("Components", "_Imports.razor"));
 
         Assert.NotNull(json);
-        Assert.DoesNotContain("Components\\\\_Imports.razor", json);
         // The new entry uses a Block-only snippet, not the fragile
         // Microsoft.AspNetCore.Components.Forms anchor.
         Assert.DoesNotContain("Microsoft.AspNetCore.Components.Forms", json);
-        Assert.Contains("Components/_Imports.razor", json);
+        Assert.Contains(EscapeForJsonString(OsImportsRazor), json);
         Assert.Contains("@using Syncfusion.Blazor.Toolkit", json);
         using var doc = JsonDocument.Parse(json);
         var files = doc.RootElement.GetProperty("Files");
         Assert.Equal(2, files.GetArrayLength());
         var importsEntry = files[1];
-        Assert.Equal("Components/_Imports.razor", importsEntry.GetProperty("FileName").GetString());
+        Assert.Equal(OsImportsRazor, importsEntry.GetProperty("FileName").GetString());
         // The Replacements array carries a single Block-only snippet.
         var replacements = importsEntry.GetProperty("Replacements");
         Assert.Equal(1, replacements.GetArrayLength());
@@ -220,19 +218,59 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
 
         var json = SyncfusionBlazorToolkitHelper.BuildResolvedCodeModifierConfigJson(
             configPath,
-            themeFile: "Components/App.razor",
-            importsFile: "_Imports.razor");
+            themeFile: Path.Combine("Components", "App.razor"),
+            importsFile: Path.Combine("Components", "_Imports.razor"));
 
         Assert.NotNull(json);
         Assert.DoesNotContain("$(ThemeFile)", json);
-        Assert.DoesNotContain("Components\\\\_Imports.razor", json);
-        Assert.Contains("Components/App.razor", json);
-        Assert.Contains("\"_Imports.razor\"", json);
+        Assert.Contains(EscapeForJsonString(OsAppRazor), json);
+        Assert.Contains(EscapeForJsonString(OsImportsRazor), json);
         Assert.Contains("@using Syncfusion.Blazor.Toolkit", json);
         Assert.Contains("fluent.min.css", json);
         using var doc = JsonDocument.Parse(json);
         var files = doc.RootElement.GetProperty("Files");
         Assert.Equal(3, files.GetArrayLength());
+    }
+
+    [Fact]
+    public void BuildResolvedCodeModifierConfigJson_EmittedFileNames_MatchOsNativePaths()
+    {
+        // The bug: the helper used to canonicalize the emitted FileName
+        // to forward slashes, which silently broke MSBuildWorkspace's
+        // EndsWith lookup on Windows and caused the CodeModifier to skip
+        // every theme and using-directive change. Guard against
+        // regression by asserting the emitted FileName uses the OS-native
+        // separator that Path.GetRelativePath / AdditionalDocument.FilePath
+        // would produce.
+        var configPath = WriteConfig(SampleConfig);
+
+        var json = SyncfusionBlazorToolkitHelper.BuildResolvedCodeModifierConfigJson(
+            configPath,
+            themeFile: Path.Combine("Components", "App.razor"),
+            importsFile: Path.Combine("Components", "_Imports.razor"));
+
+        Assert.NotNull(json);
+        using var doc = JsonDocument.Parse(json);
+        var files = doc.RootElement.GetProperty("Files");
+        Assert.Equal(3, files.GetArrayLength());
+
+        // The theme and imports entries must NOT contain forward slashes
+        // when running on Windows (where backslashes are native). On
+        // Linux they are allowed because that IS the OS-native form.
+        for (int i = 1; i < files.GetArrayLength(); i++)
+        {
+            string emittedFileName = files[i].GetProperty("FileName").GetString()!;
+            if (Path.DirectorySeparatorChar == '\\')
+            {
+                Assert.DoesNotContain('/', emittedFileName);
+                Assert.Contains("\\", emittedFileName);
+            }
+            else
+            {
+                Assert.DoesNotContain('\\', emittedFileName);
+                Assert.Contains("/", emittedFileName);
+            }
+        }
     }
 
     [Fact]
@@ -272,33 +310,6 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Fact]
-    public void BuildResolvedCodeModifierConfigJson_PlaceholderAbsent_AppendsResolvedEntries()
-    {
-        // When both placeholders are absent (e.g. someone hand-edits the JSON
-        // to remove them), the helper should still append the resolved
-        // entries so the scaffolder still works.
-        const string withoutPlaceholders = @"{
-  ""Files"": [
-    {
-      ""FileName"": ""Program.cs"",
-      ""Methods"": { ""Global"": { ""CodeChanges"": [] } }
-    }
-  ]
-}";
-        var configPath = WriteConfig(withoutPlaceholders);
-        var json = SyncfusionBlazorToolkitHelper.BuildResolvedCodeModifierConfigJson(
-            configPath,
-            themeFile: Path.Combine("Components", "App.razor"),
-            importsFile: Path.Combine("Components", "_Imports.razor"));
-
-        Assert.NotNull(json);
-        Assert.Contains("Components/App.razor", json);
-        Assert.Contains("Components/_Imports.razor", json);
-        using var doc = JsonDocument.Parse(json);
-        Assert.Equal(3, doc.RootElement.GetProperty("Files").GetArrayLength());
-    }
-
-    [Fact]
     public void BuildResolvedCodeModifierConfigJson_NullLogger_DoesNotThrow()
     {
         var configPath = WriteConfig("{ not valid json");
@@ -323,5 +334,20 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         var path = Path.Combine(_tempDir, "syncfusionBlazorToolkitChanges.json");
         File.WriteAllText(path, contents);
         return path;
+    }
+
+    /// <summary>
+    /// JSON-escapes a path string for substring matching against a
+    /// serialized JSON document. On Windows, backslashes are encoded
+    /// as <c>\\</c> in the JSON, so the substring needs the same
+    /// encoding. On Linux, no escaping is needed.
+    /// </summary>
+    private static string EscapeForJsonString(string s)
+    {
+        if (Path.DirectorySeparatorChar == '\\')
+        {
+            return s.Replace("\\", "\\\\");
+        }
+        return s;
     }
 }

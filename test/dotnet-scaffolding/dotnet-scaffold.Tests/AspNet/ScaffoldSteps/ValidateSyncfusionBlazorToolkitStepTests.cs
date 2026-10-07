@@ -97,6 +97,9 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
         Assert.False(result);
     }
 
+    private static string OsComponentsImportsRazor =>
+        "Components" + System.IO.Path.DirectorySeparatorChar + "_Imports.razor";
+
     [Fact]
     public async Task ExecuteAsync_PrefersComponents_ImportsFile()
     {
@@ -117,7 +120,11 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
         Assert.True(_context.Properties.TryGetValue(
             nameof(SyncfusionBlazorToolkitSettings), out var settingsObj));
         var settings = Assert.IsType<SyncfusionBlazorToolkitSettings>(settingsObj);
-        Assert.Equal("Components/_Imports.razor", settings.ImportsFile);
+        // ImportsFile must use OS-native separators (backslash on
+        // Windows, forward slash on Linux) so the CodeModifier's
+        // EndsWith lookup against MSBuildWorkspace's AdditionalDocument
+        // paths succeeds.
+        Assert.Equal(OsComponentsImportsRazor, settings.ImportsFile);
         Assert.False(settings.ImportsFileSkipped);
     }
 
@@ -242,7 +249,8 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
             nameof(SyncfusionBlazorToolkitSettings), out var settingsObj));
         var settings = Assert.IsType<SyncfusionBlazorToolkitSettings>(settingsObj);
         // Should have skipped bin/ and discovered the Pages/ one.
-        Assert.Equal("Pages/_Imports.razor", settings.ImportsFile);
+        // ImportsFile uses OS-native separators.
+        Assert.Equal("Pages" + System.IO.Path.DirectorySeparatorChar + "_Imports.razor", settings.ImportsFile);
     }
 
     private class TestTelemetryService : ITelemetryService

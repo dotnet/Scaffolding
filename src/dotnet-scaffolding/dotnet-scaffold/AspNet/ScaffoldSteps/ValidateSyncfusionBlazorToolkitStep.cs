@@ -100,9 +100,14 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
         string? importsPath = DiscoverImportsFile(projectDirectory);
         if (!string.IsNullOrEmpty(importsPath))
         {
-            // Store the project-relative path in canonical (forward-slash) form.
+            // Use OS-native separators for the path that the CodeModifier
+            // will look up. Path.GetRelativePath returns OS-native form
+            // ("Components\_Imports.razor" on Windows,
+            // "Components/_Imports.razor" on Linux). Canonicalizing to
+            // forward slashes would silently break the file lookup on
+            // Windows and cause the @using directive to be skipped.
             string relativePath = Path.GetRelativePath(projectDirectory, importsPath);
-            settings.ImportsFile = SyncfusionBlazorToolkitHelper.CanonicalizePath(relativePath);
+            settings.ImportsFile = SyncfusionBlazorToolkitHelper.ToOsNativePath(relativePath);
             settings.ImportsFileSkipped = false;
         }
         else

@@ -1,6 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
+using System;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 {
                     _logger.LogError($"Invalid project path: {ProjectPath}");
                     return Task.FromResult(false);
-                }                
+                }
 
                 // Find or create appsettings.json file
                 var appSettingsFileSearch = _fileSystem.EnumerateFiles(baseProjectPath, "appsettings.json", SearchOption.AllDirectories);
@@ -147,16 +147,23 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         writeContent = true;
                         azureAdObject["ClientId"] = ClientId;
                     }
-
                     if (!string.IsNullOrEmpty(Domain) && (azureAdObject["Domain"] is null || azureAdObject["Domain"]?.ToString() != Domain))
                     {
                         writeContent = true;
                         azureAdObject["Domain"] = Domain;
                     }
-                    else
+                    else if (string.IsNullOrEmpty(Domain) && !string.IsNullOrEmpty(TenantId) && TenantId.EndsWith(".onmicrosoft.com", StringComparison.OrdinalIgnoreCase) && (azureAdObject["Domain"] is null || azureAdObject["Domain"]?.ToString() != TenantId))
                     {
                         writeContent = true;
-                        azureAdObject["Domain"] = $"{Username}.onmicrosoft.com";
+                        azureAdObject["Domain"] = TenantId;
+                    }
+                    else if (string.IsNullOrEmpty(Domain) && !string.IsNullOrEmpty(TenantId) && !TenantId.EndsWith(".onmicrosoft.com", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (azureAdObject["Domain"] is not null)
+                        {
+                            writeContent = true;
+                            azureAdObject["Domain"] = null;
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(TenantId) && (azureAdObject["TenantId"] is null || azureAdObject["TenantId"]?.ToString() != TenantId))
@@ -224,7 +231,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             }
 
             return Task.FromResult(false);
-            
+
         }
 
         /// <summary>

@@ -239,6 +239,48 @@ public class EntraIdHelperTests
         }
     }
 
+    [Fact]
+    public void GetTextTemplatingProperties_ServerAndClientNavMenus_GeneratesForBothLayouts()
+    {
+        string testDirectory = Path.Combine(Path.GetTempPath(), nameof(EntraIdHelperTests), Guid.NewGuid().ToString());
+        string serverDirectory = Path.Combine(testDirectory, "Server");
+        string serverLayoutDirectory = Path.Combine(serverDirectory, "Components", "Layout");
+        string clientDirectory = Path.Combine(testDirectory, "Client");
+        string clientLayoutDirectory = Path.Combine(clientDirectory, "Layout");
+        string clientProjectPath = Path.Combine(clientDirectory, "Client.csproj");
+
+        try
+        {
+            Directory.CreateDirectory(serverLayoutDirectory);
+            Directory.CreateDirectory(clientLayoutDirectory);
+            File.WriteAllText(Path.Combine(serverLayoutDirectory, "NavMenu.razor"), string.Empty);
+            File.WriteAllText(Path.Combine(clientLayoutDirectory, "NavMenu.razor"), string.Empty);
+            EntraIdModel entraIdModel = new()
+            {
+                ProjectInfo = new ProjectInfo(Path.Combine(serverDirectory, "Server.csproj")),
+                BaseOutputPath = serverDirectory
+            };
+
+            string[] outputPaths = EntraIdHelper.GetTextTemplatingProperties(
+                [Path.Combine("BlazorEntraId", "LoginOrLogout.tt")],
+                entraIdModel,
+                clientProjectPath)
+                .Select(property => property.OutputPath)
+                .ToArray();
+
+            Assert.Equal(2, outputPaths.Length);
+            Assert.Contains(Path.Combine(serverLayoutDirectory, "LoginOrLogout.razor"), outputPaths);
+            Assert.Contains(Path.Combine(clientLayoutDirectory, "LoginOrLogout.razor"), outputPaths);
+        }
+        finally
+        {
+            if (Directory.Exists(testDirectory))
+            {
+                Directory.Delete(testDirectory, recursive: true);
+            }
+        }
+    }
+
     private EntraIdModel CreateTestEntraIdModel()
     {
         return new EntraIdModel

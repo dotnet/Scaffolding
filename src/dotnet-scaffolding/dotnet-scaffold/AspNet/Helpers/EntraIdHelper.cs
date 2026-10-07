@@ -42,35 +42,46 @@ internal static class EntraIdHelper
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {
                 string extension = templateFullName.StartsWith("loginor", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
-                string templateNameWithNamespace = String.Equals(extension, ".razor", StringComparison.Ordinal)
-                    ? GetLayoutOutputPath(serverLayoutPath, serverNavMenuPath, clientLayoutPath, clientNavMenuPath)
-                    : entraIdModel.BaseOutputPath ?? string.Empty;
-                string outputFileName = Path.Combine(templateNameWithNamespace, templateFullName + extension);
+                IEnumerable<string> outputDirectories = String.Equals(extension, ".razor", StringComparison.Ordinal)
+                    ? GetLayoutOutputPaths(serverLayoutPath, serverNavMenuPath, clientLayoutPath, clientNavMenuPath)
+                    : [entraIdModel.BaseOutputPath ?? string.Empty];
 
-                textTemplatingProperties.Add(new()
+                foreach (string outputDirectory in outputDirectories)
                 {
-                    TemplateModel = entraIdModel,
-                    TemplateModelName = "Model",
-                    TemplatePath = templatePath,
-                    TemplateType = templateType,
-                    OutputPath = outputFileName
-                });
+                    textTemplatingProperties.Add(new()
+                    {
+                        TemplateModel = entraIdModel,
+                        TemplateModelName = "Model",
+                        TemplatePath = templatePath,
+                        TemplateType = templateType,
+                        OutputPath = Path.Combine(outputDirectory, templateFullName + extension)
+                    });
+                }
             }
         }
 
         return textTemplatingProperties;
     }
 
-    private static string GetLayoutOutputPath(string serverLayoutPath, string serverNavMenuPath, string? clientLayoutPath, string? clientNavMenuPath)
+    private static IReadOnlyList<string> GetLayoutOutputPaths(string serverLayoutPath, string serverNavMenuPath, string? clientLayoutPath, string? clientNavMenuPath)
     {
-        if (!string.IsNullOrEmpty(clientNavMenuPath) && File.Exists(clientNavMenuPath))
-        {
-            return clientLayoutPath!;
-        }
+        var layoutOutputPaths = new List<string>();
 
         if (File.Exists(serverNavMenuPath))
         {
-            return serverLayoutPath;
+            layoutOutputPaths.Add(serverLayoutPath);
+        }
+
+        if (!string.IsNullOrEmpty(clientLayoutPath) &&
+            !string.IsNullOrEmpty(clientNavMenuPath) &&
+            File.Exists(clientNavMenuPath))
+        {
+            layoutOutputPaths.Add(clientLayoutPath);
+        }
+
+        if (layoutOutputPaths.Count > 0)
+        {
+            return layoutOutputPaths;
         }
 
         string expectedPaths = string.IsNullOrEmpty(clientNavMenuPath) ? $"'{serverNavMenuPath}'" : $"'{serverNavMenuPath}' or '{clientNavMenuPath}'";

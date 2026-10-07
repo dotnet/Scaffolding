@@ -293,7 +293,10 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
             antiforgeryChanges);
 
         Assert.Equal(
-            ["app.MapStaticAssets()"],
+            [
+                "app.MapStaticAssets()",
+                "app.MapRazorComponents<App>()"
+            ],
             antiforgeryChange.GetProperty("InsertBefore").EnumerateArray().Select(line => line.GetString()));
         Assert.Equal(
             "app.UseAntiforgery()",
@@ -358,6 +361,49 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         Assert.True(
             program.IndexOf("app.UseAntiforgery();", StringComparison.Ordinal) <
             program.IndexOf("app.MapStaticAssets();", StringComparison.Ordinal));
+
+        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(programPath), "app.UseAntiforgery();"));
+    }
+
+    [Fact]
+    public async Task BlazorEntraChangesConfig_UsesRazorComponentsAsAntiforgeryFallback()
+    {
+        if (TargetFramework == "net10.0")
+        {
+            return;
+        }
+
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        File.WriteAllText(programPath, """
+            var builder = WebApplication.CreateBuilder(args);
+            var app = builder.Build();
+
+            app.MapRazorComponents<App>();
+
+            app.Run();
+            """);
+        var step = new WrappedCodeModificationStep(
+            NullLogger<WrappedCodeModificationStep>.Instance,
+            _testTelemetryService)
+        {
+            CodeModifierConfigPath = Path.Combine(
+                GetActualTemplatesBasePath(),
+                TargetFramework,
+                "CodeModificationConfigs",
+                "blazorEntraChanges.json"),
+            CodeChangeOptions = [],
+            ProjectPath = _testProjectPath
+        };
+
+        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
+
+        var program = File.ReadAllText(programPath);
+        Assert.Equal(1, CountOccurrences(program, "app.UseAntiforgery();"));
+        Assert.True(
+            program.IndexOf("app.UseAntiforgery();", StringComparison.Ordinal) <
+            program.IndexOf("app.MapRazorComponents<App>();", StringComparison.Ordinal));
 
         Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
         Assert.Equal(1, CountOccurrences(File.ReadAllText(programPath), "app.UseAntiforgery();"));
@@ -461,7 +507,15 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
     {
         var configPath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs", configFileName);
         using var config = JsonDocument.Parse(File.ReadAllText(configPath));
-        var navMenuConfig = Assert.Single(config.RootElement.GetProperty("Files").EnumerateArray(), file => file.GetProperty("FileName").GetString() == navMenuPath);
+        var normalizedNavMenuPath = NormalizePathSeparators(navMenuPath);
+        var navMenuConfig = Assert.Single(
+            config.RootElement.GetProperty("Files").EnumerateArray(),
+            file =>
+            {
+                string? configuredFileName = file.GetProperty("FileName").GetString();
+                return configuredFileName is not null &&
+                    NormalizePathSeparators(configuredFileName) == normalizedNavMenuPath;
+            });
         var replacement = Assert.Single(navMenuConfig.GetProperty("Replacements").EnumerateArray());
 
         Assert.Equal("<LoginOrLogout />", replacement.GetProperty("CheckBlock").GetString());
@@ -469,7 +523,7 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         Assert.Equal(["    <LoginOrLogout />", "    </nav>"], replacement.GetProperty("MultiLineBlock").EnumerateArray().Select(line => line.GetString()));
 
         File.WriteAllText(_testProjectPath, ProjectContent);
-        var navMenuOutputPath = Path.Combine(_testProjectDir, navMenuPath);
+        var navMenuOutputPath = Path.Combine(_testProjectDir, normalizedNavMenuPath);
         Directory.CreateDirectory(Path.GetDirectoryName(navMenuOutputPath)!);
         File.WriteAllText(navMenuOutputPath, """
             <div class="top-row ps-3 navbar navbar-dark">
@@ -501,6 +555,9 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
         Assert.Equal(1, CountOccurrences(File.ReadAllText(navMenuOutputPath), "<LoginOrLogout />"));
     }
+
+    private static string NormalizePathSeparators(string path)
+        => path.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
 
     private static int CountOccurrences(string value, string searchValue)
     {

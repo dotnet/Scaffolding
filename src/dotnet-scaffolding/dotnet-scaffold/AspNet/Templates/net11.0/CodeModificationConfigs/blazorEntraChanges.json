@@ -36,7 +36,10 @@
                       }
                     },
                     {
-                      "InsertBefore": [ "app.MapStaticAssets()" ],
+                      "InsertBefore": [
+                        "app.MapStaticAssets()",
+                        "app.MapRazorComponents<App>()"
+                      ],
                       "CheckBlock": "app.UseAntiforgery()",
                       "Block": "app.UseAntiforgery()",
                       "LeadingTrivia": {

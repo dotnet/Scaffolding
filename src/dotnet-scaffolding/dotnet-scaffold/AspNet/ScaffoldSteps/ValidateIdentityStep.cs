@@ -307,7 +307,10 @@ internal class ValidateIdentityStep : ScaffoldStep
         {
             ProjectInfo = projectInfo,
             DbContextInfo = dbContextInfo,
-            DbContextNamespace = dbContextInfo.DbContextNamespace,
+            DbContextNamespace = settings.BlazorScenario &&
+                projectInfo.LowestSupportedTargetFramework is TargetFramework.Net8
+                ? dbContextInfo.DbContextNamespace
+                : string.Empty,
             IdentityNamespace = identityNamespace,
             UserClassName = AspNetConstants.Identity.UserClassName,
             UserClassNamespace = userClassNamespace,

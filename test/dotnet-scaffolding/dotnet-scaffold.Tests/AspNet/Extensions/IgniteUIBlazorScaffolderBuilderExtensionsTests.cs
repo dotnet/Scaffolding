@@ -113,7 +113,7 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
     [InlineData(false)]
     public void WithIgniteUIBlazorWasmAddPackagesStep_TargetsClientFromModel(bool hasClient)
     {
-        var model = CreateModel(includeLite: true, includeGridLite: true, hasClient);
+        var model = CreateModel(hasClient);
         var step = new WrappedAddPackagesStep(
             NullLogger<WrappedAddPackagesStep>.Instance,
             Mock.Of<ITelemetryService>(),
@@ -138,7 +138,7 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
     [InlineData(false)]
     public void WithIgniteUIBlazorWasmImportsStep_TargetsClientImportsFromModel(bool hasClient)
     {
-        var model = CreateModel(includeLite: true, includeGridLite: false, hasClient);
+        var model = CreateModel(hasClient);
         var step = new AddRazorImportsStep(NullLogger<AddRazorImportsStep>.Instance, Mock.Of<IFileSystem>(), Mock.Of<ITelemetryService>())
         {
             ImportsFilePath = string.Empty,
@@ -158,7 +158,7 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
     [Fact]
     public void WithIgniteUIBlazorWasmCodeChangeStep_SkipsWithoutClient()
     {
-        var model = CreateModel(includeLite: true, includeGridLite: false, hasClient: false);
+        var model = CreateModel(hasClient: false);
         var step = new WrappedCodeModificationStep(NullLogger<WrappedCodeModificationStep>.Instance, Mock.Of<ITelemetryService>())
         {
             CodeChangeOptions = [],
@@ -170,26 +170,13 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         Assert.True(step.SkipStep);
     }
 
-    [Theory]
-    [InlineData(true, false, "IgniteUI.Blazor.Lite")]
-    [InlineData(false, true, "IgniteUI.Blazor.GridLite")]
-    [InlineData(true, true, "IgniteUI.Blazor.Lite", "IgniteUI.Blazor.GridLite")]
-    public void GetPackages_ReturnsSelectedPackages(bool includeLite, bool includeGridLite, params string[] expectedPackageNames)
-    {
-        var model = CreateModel(includeLite, includeGridLite);
-
-        var packages = IgniteUIBlazorScaffolderBuilderExtensions.GetPackages(model);
-
-        Assert.Equal(expectedPackageNames, packages.ConvertAll(p => p.Name));
-        Assert.All(packages, p => Assert.False(p.IsVersionRequired));
-    }
-
     [Fact]
-    public void Model_RequiresServiceRegistration_OnlyWhenLiteIncluded()
+    public void GetPackages_ReturnsBothPackages()
     {
-        Assert.True(CreateModel(includeLite: true, includeGridLite: false).RequiresServiceRegistration);
-        Assert.True(CreateModel(includeLite: true, includeGridLite: true).RequiresServiceRegistration);
-        Assert.False(CreateModel(includeLite: false, includeGridLite: true).RequiresServiceRegistration);
+        var packages = IgniteUIBlazorScaffolderBuilderExtensions.GetPackages();
+
+        Assert.Equal(["IgniteUI.Blazor.Lite", "IgniteUI.Blazor.GridLite"], packages.ConvertAll(p => p.Name));
+        Assert.All(packages, p => Assert.False(p.IsVersionRequired));
     }
 
     [Fact]
@@ -220,7 +207,6 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         context.Properties[nameof(IgniteUIBlazorSettings)] = new IgniteUIBlazorSettings
         {
             Project = model.ProjectPath,
-            Package = "All",
             Theme = model.Theme,
             ThemeVariant = model.ThemeVariant,
             Prerelease = false
@@ -228,7 +214,7 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         return context;
     }
 
-    private static IgniteUIBlazorModel CreateModel(bool includeLite, bool includeGridLite, bool hasClient = false)
+    private static IgniteUIBlazorModel CreateModel(bool hasClient = false)
     {
         var projectDirectory = Path.Combine("C:", "src", "MyApp");
         var clientProjectDirectory = Path.Combine("C:", "src", "MyApp.Client");
@@ -237,8 +223,6 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
             ProjectInfo = new ProjectInfo(null),
             ProjectPath = Path.Combine(projectDirectory, "MyApp.csproj"),
             BaseOutputPath = projectDirectory,
-            IncludeLite = includeLite,
-            IncludeGridLite = includeGridLite,
             Theme = "bootstrap",
             ThemeVariant = "light",
             StylesheetPath = "_content/IgniteUI.Blazor/themes/light/bootstrap.css",

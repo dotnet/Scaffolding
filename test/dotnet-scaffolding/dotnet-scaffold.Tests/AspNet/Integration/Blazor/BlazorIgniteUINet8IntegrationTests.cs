@@ -20,7 +20,7 @@ public class BlazorIgniteUINet8IntegrationTests : BlazorIgniteUIIntegrationTests
         SetupBlazorWebAppProject();
         File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.StableNuGetConfig);
 
-        // Act + Assert — dotnet scaffold aspnet blazor-igniteui --package All
+        // Act + Assert — dotnet scaffold aspnet blazor-igniteui --project TestProject.csproj
         await ScaffoldAllPackagesAndAssertAsync();
     }
 }

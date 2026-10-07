@@ -26,7 +26,7 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     internal const string WasmCodeModificationConfigFileName = "igniteUIBlazorWasmChanges.json";
 
     /// <summary>
-    /// Adds a step that installs the selected Ignite UI NuGet package(s) into the project.
+    /// Adds a step that installs the IgniteUI.Blazor.Lite and IgniteUI.Blazor.GridLite NuGet packages into the project.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorAddPackagesStep(this IScaffoldBuilder builder)
     {
@@ -37,13 +37,13 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
             var settings = GetSettings(config.Context);
             step.ProjectPath = model.ProjectPath;
             step.Prerelease = settings.Prerelease;
-            step.Packages = GetPackages(model);
+            step.Packages = GetPackages();
         });
     }
 
     /// <summary>
-    /// Adds a step that installs the selected Ignite UI NuGet package(s) into the Blazor WebAssembly client
-    /// project of a Blazor Web App. Skipped when the project has no client project.
+    /// Adds a step that installs the IgniteUI.Blazor.Lite and IgniteUI.Blazor.GridLite NuGet packages into the Blazor
+    /// WebAssembly client project of a Blazor Web App. Skipped when the project has no client project.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorWasmAddPackagesStep(this IScaffoldBuilder builder)
     {
@@ -60,13 +60,12 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
             var settings = GetSettings(config.Context);
             step.ProjectPath = model.ClientProjectPath;
             step.Prerelease = settings.Prerelease;
-            step.Packages = GetPackages(model);
+            step.Packages = GetPackages();
         });
     }
 
     /// <summary>
     /// Adds a step that registers 'builder.Services.AddIgniteUIBlazor()' in the project's Program.cs.
-    /// Skipped when only IgniteUI.Blazor.GridLite is added, since GridLite needs no service registration.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorCodeChangeStep(this IScaffoldBuilder builder)
     {
@@ -74,12 +73,6 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
         {
             var step = config.Step;
             var model = GetModel(config.Context);
-            if (!model.RequiresServiceRegistration)
-            {
-                step.SkipStep = true;
-                return;
-            }
-
             var configFileName = model.IsWebAssemblyProject ? WasmCodeModificationConfigFileName : CodeModificationConfigFileName;
             if (!TryConfigureCodeModificationStep(step, config.Context, model.ProjectPath, configFileName, model.ProjectInfo.CodeChangeOptions))
             {
@@ -90,8 +83,7 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
 
     /// <summary>
     /// Adds a step that registers 'builder.Services.AddIgniteUIBlazor()' in the Program.cs of the Blazor
-    /// WebAssembly client project of a Blazor Web App. Skipped when the project has no client project or when
-    /// only IgniteUI.Blazor.GridLite is added.
+    /// WebAssembly client project of a Blazor Web App. Skipped when the project has no client project.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorWasmCodeChangeStep(this IScaffoldBuilder builder)
     {
@@ -99,7 +91,7 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
         {
             var step = config.Step;
             var model = GetModel(config.Context);
-            if (!model.RequiresServiceRegistration || string.IsNullOrEmpty(model.ClientProjectPath))
+            if (string.IsNullOrEmpty(model.ClientProjectPath))
             {
                 step.SkipStep = true;
                 return;
@@ -168,23 +160,10 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     }
 
     /// <summary>
-    /// Returns the NuGet packages to install for the given model.
+    /// Returns the NuGet packages to install: IgniteUI.Blazor.Lite (core components) and IgniteUI.Blazor.GridLite (grid).
     /// </summary>
-    internal static List<Package> GetPackages(IgniteUIBlazorModel model)
-    {
-        List<Package> packages = [];
-        if (model.IncludeLite)
-        {
-            packages.Add(PackageConstants.IgniteUIPackages.IgniteUIBlazorLitePackage);
-        }
-
-        if (model.IncludeGridLite)
-        {
-            packages.Add(PackageConstants.IgniteUIPackages.IgniteUIBlazorGridLitePackage);
-        }
-
-        return packages;
-    }
+    internal static List<Package> GetPackages()
+        => [PackageConstants.IgniteUIPackages.IgniteUIBlazorLitePackage, PackageConstants.IgniteUIPackages.IgniteUIBlazorGridLitePackage];
 
     private static bool TryConfigureCodeModificationStep(WrappedCodeModificationStep step, ScaffolderContext context, string projectPath, string configFileName, IList<string>? codeChangeOptions)
     {

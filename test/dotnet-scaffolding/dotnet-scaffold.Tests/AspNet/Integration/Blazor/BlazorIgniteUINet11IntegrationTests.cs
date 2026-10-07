@@ -26,7 +26,7 @@ public class BlazorIgniteUINet11IntegrationTests : BlazorIgniteUIIntegrationTest
             "<clear />\n    <add key=\"nuget.org\" value=\"https://api.nuget.org/v3/index.json\" />");
         File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), nugetConfig);
 
-        // Act + Assert — dotnet scaffold aspnet blazor-igniteui --package All
+        // Act + Assert — dotnet scaffold aspnet blazor-igniteui --project TestProject.csproj
         // The Ignite UI packages ship net10.0 assets which net11.0 projects consume; no prerelease needed.
         await ScaffoldAllPackagesAndAssertAsync();
     }

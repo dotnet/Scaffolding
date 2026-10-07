@@ -46,7 +46,6 @@ internal class Constants
         public const string UseExistingApplicationOption = "--use-existing-application";
         public const string ApplicationIdOption = "--applicationId";
         //ignite ui for blazor options
-        public const string IgniteUIPackageOption = "--package";
         public const string IgniteUIThemeOption = "--theme";
         public const string IgniteUIThemeVariantOption = "--theme-variant";
     }

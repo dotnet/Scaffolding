@@ -8,10 +8,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 internal class IgniteUIBlazorSettings : BaseSettings
 {
     /// <summary>
-    /// Which Ignite UI package set to add: 'Lite', 'GridLite' or 'All'.
-    /// </summary>
-    public required string Package { get; set; }
-    /// <summary>
     /// The theme to link ('bootstrap', 'material', 'fluent' or 'indigo').
     /// </summary>
     public required string Theme { get; set; }

@@ -12,40 +12,6 @@ public class IgniteUIBlazorHelperTests
 {
     private static readonly string s_projectDir = Path.Combine("C:", "src", "MyApp");
 
-    #region --package option
-
-    [Theory]
-    [InlineData("Lite")]
-    [InlineData("GridLite")]
-    [InlineData("All")]
-    [InlineData("lite")]
-    [InlineData("GRIDLITE")]
-    [InlineData("all")]
-    public void IsValidPackageOption_AcceptsKnownValuesCaseInsensitively(string package)
-        => Assert.True(IgniteUIBlazorHelper.IsValidPackageOption(package));
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("Grid")]
-    [InlineData("IgniteUI.Blazor.Lite")]
-    public void IsValidPackageOption_RejectsUnknownValues(string? package)
-        => Assert.False(IgniteUIBlazorHelper.IsValidPackageOption(package));
-
-    [Theory]
-    [InlineData("Lite", true, false)]
-    [InlineData("GridLite", false, true)]
-    [InlineData("All", true, true)]
-    [InlineData("all", true, true)]
-    [InlineData(null, false, false)]
-    public void IncludesLite_And_IncludesGridLite_MatchSelection(string? package, bool expectLite, bool expectGridLite)
-    {
-        Assert.Equal(expectLite, IgniteUIBlazorHelper.IncludesLite(package));
-        Assert.Equal(expectGridLite, IgniteUIBlazorHelper.IncludesGridLite(package));
-    }
-
-    #endregion
-
     #region Theme normalization
 
     [Theory]
@@ -73,27 +39,22 @@ public class IgniteUIBlazorHelperTests
     {
         Assert.Equal(new[] { "bootstrap", "material", "fluent", "indigo" }, IgniteUIBlazorHelper.Themes);
         Assert.Equal(new[] { "light", "dark" }, IgniteUIBlazorHelper.ThemeVariants);
-        Assert.Equal(new[] { "Lite", "GridLite", "All" }, IgniteUIBlazorHelper.PackageOptions);
     }
 
     #endregion
 
     #region Stylesheet path
 
-    [Fact]
-    public void GetThemeStylesheetPath_UsesLiteRoot_WhenLiteStylesheetRequested()
-        => Assert.Equal("_content/IgniteUI.Blazor/themes/light/bootstrap.css",
-            IgniteUIBlazorHelper.GetThemeStylesheetPath(useLiteStylesheet: true, "bootstrap", "light"));
-
-    [Fact]
-    public void GetThemeStylesheetPath_UsesGridLiteRoot_WhenGridLiteOnly()
-        => Assert.Equal("_content/IgniteUI.Blazor.GridLite/css/themes/dark/material.css",
-            IgniteUIBlazorHelper.GetThemeStylesheetPath(useLiteStylesheet: false, "material", "dark"));
+    [Theory]
+    [InlineData("bootstrap", "light", "_content/IgniteUI.Blazor/themes/light/bootstrap.css")]
+    [InlineData("material", "dark", "_content/IgniteUI.Blazor/themes/dark/material.css")]
+    public void GetThemeStylesheetPath_UsesIgniteUIBlazorTheme(string theme, string variant, string expected)
+        => Assert.Equal(expected, IgniteUIBlazorHelper.GetThemeStylesheetPath(theme, variant));
 
     [Fact]
     public void GetThemeStylesheetPath_NormalizesThemeAndVariant()
         => Assert.Equal("_content/IgniteUI.Blazor/themes/light/bootstrap.css",
-            IgniteUIBlazorHelper.GetThemeStylesheetPath(useLiteStylesheet: true, "not-a-theme", null));
+            IgniteUIBlazorHelper.GetThemeStylesheetPath("not-a-theme", null));
 
     [Theory]
     [InlineData("_content/IgniteUI.Blazor/themes/light/bootstrap.css")]
@@ -123,15 +84,6 @@ public class IgniteUIBlazorHelperTests
     #endregion
 
     #region Project inspection
-
-    [Theory]
-    [InlineData("<Project Sdk=\"Microsoft.NET.Sdk.Web\"><ItemGroup><PackageReference Include=\"IgniteUI.Blazor.Lite\" Version=\"0.1.1\" /></ItemGroup></Project>", true)]
-    [InlineData("<Project Sdk=\"Microsoft.NET.Sdk.Web\"><ItemGroup><PackageReference Version=\"0.1.1\" Include=\"igniteui.blazor.lite\" /></ItemGroup></Project>", true)]
-    [InlineData("<Project Sdk=\"Microsoft.NET.Sdk.Web\"><ItemGroup><PackageReference Include=\"IgniteUI.Blazor.GridLite\" Version=\"0.9.2\" /></ItemGroup></Project>", false)]
-    [InlineData("<Project Sdk=\"Microsoft.NET.Sdk.Web\" />", false)]
-    [InlineData(null, false)]
-    public void ProjectReferencesLitePackage_DetectsPackageReference(string? csproj, bool expected)
-        => Assert.Equal(expected, IgniteUIBlazorHelper.ProjectReferencesLitePackage(csproj));
 
     [Fact]
     public void IsWebAssemblyProject_TrueForBlazorWebAssemblySdkAttribute()

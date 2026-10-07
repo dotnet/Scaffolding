@@ -11,15 +11,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 /// </summary>
 internal static class IgniteUIBlazorHelper
 {
-    /// <summary>Picker value that adds only the IgniteUI.Blazor.Lite package.</summary>
-    internal const string LitePackageOption = "Lite";
-    /// <summary>Picker value that adds only the IgniteUI.Blazor.GridLite package.</summary>
-    internal const string GridLitePackageOption = "GridLite";
-    /// <summary>Picker value that adds both packages.</summary>
-    internal const string AllPackagesOption = "All";
-    /// <summary>All valid values for the '--package' option.</summary>
-    internal static readonly List<string> PackageOptions = [LitePackageOption, GridLitePackageOption, AllPackagesOption];
-
     /// <summary>Default theme.</summary>
     internal const string DefaultTheme = "bootstrap";
     /// <summary>All themes shipped by Ignite UI for Blazor.</summary>
@@ -34,36 +25,16 @@ internal static class IgniteUIBlazorHelper
     internal const string ControlsNamespace = "IgniteUI.Blazor.Controls";
     /// <summary>Static web asset root of the IgniteUI.Blazor.Lite package.</summary>
     internal const string LiteStaticAssetsRoot = "_content/IgniteUI.Blazor";
-    /// <summary>Static web asset root of the IgniteUI.Blazor.GridLite package.</summary>
-    internal const string GridLiteStaticAssetsRoot = "_content/IgniteUI.Blazor.GridLite";
 
     /// <summary>
     /// Matches any Ignite UI theme stylesheet path (Lite or GridLite, any theme, any variant) so an
-    /// existing link can be detected and swapped instead of linking two themes at once.
+    /// existing link can be detected and swapped instead of linking two themes at once. GridLite-only
+    /// links are still matched so that re-running the scaffolder replaces them with the IgniteUI.Blazor
+    /// theme, which also styles the grid.
     /// </summary>
     internal static readonly Regex ThemeStylesheetRegex = new(
         @"_content/IgniteUI\.Blazor(?:\.GridLite)?/(?:css/)?themes/(?:light|dark)/(?:bootstrap|material|fluent|indigo)\.css",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-    /// <summary>
-    /// Returns true when the given '--package' value is one of <see cref="PackageOptions"/> (case-insensitive).
-    /// </summary>
-    internal static bool IsValidPackageOption(string? package)
-        => !string.IsNullOrEmpty(package) && PackageOptions.Contains(package, StringComparer.OrdinalIgnoreCase);
-
-    /// <summary>
-    /// Returns true when the IgniteUI.Blazor.Lite package is part of the given '--package' selection.
-    /// </summary>
-    internal static bool IncludesLite(string? package)
-        => string.Equals(package, LitePackageOption, StringComparison.OrdinalIgnoreCase) ||
-           string.Equals(package, AllPackagesOption, StringComparison.OrdinalIgnoreCase);
-
-    /// <summary>
-    /// Returns true when the IgniteUI.Blazor.GridLite package is part of the given '--package' selection.
-    /// </summary>
-    internal static bool IncludesGridLite(string? package)
-        => string.Equals(package, GridLitePackageOption, StringComparison.OrdinalIgnoreCase) ||
-           string.Equals(package, AllPackagesOption, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Normalizes the theme name; falls back to <see cref="DefaultTheme"/> when null, empty or unknown.
@@ -78,36 +49,13 @@ internal static class IgniteUIBlazorHelper
         => ThemeVariants.FirstOrDefault(v => v.Equals(variant, StringComparison.OrdinalIgnoreCase)) ?? DefaultThemeVariant;
 
     /// <summary>
-    /// Builds the project-relative path of the theme stylesheet to link.
-    /// The GridLite stylesheet is only used when the project uses GridLite exclusively; whenever
-    /// IgniteUI.Blazor.Lite is (or becomes) referenced, the main theme stylesheet must be used instead.
+    /// Builds the project-relative path of the IgniteUI.Blazor theme stylesheet to link. Both packages are always
+    /// installed, so the IgniteUI.Blazor.Lite theme is used: it styles the core components and the GridLite grid.
     /// </summary>
-    /// <param name="useLiteStylesheet">True to link the IgniteUI.Blazor.Lite theme; false for the GridLite-only theme.</param>
     /// <param name="theme">Theme name (see <see cref="Themes"/>).</param>
     /// <param name="variant">Theme variant (see <see cref="ThemeVariants"/>).</param>
-    internal static string GetThemeStylesheetPath(bool useLiteStylesheet, string? theme, string? variant)
-    {
-        var normalizedTheme = NormalizeTheme(theme);
-        var normalizedVariant = NormalizeThemeVariant(variant);
-        return useLiteStylesheet
-            ? $"{LiteStaticAssetsRoot}/themes/{normalizedVariant}/{normalizedTheme}.css"
-            : $"{GridLiteStaticAssetsRoot}/css/themes/{normalizedVariant}/{normalizedTheme}.css";
-    }
-
-    /// <summary>
-    /// Returns true when the project file already references the IgniteUI.Blazor.Lite package.
-    /// </summary>
-    internal static bool ProjectReferencesLitePackage(string? projectFileContent)
-    {
-        if (string.IsNullOrEmpty(projectFileContent))
-        {
-            return false;
-        }
-
-        return Regex.IsMatch(projectFileContent,
-            @"<PackageReference\s+[^>]*Include\s*=\s*""IgniteUI\.Blazor\.Lite""",
-            RegexOptions.IgnoreCase);
-    }
+    internal static string GetThemeStylesheetPath(string? theme, string? variant)
+        => $"{LiteStaticAssetsRoot}/themes/{NormalizeThemeVariant(variant)}/{NormalizeTheme(theme)}.css";
 
     /// <summary>
     /// Detects whether the project is a standalone Blazor WebAssembly project, i.e. uses the

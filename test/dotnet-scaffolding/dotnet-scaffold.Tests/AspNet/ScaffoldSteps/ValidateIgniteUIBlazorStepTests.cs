@@ -43,7 +43,6 @@ public class ValidateIgniteUIBlazorStepTests
     {
         var step = CreateStep();
         step.Project = string.Empty;
-        step.Package = "Lite";
 
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
@@ -58,31 +57,11 @@ public class ValidateIgniteUIBlazorStepTests
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(false);
         var step = CreateStep();
         step.Project = _testProjectPath;
-        step.Package = "Lite";
 
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
         Assert.False(result);
         Assert.Single(_testTelemetryService.TrackedEvents);
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("Grid")]
-    [InlineData("Both")]
-    public async Task ExecuteAsync_ReturnsFalse_WhenPackageIsInvalid(string? package)
-    {
-        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
-        var step = CreateStep();
-        step.Project = _testProjectPath;
-        step.Package = package;
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.False(result);
-        Assert.Single(_testTelemetryService.TrackedEvents);
-        Assert.False(_context.Properties.ContainsKey("IgniteUIBlazorSettings"));
     }
 
     [Fact]
@@ -90,13 +69,11 @@ public class ValidateIgniteUIBlazorStepTests
     {
         var step = CreateStep();
         step.Project = _testProjectPath;
-        step.Package = "All";
         step.Theme = "material";
         step.ThemeVariant = "dark";
         step.Prerelease = true;
 
         Assert.Equal(_testProjectPath, step.Project);
-        Assert.Equal("All", step.Package);
         Assert.Equal("material", step.Theme);
         Assert.Equal("dark", step.ThemeVariant);
         Assert.True(step.Prerelease);
@@ -108,7 +85,6 @@ public class ValidateIgniteUIBlazorStepTests
         var step = CreateStep();
 
         Assert.Null(step.Project);
-        Assert.Null(step.Package);
         Assert.Null(step.Theme);
         Assert.Null(step.ThemeVariant);
         Assert.False(step.Prerelease);

@@ -291,30 +291,6 @@ public class AspNetOptionCoverageTests
 
     #endregion
 
-    #region --package (IgniteUIPackage)
-
-    [Fact]
-    public void IgniteUIPackage_HasCorrectCliOption()
-        => Assert.Equal(Constants.CliOptions.IgniteUIPackageOption, _options.IgniteUIPackage.CliOption);
-
-    [Fact]
-    public void IgniteUIPackage_IsRequired()
-        => Assert.True(_options.IgniteUIPackage.Required);
-
-    [Fact]
-    public void IgniteUIPackage_HasCustomPickerValues()
-        => Assert.Equal(new[] { "Lite", "GridLite", "All" }, _options.IgniteUIPackage.CustomPickerValues!);
-
-    [Fact]
-    public void IgniteUIPackage_HasNonEmptyDescription()
-        => Assert.False(string.IsNullOrWhiteSpace(_options.IgniteUIPackage.Description));
-
-    [Fact]
-    public void IgniteUIPackage_HasNonEmptyDisplayName()
-        => Assert.False(string.IsNullOrWhiteSpace(_options.IgniteUIPackage.DisplayName));
-
-    #endregion
-
     #region --theme (IgniteUITheme)
 
     [Fact]

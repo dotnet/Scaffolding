@@ -6,7 +6,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 
 /// <summary>
 /// Represents the model for Ignite UI for Blazor scaffolding, containing the resolved project
-/// layout (host page, _Imports.razor), the selected packages and the theme stylesheet to link.
+/// layout (host page, _Imports.razor, WebAssembly client project) and the theme stylesheet to link.
 /// </summary>
 internal class IgniteUIBlazorModel
 {
@@ -22,14 +22,6 @@ internal class IgniteUIBlazorModel
     /// Gets the project directory.
     /// </summary>
     public required string BaseOutputPath { get; init; }
-    /// <summary>
-    /// Gets a value indicating whether the IgniteUI.Blazor.Lite package is being added.
-    /// </summary>
-    public required bool IncludeLite { get; init; }
-    /// <summary>
-    /// Gets a value indicating whether the IgniteUI.Blazor.GridLite package is being added.
-    /// </summary>
-    public required bool IncludeGridLite { get; init; }
     /// <summary>
     /// Gets the selected theme name ('bootstrap', 'material', 'fluent' or 'indigo').
     /// </summary>
@@ -66,9 +58,4 @@ internal class IgniteUIBlazorModel
     /// Gets the _Imports.razor of the Blazor WebAssembly client project, or null when there is no client project.
     /// </summary>
     public string? ClientImportsFilePath { get; init; }
-    /// <summary>
-    /// Gets a value indicating whether 'builder.Services.AddIgniteUIBlazor()' must be registered.
-    /// Only the IgniteUI.Blazor.Lite package requires service registration; GridLite does not.
-    /// </summary>
-    public bool RequiresServiceRegistration => IncludeLite;
 }

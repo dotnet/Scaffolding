@@ -21,12 +21,12 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         // Arrange — Blazor Web App (server project)
         SetupBlazorWebAppProject();
 
-        // Act + Assert — dotnet scaffold aspnet blazor-igniteui --package All
+        // Act + Assert — dotnet scaffold aspnet blazor-igniteui --project TestProject.csproj
         await ScaffoldAllPackagesAndAssertAsync();
     }
 
     [Fact]
-    public async Task Scaffold_BlazorIgniteUI_Net10_GridLiteOnly_StandaloneWebAssembly()
+    public async Task Scaffold_BlazorIgniteUI_Net10_StandaloneWebAssembly_DarkMaterialTheme()
     {
         // Arrange — standalone Blazor WebAssembly project (host page is wwwroot/index.html, root _Imports.razor)
         File.WriteAllText(_testProjectPath, GetWasmProjectContent());
@@ -35,40 +35,28 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         File.WriteAllText(Path.Combine(_testProjectDir, "_Imports.razor"), GetWasmImportsRazor());
         Directory.CreateDirectory(Path.Combine(_testProjectDir, "wwwroot"));
         File.WriteAllText(Path.Combine(_testProjectDir, "wwwroot", "index.html"), GetWasmIndexHtml());
+        await AssertBuildsAsync("before scaffolding");
 
-        var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
-        Assert.True(preExitCode == 0,
-            $"Project should build before scaffolding.\nExit code: {preExitCode}\nOutput: {preOutput}\nError: {preError}");
+        // Act — dotnet scaffold aspnet blazor-igniteui --theme material --theme-variant dark
+        await RunScaffoldAndAssertSuccessAsync("--theme", "material", "--theme-variant", "dark");
 
-        // Act — dotnet scaffold aspnet blazor-igniteui --package GridLite --theme material --theme-variant dark
-        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework,
-            "blazor-igniteui",
-            "--project", _testProjectPath,
-            "--package", "GridLite",
-            "--theme", "material",
-            "--theme-variant", "dark");
-        Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
-
-        // Assert — only GridLite is referenced and no service registration was added (GridLite needs none)
+        // Assert — both packages are referenced and the services are registered before the WebAssembly host runs
         var projectContent = File.ReadAllText(_testProjectPath);
+        Assert.Contains(LitePackageName, projectContent);
         Assert.Contains(GridLitePackageName, projectContent);
-        Assert.DoesNotContain(LitePackageName, projectContent);
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-        Assert.DoesNotContain("AddIgniteUIBlazor", programContent);
+        Assert.Contains("using IgniteUI.Blazor.Controls;", programContent);
+        Assert.Contains("builder.Services.AddIgniteUIBlazor();", programContent);
+        Assert.True(programContent.IndexOf("AddIgniteUIBlazor", StringComparison.Ordinal) < programContent.IndexOf("await builder.Build().RunAsync();", StringComparison.Ordinal),
+            $"AddIgniteUIBlazor() should be registered before the WebAssembly host runs.\n{programContent}");
 
-        // Assert — root _Imports.razor and wwwroot/index.html were updated with the GridLite dark material theme
-        var importsContent = File.ReadAllText(Path.Combine(_testProjectDir, "_Imports.razor"));
-        Assert.Contains(ControlsUsing, importsContent);
+        // Assert — root _Imports.razor and wwwroot/index.html were updated with the dark material theme
+        Assert.Contains(ControlsUsing, File.ReadAllText(Path.Combine(_testProjectDir, "_Imports.razor")));
         var indexHtmlContent = File.ReadAllText(Path.Combine(_testProjectDir, "wwwroot", "index.html"));
-        Assert.Contains("<link href=\"_content/IgniteUI.Blazor.GridLite/css/themes/dark/material.css\" rel=\"stylesheet\" />", indexHtmlContent);
-        Assert.DoesNotContain("_content/IgniteUI.Blazor/themes", indexHtmlContent);
+        Assert.Contains("<link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />", indexHtmlContent);
+        Assert.Equal(1, CountOccurrences(indexHtmlContent, "_content/IgniteUI"));
 
-        Assert.False(cliOutput.Contains("error: NU"),
-            $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
-        var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
-        Assert.True(postExitCode == 0,
-            $"Project should build after scaffolding.\nExit code: {postExitCode}\nOutput: {postOutput}\nError: {postError}");
+        await AssertBuildsAsync("after scaffolding");
     }
 
     [Fact]
@@ -157,60 +145,20 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
     }
 
     [Fact]
-    public async Task Scaffold_BlazorIgniteUI_Net10_LiteOnly_WebApp()
-    {
-        // Arrange — Blazor Web App (server project)
-        SetupBlazorWebAppProject();
-        await AssertBuildsAsync("before scaffolding");
-
-        // Act — dotnet scaffold aspnet blazor-igniteui --package Lite
-        await RunScaffoldAndAssertSuccessAsync("--package", "Lite");
-
-        // Assert — only IgniteUI.Blazor.Lite is referenced, with service registration and the Lite theme
-        var projectContent = File.ReadAllText(_testProjectPath);
-        Assert.Contains(LitePackageName, projectContent);
-        Assert.DoesNotContain(GridLitePackageName, projectContent);
-
-        var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-        Assert.Contains("using IgniteUI.Blazor.Controls;", programContent);
-        Assert.Contains("builder.Services.AddIgniteUIBlazor();", programContent);
-
-        Assert.Contains(ControlsUsing, File.ReadAllText(Path.Combine(_testProjectDir, "Components", "_Imports.razor")));
-
-        var appRazorContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
-        Assert.Contains(LiteBootstrapLightStylesheet, appRazorContent);
-        Assert.DoesNotContain("_content/IgniteUI.Blazor.GridLite", appRazorContent);
-
-        await AssertBuildsAsync("after scaffolding");
-    }
-
-    [Fact]
-    public async Task Scaffold_BlazorIgniteUI_Net10_GridLiteOnly_WebApp()
+    public async Task Scaffold_BlazorIgniteUI_Net10_WebApp_WithAssetsCollection()
     {
         // Arrange — Blazor Web App whose App.razor uses the fingerprinted asset collection (@Assets, .NET 9+)
         SetupBlazorWebAppProject();
         File.WriteAllText(Path.Combine(_testProjectDir, "Components", "App.razor"), GetAppRazorWithAssets());
         await AssertBuildsAsync("before scaffolding");
 
-        // Act — dotnet scaffold aspnet blazor-igniteui --package GridLite
-        await RunScaffoldAndAssertSuccessAsync("--package", "GridLite");
+        // Act
+        await RunScaffoldAndAssertSuccessAsync();
 
-        // Assert — only GridLite is referenced; it needs no service registration, so Program.cs must be untouched
-        var projectContent = File.ReadAllText(_testProjectPath);
-        Assert.Contains(GridLitePackageName, projectContent);
-        Assert.DoesNotContain(LitePackageName, projectContent);
-
-        var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-        Assert.DoesNotContain("AddIgniteUIBlazor", programContent);
-        Assert.DoesNotContain("IgniteUI.Blazor.Controls", programContent);
-
-        Assert.Contains(ControlsUsing, File.ReadAllText(Path.Combine(_testProjectDir, "Components", "_Imports.razor")));
-
-        // Assert — the GridLite-only stylesheet is linked with the same @Assets syntax as the existing link, right after it
+        // Assert — the theme is linked with the same @Assets syntax as the existing link, right after it
         var appRazorContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
-        var expectedLink = $"<link rel=\"stylesheet\" href=\"@Assets[\"{GridLiteBootstrapLightStylesheet}\"]\" />";
+        var expectedLink = $"<link rel=\"stylesheet\" href=\"@Assets[\"{LiteBootstrapLightStylesheet}\"]\" />";
         Assert.Contains(expectedLink, appRazorContent);
-        Assert.DoesNotContain("_content/IgniteUI.Blazor/themes", appRazorContent);
         var existingLinkIndex = appRazorContent.IndexOf("@Assets[\"app.css\"]", StringComparison.Ordinal);
         var themeLinkIndex = appRazorContent.IndexOf(expectedLink, StringComparison.Ordinal);
         var headOutletIndex = appRazorContent.IndexOf("<HeadOutlet />", StringComparison.Ordinal);
@@ -221,31 +169,35 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
     }
 
     [Fact]
-    public async Task Scaffold_BlazorIgniteUI_Net10_RerunWithGridLite_KeepsLiteThemeAndSwapsTheme()
+    public async Task Scaffold_BlazorIgniteUI_Net10_Rerun_ReplacesGridLiteOnlyThemeAndSwapsTheme()
     {
-        // Arrange — Blazor Web App that first gets IgniteUI.Blazor.Lite with the default light bootstrap theme
+        // Arrange — Blazor Web App whose App.razor links the GridLite-only theme, as earlier versions of the scaffolder
+        // did for '--package GridLite'
         SetupBlazorWebAppProject();
+        var appRazorPath = Path.Combine(_testProjectDir, "Components", "App.razor");
+        File.WriteAllText(appRazorPath, File.ReadAllText(appRazorPath).Replace(
+            "<HeadOutlet />", $"<link href=\"{GridLiteBootstrapLightStylesheet}\" rel=\"stylesheet\" />\n    <HeadOutlet />"));
+        Assert.Contains(GridLiteBootstrapLightStylesheet, File.ReadAllText(appRazorPath));
         await AssertBuildsAsync("before scaffolding");
-        await RunScaffoldAndAssertSuccessAsync("--package", "Lite");
-        Assert.Contains(LiteBootstrapLightStylesheet, File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor")));
 
-        // Act — re-run for GridLite with another theme. Lite is already referenced, so the IgniteUI.Blazor theme (not the
-        // GridLite-only one) must be kept, and the existing link must be swapped rather than duplicated.
-        var cliOutput = await RunScaffoldAndAssertSuccessAsync("--package", "GridLite", "--theme", "material", "--theme-variant", "dark");
-        Assert.Contains("already references IgniteUI.Blazor.Lite", cliOutput);
+        // Act — the first run replaces the GridLite-only theme with the IgniteUI.Blazor theme, which styles the grid too
+        await RunScaffoldAndAssertSuccessAsync();
+        var appRazorContent = File.ReadAllText(appRazorPath);
+        Assert.Contains(LiteBootstrapLightStylesheet, appRazorContent);
+        Assert.DoesNotContain(GridLiteBootstrapLightStylesheet, appRazorContent);
 
-        // Assert — both packages, exactly one theme link, pointing at the Lite dark material theme
-        var projectContent = File.ReadAllText(_testProjectPath);
-        Assert.Contains(LitePackageName, projectContent);
-        Assert.Contains(GridLitePackageName, projectContent);
+        // Act — the second run with another theme swaps the existing link rather than adding a second one
+        await RunScaffoldAndAssertSuccessAsync("--theme", "material", "--theme-variant", "dark");
 
-        var appRazorContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
+        // Assert — exactly one theme link, pointing at the dark material theme
+        appRazorContent = File.ReadAllText(appRazorPath);
         Assert.Equal(1, CountOccurrences(appRazorContent, "_content/IgniteUI"));
         Assert.Contains("_content/IgniteUI.Blazor/themes/dark/material.css", appRazorContent);
-        Assert.DoesNotContain(LiteBootstrapLightStylesheet, appRazorContent);
-        Assert.DoesNotContain("_content/IgniteUI.Blazor.GridLite", appRazorContent);
 
-        // Assert — the second run duplicated neither the registration nor the using directive
+        // Assert — re-running duplicated neither the packages, the registration nor the using directive
+        var projectContent = File.ReadAllText(_testProjectPath);
+        Assert.Equal(1, CountOccurrences(projectContent, $"\"{LitePackageName}\""));
+        Assert.Equal(1, CountOccurrences(projectContent, $"\"{GridLitePackageName}\""));
         Assert.Equal(1, CountOccurrences(File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs")), "AddIgniteUIBlazor"));
         Assert.Equal(1, CountOccurrences(File.ReadAllText(Path.Combine(_testProjectDir, "Components", "_Imports.razor")), ControlsUsing));
 
@@ -277,14 +229,13 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
 
         await AssertBuildsAsync("before scaffolding");
 
-        // Act — dotnet scaffold aspnet blazor-igniteui --project TestProject\TestProject.csproj --package All (from _testDirectory)
+        // Act — dotnet scaffold aspnet blazor-igniteui --project TestProject\TestProject.csproj (from _testDirectory)
         var relativeProjectPath = Path.Combine("TestProject", "TestProject.csproj");
         var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldInDirectoryAsync(
             _testDirectory,
             TargetFramework,
             "blazor-igniteui",
-            "--project", relativeProjectPath,
-            "--package", "All");
+            "--project", relativeProjectPath);
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed with a relative --project path.\nOutput: {cliOutput}\nError: {cliError}");
         Assert.DoesNotContain("Unhandled exception", cliOutput + cliError);
         Assert.False(cliOutput.Contains("error: NU"), $"Scaffolding should not produce NuGet errors.\nOutput: {cliOutput}");
@@ -419,7 +370,7 @@ app.Run();
     }
 
     /// <summary>
-    /// Runs '--package All' and asserts that the scaffolder fails without modifying the server or the client project.
+    /// Runs the scaffolder and asserts that it fails without modifying the server or the client project.
     /// </summary>
     /// <returns>The scaffolder's combined console output.</returns>
     private async Task<string> ScaffoldAndAssertFailsWithoutChangesAsync(string clientProjectDir)
@@ -437,7 +388,7 @@ app.Run();
         var before = Array.ConvertAll(trackedFiles, path => File.ReadAllText(path));
 
         var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework, "blazor-igniteui", "--project", _testProjectPath, "--package", "All");
+            TargetFramework, "blazor-igniteui", "--project", _testProjectPath);
 
         Assert.True(cliExitCode != 0, $"CLI scaffold should fail.\nOutput: {cliOutput}\nError: {cliError}");
         Assert.DoesNotContain("Unhandled exception", cliOutput + cliError);

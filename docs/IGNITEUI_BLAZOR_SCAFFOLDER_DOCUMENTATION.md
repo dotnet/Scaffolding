@@ -16,17 +16,19 @@
 
 ## Overview
 
-The **Ignite UI for Blazor Scaffolder** (`dotnet scaffold aspnet blazor-igniteui`) adds the open-source (MIT licensed) Ignite UI for Blazor packages from Infragistics to an **existing** Blazor project:
+The **Ignite UI for Blazor Scaffolder** (`dotnet scaffold aspnet blazor-igniteui`) adds the open-source (MIT licensed) Ignite UI for Blazor components from Infragistics to an **existing** Blazor project. It always installs and configures both component sets:
 
-| Package | Contents | Service registration |
-|---------|----------|----------------------|
-| `IgniteUI.Blazor.Lite` | Core UI components (inputs, buttons, dialogs, combo, ...) | `builder.Services.AddIgniteUIBlazor()` |
-| `IgniteUI.Blazor.GridLite` | Lightweight data grid (`<IgbGridLite>`) | None required |
+| Package | Contents |
+|---------|----------|
+| `IgniteUI.Blazor.Lite` | Core UI components (inputs, buttons, dialogs, combo, ...) |
+| `IgniteUI.Blazor.GridLite` | Lightweight data grid (`<IgbGridLite>`) |
+
+If you don't need one of them, remove its package reference after scaffolding (see [Removing a component set](#removing-a-component-set)).
 
 The scaffolder performs the manual setup steps described in the Ignite UI documentation:
 
-1. Installs the selected NuGet package(s).
-2. Registers `builder.Services.AddIgniteUIBlazor()` in `Program.cs` (only when `IgniteUI.Blazor.Lite` is added).
+1. Installs both NuGet packages.
+2. Registers `builder.Services.AddIgniteUIBlazor()` in `Program.cs`.
 3. Adds `@using IgniteUI.Blazor.Controls` to `_Imports.razor`.
 4. Links a theme stylesheet in the host page (`Components/App.razor`, `Pages/_Host.cshtml`, `Pages/_Layout.cshtml` or `wwwroot/index.html`).
 5. For a Blazor Web App with a WebAssembly client project, repeats steps 1–3 in the client project.
@@ -48,18 +50,18 @@ The scaffolder performs the manual setup steps described in the Ignite UI docume
 # Interactive
 dotnet scaffold aspnet blazor-igniteui
 
-# Add both packages with the default light bootstrap theme
-dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp.csproj --package All
+# Add Ignite UI with the default light bootstrap theme
+dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp.csproj
 
-# Add only the grid with the dark material theme
-dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp.csproj --package GridLite --theme material --theme-variant dark
+# Add Ignite UI with the dark material theme
+dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp.csproj --theme material --theme-variant dark
 
-# Add the core components using prerelease package versions
-dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp.csproj --package Lite --prerelease
+# Add Ignite UI using prerelease package versions
+dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp.csproj --prerelease
 
 # Blazor Web App with a WebAssembly client project: target the SERVER project.
-# The referenced MyBlazorApp.Client project is detected and updated automatically.
-dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp/MyBlazorApp.csproj --package All
+# The referenced MyBlazorApp.Client project is discovered and updated automatically.
+dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp/MyBlazorApp.csproj
 ```
 
 ---
@@ -69,7 +71,6 @@ dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp/MyBl
 | Option | Required | Values | Default | Description |
 |--------|----------|--------|---------|-------------|
 | `--project` | Yes | path to `.csproj` | | The Blazor project to modify. For a Blazor Web App with a `.Client` project, pass the **server** project; the client is updated automatically (see [section 5](#5-blazor-web-app-with-a-webassembly-client-project)). |
-| `--package` | Yes | `Lite`, `GridLite`, `All` | | Which Ignite UI package(s) to add. |
 | `--theme` | No | `bootstrap`, `material`, `fluent`, `indigo` | `bootstrap` | Theme stylesheet to link. |
 | `--theme-variant` | No | `light`, `dark` | `light` | Variant of the theme stylesheet. |
 | `--prerelease` | No | flag | `false` | Install prerelease package versions. |
@@ -82,11 +83,11 @@ Unknown `--theme` / `--theme-variant` values fall back to the defaults with an i
 
 ### 1. NuGet packages
 
-`IgniteUI.Blazor.Lite` and/or `IgniteUI.Blazor.GridLite` are added with `dotnet add package`. The packages are not versioned in lockstep with .NET, so the latest stable version is installed (or the latest prerelease with `--prerelease`).
+`IgniteUI.Blazor.Lite` and `IgniteUI.Blazor.GridLite` are added with `dotnet add package`. The packages are not versioned in lockstep with .NET, so the latest stable version is installed (or the latest prerelease with `--prerelease`).
 
 ### 2. Service registration (`Program.cs`)
 
-Only `IgniteUI.Blazor.Lite` needs service registration. When it is selected, the scaffolder adds:
+The scaffolder registers the Ignite UI services required by the `IgniteUI.Blazor.Lite` components (the GridLite grid needs no registration of its own):
 
 ```csharp
 using IgniteUI.Blazor.Controls;
@@ -105,12 +106,7 @@ The change is skipped when `AddIgniteUIBlazor` is already present. To trim the i
 
 ### 4. Theme stylesheet
 
-Exactly one theme stylesheet is linked in the `<head>` of the host page:
-
-| Scenario | Stylesheet |
-|----------|------------|
-| `IgniteUI.Blazor.Lite` is added or already referenced | `_content/IgniteUI.Blazor/themes/{variant}/{theme}.css` |
-| Only `IgniteUI.Blazor.GridLite` is used | `_content/IgniteUI.Blazor.GridLite/css/themes/{variant}/{theme}.css` |
+Exactly one theme stylesheet is linked in the `<head>` of the host page: `_content/IgniteUI.Blazor/themes/{variant}/{theme}.css`. This theme styles both the core components and the GridLite grid.
 
 The `<link>` is inserted after the last existing `<link>` in `<head>` and matches its indentation. When the host page is a `.razor` file that already uses the fingerprinted asset collection (`@Assets["..."]`, .NET 9+), the new link uses the same syntax:
 
@@ -128,7 +124,7 @@ If a different Ignite UI theme is already linked, its `href` is swapped for the 
 
 ### 5. Blazor Web App with a WebAssembly client project
 
-**Always target the server project**, i.e. the project that references `MyApp.Client`. While validating the options, before any file is changed, the scaffolder evaluates the server project's `ProjectReference` items with MSBuild and evaluates each referenced project. A referenced project that uses the `Microsoft.NET.Sdk.BlazorWebAssembly` SDK is the Blazor WebAssembly client. The package(s), the service registration and the `@using` directive are applied to it as well (using `igniteUIBlazorWasmChanges.json` for its `Program.cs`). The host page only exists in the server project, so the stylesheet is linked once, in the server host page. The tool logs `Found Blazor WebAssembly client project '...'; it will be configured as well.` when a client was found.
+**Always target the server project**, i.e. the project that references `MyApp.Client`. While validating the options, before any file is changed, the scaffolder evaluates the server project's `ProjectReference` items with MSBuild and evaluates each referenced project. A referenced project that uses the `Microsoft.NET.Sdk.BlazorWebAssembly` SDK is the Blazor WebAssembly client. The packages, the service registration and the `@using` directive are applied to it as well (using `igniteUIBlazorWasmChanges.json` for its `Program.cs`). The host page only exists in the server project, so the stylesheet is linked once, in the server host page. The tool logs `Found Blazor WebAssembly client project '...'; it will be configured as well.` when a client was found.
 
 Discovery reads the project files only, so neither project has to be restored or built first. A server project that references no WebAssembly project (Blazor Server, or a Blazor Web App without a `.Client` project) is configured on its own.
 
@@ -171,7 +167,16 @@ The scaffolder is idempotent:
 - Packages already referenced are left as they are (`dotnet add package` updates the version at most).
 - `AddIgniteUIBlazor` and `@using IgniteUI.Blazor.Controls` are never duplicated.
 - Re-running with a different `--theme` / `--theme-variant` swaps the linked theme.
-- Running `--package GridLite` on a project that already references `IgniteUI.Blazor.Lite` keeps the `IgniteUI.Blazor` theme stylesheet (the GridLite-only stylesheet must not be used alongside other Ignite UI components).
+- A GridLite-only theme link (`_content/IgniteUI.Blazor.GridLite/themes/...`), for example one added by an earlier version of the scaffolder, is replaced with the `IgniteUI.Blazor` theme.
+
+### Removing a component set
+
+To keep only one component set, remove the other package after scaffolding:
+
+- Without the grid: `dotnet remove package IgniteUI.Blazor.GridLite`.
+- Without the core components: `dotnet remove package IgniteUI.Blazor.Lite`, remove `builder.Services.AddIgniteUIBlazor();` from `Program.cs`, and change the theme link to the GridLite-only theme, `_content/IgniteUI.Blazor.GridLite/themes/{variant}/{theme}.css`.
+
+For a Blazor Web App with a WebAssembly client project, apply the same changes to the client project, except the theme link, which is only in the server host page. Re-running the scaffolder installs both component sets again.
 
 ---
 
@@ -184,7 +189,7 @@ The scaffolder is idempotent:
 | Components render nothing in a Blazor Web App | Add an interactive render mode (see [Render Mode Requirements](#render-mode-requirements)). |
 | `dotnet add package` fails | Verify network access and that your `NuGet.config` can reach nuget.org (or a mirror). Use `--prerelease` to allow prerelease versions. |
 | `error: There are no versions available for the package 'IgniteUI.Blazor.Lite'` (or `GridLite`) followed by `Failed.` | The project's `NuGet.config` only lists feeds that do not carry third-party packages (for example curated Microsoft mirror feeds). The scaffolder continues with the remaining steps; add nuget.org (or your organization's mirror of it) as a package source and re-run the scaffolder, or run `dotnet add package IgniteUI.Blazor.Lite` manually. |
-| `Program.cs` was not modified | The step only runs for `--package Lite` / `All`. It inserts before `var app = builder.Build();` (hosted) or `await builder.Build().RunAsync();` (WebAssembly); other bootstrapping shapes must be edited manually. |
+| `Program.cs` was not modified | The registration is inserted before `var app = builder.Build();` (hosted) or `await builder.Build().RunAsync();` (WebAssembly); other bootstrapping shapes must be edited manually. |
 | The `.Client` project of a Blazor Web App was not updated | `--project` pointed at the client instead of the server project, or the server project has no `ProjectReference` to the client. Target the server project and re-run the scaffolder (it is idempotent). The log should then contain `Found Blazor WebAssembly client project`. |
 | `Unable to resolve the Blazor WebAssembly client project ...` or `Unable to evaluate ...` | Client discovery failed before any change was made: a referenced project is missing, a project could not be evaluated, or the server references more than one Blazor WebAssembly project. Follow the guidance in the message (see [section 5](#5-blazor-web-app-with-a-webassembly-client-project)) and re-run the scaffolder. |
 

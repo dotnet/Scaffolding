@@ -129,7 +129,7 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
 
     /// <summary>
     /// Runs the scaffolder and asserts the Blazor Web App was wired up for both Ignite UI packages
-    /// ('--package All' with the default light bootstrap theme).
+    /// (with the default light bootstrap theme).
     /// </summary>
     /// <param name="buildBeforeScaffolding">
     /// Builds (and therefore restores) the project before scaffolding. Pass false to verify that the scaffolder works on
@@ -146,7 +146,7 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
         }
 
         var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework, "blazor-igniteui", "--project", _testProjectPath, "--package", "All");
+            TargetFramework, "blazor-igniteui", "--project", _testProjectPath);
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
         // packages

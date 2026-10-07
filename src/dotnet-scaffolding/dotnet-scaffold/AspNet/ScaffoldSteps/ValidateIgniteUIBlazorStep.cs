@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 /// <summary>
 /// Scaffold step that validates the Ignite UI for Blazor options and initializes the
-/// <see cref="IgniteUIBlazorModel"/> (resolved host page, _Imports.razor, packages, theme stylesheet and,
+/// <see cref="IgniteUIBlazorModel"/> (resolved host page, _Imports.razor, theme stylesheet and,
 /// for a Blazor Web App, the referenced Blazor WebAssembly client project).
 /// </summary>
 internal class ValidateIgniteUIBlazorStep : ScaffoldStep
@@ -30,10 +30,6 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
     /// Path to the project file.
     /// </summary>
     public string? Project { get; set; }
-    /// <summary>
-    /// Which Ignite UI package set to add: 'Lite', 'GridLite' or 'All'.
-    /// </summary>
-    public string? Package { get; set; }
     /// <summary>
     /// The theme to link ('bootstrap', 'material', 'fluent' or 'indigo'). Defaults to 'bootstrap'.
     /// </summary>
@@ -108,12 +104,6 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             return null;
         }
 
-        if (!IgniteUIBlazorHelper.IsValidPackageOption(Package))
-        {
-            _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.IgniteUIPackageOption} option. Expected one of: {string.Join(", ", IgniteUIBlazorHelper.PackageOptions)}.");
-            return null;
-        }
-
         var theme = IgniteUIBlazorHelper.NormalizeTheme(Theme);
         if (!string.IsNullOrEmpty(Theme) && !theme.Equals(Theme, StringComparison.OrdinalIgnoreCase))
         {
@@ -131,7 +121,6 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
         return new IgniteUIBlazorSettings
         {
             Project = Path.GetFullPath(Project),
-            Package = Package!,
             Theme = theme,
             ThemeVariant = themeVariant,
             Prerelease = Prerelease
@@ -179,17 +168,8 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             }
         }
 
-        bool includeLite = IgniteUIBlazorHelper.IncludesLite(settings.Package);
-        bool includeGridLite = IgniteUIBlazorHelper.IncludesGridLite(settings.Package);
-        // The GridLite stylesheet is only appropriate when GridLite is the only Ignite UI package in use.
-        bool useLiteStylesheet = includeLite || IgniteUIBlazorHelper.ProjectReferencesLitePackage(projectFileContent);
-        if (includeGridLite && !includeLite && useLiteStylesheet)
-        {
-            _logger.LogInformation("The project already references IgniteUI.Blazor.Lite; linking the IgniteUI.Blazor theme stylesheet instead of the GridLite-only stylesheet.");
-        }
-
         var hostPagePath = IgniteUIBlazorHelper.FindHostPage(_fileSystem, projectDirectory);
-        var stylesheetPath = IgniteUIBlazorHelper.GetThemeStylesheetPath(useLiteStylesheet, settings.Theme, settings.ThemeVariant);
+        var stylesheetPath = IgniteUIBlazorHelper.GetThemeStylesheetPath(settings.Theme, settings.ThemeVariant);
         if (hostPagePath is null)
         {
             _logger.LogWarning($"Could not find a host page ({string.Join(", ", IgniteUIBlazorHelper.HostPageCandidates)}) in '{projectDirectory}'.");
@@ -205,8 +185,6 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             ProjectInfo = projectInfo,
             ProjectPath = settings.Project,
             BaseOutputPath = projectDirectory,
-            IncludeLite = includeLite,
-            IncludeGridLite = includeGridLite,
             Theme = settings.Theme,
             ThemeVariant = settings.ThemeVariant,
             StylesheetPath = stylesheetPath,

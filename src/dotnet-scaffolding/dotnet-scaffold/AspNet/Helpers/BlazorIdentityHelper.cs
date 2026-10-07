@@ -26,35 +26,63 @@ internal static class BlazorIdentityHelper
             return [];
         }
 
+        var projectName = Path.GetFileNameWithoutExtension(blazorIdentityModel.ProjectInfo.ProjectPath);
+        if (string.IsNullOrEmpty(projectName))
+        {
+            return [];
+        }
+
+        var templateTypes = GetBlazorIdentityTemplateTypes(blazorIdentityModel.ProjectInfo.LowestSupportedTargetFramework);
+        var isNet9OrLater = blazorIdentityModel.ProjectInfo.LowestSupportedTargetFramework.IsNetVersionOrLater(9);
         var textTemplatingProperties = new List<TextTemplatingProperty>();
         foreach (var templatePath in allT4TemplatePaths)
         {
+            if (string.IsNullOrEmpty(templatePath))
+            {
+                continue;
+            }
+
             var templateFullName = GetFormattedRelativeIdentityFile(templatePath);
             var typeName = StringUtil.GetTypeNameFromNamespace(templateFullName);
-            var templateTypes = GetBlazorIdentityTemplateTypes(blazorIdentityModel.ProjectInfo.LowestSupportedTargetFramework);
             var templateType = templateTypes.FirstOrDefault(x =>
                 !string.IsNullOrEmpty(x.FullName) &&
                 x.FullName.Contains(templateFullName) &&
                 x.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase));
 
-            var projectName = Path.GetFileNameWithoutExtension(blazorIdentityModel.ProjectInfo.ProjectPath);
-
-            if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
+            if (templateType is null)
             {
-                // Files in Pages and Shared folders are Razor components, others are C# files
-                string extension = templateFullName.StartsWith("Pages", StringComparison.OrdinalIgnoreCase) ||
-                                   templateFullName.StartsWith("Shared", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
-                string relativeTemplatePath = templateFullName.Replace('.', Path.DirectorySeparatorChar);
-                string outputFileName = $"{Path.Combine(GetIdentityComponentsPath(blazorIdentityModel.BaseOutputPath), relativeTemplatePath)}{extension}";
-                textTemplatingProperties.Add(new()
-                {
-                    TemplateModel = blazorIdentityModel,
-                    TemplateModelName = "Model",
-                    TemplatePath = templatePath,
-                    TemplateType = templateType,
-                    OutputPath = outputFileName
-                });
+                continue;
             }
+
+            if (isNet9OrLater &&
+                typeName.Equals("IdentityRevalidatingAuthenticationStateProvider", StringComparison.Ordinal) &&
+                !blazorIdentityModel.UsesInteractiveServer)
+            {
+                continue;
+            }
+
+            // Files in Pages and Shared folders are Razor components, others are C# files
+            string extension = templateFullName.StartsWith("Pages", StringComparison.OrdinalIgnoreCase) ||
+                               templateFullName.StartsWith("Shared", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
+            string relativeTemplatePath = templateFullName.Replace('.', Path.DirectorySeparatorChar);
+            string outputFileName = $"{Path.Combine(GetIdentityComponentsPath(blazorIdentityModel.BaseOutputPath), relativeTemplatePath)}{extension}";
+
+            // Place RedirectToLogin in the client project so both server and WebAssembly routing can use it.
+            if (isNet9OrLater &&
+                typeName.Equals("RedirectToLogin", StringComparison.Ordinal) &&
+                !string.IsNullOrEmpty(blazorIdentityModel.BlazorWebAssemblyClientProjectPath))
+            {
+                outputFileName = Path.Combine(Path.GetDirectoryName(blazorIdentityModel.BlazorWebAssemblyClientProjectPath)!, "RedirectToLogin.razor");
+            }
+
+            textTemplatingProperties.Add(new()
+            {
+                TemplateModel = blazorIdentityModel,
+                TemplateModelName = "Model",
+                TemplatePath = templatePath,
+                TemplateType = templateType,
+                OutputPath = outputFileName
+            });
         }
 
         return textTemplatingProperties;
@@ -283,6 +311,7 @@ internal static class BlazorIdentityHelper
         typeof(Templates.net11.BlazorIdentity.IdentityNoOpEmailSender),
         typeof(Templates.net11.BlazorIdentity.IdentityRedirectManager),
         typeof(Templates.net11.BlazorIdentity.IdentityRevalidatingAuthenticationStateProvider),
+        typeof(Templates.net11.BlazorIdentity.PasskeyAuthenticators),
         typeof(Templates.net11.BlazorIdentity.PasskeyInputModel),
         typeof(Templates.net11.BlazorIdentity.PasskeyOperation),
         typeof(Templates.net11.BlazorIdentity.Pages._Imports),

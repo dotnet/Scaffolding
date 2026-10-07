@@ -37,6 +37,13 @@ public enum TargetFramework
 internal static class TargetFrameworkExtensions
 {
     /// <summary>
+    /// Determines whether the target framework meets the specified minimum .NET major version.
+    /// </summary>
+    /// <returns>False if the target framework is null or unrecognized, or its major version is below the minimum.</returns>
+    public static bool IsNetVersionOrLater(this TargetFramework? targetFramework, int minimumMajorVersion)
+        => targetFramework.TryGetMajorVersion(out var majorVersion) && majorVersion >= minimumMajorVersion;
+
+    /// <summary>
     /// Attempts to get the .NET major version number (for example, 9 for <see cref="TargetFramework.Net9"/>)
     /// for the specified target framework.
     /// </summary>

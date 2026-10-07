@@ -21,7 +21,13 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
     public required string TargetFileName { get; set; }
 
     /// <summary>
-    /// Gets or sets the method calls (e.g. 'AddIgniteUIBlazor(') that <see cref="TargetFileName"/> must contain afterwards.
+    /// Gets or sets the exact file that is changed, when it is known (e.g. the resolved host page). When null, any
+    /// <see cref="TargetFileName"/> file in the project (outside bin/ and obj/) is checked.
+    /// </summary>
+    public string? TargetFilePath { get; set; }
+
+    /// <summary>
+    /// Gets or sets the text (e.g. 'AddIgniteUIBlazor(' or a stylesheet path) that the changed file must contain afterwards.
     /// </summary>
     public required IReadOnlyList<string> RequiredCalls { get; set; }
 
@@ -34,6 +40,12 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
     /// Gets or sets how to make the change manually when it cannot be applied automatically.
     /// </summary>
     public required string ManualInstructions { get; set; }
+
+    /// <summary>
+    /// Gets or sets why the change cannot be made at all (e.g. no host page was found). When set, the step does not
+    /// modify anything and reports the incomplete setup with <see cref="ManualInstructions"/>.
+    /// </summary>
+    public string? IncompleteReason { get; set; }
 
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
@@ -51,14 +63,19 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
     /// <inheritdoc />
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
+        if (IncompleteReason is not null)
+        {
+            _logger.LogError($"Ignite UI for Blazor setup is incomplete: {IncompleteReason}. {ManualInstructions}");
+            return false;
+        }
+
         if (await base.ExecuteAsync(context, cancellationToken) && ContainsRequiredCalls())
         {
             return true;
         }
 
         _logger.LogError(
-            $"Ignite UI for Blazor setup is incomplete: {ChangeDescription} could not be added to {TargetFileName} in '{ProjectPath}'. " +
-            $"{ManualInstructions} Then re-run the scaffolder to complete the remaining steps.");
+            $"Ignite UI for Blazor setup is incomplete: {ChangeDescription} could not be added to {TargetFileName} in '{ProjectPath}'. {ManualInstructions}");
         return false;
     }
 
@@ -68,6 +85,12 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
     /// </summary>
     internal bool ContainsRequiredCalls()
     {
+        if (TargetFilePath is not null)
+        {
+            return _fileSystem.FileExists(TargetFilePath) &&
+                   RequiredCalls.All(call => _fileSystem.ReadAllText(TargetFilePath).Contains(call, StringComparison.Ordinal));
+        }
+
         var projectDirectory = Path.GetDirectoryName(ProjectPath);
         if (string.IsNullOrEmpty(projectDirectory) || !_fileSystem.DirectoryExists(projectDirectory))
         {

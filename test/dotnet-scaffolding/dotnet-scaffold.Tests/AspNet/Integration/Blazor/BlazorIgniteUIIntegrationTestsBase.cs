@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -71,6 +72,7 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
     [InlineData("igniteUIBlazorChanges.json")]
     [InlineData("igniteUIBlazorWasmChanges.json")]
     [InlineData("igniteUIBlazorMauiChanges.json")]
+    [InlineData("igniteUIBlazorThemeChanges.json")]
     public void CodeModificationConfig_ExistsForTargetFramework(string configFileName)
     {
         var configPath = GetCodeModificationConfigPath(configFileName);
@@ -143,6 +145,64 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
 
         // Re-running the scaffolder must not register the services twice.
         Assert.Single(Regex.Matches(await ApplyConfigAsync(), Regex.Escape("AddIgniteUIBlazor")));
+    }
+
+    [Theory]
+    [InlineData("Components", "App.razor", true, "<!DOCTYPE html>\n<html>\n<head>\n    <link rel=\"stylesheet\" href=\"@Assets[\"app.css\"]\" />\n    <HeadOutlet />\n</head>\n<body><Routes /></body>\n</html>\n",
+        "    <HeadOutlet />\n    <link rel=\"stylesheet\" href=\"@Assets[\"_content/IgniteUI.Blazor/themes/dark/material.css\"]\" />\n</head>")]
+    [InlineData("Pages", "_Host.cshtml", true, "@page \"/\"\n<html>\n<head>\n    <link href=\"css/site.css\" rel=\"stylesheet\" />\n</head>\n</html>\n",
+        "    <link href=\"css/site.css\" rel=\"stylesheet\" />\n    <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />\n</head>")]
+    [InlineData("wwwroot", "index.html", false, "<!DOCTYPE html>\n<html>\n<head>\n    <title>App</title>\n</head>\n<body></body>\n</html>\n",
+        "    <title>App</title>\n    <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />\n</head>")]
+    public async Task ThemeRecipe_LinksBeforeHeadAndSwapsThemeWithoutDuplicates(string folder, string fileName, bool inWorkspace, string hostPage, string expectedHead)
+    {
+        // The shared recipe, applied with the values the scaffolder analyzes, for every kind of host page: App.razor and
+        // _Host.cshtml as workspace documents, a standalone app's wwwroot/index.html on disk.
+        var hostPagePath = Path.Combine(_testProjectDir, folder, fileName);
+        Directory.CreateDirectory(Path.GetDirectoryName(hostPagePath)!);
+        File.WriteAllText(hostPagePath, hostPage);
+        var projectPath = _testProjectPath;
+        using var workspace = new AdhocWorkspace();
+        var project = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Create(),
+            "TestProject", "TestProject", LanguageNames.CSharp, filePath: projectPath));
+        DocumentId? documentId = null;
+        if (inWorkspace)
+        {
+            var document = project.AddAdditionalDocument(fileName, SourceText.From(hostPage), filePath: hostPagePath);
+            documentId = document.Id;
+            Assert.True(workspace.TryApplyChanges(document.Project.Solution));
+        }
+
+        var codeService = new Mock<ICodeService>();
+        codeService.Setup(service => service.GetWorkspaceAsync()).ReturnsAsync(workspace);
+        codeService.Setup(service => service.TryApplyChanges(It.IsAny<Solution>()))
+            .Returns((Solution solution) => workspace.TryApplyChanges(solution));
+
+        async Task<string> ApplyThemeAsync(string stylesheetPath)
+        {
+            var current = await ReadHostPageAsync();
+            var (options, properties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(_testProjectDir, hostPagePath, current, stylesheetPath);
+            var config = CodeModifierConfigHelper.GetCodeModifierConfig(GetCodeModificationConfigPath("igniteUIBlazorThemeChanges.json"));
+            Assert.NotNull(config);
+            config.EditCodeModifierConfig(properties);
+            Assert.True(await new ProjectModifier(projectPath, codeService.Object, Mock.Of<ILogger>(), config, options).RunAsync());
+            return await ReadHostPageAsync();
+        }
+
+        async Task<string> ReadHostPageAsync()
+            => documentId is null
+                ? File.ReadAllText(hostPagePath)
+                : (await workspace.CurrentSolution.GetAdditionalDocument(documentId)!.GetTextAsync()).ToString();
+
+        const string darkMaterial = "_content/IgniteUI.Blazor/themes/dark/material.css";
+        var updated = await ApplyThemeAsync(darkMaterial);
+        Assert.Contains(expectedHead, updated);
+
+        // A re-run with the same theme changes nothing; a different theme swaps the path in place.
+        Assert.Equal(updated, await ApplyThemeAsync(darkMaterial));
+        var swapped = await ApplyThemeAsync("_content/IgniteUI.Blazor/themes/light/fluent.css");
+        Assert.Equal(updated.Replace(darkMaterial, "_content/IgniteUI.Blazor/themes/light/fluent.css"), swapped);
+        Assert.Single(Regex.Matches(swapped, Regex.Escape("_content/IgniteUI")));
     }
 
     #endregion

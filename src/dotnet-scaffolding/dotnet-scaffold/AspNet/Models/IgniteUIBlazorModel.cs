@@ -79,6 +79,18 @@ internal class IgniteUIBlazorModel
     /// </summary>
     public bool AddInteractiveServerSupport { get; init; }
     /// <summary>
+    /// Gets the shared recipe that links the theme stylesheet in the host page, or null when there is no host page.
+    /// </summary>
+    public string? ThemeCodeModificationConfigPath { get; init; }
+    /// <summary>
+    /// Gets the options that select the host page and the action (link or swap) in the theme recipe.
+    /// </summary>
+    public IReadOnlyList<string> ThemeCodeChangeOptions { get; init; } = [];
+    /// <summary>
+    /// Gets the values substituted into the theme recipe (stylesheet path, link, existing theme path).
+    /// </summary>
+    public IReadOnlyDictionary<string, string> ThemeCodeModifierProperties { get; init; } = new Dictionary<string, string>();
+    /// <summary>
     /// Gets the render mode guidance logged when the setup completes, or null when none is needed.
     /// </summary>
     public string? RenderModeGuidance { get; init; }

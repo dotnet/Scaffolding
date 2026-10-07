@@ -39,16 +39,27 @@ internal static class BlazorInteractivityAnalyzer
     /// <param name="programPath">The Program.cs path, for diagnostics.</param>
     /// <param name="projectPath">The project path, for diagnostics.</param>
     /// <param name="allowSyntaxFallback">
-    /// When the Blazor APIs are not available to the semantic model at all (for example a project that has not been
-    /// restored for a target framework whose reference pack is not installed), match the invoked Blazor method names in
-    /// Program.cs instead of failing. The names are specific to the Blazor APIs, so a registration is never missed.
+    /// When the semantic model cannot resolve the Blazor registrations, match the invoked Blazor method names in
+    /// Program.cs instead of failing. This covers projects that have not been restored: the framework reference pack may
+    /// be missing, and registrations from packages (such as 'AddInteractiveWebAssemblyComponents()' from
+    /// Microsoft.AspNetCore.Components.WebAssembly.Server) do not resolve until the packages are restored. The names are
+    /// specific to the Blazor APIs, so an unresolved registration still counts as present and is never duplicated.
     /// </param>
     internal static async Task<(BlazorInteractivity? Interactivity, string? Error)> AnalyzeAsync(Document? programDocument, string programPath, string? projectPath, bool allowSyntaxFallback = false)
     {
         var semanticModel = programDocument is null ? null : await programDocument.GetSemanticModelAsync();
         var programRoot = programDocument is null ? null : await programDocument.GetSyntaxRootAsync();
-        if (allowSyntaxFallback && programRoot is not null &&
-            semanticModel?.Compilation.GetTypeByMetadataName(BlazorCrudHelper.IRazorComponentsBuilderType) is null)
+        var blazorApisAvailable = semanticModel?.Compilation.GetTypeByMetadataName(BlazorCrudHelper.IRazorComponentsBuilderType) is not null;
+
+        // An unresolved registration is not an absent registration. Other errors (such as unavailable
+        // generated Razor component types) need not prevent analysis of these service registrations.
+        var unresolvedRegistration = !blazorApisAvailable || programRoot is null ? null : programRoot.DescendantNodes().OfType<SimpleNameSyntax>()
+            .FirstOrDefault(name =>
+                name.Identifier.ValueText is BlazorCrudHelper.AddInteractiveServerComponentsMethod or BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod &&
+                IsInvokedName(name) &&
+                semanticModel!.GetSymbolInfo(name).Symbol is null);
+
+        if (allowSyntaxFallback && programRoot is not null && (!blazorApisAvailable || unresolvedRegistration is not null))
         {
             return (new BlazorInteractivity(
                 IsInvoked(programRoot, BlazorCrudHelper.AddRazorComponentsMethod),
@@ -57,19 +68,11 @@ internal static class BlazorInteractivityAnalyzer
                 IsInvoked(programRoot, BlazorCrudHelper.MapRazorComponentsMethod)), null);
         }
 
-        if (programDocument is null || semanticModel is null || programRoot is null ||
-            semanticModel.Compilation.GetTypeByMetadataName(BlazorCrudHelper.IRazorComponentsBuilderType) is null)
+        if (programDocument is null || semanticModel is null || programRoot is null || !blazorApisAvailable)
         {
             return (null, $"Unable to analyze Blazor registrations in '{programPath}'. Ensure the project's SDK and references are available and 'dotnet restore' succeeds.");
         }
 
-        // An unresolved registration is not an absent registration. Other errors (such as unavailable
-        // generated Razor component types) need not prevent analysis of these service registrations.
-        var unresolvedRegistration = programRoot.DescendantNodes().OfType<SimpleNameSyntax>()
-            .FirstOrDefault(name =>
-                name.Identifier.ValueText is BlazorCrudHelper.AddInteractiveServerComponentsMethod or BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod &&
-                IsInvokedName(name) &&
-                semanticModel.GetSymbolInfo(name).Symbol is null);
         if (unresolvedRegistration is not null)
         {
             return (null, $"Unable to resolve Blazor registration '{unresolvedRegistration}' in '{programPath}'. Check the registration's imports and package references, then run 'dotnet build \"{projectPath}\"' for diagnostics.");

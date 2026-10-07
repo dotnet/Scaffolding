@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
@@ -98,14 +99,14 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
     }
 
     [Fact]
-    public void WithIgniteUIBlazorThemeStylesheetStep_AddsAddIgniteUIThemeStylesheetStep()
+    public void WithIgniteUIBlazorThemeStylesheetStep_AddsIgniteUICodeModificationStep()
     {
-        var mockBuilder = CreateBuilder<AddIgniteUIThemeStylesheetStep>();
+        var mockBuilder = CreateBuilder<IgniteUICodeModificationStep>();
 
         IScaffoldBuilder result = mockBuilder.Object.WithIgniteUIBlazorThemeStylesheetStep();
 
         Assert.NotNull(result);
-        VerifyStepAdded<AddIgniteUIThemeStylesheetStep>(mockBuilder);
+        VerifyStepAdded<IgniteUICodeModificationStep>(mockBuilder);
     }
 
     [Theory]
@@ -193,22 +194,36 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
     }
 
     [Fact]
-    public void WithIgniteUIBlazorThemeStylesheetStep_RunsWithoutHostPage()
+    public void WithIgniteUIBlazorThemeStylesheetStep_AppliesThemeRecipeWithAnalyzedValues()
     {
-        // Without a host page the step still runs, so that it fails and reports the <link> to add manually.
-        var model = CreateModel(hasHostPage: false);
-        var step = new AddIgniteUIThemeStylesheetStep(NullLogger<AddIgniteUIThemeStylesheetStep>.Instance, Mock.Of<IFileSystem>(), Mock.Of<ITelemetryService>())
-        {
-            StylesheetPath = string.Empty
-        };
+        var model = CreateModel();
+        var step = CreateServicesStep();
 
         ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorThemeStylesheetStep());
 
         Assert.False(step.SkipStep);
         Assert.False(step.ContinueOnError);
-        Assert.Null(step.HostPagePath);
-        Assert.Equal(model.BaseOutputPath, step.ProjectDirectory);
-        Assert.Equal(model.StylesheetPath, step.StylesheetPath);
+        Assert.Null(step.IncompleteReason);
+        Assert.Equal(model.ThemeCodeModificationConfigPath, step.CodeModifierConfigPath);
+        Assert.Equal(model.ThemeCodeChangeOptions, step.CodeChangeOptions);
+        Assert.Equal(model.StylesheetPath, step.CodeModifierProperties["$(IgniteUIThemeStylesheetPath)"]);
+        Assert.Equal(model.HostPagePath, step.TargetFilePath);
+        Assert.Equal([model.StylesheetPath], step.RequiredCalls);
+    }
+
+    [Fact]
+    public void WithIgniteUIBlazorThemeStylesheetStep_ReportsIncompleteSetupWithoutHostPage()
+    {
+        // Without a host page the step still runs, so that it fails and reports the <link> to add manually.
+        var model = CreateModel(hasHostPage: false);
+        var step = CreateServicesStep();
+
+        ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorThemeStylesheetStep());
+
+        Assert.False(step.SkipStep);
+        Assert.Contains("no host page", step.IncompleteReason);
+        Assert.Contains(model.BaseOutputPath, step.IncompleteReason);
+        Assert.Contains($"<link href=\"{model.StylesheetPath}\" rel=\"stylesheet\" />", step.ManualInstructions);
     }
 
     [Theory]
@@ -348,6 +363,11 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
             IsWebAssemblyProject = false,
             IsMauiBlazorHybridProject = isMauiBlazorHybridProject,
             HostPagePath = hasHostPage ? Path.Combine(projectDirectory, "Components", "App.razor") : null,
+            ThemeCodeModificationConfigPath = hasHostPage ? Path.Combine("configs", "igniteUIBlazorThemeChanges.json") : null,
+            ThemeCodeChangeOptions = hasHostPage ? ["IgniteUIAppRazorHost", "IgniteUILinkTheme"] : [],
+            ThemeCodeModifierProperties = hasHostPage
+                ? new Dictionary<string, string> { ["$(IgniteUIThemeStylesheetPath)"] = "_content/IgniteUI.Blazor/themes/light/bootstrap.css" }
+                : new Dictionary<string, string>(),
             ImportsFilePath = Path.Combine(projectDirectory, "Components", "_Imports.razor"),
             ClientProjectPath = hasClient ? Path.Combine(clientProjectDirectory, "MyApp.Client.csproj") : null,
             ClientImportsFilePath = hasClient ? Path.Combine(clientProjectDirectory, "_Imports.razor") : null,

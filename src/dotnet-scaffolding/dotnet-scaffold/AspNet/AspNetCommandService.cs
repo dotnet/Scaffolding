@@ -28,7 +28,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(AddFileStep),
                 typeof(IgniteUIBlazorGuidanceStep),
                 typeof(IgniteUICodeModificationStep),
-                typeof(AddIgniteUIThemeStylesheetStep),
                 typeof(AddRazorImportsStep),
                 typeof(AreaScaffolderStep),
                 typeof(DetectBlazorWasmStep),

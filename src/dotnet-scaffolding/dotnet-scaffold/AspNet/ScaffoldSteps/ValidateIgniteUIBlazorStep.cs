@@ -34,11 +34,13 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
     /// </summary>
     public string? Project { get; set; }
     /// <summary>
-    /// The theme to link ('bootstrap', 'material', 'fluent' or 'indigo'). Defaults to 'bootstrap'.
+    /// The theme to link ('bootstrap', 'material', 'fluent' or 'indigo'). Defaults to the theme already linked in the
+    /// host page, otherwise 'bootstrap'.
     /// </summary>
     public string? Theme { get; set; }
     /// <summary>
-    /// The theme variant to link ('light' or 'dark'). Defaults to 'light'.
+    /// The theme variant to link ('light' or 'dark'). Defaults to the variant already linked in the host page,
+    /// otherwise 'light'.
     /// </summary>
     public string? ThemeVariant { get; set; }
     /// <summary>
@@ -124,8 +126,9 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
         return new IgniteUIBlazorSettings
         {
             Project = Path.GetFullPath(Project),
-            Theme = theme,
-            ThemeVariant = themeVariant,
+            // An omitted option stays null so that the theme already linked in the host page can be kept.
+            Theme = string.IsNullOrWhiteSpace(Theme) ? null : theme,
+            ThemeVariant = string.IsNullOrWhiteSpace(ThemeVariant) ? null : themeVariant,
             Prerelease = Prerelease
         };
     }
@@ -242,7 +245,8 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
         }
 
         var hostPagePath = IgniteUIBlazorHelper.FindHostPage(_fileSystem, projectDirectory);
-        var stylesheetPath = IgniteUIBlazorHelper.GetThemeStylesheetPath(settings.Theme, settings.ThemeVariant);
+        var (theme, themeVariant) = ResolveTheme(settings, hostPagePath);
+        var stylesheetPath = IgniteUIBlazorHelper.GetThemeStylesheetPath(theme, themeVariant);
         if (hostPagePath is null)
         {
             // The remaining setup still runs; the theme step then fails and reports the <link> to add manually.
@@ -261,6 +265,23 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             return null;
         }
 
+        // The theme link uses the shared recipe; the host page analysis (link or swap, link syntax, indentation)
+        // provides its values.
+        string? themeCodeModificationConfigPath = null;
+        List<string> themeCodeChangeOptions = [];
+        Dictionary<string, string> themeCodeModifierProperties = [];
+        if (hostPagePath is not null)
+        {
+            themeCodeModificationConfigPath = FindCodeModificationConfig(settings.Project, IgniteUIBlazorScaffolderBuilderExtensions.ThemeCodeModificationConfigFileName);
+            if (themeCodeModificationConfigPath is null)
+            {
+                return null;
+            }
+
+            (themeCodeChangeOptions, themeCodeModifierProperties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(
+                projectDirectory, hostPagePath, _fileSystem.ReadAllText(hostPagePath), stylesheetPath);
+        }
+
         // No option-filtered blocks exist in the Ignite UI code modification configs.
         projectInfo.CodeChangeOptions = [];
 
@@ -269,8 +290,8 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             ProjectInfo = projectInfo,
             ProjectPath = settings.Project,
             BaseOutputPath = projectDirectory,
-            Theme = settings.Theme,
-            ThemeVariant = settings.ThemeVariant,
+            Theme = theme,
+            ThemeVariant = themeVariant,
             StylesheetPath = stylesheetPath,
             IsWebAssemblyProject = isWebAssemblyProject,
             IsMauiBlazorHybridProject = isMauiBlazorHybridProject,
@@ -281,6 +302,9 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             CodeModificationConfigPath = codeModificationConfigPath,
             ClientCodeModificationConfigPath = clientCodeModificationConfigPath,
             AddInteractiveServerSupport = addInteractiveServerSupport,
+            ThemeCodeModificationConfigPath = themeCodeModificationConfigPath,
+            ThemeCodeChangeOptions = themeCodeChangeOptions,
+            ThemeCodeModifierProperties = themeCodeModifierProperties,
             RenderModeGuidance = interactivity is { UsesRazorComponents: true }
                 ? IgniteUIBlazorHelper.GetRenderModeGuidance(
                     interactivity.UsesInteractiveServer || addInteractiveServerSupport,
@@ -308,6 +332,31 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
         }
 
         return configPath;
+    }
+
+    /// <summary>
+    /// Resolves the theme to link: each of '--theme' and '--theme-variant' that is given wins; an omitted one keeps the
+    /// value of the Ignite UI theme already linked in the host page, so a re-run does not change the app's appearance;
+    /// without a linked theme the defaults (bootstrap, light) apply.
+    /// </summary>
+    private (string Theme, string ThemeVariant) ResolveTheme(IgniteUIBlazorSettings settings, string? hostPagePath)
+    {
+        if ((settings.Theme is not null && settings.ThemeVariant is not null) ||
+            hostPagePath is null ||
+            !IgniteUIBlazorHelper.TryGetLinkedTheme(_fileSystem.ReadAllText(hostPagePath), out var linkedTheme, out var linkedThemeVariant))
+        {
+            return (settings.Theme ?? IgniteUIBlazorHelper.DefaultTheme, settings.ThemeVariant ?? IgniteUIBlazorHelper.DefaultThemeVariant);
+        }
+
+        var theme = settings.Theme ?? linkedTheme;
+        var themeVariant = settings.ThemeVariant ?? linkedThemeVariant;
+        var kept = settings.Theme is null && settings.ThemeVariant is null ? $"theme '{theme}' ({themeVariant})"
+            : settings.Theme is null ? $"theme '{theme}'"
+            : $"theme variant '{themeVariant}'";
+        _logger.LogInformation(
+            $"Keeping the Ignite UI {kept} already linked in '{Path.GetFileName(hostPagePath)}'. " +
+            $"Pass {AspNetConstants.CliOptions.IgniteUIThemeOption} / {AspNetConstants.CliOptions.IgniteUIThemeVariantOption} to change it.");
+        return (theme, themeVariant);
     }
 
     /// <summary>

@@ -376,15 +376,9 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         // Act
         await RunScaffoldAndAssertSuccessAsync();
 
-        // Assert — the theme is linked with the same @Assets syntax as the existing link, right after it
-        var appRazorContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
-        var expectedLink = $"<link rel=\"stylesheet\" href=\"@Assets[\"{LiteBootstrapLightStylesheet}\"]\" />";
-        Assert.Contains(expectedLink, appRazorContent);
-        var existingLinkIndex = appRazorContent.IndexOf("@Assets[\"app.css\"]", StringComparison.Ordinal);
-        var themeLinkIndex = appRazorContent.IndexOf(expectedLink, StringComparison.Ordinal);
-        var headOutletIndex = appRazorContent.IndexOf("<HeadOutlet />", StringComparison.Ordinal);
-        Assert.True(existingLinkIndex < themeLinkIndex && themeLinkIndex < headOutletIndex,
-            $"The theme link should follow the existing stylesheet link inside <head>.\n{appRazorContent}");
+        // Assert — the theme is linked with the same @Assets syntax as the existing link, right before </head>
+        var appRazorContent = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor")).ReplaceLineEndings("\n");
+        Assert.Contains($"    <HeadOutlet />\n    <link rel=\"stylesheet\" href=\"@Assets[\"{LiteBootstrapLightStylesheet}\"]\" />\n</head>", appRazorContent);
 
         await AssertBuildsAsync("after scaffolding");
     }
@@ -423,6 +417,36 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         Assert.Equal(1, CountOccurrences(File.ReadAllText(Path.Combine(_testProjectDir, "Components", "_Imports.razor")), ControlsUsing));
 
         await AssertBuildsAsync("after scaffolding twice");
+    }
+
+    [Fact]
+    public async Task Scaffold_BlazorIgniteUI_Net10_Rerun_PreservesLinkedThemeUnlessOverridden()
+    {
+        // Arrange — a Blazor Web App set up with the dark material theme
+        SetupBlazorWebAppProject();
+        var appRazorPath = Path.Combine(_testProjectDir, "Components", "App.razor");
+        await RunScaffoldAndAssertSuccessAsync("--theme", "material", "--theme-variant", "dark");
+        Assert.Contains("_content/IgniteUI.Blazor/themes/dark/material.css", File.ReadAllText(appRazorPath));
+
+        // Act + Assert — a re-run without theme options keeps the linked theme instead of resetting it to bootstrap/light
+        var cliOutput = await RunScaffoldAndAssertSuccessAsync();
+        Assert.Contains("Keeping the Ignite UI theme 'material' (dark) already linked", cliOutput);
+        AssertSingleThemeLink(appRazorPath, "_content/IgniteUI.Blazor/themes/dark/material.css");
+
+        // Act + Assert — only '--theme' is given: the theme changes and the linked variant is kept
+        await RunScaffoldAndAssertSuccessAsync("--theme", "fluent");
+        AssertSingleThemeLink(appRazorPath, "_content/IgniteUI.Blazor/themes/dark/fluent.css");
+
+        // Act + Assert — only '--theme-variant' is given: the variant changes and the linked theme is kept
+        await RunScaffoldAndAssertSuccessAsync("--theme-variant", "light");
+        AssertSingleThemeLink(appRazorPath, "_content/IgniteUI.Blazor/themes/light/fluent.css");
+    }
+
+    private static void AssertSingleThemeLink(string hostPagePath, string expectedStylesheet)
+    {
+        var content = File.ReadAllText(hostPagePath);
+        Assert.Equal(1, CountOccurrences(content, "_content/IgniteUI"));
+        Assert.Contains(expectedStylesheet, content);
     }
 
     [Fact]
@@ -475,7 +499,7 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         Assert.Contains(ControlsUsing, File.ReadAllText(Path.Combine(_testProjectDir, "_Imports.razor")));
         // line endings are normalized because the fixture's verbatim string follows the checkout's line endings
         var hostPageContent = File.ReadAllText(Path.Combine(_testProjectDir, "Pages", "_Host.cshtml")).ReplaceLineEndings("\n");
-        Assert.Contains($"    <link href=\"css/site.css\" rel=\"stylesheet\" />\n    <link href=\"{LiteBootstrapLightStylesheet}\" rel=\"stylesheet\" />", hostPageContent);
+        Assert.Contains($"    <component type=\"typeof(HeadOutlet)\" render-mode=\"ServerPrerendered\" />\n    <link href=\"{LiteBootstrapLightStylesheet}\" rel=\"stylesheet\" />\n</head>", hostPageContent);
         Assert.DoesNotContain("_content/IgniteUI", File.ReadAllText(Path.Combine(_testProjectDir, "App.razor")));
 
         // Assert — the class library reference was inspected without being treated as a WebAssembly client

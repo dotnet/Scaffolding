@@ -33,8 +33,21 @@ internal static class IgniteUIBlazorHelper
     /// theme, which also styles the grid.
     /// </summary>
     internal static readonly Regex ThemeStylesheetRegex = new(
-        @"_content/IgniteUI\.Blazor(?:\.GridLite)?/(?:css/)?themes/(?:light|dark)/(?:bootstrap|material|fluent|indigo)\.css",
+        @"_content/IgniteUI\.Blazor(?:\.GridLite)?/(?:css/)?themes/(?<variant>light|dark)/(?<theme>bootstrap|material|fluent|indigo)\.css",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>
+    /// Reads the Ignite UI theme and variant that the host page already links (the first Ignite UI theme stylesheet,
+    /// IgniteUI.Blazor or GridLite-only), so that a re-run keeps them when '--theme' / '--theme-variant' are omitted.
+    /// </summary>
+    /// <returns>True when the content links an Ignite UI theme stylesheet.</returns>
+    internal static bool TryGetLinkedTheme(string? hostPageContent, out string theme, out string themeVariant)
+    {
+        var match = string.IsNullOrEmpty(hostPageContent) ? Match.Empty : ThemeStylesheetRegex.Match(hostPageContent);
+        theme = match.Success ? match.Groups["theme"].Value.ToLowerInvariant() : DefaultTheme;
+        themeVariant = match.Success ? match.Groups["variant"].Value.ToLowerInvariant() : DefaultThemeVariant;
+        return match.Success;
+    }
 
     /// <summary>
     /// Normalizes the '--theme' value: <see cref="DefaultTheme"/> when it is omitted, otherwise the matching entry of
@@ -197,6 +210,59 @@ internal static class IgniteUIBlazorHelper
     /// </summary>
     internal static bool DeclaresRenderMode(string? razorContent)
         => !string.IsNullOrEmpty(razorContent) && razorContent.Contains("@rendermode", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Recipe option that links the theme stylesheet right before &lt;/head&gt;.</summary>
+    internal const string LinkThemeRecipeOption = "IgniteUILinkTheme";
+    /// <summary>Recipe option that swaps the path of an Ignite UI theme stylesheet the host page already links.</summary>
+    internal const string SwapThemeRecipeOption = "IgniteUISwapTheme";
+
+    /// <summary>
+    /// The recipe option of each host page in igniteUIBlazorThemeChanges.json, keyed by <see cref="HostPageCandidates"/>.
+    /// </summary>
+    internal static readonly IReadOnlyDictionary<string, string> HostPageRecipeOptions = new Dictionary<string, string>
+    {
+        [Path.Combine("Components", "App.razor")] = "IgniteUIAppRazorHost",
+        [Path.Combine("Pages", "_Layout.cshtml")] = "IgniteUILayoutCshtmlHost",
+        [Path.Combine("Pages", "_Host.cshtml")] = "IgniteUIHostCshtmlHost",
+        [Path.Combine("wwwroot", "index.html")] = "IgniteUIIndexHtmlHost",
+    };
+
+    /// <summary>
+    /// Analyzes the host page and returns the options and properties for the shared theme recipe
+    /// (igniteUIBlazorThemeChanges.json): swap the path of an Ignite UI theme the page already links, or insert a
+    /// &lt;link&gt; right before &lt;/head&gt; with the page's indentation, line endings and (for a .razor page that
+    /// already uses it) the fingerprinted <c>@Assets["..."]</c> syntax.
+    /// </summary>
+    /// <param name="projectDirectory">The project directory.</param>
+    /// <param name="hostPagePath">The host page found by <see cref="FindHostPage"/>.</param>
+    /// <param name="hostPageContent">The host page content.</param>
+    /// <param name="stylesheetPath">The theme stylesheet path to link.</param>
+    internal static (List<string> Options, Dictionary<string, string> Properties) GetThemeRecipeInputs(
+        string projectDirectory, string hostPagePath, string hostPageContent, string stylesheetPath)
+    {
+        var hostPageOption = HostPageRecipeOptions[Path.GetRelativePath(projectDirectory, hostPagePath)];
+        var properties = new Dictionary<string, string> { ["$(IgniteUIThemeStylesheetPath)"] = stylesheetPath };
+        var linkedTheme = ThemeStylesheetRegex.Match(hostPageContent);
+        if (linkedTheme.Success)
+        {
+            properties["$(IgniteUIExistingThemeStylesheetPath)"] = linkedTheme.Value;
+            return ([hostPageOption, SwapThemeRecipeOption], properties);
+        }
+
+        // The recipe replaces '</head>' with the link followed by '</head>'. The tag is passed as written in the page
+        // (the replacement is case-sensitive), the link gets the page's line ending, and when '</head>' starts its line
+        // the link is indented one level deeper than it.
+        var headIndex = hostPageContent.IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
+        var headClosingTag = hostPageContent.Substring(headIndex, "</head>".Length);
+        var lineStart = hostPageContent.LastIndexOf('\n', Math.Max(headIndex - 1, 0)) + 1;
+        var headIndent = hostPageContent[lineStart..headIndex];
+        var link = BuildStylesheetLink(stylesheetPath, UsesAssetsCollection(hostPagePath, hostPageContent));
+        properties["$(IgniteUIHeadClosingTag)"] = headClosingTag;
+        properties["$(IgniteUIThemeLinkBeforeHead)"] = string.IsNullOrWhiteSpace(headIndent)
+            ? $"{(headIndent.Contains('\t') ? "\t" : "    ")}{link}{DetectLineEnding(hostPageContent)}{headIndent}{headClosingTag}"
+            : $"{link}{headClosingTag}";
+        return ([hostPageOption, LinkThemeRecipeOption], properties);
+    }
 
     /// <summary>
     /// Detects the dominant line ending of the given text ("\r\n" or "\n").

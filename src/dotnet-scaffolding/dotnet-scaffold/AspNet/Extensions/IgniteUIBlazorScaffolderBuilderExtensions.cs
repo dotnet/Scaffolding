@@ -22,6 +22,8 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     internal const string CodeModificationConfigFileName = "igniteUIBlazorChanges.json";
     /// <summary>Code modification config for Blazor WebAssembly projects (standalone or the Web App client project).</summary>
     internal const string WasmCodeModificationConfigFileName = "igniteUIBlazorWasmChanges.json";
+    /// <summary>Shared recipe that links the Ignite UI theme stylesheet in the host page.</summary>
+    internal const string ThemeCodeModificationConfigFileName = "igniteUIBlazorThemeChanges.json";
     /// <summary>Code modification config for .NET MAUI Blazor Hybrid apps (MauiProgram.cs).</summary>
     internal const string MauiCodeModificationConfigFileName = "igniteUIBlazorMauiChanges.json";
     /// <summary>The file that registers the app's services in ASP.NET Core and Blazor WebAssembly projects.</summary>
@@ -93,7 +95,7 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
             step.TargetFileName = RegistrationFileName;
             step.RequiredCalls = [$"{BlazorCrudHelper.AddInteractiveServerComponentsMethod}(", $"{BlazorCrudHelper.AddInteractiveServerRenderModeMethod}("];
             step.ChangeDescription = "Interactive Server support";
-            step.ManualInstructions = "Chain '.AddInteractiveServerComponents()' after 'builder.Services.AddRazorComponents()' and '.AddInteractiveServerRenderMode()' after 'app.MapRazorComponents<App>()'.";
+            step.ManualInstructions = "Chain '.AddInteractiveServerComponents()' after 'builder.Services.AddRazorComponents()' and '.AddInteractiveServerRenderMode()' after 'app.MapRazorComponents<App>()', then re-run the scaffolder to complete the remaining steps.";
         });
     }
 
@@ -167,18 +169,34 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     }
 
     /// <summary>
-    /// Adds a step that links the selected Ignite UI theme stylesheet in the project's host page. When no host page
-    /// could be resolved, the step fails and reports the &lt;link&gt; to add manually.
+    /// Adds a step that links the selected Ignite UI theme stylesheet in the project's host page with the shared theme
+    /// recipe (igniteUIBlazorThemeChanges.json), using the values analyzed by <see cref="ValidateIgniteUIBlazorStep"/>.
+    /// This is the last setup step: when no host page was found or the link cannot be added, it fails and reports the
+    /// &lt;link&gt; to add manually.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorThemeStylesheetStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<AddIgniteUIThemeStylesheetStep>(config =>
+        return builder.WithStep<IgniteUICodeModificationStep>(config =>
         {
             var step = config.Step;
             var model = GetModel(config.Context);
-            step.HostPagePath = model.HostPagePath;
-            step.ProjectDirectory = model.BaseOutputPath;
-            step.StylesheetPath = model.StylesheetPath;
+            step.ProjectPath = model.ProjectPath;
+            step.CodeModifierConfigPath = model.ThemeCodeModificationConfigPath;
+            step.CodeChangeOptions = [.. model.ThemeCodeChangeOptions];
+            foreach (var (name, value) in model.ThemeCodeModifierProperties)
+            {
+                step.CodeModifierProperties[name] = value;
+            }
+
+            step.TargetFileName = Path.GetFileName(model.HostPagePath) ?? string.Empty;
+            step.TargetFilePath = model.HostPagePath;
+            step.RequiredCalls = [model.StylesheetPath];
+            step.ChangeDescription = "the theme stylesheet link";
+            step.ManualInstructions =
+                $"To finish the setup, add the following line to the <head> of the page that hosts your Blazor app: {IgniteUIBlazorHelper.BuildStylesheetLink(model.StylesheetPath, useAssetsCollection: false)}";
+            step.IncompleteReason = model.HostPagePath is null
+                ? $"no host page ({string.Join(", ", IgniteUIBlazorHelper.HostPageCandidates)}) with a <head> element was found in '{model.BaseOutputPath}', so the theme stylesheet was not linked. All other setup steps completed"
+                : null;
         });
     }
 
@@ -232,7 +250,7 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
         step.TargetFileName = registrationFileName;
         step.RequiredCalls = ["AddIgniteUIBlazor("];
         step.ChangeDescription = "'builder.Services.AddIgniteUIBlazor()'";
-        step.ManualInstructions = $"Add 'using {IgniteUIBlazorHelper.ControlsNamespace};' and 'builder.Services.AddIgniteUIBlazor();' where the app's services are registered (before the app is built).";
+        step.ManualInstructions = $"Add 'using {IgniteUIBlazorHelper.ControlsNamespace};' and 'builder.Services.AddIgniteUIBlazor();' where the app's services are registered (before the app is built), then re-run the scaffolder to complete the remaining steps.";
         step.ProjectPath = projectPath;
         step.CodeChangeOptions = codeChangeOptions ?? [];
         if (context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj) &&

@@ -276,13 +276,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal static class IgniteUITheme
             {
                 internal const string DisplayName = "Ignite UI theme";
-                internal const string Description = "Ignite UI theme stylesheet to link in the host page: bootstrap (default), material, fluent or indigo.";
+                internal const string Description = "Ignite UI theme stylesheet to link in the host page: bootstrap, material, fluent or indigo. When omitted, the theme already linked in the host page is kept; otherwise bootstrap is used.";
             }
 
             internal static class IgniteUIThemeVariant
             {
                 internal const string DisplayName = "Ignite UI theme variant";
-                internal const string Description = "Variant of the Ignite UI theme stylesheet to link: light (default) or dark.";
+                internal const string Description = "Variant of the Ignite UI theme stylesheet to link: light or dark. When omitted, the variant already linked in the host page is kept; otherwise light is used.";
             }
         }
     }

@@ -85,7 +85,35 @@ public class IgniteUICodeModificationStepTests
             invocation.Method.Name == nameof(ILogger.Log) &&
             Equals(invocation.Arguments[0], LogLevel.Error) &&
             invocation.Arguments[2].ToString()!.Contains("Ignite UI for Blazor setup is incomplete") &&
-            invocation.Arguments[2].ToString()!.Contains("Add 'builder.Services.AddIgniteUIBlazor();'.") &&
-            invocation.Arguments[2].ToString()!.Contains("re-run the scaffolder"));
+            invocation.Arguments[2].ToString()!.Contains("could not be added to Program.cs") &&
+            invocation.Arguments[2].ToString()!.Contains("Add 'builder.Services.AddIgniteUIBlazor();'."));
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReportsIncompleteReason_WithoutModifyingAnything()
+    {
+        var step = CreateStep();
+        step.IncompleteReason = "no host page was found";
+
+        Assert.False(await step.ExecuteAsync(new ScaffolderContext(Mock.Of<IScaffolder>())));
+
+        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        var error = Assert.Single(_logger.Invocations, invocation => Equals(invocation.Arguments[0], LogLevel.Error));
+        Assert.Equal("Ignite UI for Blazor setup is incomplete: no host page was found. Add 'builder.Services.AddIgniteUIBlazor();'.", error.Arguments[2].ToString());
+    }
+
+    [Theory]
+    [InlineData("<head><link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /></head>", true)]
+    [InlineData("<head></head>", false)]
+    public void ContainsRequiredCalls_ChecksTheExactTargetFile(string hostPage, bool expected)
+    {
+        var hostPagePath = Path.Combine(s_projectDirectory, "Components", "App.razor");
+        _fileSystem.Setup(fs => fs.FileExists(hostPagePath)).Returns(true);
+        _fileSystem.Setup(fs => fs.ReadAllText(hostPagePath)).Returns(hostPage);
+        var step = CreateStep("App.razor", requiredCalls: ["_content/IgniteUI.Blazor/themes/dark/material.css"]);
+        step.TargetFilePath = hostPagePath;
+
+        Assert.Equal(expected, step.ContainsRequiredCalls());
+        _fileSystem.Verify(fs => fs.EnumerateFiles(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SearchOption>()), Times.Never);
     }
 }

@@ -76,6 +76,62 @@ public class IgniteUIBlazorHelperTests
         => Assert.Matches(IgniteUIBlazorHelper.ThemeStylesheetRegex, path);
 
     [Theory]
+    [InlineData("<link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />", true, "material", "dark")]
+    [InlineData("<link href=\"_content/IgniteUI.Blazor.GridLite/css/themes/light/fluent.css\" rel=\"stylesheet\" />", true, "fluent", "light")]
+    [InlineData("<link rel=\"stylesheet\" href=\"@Assets[\"_content/IgniteUI.Blazor/themes/dark/indigo.css\"]\" />", true, "indigo", "dark")]
+    [InlineData("<link href=\"_CONTENT/IGNITEUI.BLAZOR/THEMES/DARK/FLUENT.CSS\" rel=\"stylesheet\" />", true, "fluent", "dark")]
+    [InlineData("<link href=\"css/app.css\" rel=\"stylesheet\" />", false, "bootstrap", "light")]
+    [InlineData(null, false, "bootstrap", "light")]
+    public void TryGetLinkedTheme_ReadsTheLinkedThemeOrReturnsDefaults(string? content, bool expectedFound, string expectedTheme, string expectedVariant)
+    {
+        Assert.Equal(expectedFound, IgniteUIBlazorHelper.TryGetLinkedTheme(content, out var theme, out var variant));
+        Assert.Equal(expectedTheme, theme);
+        Assert.Equal(expectedVariant, variant);
+    }
+
+    private const string LiteMaterialDark = "_content/IgniteUI.Blazor/themes/dark/material.css";
+
+    [Fact]
+    public void GetThemeRecipeInputs_LinksBeforeHead_WithAssetsSyntaxAndIndentation()
+    {
+        var hostPage = Path.Combine(s_projectDir, "Components", "App.razor");
+        const string content = "<head>\n    <link rel=\"stylesheet\" href=\"@Assets[\"app.css\"]\" />\n    <HeadOutlet />\n</head>\n";
+
+        var (options, properties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(s_projectDir, hostPage, content, LiteMaterialDark);
+
+        Assert.Equal(["IgniteUIAppRazorHost", IgniteUIBlazorHelper.LinkThemeRecipeOption], options);
+        Assert.Equal(LiteMaterialDark, properties["$(IgniteUIThemeStylesheetPath)"]);
+        Assert.Equal("</head>", properties["$(IgniteUIHeadClosingTag)"]);
+        Assert.Equal($"    <link rel=\"stylesheet\" href=\"@Assets[\"{LiteMaterialDark}\"]\" />\n</head>", properties["$(IgniteUIThemeLinkBeforeHead)"]);
+    }
+
+    [Theory]
+    [InlineData("wwwroot", "index.html", "<html>\r\n<HEAD>\r\n    <title>App</title>\r\n</HEAD>\r\n", "IgniteUIIndexHtmlHost", "</HEAD>", "    <link href=\"{0}\" rel=\"stylesheet\" />\r\n</HEAD>")]
+    [InlineData("Pages", "_Host.cshtml", "<head>\n\t\t<base href=\"~/\" />\n\t</head>\n", "IgniteUIHostCshtmlHost", "</head>", "\t<link href=\"{0}\" rel=\"stylesheet\" />\n\t</head>")]
+    public void GetThemeRecipeInputs_UsesTheTagCasingLineEndingAndIndentationOfThePage(
+        string folder, string fileName, string content, string expectedHostOption, string expectedTag, string expectedBlockFormat)
+    {
+        var (options, properties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(s_projectDir, Path.Combine(s_projectDir, folder, fileName), content, LiteMaterialDark);
+
+        Assert.Equal([expectedHostOption, IgniteUIBlazorHelper.LinkThemeRecipeOption], options);
+        Assert.Equal(expectedTag, properties["$(IgniteUIHeadClosingTag)"]);
+        Assert.Equal(string.Format(expectedBlockFormat, LiteMaterialDark), properties["$(IgniteUIThemeLinkBeforeHead)"]);
+    }
+
+    [Fact]
+    public void GetThemeRecipeInputs_SwapsAnExistingIgniteUITheme()
+    {
+        const string gridLiteTheme = "_content/IgniteUI.Blazor.GridLite/css/themes/light/bootstrap.css";
+        var content = $"<head>\n    <link href=\"{gridLiteTheme}\" rel=\"stylesheet\" />\n</head>\n";
+
+        var (options, properties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(s_projectDir, Path.Combine(s_projectDir, "wwwroot", "index.html"), content, LiteMaterialDark);
+
+        Assert.Equal(["IgniteUIIndexHtmlHost", IgniteUIBlazorHelper.SwapThemeRecipeOption], options);
+        Assert.Equal(gridLiteTheme, properties["$(IgniteUIExistingThemeStylesheetPath)"]);
+        Assert.Equal(LiteMaterialDark, properties["$(IgniteUIThemeStylesheetPath)"]);
+    }
+
+    [Theory]
     [InlineData("_content/IgniteUI.Blazor/app.bundle.js")]
     [InlineData("css/app.css")]
     [InlineData("_content/IgniteUI.Blazor/themes/light/custom.css")]

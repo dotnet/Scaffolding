@@ -8,13 +8,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 internal class IgniteUIBlazorSettings : BaseSettings
 {
     /// <summary>
-    /// The theme to link ('bootstrap', 'material', 'fluent' or 'indigo').
+    /// The requested theme ('bootstrap', 'material', 'fluent' or 'indigo'), or null when '--theme' was omitted: the
+    /// theme already linked in the host page is then kept, otherwise 'bootstrap' is used.
     /// </summary>
-    public required string Theme { get; set; }
+    public string? Theme { get; set; }
     /// <summary>
-    /// The theme variant to link ('light' or 'dark').
+    /// The requested theme variant ('light' or 'dark'), or null when '--theme-variant' was omitted: the variant already
+    /// linked in the host page is then kept, otherwise 'light' is used.
     /// </summary>
-    public required string ThemeVariant { get; set; }
+    public string? ThemeVariant { get; set; }
     /// <summary>
     /// Indicates if prerelease package versions should be installed.
     /// </summary>

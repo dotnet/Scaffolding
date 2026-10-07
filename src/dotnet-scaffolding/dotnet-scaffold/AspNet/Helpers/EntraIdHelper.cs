@@ -52,6 +52,14 @@ internal static class EntraIdHelper
             ? projectOutputPath
             : Path.Combine(projectOutputPath, "Components");
         string redirectToLoginOutputPath = Path.Combine(componentsOutputPath, "RedirectToLogin.razor");
+        if (!isStandaloneWasmProject && !string.IsNullOrEmpty(blazorWasmClientProjectPath))
+        {
+            string? clientDirectory = Path.GetDirectoryName(blazorWasmClientProjectPath);
+            if (clientDirectory is not null && File.Exists(Path.Combine(clientDirectory, "Routes.razor")))
+            {
+                redirectToLoginOutputPath = Path.Combine(clientDirectory, "RedirectToLogin.razor");
+            }
+        }
 
         var entries = new List<(string Name, string OutputPath)>
         {

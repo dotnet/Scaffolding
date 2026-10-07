@@ -4,10 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
+using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
@@ -144,7 +146,7 @@ public class EntraIdHelperTests
     }
 
     [Fact]
-    public void GetTextTemplatingProperties_WithHostedWasmClient_GeneratesRazorComponentsInHostProject()
+    public void GetTextTemplatingProperties_WithHostedWasmClientWithoutClientRouter_GeneratesRazorComponentsInHostProject()
     {
         // Arrange
         EntraIdModel entraIdModel = CreateTestEntraIdModel();
@@ -166,6 +168,43 @@ public class EntraIdHelperTests
             property.OutputPath == Path.Combine("output", "Components", "Layout", "LoginOrLogout.razor"));
         Assert.Contains(properties, property =>
             property.OutputPath == Path.Combine("output", "Components", "RedirectToLogin.razor"));
+    }
+
+    [Theory]
+    [InlineData("Auto")]
+    [InlineData("WebAssembly")]
+    public async Task GetTextTemplatingProperties_WithSdkGeneratedGlobalRouter_GeneratesRedirectInClient(string interactivity)
+    {
+        string root = Path.Combine(Path.GetTempPath(), nameof(EntraIdHelperTests), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(root);
+        try
+        {
+            var created = await ScaffoldCliHelper.RunDotNetAsync(
+                root, "new", "blazor", "-n", "TestProject", "-o", root,
+                "-int", interactivity, "-ai", "--no-restore");
+            Assert.True(created.ExitCode == 0, $"dotnet new failed: {created.Output}{created.Error}");
+            string serverDirectory = Path.Combine(root, "TestProject");
+            string clientDirectory = Path.Combine(root, "TestProject.Client");
+            Assert.True(File.Exists(Path.Combine(clientDirectory, "Routes.razor")));
+            Assert.False(File.Exists(Path.Combine(serverDirectory, "Components", "Routes.razor")));
+            var model = new EntraIdModel
+            {
+                ProjectInfo = new ProjectInfo(Path.Combine(serverDirectory, "TestProject.csproj")),
+                BaseOutputPath = serverDirectory,
+                EntraIdNamespace = "TestProject"
+            };
+
+            TextTemplatingProperty property = Assert.Single(EntraIdHelper.GetTextTemplatingProperties(
+                [Path.Combine("BlazorEntraId", "RedirectToLogin.tt")],
+                model,
+                Path.Combine(clientDirectory, "TestProject.Client.csproj")));
+
+            Assert.Equal(Path.Combine(clientDirectory, "RedirectToLogin.razor"), property.OutputPath);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
     }
 
     [Fact]
@@ -209,6 +248,7 @@ public class EntraIdHelperTests
         string output = template.TransformText();
 
         Assert.Contains("@inject NavigationManager NavigationManager", output);
+        Assert.DoesNotContain("@using TestProject", output);
         Assert.Contains("authentication/login?returnUrl=", output);
         Assert.Contains("Uri.EscapeDataString(NavigationManager.Uri)", output);
         Assert.Contains("forceLoad: true", output);

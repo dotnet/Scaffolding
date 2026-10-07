@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
@@ -56,24 +57,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     return Task.FromResult(true);
                 }
 
-                XDocument projectDocument = XDocument.Parse(_fileSystem.ReadAllText(fullProjectPath));
-                string projectDirectory = Path.GetDirectoryName(fullProjectPath) ?? string.Empty;
-                foreach (XElement projectReference in projectDocument
-                    .Descendants()
-                    .Where(element => element.Name.LocalName.Equals("ProjectReference", StringComparison.OrdinalIgnoreCase)))
+                if (!BlazorWebAssemblyClientProjectResolver.TryGetClient(
+                    fullProjectPath, _fileSystem, out var client, out var error))
                 {
-                    string? include = projectReference.Attribute("Include")?.Value;
-                    if (string.IsNullOrWhiteSpace(include))
-                    {
-                        continue;
-                    }
+                    _logger.LogError("{Error}", error);
+                    return Task.FromResult(false);
+                }
 
-                    string referencedProjectPath = Path.GetFullPath(include, projectDirectory);
-                    if (_fileSystem.FileExists(referencedProjectPath) && UsesBlazorWebAssemblySdk(referencedProjectPath))
-                    {
-                        SetWebAssemblyProject(context, referencedProjectPath);
-                        return Task.FromResult(true);
-                    }
+                if (client is not null)
+                {
+                    SetWebAssemblyProject(context, client.Value.ProjectPath);
+                    return Task.FromResult(true);
                 }
 
                 context.Properties["IsBlazorWasmProject"] = false;

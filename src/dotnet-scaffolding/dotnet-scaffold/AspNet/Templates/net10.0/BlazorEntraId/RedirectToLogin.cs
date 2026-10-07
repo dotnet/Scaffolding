@@ -22,9 +22,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorEntraId
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.EntraIdNamespace));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n@code {\r\n    protected override " +
+            this.Write("@inject NavigationManager NavigationManager\r\n\r\n@code {\r\n    protected override " +
                     "void OnInitialized()\r\n    {\r\n        NavigationManager.NavigateTo($\"authenticati" +
                     "on/login?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}\", forceLoad: t" +
                     "rue);\r\n    }\r\n}\r\n");

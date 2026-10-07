@@ -39,11 +39,11 @@ IScaffoldRunner runner = builder.Build();
 
 // add handler for routing the interactive tool through the Spectre.Console experience, all others
 // are routed through System.CommandLine experience
-builder.AddHandler((parseResult, cancellationToken) =>
+builder.AddHandler(async (parseResult, cancellationToken) =>
 {
     ScaffoldCommandAppBuilder appBuilder = new(runner, [.. parseResult.Tokens.Select(t => t.Value)]);
     ScaffoldCommandApp app = appBuilder.Build();
-    return app.RunAsync();
+    return await app.RunAsync();
 });
 
 var telemetryWrapper = builder.ServiceProvider?.GetRequiredService<IFirstPartyToolTelemetryWrapper>();

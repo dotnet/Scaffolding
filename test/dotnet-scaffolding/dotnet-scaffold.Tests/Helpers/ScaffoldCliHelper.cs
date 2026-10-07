@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -21,12 +22,20 @@ internal static class ScaffoldCliHelper
     /// Gets the repository root directory by navigating up from the test assembly output path.
     /// The Arcade build layout is: {repoRoot}/artifacts/bin/{project}/{Config}/{TFM}/{assembly}.dll
     /// </summary>
-    private static string GetRepoRoot()
+    internal static string GetRepoRoot()
     {
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation)!;
         // Navigate from artifacts/bin/dotnet-scaffold.Tests/{Config}/{TFM}/ up to repo root
         return Path.GetFullPath(Path.Combine(assemblyDirectory, "..", "..", "..", "..", ".."));
+    }
+
+    internal static string GetTestTargetFramework()
+    {
+        var framework = Assembly.GetExecutingAssembly().GetCustomAttribute<TargetFrameworkAttribute>()
+            ?? throw new System.InvalidOperationException("The test assembly has no target framework attribute.");
+        var version = new FrameworkName(framework.FrameworkName).Version;
+        return $"net{version.Major}.{version.Minor}";
     }
 
     /// <summary>
@@ -169,6 +178,9 @@ internal static class ScaffoldCliHelper
         return "Debug";
     }
 
+    internal static string[] GetPrereleaseArguments(string projectTargetFramework)
+        => projectTargetFramework == "net11.0" ? ["--prerelease"] : [];
+
     /// <summary>
     /// Runs a dotnet-scaffold CLI command by invoking the already-built tool DLL:
     /// <c>dotnet {artifacts/bin/dotnet-scaffold/{config}/{framework}/dotnet-scaffold.dll} aspnet {command} {args}</c>.
@@ -254,12 +266,14 @@ internal static class ScaffoldCliHelper
     /// Runs <c>dotnet build</c> in the specified working directory.
     /// </summary>
     public static async Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)
+        => await RunDotNetAsync(workingDirectory, "build");
+
+    internal static async Task<(int ExitCode, string Output, string Error)> RunDotNetAsync(string workingDirectory, params string[] arguments)
     {
-        var buildProcess = new Process
+        using var buildProcess = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                Arguments = "build",
                 WorkingDirectory = workingDirectory,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -268,11 +282,16 @@ internal static class ScaffoldCliHelper
             }
         };
         ConfigureDotNetEnvironment(buildProcess.StartInfo);
+        foreach (var argument in arguments)
+        {
+            buildProcess.StartInfo.ArgumentList.Add(argument);
+        }
+
         buildProcess.Start();
-        string output = await buildProcess.StandardOutput.ReadToEndAsync();
-        string error = await buildProcess.StandardError.ReadToEndAsync();
+        var outputTask = buildProcess.StandardOutput.ReadToEndAsync();
+        var errorTask = buildProcess.StandardError.ReadToEndAsync();
         await buildProcess.WaitForExitAsync();
-        return (buildProcess.ExitCode, output, error);
+        return (buildProcess.ExitCode, await outputTask, await errorTask);
     }
 
     /// <summary>

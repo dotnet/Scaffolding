@@ -334,7 +334,7 @@ internal static class ProjectModifierHelper
     }
 
     /// <summary>
-    /// Trim ' ', '\r', '\n' and replace any whitespace with no spaces.
+    /// Removes spaces, carriage returns, line feeds, and semicolons for textual statement comparisons.
     /// </summary>
     /// <param name="statement"></param>
     /// <returns></returns>
@@ -461,48 +461,23 @@ internal static class ProjectModifierHelper
     {
         if (codeChanges is null)
         {
-            return;    
+            return;
         }
 
-        bool sourceChanged = false;
-        var sourceFileString = File.ReadAllText(filePath);
-        if (string.IsNullOrEmpty(sourceFileString))
+        string source;
+        try
+        {
+            source = File.ReadAllText(filePath);
+        }
+        catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
         {
             return;
         }
 
-        var trimmedSourceFile = TrimStatement(sourceFileString);
-        var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(TrimStatement(c.Block)));
-        if (!applicableCodeChanges.Any())
+        var updatedSource = ApplyTextReplacements(source, codeChanges);
+        if (updatedSource != source)
         {
-            return;
-        }
-
-        foreach (var change in applicableCodeChanges)
-        {
-            // If doing a code replacement, replace ReplaceSnippet in source with Block
-            if (change.ReplaceSnippet != null)
-            {
-                var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
-                    (string.IsNullOrEmpty(change.CheckBlock) ||
-                     !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)))
-                {
-                    sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
-                    sourceChanged = true;
-                }
-
-            }
-            else
-            {
-                sourceFileString += change.Block; // Otherwise appending block to end of file
-                sourceChanged = true;
-            }
-        }
-
-        if (sourceChanged)
-        {
-            File.WriteAllText(filePath, sourceFileString);
+            File.WriteAllText(filePath, updatedSource);
         }
     }
 
@@ -520,45 +495,14 @@ internal static class ProjectModifierHelper
             return null;
         }
 
-        var sourceText = await fileDoc.GetTextAsync();
-        var sourceFileString = sourceText?.ToString() ?? null;
-        if (sourceFileString is null)
+        var source = (await fileDoc.GetTextAsync()).ToString();
+        var updatedSource = ApplyTextReplacements(source, codeChanges);
+        if (updatedSource == source)
         {
             return null;
         }
 
-        var trimmedSourceFile = TrimStatement(sourceFileString);
-        var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(TrimStatement(c.Block)));
-        if (!applicableCodeChanges.Any())
-        {
-            return null;
-        }
-
-        foreach (var change in applicableCodeChanges)
-        {
-            // If doing a code replacement, replace ReplaceSnippet in source with Block
-            if (change.ReplaceSnippet != null)
-            {
-                var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
-                    (string.IsNullOrEmpty(change.CheckBlock) ||
-                     !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)))
-                {
-                    sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
-                }
-
-            }
-            else if (change.Prepend)
-            {
-                sourceFileString = change.Block + sourceFileString; // Prepending block to start of file
-            }
-            else
-            {
-                sourceFileString += change.Block; // Otherwise appending block to end of file
-            }
-        }
-
-        var updatedSourceText = SourceText.From(sourceFileString);
+        var updatedSourceText = SourceText.From(updatedSource);
         //check for Document class first as its a subclass of TextDocument
         //use Document.WithText extension to return an updated Document
         if (fileDoc is Document document)
@@ -574,6 +518,45 @@ internal static class ProjectModifierHelper
         }
 
         return null;
+    }
+
+    private static string ApplyTextReplacements(string source, IEnumerable<CodeSnippet> codeChanges)
+    {
+        var trimmedSource = TrimStatement(source);
+        foreach (var change in codeChanges.Where(c => !trimmedSource.Contains(TrimStatement(c.Block))))
+        {
+            if (!string.IsNullOrEmpty(change.CheckBlock) && source.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var snippet = change.ReplaceSnippet is null ? string.Empty : string.Join("\n", change.ReplaceSnippet).Replace("\r\n", "\n");
+            if (!string.IsNullOrEmpty(snippet))
+            {
+                source = ReplaceSnippet(source, snippet, change.Block);
+            }
+            else if (change.Prepend)
+            {
+                source = change.Block + source;
+            }
+            else
+            {
+                source += change.Block;
+            }
+        }
+
+        return source;
+    }
+
+    private static string ReplaceSnippet(string source, string snippet, string replacement)
+    {
+        if (!snippet.Contains('\n'))
+        {
+            return source.Replace(snippet, replacement, StringComparison.Ordinal);
+        }
+
+        var pattern = string.Join(@"\r?\n", snippet.Split('\n').Select(Regex.Escape));
+        return Regex.Replace(source, pattern, _ => replacement);
     }
 
     internal static async Task UpdateDocument(Document document)

@@ -53,8 +53,8 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "lass=\"form-control\" autocomplete=\"off\" />\r\n                <label for=\"Input.Two" +
                     "FactorCode\" class=\"form-label\">Authenticator code</label>\r\n                <Vali" +
                     "dationMessage For=\"() => Input.TwoFactorCode\" class=\"text-danger\" />\r\n          " +
-                    "  </div>\r\n            <div class=\"checkbox mb-3\">\r\n                <label for=\"r" +
-                    "emember-machine\" class=\"form-label\">\r\n                    <InputCheckbox @bind-V" +
+                    "  </div>\r\n            <div class=\"checkbox mb-3\">\r\n                <label" +
+                    " class=\"form-label\">\r\n                    <InputCheckbox @bind-V" +
                     "alue=\"Input.RememberMachine\" />\r\n                    Remember this machine\r\n    " +
                     "            </label>\r\n            </div>\r\n            <div>\r\n                <bu" +
                     "tton type=\"submit\" class=\"w-100 btn btn-lg btn-primary\">Log in</button>\r\n       " +

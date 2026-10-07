@@ -7,7 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.Pages
 {
     using System.Collections.Generic;
     using System.Text;
@@ -18,153 +18,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity
     /// Class to produce the template output
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public partial class IdentityComponentsEndpointRouteBuilderExtensions : IdentityComponentsEndpointRouteBuilderExtensionsBase
+    public partial class AccessDenied : AccessDeniedBase
     {
         /// <summary>
         /// Create the template output
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("using System.Security.Claims;\r\nusing System.Text.Json;\r\n");
-
-    var sortedUsings = new SortedSet<string>()
-    {
-        Model.UserClassNamespace,
-        $"{Model.IdentityNamespace}.Pages",
-        $"{Model.IdentityNamespace}.Pages.Manage",
-        "Microsoft.AspNetCore.Authentication",
-        "Microsoft.AspNetCore.Components.Authorization",
-        "Microsoft.AspNetCore.Http.Extensions",
-        "Microsoft.AspNetCore.Identity",
-        "Microsoft.AspNetCore.Mvc",
-        "Microsoft.Extensions.Primitives",
-    };
-
-    if (!string.IsNullOrEmpty(Model.DbContextNamespace))
-    {
-        sortedUsings.Add(Model.DbContextNamespace);
-    }
-
-    foreach (var usingNamespace in sortedUsings)
-    {
-            this.Write("using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(usingNamespace));
-            this.Write(";\r\n");
-  }
-
-            this.Write(@"
-namespace Microsoft.AspNetCore.Routing
-{
-    internal static class IdentityComponentsEndpointRouteBuilderExtensions
-    {
-        // These endpoints are required by the Identity Razor components defined in the /Components/Account/Pages directory of this project.
-        public static IEndpointConventionBuilder MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
-        {
-            ArgumentNullException.ThrowIfNull(endpoints);
-
-            var accountGroup = endpoints.MapGroup(""/Account"");
-
-            accountGroup.MapPost(""/PerformExternalLogin"", (
-                HttpContext context,
-                [FromServices] SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@"> signInManager,
-                [FromForm] string provider,
-                [FromForm] string returnUrl) =>
-            {
-                IEnumerable<KeyValuePair<string, StringValues>> query = [
-                    new(""ReturnUrl"", returnUrl),
-                    new(""Action"", ExternalLogin.LoginCallbackAction)];
-
-                var redirectUrl = UriHelper.BuildRelative(
-                    context.Request.PathBase,
-                    ""/Account/ExternalLogin"",
-                    QueryString.Create(query));
-
-                var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-                return TypedResults.Challenge(properties, [provider]);
-            });
-
-            accountGroup.MapPost(""/Logout"", async (
-                ClaimsPrincipal user,
-                SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@"> signInManager,
-                [FromForm] string returnUrl) =>
-            {
-                await signInManager.SignOutAsync();
-                return TypedResults.LocalRedirect($""~/{returnUrl}"");
-            });
-
-            var manageGroup = accountGroup.MapGroup(""/Manage"").RequireAuthorization();
-
-            manageGroup.MapPost(""/LinkExternalLogin"", async (
-                HttpContext context,
-                [FromServices] SignInManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@"> signInManager,
-                [FromForm] string provider) =>
-            {
-                // Clear the existing external cookie to ensure a clean login process
-                await context.SignOutAsync(IdentityConstants.ExternalScheme);
-
-                var redirectUrl = UriHelper.BuildRelative(
-                    context.Request.PathBase,
-                    ""/Account/Manage/ExternalLogins"",
-                    QueryString.Create(""Action"", ExternalLogins.LinkLoginCallbackAction));
-
-                var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, signInManager.UserManager.GetUserId(context.User));
-                return TypedResults.Challenge(properties, [provider]);
-            });
-
-            var loggerFactory = endpoints.ServiceProvider.GetRequiredService<ILoggerFactory>();
-            var downloadLogger = loggerFactory.CreateLogger(""DownloadPersonalData"");
-
-            manageGroup.MapPost(""/DownloadPersonalData"", async (
-                HttpContext context,
-                [FromServices] UserManager<");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@"> userManager,
-                [FromServices] AuthenticationStateProvider authenticationStateProvider) =>
-            {
-                var user = await userManager.GetUserAsync(context.User);
-                if (user is null)
-                {
-                    return Results.NotFound($""Unable to load user with ID '{userManager.GetUserId(context.User)}'."");
-                }
-
-                var userId = await userManager.GetUserIdAsync(user);
-                downloadLogger.LogInformation(""User with ID '{UserId}' asked for their personal data."", userId);
-
-                // Only include personal data for download
-                var personalData = new Dictionary<string, string>();
-                var personalDataProps = typeof(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
-            this.Write(@").GetProperties().Where(
-                    prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
-                foreach (var p in personalDataProps)
-                {
-                    personalData.Add(p.Name, p.GetValue(user)?.ToString() ?? ""null"");
-                }
-
-                var logins = await userManager.GetLoginsAsync(user);
-                foreach (var l in logins)
-                {
-                    personalData.Add($""{l.LoginProvider} external login provider key"", l.ProviderKey);
-                }
-
-                personalData.Add(""Authenticator Key"", (await userManager.GetAuthenticatorKeyAsync(user))!);
-                var fileBytes = JsonSerializer.SerializeToUtf8Bytes(personalData);
-
-                context.Response.Headers.TryAdd(""Content-Disposition"", ""attachment; filename=PersonalData.json"");
-                return TypedResults.File(fileBytes, contentType: ""application/json"", fileDownloadName: ""PersonalData.json"");
-            });
-
-            return accountGroup;
-        }
-    }
-}
-");
+            this.Write("@page \"/Account/AccessDenied\"\r\n\r\n<PageTitle>Access denied</PageTitle>\r\n\r\n<header>" +
+                    "\r\n    <h1 class=\"text-danger\">Access denied</h1>\r\n    <p class=\"text-danger\">You" +
+                    " do not have access to this resource.</p>\r\n</header>\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;
@@ -224,8 +87,8 @@ if ((ModelValueAcquired == false))
         }
         else
         {
-            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the parameter \'Model\' did not match the type of the data passed to" +
-                    " the template.");
+            this.Error("The type \'Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel\' of the par" +
+                    "ameter \'Model\' did not match the type of the data passed to the template.");
         }
     }
 }
@@ -249,7 +112,7 @@ if ((ModelValueAcquired == false))
     /// Base class for this transformation
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
-    public class IdentityComponentsEndpointRouteBuilderExtensionsBase
+    public class AccessDeniedBase
     {
         #region Fields
         private global::System.Text.StringBuilder generationEnvironmentField;

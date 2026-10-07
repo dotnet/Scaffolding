@@ -25,9 +25,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 internal class AddIgniteUIThemeStylesheetStep : ScaffoldStep
 {
     /// <summary>
-    /// Gets or sets the full path of the host page that contains the &lt;head&gt; element.
+    /// Gets or sets the full path of the host page that contains the &lt;head&gt; element, or null when no known host
+    /// page was found. The step then fails and reports the &lt;link&gt; to add manually.
     /// </summary>
-    public required string HostPagePath { get; set; }
+    public string? HostPagePath { get; set; }
+
+    /// <summary>
+    /// Gets or sets the project directory that was searched for a host page (used in the guidance when none was found).
+    /// </summary>
+    public string? ProjectDirectory { get; set; }
 
     /// <summary>
     /// Gets or sets the project-relative stylesheet path, e.g. '_content/IgniteUI.Blazor/themes/light/bootstrap.css'.
@@ -46,7 +52,6 @@ internal class AddIgniteUIThemeStylesheetStep : ScaffoldStep
         _logger = logger;
         _fileSystem = fileSystem;
         _telemetryService = telemetryService;
-        ContinueOnError = true;
     }
 
     /// <inheritdoc />
@@ -59,42 +64,60 @@ internal class AddIgniteUIThemeStylesheetStep : ScaffoldStep
 
     private bool Execute()
     {
-        if (string.IsNullOrEmpty(HostPagePath) || string.IsNullOrEmpty(StylesheetPath))
+        if (string.IsNullOrEmpty(StylesheetPath))
         {
-            _logger.LogError("Host page path or stylesheet path was not provided.");
+            _logger.LogError("No Ignite UI theme stylesheet path was provided.");
             return false;
         }
 
-        if (!_fileSystem.FileExists(HostPagePath))
+        if (string.IsNullOrEmpty(HostPagePath) || !_fileSystem.FileExists(HostPagePath))
         {
-            _logger.LogError($"Host page '{HostPagePath}' was not found.");
-            return false;
+            var candidates = string.Join(", ", IgniteUIBlazorHelper.HostPageCandidates);
+            return ReportIncompleteSetup($"no host page ({candidates}) with a <head> element was found in '{ProjectDirectory ?? HostPagePath}'");
         }
 
         var fileName = Path.GetFileName(HostPagePath);
-        var content = _fileSystem.ReadAllText(HostPagePath) ?? string.Empty;
-        var updatedContent = ApplyStylesheetLink(HostPagePath, content, StylesheetPath, out var outcome);
-
-        switch (outcome)
+        try
         {
-            case StylesheetLinkOutcome.AlreadyLinked:
-                _logger.LogInformation($"'{fileName}' already links '{StylesheetPath}'.");
-                return true;
-            case StylesheetLinkOutcome.NoHeadElement:
-                _logger.LogWarning($"Could not find a </head> element in '{fileName}'. Add the following line to the <head> of your host page manually:");
-                _logger.LogWarning($"    {IgniteUIBlazorHelper.BuildStylesheetLink(StylesheetPath, useAssetsCollection: false)}");
-                return false;
-            case StylesheetLinkOutcome.Replaced:
-                _logger.LogInformation($"Updating the Ignite UI theme in '{fileName}' to '{StylesheetPath}'...");
-                break;
-            default:
-                _logger.LogInformation($"Linking '{StylesheetPath}' in '{fileName}'...");
-                break;
+            var content = _fileSystem.ReadAllText(HostPagePath) ?? string.Empty;
+            var updatedContent = ApplyStylesheetLink(HostPagePath, content, StylesheetPath, out var outcome);
+
+            switch (outcome)
+            {
+                case StylesheetLinkOutcome.AlreadyLinked:
+                    _logger.LogInformation($"'{fileName}' already links '{StylesheetPath}'.");
+                    return true;
+                case StylesheetLinkOutcome.NoHeadElement:
+                    return ReportIncompleteSetup($"'{HostPagePath}' has no </head> element");
+                case StylesheetLinkOutcome.Replaced:
+                    _logger.LogInformation($"Updating the Ignite UI theme in '{fileName}' to '{StylesheetPath}'...");
+                    break;
+                default:
+                    _logger.LogInformation($"Linking '{StylesheetPath}' in '{fileName}'...");
+                    break;
+            }
+
+            _fileSystem.WriteAllText(HostPagePath, updatedContent);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return ReportIncompleteSetup($"'{HostPagePath}' could not be updated ({ex.Message})");
         }
 
-        _fileSystem.WriteAllText(HostPagePath, updatedContent);
         _logger.LogInformation("Done");
         return true;
+    }
+
+    /// <summary>
+    /// Reports that the theme stylesheet could not be linked and what the user has to add to finish the setup.
+    /// This is the last Ignite UI setup step, so every other change has been applied when it fails.
+    /// </summary>
+    private bool ReportIncompleteSetup(string reason)
+    {
+        _logger.LogError($"Ignite UI for Blazor setup is incomplete: {reason}, so the theme stylesheet was not linked. All other setup steps completed.");
+        _logger.LogError("To finish the setup, add the following line to the <head> of the page that hosts your Blazor app:");
+        _logger.LogError($"    {IgniteUIBlazorHelper.BuildStylesheetLink(StylesheetPath, useAssetsCollection: false)}");
+        return false;
     }
 
     /// <summary>

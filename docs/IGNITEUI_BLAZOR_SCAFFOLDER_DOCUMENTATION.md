@@ -8,6 +8,7 @@
 - [What the Scaffolder Does](#what-the-scaffolder-does)
 - [Supported Project Types](#supported-project-types)
 - [Render Mode Requirements](#render-mode-requirements)
+- [Failures and Incomplete Setup](#failures-and-incomplete-setup)
 - [Re-running the Scaffolder](#re-running-the-scaffolder)
 - [Troubleshooting](#troubleshooting)
 - [Implementation Notes](#implementation-notes)
@@ -159,7 +160,7 @@ Before changing anything, the scaffolder evaluates the project with MSBuild (SDK
 
 A multi-targeted project, such as a MAUI app targeting `net10.0-android;net10.0-ios;...`, is also evaluated for each of its target frameworks, because MSBuild adds default items such as `.razor` files only per target framework. These evaluations run out of process with `dotnet msbuild`, so evaluating a MAUI app does not need its workloads installed; installing the packages afterwards does.
 
-The check does not depend on the template layout: components can live in any folder, including folders outside the project that are added with a `<Content Include="...razor" />` item. The layout only determines which host page and `_Imports.razor` are updated (the table above); when no known host page exists, the scaffolder prints the stylesheet `<link>` to add manually.
+The check does not depend on the template layout: components can live in any folder, including folders outside the project that are added with a `<Content Include="...razor" />` item. The layout only determines which host page and `_Imports.razor` are updated (the table above); when no known host page exists, the theme stylesheet cannot be linked automatically and the run ends as incomplete (see [Failures and Incomplete Setup](#failures-and-incomplete-setup)).
 
 Other projects are rejected with an error that says why, for example a Razor Pages or MVC app (no Razor components), a .NET MAUI app without Razor components, a Razor class library or a console app. Blazor Hybrid apps hosted in WPF or Windows Forms (`BlazorWebView` without .NET MAUI) are not supported; follow the manual steps in the Ignite UI documentation for those.
 
@@ -179,6 +180,20 @@ Ignite UI components need an **interactive** render mode; static server-side ren
 
 - A **warning** when `Program.cs` registers neither `.AddInteractiveServerComponents()` nor `.AddInteractiveWebAssemblyComponents()`.
 - An **informational message** when no `@rendermode` is declared on `<Routes />` (`App.razor`) or in `Routes.razor`, reminding you to add `@rendermode InteractiveServer` (or `InteractiveWebAssembly` / `InteractiveAuto`) to the pages that use Ignite UI, or to set `<Routes @rendermode="InteractiveAuto" />` globally.
+
+---
+
+## Failures and Incomplete Setup
+
+Every setup step is required, so the scaffolder reports success (exit code `0`) only when Ignite UI is fully set up. Otherwise it logs an error that says what is left to do and exits with a non-zero code:
+
+- **Validation** (before any file is changed): an invalid option, an unsupported project, a client discovery problem, a commercial Ignite UI package, or a missing code modification configuration (`Unable to find the code modification configuration ...`; reinstall the tool) stops the scaffolder without changes.
+- **Package installation**: when `dotnet add package` fails, the scaffolder stops at that step (`Failed to add package ...`) and makes no further changes.
+- **Service registration**: when `builder.Services.AddIgniteUIBlazor()` cannot be added because `Program.cs` (or `MauiProgram.cs`) has a shape the scaffolder does not recognize, the scaffolder stops with `Ignite UI for Blazor setup is incomplete: 'builder.Services.AddIgniteUIBlazor()' could not be added ...`. Add `using IgniteUI.Blazor.Controls;` and `builder.Services.AddIgniteUIBlazor();` where the app's services are registered, then re-run the scaffolder to complete `_Imports.razor` and the theme stylesheet.
+- **`_Imports.razor`**: when the file cannot be written, the scaffolder stops and prints the `@using` line to add.
+- **Theme stylesheet** (the last step): when no known host page exists, the host page has no `</head>`, or it cannot be written, every other change has been applied and the scaffolder ends with `Ignite UI for Blazor setup is incomplete: ...` and the `<link>` line to add to the `<head>` of the page that hosts your Blazor app.
+
+Changes made before a failing step are kept. Because the scaffolder is idempotent, fixing the cause and re-running it completes the remaining steps without duplicating the earlier ones.
 
 ---
 
@@ -206,12 +221,13 @@ For a Blazor Web App with a WebAssembly client project, apply the same changes t
 
 | Symptom | Cause / fix |
 |---------|-------------|
-| `Could not find a host page ... Add the following line to the <head> of your host page manually` | None of the known host pages contains a `</head>` element. Add the printed `<link>` to your host page. |
+| `Ignite UI for Blazor setup is incomplete: no host page ... was found` (or `... has no </head> element`), followed by a `<link>` line | None of the known host pages (`Components/App.razor`, `Pages/_Host.cshtml`, `Pages/_Layout.cshtml`, `wwwroot/index.html`) contains a `</head>` element. All other changes were applied; add the printed `<link>` to the `<head>` of the page that hosts your Blazor app. |
 | Components render but are unstyled | The theme stylesheet is missing or the path is wrong. Check the `<link>` in the host page and that the package restore succeeded. |
 | Components render nothing in a Blazor Web App | Add an interactive render mode (see [Render Mode Requirements](#render-mode-requirements)). |
-| `dotnet add package` fails | Verify network access and that your `NuGet.config` can reach nuget.org (or a mirror). Use `--prerelease` to allow prerelease versions. |
-| `error: There are no versions available for the package 'IgniteUI.Blazor.Lite'` (or `GridLite`) followed by `Failed.` | The project's `NuGet.config` only lists feeds that do not carry third-party packages (for example curated Microsoft mirror feeds). The scaffolder continues with the remaining steps; add nuget.org (or your organization's mirror of it) as a package source and re-run the scaffolder, or run `dotnet add package IgniteUI.Blazor.Lite` manually. |
-| `Program.cs` (or `MauiProgram.cs`) was not modified | The registration is inserted before `var app = builder.Build();` (hosted) or `await builder.Build().RunAsync();` (WebAssembly), or after `builder.Services.AddMauiBlazorWebView();` in `MauiProgram.CreateMauiApp()` (MAUI Blazor Hybrid); other bootstrapping shapes must be edited manually. |
+| `Failed to add package 'IgniteUI.Blazor.Lite' ...` (or `GridLite`) | `dotnet add package` failed. The scaffolder stopped at this step without making further changes. Verify network access and that your `NuGet.config` can reach nuget.org (or a mirror), then re-run the scaffolder. Use `--prerelease` to allow prerelease versions. |
+| `error: There are no versions available for the package 'IgniteUI.Blazor.Lite'` (or `GridLite`) followed by `Failed.` | The project's `NuGet.config` only lists feeds that do not carry third-party packages (for example curated Microsoft mirror feeds). The scaffolder stops at the package step without making further changes; add nuget.org (or your organization's mirror of it) as a package source and re-run the scaffolder. |
+| `Ignite UI for Blazor setup is incomplete: 'builder.Services.AddIgniteUIBlazor()' could not be added to Program.cs` (or `MauiProgram.cs`) | The registration is inserted before `var app = builder.Build();` (hosted) or `await builder.Build().RunAsync();` (WebAssembly), or after `builder.Services.AddMauiBlazorWebView();` in `MauiProgram.CreateMauiApp()` (MAUI Blazor Hybrid). For other bootstrapping shapes, add `using IgniteUI.Blazor.Controls;` and `builder.Services.AddIgniteUIBlazor();` manually and re-run the scaffolder to complete the remaining steps. |
+| `Unable to find the code modification configuration '...'` | The tool installation is missing a file the scaffolder needs. Nothing was changed; reinstall the `dotnet scaffold` tool and re-run it. |
 | The `.Client` project of a Blazor Web App was not updated | `--project` pointed at the client instead of the server project, or the server project has no `ProjectReference` to the client. Target the server project and re-run the scaffolder (it is idempotent). The log should then contain `Found Blazor WebAssembly client project`. |
 | `... is not a supported Blazor app` | The project is not a Blazor Web App, Blazor Server, standalone Blazor WebAssembly or .NET MAUI Blazor Hybrid app (see [Supported Project Types](#supported-project-types)). Pass the Blazor app project to `--project`; for a Blazor Web App with a `.Client` project, pass the server project. |
 | `... references the commercial IgniteUI.Blazor package` (or `IgniteUI.Blazor.Trial`) | See [Commercial Ignite UI for Blazor package](#commercial-ignite-ui-for-blazor-package). |
@@ -227,7 +243,7 @@ Source locations (see [CONTRIBUTING.md](../CONTRIBUTING.md) for the general layo
 - Registration: `src/dotnet-scaffolding/dotnet-scaffold/AspNet/AspNetCommandService.cs` (`blazor-igniteui`)
 - Options / strings: `AspNet/Commands/AspNetOptions.cs`, `AspNet/Commands/AspnetStrings.cs`, `AspNet/Common/Constants.cs`
 - Packages: `AspNet/Common/PackageConstants.cs` (`IgniteUIPackages`)
-- Steps: `AspNet/ScaffoldSteps/ValidateIgniteUIBlazorStep.cs`, `AddRazorImportsStep.cs`, `AddIgniteUIThemeStylesheetStep.cs` (plus the shared `WrappedAddPackagesStep` and `WrappedCodeModificationStep`)
+- Steps: `AspNet/ScaffoldSteps/ValidateIgniteUIBlazorStep.cs`, `AddIgniteUIServicesStep.cs` (the shared `WrappedCodeModificationStep` plus a check that the registration was added), `AddRazorImportsStep.cs`, `AddIgniteUIThemeStylesheetStep.cs` (plus the shared `WrappedAddPackagesStep`)
 - WebAssembly client discovery: `AspNet/Helpers/BlazorWebAssemblyClientProjectResolver.cs` (shared with the Identity scaffolder), called from `ValidateIgniteUIBlazorStep`
 - Supported-project and commercial-package checks: `AspNet/Helpers/IgniteUIBlazorProjectInspector.cs`, called from `ValidateIgniteUIBlazorStep`, using `MSBuildProjectService.TryGetEvaluatedProperties` / `TryGetEvaluatedItems`
 - Builder extensions: `AspNet/Extensions/IgniteUIBlazorScaffolderBuilderExtensions.cs`

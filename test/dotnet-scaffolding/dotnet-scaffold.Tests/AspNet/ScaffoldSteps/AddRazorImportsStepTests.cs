@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
@@ -45,6 +47,30 @@ public class AddRazorImportsStepTests
 
         Assert.False(result);
         _mockFileSystem.Verify(f => f.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_FailsWithManualInstructions_WhenFileCannotBeWritten()
+    {
+        var logger = new Mock<ILogger<AddRazorImportsStep>>();
+        _mockFileSystem.Setup(f => f.FileExists(_importsPath)).Returns(true);
+        _mockFileSystem.Setup(f => f.ReadAllText(_importsPath)).Returns("@using System.Net.Http\n");
+        _mockFileSystem.Setup(f => f.WriteAllText(_importsPath, It.IsAny<string>())).Throws(new UnauthorizedAccessException("Access denied."));
+        var step = new AddRazorImportsStep(logger.Object, _mockFileSystem.Object, _mockTelemetryService.Object)
+        {
+            ImportsFilePath = _importsPath,
+            Namespaces = [Namespace]
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        // A required step: the failure must stop the scaffolder instead of being ignored.
+        Assert.False(result);
+        Assert.False(step.ContinueOnError);
+        Assert.Contains(logger.Invocations, invocation =>
+            Equals(invocation.Arguments[0], LogLevel.Error) && invocation.Arguments[2].ToString()!.Contains("Access denied."));
+        Assert.Contains(logger.Invocations, invocation =>
+            Equals(invocation.Arguments[0], LogLevel.Error) && invocation.Arguments[2].ToString()!.Contains($"@using {Namespace}"));
     }
 
     [Fact]

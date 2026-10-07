@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(AddAspNetConnectionStringStep),
                 typeof(AddDbSetToExistingContextStep),
                 typeof(AddFileStep),
+                typeof(AddIgniteUIServicesStep),
                 typeof(AddIgniteUIThemeStylesheetStep),
                 typeof(AddRazorImportsStep),
                 typeof(AreaScaffolderStep),

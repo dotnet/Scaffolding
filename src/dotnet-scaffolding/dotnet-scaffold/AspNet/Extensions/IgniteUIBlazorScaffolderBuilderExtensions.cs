@@ -1,10 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
-using Microsoft.DotNet.Scaffolding.Core.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
-using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
@@ -26,6 +24,10 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     internal const string WasmCodeModificationConfigFileName = "igniteUIBlazorWasmChanges.json";
     /// <summary>Code modification config for .NET MAUI Blazor Hybrid apps (MauiProgram.cs).</summary>
     internal const string MauiCodeModificationConfigFileName = "igniteUIBlazorMauiChanges.json";
+    /// <summary>The file that registers the app's services in ASP.NET Core and Blazor WebAssembly projects.</summary>
+    internal const string RegistrationFileName = "Program.cs";
+    /// <summary>The file that registers the app's services in a .NET MAUI Blazor Hybrid app.</summary>
+    internal const string MauiRegistrationFileName = "MauiProgram.cs";
 
     /// <summary>
     /// Adds a step that installs the IgniteUI.Blazor.Lite and IgniteUI.Blazor.GridLite NuGet packages into the project.
@@ -67,42 +69,37 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     }
 
     /// <summary>
-    /// Adds a step that registers 'builder.Services.AddIgniteUIBlazor()' in the project's Program.cs.
+    /// Adds a step that registers 'builder.Services.AddIgniteUIBlazor()' in the project's Program.cs
+    /// (MauiProgram.cs for a .NET MAUI Blazor Hybrid app). The step fails when the registration cannot be added.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorCodeChangeStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<WrappedCodeModificationStep>(config =>
+        return builder.WithStep<AddIgniteUIServicesStep>(config =>
         {
-            var step = config.Step;
             var model = GetModel(config.Context);
-            var configFileName = GetCodeModificationConfigFileName(model);
-            if (!TryConfigureCodeModificationStep(step, config.Context, model.ProjectPath, configFileName, model.ProjectInfo.CodeChangeOptions))
-            {
-                step.SkipStep = true;
-            }
+            ConfigureServicesStep(config.Step, config.Context, model.ProjectPath, model.CodeModificationConfigPath,
+                model.IsMauiBlazorHybridProject ? MauiRegistrationFileName : RegistrationFileName, model.ProjectInfo.CodeChangeOptions);
         });
     }
 
     /// <summary>
     /// Adds a step that registers 'builder.Services.AddIgniteUIBlazor()' in the Program.cs of the Blazor
-    /// WebAssembly client project of a Blazor Web App. Skipped when the project has no client project.
+    /// WebAssembly client project of a Blazor Web App. Skipped when the project has no client project;
+    /// otherwise the step fails when the registration cannot be added.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorWasmCodeChangeStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<WrappedCodeModificationStep>(config =>
+        return builder.WithStep<AddIgniteUIServicesStep>(config =>
         {
             var step = config.Step;
             var model = GetModel(config.Context);
-            if (string.IsNullOrEmpty(model.ClientProjectPath))
+            if (string.IsNullOrEmpty(model.ClientProjectPath) || string.IsNullOrEmpty(model.ClientCodeModificationConfigPath))
             {
                 step.SkipStep = true;
                 return;
             }
 
-            if (!TryConfigureCodeModificationStep(step, config.Context, model.ClientProjectPath, WasmCodeModificationConfigFileName, model.ProjectInfo.CodeChangeOptions))
-            {
-                step.SkipStep = true;
-            }
+            ConfigureServicesStep(step, config.Context, model.ClientProjectPath, model.ClientCodeModificationConfigPath, RegistrationFileName, model.ProjectInfo.CodeChangeOptions);
         });
     }
 
@@ -141,8 +138,8 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     }
 
     /// <summary>
-    /// Adds a step that links the selected Ignite UI theme stylesheet in the project's host page.
-    /// Skipped when no host page could be resolved (guidance is logged by <see cref="ValidateIgniteUIBlazorStep"/>).
+    /// Adds a step that links the selected Ignite UI theme stylesheet in the project's host page. When no host page
+    /// could be resolved, the step fails and reports the &lt;link&gt; to add manually.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorThemeStylesheetStep(this IScaffoldBuilder builder)
     {
@@ -150,23 +147,18 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
         {
             var step = config.Step;
             var model = GetModel(config.Context);
-            if (string.IsNullOrEmpty(model.HostPagePath))
-            {
-                step.SkipStep = true;
-                return;
-            }
-
             step.HostPagePath = model.HostPagePath;
+            step.ProjectDirectory = model.BaseOutputPath;
             step.StylesheetPath = model.StylesheetPath;
         });
     }
 
     /// <summary>
-    /// Returns the code modification config that registers the Ignite UI services for the model's project type.
+    /// Returns the code modification config that registers the Ignite UI services for the given project type.
     /// </summary>
-    internal static string GetCodeModificationConfigFileName(IgniteUIBlazorModel model)
-        => model.IsMauiBlazorHybridProject ? MauiCodeModificationConfigFileName
-            : model.IsWebAssemblyProject ? WasmCodeModificationConfigFileName
+    internal static string GetCodeModificationConfigFileName(bool isWebAssemblyProject, bool isMauiBlazorHybridProject)
+        => isMauiBlazorHybridProject ? MauiCodeModificationConfigFileName
+            : isWebAssemblyProject ? WasmCodeModificationConfigFileName
             : CodeModificationConfigFileName;
 
     /// <summary>
@@ -175,16 +167,10 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     internal static List<Package> GetPackages()
         => [PackageConstants.IgniteUIPackages.IgniteUIBlazorLitePackage, PackageConstants.IgniteUIPackages.IgniteUIBlazorGridLitePackage];
 
-    private static bool TryConfigureCodeModificationStep(WrappedCodeModificationStep step, ScaffolderContext context, string projectPath, string configFileName, IList<string>? codeChangeOptions)
+    private static void ConfigureServicesStep(AddIgniteUIServicesStep step, ScaffolderContext context, string projectPath, string codeModificationConfigPath, string registrationFileName, IList<string>? codeChangeOptions)
     {
-        string targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
-        string? codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile(configFileName, System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
-        if (string.IsNullOrEmpty(codeModificationFilePath))
-        {
-            return false;
-        }
-
-        step.CodeModifierConfigPath = codeModificationFilePath;
+        step.CodeModifierConfigPath = codeModificationConfigPath;
+        step.RegistrationFileName = registrationFileName;
         step.ProjectPath = projectPath;
         step.CodeChangeOptions = codeChangeOptions ?? [];
         if (context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj) &&
@@ -195,8 +181,6 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
                 step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
             }
         }
-
-        return true;
     }
 
     private static IgniteUIBlazorModel GetModel(ScaffolderContext context)

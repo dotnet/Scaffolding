@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
@@ -144,6 +145,33 @@ public class AddIgniteUIThemeStylesheetStepTests
 
         Assert.True(result);
         _mockFileSystem.Verify(f => f.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_ReportsIncompleteSetup_WhenStylesheetCannotBeLinked(bool hasHostPageWithoutHead)
+    {
+        // No known host page was found, or the host page has no </head>: the run must fail and say what is left to do.
+        var logger = new Mock<ILogger<AddIgniteUIThemeStylesheetStep>>();
+        _mockFileSystem.Setup(f => f.FileExists(s_appRazorPath)).Returns(hasHostPageWithoutHead);
+        _mockFileSystem.Setup(f => f.ReadAllText(s_appRazorPath)).Returns("<Routes />");
+        var step = new AddIgniteUIThemeStylesheetStep(logger.Object, _mockFileSystem.Object, _mockTelemetryService.Object)
+        {
+            HostPagePath = hasHostPageWithoutHead ? s_appRazorPath : null,
+            ProjectDirectory = Path.GetDirectoryName(Path.GetDirectoryName(s_appRazorPath)),
+            StylesheetPath = LiteBootstrapLight
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        Assert.False(step.ContinueOnError);
+        _mockFileSystem.Verify(f => f.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        Assert.Contains(logger.Invocations, invocation =>
+            Equals(invocation.Arguments[0], LogLevel.Error) && invocation.Arguments[2].ToString()!.Contains("Ignite UI for Blazor setup is incomplete"));
+        Assert.Contains(logger.Invocations, invocation =>
+            Equals(invocation.Arguments[0], LogLevel.Error) && invocation.Arguments[2].ToString()!.Contains($"<link href=\"{LiteBootstrapLight}\" rel=\"stylesheet\" />"));
     }
 
     [Fact]

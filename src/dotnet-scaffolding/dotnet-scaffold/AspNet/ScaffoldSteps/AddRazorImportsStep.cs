@@ -42,13 +42,27 @@ internal class AddRazorImportsStep : ScaffoldStep
         _logger = logger;
         _fileSystem = fileSystem;
         _telemetryService = telemetryService;
-        ContinueOnError = true;
     }
 
     /// <inheritdoc />
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        bool result = Execute();
+        bool result;
+        try
+        {
+            result = Execute();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _logger.LogError($"Unable to update '{ImportsFilePath}': {ex.Message} Add the following line(s) to it manually, then re-run the scaffolder:");
+            foreach (var ns in Namespaces ?? [])
+            {
+                _logger.LogError($"    @using {ns}");
+            }
+
+            result = false;
+        }
+
         _telemetryService.TrackEvent(new WrappedStepTelemetryEvent(nameof(AddRazorImportsStep), context.Scaffolder.DisplayName, result));
         return Task.FromResult(result);
     }

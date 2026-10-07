@@ -212,7 +212,7 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
     }
 
     [Fact]
-    public async Task Scaffold_BlazorIgniteUI_Net10_WebAppWithoutTemplateLayout()
+    public async Task Scaffold_BlazorIgniteUI_Net10_WebAppWithoutTemplateLayout_ReportsIncompleteThemeSetup()
     {
         // Arrange — a Blazor Web App whose components live in 'UI/' instead of the template's 'Components/'
         SetupBlazorWebAppProject();
@@ -222,7 +222,7 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         await AssertBuildsAsync("before scaffolding");
 
         // Act
-        var cliOutput = await RunScaffoldAndAssertSuccessAsync();
+        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(TargetFramework, "blazor-igniteui", "--project", _testProjectPath);
 
         // Assert — the project is accepted; packages, services and the root _Imports.razor are set up
         var projectContent = File.ReadAllText(_testProjectPath);
@@ -231,12 +231,68 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         Assert.Contains("builder.Services.AddIgniteUIBlazor();", File.ReadAllText(programPath));
         Assert.Contains(ControlsUsing, File.ReadAllText(Path.Combine(_testProjectDir, "_Imports.razor")));
 
-        // Assert — no known host page exists, so the stylesheet link is printed for manual addition instead
-        Assert.Contains("Could not find a host page", cliOutput);
-        Assert.Contains(LiteBootstrapLightStylesheet, cliOutput);
+        // Assert — no known host page exists, so the required stylesheet link could not be added: the run fails and
+        // says exactly what is left to do
+        Assert.True(cliExitCode != 0, $"CLI scaffold should report the incomplete setup as a failure.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.Contains("Ignite UI for Blazor setup is incomplete", cliOutput + cliError);
+        Assert.Contains($"<link href=\"{LiteBootstrapLightStylesheet}\" rel=\"stylesheet\" />", cliOutput + cliError);
         Assert.DoesNotContain("_content/IgniteUI", File.ReadAllText(Path.Combine(_testProjectDir, "UI", "App.razor")));
 
         await AssertBuildsAsync("after scaffolding");
+    }
+
+    [Fact]
+    public async Task Scaffold_BlazorIgniteUI_Net10_PackageInstallFails_StopsBeforeOtherChanges()
+    {
+        // Arrange — the only package source is an empty local folder, so 'dotnet add package' fails
+        SetupBlazorWebAppProject();
+        var emptyFeed = Path.Combine(_testDirectory, "empty-feed");
+        Directory.CreateDirectory(emptyFeed);
+        File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), $"""
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <packageSources>
+                <clear />
+                <add key="empty" value="{emptyFeed}" />
+              </packageSources>
+            </configuration>
+            """);
+
+        // Act + Assert — the shared package step reports the failure and no later step runs
+        var cliOutput = await ScaffoldAndAssertFailsWithoutChangesAsync();
+        Assert.Contains($"Failed to add package '{LitePackageName}'", cliOutput);
+    }
+
+    [Fact]
+    public async Task Scaffold_BlazorIgniteUI_Net10_UnrecognizedProgram_ReportsIncompleteServiceRegistration()
+    {
+        // Arrange — a Startup-based app: there is no 'builder.Build()' for the code modifier to insert the registration before
+        SetupBlazorWebAppProject();
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        File.WriteAllText(programPath, """
+            public class Program
+            {
+                public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
+
+                public static IHostBuilder CreateHostBuilder(string[] args) =>
+                    Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(web => web.Configure(app => { }));
+            }
+            """);
+        var importsPath = Path.Combine(_testProjectDir, "Components", "_Imports.razor");
+        var appRazorPath = Path.Combine(_testProjectDir, "Components", "App.razor");
+        var importsBefore = File.ReadAllText(importsPath);
+        var appRazorBefore = File.ReadAllText(appRazorPath);
+
+        // Act
+        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(TargetFramework, "blazor-igniteui", "--project", _testProjectPath);
+
+        // Assert — the run fails with the manual registration instructions and stops before _Imports.razor and the theme
+        Assert.True(cliExitCode != 0, $"CLI scaffold should fail.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.Contains("Ignite UI for Blazor setup is incomplete", cliOutput + cliError);
+        Assert.Contains("builder.Services.AddIgniteUIBlazor();", cliOutput + cliError);
+        Assert.DoesNotContain("AddIgniteUIBlazor", File.ReadAllText(programPath));
+        Assert.Equal(importsBefore, File.ReadAllText(importsPath));
+        Assert.Equal(appRazorBefore, File.ReadAllText(appRazorPath));
     }
 
     [Fact]

@@ -54,25 +54,25 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
     }
 
     [Fact]
-    public void WithIgniteUIBlazorCodeChangeStep_AddsWrappedCodeModificationStep()
+    public void WithIgniteUIBlazorCodeChangeStep_AddsAddIgniteUIServicesStep()
     {
-        var mockBuilder = CreateBuilder<WrappedCodeModificationStep>();
+        var mockBuilder = CreateBuilder<AddIgniteUIServicesStep>();
 
         IScaffoldBuilder result = mockBuilder.Object.WithIgniteUIBlazorCodeChangeStep();
 
         Assert.NotNull(result);
-        VerifyStepAdded<WrappedCodeModificationStep>(mockBuilder);
+        VerifyStepAdded<AddIgniteUIServicesStep>(mockBuilder);
     }
 
     [Fact]
-    public void WithIgniteUIBlazorWasmCodeChangeStep_AddsWrappedCodeModificationStep()
+    public void WithIgniteUIBlazorWasmCodeChangeStep_AddsAddIgniteUIServicesStep()
     {
-        var mockBuilder = CreateBuilder<WrappedCodeModificationStep>();
+        var mockBuilder = CreateBuilder<AddIgniteUIServicesStep>();
 
         IScaffoldBuilder result = mockBuilder.Object.WithIgniteUIBlazorWasmCodeChangeStep();
 
         Assert.NotNull(result);
-        VerifyStepAdded<WrappedCodeModificationStep>(mockBuilder);
+        VerifyStepAdded<AddIgniteUIServicesStep>(mockBuilder);
     }
 
     [Fact]
@@ -155,19 +155,60 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         }
     }
 
-    [Fact]
-    public void WithIgniteUIBlazorWasmCodeChangeStep_SkipsWithoutClient()
+    [Theory]
+    [InlineData(false, "Program.cs")]
+    [InlineData(true, "MauiProgram.cs")]
+    public void WithIgniteUIBlazorCodeChangeStep_UsesResolvedConfigAndRegistrationFile(bool isMauiBlazorHybridProject, string expectedRegistrationFile)
     {
-        var model = CreateModel(hasClient: false);
-        var step = new WrappedCodeModificationStep(NullLogger<WrappedCodeModificationStep>.Instance, Mock.Of<ITelemetryService>())
-        {
-            CodeChangeOptions = [],
-            ProjectPath = string.Empty
-        };
+        var model = CreateModel(isMauiBlazorHybridProject: isMauiBlazorHybridProject);
+        var step = CreateServicesStep();
+
+        ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorCodeChangeStep());
+
+        // A required step is never skipped: a missing config fails validation before any change is made.
+        Assert.False(step.SkipStep);
+        Assert.False(step.ContinueOnError);
+        Assert.Equal(model.ProjectPath, step.ProjectPath);
+        Assert.Equal(model.CodeModificationConfigPath, step.CodeModifierConfigPath);
+        Assert.Equal(expectedRegistrationFile, step.RegistrationFileName);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WithIgniteUIBlazorWasmCodeChangeStep_TargetsClientFromModel(bool hasClient)
+    {
+        var model = CreateModel(hasClient);
+        var step = CreateServicesStep();
 
         ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorWasmCodeChangeStep());
 
-        Assert.True(step.SkipStep);
+        Assert.Equal(!hasClient, step.SkipStep);
+        if (hasClient)
+        {
+            Assert.Equal(model.ClientProjectPath, step.ProjectPath);
+            Assert.Equal(model.ClientCodeModificationConfigPath, step.CodeModifierConfigPath);
+            Assert.Equal("Program.cs", step.RegistrationFileName);
+        }
+    }
+
+    [Fact]
+    public void WithIgniteUIBlazorThemeStylesheetStep_RunsWithoutHostPage()
+    {
+        // Without a host page the step still runs, so that it fails and reports the <link> to add manually.
+        var model = CreateModel(hasHostPage: false);
+        var step = new AddIgniteUIThemeStylesheetStep(NullLogger<AddIgniteUIThemeStylesheetStep>.Instance, Mock.Of<IFileSystem>(), Mock.Of<ITelemetryService>())
+        {
+            StylesheetPath = string.Empty
+        };
+
+        ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorThemeStylesheetStep());
+
+        Assert.False(step.SkipStep);
+        Assert.False(step.ContinueOnError);
+        Assert.Null(step.HostPagePath);
+        Assert.Equal(model.BaseOutputPath, step.ProjectDirectory);
+        Assert.Equal(model.StylesheetPath, step.StylesheetPath);
     }
 
     [Theory]
@@ -175,23 +216,7 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
     [InlineData(true, false, "igniteUIBlazorWasmChanges.json")]
     [InlineData(false, true, "igniteUIBlazorMauiChanges.json")]
     public void GetCodeModificationConfigFileName_MatchesProjectType(bool isWebAssemblyProject, bool isMauiBlazorHybridProject, string expected)
-    {
-        var baseModel = CreateModel();
-        var model = new IgniteUIBlazorModel
-        {
-            ProjectInfo = baseModel.ProjectInfo,
-            ProjectPath = baseModel.ProjectPath,
-            BaseOutputPath = baseModel.BaseOutputPath,
-            Theme = baseModel.Theme,
-            ThemeVariant = baseModel.ThemeVariant,
-            StylesheetPath = baseModel.StylesheetPath,
-            IsWebAssemblyProject = isWebAssemblyProject,
-            IsMauiBlazorHybridProject = isMauiBlazorHybridProject,
-            ImportsFilePath = baseModel.ImportsFilePath
-        };
-
-        Assert.Equal(expected, IgniteUIBlazorScaffolderBuilderExtensions.GetCodeModificationConfigFileName(model));
-    }
+        => Assert.Equal(expected, IgniteUIBlazorScaffolderBuilderExtensions.GetCodeModificationConfigFileName(isWebAssemblyProject, isMauiBlazorHybridProject));
 
     [Fact]
     public void GetPackages_ReturnsBothPackages()
@@ -237,7 +262,15 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         return context;
     }
 
-    private static IgniteUIBlazorModel CreateModel(bool hasClient = false)
+    private static AddIgniteUIServicesStep CreateServicesStep()
+        => new(NullLogger<WrappedCodeModificationStep>.Instance, Mock.Of<ITelemetryService>(), Mock.Of<IFileSystem>())
+        {
+            CodeChangeOptions = [],
+            ProjectPath = string.Empty,
+            RegistrationFileName = string.Empty
+        };
+
+    private static IgniteUIBlazorModel CreateModel(bool hasClient = false, bool isMauiBlazorHybridProject = false, bool hasHostPage = true)
     {
         var projectDirectory = Path.Combine("C:", "src", "MyApp");
         var clientProjectDirectory = Path.Combine("C:", "src", "MyApp.Client");
@@ -250,10 +283,13 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
             ThemeVariant = "light",
             StylesheetPath = "_content/IgniteUI.Blazor/themes/light/bootstrap.css",
             IsWebAssemblyProject = false,
-            HostPagePath = Path.Combine(projectDirectory, "Components", "App.razor"),
+            IsMauiBlazorHybridProject = isMauiBlazorHybridProject,
+            HostPagePath = hasHostPage ? Path.Combine(projectDirectory, "Components", "App.razor") : null,
             ImportsFilePath = Path.Combine(projectDirectory, "Components", "_Imports.razor"),
             ClientProjectPath = hasClient ? Path.Combine(clientProjectDirectory, "MyApp.Client.csproj") : null,
-            ClientImportsFilePath = hasClient ? Path.Combine(clientProjectDirectory, "_Imports.razor") : null
+            ClientImportsFilePath = hasClient ? Path.Combine(clientProjectDirectory, "_Imports.razor") : null,
+            CodeModificationConfigPath = Path.Combine("configs", isMauiBlazorHybridProject ? "igniteUIBlazorMauiChanges.json" : "igniteUIBlazorChanges.json"),
+            ClientCodeModificationConfigPath = hasClient ? Path.Combine("configs", "igniteUIBlazorWasmChanges.json") : null
         };
     }
 }

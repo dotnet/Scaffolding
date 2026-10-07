@@ -63,4 +63,14 @@ internal class IgniteUIBlazorModel
     /// Gets the _Imports.razor of the Blazor WebAssembly client project, or null when there is no client project.
     /// </summary>
     public string? ClientImportsFilePath { get; init; }
+    /// <summary>
+    /// Gets the code modification config that registers the Ignite UI services in the project
+    /// (resolved during validation, so that a missing config fails before any change is made).
+    /// </summary>
+    public required string CodeModificationConfigPath { get; init; }
+    /// <summary>
+    /// Gets the code modification config that registers the Ignite UI services in the Blazor WebAssembly client
+    /// project, or null when there is no client project.
+    /// </summary>
+    public string? ClientCodeModificationConfigPath { get; init; }
 }

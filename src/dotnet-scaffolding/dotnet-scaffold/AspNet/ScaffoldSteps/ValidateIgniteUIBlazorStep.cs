@@ -1,7 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.DotNet.Scaffolding.Core.Helpers;
+using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -211,9 +214,20 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
         var stylesheetPath = IgniteUIBlazorHelper.GetThemeStylesheetPath(settings.Theme, settings.ThemeVariant);
         if (hostPagePath is null)
         {
-            _logger.LogWarning($"Could not find a host page ({string.Join(", ", IgniteUIBlazorHelper.HostPageCandidates)}) in '{projectDirectory}'.");
-            _logger.LogWarning("Add the following line to the <head> of your host page manually:");
-            _logger.LogWarning($"    {IgniteUIBlazorHelper.BuildStylesheetLink(stylesheetPath, useAssetsCollection: false)}");
+            // The remaining setup still runs; the theme step then fails and reports the <link> to add manually.
+            _logger.LogWarning($"Could not find a host page ({string.Join(", ", IgniteUIBlazorHelper.HostPageCandidates)}) in '{projectDirectory}'. The theme stylesheet cannot be linked automatically.");
+        }
+
+        // The service registration is required, so its code modification configs must be available before anything changes.
+        var codeModificationConfigPath = FindCodeModificationConfig(
+            settings.Project,
+            IgniteUIBlazorScaffolderBuilderExtensions.GetCodeModificationConfigFileName(isWebAssemblyProject, isMauiBlazorHybridProject));
+        string? clientCodeModificationConfigPath = null;
+        if (codeModificationConfigPath is null ||
+            (clientProjectPath is not null &&
+             (clientCodeModificationConfigPath = FindCodeModificationConfig(clientProjectPath, IgniteUIBlazorScaffolderBuilderExtensions.WasmCodeModificationConfigFileName)) is null))
+        {
+            return null;
         }
 
         // No option-filtered blocks exist in the Ignite UI code modification configs.
@@ -232,8 +246,29 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             HostPagePath = hostPagePath,
             ImportsFilePath = IgniteUIBlazorHelper.GetImportsFilePath(_fileSystem, projectDirectory),
             ClientProjectPath = clientProjectPath,
-            ClientImportsFilePath = clientImportsFilePath
+            ClientImportsFilePath = clientImportsFilePath,
+            CodeModificationConfigPath = codeModificationConfigPath,
+            ClientCodeModificationConfigPath = clientCodeModificationConfigPath
         };
+    }
+
+    /// <summary>
+    /// Finds the code modification config that registers the Ignite UI services in <paramref name="projectPath"/>,
+    /// for the project's target framework. Logs an error when the config is missing from the tool installation.
+    /// </summary>
+    private string? FindCodeModificationConfig(string projectPath, string configFileName)
+    {
+        var targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
+        var configPath = GlobalToolFileFinder.FindCodeModificationConfigFile(configFileName, typeof(ValidateIgniteUIBlazorStep).Assembly, targetFrameworkFolder);
+        if (string.IsNullOrEmpty(configPath))
+        {
+            _logger.LogError(
+                $"Unable to find the code modification configuration '{configFileName}' for {targetFrameworkFolder}, which registers the Ignite UI for Blazor services in '{projectPath}'. " +
+                "The dotnet-scaffold installation may be incomplete; reinstall the tool and re-run the scaffolder.");
+            return null;
+        }
+
+        return configPath;
     }
 
     /// <summary>

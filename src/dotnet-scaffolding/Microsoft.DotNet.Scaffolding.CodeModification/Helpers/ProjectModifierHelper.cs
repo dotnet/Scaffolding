@@ -458,24 +458,31 @@ internal static class ProjectModifierHelper
     }
 
     internal static void ApplyReplacementsOnFileOnDisk(string filePath, IEnumerable<CodeSnippet>? codeChanges)
+        => TryApplyReplacementsOnFileOnDiskCore(filePath, codeChanges, out _, preserveLegacyCssBehavior: true);
+
+    internal static bool TryApplyReplacementsOnFileOnDisk(string filePath, IEnumerable<CodeSnippet>? codeChanges, out string? error)
+        => TryApplyReplacementsOnFileOnDiskCore(filePath, codeChanges, out error, preserveLegacyCssBehavior: false);
+
+    private static bool TryApplyReplacementsOnFileOnDiskCore(string filePath, IEnumerable<CodeSnippet>? codeChanges, out string? error, bool preserveLegacyCssBehavior)
     {
+        error = null;
         if (codeChanges is null)
         {
-            return;    
+            return true;
         }
 
         bool sourceChanged = false;
         var sourceFileString = File.ReadAllText(filePath);
-        if (string.IsNullOrEmpty(sourceFileString))
+        if (string.IsNullOrEmpty(sourceFileString) && preserveLegacyCssBehavior)
         {
-            return;
+            return true;
         }
 
         var trimmedSourceFile = TrimStatement(sourceFileString);
         var applicableCodeChanges = codeChanges.Where(c => !trimmedSourceFile.Contains(TrimStatement(c.Block)));
         if (!applicableCodeChanges.Any())
         {
-            return;
+            return true;
         }
 
         foreach (var change in applicableCodeChanges)
@@ -483,15 +490,32 @@ internal static class ProjectModifierHelper
             // If doing a code replacement, replace ReplaceSnippet in source with Block
             if (change.ReplaceSnippet != null)
             {
-                var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
-                if (sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase) &&
-                    (string.IsNullOrEmpty(change.CheckBlock) ||
-                     !sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase)))
+                if (!string.IsNullOrEmpty(change.CheckBlock) && sourceFileString.Contains(change.CheckBlock, StringComparison.OrdinalIgnoreCase))
                 {
-                    sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block);
-                    sourceChanged = true;
+                    continue;
                 }
 
+                var replaceSnippet = string.Join(Environment.NewLine, change.ReplaceSnippet);
+                if ((string.IsNullOrEmpty(replaceSnippet) && !preserveLegacyCssBehavior) ||
+                    !sourceFileString.Contains(replaceSnippet, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (preserveLegacyCssBehavior)
+                    {
+                        continue;
+                    }
+
+                    error = $"Replacement snippet '{replaceSnippet}' was not found in '{filePath}'.";
+                    return false;
+                }
+
+                sourceFileString = sourceFileString.Replace(replaceSnippet, change.Block,
+                    preserveLegacyCssBehavior ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
+                sourceChanged = true;
+            }
+            else if (!preserveLegacyCssBehavior && change.Prepend)
+            {
+                sourceFileString = change.Block + sourceFileString;
+                sourceChanged = true;
             }
             else
             {
@@ -504,6 +528,8 @@ internal static class ProjectModifierHelper
         {
             File.WriteAllText(filePath, sourceFileString);
         }
+
+        return true;
     }
 
     /// <summary>

@@ -56,6 +56,18 @@
             "Usings": [
                 "Microsoft.AspNetCore.Authentication.OpenIdConnect",
                 "Microsoft.Identity.Web"
+            ],
+            "Replacements": [
+                {
+                    "CheckBlock": "AddAuthenticationStateSerialization",
+                    "ReplaceSnippet": [
+                        ".AddInteractiveWebAssemblyComponents();"
+                    ],
+                    "MultiLineBlock": [
+                        ".AddInteractiveWebAssemblyComponents()",
+                        "    .AddAuthenticationStateSerialization();"
+                    ]
+                }
             ]
         },
         {

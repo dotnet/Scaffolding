@@ -58,6 +58,15 @@ internal class IgniteUIBlazorModel
     /// </summary>
     public required string ImportsFilePath { get; init; }
     /// <summary>
+    /// Gets the Blazor WebAssembly client project referenced by a Blazor Web App server project, or null when
+    /// the project has no client (Blazor Server, server-only Blazor Web App, or standalone Blazor WebAssembly).
+    /// </summary>
+    public string? ClientProjectPath { get; init; }
+    /// <summary>
+    /// Gets the _Imports.razor of the Blazor WebAssembly client project, or null when there is no client project.
+    /// </summary>
+    public string? ClientImportsFilePath { get; init; }
+    /// <summary>
     /// Gets a value indicating whether 'builder.Services.AddIgniteUIBlazor()' must be registered.
     /// Only the IgniteUI.Blazor.Lite package requires service registration; GridLite does not.
     /// </summary>

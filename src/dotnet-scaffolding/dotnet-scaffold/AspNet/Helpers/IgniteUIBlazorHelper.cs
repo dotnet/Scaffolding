@@ -184,6 +184,17 @@ internal static class IgniteUIBlazorHelper
     }
 
     /// <summary>
+    /// Finds the _Imports.razor of a Blazor WebAssembly client project: the root '_Imports.razor' by convention,
+    /// or 'Components/_Imports.razor' when only that one exists.
+    /// </summary>
+    internal static string GetClientImportsFilePath(IFileSystem fileSystem, string clientProjectDirectory)
+    {
+        var rootImports = Path.Combine(clientProjectDirectory, "_Imports.razor");
+        var componentsImports = Path.Combine(clientProjectDirectory, "Components", "_Imports.razor");
+        return !fileSystem.FileExists(rootImports) && fileSystem.FileExists(componentsImports) ? componentsImports : rootImports;
+    }
+
+    /// <summary>
     /// Returns true when the given host page content contains a closing &lt;/head&gt; tag.
     /// </summary>
     internal static bool ContainsHeadClosingTag(string? content)

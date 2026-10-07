@@ -131,20 +131,22 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
     /// Runs the scaffolder and asserts the Blazor Web App was wired up for both Ignite UI packages
     /// ('--package All' with the default light bootstrap theme).
     /// </summary>
+    /// <param name="buildBeforeScaffolding">
+    /// Builds (and therefore restores) the project before scaffolding. Pass false to verify that the scaffolder works on
+    /// a project that has never been restored.
+    /// </param>
     /// <returns>The scaffolder's console output, for additional assertions by the caller.</returns>
-    protected async Task<string> ScaffoldAllPackagesAndAssertAsync(params string[] extraCliArgs)
+    protected async Task<string> ScaffoldAllPackagesAndAssertAsync(bool buildBeforeScaffolding = true)
     {
-        var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
-        Assert.True(preExitCode == 0,
-            $"Project should build before scaffolding.\nExit code: {preExitCode}\nOutput: {preOutput}\nError: {preError}");
+        if (buildBeforeScaffolding)
+        {
+            var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
+            Assert.True(preExitCode == 0,
+                $"Project should build before scaffolding.\nExit code: {preExitCode}\nOutput: {preOutput}\nError: {preError}");
+        }
 
-        string[] args =
-        [
-            "--project", _testProjectPath,
-            "--package", "All",
-            .. extraCliArgs
-        ];
-        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(TargetFramework, "blazor-igniteui", args);
+        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework, "blazor-igniteui", "--project", _testProjectPath, "--package", "All");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
         // packages

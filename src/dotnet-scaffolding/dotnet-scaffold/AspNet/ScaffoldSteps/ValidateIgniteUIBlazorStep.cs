@@ -17,7 +17,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 /// <summary>
 /// Scaffold step that validates the Ignite UI for Blazor options and initializes the
-/// <see cref="IgniteUIBlazorModel"/> (resolved host page, _Imports.razor, packages and theme stylesheet).
+/// <see cref="IgniteUIBlazorModel"/> (resolved host page, _Imports.razor, packages, theme stylesheet and,
+/// for a Blazor Web App, the referenced Blazor WebAssembly client project).
 /// </summary>
 internal class ValidateIgniteUIBlazorStep : ScaffoldStep
 {
@@ -153,6 +154,30 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
         var projectFileContent = _fileSystem.ReadAllText(settings.Project);
         var programFilePath = Path.Combine(projectDirectory, "Program.cs");
         var programFileContent = _fileSystem.FileExists(programFilePath) ? _fileSystem.ReadAllText(programFilePath) : null;
+        bool isWebAssemblyProject = IgniteUIBlazorHelper.IsWebAssemblyProject(projectFileContent, programFileContent);
+
+        // A Blazor Web App server project may reference a WebAssembly client project that needs the same packages,
+        // services and imports. Resolve it here, before any changes are made, so that a broken reference, an evaluation
+        // failure or an ambiguous client stops the scaffolder instead of leaving the client silently unconfigured.
+        // A standalone WebAssembly project is the client itself and has no client project to discover.
+        string? clientProjectPath = null;
+        string? clientImportsFilePath = null;
+        if (!isWebAssemblyProject)
+        {
+            if (!BlazorWebAssemblyClientProjectResolver.TryGetClient(settings.Project, _fileSystem, out var client, out var error))
+            {
+                _logger.LogError(error);
+                return null;
+            }
+
+            if (client is not null)
+            {
+                // The resolver returns fully qualified project paths, so the directory is always available.
+                clientProjectPath = client.Value.ProjectPath;
+                clientImportsFilePath = IgniteUIBlazorHelper.GetClientImportsFilePath(_fileSystem, Path.GetDirectoryName(clientProjectPath)!);
+                _logger.LogInformation($"Found Blazor WebAssembly client project '{clientProjectPath}'; it will be configured as well.");
+            }
+        }
 
         bool includeLite = IgniteUIBlazorHelper.IncludesLite(settings.Package);
         bool includeGridLite = IgniteUIBlazorHelper.IncludesGridLite(settings.Package);
@@ -185,9 +210,11 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             Theme = settings.Theme,
             ThemeVariant = settings.ThemeVariant,
             StylesheetPath = stylesheetPath,
-            IsWebAssemblyProject = IgniteUIBlazorHelper.IsWebAssemblyProject(projectFileContent, programFileContent),
+            IsWebAssemblyProject = isWebAssemblyProject,
             HostPagePath = hostPagePath,
-            ImportsFilePath = IgniteUIBlazorHelper.GetImportsFilePath(_fileSystem, projectDirectory)
+            ImportsFilePath = IgniteUIBlazorHelper.GetImportsFilePath(_fileSystem, projectDirectory),
+            ClientProjectPath = clientProjectPath,
+            ClientImportsFilePath = clientImportsFilePath
         };
     }
 

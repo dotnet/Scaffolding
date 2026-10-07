@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 /// <summary>
 /// Provides extension methods for <see cref="IScaffoldBuilder"/> to add Ignite UI for Blazor scaffolding steps.
 /// The steps cover the project passed via '--project' and, for Blazor Web Apps with a WebAssembly client
-/// project (detected by <see cref="DetectBlazorWasmStep"/>), the client project as well.
+/// project (resolved by <see cref="ValidateIgniteUIBlazorStep"/>), the client project as well.
 /// </summary>
 internal static class IgniteUIBlazorScaffolderBuilderExtensions
 {
@@ -24,20 +24,6 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     internal const string CodeModificationConfigFileName = "igniteUIBlazorChanges.json";
     /// <summary>Code modification config for Blazor WebAssembly projects (standalone or the Web App client project).</summary>
     internal const string WasmCodeModificationConfigFileName = "igniteUIBlazorWasmChanges.json";
-
-    /// <summary>
-    /// Adds a step that detects whether the project references a Blazor WebAssembly client project.
-    /// </summary>
-    public static IScaffoldBuilder WithIgniteUIBlazorDetectBlazorWasmStep(this IScaffoldBuilder builder)
-    {
-        return builder.WithStep<DetectBlazorWasmStep>(config =>
-        {
-            var model = GetModel(config.Context);
-            config.Step.ProjectPath = model.ProjectPath;
-            // A failure to enumerate project references must not abort the scaffolder.
-            config.Step.ContinueOnError = true;
-        });
-    }
 
     /// <summary>
     /// Adds a step that installs the selected Ignite UI NuGet package(s) into the project.
@@ -57,22 +43,22 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
 
     /// <summary>
     /// Adds a step that installs the selected Ignite UI NuGet package(s) into the Blazor WebAssembly client
-    /// project of a Blazor Web App. Skipped when no client project was detected.
+    /// project of a Blazor Web App. Skipped when the project has no client project.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorWasmAddPackagesStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<WrappedAddPackagesStep>(config =>
         {
             var step = config.Step;
-            if (!TryGetClientProjectPath(config.Context, out var clientProjectPath))
+            var model = GetModel(config.Context);
+            if (string.IsNullOrEmpty(model.ClientProjectPath))
             {
                 step.SkipStep = true;
                 return;
             }
 
-            var model = GetModel(config.Context);
             var settings = GetSettings(config.Context);
-            step.ProjectPath = clientProjectPath;
+            step.ProjectPath = model.ClientProjectPath;
             step.Prerelease = settings.Prerelease;
             step.Packages = GetPackages(model);
         });
@@ -104,7 +90,7 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
 
     /// <summary>
     /// Adds a step that registers 'builder.Services.AddIgniteUIBlazor()' in the Program.cs of the Blazor
-    /// WebAssembly client project of a Blazor Web App. Skipped when no client project was detected or when
+    /// WebAssembly client project of a Blazor Web App. Skipped when the project has no client project or when
     /// only IgniteUI.Blazor.GridLite is added.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorWasmCodeChangeStep(this IScaffoldBuilder builder)
@@ -113,13 +99,13 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
         {
             var step = config.Step;
             var model = GetModel(config.Context);
-            if (!model.RequiresServiceRegistration || !TryGetClientProjectPath(config.Context, out var clientProjectPath))
+            if (!model.RequiresServiceRegistration || string.IsNullOrEmpty(model.ClientProjectPath))
             {
                 step.SkipStep = true;
                 return;
             }
 
-            if (!TryConfigureCodeModificationStep(step, config.Context, clientProjectPath, WasmCodeModificationConfigFileName, model.ProjectInfo.CodeChangeOptions))
+            if (!TryConfigureCodeModificationStep(step, config.Context, model.ClientProjectPath, WasmCodeModificationConfigFileName, model.ProjectInfo.CodeChangeOptions))
             {
                 step.SkipStep = true;
             }
@@ -141,27 +127,21 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
 
     /// <summary>
     /// Adds a step that imports the 'IgniteUI.Blazor.Controls' namespace in the _Imports.razor of the Blazor
-    /// WebAssembly client project of a Blazor Web App. Skipped when no client project was detected.
+    /// WebAssembly client project of a Blazor Web App. Skipped when the project has no client project.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorWasmImportsStep(this IScaffoldBuilder builder)
     {
         return builder.WithStep<AddRazorImportsStep>(config =>
         {
             var step = config.Step;
-            if (!TryGetClientProjectPath(config.Context, out var clientProjectPath))
+            var model = GetModel(config.Context);
+            if (string.IsNullOrEmpty(model.ClientImportsFilePath))
             {
                 step.SkipStep = true;
                 return;
             }
 
-            var clientProjectDirectory = Path.GetDirectoryName(clientProjectPath);
-            if (string.IsNullOrEmpty(clientProjectDirectory))
-            {
-                step.SkipStep = true;
-                return;
-            }
-
-            step.ImportsFilePath = GetClientImportsFilePath(clientProjectDirectory);
+            step.ImportsFilePath = model.ClientImportsFilePath;
             step.Namespaces = [IgniteUIBlazorHelper.ControlsNamespace];
         });
     }
@@ -206,17 +186,6 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
         return packages;
     }
 
-    /// <summary>
-    /// Resolves the _Imports.razor of a Blazor WebAssembly client project (root '_Imports.razor' by convention,
-    /// 'Components/_Imports.razor' when that is what the project uses).
-    /// </summary>
-    internal static string GetClientImportsFilePath(string clientProjectDirectory)
-    {
-        var rootImports = Path.Combine(clientProjectDirectory, "_Imports.razor");
-        var componentsImports = Path.Combine(clientProjectDirectory, "Components", "_Imports.razor");
-        return !File.Exists(rootImports) && File.Exists(componentsImports) ? componentsImports : rootImports;
-    }
-
     private static bool TryConfigureCodeModificationStep(WrappedCodeModificationStep step, ScaffolderContext context, string projectPath, string configFileName, IList<string>? codeChangeOptions)
     {
         string targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
@@ -239,20 +208,6 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
         }
 
         return true;
-    }
-
-    private static bool TryGetClientProjectPath(ScaffolderContext context, out string clientProjectPath)
-    {
-        clientProjectPath = string.Empty;
-        if (context.Properties.TryGetValue("IsBlazorWasmProject", out var isBlazorWasm) && isBlazorWasm is true &&
-            context.Properties.TryGetValue("BlazorWasmClientProjectPath", out var clientProjectPathObj) &&
-            clientProjectPathObj is string path && !string.IsNullOrEmpty(path))
-        {
-            clientProjectPath = path;
-            return true;
-        }
-
-        return false;
     }
 
     private static IgniteUIBlazorModel GetModel(ScaffolderContext context)

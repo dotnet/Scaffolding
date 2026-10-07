@@ -291,5 +291,21 @@ public class IgniteUIBlazorHelperTests
         Assert.Equal(Path.Combine(s_projectDir, "_Imports.razor"), IgniteUIBlazorHelper.GetImportsFilePath(fileSystem.Object, s_projectDir));
     }
 
+    [Theory]
+    [InlineData(true, true, false)]
+    [InlineData(true, false, false)]
+    [InlineData(false, false, false)]
+    [InlineData(false, true, true)]
+    public void GetClientImportsFilePath_PrefersRootImports(bool rootExists, bool componentsExists, bool expectComponents)
+    {
+        var rootImports = Path.Combine(s_projectDir, "_Imports.razor");
+        var componentsImports = Path.Combine(s_projectDir, "Components", "_Imports.razor");
+        var fileSystem = new Mock<IFileSystem>();
+        fileSystem.Setup(f => f.FileExists(rootImports)).Returns(rootExists);
+        fileSystem.Setup(f => f.FileExists(componentsImports)).Returns(componentsExists);
+
+        Assert.Equal(expectComponents ? componentsImports : rootImports, IgniteUIBlazorHelper.GetClientImportsFilePath(fileSystem.Object, s_projectDir));
+    }
+
     #endregion
 }

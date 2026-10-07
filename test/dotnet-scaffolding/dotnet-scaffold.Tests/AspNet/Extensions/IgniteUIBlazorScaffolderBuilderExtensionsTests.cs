@@ -4,9 +4,15 @@ using System;
 using System.IO;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
+using Microsoft.DotNet.Scaffolding.Core.Model;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
+using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -24,17 +30,6 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
 
     private static void VerifyStepAdded<TStep>(Mock<IScaffoldBuilder> mockBuilder) where TStep : Microsoft.DotNet.Scaffolding.Core.Steps.ScaffoldStep
         => mockBuilder.Verify(b => b.WithStep<TStep>(It.IsAny<Action<ScaffoldStepConfigurator<TStep>>>(), It.IsAny<Action<ScaffoldStepConfigurator<TStep>>>()), Times.Once);
-
-    [Fact]
-    public void WithIgniteUIBlazorDetectBlazorWasmStep_AddsDetectBlazorWasmStep()
-    {
-        var mockBuilder = CreateBuilder<DetectBlazorWasmStep>();
-
-        IScaffoldBuilder result = mockBuilder.Object.WithIgniteUIBlazorDetectBlazorWasmStep();
-
-        Assert.NotNull(result);
-        VerifyStepAdded<DetectBlazorWasmStep>(mockBuilder);
-    }
 
     [Fact]
     public void WithIgniteUIBlazorAddPackagesStep_AddsWrappedAddPackagesStep()
@@ -114,6 +109,68 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
     }
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WithIgniteUIBlazorWasmAddPackagesStep_TargetsClientFromModel(bool hasClient)
+    {
+        var model = CreateModel(includeLite: true, includeGridLite: true, hasClient);
+        var step = new WrappedAddPackagesStep(
+            NullLogger<WrappedAddPackagesStep>.Instance,
+            Mock.Of<ITelemetryService>(),
+            new NuGetVersionService(Mock.Of<IEnvironmentService>(e => e.CurrentDirectory == Directory.GetCurrentDirectory())))
+        {
+            Packages = [],
+            ProjectPath = string.Empty
+        };
+
+        ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorWasmAddPackagesStep());
+
+        Assert.Equal(!hasClient, step.SkipStep);
+        if (hasClient)
+        {
+            Assert.Equal(model.ClientProjectPath, step.ProjectPath);
+            Assert.Equal(2, step.Packages.Count);
+        }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WithIgniteUIBlazorWasmImportsStep_TargetsClientImportsFromModel(bool hasClient)
+    {
+        var model = CreateModel(includeLite: true, includeGridLite: false, hasClient);
+        var step = new AddRazorImportsStep(NullLogger<AddRazorImportsStep>.Instance, Mock.Of<IFileSystem>(), Mock.Of<ITelemetryService>())
+        {
+            ImportsFilePath = string.Empty,
+            Namespaces = []
+        };
+
+        ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorWasmImportsStep());
+
+        Assert.Equal(!hasClient, step.SkipStep);
+        if (hasClient)
+        {
+            Assert.Equal(model.ClientImportsFilePath, step.ImportsFilePath);
+            Assert.Equal([IgniteUIBlazorHelper.ControlsNamespace], step.Namespaces);
+        }
+    }
+
+    [Fact]
+    public void WithIgniteUIBlazorWasmCodeChangeStep_SkipsWithoutClient()
+    {
+        var model = CreateModel(includeLite: true, includeGridLite: false, hasClient: false);
+        var step = new WrappedCodeModificationStep(NullLogger<WrappedCodeModificationStep>.Instance, Mock.Of<ITelemetryService>())
+        {
+            CodeChangeOptions = [],
+            ProjectPath = string.Empty
+        };
+
+        ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorWasmCodeChangeStep());
+
+        Assert.True(step.SkipStep);
+    }
+
+    [Theory]
     [InlineData(true, false, "IgniteUI.Blazor.Lite")]
     [InlineData(false, true, "IgniteUI.Blazor.GridLite")]
     [InlineData(true, true, "IgniteUI.Blazor.Lite", "IgniteUI.Blazor.GridLite")]
@@ -142,9 +199,39 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         Assert.Equal("igniteUIBlazorWasmChanges.json", IgniteUIBlazorScaffolderBuilderExtensions.WasmCodeModificationConfigFileName);
     }
 
-    private static IgniteUIBlazorModel CreateModel(bool includeLite, bool includeGridLite)
+    private static void ConfigureStep<TStep>(TStep step, ScaffolderContext context, Func<IScaffoldBuilder, IScaffoldBuilder> addStep)
+        where TStep : Microsoft.DotNet.Scaffolding.Core.Steps.ScaffoldStep
+    {
+        Mock<IScaffoldBuilder> mockBuilder = new Mock<IScaffoldBuilder>();
+        mockBuilder.Setup(b => b.WithStep<TStep>(It.IsAny<Action<ScaffoldStepConfigurator<TStep>>>(), It.IsAny<Action<ScaffoldStepConfigurator<TStep>>>()))
+            .Callback<Action<ScaffoldStepConfigurator<TStep>>, Action<ScaffoldStepConfigurator<TStep>>?>((configure, _) =>
+                configure(new ScaffoldStepConfigurator<TStep> { Step = step, Context = context }))
+            .Returns(mockBuilder.Object);
+
+        addStep(mockBuilder.Object);
+
+        VerifyStepAdded<TStep>(mockBuilder);
+    }
+
+    private static ScaffolderContext CreateContext(IgniteUIBlazorModel model)
+    {
+        var context = new ScaffolderContext(Mock.Of<IScaffolder>());
+        context.Properties[nameof(IgniteUIBlazorModel)] = model;
+        context.Properties[nameof(IgniteUIBlazorSettings)] = new IgniteUIBlazorSettings
+        {
+            Project = model.ProjectPath,
+            Package = "All",
+            Theme = model.Theme,
+            ThemeVariant = model.ThemeVariant,
+            Prerelease = false
+        };
+        return context;
+    }
+
+    private static IgniteUIBlazorModel CreateModel(bool includeLite, bool includeGridLite, bool hasClient = false)
     {
         var projectDirectory = Path.Combine("C:", "src", "MyApp");
+        var clientProjectDirectory = Path.Combine("C:", "src", "MyApp.Client");
         return new IgniteUIBlazorModel
         {
             ProjectInfo = new ProjectInfo(null),
@@ -157,7 +244,9 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
             StylesheetPath = "_content/IgniteUI.Blazor/themes/light/bootstrap.css",
             IsWebAssemblyProject = false,
             HostPagePath = Path.Combine(projectDirectory, "Components", "App.razor"),
-            ImportsFilePath = Path.Combine(projectDirectory, "Components", "_Imports.razor")
+            ImportsFilePath = Path.Combine(projectDirectory, "Components", "_Imports.razor"),
+            ClientProjectPath = hasClient ? Path.Combine(clientProjectDirectory, "MyApp.Client.csproj") : null,
+            ClientImportsFilePath = hasClient ? Path.Combine(clientProjectDirectory, "_Imports.razor") : null
         };
     }
 }

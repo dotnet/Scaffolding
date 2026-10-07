@@ -394,7 +394,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.ThemeVariant = context.GetOptionResult(options.IgniteUIThemeVariant);
                     step.Prerelease = context.GetOptionResult(options.Prerelease);
                 })
-                .WithIgniteUIBlazorDetectBlazorWasmStep()
                 .WithIgniteUIBlazorAddPackagesStep()
                 .WithIgniteUIBlazorWasmAddPackagesStep()
                 .WithIgniteUIBlazorCodeChangeStep()

@@ -110,6 +110,23 @@
       ]
     },
     {
+      "FileRelativePath": "Program.cs",
+        "Properties": [
+            {
+                "MatchAny": [ ".AddMicrosoftIdentityWebApp", ".AddMicrosoftIdentityWebApi" ],
+                "Sets": "HasAuthentication"
+            },
+            {
+                "MatchAny": [ ".AddMicrosoftGraph", ".AddMicrosoftGraphBeta" ],
+                "Sets": "CallsMicrosoftGraph"
+            },
+            {
+                "MatchAny": [ ".EnableTokenAcquisitionToCallDownstreamApi", ".AddDownstreamApi" ],
+                "Sets": "CallsDownstreamApi"
+            }
+      ]
+    },
+    {
       "FileRelativePath": "Properties\\launchSettings.json",
       "Properties": [
         {

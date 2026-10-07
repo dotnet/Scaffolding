@@ -54,25 +54,25 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
     }
 
     [Fact]
-    public void WithIgniteUIBlazorCodeChangeStep_AddsAddIgniteUIServicesStep()
+    public void WithIgniteUIBlazorCodeChangeStep_AddsIgniteUICodeModificationStep()
     {
-        var mockBuilder = CreateBuilder<AddIgniteUIServicesStep>();
+        var mockBuilder = CreateBuilder<IgniteUICodeModificationStep>();
 
         IScaffoldBuilder result = mockBuilder.Object.WithIgniteUIBlazorCodeChangeStep();
 
         Assert.NotNull(result);
-        VerifyStepAdded<AddIgniteUIServicesStep>(mockBuilder);
+        VerifyStepAdded<IgniteUICodeModificationStep>(mockBuilder);
     }
 
     [Fact]
-    public void WithIgniteUIBlazorWasmCodeChangeStep_AddsAddIgniteUIServicesStep()
+    public void WithIgniteUIBlazorWasmCodeChangeStep_AddsIgniteUICodeModificationStep()
     {
-        var mockBuilder = CreateBuilder<AddIgniteUIServicesStep>();
+        var mockBuilder = CreateBuilder<IgniteUICodeModificationStep>();
 
         IScaffoldBuilder result = mockBuilder.Object.WithIgniteUIBlazorWasmCodeChangeStep();
 
         Assert.NotNull(result);
-        VerifyStepAdded<AddIgniteUIServicesStep>(mockBuilder);
+        VerifyStepAdded<IgniteUICodeModificationStep>(mockBuilder);
     }
 
     [Fact]
@@ -170,7 +170,7 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         Assert.False(step.ContinueOnError);
         Assert.Equal(model.ProjectPath, step.ProjectPath);
         Assert.Equal(model.CodeModificationConfigPath, step.CodeModifierConfigPath);
-        Assert.Equal(expectedRegistrationFile, step.RegistrationFileName);
+        Assert.Equal(expectedRegistrationFile, step.TargetFileName);
     }
 
     [Theory]
@@ -188,7 +188,7 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         {
             Assert.Equal(model.ClientProjectPath, step.ProjectPath);
             Assert.Equal(model.ClientCodeModificationConfigPath, step.CodeModifierConfigPath);
-            Assert.Equal("Program.cs", step.RegistrationFileName);
+            Assert.Equal("Program.cs", step.TargetFileName);
         }
     }
 
@@ -209,6 +209,66 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         Assert.Null(step.HostPagePath);
         Assert.Equal(model.BaseOutputPath, step.ProjectDirectory);
         Assert.Equal(model.StylesheetPath, step.StylesheetPath);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WithIgniteUIBlazorInteractivityStep_AddsInteractiveServerOnlyWhenNeeded(bool addInteractiveServerSupport)
+    {
+        var model = CreateModel(addInteractiveServerSupport: addInteractiveServerSupport);
+        var step = CreateServicesStep();
+
+        ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorInteractivityStep());
+
+        Assert.Equal(!addInteractiveServerSupport, step.SkipStep);
+        if (addInteractiveServerSupport)
+        {
+            Assert.False(step.ContinueOnError);
+            Assert.Equal(model.ProjectPath, step.ProjectPath);
+            Assert.Equal("Program.cs", step.TargetFileName);
+            Assert.Equal(["AddInteractiveServerComponents(", "AddInteractiveServerRenderMode("], step.RequiredCalls);
+            Assert.Equal(IgniteUIBlazorScaffolderBuilderExtensions.GetInteractiveServerCodeModificationJson(), step.CodeModifierConfigJsonText);
+        }
+    }
+
+    [Fact]
+    public void GetInteractiveServerCodeModificationJson_UsesSharedBlazorRecipes()
+    {
+        var config = Microsoft.DotNet.Scaffolding.CodeModification.Helpers.CodeModifierConfigHelper.GetCodeModifierConfigFromJson(
+            IgniteUIBlazorScaffolderBuilderExtensions.GetInteractiveServerCodeModificationJson());
+
+        var file = Assert.Single(config!.Files!);
+        Assert.Equal("Program.cs", file.FileName);
+        var changes = file.Methods!["Global"].CodeChanges!;
+        Assert.Collection(changes,
+            change =>
+            {
+                Assert.Equal("AddInteractiveServerComponents()", change.Block);
+                Assert.Equal("WebApplication.CreateBuilder.Services.AddRazorComponents()", change.Parent);
+            },
+            change =>
+            {
+                Assert.Equal("AddInteractiveServerRenderMode()", change.Block);
+                Assert.Equal("MapRazorComponents<App>", change.Parent);
+            });
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("Pages that use Ignite UI components need an interactive render mode.")]
+    public void WithIgniteUIBlazorGuidanceStep_LogsGuidanceOnlyWhenThereIsSome(string? guidance)
+    {
+        var model = CreateModel(renderModeGuidance: guidance);
+        var step = new IgniteUIBlazorGuidanceStep(NullLogger<IgniteUIBlazorGuidanceStep>.Instance);
+
+        ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorGuidanceStep());
+
+        Assert.Equal(guidance is null, step.SkipStep);
+        if (guidance is not null)
+        {
+            Assert.Equal([guidance], step.Messages);
+        }
     }
 
     [Theory]
@@ -262,15 +322,18 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         return context;
     }
 
-    private static AddIgniteUIServicesStep CreateServicesStep()
+    private static IgniteUICodeModificationStep CreateServicesStep()
         => new(NullLogger<WrappedCodeModificationStep>.Instance, Mock.Of<ITelemetryService>(), Mock.Of<IFileSystem>())
         {
             CodeChangeOptions = [],
             ProjectPath = string.Empty,
-            RegistrationFileName = string.Empty
+            TargetFileName = string.Empty,
+            RequiredCalls = [],
+            ChangeDescription = string.Empty,
+            ManualInstructions = string.Empty
         };
 
-    private static IgniteUIBlazorModel CreateModel(bool hasClient = false, bool isMauiBlazorHybridProject = false, bool hasHostPage = true)
+    private static IgniteUIBlazorModel CreateModel(bool hasClient = false, bool isMauiBlazorHybridProject = false, bool hasHostPage = true, bool addInteractiveServerSupport = false, string? renderModeGuidance = null)
     {
         var projectDirectory = Path.Combine("C:", "src", "MyApp");
         var clientProjectDirectory = Path.Combine("C:", "src", "MyApp.Client");
@@ -289,7 +352,9 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
             ClientProjectPath = hasClient ? Path.Combine(clientProjectDirectory, "MyApp.Client.csproj") : null,
             ClientImportsFilePath = hasClient ? Path.Combine(clientProjectDirectory, "_Imports.razor") : null,
             CodeModificationConfigPath = Path.Combine("configs", isMauiBlazorHybridProject ? "igniteUIBlazorMauiChanges.json" : "igniteUIBlazorChanges.json"),
-            ClientCodeModificationConfigPath = hasClient ? Path.Combine("configs", "igniteUIBlazorWasmChanges.json") : null
+            ClientCodeModificationConfigPath = hasClient ? Path.Combine("configs", "igniteUIBlazorWasmChanges.json") : null,
+            AddInteractiveServerSupport = addInteractiveServerSupport,
+            RenderModeGuidance = renderModeGuidance
         };
     }
 }

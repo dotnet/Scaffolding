@@ -13,20 +13,23 @@ using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.ScaffoldSteps;
 
-public class AddIgniteUIServicesStepTests
+public class IgniteUICodeModificationStepTests
 {
     private static readonly string s_projectDirectory = Path.Combine(Path.GetTempPath(), "MyApp");
     private static readonly string s_projectPath = Path.Combine(s_projectDirectory, "MyApp.csproj");
     private readonly Mock<IFileSystem> _fileSystem = new();
     private readonly Mock<ILogger<WrappedCodeModificationStep>> _logger = new();
 
-    private AddIgniteUIServicesStep CreateStep(string registrationFileName = "Program.cs", string? configPath = "igniteUIBlazorChanges.json")
+    private IgniteUICodeModificationStep CreateStep(string targetFileName = "Program.cs", string? configPath = "igniteUIBlazorChanges.json", params string[] requiredCalls)
         => new(_logger.Object, Mock.Of<ITelemetryService>(), _fileSystem.Object)
         {
             CodeChangeOptions = [],
             CodeModifierConfigPath = configPath,
             ProjectPath = s_projectPath,
-            RegistrationFileName = registrationFileName
+            TargetFileName = targetFileName,
+            RequiredCalls = requiredCalls.Length == 0 ? ["AddIgniteUIBlazor("] : requiredCalls,
+            ChangeDescription = "'builder.Services.AddIgniteUIBlazor()'",
+            ManualInstructions = "Add 'builder.Services.AddIgniteUIBlazor();'."
         };
 
     private void SetupFiles(string fileName, params (string RelativePath, string Content)[] files)
@@ -41,22 +44,31 @@ public class AddIgniteUIServicesStepTests
     }
 
     [Fact]
-    public void IsRegistered_TrueWhenRegistrationFileCallsAddIgniteUIBlazor()
+    public void ContainsRequiredCalls_TrueWhenTargetFileCallsAddIgniteUIBlazor()
     {
         SetupFiles("MauiProgram.cs", ("MauiProgram.cs", "builder.Services.AddMauiBlazorWebView();\nbuilder.Services.AddIgniteUIBlazor();"));
 
-        Assert.True(CreateStep("MauiProgram.cs").IsRegistered());
+        Assert.True(CreateStep("MauiProgram.cs").ContainsRequiredCalls());
     }
 
     [Fact]
-    public void IsRegistered_IgnoresBuildOutputAndOtherFiles()
+    public void ContainsRequiredCalls_IgnoresBuildOutput()
     {
         SetupFiles("Program.cs",
             ("Program.cs", "var builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();"),
             (Path.Combine("obj", "Debug", "Program.cs"), "builder.Services.AddIgniteUIBlazor();"),
             (Path.Combine("bin", "Program.cs"), "builder.Services.AddIgniteUIBlazor();"));
 
-        Assert.False(CreateStep().IsRegistered());
+        Assert.False(CreateStep().ContainsRequiredCalls());
+    }
+
+    [Fact]
+    public void ContainsRequiredCalls_RequiresEveryCallInTheSameFile()
+    {
+        SetupFiles("Program.cs", ("Program.cs", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents();\napp.MapRazorComponents<App>();"));
+
+        Assert.False(CreateStep(requiredCalls: ["AddInteractiveServerComponents(", "AddInteractiveServerRenderMode("]).ContainsRequiredCalls());
+        Assert.True(CreateStep(requiredCalls: ["AddInteractiveServerComponents("]).ContainsRequiredCalls());
     }
 
     [Fact]
@@ -73,7 +85,7 @@ public class AddIgniteUIServicesStepTests
             invocation.Method.Name == nameof(ILogger.Log) &&
             Equals(invocation.Arguments[0], LogLevel.Error) &&
             invocation.Arguments[2].ToString()!.Contains("Ignite UI for Blazor setup is incomplete") &&
-            invocation.Arguments[2].ToString()!.Contains("builder.Services.AddIgniteUIBlazor();") &&
+            invocation.Arguments[2].ToString()!.Contains("Add 'builder.Services.AddIgniteUIBlazor();'.") &&
             invocation.Arguments[2].ToString()!.Contains("re-run the scaffolder"));
     }
 }

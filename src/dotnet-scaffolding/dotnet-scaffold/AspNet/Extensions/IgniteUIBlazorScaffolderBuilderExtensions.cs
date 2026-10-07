@@ -69,12 +69,41 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     }
 
     /// <summary>
+    /// Adds a step that enables Interactive Server support in the Program.cs of a Blazor Web App that configures no
+    /// interactivity, using the shared Blazor code modification recipes: 'AddInteractiveServerComponents()' on the
+    /// 'AddRazorComponents()' chain and 'AddInteractiveServerRenderMode()' on the 'MapRazorComponents&lt;App&gt;()' chain.
+    /// Render modes on &lt;Routes&gt;, &lt;HeadOutlet&gt; and existing pages are not changed. Skipped when the app already
+    /// configures Server, WebAssembly or Auto interactivity, or is not a Blazor Web App.
+    /// </summary>
+    public static IScaffoldBuilder WithIgniteUIBlazorInteractivityStep(this IScaffoldBuilder builder)
+    {
+        return builder.WithStep<IgniteUICodeModificationStep>(config =>
+        {
+            var step = config.Step;
+            var model = GetModel(config.Context);
+            if (!model.AddInteractiveServerSupport)
+            {
+                step.SkipStep = true;
+                return;
+            }
+
+            step.CodeModifierConfigJsonText = GetInteractiveServerCodeModificationJson();
+            step.ProjectPath = model.ProjectPath;
+            step.CodeChangeOptions = [];
+            step.TargetFileName = RegistrationFileName;
+            step.RequiredCalls = [$"{BlazorCrudHelper.AddInteractiveServerComponentsMethod}(", $"{BlazorCrudHelper.AddInteractiveServerRenderModeMethod}("];
+            step.ChangeDescription = "Interactive Server support";
+            step.ManualInstructions = "Chain '.AddInteractiveServerComponents()' after 'builder.Services.AddRazorComponents()' and '.AddInteractiveServerRenderMode()' after 'app.MapRazorComponents<App>()'.";
+        });
+    }
+
+    /// <summary>
     /// Adds a step that registers 'builder.Services.AddIgniteUIBlazor()' in the project's Program.cs
     /// (MauiProgram.cs for a .NET MAUI Blazor Hybrid app). The step fails when the registration cannot be added.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorCodeChangeStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<AddIgniteUIServicesStep>(config =>
+        return builder.WithStep<IgniteUICodeModificationStep>(config =>
         {
             var model = GetModel(config.Context);
             ConfigureServicesStep(config.Step, config.Context, model.ProjectPath, model.CodeModificationConfigPath,
@@ -89,7 +118,7 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorWasmCodeChangeStep(this IScaffoldBuilder builder)
     {
-        return builder.WithStep<AddIgniteUIServicesStep>(config =>
+        return builder.WithStep<IgniteUICodeModificationStep>(config =>
         {
             var step = config.Step;
             var model = GetModel(config.Context);
@@ -154,6 +183,36 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     }
 
     /// <summary>
+    /// Adds a final step that logs what the developer still has to do once the setup has completed, such as adding an
+    /// interactive render mode to the pages that use Ignite UI components. Skipped when there is nothing to report.
+    /// </summary>
+    public static IScaffoldBuilder WithIgniteUIBlazorGuidanceStep(this IScaffoldBuilder builder)
+    {
+        return builder.WithStep<IgniteUIBlazorGuidanceStep>(config =>
+        {
+            var model = GetModel(config.Context);
+            if (string.IsNullOrEmpty(model.RenderModeGuidance))
+            {
+                config.Step.SkipStep = true;
+                return;
+            }
+
+            config.Step.Messages = [model.RenderModeGuidance];
+        });
+    }
+
+    /// <summary>
+    /// Returns the code modification config that enables Interactive Server support, built from the shared Blazor
+    /// recipes (<see cref="BlazorCrudHelper.AddInteractiveServerComponentsSnippet"/> and
+    /// <see cref="BlazorCrudHelper.AddInteractiveServerRenderModeSnippet"/>). The code modifier skips a change whose
+    /// block is already present, so the registrations are never duplicated.
+    /// </summary>
+    internal static string GetInteractiveServerCodeModificationJson()
+        => BlazorCrudHelper.AdditionalCodeModificationJson.Replace(
+            "$(CodeChanges)",
+            string.Join(",", BlazorCrudHelper.AddInteractiveServerComponentsSnippet, BlazorCrudHelper.AddInteractiveServerRenderModeSnippet));
+
+    /// <summary>
     /// Returns the code modification config that registers the Ignite UI services for the given project type.
     /// </summary>
     internal static string GetCodeModificationConfigFileName(bool isWebAssemblyProject, bool isMauiBlazorHybridProject)
@@ -167,10 +226,13 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     internal static List<Package> GetPackages()
         => [PackageConstants.IgniteUIPackages.IgniteUIBlazorLitePackage, PackageConstants.IgniteUIPackages.IgniteUIBlazorGridLitePackage];
 
-    private static void ConfigureServicesStep(AddIgniteUIServicesStep step, ScaffolderContext context, string projectPath, string codeModificationConfigPath, string registrationFileName, IList<string>? codeChangeOptions)
+    private static void ConfigureServicesStep(IgniteUICodeModificationStep step, ScaffolderContext context, string projectPath, string codeModificationConfigPath, string registrationFileName, IList<string>? codeChangeOptions)
     {
         step.CodeModifierConfigPath = codeModificationConfigPath;
-        step.RegistrationFileName = registrationFileName;
+        step.TargetFileName = registrationFileName;
+        step.RequiredCalls = ["AddIgniteUIBlazor("];
+        step.ChangeDescription = "'builder.Services.AddIgniteUIBlazor()'";
+        step.ManualInstructions = $"Add 'using {IgniteUIBlazorHelper.ControlsNamespace};' and 'builder.Services.AddIgniteUIBlazor();' where the app's services are registered (before the app is built).";
         step.ProjectPath = projectPath;
         step.CodeChangeOptions = codeChangeOptions ?? [];
         if (context.Properties.TryGetValue(Internal.Constants.StepConstants.CodeModifierProperties, out var codeModifierPropertiesObj) &&

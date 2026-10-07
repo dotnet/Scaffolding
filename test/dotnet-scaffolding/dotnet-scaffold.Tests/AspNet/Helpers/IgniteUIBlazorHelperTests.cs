@@ -97,12 +97,26 @@ public class IgniteUIBlazorHelperTests
     #region Project inspection
 
     [Theory]
-    [InlineData("builder.Services.AddRazorComponents().AddInteractiveServerComponents();", true)]
-    [InlineData("builder.Services.AddRazorComponents()\n    .AddInteractiveWebAssemblyComponents();", true)]
-    [InlineData("builder.Services.AddRazorComponents();", false)]
-    [InlineData(null, false)]
-    public void HasInteractiveRenderModeServices_DetectsInteractiveRegistrations(string? program, bool expected)
-        => Assert.Equal(expected, IgniteUIBlazorHelper.HasInteractiveRenderModeServices(program));
+    [InlineData(true, false, true, "Interactive Server support was added", "'@rendermode InteractiveServer' to them")]
+    [InlineData(true, false, false, null, "'@rendermode InteractiveServer' to them")]
+    [InlineData(false, true, false, null, "'@rendermode InteractiveWebAssembly' to them (such pages belong in the client project)")]
+    [InlineData(true, true, false, null, "'@rendermode InteractiveAuto'")]
+    public void GetRenderModeGuidance_SuggestsTheConfiguredRenderModes(bool server, bool webAssembly, bool added, string? expectedAddedNote, string expectedRenderModes)
+    {
+        var guidance = IgniteUIBlazorHelper.GetRenderModeGuidance(server, webAssembly, added, hasGlobalRenderMode: false);
+
+        Assert.NotNull(guidance);
+        Assert.Contains("Pages that use Ignite UI components need an interactive render mode", guidance);
+        Assert.Contains(expectedRenderModes, guidance);
+        Assert.Equal(server && webAssembly, guidance.Contains("InteractiveAuto"));
+        Assert.Equal(expectedAddedNote is not null, guidance.Contains("Interactive Server support was added"));
+    }
+
+    [Theory]
+    [InlineData(true, false, true)]
+    [InlineData(false, false, false)]
+    public void GetRenderModeGuidance_ReturnsNull_WhenGloballyInteractiveOrNotInteractive(bool server, bool webAssembly, bool hasGlobalRenderMode)
+        => Assert.Null(IgniteUIBlazorHelper.GetRenderModeGuidance(server, webAssembly, addedInteractiveServer: false, hasGlobalRenderMode));
 
     [Theory]
     [InlineData("<Routes @rendermode=\"InteractiveAuto\" />", true)]

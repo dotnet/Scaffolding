@@ -26,7 +26,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(AddAspNetConnectionStringStep),
                 typeof(AddDbSetToExistingContextStep),
                 typeof(AddFileStep),
-                typeof(AddIgniteUIServicesStep),
+                typeof(IgniteUIBlazorGuidanceStep),
+                typeof(IgniteUICodeModificationStep),
                 typeof(AddIgniteUIThemeStylesheetStep),
                 typeof(AddRazorImportsStep),
                 typeof(AreaScaffolderStep),
@@ -396,11 +397,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 })
                 .WithIgniteUIBlazorAddPackagesStep()
                 .WithIgniteUIBlazorWasmAddPackagesStep()
+                .WithIgniteUIBlazorInteractivityStep()
                 .WithIgniteUIBlazorCodeChangeStep()
                 .WithIgniteUIBlazorWasmCodeChangeStep()
                 .WithIgniteUIBlazorImportsStep()
                 .WithIgniteUIBlazorWasmImportsStep()
-                .WithIgniteUIBlazorThemeStylesheetStep();
+                .WithIgniteUIBlazorThemeStylesheetStep()
+                .WithIgniteUIBlazorGuidanceStep();
         }
     }
 }

@@ -76,6 +76,11 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         var cliOutput = await ScaffoldAllPackagesAndAssertAsync(buildBeforeScaffolding: false);
         Assert.Contains("Found Blazor WebAssembly client project", cliOutput);
 
+        // Assert (hosting) — the WebAssembly configuration is kept, and the guidance only suggests WebAssembly
+        Assert.DoesNotContain("AddInteractiveServer", File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs")));
+        Assert.Contains("'@rendermode InteractiveWebAssembly'", cliOutput);
+        Assert.DoesNotContain("InteractiveAuto", cliOutput);
+
         // Assert (client) — packages, service registration and @using were applied to the client project too
         var clientProjectContent = File.ReadAllText(Path.Combine(clientProjectDir, "TestProject.Client.csproj"));
         Assert.Contains(LitePackageName, clientProjectContent);
@@ -296,6 +301,71 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
     }
 
     [Fact]
+    public async Task Scaffold_BlazorIgniteUI_Net10_WebAppWithoutInteractivity_AddsInteractiveServerSupport()
+    {
+        // Arrange — a Blazor Web App that renders only static SSR pages
+        SetupBlazorWebAppProject();
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        File.WriteAllText(programPath, GetWebAppProgramCs(string.Empty, string.Empty));
+        var appRazorPath = Path.Combine(_testProjectDir, "Components", "App.razor");
+        var routesRazorPath = Path.Combine(_testProjectDir, "Components", "Routes.razor");
+        var routesBefore = File.ReadAllText(routesRazorPath);
+        await AssertBuildsAsync("before scaffolding");
+
+        // Act
+        var cliOutput = await RunScaffoldAndAssertSuccessAsync();
+
+        // Assert — Interactive Server support was added to the existing chains, once
+        var programContent = File.ReadAllText(programPath);
+        var servicesChain = programContent[programContent.IndexOf("builder.Services.AddRazorComponents()", StringComparison.Ordinal)..programContent.IndexOf("var app", StringComparison.Ordinal)];
+        Assert.Contains(".AddInteractiveServerComponents()", servicesChain);
+        var endpointsChain = programContent[programContent.IndexOf("app.MapRazorComponents<App>()", StringComparison.Ordinal)..];
+        Assert.Contains(".AddInteractiveServerRenderMode()", endpointsChain);
+        Assert.Equal(1, CountOccurrences(programContent, "AddInteractiveServerComponents"));
+        Assert.Equal(1, CountOccurrences(programContent, "AddInteractiveServerRenderMode"));
+
+        // Assert — no global or page render mode was set: the existing static SSR pages stay static
+        Assert.DoesNotContain("@rendermode", File.ReadAllText(appRazorPath));
+        Assert.Equal(routesBefore, File.ReadAllText(routesRazorPath));
+
+        // Assert — the guidance names the render mode that was added, and nothing else
+        Assert.Contains("Interactive Server support was added to Program.cs", cliOutput);
+        Assert.Contains("'@rendermode InteractiveServer'", cliOutput);
+        Assert.DoesNotContain("InteractiveAuto", cliOutput);
+        Assert.DoesNotContain("InteractiveWebAssembly", cliOutput);
+        await AssertBuildsAsync("after scaffolding");
+
+        // Act + Assert — re-running keeps a single registration of each
+        await RunScaffoldAndAssertSuccessAsync();
+        programContent = File.ReadAllText(programPath);
+        Assert.Equal(1, CountOccurrences(programContent, "AddInteractiveServerComponents"));
+        Assert.Equal(1, CountOccurrences(programContent, "AddInteractiveServerRenderMode"));
+        Assert.Equal(1, CountOccurrences(programContent, "AddIgniteUIBlazor"));
+    }
+
+    [Fact]
+    public async Task Scaffold_BlazorIgniteUI_Net10_WebAppWithInteractiveServer_KeepsConfiguration()
+    {
+        // Arrange — a Blazor Web App that already configures Interactive Server
+        SetupBlazorWebAppProject();
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        File.WriteAllText(programPath, GetWebAppProgramCs("\n    .AddInteractiveServerComponents()", "\n    .AddInteractiveServerRenderMode()"));
+
+        // Act
+        var cliOutput = await RunScaffoldAndAssertSuccessAsync();
+
+        // Assert — the existing Interactive Server configuration is kept as is; no other render mode is added
+        var programContent = File.ReadAllText(programPath);
+        Assert.Contains("builder.Services.AddIgniteUIBlazor();", programContent);
+        Assert.Equal(1, CountOccurrences(programContent, "AddInteractiveServerComponents"));
+        Assert.Equal(1, CountOccurrences(programContent, "AddInteractiveServerRenderMode"));
+        Assert.DoesNotContain("InteractiveWebAssembly", programContent);
+        Assert.DoesNotContain("Interactive Server support was added", cliOutput);
+        Assert.Contains("'@rendermode InteractiveServer'", cliOutput);
+        Assert.DoesNotContain("InteractiveAuto", cliOutput);
+    }
+
+    [Fact]
     public async Task Scaffold_BlazorIgniteUI_Net10_WebApp_WithAssetsCollection()
     {
         // Arrange — Blazor Web App whose App.razor uses the fingerprinted asset collection (@Assets, .NET 9+)
@@ -501,6 +571,26 @@ app.Run();
     }
 
     private static int CountOccurrences(string content, string value) => Regex.Matches(content, Regex.Escape(value)).Count;
+
+    /// <summary>
+    /// Program.cs of a Blazor Web App, with the given calls chained after 'AddRazorComponents()' and 'MapRazorComponents&lt;App&gt;()'.
+    /// </summary>
+    private static string GetWebAppProgramCs(string servicesChain, string endpointsChain) => $"""
+        using TestProject.Components;
+
+        var builder = WebApplication.CreateBuilder(args);
+
+        builder.Services.AddRazorComponents(){servicesChain};
+
+        var app = builder.Build();
+
+        app.UseStaticFiles();
+        app.UseAntiforgery();
+        app.MapRazorComponents<App>(){endpointsChain};
+
+        app.Run();
+
+        """;
 
     /// <summary>
     /// Writes a Blazor Web App server project that references a Blazor WebAssembly client project.

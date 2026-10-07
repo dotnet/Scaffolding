@@ -33,6 +33,7 @@ The scaffolder performs the manual setup steps described in the Ignite UI docume
 3. Adds `@using IgniteUI.Blazor.Controls` to `_Imports.razor`.
 4. Links a theme stylesheet in the host page (`Components/App.razor`, `Pages/_Host.cshtml`, `Pages/_Layout.cshtml` or `wwwroot/index.html`).
 5. For a Blazor Web App with a WebAssembly client project, repeats steps 1–3 in the client project.
+6. For a Blazor Web App without any interactivity, enables Interactive Server support in `Program.cs` (see [Render Mode Requirements](#render-mode-requirements)).
 
 ---
 
@@ -176,10 +177,14 @@ To keep the commercial package, set it up by following the Ignite UI for Blazor 
 
 ## Render Mode Requirements
 
-Ignite UI components need an **interactive** render mode; static server-side rendering renders nothing usable. The scaffolder does not change render modes (that is an application architecture decision) but it does inspect Blazor Web Apps and logs guidance:
+Ignite UI components need an **interactive** render mode; static server-side rendering renders nothing usable. The scaffolder configures the hosting support a Blazor Web App needs, based on the registrations in its `Program.cs` (analyzed with the project's semantic model):
 
-- A **warning** when `Program.cs` registers neither `.AddInteractiveServerComponents()` nor `.AddInteractiveWebAssemblyComponents()`.
-- An **informational message** when no `@rendermode` is declared on `<Routes />` (`App.razor`) or in `Routes.razor`, reminding you to add `@rendermode InteractiveServer` (or `InteractiveWebAssembly` / `InteractiveAuto`) to the pages that use Ignite UI, or to set `<Routes @rendermode="InteractiveAuto" />` globally.
+- **Server, WebAssembly or Auto already configured** (`.AddInteractiveServerComponents()` and/or `.AddInteractiveWebAssemblyComponents()`): the configuration is kept as is, and the Ignite UI setup is completed for it (including the `.Client` project for WebAssembly and Auto).
+- **No interactivity configured**: Interactive Server support is enabled with the shared Blazor code modification recipes, by chaining `.AddInteractiveServerComponents()` onto `builder.Services.AddRazorComponents()` and `.AddInteractiveServerRenderMode()` onto `app.MapRazorComponents<App>()`. Neither call is added twice. If the app does not call `app.MapRazorComponents<App>()`, the scaffolder stops before making changes and explains what to add.
+
+Blazor Server apps (`AddServerSideBlazor()`), standalone Blazor WebAssembly apps and .NET MAUI Blazor Hybrid apps are always interactive and keep their hosting model.
+
+Enabling interactive hosting support does not make any page interactive: the scaffolder never changes the render modes on `<Routes>` or `<HeadOutlet>` or on existing pages, so static SSR pages stay static. Because the scaffolder does not generate pages, it ends with guidance for the pages that use Ignite UI components, suggesting only the render modes the app is configured for: for example `@rendermode InteractiveServer` when Server support was added or is configured, `@rendermode InteractiveWebAssembly` for WebAssembly (such pages belong in the client project), and `@rendermode InteractiveAuto` only when both Server and WebAssembly are configured. No guidance is shown when `App.razor` or `Routes.razor` already declares a global render mode.
 
 ---
 
@@ -187,8 +192,9 @@ Ignite UI components need an **interactive** render mode; static server-side ren
 
 Every setup step is required, so the scaffolder reports success (exit code `0`) only when Ignite UI is fully set up. Otherwise it logs an error that says what is left to do and exits with a non-zero code:
 
-- **Validation** (before any file is changed): an invalid option, an unsupported project, a client discovery problem, a commercial Ignite UI package, or a missing code modification configuration (`Unable to find the code modification configuration ...`; reinstall the tool) stops the scaffolder without changes.
+- **Validation** (before any file is changed): an invalid option, an unsupported project, a client discovery problem, a commercial Ignite UI package, a `Program.cs` whose Blazor registrations cannot be analyzed, a Blazor Web App without interactivity that does not call `app.MapRazorComponents<App>()`, or a missing code modification configuration (`Unable to find the code modification configuration ...`; reinstall the tool) stops the scaffolder without changes.
 - **Package installation**: when `dotnet add package` fails, the scaffolder stops at that step (`Failed to add package ...`) and makes no further changes.
+- **Interactive Server support**: when `.AddInteractiveServerComponents()` or `.AddInteractiveServerRenderMode()` cannot be added, the scaffolder stops with `Ignite UI for Blazor setup is incomplete: Interactive Server support could not be added ...` and the calls to chain manually.
 - **Service registration**: when `builder.Services.AddIgniteUIBlazor()` cannot be added because `Program.cs` (or `MauiProgram.cs`) has a shape the scaffolder does not recognize, the scaffolder stops with `Ignite UI for Blazor setup is incomplete: 'builder.Services.AddIgniteUIBlazor()' could not be added ...`. Add `using IgniteUI.Blazor.Controls;` and `builder.Services.AddIgniteUIBlazor();` where the app's services are registered, then re-run the scaffolder to complete `_Imports.razor` and the theme stylesheet.
 - **`_Imports.razor`**: when the file cannot be written, the scaffolder stops and prints the `@using` line to add.
 - **Theme stylesheet** (the last step): when no known host page exists, the host page has no `</head>`, or it cannot be written, every other change has been applied and the scaffolder ends with `Ignite UI for Blazor setup is incomplete: ...` and the `<link>` line to add to the `<head>` of the page that hosts your Blazor app.
@@ -223,7 +229,9 @@ For a Blazor Web App with a WebAssembly client project, apply the same changes t
 |---------|-------------|
 | `Ignite UI for Blazor setup is incomplete: no host page ... was found` (or `... has no </head> element`), followed by a `<link>` line | None of the known host pages (`Components/App.razor`, `Pages/_Host.cshtml`, `Pages/_Layout.cshtml`, `wwwroot/index.html`) contains a `</head>` element. All other changes were applied; add the printed `<link>` to the `<head>` of the page that hosts your Blazor app. |
 | Components render but are unstyled | The theme stylesheet is missing or the path is wrong. Check the `<link>` in the host page and that the package restore succeeded. |
-| Components render nothing in a Blazor Web App | Add an interactive render mode (see [Render Mode Requirements](#render-mode-requirements)). |
+| Components render nothing in a Blazor Web App | The page that uses them has no interactive render mode. Add the render mode suggested at the end of the scaffolder output, e.g. `@rendermode InteractiveServer` (see [Render Mode Requirements](#render-mode-requirements)). |
+| `... configures none and does not map its components with 'app.MapRazorComponents<App>()'` | The Blazor Web App registers Razor components without interactivity and without `app.MapRazorComponents<App>()`, so Interactive Server support cannot be added automatically. Nothing was changed; add the calls named in the message and re-run the scaffolder. |
+| `Unable to analyze Blazor registrations in '...'` or `Unable to resolve Blazor registration '...'` | The scaffolder could not determine the app's interactivity from `Program.cs`, so it made no changes rather than risk a duplicate or wrong registration. Follow the message (check the SDK, references and imports, run `dotnet build` for diagnostics) and re-run the scaffolder. |
 | `Failed to add package 'IgniteUI.Blazor.Lite' ...` (or `GridLite`) | `dotnet add package` failed. The scaffolder stopped at this step without making further changes. Verify network access and that your `NuGet.config` can reach nuget.org (or a mirror), then re-run the scaffolder. Use `--prerelease` to allow prerelease versions. |
 | `error: There are no versions available for the package 'IgniteUI.Blazor.Lite'` (or `GridLite`) followed by `Failed.` | The project's `NuGet.config` only lists feeds that do not carry third-party packages (for example curated Microsoft mirror feeds). The scaffolder stops at the package step without making further changes; add nuget.org (or your organization's mirror of it) as a package source and re-run the scaffolder. |
 | `Ignite UI for Blazor setup is incomplete: 'builder.Services.AddIgniteUIBlazor()' could not be added to Program.cs` (or `MauiProgram.cs`) | The registration is inserted before `var app = builder.Build();` (hosted) or `await builder.Build().RunAsync();` (WebAssembly), or after `builder.Services.AddMauiBlazorWebView();` in `MauiProgram.CreateMauiApp()` (MAUI Blazor Hybrid). For other bootstrapping shapes, add `using IgniteUI.Blazor.Controls;` and `builder.Services.AddIgniteUIBlazor();` manually and re-run the scaffolder to complete the remaining steps. |
@@ -243,7 +251,8 @@ Source locations (see [CONTRIBUTING.md](../CONTRIBUTING.md) for the general layo
 - Registration: `src/dotnet-scaffolding/dotnet-scaffold/AspNet/AspNetCommandService.cs` (`blazor-igniteui`)
 - Options / strings: `AspNet/Commands/AspNetOptions.cs`, `AspNet/Commands/AspnetStrings.cs`, `AspNet/Common/Constants.cs`
 - Packages: `AspNet/Common/PackageConstants.cs` (`IgniteUIPackages`)
-- Steps: `AspNet/ScaffoldSteps/ValidateIgniteUIBlazorStep.cs`, `AddIgniteUIServicesStep.cs` (the shared `WrappedCodeModificationStep` plus a check that the registration was added), `AddRazorImportsStep.cs`, `AddIgniteUIThemeStylesheetStep.cs` (plus the shared `WrappedAddPackagesStep`)
+- Steps: `AspNet/ScaffoldSteps/ValidateIgniteUIBlazorStep.cs`, `IgniteUICodeModificationStep.cs` (the shared `WrappedCodeModificationStep` plus a check that the required calls were added; used for the Interactive Server support and the service registration), `AddRazorImportsStep.cs`, `AddIgniteUIThemeStylesheetStep.cs`, `IgniteUIBlazorGuidanceStep.cs` (plus the shared `WrappedAddPackagesStep`)
+- Interactivity: `AspNet/Helpers/BlazorInteractivityAnalyzer.cs` (shared with the Identity scaffolder) and the shared recipes in `AspNet/Helpers/BlazorCrudHelper.cs` (`AddInteractiveServerComponentsSnippet`, `AddInteractiveServerRenderModeSnippet`)
 - WebAssembly client discovery: `AspNet/Helpers/BlazorWebAssemblyClientProjectResolver.cs` (shared with the Identity scaffolder), called from `ValidateIgniteUIBlazorStep`
 - Supported-project and commercial-package checks: `AspNet/Helpers/IgniteUIBlazorProjectInspector.cs`, called from `ValidateIgniteUIBlazorStep`, using `MSBuildProjectService.TryGetEvaluatedProperties` / `TryGetEvaluatedItems`
 - Builder extensions: `AspNet/Extensions/IgniteUIBlazorScaffolderBuilderExtensions.cs`

@@ -164,13 +164,32 @@ internal static class IgniteUIBlazorHelper
             : $"<link href=\"{stylesheetPath}\" rel=\"stylesheet\" />";
 
     /// <summary>
-    /// Returns true when the Program.cs of a Blazor Web App registers an interactive render mode
-    /// (server, WebAssembly or both). Ignite UI components render nothing usable under static SSR.
+    /// Returns the completion guidance for a Blazor Web App: Ignite UI components need an interactive render mode, and
+    /// the scaffolder does not change render modes on existing pages or on &lt;Routes&gt;. Only the render modes the app
+    /// is configured for are suggested (InteractiveAuto only when both Server and WebAssembly are configured).
+    /// Returns null when a global interactive render mode already makes every page interactive.
     /// </summary>
-    internal static bool HasInteractiveRenderModeServices(string? programFileContent)
-        => !string.IsNullOrEmpty(programFileContent) &&
-           (programFileContent.Contains("AddInteractiveServerComponents", StringComparison.Ordinal) ||
-            programFileContent.Contains("AddInteractiveWebAssemblyComponents", StringComparison.Ordinal));
+    /// <param name="usesInteractiveServer">Interactive Server is configured (including support added by the scaffolder).</param>
+    /// <param name="usesInteractiveWebAssembly">Interactive WebAssembly is configured.</param>
+    /// <param name="addedInteractiveServer">The scaffolder added Interactive Server support to Program.cs.</param>
+    /// <param name="hasGlobalRenderMode">App.razor or Routes.razor declares a render mode, e.g. on &lt;Routes /&gt;.</param>
+    internal static string? GetRenderModeGuidance(bool usesInteractiveServer, bool usesInteractiveWebAssembly, bool addedInteractiveServer, bool hasGlobalRenderMode)
+    {
+        if (hasGlobalRenderMode || (!usesInteractiveServer && !usesInteractiveWebAssembly))
+        {
+            return null;
+        }
+
+        var added = addedInteractiveServer
+            ? "Interactive Server support was added to Program.cs ('AddInteractiveServerComponents()' and 'AddInteractiveServerRenderMode()'); existing pages keep their render modes. "
+            : string.Empty;
+        var renderModes = usesInteractiveServer && usesInteractiveWebAssembly
+            ? "'@rendermode InteractiveServer', '@rendermode InteractiveWebAssembly' or '@rendermode InteractiveAuto' to them (pages that use WebAssembly or Auto belong in the client project)"
+            : usesInteractiveServer
+                ? "'@rendermode InteractiveServer' to them"
+                : "'@rendermode InteractiveWebAssembly' to them (such pages belong in the client project)";
+        return $"{added}Pages that use Ignite UI components need an interactive render mode: add {renderModes}.";
+    }
 
     /// <summary>
     /// Returns true when the given razor content declares a render mode (<c>@rendermode</c> directive

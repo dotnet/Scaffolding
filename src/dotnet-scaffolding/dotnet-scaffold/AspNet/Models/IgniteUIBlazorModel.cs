@@ -73,4 +73,13 @@ internal class IgniteUIBlazorModel
     /// project, or null when there is no client project.
     /// </summary>
     public string? ClientCodeModificationConfigPath { get; init; }
+    /// <summary>
+    /// Gets a value indicating whether Interactive Server support must be added to the Program.cs of a Blazor Web App
+    /// that configures no interactivity ('AddInteractiveServerComponents()' and 'AddInteractiveServerRenderMode()').
+    /// </summary>
+    public bool AddInteractiveServerSupport { get; init; }
+    /// <summary>
+    /// Gets the render mode guidance logged when the setup completes, or null when none is needed.
+    /// </summary>
+    public string? RenderModeGuidance { get; init; }
 }

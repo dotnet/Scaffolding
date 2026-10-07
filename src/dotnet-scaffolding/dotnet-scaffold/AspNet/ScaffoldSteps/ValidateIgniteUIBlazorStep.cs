@@ -65,24 +65,24 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
     /// <summary>
     /// Executes the step to validate the Ignite UI settings and initialize the <see cref="IgniteUIBlazorModel"/>.
     /// </summary>
-    public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
+    public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         var settings = ValidateSettings();
         if (settings is null)
         {
             _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIgniteUIBlazorStep), context.Scaffolder.DisplayName, false));
-            return Task.FromResult(false);
+            return false;
         }
 
         context.Properties.Add(nameof(IgniteUIBlazorSettings), settings);
 
         _logger.LogInformation("Initializing Ignite UI for Blazor scaffolding model...");
-        var model = GetModel(context, settings);
+        var model = await GetModelAsync(context, settings);
         if (model is null)
         {
             _logger.LogError("An error occurred while initializing the Ignite UI for Blazor scaffolding model.");
             _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIgniteUIBlazorStep), context.Scaffolder.DisplayName, false));
-            return Task.FromResult(false);
+            return false;
         }
 
         context.Properties.Add(nameof(IgniteUIBlazorModel), model);
@@ -90,9 +90,8 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
         // code change steps expect the dictionary to be present (shared pattern across scaffolders).
         context.Properties.Add(Constants.StepConstants.CodeModifierProperties, new Dictionary<string, string>());
 
-        LogRenderModeGuidance(model);
         _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateIgniteUIBlazorStep), context.Scaffolder.DisplayName, true));
-        return Task.FromResult(true);
+        return true;
     }
 
     /// <summary>
@@ -134,7 +133,7 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
     /// <summary>
     /// Initializes and returns the <see cref="IgniteUIBlazorModel"/> for scaffolding.
     /// </summary>
-    private IgniteUIBlazorModel? GetModel(ScaffolderContext context, IgniteUIBlazorSettings settings)
+    private async Task<IgniteUIBlazorModel?> GetModelAsync(ScaffolderContext context, IgniteUIBlazorSettings settings)
     {
         ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
         context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
@@ -210,6 +209,38 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             return null;
         }
 
+        // Ignite UI components need interactivity. A Blazor Web App keeps its Server, WebAssembly or Auto configuration;
+        // one without any gets Interactive Server support. Blazor Server and standalone WebAssembly apps are always
+        // interactive, and a MAUI Blazor Hybrid app has no Program.cs.
+        BlazorInteractivityAnalyzer.BlazorInteractivity? interactivity = null;
+        bool addInteractiveServerSupport = false;
+        if (!isWebAssemblyProject && !isMauiBlazorHybridProject &&
+            await projectInfo.CodeService.GetDocumentAsync("Program.cs") is { } programDocument)
+        {
+            var programPath = programDocument.FilePath ?? Path.Combine(projectDirectory, "Program.cs");
+            // The rest of the setup does not require a prior restore, so neither does this analysis.
+            (interactivity, var interactivityError) = await BlazorInteractivityAnalyzer.AnalyzeAsync(programDocument, programPath, settings.Project, allowSyntaxFallback: true);
+            if (interactivity is null)
+            {
+                _logger.LogError(interactivityError);
+                return null;
+            }
+
+            addInteractiveServerSupport = interactivity.UsesRazorComponents && !interactivity.UsesInteractiveServer && !interactivity.UsesInteractiveWebAssembly;
+            if (addInteractiveServerSupport && !interactivity.MapsRazorComponents)
+            {
+                _logger.LogError(
+                    $"Ignite UI components require an interactive render mode, but '{programPath}' configures none and does not map its components with 'app.MapRazorComponents<App>()', so Interactive Server support cannot be added. " +
+                    "Chain '.AddInteractiveServerComponents()' after 'builder.Services.AddRazorComponents()' and '.AddInteractiveServerRenderMode()' after 'app.MapRazorComponents<App>()', then re-run the scaffolder.");
+                return null;
+            }
+
+            if (addInteractiveServerSupport)
+            {
+                _logger.LogInformation("This Blazor Web App has no interactive render mode configured; Interactive Server support will be added to Program.cs. Existing pages keep their render modes.");
+            }
+        }
+
         var hostPagePath = IgniteUIBlazorHelper.FindHostPage(_fileSystem, projectDirectory);
         var stylesheetPath = IgniteUIBlazorHelper.GetThemeStylesheetPath(settings.Theme, settings.ThemeVariant);
         if (hostPagePath is null)
@@ -248,7 +279,15 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             ClientProjectPath = clientProjectPath,
             ClientImportsFilePath = clientImportsFilePath,
             CodeModificationConfigPath = codeModificationConfigPath,
-            ClientCodeModificationConfigPath = clientCodeModificationConfigPath
+            ClientCodeModificationConfigPath = clientCodeModificationConfigPath,
+            AddInteractiveServerSupport = addInteractiveServerSupport,
+            RenderModeGuidance = interactivity is { UsesRazorComponents: true }
+                ? IgniteUIBlazorHelper.GetRenderModeGuidance(
+                    interactivity.UsesInteractiveServer || addInteractiveServerSupport,
+                    interactivity.UsesInteractiveWebAssembly,
+                    addInteractiveServerSupport,
+                    HasGlobalRenderMode(hostPagePath))
+                : null
         };
     }
 
@@ -272,35 +311,18 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
     }
 
     /// <summary>
-    /// Ignite UI components need an interactive render mode; static server-side rendering renders nothing usable.
-    /// Logs guidance for Blazor Web Apps that do not register or declare an interactive render mode.
-    /// Blazor WebAssembly, Blazor Server and Blazor Hybrid applications are always interactive, so nothing is logged for them.
+    /// Returns true when the App.razor host page, or the Routes.razor next to it, declares a render mode, so that the
+    /// app's pages are interactive globally.
     /// </summary>
-    private void LogRenderModeGuidance(IgniteUIBlazorModel model)
+    private bool HasGlobalRenderMode(string? hostPagePath)
     {
-        if (model.IsWebAssemblyProject ||
-            model.IsMauiBlazorHybridProject ||
-            model.HostPagePath is null ||
-            !model.HostPagePath.EndsWith("App.razor", StringComparison.OrdinalIgnoreCase))
+        if (hostPagePath is null || !hostPagePath.EndsWith("App.razor", StringComparison.OrdinalIgnoreCase))
         {
-            return;
+            return false;
         }
 
-        var programFilePath = Path.Combine(model.BaseOutputPath, "Program.cs");
-        var programFileContent = _fileSystem.FileExists(programFilePath) ? _fileSystem.ReadAllText(programFilePath) : null;
-        if (!IgniteUIBlazorHelper.HasInteractiveRenderModeServices(programFileContent))
-        {
-            _logger.LogWarning("Ignite UI components require an interactive render mode, but this Blazor Web App does not register interactive components.");
-            _logger.LogWarning("Chain '.AddInteractiveServerComponents()' and/or '.AddInteractiveWebAssemblyComponents()' after 'builder.Services.AddRazorComponents()' in Program.cs, then set '@rendermode InteractiveServer' (or InteractiveWebAssembly / InteractiveAuto) on the components that use Ignite UI.");
-            return;
-        }
-
-        var appRazorContent = _fileSystem.ReadAllText(model.HostPagePath);
-        var routesRazorPath = Path.Combine(Path.GetDirectoryName(model.HostPagePath) ?? model.BaseOutputPath, "Routes.razor");
-        var routesRazorContent = _fileSystem.FileExists(routesRazorPath) ? _fileSystem.ReadAllText(routesRazorPath) : null;
-        if (!IgniteUIBlazorHelper.DeclaresRenderMode(appRazorContent) && !IgniteUIBlazorHelper.DeclaresRenderMode(routesRazorContent))
-        {
-            _logger.LogInformation("No global render mode is set on <Routes /> in App.razor. Ignite UI components need an interactive render mode: add '@rendermode InteractiveServer' (or InteractiveWebAssembly / InteractiveAuto) to the pages that use them, or set '<Routes @rendermode=\"InteractiveAuto\" />' globally.");
-        }
+        var routesRazorPath = Path.Combine(Path.GetDirectoryName(hostPagePath) ?? string.Empty, "Routes.razor");
+        return IgniteUIBlazorHelper.DeclaresRenderMode(_fileSystem.ReadAllText(hostPagePath)) ||
+               (_fileSystem.FileExists(routesRazorPath) && IgniteUIBlazorHelper.DeclaresRenderMode(_fileSystem.ReadAllText(routesRazorPath)));
     }
 }

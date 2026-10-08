@@ -139,13 +139,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string EntraIdExample2Description = "Add Microsoft Entra ID authentication by creating a new Azure application:";
         }
 
-        internal class HealthcareTracker
+        internal class SyncfusionBlazorToolkit
         {
-            internal const string Name = "healthcare-tracker";
-            internal const string DisplayName = "Healthcare Tracker (Syncfusion Toolkit sample)";
-            internal const string Description = "Demonstration only: adds a sample Blazor Healthcare Tracker page using Syncfusion Blazor Toolkit charts (MIT). Requires a Blazor Web App with the default template layout (Components/_Imports.razor, Components/App.razor, Components/Layout/NavMenu.razor). Theme is fixed to fluent.css. Not a generic data-bound scaffolder.";
-            internal const string Example = "dotnet scaffold aspnet healthcare-tracker --project ./MyBlazorApp.csproj";
-            internal const string ExampleDescription = "Scaffold a sample Healthcare Tracker page with Syncfusion Toolkit charts:";
+            internal const string Name = "syncfusion-blazor-toolkit";
+            internal const string DisplayName = "Syncfusion Blazor Toolkit";
+            // Short display description, suitable for CLI UIs and tight layouts.
+            internal const string Description = "Configure Syncfusion Blazor Toolkit in an existing Blazor application.";
+            // Extended guidance (target layouts, soft-fail behavior, render-mode reminder)
+            // shown in the scaffolder summary and any detailed help output.
+            internal const string ExtendedDescription = "Adds the Syncfusion.Blazor.Toolkit package reference, service registration, using directives, and theme stylesheet. " +
+                "Primary target: Blazor Web App with Components/_Imports.razor and Components/App.razor. " +
+                "Standalone Blazor WASM is also supported; when Components/App.razor is absent the theme stylesheet is added to wwwroot/index.html instead, " +
+                "or skipped with a warning if neither file is present. " +
+                "The scaffolder operates on a single --project; for multi-project (Auto/WASM client+server) solutions, " +
+                "run it on the project that hosts interactive components and static assets. " +
+                "Syncfusion Blazor Toolkit components require an interactive render mode (@rendermode InteractiveServer / InteractiveAuto / InteractiveWebAssembly) " +
+                "and do not work under static SSR.";
+            internal const string Example = "dotnet scaffold aspnet syncfusion-blazor-toolkit --project ./MyBlazorApp/MyBlazorApp.csproj";
+            internal const string ExampleDescription = "Set up Syncfusion Blazor Toolkit in an existing Blazor app:";
         }
 
         internal class Catagories

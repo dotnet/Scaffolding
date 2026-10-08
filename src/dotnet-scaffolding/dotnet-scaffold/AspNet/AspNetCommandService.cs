@@ -8,6 +8,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.DotNet.Tools.Scaffold.Command;
@@ -37,7 +38,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(ValidateBlazorCrudStep),
                 typeof(ValidateEfControllerStep),
                 typeof(ValidateEntraIdStep),
-                typeof(ValidateHealthcareTrackerStep),
+                typeof(ValidateSyncfusionBlazorToolkitStep),
+                typeof(ResolveSyncfusionBlazorToolkitThemeStep),
+                typeof(SummarizeSyncfusionBlazorToolkitStep),
                 typeof(ValidateIdentityStep),
                 typeof(ValidateMinimalApiStep),
                 typeof(ValidateRazorPagesStep),
@@ -213,22 +216,23 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithBlazorCrudTextTemplatingStep()
                 .WithBlazorCrudCodeChangeStep();
 
-            _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.HealthcareTracker.Name)
-                .WithDisplayName(AspnetStrings.HealthcareTracker.DisplayName)
+            _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.SyncfusionBlazorToolkit.Name)
+                .WithDisplayName(AspnetStrings.SyncfusionBlazorToolkit.DisplayName)
                 .WithCategory(AspnetStrings.Catagories.Syncfusion)
-                .WithDescription(AspnetStrings.HealthcareTracker.Description)
-                .WithExample(AspnetStrings.HealthcareTracker.Example, AspnetStrings.HealthcareTracker.ExampleDescription)
+                .WithDescription(AspnetStrings.SyncfusionBlazorToolkit.Description)
+                .WithExample(AspnetStrings.SyncfusionBlazorToolkit.Example, AspnetStrings.SyncfusionBlazorToolkit.ExampleDescription)
                 .WithOptions([options.Project, options.Prerelease])
-                .WithStep<ValidateHealthcareTrackerStep>(config =>
+                .WithStep<ValidateSyncfusionBlazorToolkitStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
                     step.Project = context.GetOptionResult(options.Project);
                     step.Prerelease = context.GetOptionResult(options.Prerelease);
                 })
-                .WithHealthcareTrackerAddPackagesStep()
-                .WithHealthcareTrackerTextTemplatingStep()
-                .WithHealthcareTrackerCodeChangeStep();
+                .WithStep<ResolveSyncfusionBlazorToolkitThemeStep>()
+                .WithSyncfusionBlazorToolkitAddPackagesStep()
+                .WithSyncfusionBlazorToolkitCodeChangeStep()
+                .WithStep<SummarizeSyncfusionBlazorToolkitStep>();
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorPage.Crud)
                 .WithDisplayName(AspnetStrings.RazorPage.CrudDisplayName)

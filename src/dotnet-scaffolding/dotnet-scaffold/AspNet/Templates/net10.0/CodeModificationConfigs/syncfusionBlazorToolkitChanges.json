@@ -1,0 +1,24 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CheckBlock": "AddSyncfusionBlazorToolkit",
+              "Block": "builder.Services.AddSyncfusionBlazorToolkit();",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Syncfusion.Blazor.Toolkit"
+      ]
+    }
+  ]
+}

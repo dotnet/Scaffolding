@@ -42,7 +42,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
             {
               ""InsertAfter"": ""WebApplication.CreateBuilder"",
               ""CheckBlock"": ""AddSyncfusionBlazorToolkit"",
-              ""Block"": ""builder.Services.AddSyncfusionBlazorToolkit();"",
+              ""Block"": ""builder.Services.AddSyncfusionBlazorToolkit()"",
               ""LeadingTrivia"": { ""Newline"": true }
             }
           ]
@@ -111,10 +111,10 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     [Fact]
     public void ToOsNativePath_UsesOsNativeSeparator()
     {
-        string result = SyncfusionBlazorToolkitHelper.ToOsNativePath("Components/App.razor");
+        string? result = SyncfusionBlazorToolkitHelper.ToOsNativePath("Components/App.razor");
         Assert.Equal(OsAppRazor, result);
         // And the round-trip via backslashes.
-        string result2 = SyncfusionBlazorToolkitHelper.ToOsNativePath(@"Components\App.razor");
+        string? result2 = SyncfusionBlazorToolkitHelper.ToOsNativePath(@"Components\App.razor");
         Assert.Equal(OsAppRazor, result2);
     }
 
@@ -208,7 +208,11 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         // The Replacements array carries a single Block-only snippet.
         var replacements = importsEntry.GetProperty("Replacements");
         Assert.Equal(1, replacements.GetArrayLength());
-        Assert.Equal("@using Syncfusion.Blazor.Toolkit", replacements[0].GetProperty("Block").GetString());
+        // The Block carries a leading and trailing newline so the appended
+        // snippet does not glue to the surrounding lines of the file.
+        Assert.Equal("\n@using Syncfusion.Blazor.Toolkit\n", replacements[0].GetProperty("Block").GetString());
+        // CheckBlock makes re-runs idempotent even with the extra newlines.
+        Assert.Equal("Syncfusion.Blazor.Toolkit", replacements[0].GetProperty("CheckBlock").GetString());
     }
 
     [Fact]

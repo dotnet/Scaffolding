@@ -119,4 +119,37 @@ public static class RoslynExtensions
             (!string.IsNullOrEmpty(x.FilePath) &&
              x.FilePath.EndsWith(normalizedName, StringComparison.OrdinalIgnoreCase)));
     }
+
+    /// <summary>
+    /// Match AdditionalDocument by project-relative path (e.g. "_Imports.razor" vs
+    /// "Components/_Imports.razor"), not by bare <c>EndsWith("_Imports.razor")</c>
+    /// which would also match the wrong file (e.g. <c>Components/_Imports.razor</c>
+    /// when the caller asked for <c>_Imports.razor</c> at the project root).
+    /// </summary>
+    public static TextDocument? GetAdditionalDocumentByRelativePath(this Project project, string? relativePath)
+    {
+        if (string.IsNullOrEmpty(relativePath) || string.IsNullOrEmpty(project.FilePath))
+        {
+            return null;
+        }
+
+        var projectDir = Path.GetDirectoryName(project.FilePath);
+        if (string.IsNullOrEmpty(projectDir))
+        {
+            return null;
+        }
+
+        var normalizedRelative = relativePath
+            .Replace('/', Path.DirectorySeparatorChar)
+            .Replace('\\', Path.DirectorySeparatorChar);
+
+        var expectedFull = Path.GetFullPath(Path.Combine(projectDir, normalizedRelative));
+        var comparison = OperatingSystem.IsWindows()
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
+
+        return project.AdditionalDocuments.FirstOrDefault(doc =>
+            !string.IsNullOrEmpty(doc.FilePath) &&
+            Path.GetFullPath(doc.FilePath).Equals(expectedFull, comparison));
+    }
 }

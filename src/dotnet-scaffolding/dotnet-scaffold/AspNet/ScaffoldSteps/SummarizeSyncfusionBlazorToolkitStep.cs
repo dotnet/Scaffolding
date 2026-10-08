@@ -88,11 +88,12 @@ internal class SummarizeSyncfusionBlazorToolkitStep : ScaffoldStep
 
         _logger.LogInformation(
             "Next steps: " +
-            "(1) Add Syncfusion Blazor Toolkit components to your pages (e.g. <SfButton>, <SfGrid>). " +
-            "(2) Verify the page or component hosting the Toolkit is rendered with an interactive render mode " +
+            "(1) Use Toolkit components with an interactive render mode " +
             "(@rendermode InteractiveServer / InteractiveAuto / InteractiveWebAssembly). " +
-            "Static SSR is not supported by Syncfusion Blazor Toolkit components. " +
-            "(3) Re-run the scaffolder at any time: the package, Program.cs, _Imports, and theme are all idempotent.");
+            "(2) For Blazor Web App (Auto) multi-project solutions, run this scaffolder on the project " +
+            "that hosts interactive components and static assets (often the .Client project for usings, " +
+            "and the server project for AddSyncfusionBlazorToolkit() if services live there). " +
+            "(3) Re-run is idempotent for package, Program.cs, _Imports, and theme.");
 
         return Task.FromResult(true);
     }

@@ -48,13 +48,15 @@ internal static class SyncfusionBlazorToolkitHelper
     // idempotent and resilient to missing framework usings such as
     // @using Microsoft.AspNetCore.Components.Forms. The block is also
     // appended (not replaced) so the snippet is safe regardless of which
-    // other usings the project already has.
+    // other usings the project already has. A leading newline keeps the
+    // appended block from gluing to the previous line in the file.
     private const string ImportsBlockJson =
         "{" +
         "\"FileName\":\"IMPORTSFILE\"," +
         "\"Replacements\":[" +
             "{" +
-                "\"Block\":\"@using Syncfusion.Blazor.Toolkit\"" +
+                "\"Block\":\"\\n@using Syncfusion.Blazor.Toolkit\\n\"," +
+                "\"CheckBlock\":\"Syncfusion.Blazor.Toolkit\"" +
             "}" +
         "]" +
         "}";
@@ -71,7 +73,7 @@ internal static class SyncfusionBlazorToolkitHelper
     /// uses OS-native separators. Use <see cref="ToOsNativePath"/> for that
     /// case instead.
     /// </remarks>
-    public static string CanonicalizePath(string path)
+    public static string? CanonicalizePath(string? path)
     {
         if (string.IsNullOrEmpty(path))
         {
@@ -91,7 +93,7 @@ internal static class SyncfusionBlazorToolkitHelper
     /// why the theme stylesheet and the <c>@using</c> directive were not
     /// being injected.
     /// </summary>
-    public static string ToOsNativePath(string path)
+    public static string? ToOsNativePath(string? path)
     {
         if (string.IsNullOrEmpty(path))
         {
@@ -258,7 +260,9 @@ internal static class SyncfusionBlazorToolkitHelper
                     // file system *does* use forward slashes). Using
                     // Path.GetRelativePath's OS-native output here keeps
                     // the lookup working on every platform.
-                    string osThemeFile = ToOsNativePath(themeFile);
+                    // ToOsNativePath preserves null/empty so the IsNullOrEmpty
+                    // guard above guarantees osThemeFile is non-null here.
+                    string osThemeFile = ToOsNativePath(themeFile)!;
                     string themeEntryJson = ThemeBlockJson.Replace("THEMEFILE", EscapeForJson(osThemeFile));
                     using JsonDocument themeEntryDoc = JsonDocument.Parse(themeEntryJson);
                     themeEntryDoc.RootElement.WriteTo(writer);
@@ -267,7 +271,9 @@ internal static class SyncfusionBlazorToolkitHelper
                 if (!string.IsNullOrEmpty(importsFile))
                 {
                     // Same OS-native separator rule as for themeFile above.
-                    string osImportsFile = ToOsNativePath(importsFile);
+                    // ToOsNativePath preserves null/empty so the IsNullOrEmpty
+                    // guard above guarantees osImportsFile is non-null here.
+                    string osImportsFile = ToOsNativePath(importsFile)!;
                     string importsEntryJson = ImportsBlockJson.Replace("IMPORTSFILE", EscapeForJson(osImportsFile));
                     using JsonDocument importsEntryDoc = JsonDocument.Parse(importsEntryJson);
                     importsEntryDoc.RootElement.WriteTo(writer);

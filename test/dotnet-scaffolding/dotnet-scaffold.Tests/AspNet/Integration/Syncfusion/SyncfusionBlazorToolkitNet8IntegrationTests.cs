@@ -76,4 +76,41 @@ public class SyncfusionBlazorToolkitNet8IntegrationTests : SyncfusionBlazorToolk
             "Syncfusion\\.Blazor\\.Toolkit/styles/fluent\\.min\\.css").Count;
         Assert.Equal(1, linkCount);
     }
+
+    /// <summary>
+    /// Regression test for the bug where the scaffolder would silently skip
+    /// the @using directive when the project only hosts a root-level
+    /// <c>_Imports.razor</c> (no <c>Components/_Imports.razor</c>). With the
+    /// exact-relative-path resolution in <c>RoslynExtensions</c> and the
+    /// always-on disk-write fallback in <c>ProjectModifier</c>, the root
+    /// file must be modified on disk regardless of which AdditionalDocument
+    /// the workspace returns.
+    /// </summary>
+    [Fact]
+    public async Task Scaffold_SyncfusionBlazorToolkit_Net8_RootImportsRazor_WritesUsingOnDisk()
+    {
+        // Arrange — classic layout: _Imports at project root, no Components/_Imports.
+        File.WriteAllText(_testProjectPath, BlazorWebProjectContent);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"),
+            ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
+        File.WriteAllText(Path.Combine(_testProjectDir, "_Imports.razor"),
+            "@using Microsoft.AspNetCore.Components\n");
+        Directory.CreateDirectory(Path.Combine(_testProjectDir, "wwwroot"));
+        File.WriteAllText(Path.Combine(_testProjectDir, "wwwroot", "index.html"),
+            "<!DOCTYPE html><html><head></head><body></body></html>");
+
+        // Act
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework, "syncfusion-blazor-toolkit", "--project", _testProjectPath);
+        Assert.True(exitCode == 0, $"Output: {output}\nError: {error}");
+
+        // Assert — on disk, not only summary text
+        var imports = File.ReadAllText(Path.Combine(_testProjectDir, "_Imports.razor"));
+        Assert.Contains("@using Syncfusion.Blazor.Toolkit", imports);
+
+        // The Components/_Imports.razor file must NOT have been created or
+        // modified, since the project only has the root one.
+        Assert.False(File.Exists(Path.Combine(_testProjectDir, "Components", "_Imports.razor")),
+            "Components/_Imports.razor should not be created when the project only has a root _Imports.razor.");
+    }
 }

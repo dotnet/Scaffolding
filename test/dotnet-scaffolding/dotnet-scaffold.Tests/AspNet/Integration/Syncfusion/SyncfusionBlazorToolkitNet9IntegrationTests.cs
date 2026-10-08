@@ -26,4 +26,39 @@ public class SyncfusionBlazorToolkitNet9IntegrationTests : SyncfusionBlazorToolk
         string csproj = File.ReadAllText(_testProjectPath);
         Assert.Contains("Syncfusion.Blazor.Toolkit", csproj);
     }
+
+    /// <summary>
+    /// Regression test: root-level <c>_Imports.razor</c> (no
+    /// <c>Components/_Imports.razor</c>) must receive the
+    /// <c>@using Syncfusion.Blazor.Toolkit</c> directive on disk. The
+    /// scaffolder must not create a <c>Components/_Imports.razor</c> when the
+    /// project only has a root one.
+    /// </summary>
+    [Fact]
+    public async Task Scaffold_SyncfusionBlazorToolkit_Net9_RootImportsRazor_WritesUsingOnDisk()
+    {
+        // Arrange — classic layout: _Imports at project root, no Components/_Imports.
+        File.WriteAllText(_testProjectPath, BlazorWebProjectContent);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"),
+            ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
+        File.WriteAllText(Path.Combine(_testProjectDir, "_Imports.razor"),
+            "@using Microsoft.AspNetCore.Components\n");
+        Directory.CreateDirectory(Path.Combine(_testProjectDir, "wwwroot"));
+        File.WriteAllText(Path.Combine(_testProjectDir, "wwwroot", "index.html"),
+            "<!DOCTYPE html><html><head></head><body></body></html>");
+
+        // Act
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework, "syncfusion-blazor-toolkit", "--project", _testProjectPath);
+        Assert.True(exitCode == 0, $"Output: {output}\nError: {error}");
+
+        // Assert — on disk, not only summary text
+        var imports = File.ReadAllText(Path.Combine(_testProjectDir, "_Imports.razor"));
+        Assert.Contains("@using Syncfusion.Blazor.Toolkit", imports);
+
+        // The Components/_Imports.razor file must NOT have been created or
+        // modified, since the project only has the root one.
+        Assert.False(File.Exists(Path.Combine(_testProjectDir, "Components", "_Imports.razor")),
+            "Components/_Imports.razor should not be created when the project only has a root _Imports.razor.");
+    }
 }

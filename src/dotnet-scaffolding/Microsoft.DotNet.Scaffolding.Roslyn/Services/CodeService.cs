@@ -102,35 +102,56 @@ public class CodeService : ICodeService, IDisposable
         // so we manually persist any changed documents before delegating.
         if (_fallbackWorkspace is not null)
         {
-            var currentSolution = _fallbackWorkspace.CurrentSolution;
-            var solutionChanges = solution.GetChanges(currentSolution);
-            foreach (var projectChange in solutionChanges.GetProjectChanges())
-            {
-                foreach (var changedDocId in projectChange.GetChangedDocuments())
-                {
-                    PersistDocumentToDisk(solution.GetDocument(changedDocId));
-                }
-
-                foreach (var changedAdditionalDocId in projectChange.GetChangedAdditionalDocuments())
-                {
-                    PersistTextDocumentToDisk(solution.GetAdditionalDocument(changedAdditionalDocId));
-                }
-
-                foreach (var addedDocId in projectChange.GetAddedDocuments())
-                {
-                    PersistDocumentToDisk(solution.GetDocument(addedDocId));
-                }
-
-                foreach (var addedAdditionalDocId in projectChange.GetAddedAdditionalDocuments())
-                {
-                    PersistTextDocumentToDisk(solution.GetAdditionalDocument(addedAdditionalDocId));
-                }
-            }
-
+            PersistSolutionTextChangesToDisk(solution, _fallbackWorkspace.CurrentSolution);
             return _fallbackWorkspace.TryApplyChanges(solution);
         }
 
-        return _msBuildWorkspace?.TryApplyChanges(solution) == true;
+        if (_msBuildWorkspace is not null)
+        {
+            // Same disk persistence for AdditionalDocuments (.razor / .html / .css)
+            // so the MSBuild path behaves like the Adhoc fallback. MSBuildWorkspace
+            // does not reliably write AdditionalDocuments to disk, so the scaffolder
+            // would otherwise leave _Imports.razor / App.razor / index.html untouched.
+            PersistSolutionTextChangesToDisk(solution, _msBuildWorkspace.CurrentSolution);
+            return _msBuildWorkspace.TryApplyChanges(solution);
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Walks the diff between <paramref name="newSolution"/> and
+    /// <paramref name="oldSolution"/> and writes any changed or newly added
+    /// Documents and AdditionalDocuments to disk. Used to back the
+    /// <see cref="AdhocWorkspace"/> and <see cref="MSBuildWorkspace"/> paths, neither
+    /// of which reliably persists <c>.razor</c> / <c>.html</c> /
+    /// <c>AdditionalDocument</c> edits.
+    /// </summary>
+    private static void PersistSolutionTextChangesToDisk(Solution newSolution, Solution oldSolution)
+    {
+        var solutionChanges = newSolution.GetChanges(oldSolution);
+        foreach (var projectChange in solutionChanges.GetProjectChanges())
+        {
+            foreach (var changedDocId in projectChange.GetChangedDocuments())
+            {
+                PersistDocumentToDisk(newSolution.GetDocument(changedDocId));
+            }
+
+            foreach (var addedDocId in projectChange.GetAddedDocuments())
+            {
+                PersistDocumentToDisk(newSolution.GetDocument(addedDocId));
+            }
+
+            foreach (var changedAdditionalDocId in projectChange.GetChangedAdditionalDocuments())
+            {
+                PersistTextDocumentToDisk(newSolution.GetAdditionalDocument(changedAdditionalDocId));
+            }
+
+            foreach (var addedAdditionalDocId in projectChange.GetAddedAdditionalDocuments())
+            {
+                PersistTextDocumentToDisk(newSolution.GetAdditionalDocument(addedAdditionalDocId));
+            }
+        }
     }
 
     private static void PersistDocumentToDisk(Document? document)

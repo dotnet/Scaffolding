@@ -43,6 +43,58 @@ internal class ResolveSyncfusionBlazorToolkitThemeStep : ScaffoldStep
         _logger = logger;
     }
 
+    /// <summary>
+    /// Returns the theme host candidate list reordered so the project's SDK is
+    /// preferred. Standalone Blazor WASM projects put their host page at
+    /// <c>wwwroot/index.html</c>; Blazor Web App / Server projects put it at
+    /// <c>Components/App.razor</c>. Putting the matching one first avoids the
+    /// rare case where a project legitimately has both files (e.g. a hybrid
+    /// sample) and the wrong host wins.
+    /// </summary>
+    private static (string RelativePath, string Kind)[] GetThemeHostCandidates(string projectDirectory)
+    {
+        var csproj = _safeEnumerateCsproj(projectDirectory);
+        var isWasm = false;
+        if (csproj is not null)
+        {
+            try
+            {
+                var text = File.ReadAllText(csproj);
+                isWasm = text.Contains("Microsoft.NET.Sdk.BlazorWebAssembly", StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                // best-effort; fall through with the default order
+                isWasm = false;
+            }
+        }
+
+        // WASM: prefer index.html; Web App / Server: prefer Components/App.razor
+        return isWasm
+            ?
+            [
+                (Path.Combine("wwwroot", "index.html"), "Standalone Blazor WASM (wwwroot/index.html)"),
+                (Path.Combine("Components", "App.razor"), "Blazor Web App (Components/App.razor)"),
+            ]
+            :
+            [
+                (Path.Combine("Components", "App.razor"), "Blazor Web App (Components/App.razor)"),
+                (Path.Combine("wwwroot", "index.html"), "Standalone Blazor WASM (wwwroot/index.html)"),
+            ];
+    }
+
+    private static string? _safeEnumerateCsproj(string projectDirectory)
+    {
+        try
+        {
+            return Directory.EnumerateFiles(projectDirectory, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
         if (!context.Properties.TryGetValue(nameof(ScaffoldSteps.Settings.SyncfusionBlazorToolkitSettings), out var settingsObj) ||
@@ -65,7 +117,7 @@ internal class ResolveSyncfusionBlazorToolkitThemeStep : ScaffoldStep
             return Task.FromResult(true);
         }
 
-        foreach (var (relativePath, kind) in ThemeHostCandidates)
+        foreach (var (relativePath, kind) in GetThemeHostCandidates(projectDirectory))
         {
             var fullPath = Path.Combine(projectDirectory, relativePath);
             if (_fileSystem.FileExists(fullPath))

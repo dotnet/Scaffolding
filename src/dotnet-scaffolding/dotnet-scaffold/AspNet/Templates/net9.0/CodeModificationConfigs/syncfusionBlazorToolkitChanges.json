@@ -11,6 +11,20 @@
               "Block": "builder.Services.AddSyncfusionBlazorToolkit();",
               "LeadingTrivia": {
                 "Newline": true
+              },
+              "TrailingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "WebAssemblyHostBuilder.CreateDefault",
+              "CheckBlock": "AddSyncfusionBlazorToolkit",
+              "Block": "builder.Services.AddSyncfusionBlazorToolkit();",
+              "LeadingTrivia": {
+                "Newline": true
+              },
+              "TrailingTrivia": {
+                "Newline": true
               }
             }
           ]

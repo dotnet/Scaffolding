@@ -77,23 +77,23 @@ internal static class EfControllerHelper
             case TargetFramework.Net9:
                 return fileName switch
                 {
-                    ApiEfControllerTemplate => typeof(Templates.net9.EfController.ApiEfController),
-                    MvcEfControllerTemplate => typeof(Templates.net9.EfController.MvcEfController),
+                    ApiEfControllerTemplate => typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController.ApiEfController),
+                    MvcEfControllerTemplate => typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController.MvcEfController),
                     _ => null
                 };
             case TargetFramework.Net10:
                 return fileName switch
                 {
-                    ApiEfControllerTemplate => typeof(Templates.net10.EfController.ApiEfController),
-                    MvcEfControllerTemplate => typeof(Templates.net10.EfController.MvcEfController),
+                    ApiEfControllerTemplate => typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController.ApiEfController),
+                    MvcEfControllerTemplate => typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController.MvcEfController),
                     _ => null
                 };
             case TargetFramework.Net11:
             default:
                 return fileName switch
                 {
-                    ApiEfControllerTemplate => typeof(Templates.net11.EfController.ApiEfController),
-                    MvcEfControllerTemplate => typeof(Templates.net11.EfController.MvcEfController),
+                    ApiEfControllerTemplate => typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.EfController.ApiEfController),
+                    MvcEfControllerTemplate => typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.EfController.MvcEfController),
                     _ => null
                 };
         }

@@ -25,12 +25,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorIdentity.
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n@code {\r\n    protected override " +
-                    "void OnInitialized()\r\n    {\r\n        NavigationManager.NavigateTo($\"Account/Logi" +
-                    "n?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}\", forceLoad: true);\r\n " +
-                    "   }\r\n}\r\n");
+            this.Write("@inject NavigationManager NavigationManager\r\n\r\n@code {\r\n    protected override vo" +
+                    "id OnInitialized()\r\n    {\r\n        NavigationManager.NavigateTo($\"Account/Login?" +
+                    "returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}\", forceLoad: true);\r\n   " +
+                    " }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

@@ -322,7 +322,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     IsTemplate = true,
                     Name = "ApplicationDbContext",
                     SourcePath = "ApplicationDbContext.cshtml",
-                    OutputPath = Path.Combine("Areas", "Identity", "Data", $"{templateModel.DbContextClass}.cs"),
+                    OutputPath = Path.Combine("Data", $"{templateModel.DbContextClass}.cs"),
                     ShowInListFiles = false
                 });
 
@@ -334,7 +334,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                         IsTemplate = true,
                         Name = "ApplicationUser",
                         SourcePath = "ApplicationUser.cshtml",
-                        OutputPath = Path.Combine("Areas", "Identity", "Data", $"{templateModel.UserClass}.cs"),
+                        OutputPath = Path.Combine("Data", $"{templateModel.UserClass}.cs"),
                         ShowInListFiles = false
                     });
                 }

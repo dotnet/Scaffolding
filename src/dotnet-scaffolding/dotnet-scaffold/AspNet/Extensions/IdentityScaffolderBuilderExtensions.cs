@@ -29,16 +29,17 @@ internal static class IdentityScaffolderBuilderExtensions
         {
             var step = config.Step;
             var context = config.Context;
-            List<Package> packages = [
-                PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackage,
-                PackageConstants.AspNetCorePackages.AspNetCoreIdentityUiPackage,
-                PackageConstants.EfConstants.EfCoreToolsPackage,
-                PackageConstants.EfConstants.EfCoreDesignPackage
-            ];
 
             if (context.Properties.TryGetValue(nameof(IdentitySettings), out var commandSettingsObj) &&
                 commandSettingsObj is IdentitySettings commandSettings)
             {
+                List<Package> packages = [
+                    PackageConstants.AspNetCorePackages.AspNetCoreIdentityEfPackage,
+                    PackageConstants.AspNetCorePackages.AspNetCoreIdentityUiPackage,
+                    PackageConstants.EfConstants.EfCoreToolsPackage,
+                    PackageConstants.EfConstants.EfCoreDesignPackage
+                ];
+
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&

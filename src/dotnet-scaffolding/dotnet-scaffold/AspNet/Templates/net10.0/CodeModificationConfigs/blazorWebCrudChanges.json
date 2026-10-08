@@ -22,6 +22,14 @@
               }
             },
             {
+              "InsertAfter": "var builder = WebApplication.CreateBuilder(args);",
+              "CheckBlock": "builder.Services.AddDbContext",
+              "Block": "builder.Services.AddDbContextFactory<$(DbContextName)>(options => options.$(UseDbMethod))",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContextFactory",
               "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
               "LeadingTrivia": {

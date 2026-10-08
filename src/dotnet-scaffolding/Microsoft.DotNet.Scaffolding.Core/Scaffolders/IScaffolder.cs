@@ -44,5 +44,6 @@ public interface IScaffolder
     /// Executes the scaffolder based on the current context. Generally this will be called by the <see cref="IScaffoldRunner"/> and does not need to be called directly.
     /// </summary>
     /// <param name="context">The context for the scaffolder execution.</param>
-    Task ExecuteAsync(ScaffolderContext context);
+    /// <returns>True if every required step succeeded; otherwise, false. Skipped steps and failures with <see cref="Steps.ScaffoldStep.ContinueOnError"/> enabled do not fail the operation.</returns>
+    Task<bool> ExecuteAsync(ScaffolderContext context);
 }

@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
     {
         private readonly ITelemetryService _telemetryService;
         private readonly IScaffoldRunner _scaffoldRunnner;
+        private FlowStepResult? _executionResult;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandExecuteFlowStep"/> class.
@@ -40,17 +41,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// <inheritdoc/>
         public ValueTask ResetAsync(IFlowContext context, CancellationToken cancellationToken)
         {
+            _executionResult = null;
             return ValueTask.CompletedTask;
         }
 
         /// <inheritdoc/>
         public ValueTask<FlowStepResult> RunAsync(IFlowContext context, CancellationToken cancellationToken)
         {
-            return new ValueTask<FlowStepResult>(FlowStepResult.Success);
+            return ValidateUserInputAsync(context, cancellationToken);
         }
 
         /// <inheritdoc/>
         public async ValueTask<FlowStepResult> ValidateUserInputAsync(IFlowContext context, CancellationToken cancellationToken)
+        {
+            // Interactive validation failures fall back to RunAsync; do not execute the command twice.
+            return _executionResult ??= await ExecuteCommandAsync(context, cancellationToken);
+        }
+
+        private async ValueTask<FlowStepResult> ExecuteCommandAsync(IFlowContext context, CancellationToken cancellationToken)
         {
             // Need all 3 things, throw if not found
             DotNetToolInfo? dotnetToolInfo = context.GetComponentObj();
@@ -83,7 +91,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                     _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandInfo, aspireExitCode, chosenCategory));
                     if (aspireExitCode != 0)
                     {
-                        AnsiConsole.Console.WriteLine($"\nAspire command exit code: {aspireExitCode}");
+                        return FlowStepResult.Failure($"Aspire command exit code: {aspireExitCode}");
                     }
                     return FlowStepResult.Success;
                 }
@@ -102,7 +110,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                     _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandInfo, aspnetExitCode, chosenCategory));
                     if (aspnetExitCode != 0)
                     {
-                        AnsiConsole.Console.WriteLine($"\nAspNet command exit code: {aspnetExitCode}");
+                        return FlowStepResult.Failure($"AspNet command exit code: {aspnetExitCode}");
                     }
                     return FlowStepResult.Success;
                 }
@@ -125,7 +133,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                     _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandInfo, exitCode, chosenCategory));
                     if (exitCode != 0)
                     {
-                        AnsiConsole.Console.WriteLine($"\nCommand exit code: {exitCode}");
+                        return FlowStepResult.Failure($"Command exit code: {exitCode}");
                     }
 
                     return FlowStepResult.Success;

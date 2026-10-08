@@ -99,10 +99,6 @@
     <None Pack="true" Include="AspNet\Templates\net11.0\CodeModificationConfigs\*.json">
       <PackagePath>AspNet\CodeModificationConfigs\net11.0</PackagePath>
     </None>
-    <!-- BlazorEntraId templates for net10.0 -->
-    <None Pack="true" Include="AspNet\Templates\net10.0\BlazorEntraId\*.tt" PackagePath="AspNet\Templates\net10.0\BlazorEntraId\" />
-    <!-- BlazorEntraId templates for net11.0 -->
-    <None Pack="true" Include="AspNet\Templates\net11.0\BlazorEntraId\*.tt" PackagePath="AspNet\Templates\net11.0\BlazorEntraId\" />
     <None Include="AspNet\Templates\Shared\CodeBlocks\*" Pack="true" PackagePath="AspNet\Shared\CodeBlocks\">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>

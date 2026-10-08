@@ -81,14 +81,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// <returns>Task representing the asynchronous operation.</returns>
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
-            const string defaultInstance = "https://login.microsoftonline.com/";
-            const string defaultCallbackPath = "/signin-oidc";
-
             try
             {
                 var baseProjectPath = Path.GetDirectoryName(ProjectPath);
+                if (string.IsNullOrEmpty(baseProjectPath))
+                {
+                    baseProjectPath = Directory.GetCurrentDirectory();
+                }
 
-                if (string.IsNullOrEmpty(ProjectPath) || baseProjectPath is null || !_fileSystem.DirectoryExists(baseProjectPath))
+                if (string.IsNullOrEmpty(ProjectPath) || !_fileSystem.DirectoryExists(baseProjectPath))
                 {
                     _logger.LogError($"Invalid project path: {ProjectPath}");
                     return Task.FromResult(false);
@@ -115,7 +116,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 
                     try
                     {
-                        JsonNode? parsedSettings = JsonNode.Parse(devSettingsJson);
+                        JsonNode? parsedSettings = ParseDevelopmentSettings(devSettingsJson);
 
                         if (parsedSettings is null)
                         {
@@ -143,40 +144,48 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     developmentSettings = new JsonObject();
                 }
 
-                string resolvedDomain = !string.IsNullOrWhiteSpace(Domain)
-                    ? Domain
-                    : $"{Username}.onmicrosoft.com";
-
-                var azureAdConfig = new JsonObject
-                {
-                    ["Instance"] = !string.IsNullOrWhiteSpace(Instance) ? Instance : defaultInstance,
-                    ["TenantId"] = TenantId,
-                    ["Domain"] = resolvedDomain,
-                    ["ClientId"] = ClientId,
-                    ["CallbackPath"] = !string.IsNullOrWhiteSpace(CallbackPath) ? CallbackPath : defaultCallbackPath
-                };
+                var azureAdConfig = CreateAzureAdConfiguration(Username, TenantId, ClientId, Domain, Instance, CallbackPath);
 
                 JsonNode? existingAzureAd = developmentSettings["AzureAd"];
 
-                if (!Overwrite && existingAzureAd is JsonObject existingAzureAdObject && HasConflictingAzureAdSettings(existingAzureAdObject, azureAdConfig))
+                if (!Overwrite && existingAzureAd is JsonObject existingAzureAdObject)
                 {
-                    _logger.LogError("Conflicting AzureAd values already exist in appsettings.Development.json. Re-run with '--overwrite' to replace existing managed settings.");
-                    return Task.FromResult(false);
+                    string? conflictingKey = GetFirstConflictingAzureAdKey(existingAzureAdObject, azureAdConfig);
+                    if (!string.IsNullOrEmpty(conflictingKey))
+                    {
+                        _logger.LogError($"Conflicting AzureAd value for key '{conflictingKey}' already exists in appsettings.Development.json. Re-run with '--overwrite' to replace existing managed settings.");
+                        return Task.FromResult(false);
+                    }
                 }
 
                 if (!Overwrite && existingAzureAd is not null && existingAzureAd is not JsonObject)
                 {
-                    _logger.LogError("The existing AzureAd section in appsettings.Development.json is not a JSON object. Re-run with '--overwrite' to replace it.");
+                    _logger.LogError("Conflicting AzureAd value for key 'AzureAd' in appsettings.Development.json: the section is not a JSON object. Re-run with '--overwrite' to replace it.");
                     return Task.FromResult(false);
                 }
 
-                if (JsonNode.DeepEquals(existingAzureAd, azureAdConfig))
+                if (existingAzureAd is JsonObject existingAzureAdObjectForNoWrite &&
+                    HasMatchingManagedAzureAdSettings(existingAzureAdObjectForNoWrite, azureAdConfig))
                 {
                     _logger.LogInformation("No changes needed for AzureAd configuration in appsettings.Development.json.");
                     return Task.FromResult(true);
                 }
 
-                developmentSettings["AzureAd"] = azureAdConfig;
+                JsonObject targetAzureAd = existingAzureAd switch
+                {
+                    JsonObject jsonObject => jsonObject,
+                    _ => new JsonObject()
+                };
+
+                foreach (var setting in azureAdConfig)
+                {
+                    targetAzureAd[setting.Key] = setting.Value?.DeepClone();
+                }
+
+                if (existingAzureAd is not JsonObject)
+                {
+                    developmentSettings["AzureAd"] = targetAzureAd;
+                }
 
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 _fileSystem.WriteAllText(devSettingsPath, developmentSettings.ToJsonString(options));
@@ -192,21 +201,59 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             }
         }
 
-        private static bool HasConflictingAzureAdSettings(JsonObject existingAzureAd, JsonObject generatedAzureAd)
+        internal static JsonNode? ParseDevelopmentSettings(string json)
         {
-            foreach (string key in new[] { "Instance", "TenantId", "Domain", "ClientId", "CallbackPath" })
+            return JsonNode.Parse(
+                json,
+                new JsonNodeOptions { PropertyNameCaseInsensitive = true },
+                new JsonDocumentOptions
+                {
+                    CommentHandling = JsonCommentHandling.Skip,
+                    AllowTrailingCommas = true
+                });
+        }
+
+        internal static JsonObject CreateAzureAdConfiguration(
+            string? username, string? tenantId, string? clientId,
+            string? domain = null, string? instance = null, string? callbackPath = null)
+        {
+            return new JsonObject
             {
-                string? existingValue = existingAzureAd[key]?.ToString();
-                string? generatedValue = generatedAzureAd[key]?.ToString();
+                ["Instance"] = !string.IsNullOrWhiteSpace(instance) ? instance : "https://login.microsoftonline.com/",
+                ["TenantId"] = tenantId,
+                ["Domain"] = !string.IsNullOrWhiteSpace(domain) ? domain : $"{username}.onmicrosoft.com",
+                ["ClientId"] = clientId,
+                ["CallbackPath"] = !string.IsNullOrWhiteSpace(callbackPath) ? callbackPath : "/signin-oidc"
+            };
+        }
+
+        internal static string? GetFirstConflictingAzureAdKey(JsonObject existingAzureAd, JsonObject generatedAzureAd)
+        {
+            foreach (var setting in generatedAzureAd)
+            {
+                string? existingValue = existingAzureAd[setting.Key]?.ToString();
 
                 if (!string.IsNullOrEmpty(existingValue) &&
-                    !string.Equals(existingValue, generatedValue, StringComparison.Ordinal))
+                    !JsonNode.DeepEquals(existingAzureAd[setting.Key], setting.Value))
                 {
-                    return true;
+                    return setting.Key;
                 }
             }
 
-            return false;
+            return null;
+        }
+
+        private static bool HasMatchingManagedAzureAdSettings(JsonObject existingAzureAd, JsonObject generatedAzureAd)
+        {
+            foreach (var setting in generatedAzureAd)
+            {
+                if (!JsonNode.DeepEquals(existingAzureAd[setting.Key], setting.Value))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

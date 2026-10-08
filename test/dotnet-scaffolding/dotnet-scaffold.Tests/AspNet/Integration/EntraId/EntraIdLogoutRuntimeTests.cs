@@ -1,29 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-extern alias MicrosoftIdentityWeb;
-
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
-using System.Security.Claims;
-using System.Text.Encodings.Web;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Antiforgery;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using MicrosoftIdentityWeb::Microsoft.Identity.Web;
+using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
@@ -35,67 +22,164 @@ public class EntraIdLogoutRuntimeTests
     [Theory]
     [InlineData("net10.0")]
     [InlineData("net11.0")]
-    public async Task GeneratedLogoutForm_ClearsCookieAndSignsOutOpenIdConnect(string targetFramework)
+    public async Task GeneratedApplication_LogoutFormIsCsrfProtectedAndSignsOut(string targetFramework)
     {
-        var generatedForm = GetGeneratedFormContract(targetFramework);
-        await using var app = await CreateAppAsync(generatedForm);
-        using var client = app.GetTestClient();
+        string testDirectory = Path.Combine(Path.GetTempPath(), nameof(EntraIdLogoutRuntimeTests), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(testDirectory);
 
-        var signInResponse = await client.PostAsync("/test/signin", content: null);
-        var authCookie = GetCookie(signInResponse, CookieAuthenticationDefaults.CookiePrefix);
-        var formResponse = await SendAsync(client, HttpMethod.Get, "/test/logout-form", authCookie);
-        var formHtml = await formResponse.Content.ReadAsStringAsync();
-        var antiforgeryCookie = GetCookie(formResponse, ".AspNetCore.Antiforgery.");
-        var action = GetHtmlAttribute(formHtml, "form", "action");
-        var requestToken = GetInputValue(formHtml, "__RequestVerificationToken");
-        var returnUrl = GetInputValue(formHtml, "ReturnUrl");
-
-        using var logoutContent = new FormUrlEncodedContent(
-        [
-            new("__RequestVerificationToken", requestToken),
-            new("ReturnUrl", returnUrl)
-        ]);
-        var logoutResponse = await SendAsync(
-            client,
-            HttpMethod.Post,
-            action,
-            $"{authCookie}; {antiforgeryCookie}",
-            logoutContent);
-
-        Assert.Equal(HttpStatusCode.Redirect, logoutResponse.StatusCode);
-        Assert.Contains(
-            logoutResponse.Headers.GetValues("Set-Cookie"),
-            value => value.StartsWith(CookieAuthenticationDefaults.CookiePrefix, StringComparison.Ordinal) &&
-                value.Contains("expires=", StringComparison.OrdinalIgnoreCase));
-        Assert.True(app.Services.GetRequiredService<OpenIdConnectSignOutState>().WasSignedOut);
-    }
-
-    [Fact]
-    public async Task Logout_CrossOriginWithoutAntiforgeryToken_IsRejected()
-    {
-        await using var app = await CreateAppAsync();
-        using var client = app.GetTestClient();
-        var signInResponse = await client.PostAsync("/test/signin", content: null);
-        var authCookie = GetCookie(signInResponse, CookieAuthenticationDefaults.CookiePrefix);
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/authentication/logout")
+        try
         {
-            Content = new FormUrlEncodedContent([new("ReturnUrl", "/")])
-        };
-        request.Headers.Add("Origin", "https://attacker.example");
-        request.Headers.Add("Cookie", authCookie);
+            CreateGeneratedApplication(testDirectory, targetFramework);
+            var (buildExitCode, buildOutput, buildError) =
+                await ScaffoldCliHelper.RunBuildForFrameworkAsync(testDirectory, targetFramework);
+            Assert.True(
+                buildExitCode == 0,
+                $"Generated application should build.\nOutput: {buildOutput}\nError: {buildError}");
 
-        var response = await client.SendAsync(request);
+            int port = GetAvailablePort();
+            using var process = StartGeneratedApplication(testDirectory, targetFramework, port);
+            Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
+            Task<string> errorTask = process.StandardError.ReadToEndAsync();
 
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.False(app.Services.GetRequiredService<OpenIdConnectSignOutState>().WasSignedOut);
+            try
+            {
+                using var client = CreateClient(port);
+                await WaitUntilReadyAsync(client, process, outputTask, errorTask);
+
+                var signInResponse = await client.PostAsync("/test/signin", content: null);
+                var authCookie = GetCookie(signInResponse, ".AspNetCore.Cookies");
+                var formResponse = await SendAsync(client, HttpMethod.Get, "/", authCookie);
+                var formHtml = await formResponse.Content.ReadAsStringAsync();
+                var antiforgeryCookie = GetCookie(formResponse, ".AspNetCore.Antiforgery.");
+                var action = GetHtmlAttribute(formHtml, "form", "action");
+                var requestToken = GetInputValue(formHtml, "__RequestVerificationToken");
+                var returnUrl = GetInputValue(formHtml, "ReturnUrl");
+
+                using var crossOriginContent = new FormUrlEncodedContent([new("ReturnUrl", returnUrl)]);
+                using var crossOriginRequest = new HttpRequestMessage(HttpMethod.Post, action)
+                {
+                    Content = crossOriginContent
+                };
+                crossOriginRequest.Headers.Add("Origin", "https://attacker.example");
+                crossOriginRequest.Headers.Add("Cookie", authCookie);
+                var crossOriginResponse = await client.SendAsync(crossOriginRequest);
+
+                Assert.Equal(HttpStatusCode.BadRequest, crossOriginResponse.StatusCode);
+                Assert.Equal("false", await client.GetStringAsync("/test/signout-state"));
+
+                using var logoutContent = new FormUrlEncodedContent(
+                [
+                    new("__RequestVerificationToken", requestToken),
+                    new("ReturnUrl", returnUrl)
+                ]);
+                var logoutResponse = await SendAsync(
+                    client,
+                    HttpMethod.Post,
+                    action,
+                    $"{authCookie}; {antiforgeryCookie}",
+                    logoutContent);
+
+                Assert.Equal(HttpStatusCode.Redirect, logoutResponse.StatusCode);
+                Assert.Contains(
+                    logoutResponse.Headers.GetValues("Set-Cookie"),
+                    value => value.StartsWith(".AspNetCore.Cookies", StringComparison.Ordinal) &&
+                        value.Contains("expires=", StringComparison.OrdinalIgnoreCase));
+                Assert.Equal("true", await client.GetStringAsync("/test/signout-state"));
+            }
+            finally
+            {
+                if (!process.HasExited)
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+
+                await process.WaitForExitAsync();
+            }
+        }
+        finally
+        {
+            if (Directory.Exists(testDirectory))
+            {
+                Directory.Delete(testDirectory, recursive: true);
+            }
+        }
     }
 
-    private static async Task<WebApplication> CreateAppAsync(GeneratedFormContract? generatedForm = null)
+    private static void CreateGeneratedApplication(string testDirectory, string targetFramework)
     {
-        generatedForm ??= new("/authentication/logout", "ReturnUrl");
-        var builder = WebApplication.CreateBuilder();
-        builder.WebHost.UseTestServer();
-        builder.Services.AddAntiforgery();
+        File.WriteAllText(Path.Combine(testDirectory, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
+        File.WriteAllText(Path.Combine(testDirectory, "GeneratedEntraApp.csproj"), $$"""
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <PropertyGroup>
+                <TargetFramework>{{targetFramework}}</TargetFramework>
+                <ImplicitUsings>enable</ImplicitUsings>
+                <Nullable>enable</Nullable>
+              </PropertyGroup>
+              <ItemGroup>
+                <PackageReference Include="Microsoft.Identity.Web" Version="4.10.0" />
+              </ItemGroup>
+            </Project>
+            """);
+
+        string componentsDirectory = Path.Combine(testDirectory, "Components");
+        Directory.CreateDirectory(componentsDirectory);
+        File.WriteAllText(Path.Combine(componentsDirectory, "_Imports.razor"), """
+            @using Microsoft.AspNetCore.Components.Authorization
+            @using Microsoft.AspNetCore.Components.Forms
+            @using Microsoft.AspNetCore.Components.Routing
+            @using Microsoft.AspNetCore.Components.Web
+            @using Microsoft.AspNetCore.Components.Web.Infrastructure
+            """);
+        File.WriteAllText(Path.Combine(componentsDirectory, "App.razor"), """
+            <!DOCTYPE html>
+            <html>
+            <head><title>Generated Entra App</title></head>
+            <body>
+                <Routes />
+            </body>
+            </html>
+            """);
+        File.WriteAllText(Path.Combine(componentsDirectory, "Routes.razor"), """
+            <Router AppAssembly="typeof(Program).Assembly">
+                <Found Context="routeData">
+                    <RouteView RouteData="routeData" />
+                </Found>
+            </Router>
+            """);
+        string pagesDirectory = Path.Combine(componentsDirectory, "Pages");
+        Directory.CreateDirectory(pagesDirectory);
+        File.WriteAllText(Path.Combine(pagesDirectory, "Home.razor"), """
+            @page "/"
+
+            <LoginOrLogout />
+            """);
+        File.WriteAllText(
+            Path.Combine(componentsDirectory, "LoginOrLogout.razor"),
+            GenerateLoginOrLogout(targetFramework));
+        File.WriteAllText(Path.Combine(testDirectory, "Program.cs"), GetProgramContent());
+    }
+
+    private static string GenerateLoginOrLogout(string targetFramework)
+        => targetFramework switch
+        {
+            "net10.0" => new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorEntraId.LoginOrLogout().TransformText(),
+            "net11.0" => new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorEntraId.LoginOrLogout().TransformText(),
+            _ => throw new ArgumentOutOfRangeException(nameof(targetFramework))
+        };
+
+    private static string GetProgramContent() => """
+        using System.Security.Claims;
+        using System.Text.Encodings.Web;
+        using GeneratedEntraApp.Components;
+        using Microsoft.AspNetCore.Authentication;
+        using Microsoft.AspNetCore.Authentication.Cookies;
+        using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+        using Microsoft.Extensions.Options;
+        using Microsoft.Identity.Web;
+
+        var builder = WebApplication.CreateBuilder(args);
+        builder.Services.AddRazorComponents();
+        builder.Services.AddCascadingAuthenticationState();
         builder.Services.AddAuthorization();
         builder.Services.AddSingleton<OpenIdConnectSignOutState>();
         builder.Services
@@ -112,24 +196,111 @@ public class EntraIdLogoutRuntimeTests
         app.MapPost("/test/signin", async context =>
         {
             var principal = new ClaimsPrincipal(
-                new ClaimsIdentity([new Claim(ClaimTypes.Name, "Test User")], CookieAuthenticationDefaults.AuthenticationScheme));
+                new ClaimsIdentity(
+                    [new Claim(ClaimTypes.Name, "Test User")],
+                    CookieAuthenticationDefaults.AuthenticationScheme));
             await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
         });
-        app.MapGet("/test/logout-form", async (HttpContext context, IAntiforgery antiforgery) =>
-        {
-            var tokens = antiforgery.GetAndStoreTokens(context);
-            context.Response.ContentType = "text/html";
-            await context.Response.WriteAsync($$"""
-                <form action="{{generatedForm.Action}}" method="post">
-                    <input type="hidden" name="{{tokens.FormFieldName}}" value="{{HtmlEncoder.Default.Encode(tokens.RequestToken!)}}" />
-                    <input type="hidden" name="{{generatedForm.ReturnUrlFieldName}}" value="/" />
-                    <button type="submit">Logout</button>
-                </form>
-                """);
-        });
+        app.MapGet("/test/signout-state", (OpenIdConnectSignOutState state) => state.WasSignedOut);
         app.MapGroup("/authentication").MapLoginAndLogout();
-        await app.StartAsync();
-        return app;
+        app.MapRazorComponents<App>();
+        app.Run();
+
+        public sealed class OpenIdConnectSignOutState
+        {
+            public bool WasSignedOut { get; set; }
+        }
+
+        public sealed class RecordingOpenIdConnectHandler(
+            IOptionsMonitor<AuthenticationSchemeOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder,
+            OpenIdConnectSignOutState state)
+            : SignOutAuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
+        {
+            protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+                => Task.FromResult(AuthenticateResult.NoResult());
+
+            protected override Task HandleSignOutAsync(AuthenticationProperties? properties)
+            {
+                state.WasSignedOut = true;
+                Context.Response.Redirect(properties?.RedirectUri ?? "/");
+                return Task.CompletedTask;
+            }
+        }
+        """;
+
+    private static Process StartGeneratedApplication(string testDirectory, string targetFramework, int port)
+    {
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = ScaffoldCliHelper.GetDotNetPath(),
+                WorkingDirectory = testDirectory,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.StartInfo.ArgumentList.Add("run");
+        process.StartInfo.ArgumentList.Add("--no-build");
+        process.StartInfo.ArgumentList.Add("--framework");
+        process.StartInfo.ArgumentList.Add(targetFramework);
+        process.StartInfo.ArgumentList.Add("--urls");
+        process.StartInfo.ArgumentList.Add($"http://127.0.0.1:{port}");
+        process.StartInfo.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
+        process.Start();
+        return process;
+    }
+
+    private static HttpClient CreateClient(int port)
+    {
+        var handler = new HttpClientHandler
+        {
+            AllowAutoRedirect = false,
+            UseCookies = false
+        };
+        return new HttpClient(handler)
+        {
+            BaseAddress = new Uri($"http://127.0.0.1:{port}")
+        };
+    }
+
+    private static async Task WaitUntilReadyAsync(
+        HttpClient client,
+        Process process,
+        Task<string> outputTask,
+        Task<string> errorTask)
+    {
+        string? lastResponse = null;
+        for (int attempt = 0; attempt < 60; attempt++)
+        {
+            if (process.HasExited)
+            {
+                Assert.Fail(
+                    $"Generated application exited before startup.\nOutput: {await outputTask}\nError: {await errorTask}");
+            }
+
+            try
+            {
+                using var response = await client.GetAsync("/");
+                if (response.IsSuccessStatusCode)
+                {
+                    return;
+                }
+
+                lastResponse = $"{(int)response.StatusCode} {response.StatusCode}: {await response.Content.ReadAsStringAsync()}";
+            }
+            catch (HttpRequestException)
+            {
+            }
+
+            await Task.Delay(500);
+        }
+
+        Assert.Fail($"Generated application did not become ready within 30 seconds. Last response: {lastResponse}");
     }
 
     private static async Task<HttpResponseMessage> SendAsync(
@@ -172,59 +343,12 @@ public class EntraIdLogoutRuntimeTests
         return WebUtility.HtmlDecode(match.Groups[1].Value);
     }
 
-    private static GeneratedFormContract GetGeneratedFormContract(string targetFramework)
+    private static int GetAvailablePort()
     {
-        var assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-        var templatePath = Path.GetFullPath(Path.Combine(
-            assemblyDirectory,
-            "..",
-            "..",
-            "..",
-            "..",
-            "..",
-            "src",
-            "dotnet-scaffolding",
-            "dotnet-scaffold",
-            "AspNet",
-            "Templates",
-            targetFramework,
-            "BlazorEntraId",
-            "LoginOrLogout.tt"));
-        var template = File.ReadAllText(templatePath);
-
-        var action = GetHtmlAttribute(template, "form", "action");
-        Assert.Contains("<AntiforgeryToken />", template);
-        var returnUrlFieldName = Regex.Match(
-            template,
-            """<input\b(?=[^>]*\btype="hidden")(?=[^>]*\bname="([^"]+)")(?=[^>]*\bvalue="@currentUrl")[^>]*>""",
-            RegexOptions.IgnoreCase);
-        Assert.True(returnUrlFieldName.Success, "Could not find the generated return URL field.");
-
-        return new($"/{action.TrimStart('/')}", returnUrlFieldName.Groups[1].Value);
-    }
-
-    private sealed record GeneratedFormContract(string Action, string ReturnUrlFieldName);
-
-    private sealed class OpenIdConnectSignOutState
-    {
-        public bool WasSignedOut { get; set; }
-    }
-
-    private sealed class RecordingOpenIdConnectHandler(
-        IOptionsMonitor<AuthenticationSchemeOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        OpenIdConnectSignOutState state)
-        : SignOutAuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
-    {
-        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
-            => Task.FromResult(AuthenticateResult.NoResult());
-
-        protected override Task HandleSignOutAsync(AuthenticationProperties? properties)
-        {
-            state.WasSignedOut = true;
-            Context.Response.Redirect(properties?.RedirectUri ?? "/");
-            return Task.CompletedTask;
-        }
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        listener.Stop();
+        return port;
     }
 }

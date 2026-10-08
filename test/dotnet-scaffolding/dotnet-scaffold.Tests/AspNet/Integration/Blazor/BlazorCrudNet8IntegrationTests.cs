@@ -41,7 +41,10 @@ public enum EmploymentType
         // Set up Blazor project structure required for scaffolded code to compile
         var componentsDir = Path.Combine(_testProjectDir, "Components");
         Directory.CreateDirectory(componentsDir);
-        File.WriteAllText(Path.Combine(componentsDir, "_Imports.razor"), ScaffoldCliHelper.GetBlazorImportsRazor());
+        File.WriteAllText(
+            Path.Combine(componentsDir, "_Imports.razor"),
+            ScaffoldCliHelper.GetBlazorImportsRazor() +
+            "@using TestProject\n@using TestProject.Components\n@using TestProject.Components.Layout\n");
         File.WriteAllText(Path.Combine(componentsDir, "App.razor"), ScaffoldCliHelper.GetBlazorAppRazor());
         File.WriteAllText(Path.Combine(componentsDir, "Routes.razor"), ScaffoldCliHelper.GetBlazorRoutesRazor());
         var layoutDir = Path.Combine(componentsDir, "Layout");

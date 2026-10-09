@@ -95,6 +95,21 @@
                     ]
                 }
             ]
+        },
+        {
+            "FileName": "Components\\Layout\\NavMenu.razor",
+            "Replacements": [
+                {
+                    "CheckBlock": "<LoginOrLogout />",
+                    "ReplaceSnippet": [
+                        "</nav>"
+                    ],
+                    "MultiLineBlock": [
+                        "    <LoginOrLogout />",
+                        "    </nav>"
+                    ]
+                }
+            ]
         }
     ]
 }

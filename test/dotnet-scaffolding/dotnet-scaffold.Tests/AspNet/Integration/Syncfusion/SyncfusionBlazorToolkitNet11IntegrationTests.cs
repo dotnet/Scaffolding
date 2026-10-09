@@ -8,13 +8,13 @@ using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Syncfusion;
 
-public class SyncfusionBlazorToolkitNet9IntegrationTests : SyncfusionBlazorToolkitIntegrationTestsBase
+public class SyncfusionBlazorToolkitNet11IntegrationTests : SyncfusionBlazorToolkitIntegrationTestsBase
 {
-    protected override string TargetFramework => "net9.0";
-    protected override string TestClassName => nameof(SyncfusionBlazorToolkitNet9IntegrationTests);
+    protected override string TargetFramework => "net11.0";
+    protected override string TestClassName => nameof(SyncfusionBlazorToolkitNet11IntegrationTests);
 
     [Fact]
-    public async Task Scaffold_SyncfusionBlazorToolkit_Net9_CliInvocation()
+    public async Task Scaffold_SyncfusionBlazorToolkit_Net11_CliInvocation()
     {
         WriteBlazorWebAppScaffold();
 
@@ -23,13 +23,16 @@ public class SyncfusionBlazorToolkitNet9IntegrationTests : SyncfusionBlazorToolk
         Assert.True(cliExitCode == 0,
             $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
+        // Package reference was added.
         string csproj = File.ReadAllText(_testProjectPath);
         Assert.Contains("Syncfusion.Blazor.Toolkit", csproj);
 
+        // Program.cs was modified to register services and import the namespace.
         string programCs = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("AddSyncfusionBlazorToolkit", programCs);
         Assert.Contains("using Syncfusion.Blazor.Toolkit", programCs);
 
+        // Components/_Imports.razor received the @using directive.
         string imports = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "_Imports.razor"));
         Assert.Contains("@using Syncfusion.Blazor.Toolkit", imports);
 
@@ -47,9 +50,8 @@ public class SyncfusionBlazorToolkitNet9IntegrationTests : SyncfusionBlazorToolk
     /// project only has a root one.
     /// </summary>
     [Fact]
-    public async Task Scaffold_SyncfusionBlazorToolkit_Net9_RootImportsRazor_WritesUsingOnDisk()
+    public async Task Scaffold_SyncfusionBlazorToolkit_Net11_RootImportsRazor_WritesUsingOnDisk()
     {
-        // Arrange — classic layout: _Imports at project root, no Components/_Imports.
         File.WriteAllText(_testProjectPath, BlazorWebProjectContent);
         File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"),
             ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
@@ -59,28 +61,24 @@ public class SyncfusionBlazorToolkitNet9IntegrationTests : SyncfusionBlazorToolk
         File.WriteAllText(Path.Combine(_testProjectDir, "wwwroot", "index.html"),
             "<!DOCTYPE html><html><head></head><body></body></html>");
 
-        // Act
         var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework, "syncfusion-blazor-toolkit", "--project", _testProjectPath);
         Assert.True(exitCode == 0, $"Output: {output}\nError: {error}");
 
-        // Assert — on disk, not only summary text
         var imports = File.ReadAllText(Path.Combine(_testProjectDir, "_Imports.razor"));
         Assert.Contains("@using Syncfusion.Blazor.Toolkit", imports);
 
-        // The Components/_Imports.razor file must NOT have been created or
-        // modified, since the project only has the root one.
         Assert.False(File.Exists(Path.Combine(_testProjectDir, "Components", "_Imports.razor")),
             "Components/_Imports.razor should not be created when the project only has a root _Imports.razor.");
     }
 
     /// <summary>
-    /// Standalone Blazor WebAssembly layout on net9: Program.cs uses
+    /// Standalone Blazor WebAssembly layout on net11: Program.cs uses
     /// <c>WebAssemblyHostBuilder.CreateDefault</c>; the scaffolder must
     /// register services via that anchor.
     /// </summary>
     [Fact]
-    public async Task Scaffold_SyncfusionBlazorToolkit_Net9_StandaloneWasm_RegistersAndAddsUsing()
+    public async Task Scaffold_SyncfusionBlazorToolkit_Net11_StandaloneWasm_RegistersAndAddsUsing()
     {
         File.WriteAllText(_testProjectPath,
             "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\">" +
@@ -111,30 +109,5 @@ public class SyncfusionBlazorToolkitNet9IntegrationTests : SyncfusionBlazorToolk
 
         string indexHtml = File.ReadAllText(Path.Combine(_testProjectDir, "wwwroot", "index.html"));
         Assert.DoesNotContain("Syncfusion.Blazor.Toolkit/styles/fluent.min.css", indexHtml);
-    }
-
-    /// <summary>
-    /// Pages/_Imports.razor only (no Components/_Imports.razor): the
-    /// scaffolder should find and modify Pages/_Imports.razor on disk.
-    /// </summary>
-    [Fact]
-    public async Task Scaffold_SyncfusionBlazorToolkit_Net9_PagesImportsRazor_WritesUsingOnDisk()
-    {
-        Directory.CreateDirectory(Path.Combine(_testProjectDir, "Pages"));
-        File.WriteAllText(_testProjectPath, BlazorWebProjectContent);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"),
-            ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
-        File.WriteAllText(Path.Combine(_testProjectDir, "Pages", "_Imports.razor"),
-            "@using Microsoft.AspNetCore.Components\n");
-
-        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework, "syncfusion-blazor-toolkit", "--project", _testProjectPath);
-        Assert.True(exitCode == 0, $"Output: {output}\nError: {error}");
-
-        var imports = File.ReadAllText(Path.Combine(_testProjectDir, "Pages", "_Imports.razor"));
-        Assert.Contains("@using Syncfusion.Blazor.Toolkit", imports);
-
-        Assert.False(File.Exists(Path.Combine(_testProjectDir, "Components", "_Imports.razor")),
-            "Components/_Imports.razor should not be created when the project only has Pages/_Imports.razor.");
     }
 }

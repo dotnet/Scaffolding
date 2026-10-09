@@ -147,12 +147,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string Description = "Configure Syncfusion Blazor Toolkit in an existing Blazor application.";
             // Extended guidance (target layouts, soft-fail behavior, render-mode reminder)
             // shown in the scaffolder summary and any detailed help output.
-            internal const string ExtendedDescription = "Adds the Syncfusion.Blazor.Toolkit package reference, service registration, using directives, and theme stylesheet. " +
+            internal const string ExtendedDescription = "Adds the Syncfusion.Blazor.Toolkit 2.0.0+ package reference, " +
+                "AddSyncfusionBlazorToolkit() service registration, and the @using Syncfusion.Blazor.Toolkit directive. " +
+                "The 2.0.0+ package ships styles with the assembly and exposes a single unified namespace, so no external " +
+                "stylesheet <link> in App.razor / wwwroot/index.html and no per-component usings are required. " +
                 "Primary target: Blazor Web App with Components/_Imports.razor and Components/App.razor. " +
-                "Standalone Blazor WASM is also supported; when Components/App.razor is absent the theme stylesheet is added to wwwroot/index.html instead, " +
-                "or skipped with a warning if neither file is present. " +
-                "The scaffolder operates on a single --project; for multi-project (Auto/WASM client+server) solutions, " +
-                "run it on the project that hosts interactive components and static assets. " +
+                "Standalone Blazor WASM is also supported (root _Imports.razor and wwwroot/index.html). " +
+                "The scaffolder operates on a single --project; for multi-project (Auto / WASM client+server) solutions, " +
+                "run it on BOTH the server project (for AddSyncfusionBlazorToolkit) and the .Client project (for the @using directive). " +
                 "Syncfusion Blazor Toolkit components require an interactive render mode (@rendermode InteractiveServer / InteractiveAuto / InteractiveWebAssembly) " +
                 "and do not work under static SSR.";
             internal const string Example = "dotnet scaffold aspnet syncfusion-blazor-toolkit --project ./MyBlazorApp/MyBlazorApp.csproj";

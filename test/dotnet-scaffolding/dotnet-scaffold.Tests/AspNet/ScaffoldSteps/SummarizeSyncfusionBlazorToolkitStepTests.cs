@@ -68,8 +68,13 @@ public class SummarizeSyncfusionBlazorToolkitStepTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_LogsSkippedTheme_WithWarning()
+    public async Task ExecuteAsync_LogsSkippedTheme_WithInformation()
     {
+        // With Syncfusion.Blazor.Toolkit 2.0.0+ no external stylesheet
+        // is required, so a missing theme host is no longer a warning.
+        // The summary step should still surface the absence at
+        // Information level so users know that the detection was
+        // attempted.
         _context.Properties[nameof(SyncfusionBlazorToolkitSettings)] = new SyncfusionBlazorToolkitSettings
         {
             Project = "Test.csproj",
@@ -81,7 +86,9 @@ public class SummarizeSyncfusionBlazorToolkitStepTests
 
         await step.ExecuteAsync(_context, CancellationToken.None);
 
-        Assert.Contains(logger.Entries, e => e.Message.Contains("SKIPPED", System.StringComparison.OrdinalIgnoreCase));
+        // Should mention the absent host file / no-stylesheet message.
+        Assert.Contains(logger.Entries,
+            e => e.Message.Contains("no external stylesheet", System.StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]

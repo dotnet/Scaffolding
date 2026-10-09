@@ -77,20 +77,8 @@ internal class SummarizeSyncfusionBlazorToolkitStep : ScaffoldStep
                 "Add '@using Syncfusion.Blazor.Toolkit' to your _Imports file manually if your project uses one.");
         }
 
-        if (!string.IsNullOrEmpty(settings.ThemeFile))
-        {
-            // 2.0.0+ no longer injects a theme stylesheet. Surface this
-            // explicitly so users on older projects do not expect a
-            // link tag to appear.
-            _logger.LogInformation(
-                "  - Theme host detected at '{ThemeFile}'. No external stylesheet link is required for Syncfusion.Blazor.Toolkit 2.0.0+; styles are bundled and activated through AddSyncfusionBlazorToolkit().",
-                settings.ThemeFile);
-        }
-        else if (settings.ThemeFileSkipped)
-        {
-            _logger.LogInformation(
-                "  - No theme host file (Components/App.razor or wwwroot/index.html) was found; no external stylesheet link is required for the 2.0.0+ package.");
-        }
+        _logger.LogInformation(
+            "  - Styles: Syncfusion.Blazor.Toolkit 2.0.0+ ships styles with the assembly. No host stylesheet link was added.");
 
         // Multi-project (Blazor Web App Auto) guidance. The detection
         // is best-effort and only fires when a .Client sibling project

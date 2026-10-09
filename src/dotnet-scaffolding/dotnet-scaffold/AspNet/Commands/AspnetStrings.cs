@@ -142,21 +142,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
         internal class SyncfusionBlazorToolkit
         {
             internal const string Name = "syncfusion-blazor-toolkit";
-            internal const string DisplayName = "Syncfusion Blazor Toolkit";
+            internal const string DisplayName = "Syncfusion Blazor Toolkit setup";
             // Short display description, suitable for CLI UIs and tight layouts.
-            internal const string Description = "Configure Syncfusion Blazor Toolkit in an existing Blazor application.";
-            // Extended guidance (target layouts, soft-fail behavior, render-mode reminder)
-            // shown in the scaffolder summary and any detailed help output.
-            internal const string ExtendedDescription = "Adds the Syncfusion.Blazor.Toolkit 2.0.0+ package reference, " +
-                "AddSyncfusionBlazorToolkit() service registration, and the @using Syncfusion.Blazor.Toolkit directive. " +
-                "The 2.0.0+ package ships styles with the assembly and exposes a single unified namespace, so no external " +
-                "stylesheet <link> in App.razor / wwwroot/index.html and no per-component usings are required. " +
-                "Primary target: Blazor Web App with Components/_Imports.razor and Components/App.razor. " +
-                "Standalone Blazor WASM is also supported (root _Imports.razor and wwwroot/index.html). " +
-                "The scaffolder operates on a single --project; for multi-project (Auto / WASM client+server) solutions, " +
-                "run it on BOTH the server project (for AddSyncfusionBlazorToolkit) and the .Client project (for the @using directive). " +
-                "Syncfusion Blazor Toolkit components require an interactive render mode (@rendermode InteractiveServer / InteractiveAuto / InteractiveWebAssembly) " +
-                "and do not work under static SSR.";
+            internal const string Description = "Add the Syncfusion Blazor Toolkit package, service registration, and imports to an existing Blazor app.";
+            // Extended guidance shown in detailed help. Setup only — no pages or sample UI.
+            internal const string ExtendedDescription = "Installs Syncfusion.Blazor.Toolkit, registers AddSyncfusionBlazorToolkit(), " +
+                "and adds @using Syncfusion.Blazor.Toolkit to the project's _Imports.razor (Components folder or project root). " +
+                "Does not generate pages or sample UI. " +
+                "The 2.0.0+ package ships styles with the assembly, so no host stylesheet link is added. " +
+                "Operates on a single --project. For a Blazor Web App Auto solution, run it on the server project (services) and the .Client project (imports).";
             internal const string Example = "dotnet scaffold aspnet syncfusion-blazor-toolkit --project ./MyBlazorApp/MyBlazorApp.csproj";
             internal const string ExampleDescription = "Set up Syncfusion Blazor Toolkit in an existing Blazor app:";
         }

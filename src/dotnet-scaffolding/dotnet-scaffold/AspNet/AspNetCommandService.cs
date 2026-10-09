@@ -39,7 +39,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(ValidateEfControllerStep),
                 typeof(ValidateEntraIdStep),
                 typeof(ValidateSyncfusionBlazorToolkitStep),
-                typeof(ResolveSyncfusionBlazorToolkitThemeStep),
                 typeof(SummarizeSyncfusionBlazorToolkitStep),
                 typeof(ValidateIdentityStep),
                 typeof(ValidateMinimalApiStep),
@@ -229,7 +228,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.Project = context.GetOptionResult(options.Project);
                     step.Prerelease = context.GetOptionResult(options.Prerelease);
                 })
-                .WithStep<ResolveSyncfusionBlazorToolkitThemeStep>()
                 .WithSyncfusionBlazorToolkitAddPackagesStep()
                 .WithSyncfusionBlazorToolkitCodeChangeStep()
                 .WithStep<SummarizeSyncfusionBlazorToolkitStep>();

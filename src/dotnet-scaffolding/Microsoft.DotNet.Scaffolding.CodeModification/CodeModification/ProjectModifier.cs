@@ -81,43 +81,31 @@ internal class ProjectModifier
     {
         switch (file.Extension)
         {
-            switch (file.Extension)
-            {
-                case "cs":
-                    // Prefer workspace document; fall back to loading from disk when
-                    // MSBuildWorkspace returned an empty/partial project.
-                    var document = project.GetDocument(file.FileName) ?? project.GetDocumentFromName(file.FileName);
-                    document = await ModifyCsFile(file, document, options);
-                    //replace simple CodeFile.Replacements
-                    document = await ApplyTextReplacements(file, document, options);
-                    return document?.Project ?? project;
-                case "cshtml":
-                    var textDoc = project.GetAdditionalDocument(file.FileName);
-                    textDoc = await ModifyCshtmlFile(file, textDoc, options);
-                    return textDoc?.Project ?? project;
-                case "razor":
-                case "html":
-                    // Prefer workspace AdditionalDocument when present (in-memory edit).
-                    // Use exact relative path so "_Imports.razor" does not collide with
-                    // "Components/_Imports.razor" (EndsWith would match either).
-                    var markupDoc = project.GetAdditionalDocumentByRelativePath(file.FileName)
-                                    ?? project.GetAdditionalDocument(file.FileName);
-                    if (markupDoc is not null)
-                    {
-                        markupDoc = await ApplyTextReplacements(file, markupDoc, options);
-                        project = markupDoc?.Project ?? project;
-                    }
+            case "cs":
+                //get CodeAnalysis.Document
+                var document = project.GetDocument(file.FileName);
+                document = await ModifyCsFile(file, document, options);
+                //replace simple CodeFile.Replacements
+                document = await ApplyTextReplacements(file, document, options);
+                return document?.Project ?? project;
+            case "cshtml":
+                var textDoc = project.GetAdditionalDocument(file.FileName);
+                textDoc = await ModifyCshtmlFile(file, textDoc, options);
+                return textDoc?.Project ?? project;
+            case "razor":
+                textDoc = project.GetAdditionalDocument(file.FileName);
+                textDoc = await ApplyTextReplacements(file, textDoc, options);
+                return textDoc?.Project ?? project;
+            case "css":
+                var replacements = file.Replacements?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options)).ToArray();
+                if (replacements is null || replacements.Length == 0)
+                {
+                    break;
+                }
 
-                    // MSBuildWorkspace.TryApplyChanges often does NOT write
-                    // AdditionalDocuments (.razor / .html) to disk. Always apply the same
-                    // replacements on disk so root _Imports.razor, Pages/_Imports.razor,
-                    // App.razor, and index.html stick. This mirrors the css handling
-                    // above and also covers the case where the AdditionalDocument
-                    // couldn't be located at all.
-                    ApplyDiskReplacements(project, file, options);
-                    return project;
-                case "css":
-                    ApplyDiskReplacements(project, file, options);
+                var filePathOnDisk = project.GetFilePath(file.FileName);
+                if (string.IsNullOrEmpty(filePathOnDisk))
+                {
                     break;
                 }
 
@@ -253,56 +241,5 @@ internal class ProjectModifier
 
         DocumentBuilder documentBuilder = new(fileDoc, file, options, _consoleLogger);
         return await documentBuilder.RunAsync();
-    }
-
-    /// <summary>
-    /// Applies filtered replacements by resolving the file on disk when the Roslyn
-    /// workspace has no AdditionalDocument for it (empty MSBuild load / incomplete fallback).
-    /// </summary>
-    private static void ApplyDiskReplacements(Project project, CodeFile file, IList<string> options)
-    {
-        var filePathOnDisk = ResolveFilePathOnDisk(project, file.FileName);
-        if (string.IsNullOrEmpty(filePathOnDisk) || !File.Exists(filePathOnDisk))
-        {
-            return;
-        }
-
-        var replacements = file.Replacements?.Where(cc => ProjectModifierHelper.FilterOptions(cc.Options, options));
-        ProjectModifierHelper.ApplyReplacementsOnFileOnDisk(filePathOnDisk, replacements);
-    }
-
-    /// <summary>
-    /// Resolves a project-relative file name to a concrete on-disk path. Prefers an
-    /// exact relative-path match (so "_Imports.razor" does not collide with
-    /// "Components/_Imports.razor") and falls back to the existing
-    /// <see cref="RoslynExtensions.GetFilePath(Project, string?)"/> search for callers
-    /// that pass a bare file name.
-    /// </summary>
-    private static string? ResolveFilePathOnDisk(Project project, string? relativeOrName)
-    {
-        if (string.IsNullOrEmpty(relativeOrName) || string.IsNullOrEmpty(project.FilePath))
-        {
-            return null;
-        }
-
-        var projectDir = Path.GetDirectoryName(project.FilePath);
-        if (string.IsNullOrEmpty(projectDir))
-        {
-            return null;
-        }
-
-        var normalized = relativeOrName
-            .Replace('/', Path.DirectorySeparatorChar)
-            .Replace('\\', Path.DirectorySeparatorChar);
-
-        // Exact relative path first (matches discovery result).
-        var exact = Path.GetFullPath(Path.Combine(projectDir, normalized));
-        if (File.Exists(exact))
-        {
-            return exact;
-        }
-
-        // Fallback: existing EndsWith search.
-        return project.GetFilePath(relativeOrName);
     }
 }

@@ -10,169 +10,23 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 /// <summary>
 /// Helpers for the Syncfusion Blazor Toolkit setup scaffolder.
 ///
-/// <para><b>NuGet 2.0.0 behavior:</b> Syncfusion.Blazor.Toolkit 2.0.0+ ships
-/// with styles bundled and activated through the DI registration
-/// (<c>AddSyncfusionBlazorToolkit()</c>), so no external
-/// <c>&lt;link href="_content/.../fluent.min.css" /&gt;</c> tag is required
-/// in <c>App.razor</c> or <c>wwwroot/index.html</c>. Components also expose
-/// a single unified namespace — <c>@using Syncfusion.Blazor.Toolkit</c> —
-/// so the scaffolder only adds one <c>@using</c> directive regardless of
-/// the project layout.</para>
+/// <para>Setup is limited to the NuGet package, <c>AddSyncfusionBlazorToolkit()</c>
+/// in <c>Program.cs</c>, and a single <c>@using Syncfusion.Blazor.Toolkit</c> in
+/// the project's <c>_Imports.razor</c>. Syncfusion.Blazor.Toolkit 2.0.0+ ships
+/// styles with the assembly, so no host stylesheet link is added.</para>
 /// </summary>
 internal static class SyncfusionBlazorToolkitHelper
 {
-    // FileName marker used to identify the file entry that needs to be
-    // removed/rewritten at runtime to point at the discovered
-    // _Imports.razor file. Kept for backward compatibility with
-    // pre-2.0.0 JSON configs that may have this anchor entry. With the
-    // 2.0.0 unified namespace, the only required user-visible change is
-    // the @using directive; theme stylesheets are no longer injected.
-    internal const string ImportsFileMarker = "Components\\_Imports.razor";
-
-    // Optional theme block stub retained for callers that still want to
-    // inject an external stylesheet (only relevant when targeting a
-    // pre-2.0.0 version of the package). The new scaffolding no longer
-    // emits this entry; the constant is kept so legacy code paths
-    // continue to compile. With 2.0.0+, theme styles live inside the
-    // package and are activated via AddSyncfusionBlazorToolkit(), so the
-    // App.razor / index.html host files do not need to be modified.
-    private const string ThemeBlockJson =
-        "{" +
-        "\"FileName\":\"THEMEFILE\"," +
-        "\"Replacements\":[" +
-            "{" +
-                "\"ReplaceSnippet\":[\"</head>\"]," +
-                "\"MultiLineBlock\":[" +
-                    "\"    <link href=\\\"_content/Syncfusion.Blazor.Toolkit/styles/fluent.min.css\\\" rel=\\\"stylesheet\\\" />\"," +
-                    "\"</head>\"" +
-                "]," +
-                "\"CheckBlock\":\"Syncfusion.Blazor.Toolkit/styles/fluent.min.css\"" +
-            "}" +
-        "]" +
-        "}";
-
-    // A robust, anchor-free snippet that adds @using Syncfusion.Blazor.Toolkit
-    // to a discovered _Imports.razor file. The CodeModifier's
-    // 'applicableCodeChanges' filter (Block text already present) makes this
-    // idempotent and resilient to missing framework usings such as
-    // @using Microsoft.AspNetCore.Components.Forms. The block is also
-    // appended (not replaced) so the snippet is safe regardless of which
-    // other usings the project already has. A leading newline keeps the
-    // appended block from gluing to the previous line in the file.
-    //
-    // Syncfusion.Blazor.Toolkit 2.0.0+ exposes a single namespace
-    // (@using Syncfusion.Blazor.Toolkit) that is sufficient to render every
-    // Toolkit component. Domain-specific names that used to require
-    // additional @using directives (e.g. Syncfusion.Blazor.Toolkit.Forms)
-    // are no longer required.
-    private const string ImportsBlockJson =
-        "{" +
-        "\"FileName\":\"IMPORTSFILE\"," +
-        "\"Replacements\":[" +
-            "{" +
-                "\"Block\":\"\\n@using Syncfusion.Blazor.Toolkit\\n\"," +
-                "\"CheckBlock\":\"Syncfusion.Blazor.Toolkit\"" +
-            "}" +
-        "]" +
-        "}";
+    internal const string UsingDirective = "@using Syncfusion.Blazor.Toolkit";
+    internal const string ServiceRegistration = "builder.Services.AddSyncfusionBlazorToolkit();";
 
     /// <summary>
-    /// Canonicalizes a project-relative file path so that all forward slashes
-    /// are used regardless of host OS. Useful for log messages and unit-test
-    /// assertions where platform-neutral output is desired.
+    /// Loads the Program.cs-only code-modification config. Imports are applied
+    /// separately on disk so the using is written whether <c>_Imports.razor</c>
+    /// lives under <c>Components</c> or at the project root.
     /// </summary>
-    /// <remarks>
-    /// Do <b>not</b> use this for the FileName emitted in the code-modification
-    /// JSON. The CodeModifier looks the file up by EndsWith against the
-    /// AdditionalDocument.FilePath recorded by MSBuildWorkspace, which always
-    /// uses OS-native separators. Use <see cref="ToOsNativePath"/> for that
-    /// case instead.
-    /// </remarks>
-    public static string? CanonicalizePath(string? path)
-    {
-        if (string.IsNullOrEmpty(path))
-        {
-            return path;
-        }
-
-        return path.Replace('\\', '/');
-    }
-
-    /// <summary>
-    /// Converts a path to one that uses the OS-native directory separator
-    /// (backslash on Windows, forward slash on Linux/macOS). This is the
-    /// form that <c>MSBuildWorkspace</c> records in
-    /// <c>AdditionalDocument.FilePath</c> and that the CodeModifier matches
-    /// via <c>EndsWith</c>. Using canonical (forward-slash) paths here
-    /// causes the CodeModifier to silently skip files on Windows, which is
-    /// why the theme stylesheet and the <c>@using</c> directive were not
-    /// being injected.
-    /// </summary>
-    public static string? ToOsNativePath(string? path)
-    {
-        if (string.IsNullOrEmpty(path))
-        {
-            return path;
-        }
-
-        char native = Path.DirectorySeparatorChar;
-        if (native == '/')
-        {
-            return path.Replace('\\', '/');
-        }
-        else
-        {
-            return path.Replace('/', '\\');
-        }
-    }
-
-    /// <summary>
-    /// Loads the syncfusionBlazorToolkitChanges.json code-modification config
-    /// from disk and returns a JSON string with the file entries rewritten
-    /// to match the files actually present in the target project.
-    ///
-    /// <para>The <c>$(ThemeFile)</c> placeholder entry (no longer used by
-    /// 2.0.0+ configs but kept for backward compatibility) is replaced with a
-    /// concrete entry for <paramref name="themeFile"/> when supplied, or
-    /// dropped when <paramref name="themeFile"/> is null/empty. With
-    /// Syncfusion.Blazor.Toolkit 2.0.0+, no external stylesheet is needed
-    /// in <c>App.razor</c> or <c>wwwroot/index.html</c>; styles are bundled
-    /// with the package. The theme parameter is preserved for callers that
-    /// still need to inject a stylesheet (e.g. when targeting a pre-2.0.0
-    /// version of the package), but the scaffold step no longer wires
-    /// themeFile for default 2.0.0 runs.</para>
-    ///
-    /// <para>The <c>Components\_Imports.razor</c> anchor entry is replaced
-    /// with a concrete, anchor-free entry for <paramref name="importsFile"/>
-    /// when supplied, or dropped when <paramref name="importsFile"/> is
-    /// null/empty (so the scaffolder still succeeds in projects that don't
-    /// host a _Imports.razor file under Components/ or anywhere else).</para>
-    ///
-    /// <para>The emitted file paths use OS-native directory separators
-    /// (backslash on Windows, forward slash on Linux/macOS). This is what
-    /// <c>MSBuildWorkspace</c> records in <c>AdditionalDocument.FilePath</c>
-    /// and is what the CodeModifier matches via <c>EndsWith</c>. Canonical
-    /// (forward-slash) paths would silently fail to match on Windows and
-    /// cause the entire theme and using-directive change set to be
-    /// skipped. This is the bug behind the missing theme stylesheet and
-    /// missing <c>@using</c> directive in the generated project.</para>
-    /// </summary>
-    /// <param name="codeModificationFilePath">Absolute path of the source JSON file.</param>
-    /// <param name="themeFile">Project-relative theme host file path
-    /// (e.g. "Components/App.razor", "wwwroot/index.html") or null to drop
-    /// the theme entry. Separators are normalized to OS-native form
-    /// before emission. With 2.0.0+, pass null to skip theme injection
-    /// (styles are bundled and activated via DI).</param>
-    /// <param name="importsFile">Project-relative path of the discovered
-    /// _Imports.razor file (e.g. "Components/_Imports.razor" or
-    /// "_Imports.razor") or null to drop the imports entry. Separators
-    /// are normalized to OS-native form before emission.</param>
-    /// <param name="logger">Optional logger for structured diagnostic
-    /// output. When null, logging is skipped.</param>
     public static string? BuildResolvedCodeModifierConfigJson(
         string codeModificationFilePath,
-        string? themeFile,
-        string? importsFile,
         ILogger? logger = null)
     {
         if (string.IsNullOrEmpty(codeModificationFilePath) || !File.Exists(codeModificationFilePath))
@@ -192,8 +46,7 @@ internal static class SyncfusionBlazorToolkitHelper
         catch (Exception ex)
         {
             logger?.LogError(ex,
-                "Syncfusion Blazor Toolkit failed to read the code-modification config file '{ConfigPath}'. " +
-                "Verify the file exists, is readable, and is not locked by another process.",
+                "Syncfusion Blazor Toolkit failed to read the code-modification config file '{ConfigPath}'.",
                 codeModificationFilePath);
             return null;
         }
@@ -201,42 +54,23 @@ internal static class SyncfusionBlazorToolkitHelper
         if (string.IsNullOrWhiteSpace(jsonText))
         {
             logger?.LogWarning(
-                "Syncfusion Blazor Toolkit code-modification config file '{ConfigPath}' is empty. " +
-                "Skipping code-modification step.",
+                "Syncfusion Blazor Toolkit code-modification config file '{ConfigPath}' is empty.",
                 codeModificationFilePath);
             return null;
         }
 
-        JsonDocument doc;
         try
         {
-            doc = JsonDocument.Parse(jsonText);
-        }
-        catch (JsonException ex)
-        {
-            logger?.LogError(ex,
-                "Syncfusion Blazor Toolkit code-modification config file '{ConfigPath}' is not valid JSON. " +
-                "Repair the JSON or restore the file from source control, then re-run the scaffolder.",
-                codeModificationFilePath);
-            return null;
-        }
-
-        using (doc)
-        {
+            using JsonDocument doc = JsonDocument.Parse(jsonText);
             if (!doc.RootElement.TryGetProperty("Files", out JsonElement filesElement) ||
                 filesElement.ValueKind != JsonValueKind.Array)
             {
                 logger?.LogError(
-                    "Syncfusion Blazor Toolkit code-modification config file '{ConfigPath}' is missing the required 'Files' array. " +
-                    "Skipping code-modification step.",
+                    "Syncfusion Blazor Toolkit code-modification config file '{ConfigPath}' is missing the required 'Files' array.",
                     codeModificationFilePath);
                 return null;
             }
 
-            // Build a new Files array. We carry over each entry except the
-            // theme placeholder and the imports anchor. Those are
-            // re-emitted (or dropped) below based on what was actually
-            // discovered in the target project.
             using var stream = new MemoryStream();
             using (var writer = new Utf8JsonWriter(stream))
             {
@@ -245,66 +79,13 @@ internal static class SyncfusionBlazorToolkitHelper
                 writer.WriteStartArray();
                 foreach (JsonElement fileEntry in filesElement.EnumerateArray())
                 {
-                    string? fileName = null;
                     if (fileEntry.ValueKind == JsonValueKind.Object &&
                         fileEntry.TryGetProperty("FileName", out JsonElement fileNameElement) &&
-                        fileNameElement.ValueKind == JsonValueKind.String)
+                        fileNameElement.ValueKind == JsonValueKind.String &&
+                        string.Equals(fileNameElement.GetString(), "Program.cs", StringComparison.OrdinalIgnoreCase))
                     {
-                        fileName = fileNameElement.GetString();
+                        fileEntry.WriteTo(writer);
                     }
-
-                    // Drop any $(ThemeFile) placeholder entry. With
-                    // Syncfusion.Blazor.Toolkit 2.0.0+ no external
-                    // stylesheet is required, so the resolved config
-                    // should never include a theme entry. The
-                    // conditional re-emit below (when themeFile is
-                    // supplied) lets callers that explicitly want a
-                    // theme entry (e.g. pre-2.0.0 target) still get one.
-                    if (string.Equals(fileName, "$(ThemeFile)", StringComparison.Ordinal))
-                    {
-                        continue;
-                    }
-
-                    if (string.Equals(fileName, ImportsFileMarker, StringComparison.Ordinal))
-                    {
-                        // Drop the anchor-based placeholder; we'll re-add
-                        // it below with an anchor-free Block-only snippet
-                        // when an _Imports.razor file was discovered.
-                        continue;
-                    }
-
-                    fileEntry.WriteTo(writer);
-                }
-
-                if (!string.IsNullOrEmpty(themeFile))
-                {
-                    // IMPORTANT: Use OS-native separators in the JSON
-                    // output. The CodeModifier resolves FileName values
-                    // against MSBuildWorkspace's AdditionalDocument list
-                    // using EndsWith(OSNativePath). Forward slashes only
-                    // would silently fail to match the actual
-                    // AdditionalDocument paths on Windows (which use
-                    // backslashes) and vice versa on Linux (where the
-                    // file system *does* use forward slashes). Using
-                    // Path.GetRelativePath's OS-native output here keeps
-                    // the lookup working on every platform.
-                    // ToOsNativePath preserves null/empty so the IsNullOrEmpty
-                    // guard above guarantees osThemeFile is non-null here.
-                    string osThemeFile = ToOsNativePath(themeFile)!;
-                    string themeEntryJson = ThemeBlockJson.Replace("THEMEFILE", EscapeForJson(osThemeFile));
-                    using JsonDocument themeEntryDoc = JsonDocument.Parse(themeEntryJson);
-                    themeEntryDoc.RootElement.WriteTo(writer);
-                }
-
-                if (!string.IsNullOrEmpty(importsFile))
-                {
-                    // Same OS-native separator rule as for themeFile above.
-                    // ToOsNativePath preserves null/empty so the IsNullOrEmpty
-                    // guard above guarantees osImportsFile is non-null here.
-                    string osImportsFile = ToOsNativePath(importsFile)!;
-                    string importsEntryJson = ImportsBlockJson.Replace("IMPORTSFILE", EscapeForJson(osImportsFile));
-                    using JsonDocument importsEntryDoc = JsonDocument.Parse(importsEntryJson);
-                    importsEntryDoc.RootElement.WriteTo(writer);
                 }
 
                 writer.WriteEndArray();
@@ -313,41 +94,121 @@ internal static class SyncfusionBlazorToolkitHelper
 
             return Encoding.UTF8.GetString(stream.ToArray());
         }
+        catch (JsonException ex)
+        {
+            logger?.LogError(ex,
+                "Syncfusion Blazor Toolkit code-modification config file '{ConfigPath}' is not valid JSON.",
+                codeModificationFilePath);
+            return null;
+        }
     }
 
     /// <summary>
-    /// JSON-escapes a string for inline insertion into a JSON literal.
-    /// We build the theme block as a string template and substitute the
-    /// file path, so the path itself must be escaped (backslashes and
-    /// quotes).
+    /// Appends <c>@using Syncfusion.Blazor.Toolkit</c> to the discovered
+    /// <c>_Imports.razor</c> on disk. Idempotent. Does nothing when no imports
+    /// file was discovered. This stays in the Toolkit scaffolder so razor edits
+    /// do not depend on shared workspace lookup.
     /// </summary>
-    private static string EscapeForJson(string input)
+    public static void EnsureImportsUsing(string? projectPath, string? importsRelativePath)
     {
-        var sb = new StringBuilder(input.Length);
-        foreach (char c in input)
+        if (string.IsNullOrEmpty(projectPath) || string.IsNullOrEmpty(importsRelativePath))
         {
-            switch (c)
-            {
-                case '\\':
-                    sb.Append("\\\\");
-                    break;
-                case '"':
-                    sb.Append("\\\"");
-                    break;
-                case '\n':
-                    sb.Append("\\n");
-                    break;
-                case '\r':
-                    sb.Append("\\r");
-                    break;
-                case '\t':
-                    sb.Append("\\t");
-                    break;
-                default:
-                    sb.Append(c);
-                    break;
-            }
+            return;
         }
-        return sb.ToString();
+
+        string? projectDirectory = Path.GetDirectoryName(projectPath);
+        if (string.IsNullOrEmpty(projectDirectory))
+        {
+            return;
+        }
+
+        string importsPath = Path.Combine(projectDirectory, importsRelativePath);
+        if (!File.Exists(importsPath))
+        {
+            return;
+        }
+
+        string text = File.ReadAllText(importsPath);
+        if (text.Contains("Syncfusion.Blazor.Toolkit", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        string separator = text.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+        if (text.Length > 0 && !text.EndsWith('\n'))
+        {
+            text += separator;
+        }
+
+        File.WriteAllText(importsPath, text + UsingDirective + separator);
+    }
+
+    /// <summary>
+    /// Writes <c>using Syncfusion.Blazor.Toolkit;</c> and
+    /// <c>builder.Services.AddSyncfusionBlazorToolkit();</c> into Program.cs.
+    /// Idempotent. Done in the Toolkit scaffolder so registration is not
+    /// dropped when the shared code-modification workspace does not load
+    /// Program.cs.
+    /// </summary>
+    public static void EnsureServiceRegistration(string? projectPath)
+    {
+        if (string.IsNullOrEmpty(projectPath))
+        {
+            return;
+        }
+
+        string? projectDirectory = Path.GetDirectoryName(projectPath);
+        if (string.IsNullOrEmpty(projectDirectory))
+        {
+            return;
+        }
+
+        string programPath = Path.Combine(projectDirectory, "Program.cs");
+        if (!File.Exists(programPath))
+        {
+            return;
+        }
+
+        string text = File.ReadAllText(programPath);
+        string separator = text.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+
+        if (!text.Contains("using Syncfusion.Blazor.Toolkit", StringComparison.Ordinal))
+        {
+            text = "using Syncfusion.Blazor.Toolkit;" + separator + text;
+        }
+
+        if (text.Contains("AddSyncfusionBlazorToolkit", StringComparison.Ordinal))
+        {
+            File.WriteAllText(programPath, text);
+            return;
+        }
+
+        string[] anchors =
+        [
+            "WebApplication.CreateBuilder",
+            "WebAssemblyHostBuilder.CreateDefault",
+        ];
+
+        foreach (string anchor in anchors)
+        {
+            int anchorIndex = text.IndexOf(anchor, StringComparison.Ordinal);
+            if (anchorIndex < 0)
+            {
+                continue;
+            }
+
+            int lineEnd = text.IndexOf('\n', anchorIndex);
+            if (lineEnd < 0)
+            {
+                text += separator + ServiceRegistration + separator;
+            }
+            else
+            {
+                text = text.Insert(lineEnd + 1, ServiceRegistration + separator);
+            }
+
+            File.WriteAllText(programPath, text);
+            return;
+        }
     }
 }

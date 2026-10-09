@@ -12,8 +12,6 @@ public class SyncfusionBlazorToolkitSettingsTests
     public void Defaults_AreSafe()
     {
         var settings = new SyncfusionBlazorToolkitSettings { Project = "Test.csproj" };
-        Assert.Null(settings.ThemeFile);
-        Assert.False(settings.ThemeFileSkipped);
         Assert.Null(settings.ImportsFile);
         Assert.False(settings.ImportsFileSkipped);
         Assert.False(settings.PackageAlreadyReferenced);
@@ -28,17 +26,13 @@ public class SyncfusionBlazorToolkitSettingsTests
         {
             Project = "Test.csproj",
             Prerelease = true,
-            ThemeFile = "Components/App.razor",
-            ThemeFileSkipped = false,
             ImportsFile = "Components/_Imports.razor",
             ImportsFileSkipped = false,
             PackageAlreadyReferenced = true,
             ServicesAlreadyRegistered = true,
         };
 
-        Assert.Equal("Components/App.razor", settings.ThemeFile);
         Assert.Equal("Components/_Imports.razor", settings.ImportsFile);
-        Assert.True(settings.PackageAlreadyReferenced);
         Assert.True(settings.ServicesAlreadyRegistered);
         Assert.True(settings.Prerelease);
     }

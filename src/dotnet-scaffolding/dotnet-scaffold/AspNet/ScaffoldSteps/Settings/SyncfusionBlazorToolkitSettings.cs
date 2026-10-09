@@ -14,25 +14,6 @@ internal class SyncfusionBlazorToolkitSettings : BaseSettings
     public bool Prerelease { get; init; }
 
     /// <summary>
-    /// Resolved theme target file path relative to the project root, in
-    /// OS-native separator form (e.g. "Components\App.razor" on Windows or
-    /// "Components/App.razor" on Linux), or null when no suitable host file
-    /// was found. With Syncfusion.Blazor.Toolkit 2.0.0+, no external
-    /// stylesheet is injected; this field is still recorded so the
-    /// summary step can describe the discovered host layout and so
-    /// callers that explicitly target a pre-2.0.0 version can still
-    /// request a theme entry.
-    /// </summary>
-    public string? ThemeFile { get; set; }
-
-    /// <summary>
-    /// True when no theme host file was found and the theme stylesheet
-    /// step was skipped. False when the theme was applied (or already
-    /// applied on a previous run).
-    /// </summary>
-    public bool ThemeFileSkipped { get; set; }
-
-    /// <summary>
     /// Project-relative path of the _Imports.razor file where the
     /// <c>@using Syncfusion.Blazor.Toolkit</c> directive should be
     /// inserted, in OS-native separator form (e.g.

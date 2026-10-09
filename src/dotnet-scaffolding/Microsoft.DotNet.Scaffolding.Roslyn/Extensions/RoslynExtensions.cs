@@ -44,8 +44,7 @@ public static class RoslynExtensions
             var fileText = File.ReadAllText(filePath);
             if (!string.IsNullOrEmpty(fileText))
             {
-                // Pass both name and filePath so TryApplyChanges / disk persistence can locate the file.
-                return project.AddDocument(Path.GetFileName(filePath), fileText, filePath: filePath);
+                return project.AddDocument(filePath, fileText);
             }
         }
 
@@ -98,7 +97,7 @@ public static class RoslynExtensions
         }
 
         //often Document.Name is the file path of the document and not the name.
-        //check for all possible cases.
+        //check for all possible cases. 
         return project.Documents.FirstOrDefault(x =>
             x.Name.EndsWith(documentName.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase) ||
             (!string.IsNullOrEmpty(x.FilePath) && x.FilePath.EndsWith(documentName.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase)));
@@ -111,45 +110,10 @@ public static class RoslynExtensions
             return null;
         }
 
-        // Match GetDocument: Document.Name may be file name only (AdhocWorkspace fallback)
-        // or a relative/full path (MSBuildWorkspace). FilePath is preferred when set.
-        var normalizedName = documentName.Replace("\\", Path.DirectorySeparatorChar.ToString());
+        //often TextDocument.Name is the file path of the document and not the name.
+        //check for all possible cases. 
         return project.AdditionalDocuments.FirstOrDefault(x =>
-            x.Name.EndsWith(normalizedName, StringComparison.OrdinalIgnoreCase) ||
-            (!string.IsNullOrEmpty(x.FilePath) &&
-             x.FilePath.EndsWith(normalizedName, StringComparison.OrdinalIgnoreCase)));
-    }
-
-    /// <summary>
-    /// Match AdditionalDocument by project-relative path (e.g. "_Imports.razor" vs
-    /// "Components/_Imports.razor"), not by bare <c>EndsWith("_Imports.razor")</c>
-    /// which would also match the wrong file (e.g. <c>Components/_Imports.razor</c>
-    /// when the caller asked for <c>_Imports.razor</c> at the project root).
-    /// </summary>
-    public static TextDocument? GetAdditionalDocumentByRelativePath(this Project project, string? relativePath)
-    {
-        if (string.IsNullOrEmpty(relativePath) || string.IsNullOrEmpty(project.FilePath))
-        {
-            return null;
-        }
-
-        var projectDir = Path.GetDirectoryName(project.FilePath);
-        if (string.IsNullOrEmpty(projectDir))
-        {
-            return null;
-        }
-
-        var normalizedRelative = relativePath
-            .Replace('/', Path.DirectorySeparatorChar)
-            .Replace('\\', Path.DirectorySeparatorChar);
-
-        var expectedFull = Path.GetFullPath(Path.Combine(projectDir, normalizedRelative));
-        var comparison = OperatingSystem.IsWindows()
-            ? StringComparison.OrdinalIgnoreCase
-            : StringComparison.Ordinal;
-
-        return project.AdditionalDocuments.FirstOrDefault(doc =>
-            !string.IsNullOrEmpty(doc.FilePath) &&
-            Path.GetFullPath(doc.FilePath).Equals(expectedFull, comparison));
+            !string.IsNullOrEmpty(x.FilePath) &&
+            x.FilePath.EndsWith(documentName.Replace("\\", Path.DirectorySeparatorChar.ToString()), StringComparison.OrdinalIgnoreCase));
     }
 }

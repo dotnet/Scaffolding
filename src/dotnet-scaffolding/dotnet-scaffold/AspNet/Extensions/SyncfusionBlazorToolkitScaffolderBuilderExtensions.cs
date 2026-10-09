@@ -18,8 +18,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
 /// <summary>
 /// Provides extension methods for <see cref="IScaffoldBuilder"/> to add Syncfusion Blazor
 /// Toolkit setup scaffolding steps. The setup scaffolder only adds the NuGet package and
-/// applies a small set of code changes (service registration, using directives, theme
-/// stylesheet); it does not generate any Razor pages.
+/// applies a small set of code changes (service registration and using directives);
+/// it does not generate any Razor pages or inject a host stylesheet.
 ///
 /// <para><b>Syncfusion.Blazor.Toolkit 2.0.0+ behavior:</b> Styles ship with the
 /// assembly and are activated through <c>AddSyncfusionBlazorToolkit()</c>, so no
@@ -62,18 +62,9 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
     }
 
     /// <summary>
-    /// Adds a code-modification step driven by syncfusionBlazorToolkitChanges.json.
-    /// The Components/_Imports.razor anchor entry is rewritten to a concrete,
-    /// anchor-free Block-only entry when an _Imports.razor file was discovered, or
-    /// removed when none was found.
-    ///
-    /// <para>With Syncfusion.Blazor.Toolkit 2.0.0+ the theme parameter is forced to
-    /// <c>null</c> so no external stylesheet is injected into
-    /// <c>App.razor</c> or <c>wwwroot/index.html</c>. The theme detection result is
-    /// still surfaced via the <c>ThemeFile</c> setting so the summary step can
-    /// describe the host layout. The summary step explains the no-stylesheet
-    /// behavior and that styles are activated through
-    /// <c>AddSyncfusionBlazorToolkit()</c>.</para>
+    /// Adds a code-modification step driven by syncfusionBlazorToolkitChanges.json
+    /// (Program.cs only) and writes <c>@using Syncfusion.Blazor.Toolkit</c> into
+    /// the discovered <c>_Imports.razor</c>. No host stylesheet is added.
     /// </summary>
     public static IScaffoldBuilder WithSyncfusionBlazorToolkitCodeChangeStep(this IScaffoldBuilder builder)
     {
@@ -122,25 +113,17 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
             // up to print clear multi-project guidance.
             DetectMultiProjectLayout(settings, context);
 
-            // Resolve the JSON in memory. With Syncfusion.Blazor.Toolkit
-            // 2.0.0+ we pass themeFile: null so the helper never emits an
-            // external stylesheet entry; styles are bundled with the
-            // package and activated through AddSyncfusionBlazorToolkit().
-            //
-            // The Components/_Imports.razor anchor entry (if present in
-            // the source JSON) is replaced with a concrete, anchor-free
-            // Block-only entry for the discovered _Imports.razor path,
-            // or dropped when no _Imports.razor was found.
-            //
-            // We pass a NullLogger to the helper because the
-            // configuration lambda does not have access to the DI
-            // container. The downstream WrappedCodeModificationStep has
-            // its own logger and will surface any errors it encounters.
+            // Program.cs only. _Imports.razor is edited on disk by this
+            // step so the using is applied even when the razor file is
+            // not in the Roslyn workspace (Components folder or project root).
             string? resolvedJson = SyncfusionBlazorToolkitHelper.BuildResolvedCodeModifierConfigJson(
                 codeModificationFilePath!,
-                themeFile: null, // 2.0.0+: no external stylesheet needed.
-                importsFile: settings.ImportsFile,
                 logger: null);
+            // Registration is applied on disk so it is not dropped when the
+            // shared code-modification workspace does not load Program.cs.
+            // The JSON config remains the idempotent check for the shared step.
+            SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(settings.Project);
+            SyncfusionBlazorToolkitHelper.EnsureImportsUsing(settings.Project, settings.ImportsFile);
 
             if (!string.IsNullOrEmpty(resolvedJson))
             {
@@ -148,9 +131,7 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
             }
             else
             {
-                // Defensive: never pass the unresolved $(ThemeFile)
-                // placeholder configuration to the downstream step. If
-                // the helper returned null, the source JSON is missing
+                // If the helper returned null, the source JSON is missing
                 // or invalid; fail the step with a clear, actionable
                 // message instead of silently corrupting the project.
                 step.SkipStep = true;

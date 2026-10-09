@@ -26,9 +26,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 ///         the project root, then any _Imports.razor under the project. If
 ///         none is found, the using-directive step is skipped (logged as
 ///         a warning) instead of failing the whole scaffolder.</item>
-///   <item>Components/App.razor — preferred theme host, then
-///         wwwroot/index.html. If neither is found, the theme step is
-///         skipped (logged as a warning).</item>
 /// </list>
 ///
 /// <para>The package install and Program.cs service-registration steps
@@ -107,7 +104,7 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
             // forward slashes would silently break the file lookup on
             // Windows and cause the @using directive to be skipped.
             string relativePath = Path.GetRelativePath(projectDirectory, importsPath);
-            settings.ImportsFile = SyncfusionBlazorToolkitHelper.ToOsNativePath(relativePath);
+            settings.ImportsFile = relativePath;
             settings.ImportsFileSkipped = false;
         }
         else

@@ -71,11 +71,8 @@ public class CodeService : ICodeService, IDisposable
 
         var msBuildWorkspace = await GetMsBuildWorkspaceAsync();
 
-        // Happy path: MSBuildWorkspace loaded the project with source documents.
-        // An empty project (common with preview SDKs like net11.0 where evaluation
-        // "succeeds" but yields no documents) is treated as a load failure.
-        var msBuildProject = msBuildWorkspace?.CurrentSolution?.GetProject(_projectPath);
-        if (msBuildProject is not null && msBuildProject.Documents.Any())
+        // Happy path: MSBuildWorkspace successfully loaded the project.
+        if (msBuildWorkspace?.CurrentSolution?.GetProject(_projectPath) is not null)
         {
             return msBuildWorkspace;
         }
@@ -102,88 +99,25 @@ public class CodeService : ICodeService, IDisposable
         // so we manually persist any changed documents before delegating.
         if (_fallbackWorkspace is not null)
         {
-            PersistSolutionTextChangesToDisk(solution, _fallbackWorkspace.CurrentSolution);
+            var currentSolution = _fallbackWorkspace.CurrentSolution;
+            var solutionChanges = solution.GetChanges(currentSolution);
+            foreach (var projectChange in solutionChanges.GetProjectChanges())
+            {
+                foreach (var changedDocId in projectChange.GetChangedDocuments())
+                {
+                    var newDoc = solution.GetDocument(changedDocId);
+                    if (newDoc?.FilePath is not null && newDoc.TryGetText(out var sourceText))
+                    {
+                        try { File.WriteAllText(newDoc.FilePath, sourceText.ToString(), Encoding.UTF8); }
+                        catch { /* best-effort */ }
+                    }
+                }
+            }
+
             return _fallbackWorkspace.TryApplyChanges(solution);
         }
 
-        if (_msBuildWorkspace is not null)
-        {
-            // Same disk persistence for AdditionalDocuments (.razor / .html / .css)
-            // so the MSBuild path behaves like the Adhoc fallback. MSBuildWorkspace
-            // does not reliably write AdditionalDocuments to disk, so the scaffolder
-            // would otherwise leave _Imports.razor / App.razor / index.html untouched.
-            PersistSolutionTextChangesToDisk(solution, _msBuildWorkspace.CurrentSolution);
-            return _msBuildWorkspace.TryApplyChanges(solution);
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Walks the diff between <paramref name="newSolution"/> and
-    /// <paramref name="oldSolution"/> and writes any changed or newly added
-    /// Documents and AdditionalDocuments to disk. Used to back the
-    /// <see cref="AdhocWorkspace"/> and <see cref="MSBuildWorkspace"/> paths, neither
-    /// of which reliably persists <c>.razor</c> / <c>.html</c> /
-    /// <c>AdditionalDocument</c> edits.
-    /// </summary>
-    private static void PersistSolutionTextChangesToDisk(Solution newSolution, Solution oldSolution)
-    {
-        var solutionChanges = newSolution.GetChanges(oldSolution);
-        foreach (var projectChange in solutionChanges.GetProjectChanges())
-        {
-            foreach (var changedDocId in projectChange.GetChangedDocuments())
-            {
-                PersistDocumentToDisk(newSolution.GetDocument(changedDocId));
-            }
-
-            foreach (var addedDocId in projectChange.GetAddedDocuments())
-            {
-                PersistDocumentToDisk(newSolution.GetDocument(addedDocId));
-            }
-
-            foreach (var changedAdditionalDocId in projectChange.GetChangedAdditionalDocuments())
-            {
-                PersistTextDocumentToDisk(newSolution.GetAdditionalDocument(changedAdditionalDocId));
-            }
-
-            foreach (var addedAdditionalDocId in projectChange.GetAddedAdditionalDocuments())
-            {
-                PersistTextDocumentToDisk(newSolution.GetAdditionalDocument(addedAdditionalDocId));
-            }
-        }
-    }
-
-    private static void PersistDocumentToDisk(Document? document)
-    {
-        if (document?.FilePath is null)
-        {
-            return;
-        }
-
-        if (!document.TryGetText(out var sourceText))
-        {
-            sourceText = document.GetTextAsync().GetAwaiter().GetResult();
-        }
-
-        try { File.WriteAllText(document.FilePath, sourceText.ToString(), Encoding.UTF8); }
-        catch { /* best-effort */ }
-    }
-
-    private static void PersistTextDocumentToDisk(TextDocument? document)
-    {
-        if (document?.FilePath is null)
-        {
-            return;
-        }
-
-        if (!document.TryGetText(out var sourceText))
-        {
-            sourceText = document.GetTextAsync().GetAwaiter().GetResult();
-        }
-
-        try { File.WriteAllText(document.FilePath, sourceText.ToString(), Encoding.UTF8); }
-        catch { /* best-effort */ }
+        return _msBuildWorkspace?.TryApplyChanges(solution) == true;
     }
 
     private async Task<MSBuildWorkspace?> GetMsBuildWorkspaceAsync(bool refresh = false)
@@ -216,11 +150,9 @@ public class CodeService : ICodeService, IDisposable
     }
 
     /// <summary>
-    /// Builds an <see cref="AdhocWorkspace"/> populated with the project's source files.
-    /// C# files are added as Documents; razor/cshtml/html files as AdditionalDocuments so
-    /// <see cref="ProjectModifier"/> can resolve them the same way MSBuildWorkspace does.
+    /// Builds an <see cref="AdhocWorkspace"/> populated with the project's .cs source files.
     /// Used when <see cref="MSBuildWorkspace"/> cannot load the project (e.g., preview SDK
-    /// versions such as net11.0). Document changes are written to disk manually inside
+    /// versions such as net11.0).  Document changes are written to disk manually inside
     /// <see cref="TryApplyChanges"/> before the in-memory workspace state is updated.
     /// </summary>
     private async Task<AdhocWorkspace?> BuildFallbackWorkspaceAsync()
@@ -242,7 +174,15 @@ public class CodeService : ICodeService, IDisposable
         workspace.AddProject(projectInfo);
         var addedProject = workspace.CurrentSolution.Projects.First();
 
-        foreach (var file in EnumerateProjectSourceFiles(projectDirectory, "*.cs"))
+        var sourceFiles = Directory.GetFiles(projectDirectory, "*.cs", SearchOption.AllDirectories)
+            .Where(f =>
+            {
+                var rel = Path.GetRelativePath(projectDirectory, f);
+                return !rel.StartsWith("obj" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+                    && !rel.StartsWith("bin" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+            });
+
+        foreach (var file in sourceFiles)
         {
             try
             {
@@ -260,44 +200,7 @@ public class CodeService : ICodeService, IDisposable
             catch { /* skip unreadable files */ }
         }
 
-        // Markup files must be AdditionalDocuments — ProjectModifier resolves razor/html/cshtml
-        // via GetAdditionalDocument, not GetDocument.
-        var solution = workspace.CurrentSolution;
-        var additionalGlobs = new[] { "*.razor", "*.cshtml", "*.html" };
-        foreach (var glob in additionalGlobs)
-        {
-            foreach (var file in EnumerateProjectSourceFiles(projectDirectory, glob))
-            {
-                try
-                {
-                    var text = await File.ReadAllTextAsync(file);
-                    solution = solution.AddAdditionalDocument(
-                        DocumentId.CreateNewId(addedProject.Id),
-                        name: Path.GetFileName(file),
-                        text: SourceText.From(text, Encoding.UTF8),
-                        filePath: file);
-                }
-                catch { /* skip unreadable files */ }
-            }
-        }
-
-        if (!ReferenceEquals(solution, workspace.CurrentSolution))
-        {
-            workspace.TryApplyChanges(solution);
-        }
-
         return workspace;
-    }
-
-    private static IEnumerable<string> EnumerateProjectSourceFiles(string projectDirectory, string searchPattern)
-    {
-        return Directory.GetFiles(projectDirectory, searchPattern, SearchOption.AllDirectories)
-            .Where(f =>
-            {
-                var rel = Path.GetRelativePath(projectDirectory, f);
-                return !rel.StartsWith("obj" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-                    && !rel.StartsWith("bin" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
-            });
     }
 
     public async Task OpenProjectAsync()

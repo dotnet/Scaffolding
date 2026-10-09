@@ -34,7 +34,6 @@ public class SummarizeSyncfusionBlazorToolkitStepTests
         _context.Properties[nameof(SyncfusionBlazorToolkitSettings)] = new SyncfusionBlazorToolkitSettings
         {
             Project = "Test.csproj",
-            ThemeFile = "Components/App.razor",
             ImportsFile = "Components/_Imports.razor",
         };
         var logger = new TestLogger<SummarizeSyncfusionBlazorToolkitStep>();
@@ -52,8 +51,6 @@ public class SummarizeSyncfusionBlazorToolkitStepTests
         _context.Properties[nameof(SyncfusionBlazorToolkitSettings)] = new SyncfusionBlazorToolkitSettings
         {
             Project = "Test.csproj",
-            ThemeFile = "Components/App.razor",
-            ThemeFileSkipped = false,
             ImportsFile = "Components/_Imports.razor",
             ImportsFileSkipped = false,
             PackageAlreadyReferenced = true,
@@ -78,8 +75,6 @@ public class SummarizeSyncfusionBlazorToolkitStepTests
         _context.Properties[nameof(SyncfusionBlazorToolkitSettings)] = new SyncfusionBlazorToolkitSettings
         {
             Project = "Test.csproj",
-            ThemeFile = null,
-            ThemeFileSkipped = true,
         };
         var logger = new TestLogger<SummarizeSyncfusionBlazorToolkitStep>();
         var step = new SummarizeSyncfusionBlazorToolkitStep(logger);

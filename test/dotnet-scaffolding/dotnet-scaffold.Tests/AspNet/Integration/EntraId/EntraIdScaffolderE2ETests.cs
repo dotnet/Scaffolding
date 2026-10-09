@@ -219,21 +219,19 @@ public class EntraIdScaffolderE2ETests
         // The order is critical for the scaffolding to work correctly:
         // 1. ValidateEntraIdStep - Validates all inputs and creates EntraIdSettings and EntraIdModel
         // 2. RegisterAppStep - Registers or updates Azure AD application (uses msidentity CLI)
-        // 3. AddClientSecretStep - Adds client secret (ensures msidentity is installed)
-        // 4. DetectBlazorWasmStep - Detects if project is Blazor WASM
-        // 5. UpdateAppSettingsStep - Updates appsettings.json
-        // 6. UpdateAppAuthorizationStep - Updates authorization settings
-        // 7. EntraAddPackagesStep - Adds required NuGet packages
-        // 8. EntraBlazorWasmAddPackagesStep - Adds Blazor WASM specific packages
-        // 9. EntraIdCodeChangeStep - Makes code modifications
-        // 10. EntraIdBlazorWasmCodeChangeStep - Makes Blazor WASM specific code changes
-        // 11. EntraIdTextTemplatingStep - Generates files from templates
+        // 3. DetectBlazorWasmStep - Detects if project is Blazor WASM
+        // 4. UpdateAppSettingsStep - Updates appsettings.Development.json
+        // 5. UpdateAppAuthorizationStep - Updates authorization settings
+        // 6. EntraAddPackagesStep - Adds required NuGet packages
+        // 7. EntraBlazorWasmAddPackagesStep - Adds Blazor WASM specific packages
+        // 8. EntraIdCodeChangeStep - Makes code modifications
+        // 9. EntraIdBlazorWasmCodeChangeStep - Makes Blazor WASM specific code changes
+        // 10. EntraIdTextTemplatingStep - Generates files from templates
 
         var stepTypes = new[]
         {
             typeof(ValidateEntraIdStep),
-            typeof(RegisterAppStep),
-            typeof(AddClientSecretStep)
+            typeof(RegisterAppStep)
         };
 
         // Verify all key steps exist
@@ -263,12 +261,6 @@ public class EntraIdScaffolderE2ETests
         Assert.Contains(registerStepParams, p => p.ParameterType == typeof(IFileSystem));
         Assert.Contains(registerStepParams, p => p.ParameterType == typeof(ITelemetryService));
 
-        // AddClientSecretStep dependencies
-        var addSecretStepConstructor = typeof(AddClientSecretStep).GetConstructors().First();
-        var addSecretStepParams = addSecretStepConstructor.GetParameters();
-        Assert.Contains(addSecretStepParams, p => p.ParameterType.Name.Contains("ILogger"));
-        Assert.Contains(addSecretStepParams, p => p.ParameterType == typeof(IFileSystem));
-        Assert.Contains(addSecretStepParams, p => p.ParameterType == typeof(IEnvironmentService));
     }
 
     [Fact]

@@ -352,7 +352,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     .WithDescription(AspnetStrings.EntraId.Description)
                     .WithExample(AspnetStrings.EntraId.EntraIdExample1, AspnetStrings.EntraId.EntraIdExample1Description)
                     .WithExample(AspnetStrings.EntraId.EntraIdExample2, AspnetStrings.EntraId.EntraIdExample2Description)
-                    .WithOptions([options.Username, options.Project, options.TenantId, options.UseExistingApplication, options.ApplicationId])
+                    .WithOptions([options.Username, options.Project, options.TenantId, options.UseExistingApplication, options.ApplicationId, options.Overwrite])
                     .WithStep<ValidateEntraIdStep>(config =>
                     {
                         var step = config.Step;
@@ -362,9 +362,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                         step.TenantId = context.GetOptionResult(options.TenantId);
                         step.Application = context.GetOptionResult(options.ApplicationId);
                         step.UseExistingApplication = context.GetOptionResult(options.UseExistingApplication);
+                        step.Overwrite = context.GetOptionResult(options.Overwrite);
                     })
                     .WithRegisterAppStep()
-                    .WithAddClientSecretStep()
                     .WithDetectBlazorWasmStep()
                     .WithUpdateAppSettingsStep()
                     .WithUpdateAppAuthorizationStep()

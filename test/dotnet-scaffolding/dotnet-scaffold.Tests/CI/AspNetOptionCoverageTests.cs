@@ -1,6 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Hosting;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
+using Microsoft.DotNet.Tools.Scaffold.AspNet;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Xunit;
@@ -314,15 +320,41 @@ public class AspNetOptionCoverageTests
     [InlineData("--tenantId", "--application-id")]
     public void EntraIdOptionSpellings_ParseAndBindValues(string tenantOption, string applicationOption)
     {
+        const string username = "user@contoso.com";
         const string tenantId = "test-tenant-id";
         const string applicationId = "test-application-id";
-        var command = CreateEntraIdParserCommand();
+        var (command, options) = CreateConfiguredEntraIdCommand();
 
-        var parseResult = command.Parse([tenantOption, tenantId, applicationOption, applicationId]);
+        var parseResult = command.Parse(
+        [
+            "aspnet", "entra-id",
+            "--username", username,
+            "--project", "C:/MyWebApp/MyWebApp.csproj",
+            tenantOption, tenantId,
+            "--use-existing-application", "true",
+            applicationOption, applicationId
+        ]);
 
         Assert.Empty(parseResult.Errors);
-        Assert.Equal(tenantId, _options.TenantId.GetValue(parseResult));
-        Assert.Equal(applicationId, _options.ApplicationId.GetValue(parseResult));
+        Assert.Equal(username, options.Username.GetValue(parseResult));
+        Assert.Equal(tenantId, options.TenantId.GetValue(parseResult));
+        Assert.Equal(applicationId, options.ApplicationId.GetValue(parseResult));
+    }
+
+    [Theory]
+    [InlineData(AspnetStrings.EntraId.EntraIdExample1, "your-app-id")]
+    [InlineData(AspnetStrings.EntraId.EntraIdExample2, null)]
+    public void EntraIdHelpExamples_ParseAndBindValues(string example, string? expectedApplicationId)
+    {
+        var (command, options) = CreateConfiguredEntraIdCommand();
+        var arguments = example.Split(' ', System.StringSplitOptions.RemoveEmptyEntries)[2..];
+
+        var parseResult = command.Parse(arguments);
+
+        Assert.Empty(parseResult.Errors);
+        Assert.Equal("user@contoso.com", options.Username.GetValue(parseResult));
+        Assert.Equal("your-tenant-id", options.TenantId.GetValue(parseResult));
+        Assert.Equal(expectedApplicationId, options.ApplicationId.GetValue(parseResult));
     }
 
     [Fact]
@@ -330,14 +362,22 @@ public class AspNetOptionCoverageTests
     {
         const string invalidOption = "--tenant_id";
         const string applicationId = "test-application-id";
-        var command = CreateEntraIdParserCommand();
+        var (command, options) = CreateConfiguredEntraIdCommand();
 
-        var parseResult = command.Parse([invalidOption, "test-tenant-id", "--application-id", applicationId]);
+        var parseResult = command.Parse(
+        [
+            "aspnet", "entra-id",
+            "--username", "user@contoso.com",
+            "--project", "C:/MyWebApp/MyWebApp.csproj",
+            invalidOption, "test-tenant-id",
+            "--use-existing-application", "true",
+            "--application-id", applicationId
+        ]);
 
         Assert.NotEmpty(parseResult.Errors);
         Assert.Contains(parseResult.Errors, error => error.Message.Contains(invalidOption, System.StringComparison.Ordinal));
-        Assert.Throws<System.InvalidOperationException>(() => _options.TenantId.GetValue(parseResult));
-        Assert.Equal(applicationId, _options.ApplicationId.GetValue(parseResult));
+        Assert.Throws<System.InvalidOperationException>(() => options.TenantId.GetValue(parseResult));
+        Assert.Equal(applicationId, options.ApplicationId.GetValue(parseResult));
     }
 
     [Fact]
@@ -345,22 +385,61 @@ public class AspNetOptionCoverageTests
     {
         const string invalidOption = "--application_id";
         const string tenantId = "test-tenant-id";
-        var command = CreateEntraIdParserCommand();
+        var (command, options) = CreateConfiguredEntraIdCommand();
 
-        var parseResult = command.Parse(["--tenant-id", tenantId, invalidOption, "test-application-id"]);
+        var parseResult = command.Parse(
+        [
+            "aspnet", "entra-id",
+            "--username", "user@contoso.com",
+            "--project", "C:/MyWebApp/MyWebApp.csproj",
+            "--tenant-id", tenantId,
+            "--use-existing-application", "true",
+            invalidOption, "test-application-id"
+        ]);
 
         Assert.NotEmpty(parseResult.Errors);
         Assert.Contains(parseResult.Errors, error => error.Message.Contains(invalidOption, System.StringComparison.Ordinal));
-        Assert.Equal(tenantId, _options.TenantId.GetValue(parseResult));
-        Assert.Null(_options.ApplicationId.GetValue(parseResult));
+        Assert.Equal(tenantId, options.TenantId.GetValue(parseResult));
+        Assert.Null(options.ApplicationId.GetValue(parseResult));
     }
 
-    private System.CommandLine.Command CreateEntraIdParserCommand()
+    private static (System.CommandLine.RootCommand Command, EntraIdOptions Options) CreateConfiguredEntraIdCommand()
     {
-        var command = new System.CommandLine.Command("entra-id");
-        command.Options.Add(_options.TenantId.ToCliOption());
-        command.Options.Add(_options.ApplicationId.ToCliOption());
-        return command;
+        IScaffoldRunnerBuilder builder = Host.CreateScaffoldBuilder();
+        new AspNetCommandService(builder).AddScaffolderCommands();
+
+        ScaffoldBuilder entraIdScaffolder = builder.Scaffolders[ScaffolderCatagory.AspNet]
+            .Single(scaffolder => scaffolder.Name == AspnetStrings.EntraId.Name);
+        var options = new EntraIdOptions(entraIdScaffolder.Options);
+
+        var entraIdCommand = new System.CommandLine.Command(entraIdScaffolder.Name);
+        foreach (ScaffolderOption option in entraIdScaffolder.Options)
+        {
+            entraIdCommand.Options.Add(option.ToCliOption());
+        }
+
+        var aspNetCommand = new System.CommandLine.Command("aspnet");
+        aspNetCommand.Subcommands.Add(entraIdCommand);
+        var rootCommand = new System.CommandLine.RootCommand();
+        rootCommand.Subcommands.Add(aspNetCommand);
+        return (rootCommand, options);
+    }
+
+    private sealed class EntraIdOptions
+    {
+        public EntraIdOptions(IEnumerable<ScaffolderOption> options)
+        {
+            Username = GetOption(Constants.CliOptions.UsernameOption);
+            TenantId = GetOption(Constants.CliOptions.TenantIdOption);
+            ApplicationId = GetOption(Constants.CliOptions.ApplicationIdOption);
+
+            ScaffolderOption<string> GetOption(string cliOption)
+                => Assert.IsType<ScaffolderOption<string>>(options.Single(option => option.CliOption == cliOption));
+        }
+
+        public ScaffolderOption<string> Username { get; }
+        public ScaffolderOption<string> TenantId { get; }
+        public ScaffolderOption<string> ApplicationId { get; }
     }
 
     #endregion

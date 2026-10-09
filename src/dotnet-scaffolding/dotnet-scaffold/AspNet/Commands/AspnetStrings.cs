@@ -133,9 +133,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string Name = "entra-id";
             internal const string DisplayName = "Entra ID";
             internal const string Description = "Add Entra auth";
-            internal const string EntraIdExample1 = "dotnet scaffold aspnet entra-id --project C:/MyWebApp/MyWebApp.csproj --tenant-id your-tenant-id --use-existing-application true --application-id your-app-id";
+            internal const string EntraIdExample1 = "dotnet scaffold aspnet entra-id --username user@contoso.com --project C:/MyWebApp/MyWebApp.csproj --tenant-id your-tenant-id --use-existing-application true --application-id your-app-id";
             internal const string EntraIdExample1Description = "Add Microsoft Entra ID authentication using an existing Azure application:";
-            internal const string EntraIdExample2 = "dotnet scaffold aspnet entra-id --project C:/MyWebApp/MyWebApp.csproj --tenant-id your-tenant-id --use-existing-application false";
+            internal const string EntraIdExample2 = "dotnet scaffold aspnet entra-id --username user@contoso.com --project C:/MyWebApp/MyWebApp.csproj --tenant-id your-tenant-id --use-existing-application false";
             internal const string EntraIdExample2Description = "Add Microsoft Entra ID authentication by creating a new Azure application:";
         }
 

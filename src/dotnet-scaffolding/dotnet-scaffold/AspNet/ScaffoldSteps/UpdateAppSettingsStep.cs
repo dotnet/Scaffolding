@@ -168,6 +168,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     HasMatchingManagedAzureAdSettings(existingAzureAdObjectForNoWrite, azureAdConfig))
                 {
                     _logger.LogInformation("No changes needed for AzureAd configuration in appsettings.Development.json.");
+                    LogDevelopmentEnvironmentNotice();
                     return Task.FromResult(true);
                 }
 
@@ -191,7 +192,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 _fileSystem.WriteAllText(devSettingsPath, developmentSettings.ToJsonString(options));
 
                 _logger.LogInformation($"Updated '{Path.GetFileName(devSettingsPath)}' with AzureAd development configuration.");
-                _logger.LogInformation("The generated AzureAd app registration and settings are intended for development environments.");
+                LogDevelopmentEnvironmentNotice();
                 return Task.FromResult(true);
             }
             catch (Exception ex)
@@ -199,6 +200,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 _logger.LogError($"Failed to update appsettings.Development.json: {ex.Message}");
                 return Task.FromResult(false);
             }
+        }
+
+        private void LogDevelopmentEnvironmentNotice()
+        {
+            _logger.LogInformation("The generated AzureAd app registration and settings are intended for development environments.");
         }
 
         internal static JsonNode? ParseDevelopmentSettings(string json)

@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -10,6 +12,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
@@ -217,8 +220,9 @@ public class UpdateAppSettingsStepTests
             }
             """);
 
+        var logger = new TestLogger();
         var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
+            logger,
             _mockFileSystem.Object,
             Mock.Of<ITelemetryService>())
         {
@@ -234,6 +238,9 @@ public class UpdateAppSettingsStepTests
         Assert.True(result);
         _mockFileSystem.Verify(fs => fs.ReadAllText(devSettingsPath), Times.Once);
         _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        Assert.Contains(
+            "The generated AzureAd app registration and settings are intended for development environments.",
+            logger.InformationMessages);
     }
 
     [Theory]
@@ -680,5 +687,27 @@ public class UpdateAppSettingsStepTests
 
         Assert.False(result);
         _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    private sealed class TestLogger : ILogger<UpdateAppSettingsStep>
+    {
+        public List<string> InformationMessages { get; } = new();
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (logLevel == LogLevel.Information)
+            {
+                InformationMessages.Add(formatter(state, exception));
+            }
+        }
     }
 }

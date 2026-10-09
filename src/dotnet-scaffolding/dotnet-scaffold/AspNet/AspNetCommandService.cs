@@ -363,7 +363,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                         step.Overwrite = context.GetOptionResult(options.Overwrite);
                     })
                     .WithRegisterAppStep()
-                    .WithAddClientSecretStep()
                     .WithDetectBlazorWasmStep()
                     .WithUpdateAppSettingsStep()
                     .WithUpdateAppAuthorizationStep()

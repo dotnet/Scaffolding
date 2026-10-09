@@ -53,15 +53,23 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
         Assert.True(postExitCode == 0, $"Project should build after scaffolding. Error: {postError}");
     }
 
-    [SkippableFact]
-    public async Task Scaffold_Interactive_BlazorWasm_Builds()
+    [SkippableTheory]
+    [InlineData("WebAssembly")]
+    [InlineData("Auto")]
+    public async Task Scaffold_Interactive_HostedClient_RewritesRoutesAndBuilds(string interactivity)
     {
         var entraSettings = GetRequiredExternalEntraSettings();
 
-        // Arrange — Blazor WebAssembly project structure
-        File.WriteAllText(_testProjectPath, ProjectContent);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
-        ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
+        var created = await ScaffoldCliHelper.RunDotNetAsync(
+            _testDirectory, "new", "blazor", "-n", "TestProject", "-o", _testDirectory,
+            "-f", TargetFramework, "-int", interactivity, "-ai", "--no-restore");
+        Assert.True(created.ExitCode == 0, $"dotnet new failed: {created.Output}\n{created.Error}");
+        string clientDirectory = Path.Combine(_testDirectory, "TestProject.Client");
+        string clientProjectPath = Path.Combine(clientDirectory, "TestProject.Client.csproj");
+        string routesPath = Path.Combine(clientDirectory, "Routes.razor");
+        Assert.Contains("Microsoft.NET.Sdk.BlazorWebAssembly", File.ReadAllText(clientProjectPath));
+        Assert.Contains("<RouteView ", File.ReadAllText(routesPath));
+        Assert.False(File.Exists(Path.Combine(clientDirectory, "RedirectToLogin.razor")));
 
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
         Assert.True(preExitCode == 0, $"Project should build before scaffolding. Error: {preError}");
@@ -78,60 +86,19 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
 
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
-        // Assert — generated client components exist (RedirectToLogin or other expected artifacts may vary by template)
-        // At minimum, the project should still build after scaffolding
+        string routes = File.ReadAllText(routesPath);
+        Assert.Contains("<AuthorizeRouteView", routes);
+        Assert.Contains("<NotAuthorized>", routes);
+        Assert.Contains("<RedirectToLogin />", routes);
+        Assert.DoesNotContain("<RouteView ", routes);
+        Assert.Contains("authentication/login?returnUrl=",
+            File.ReadAllText(Path.Combine(clientDirectory, "RedirectToLogin.razor")));
+        Assert.Contains("AddAuthenticationStateDeserialization",
+            File.ReadAllText(Path.Combine(clientDirectory, "Program.cs")));
+        Assert.Contains("AddAuthenticationStateSerialization",
+            File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs")));
         var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
         Assert.True(postExitCode == 0, $"Project should build after scaffolding. Error: {postError}");
-    }
-
-    [SkippableFact]
-    public async Task Scaffold_Interactive_Auto_Hosted_Builds()
-    {
-        var entraSettings = GetRequiredExternalEntraSettings();
-
-        // Arrange — create a server project that references a client project (Auto hosted layout)
-        var serverDir = _testProjectDir;
-        var clientDir = Path.Combine(_testDirectory, "TestProject.Client");
-        Directory.CreateDirectory(clientDir);
-
-        var serverProjPath = _testProjectPath;
-        var clientProjPath = Path.Combine(clientDir, "TestProject.Client.csproj");
-
-        // Server project references the client project
-        var serverProjectContent = """
-            <Project Sdk="Microsoft.NET.Sdk.Web">
-              <ItemGroup>
-                <ProjectReference Include="..\TestProject.Client\TestProject.Client.csproj" />
-              </ItemGroup>
-            </Project>
-            """;
-        File.WriteAllText(serverProjPath, serverProjectContent);
-
-        // Client project is a Blazor WASM project
-        File.WriteAllText(clientProjPath, ScaffoldCliHelper.GetWebProjectContent(TargetFramework).Replace("Microsoft.NET.Sdk.Web", "Microsoft.NET.Sdk.BlazorWebAssembly"));
-        File.WriteAllText(Path.Combine(clientDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject.Client"));
-        ScaffoldCliHelper.SetupBlazorProjectStructure(clientDir);
-
-        // Add minimal Program.cs to server
-        File.WriteAllText(Path.Combine(serverDir, "Program.cs"), ScaffoldCliHelper.GetMinimalProgramCs());
-
-        var (preExitCode, preOutput, preError) = await RunBuildAsync(serverDir);
-        Assert.True(preExitCode == 0, $"Server project should build before scaffolding. Error: {preError}");
-
-        // Act — run scaffolder on the server project and ensure it detects the referenced client
-        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework,
-            "entra-id",
-            "--project", serverProjPath,
-            "--username", entraSettings.Username,
-            "--tenantId", entraSettings.TenantId,
-            "--use-existing-application",
-            "--applicationId", entraSettings.ApplicationId);
-
-        Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
-
-        var (postExitCode, postOutput, postError) = await RunBuildAsync(serverDir);
-        Assert.True(postExitCode == 0, $"Server project should build after scaffolding. Error: {postError}");
     }
 
     [Fact]

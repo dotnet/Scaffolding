@@ -12,8 +12,8 @@ using Microsoft.Extensions.Logging;
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 {
     /// <summary>
-    /// Detects whether the selected project or one of its project references uses the Blazor WebAssembly SDK.
-    /// Sets context properties if a Blazor WASM project is detected.
+    /// Detects a Blazor WebAssembly client referenced by the selected server project.
+    /// Rejects directly selected WebAssembly projects because Entra scaffolding requires a server host.
     /// </summary>
     internal class DetectBlazorWasmStep : ScaffoldStep
     {
@@ -53,8 +53,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             {
                 if (UsesBlazorWebAssemblySdk(fullProjectPath))
                 {
-                    SetWebAssemblyProject(context, fullProjectPath);
-                    return Task.FromResult(true);
+                    _logger.LogError(
+                        "Entra ID scaffolding requires a server host and does not support directly selected Blazor WebAssembly projects. " +
+                        "For a hosted Blazor Web App, select the server project instead. " +
+                        "Standalone WebAssembly apps require separate MSAL authentication configuration.");
+                    return Task.FromResult(false);
                 }
 
                 if (!BlazorWebAssemblyClientProjectResolver.TryGetClient(

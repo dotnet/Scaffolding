@@ -37,28 +37,44 @@ public class DetectBlazorWasmStepTests : IDisposable
         _context = new ScaffolderContext(scaffolder.Object);
     }
 
-    [Fact]
-    public async Task ExecuteAsync_DetectsStandaloneWebAssemblyProject()
+    [Theory]
+    [InlineData("""<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly" />""")]
+    [InlineData("""<Project><Sdk Name="Microsoft.NET.Sdk.BlazorWebAssembly" /></Project>""")]
+    public async Task ExecuteAsync_RejectsDirectlySelectedWebAssemblyProject(string projectContent)
     {
         string projectPath = Path.GetFullPath("StandaloneClient.csproj");
         string projectArgument = Path.GetRelativePath(Environment.CurrentDirectory, projectPath);
         var fileSystem = new Mock<IFileSystem>();
         fileSystem.Setup(fs => fs.FileExists(projectPath)).Returns(true);
-        fileSystem.Setup(fs => fs.ReadAllText(projectPath)).Returns(
-            """
-            <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
-              <PropertyGroup>
-                <TargetFramework>net11.0</TargetFramework>
-              </PropertyGroup>
-            </Project>
-            """);
-        var step = CreateStep(fileSystem.Object, projectArgument);
+        fileSystem.Setup(fs => fs.ReadAllText(projectPath)).Returns(projectContent);
+        var logger = new Mock<ILogger<DetectBlazorWasmStep>>();
+        var step = new DetectBlazorWasmStep(
+            logger.Object, fileSystem.Object, Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = projectArgument
+        };
 
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
-        Assert.True(result);
-        Assert.Equal(true, _context.Properties["IsBlazorWasmProject"]);
-        Assert.Equal(projectPath, _context.Properties["BlazorWasmClientProjectPath"]);
+        Assert.False(result);
+        Assert.False(_context.Properties.ContainsKey("IsBlazorWasmProject"));
+        Assert.False(_context.Properties.ContainsKey("BlazorWasmClientProjectPath"));
+        Assert.Contains(logger.Invocations, invocation =>
+            invocation.Method.Name == nameof(ILogger.Log) &&
+            Equals(invocation.Arguments[0], LogLevel.Error) &&
+            invocation.Arguments[2].ToString()!.Contains("select the server project instead"));
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_AcceptsServerProjectWithoutWebAssemblyClient()
+    {
+        string projectPath = Path.Combine(_testDirectory, "Server.csproj");
+        File.WriteAllText(projectPath, "<Project />");
+        var step = CreateStep(FileSystem.Instance, projectPath);
+
+        Assert.True(await step.ExecuteAsync(_context));
+        Assert.Equal(false, _context.Properties["IsBlazorWasmProject"]);
+        Assert.False(_context.Properties.ContainsKey("BlazorWasmClientProjectPath"));
     }
 
     [Fact]

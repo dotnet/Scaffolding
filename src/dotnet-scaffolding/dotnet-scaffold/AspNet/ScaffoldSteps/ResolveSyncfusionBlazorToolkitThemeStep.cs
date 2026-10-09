@@ -17,9 +17,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 /// SyncfusionBlazorToolkitSettings in the ScaffolderContext so the
 /// code-modification step can target the right file.
 ///
-/// If neither host file is present the theme step is skipped (logged as
-/// a warning). Package install, Program.cs registration, and the
-/// Components/_Imports.razor @using directive are still applied.
+/// <para><b>Syncfusion.Blazor.Toolkit 2.0.0+:</b> Theme styles are
+/// bundled with the package and activated through the DI registration
+/// (<c>AddSyncfusionBlazorToolkit()</c>). The scaffolder no longer
+/// injects an external <c>&lt;link href="_content/.../fluent.min.css"/&gt;</c>
+/// tag into the host file. The <c>ThemeFile</c> / <c>ThemeFileSkipped</c>
+/// settings are still computed so the summary step can describe what
+/// was (or wasn't) changed, and so callers that explicitly target a
+/// pre-2.0.0 version of the package still work.</para>
+///
+/// <para>If no host file is found, the theme step is skipped (logged as a
+/// warning). Package install, Program.cs registration, and the
+/// Components/_Imports.razor @using directive are still applied.</para>
 /// </summary>
 internal class ResolveSyncfusionBlazorToolkitThemeStep : ScaffoldStep
 {
@@ -33,6 +42,7 @@ internal class ResolveSyncfusionBlazorToolkitThemeStep : ScaffoldStep
     [
         (Path.Combine("Components", "App.razor"), "Blazor Web App (Components/App.razor)"),
         (Path.Combine("wwwroot", "index.html"), "Standalone Blazor WASM (wwwroot/index.html)"),
+        (Path.Combine("App.razor"), "Hybrid / older template (root App.razor)"),
     ];
 
     public ResolveSyncfusionBlazorToolkitThemeStep(
@@ -53,7 +63,7 @@ internal class ResolveSyncfusionBlazorToolkitThemeStep : ScaffoldStep
     /// </summary>
     private static (string RelativePath, string Kind)[] GetThemeHostCandidates(string projectDirectory)
     {
-        var csproj = _safeEnumerateCsproj(projectDirectory);
+        var csproj = SafeEnumerateCsproj(projectDirectory);
         var isWasm = false;
         if (csproj is not null)
         {
@@ -75,15 +85,17 @@ internal class ResolveSyncfusionBlazorToolkitThemeStep : ScaffoldStep
             [
                 (Path.Combine("wwwroot", "index.html"), "Standalone Blazor WASM (wwwroot/index.html)"),
                 (Path.Combine("Components", "App.razor"), "Blazor Web App (Components/App.razor)"),
+                (Path.Combine("App.razor"), "Hybrid / older template (root App.razor)"),
             ]
             :
             [
                 (Path.Combine("Components", "App.razor"), "Blazor Web App (Components/App.razor)"),
                 (Path.Combine("wwwroot", "index.html"), "Standalone Blazor WASM (wwwroot/index.html)"),
+                (Path.Combine("App.razor"), "Hybrid / older template (root App.razor)"),
             ];
     }
 
-    private static string? _safeEnumerateCsproj(string projectDirectory)
+    private static string? SafeEnumerateCsproj(string projectDirectory)
     {
         try
         {
@@ -128,27 +140,31 @@ internal class ResolveSyncfusionBlazorToolkitThemeStep : ScaffoldStep
                 // paths, which are always OS-native. Canonicalizing to
                 // forward slashes here would silently break the lookup on
                 // Windows and cause the theme stylesheet to be skipped.
+                //
+                // With Syncfusion.Blazor.Toolkit 2.0.0+ the resolved path
+                // is recorded for the summary step and any pre-2.0.0
+                // compatibility path; the code-modification step does not
+                // emit a theme entry by default.
                 settings.ThemeFile = Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.SyncfusionBlazorToolkitHelper.ToOsNativePath(relativePath);
                 settings.ThemeFileSkipped = false;
                 _logger.LogInformation(
-                    "Syncfusion Blazor Toolkit theme stylesheet will be added to '{ThemeFile}' ({Kind}).",
+                    "Syncfusion Blazor Toolkit detected theme host '{ThemeFile}' ({Kind}). " +
+                    "No external stylesheet link will be injected because the 2.0.0 package ships styles with the assembly and activates them through AddSyncfusionBlazorToolkit().",
                     settings.ThemeFile,
                     kind);
                 return Task.FromResult(true);
             }
         }
 
-        // Neither Components/App.razor nor wwwroot/index.html was found.
-        // Don't fail the whole scaffolder; the rest of the setup (package,
-        // Program.cs, _Imports.razor) is still useful.
+        // No theme host found. Don't fail the whole scaffolder; the rest
+        // of the setup (package, Program.cs, _Imports.razor) is still
+        // useful.
         settings.ThemeFile = null;
         settings.ThemeFileSkipped = true;
-        _logger.LogWarning(
-            "Syncfusion Blazor Toolkit theme stylesheet was skipped: neither '{AppRazor}' nor '{IndexHtml}' was found in the project. " +
-            "The package, Program.cs registration, and Components/_Imports.razor @using directive were still applied; " +
-            "add the theme <link> manually if your project uses a different host file.",
-            Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.SyncfusionBlazorToolkitHelper.ToOsNativePath(Path.Combine("Components", "App.razor")),
-            Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.SyncfusionBlazorToolkitHelper.ToOsNativePath(Path.Combine("wwwroot", "index.html")));
+        _logger.LogInformation(
+            "Syncfusion Blazor Toolkit did not find a theme host file (Components/App.razor, wwwroot/index.html, or root App.razor) under '{ProjectDirectory}'. " +
+            "No external stylesheet link is required for the 2.0.0+ package; styles are bundled and activated through AddSyncfusionBlazorToolkit().",
+            projectDirectory);
         return Task.FromResult(true);
     }
 }

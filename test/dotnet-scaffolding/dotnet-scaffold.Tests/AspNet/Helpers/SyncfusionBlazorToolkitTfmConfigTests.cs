@@ -212,4 +212,70 @@ public class SyncfusionBlazorToolkitTfmConfigTests
         }
         Assert.False(hasUsingDirective, "@using directive entry should not be emitted when importsFile is null");
     }
+
+    /// <summary>
+    /// With Syncfusion.Blazor.Toolkit 2.0.0+, the scaffolder passes
+    /// <c>themeFile: null</c> by default so no external stylesheet
+    /// <c>&lt;link&gt;</c> is injected. The resolved JSON must therefore
+    /// contain NO theme entry even when the host file is present.
+    /// </summary>
+    [Theory]
+    [InlineData("net8.0")]
+    [InlineData("net9.0")]
+    [InlineData("net10.0")]
+    [InlineData("net11.0")]
+    public void RealTfmConfig_WithThemeFileNull_DoesNotEmitThemeStylesheet(string tfm)
+    {
+        var repoRoot = FindRepoRoot();
+        var tfmConfigPath = Path.Combine(
+            repoRoot,
+            "src", "dotnet-scaffolding", "dotnet-scaffold",
+            "AspNet", "Templates", tfm, "CodeModificationConfigs",
+            "syncfusionBlazorToolkitChanges.json");
+
+        // The 2.0.0+ default path: themeFile is null.
+        var resolved = SyncfusionBlazorToolkitHelper.BuildResolvedCodeModifierConfigJson(
+            tfmConfigPath,
+            themeFile: null,
+            importsFile: OsRelative("Components", "_Imports.razor"));
+
+        Assert.NotNull(resolved);
+        Assert.DoesNotContain("fluent.min.css", resolved);
+
+        using var doc = JsonDocument.Parse(resolved);
+        var files = doc.RootElement.GetProperty("Files");
+
+        // Expect 2 entries: Program.cs + _Imports.razor. No theme entry.
+        Assert.Equal(2, files.GetArrayLength());
+        Assert.Equal("Program.cs", files[0].GetProperty("FileName").GetString());
+    }
+
+    /// <summary>
+    /// With Syncfusion.Blazor.Toolkit 2.0.0+ the @using block is
+    /// <c>\n@using Syncfusion.Blazor.Toolkit\n</c> — the leading newline
+    /// keeps the appended snippet from gluing to the previous line in the
+    /// file. The <c>CheckBlock</c> makes re-runs idempotent.
+    /// </summary>
+    [Theory]
+    [InlineData("net8.0")]
+    [InlineData("net9.0")]
+    [InlineData("net10.0")]
+    [InlineData("net11.0")]
+    public void RealTfmConfig_ImportsBlock_HasLeadingNewlineAndIdempotentCheckBlock(string tfm)
+    {
+        var repoRoot = FindRepoRoot();
+        var tfmConfigPath = Path.Combine(
+            repoRoot,
+            "src", "dotnet-scaffolding", "dotnet-scaffold",
+            "AspNet", "Templates", tfm, "CodeModificationConfigs",
+            "syncfusionBlazorToolkitChanges.json");
+
+        var resolved = SyncfusionBlazorToolkitHelper.BuildResolvedCodeModifierConfigJson(
+            tfmConfigPath,
+            themeFile: null,
+            importsFile: OsRelative("Components", "_Imports.razor"));
+
+        Assert.NotNull(resolved);
+        Assert.Contains("\\n@using Syncfusion.Blazor.Toolkit\\n", resolved);
+    }
 }

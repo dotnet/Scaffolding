@@ -9,24 +9,33 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 /// <summary>
 /// Helpers for the Syncfusion Blazor Toolkit setup scaffolder.
+///
+/// <para><b>NuGet 2.0.0 behavior:</b> Syncfusion.Blazor.Toolkit 2.0.0+ ships
+/// with styles bundled and activated through the DI registration
+/// (<c>AddSyncfusionBlazorToolkit()</c>), so no external
+/// <c>&lt;link href="_content/.../fluent.min.css" /&gt;</c> tag is required
+/// in <c>App.razor</c> or <c>wwwroot/index.html</c>. Components also expose
+/// a single unified namespace — <c>@using Syncfusion.Blazor.Toolkit</c> —
+/// so the scaffolder only adds one <c>@using</c> directive regardless of
+/// the project layout.</para>
 /// </summary>
 internal static class SyncfusionBlazorToolkitHelper
 {
-    // The theme entry in syncfusionBlazorToolkitChanges.json uses a
-    // $(ThemeFile) placeholder for the file name. We rewrite that entry
-    // at runtime to point at the resolved host file
-    // (Components/App.razor or wwwroot/index.html) or drop it entirely
-    // when no host file was found.
-    internal const string ThemeFilePlaceholder = "$(ThemeFile)";
-
     // FileName marker used to identify the file entry that needs to be
     // removed/rewritten at runtime to point at the discovered
-    // _Imports.razor file.
+    // _Imports.razor file. Kept for backward compatibility with
+    // pre-2.0.0 JSON configs that may have this anchor entry. With the
+    // 2.0.0 unified namespace, the only required user-visible change is
+    // the @using directive; theme stylesheets are no longer injected.
     internal const string ImportsFileMarker = "Components\\_Imports.razor";
 
-    // Theme block (link to fluent.min.css) used to inject the stylesheet
-    // into the resolved host file when a host is available. THEMEFILE is
-    // replaced with the actual file path at runtime.
+    // Optional theme block stub retained for callers that still want to
+    // inject an external stylesheet (only relevant when targeting a
+    // pre-2.0.0 version of the package). The new scaffolding no longer
+    // emits this entry; the constant is kept so legacy code paths
+    // continue to compile. With 2.0.0+, theme styles live inside the
+    // package and are activated via AddSyncfusionBlazorToolkit(), so the
+    // App.razor / index.html host files do not need to be modified.
     private const string ThemeBlockJson =
         "{" +
         "\"FileName\":\"THEMEFILE\"," +
@@ -50,6 +59,12 @@ internal static class SyncfusionBlazorToolkitHelper
     // appended (not replaced) so the snippet is safe regardless of which
     // other usings the project already has. A leading newline keeps the
     // appended block from gluing to the previous line in the file.
+    //
+    // Syncfusion.Blazor.Toolkit 2.0.0+ exposes a single namespace
+    // (@using Syncfusion.Blazor.Toolkit) that is sufficient to render every
+    // Toolkit component. Domain-specific names that used to require
+    // additional @using directives (e.g. Syncfusion.Blazor.Toolkit.Forms)
+    // are no longer required.
     private const string ImportsBlockJson =
         "{" +
         "\"FileName\":\"IMPORTSFILE\"," +
@@ -116,9 +131,16 @@ internal static class SyncfusionBlazorToolkitHelper
     /// from disk and returns a JSON string with the file entries rewritten
     /// to match the files actually present in the target project.
     ///
-    /// <para>The <c>$(ThemeFile)</c> placeholder entry is replaced with a
+    /// <para>The <c>$(ThemeFile)</c> placeholder entry (no longer used by
+    /// 2.0.0+ configs but kept for backward compatibility) is replaced with a
     /// concrete entry for <paramref name="themeFile"/> when supplied, or
-    /// dropped when <paramref name="themeFile"/> is null/empty.</para>
+    /// dropped when <paramref name="themeFile"/> is null/empty. With
+    /// Syncfusion.Blazor.Toolkit 2.0.0+, no external stylesheet is needed
+    /// in <c>App.razor</c> or <c>wwwroot/index.html</c>; styles are bundled
+    /// with the package. The theme parameter is preserved for callers that
+    /// still need to inject a stylesheet (e.g. when targeting a pre-2.0.0
+    /// version of the package), but the scaffold step no longer wires
+    /// themeFile for default 2.0.0 runs.</para>
     ///
     /// <para>The <c>Components\_Imports.razor</c> anchor entry is replaced
     /// with a concrete, anchor-free entry for <paramref name="importsFile"/>
@@ -139,7 +161,8 @@ internal static class SyncfusionBlazorToolkitHelper
     /// <param name="themeFile">Project-relative theme host file path
     /// (e.g. "Components/App.razor", "wwwroot/index.html") or null to drop
     /// the theme entry. Separators are normalized to OS-native form
-    /// before emission.</param>
+    /// before emission. With 2.0.0+, pass null to skip theme injection
+    /// (styles are bundled and activated via DI).</param>
     /// <param name="importsFile">Project-relative path of the discovered
     /// _Imports.razor file (e.g. "Components/_Imports.razor" or
     /// "_Imports.razor") or null to drop the imports entry. Separators
@@ -230,10 +253,15 @@ internal static class SyncfusionBlazorToolkitHelper
                         fileName = fileNameElement.GetString();
                     }
 
-                    if (string.Equals(fileName, ThemeFilePlaceholder, StringComparison.Ordinal))
+                    // Drop any $(ThemeFile) placeholder entry. With
+                    // Syncfusion.Blazor.Toolkit 2.0.0+ no external
+                    // stylesheet is required, so the resolved config
+                    // should never include a theme entry. The
+                    // conditional re-emit below (when themeFile is
+                    // supplied) lets callers that explicitly want a
+                    // theme entry (e.g. pre-2.0.0 target) still get one.
+                    if (string.Equals(fileName, "$(ThemeFile)", StringComparison.Ordinal))
                     {
-                        // Drop the placeholder entry; we'll re-add it below
-                        // if a theme file was discovered.
                         continue;
                     }
 

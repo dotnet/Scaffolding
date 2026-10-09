@@ -1,9 +1,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System;
+using System.CodeDom.Compiler;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -111,5 +116,99 @@ public class WrappedTextTemplatingStepTests
                 It.IsAny<System.Collections.Generic.IReadOnlyDictionary<string, string>>(),
                 It.IsAny<System.Collections.Generic.IReadOnlyDictionary<string, double>>()),
             Times.Once);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsFalse_WhenTemplateTypeDoesNotImplementTransformation()
+    {
+        string outputDirectory = Path.Combine(Path.GetTempPath(), nameof(WrappedTextTemplatingStepTests), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(outputDirectory);
+        string outputPath = Path.Combine(outputDirectory, "Employee.cs");
+        try
+        {
+            Mock<ITelemetryService> mockTelemetryService = new Mock<ITelemetryService>();
+            WrappedTextTemplatingStep step = new WrappedTextTemplatingStep(
+                NullLogger<WrappedTextTemplatingStep>.Instance,
+                mockTelemetryService.Object)
+            {
+                TextTemplatingProperties =
+                [
+                    new TextTemplatingProperty
+                    {
+                        TemplatePath = "Employee.tt",
+                        TemplateType = typeof(object),
+                        OutputPath = outputPath,
+                        TemplateModelName = "Model",
+                        TemplateModel = new object()
+                    }
+                ]
+            };
+
+            bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+            Assert.False(result);
+            Assert.False(File.Exists(outputPath));
+        }
+        finally
+        {
+            Directory.Delete(outputDirectory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsFalse_WhenTemplateProcessingReturnsErrors()
+    {
+        string outputDirectory = Path.Combine(Path.GetTempPath(), nameof(WrappedTextTemplatingStepTests), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(outputDirectory);
+        string outputPath = Path.Combine(outputDirectory, "Employee.cs");
+        try
+        {
+            Mock<ITelemetryService> mockTelemetryService = new Mock<ITelemetryService>();
+            WrappedTextTemplatingStep step = new WrappedTextTemplatingStep(
+                NullLogger<WrappedTextTemplatingStep>.Instance,
+                mockTelemetryService.Object)
+            {
+                TextTemplatingProperties =
+                [
+                    new TextTemplatingProperty
+                    {
+                        TemplatePath = "Employee.tt",
+                        TemplateType = typeof(FailingTransformation),
+                        OutputPath = outputPath,
+                        TemplateModelName = "Model",
+                        TemplateModel = new object()
+                    }
+                ]
+            };
+
+            bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+            Assert.False(result);
+            Assert.False(File.Exists(outputPath));
+        }
+        finally
+        {
+            Directory.Delete(outputDirectory, recursive: true);
+        }
+    }
+
+    private sealed class FailingTransformation : ITextTransformation
+    {
+        public IDictionary<string, object> Session { get; set; } = new Dictionary<string, object>();
+        public CompilerErrorCollection Errors { get; } = new CompilerErrorCollection();
+
+        public FailingTransformation()
+        {
+            Errors.Add(new CompilerError { ErrorText = "Template failed." });
+        }
+
+        public void Initialize()
+        {
+        }
+
+        public string TransformText()
+        {
+            return "generated-content";
+        }
     }
 }

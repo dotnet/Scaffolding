@@ -61,40 +61,57 @@ public class TextTemplatingStep : ScaffoldStep
             };
 
             var host = new TextTemplatingEngineHost { TemplateFile = templatingProperty.TemplatePath };
-            ITextTransformation? textTransformation = null;
             try
             {
                 // Re-instantiate the ITextTransformation type provided (using the TextTemplatingFilePreprocessor in the scaffolder)
-                textTransformation = Activator.CreateInstance(templatingProperty.TemplateType) as ITextTransformation;
-                if (textTransformation != null)
+                var transformationInstance = Activator.CreateInstance(templatingProperty.TemplateType);
+                if (transformationInstance is not ITextTransformation textTransformation)
                 {
-                    textTransformation.Session = host.CreateSession();
+                    _logger.LogError("Template type '{TemplateType}' does not implement {TransformationInterface}.", templatingProperty.TemplateType.FullName, typeof(ITextTransformation).FullName);
+                    return Task.FromResult(false);
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Unable to create an instance of template type '{templatingProperty.TemplateType.Name}'");
-                _logger.LogError(ex.Message);
-            }
 
-            if (textTransformation is not null)
-            {
+                textTransformation.Session = host.CreateSession();
                 var templatedString = templateInvoker.InvokeTemplate(textTransformation, dictParams);
                 var outputFolderPath = Path.GetDirectoryName(templatingProperty.OutputPath);
-                // Create the directory for the output file in case not already there.
-                if (!string.IsNullOrEmpty(templatedString) && !string.IsNullOrEmpty(outputFolderPath))
-                {
-                    if (!Directory.Exists(outputFolderPath))
-                    {
-                        Directory.CreateDirectory(outputFolderPath);
-                    }
 
-                    // If Overwrite is true, write file, or if it doesn't exist
-                    if (Overwrite || !File.Exists(templatingProperty.OutputPath))
-                    {
-                        File.WriteAllText(templatingProperty.OutputPath, templatedString);
-                    }
+                if (string.IsNullOrEmpty(templatedString))
+                {
+                    _logger.LogError("Template '{TemplatePath}' produced empty output for '{OutputPath}'.", templatingProperty.TemplatePath, templatingProperty.OutputPath);
+                    return Task.FromResult(false);
                 }
+
+                if (string.IsNullOrEmpty(outputFolderPath))
+                {
+                    _logger.LogError("Invalid output path '{OutputPath}' for template '{TemplatePath}'.", templatingProperty.OutputPath, templatingProperty.TemplatePath);
+                    return Task.FromResult(false);
+                }
+
+                // Create the directory for the output file in case not already there.
+                if (!Directory.Exists(outputFolderPath))
+                {
+                    Directory.CreateDirectory(outputFolderPath);
+                }
+
+                // If Overwrite is true, write file, or if it doesn't exist
+                if (Overwrite || !File.Exists(templatingProperty.OutputPath))
+                {
+                    File.WriteAllText(templatingProperty.OutputPath, templatedString);
+                }
+            }
+            catch (Exception ex) when (
+                ex is MissingMethodException
+                or MemberAccessException
+                or System.Reflection.TargetInvocationException
+                or InvalidOperationException
+                or IOException
+                or UnauthorizedAccessException
+                or ArgumentException
+                or NotSupportedException)
+            {
+                _logger.LogError(ex, "Failed to process template '{TemplatePath}' using type '{TemplateType}' for output '{OutputPath}'.",
+                    templatingProperty.TemplatePath, templatingProperty.TemplateType.FullName, templatingProperty.OutputPath);
+                return Task.FromResult(false);
             }
         }
 

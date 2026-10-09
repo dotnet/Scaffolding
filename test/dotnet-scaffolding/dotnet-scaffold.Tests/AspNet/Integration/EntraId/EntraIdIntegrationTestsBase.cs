@@ -8,6 +8,7 @@ using System.IO;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.CodeModification;
@@ -285,6 +286,53 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         var updatedProgramContent = await ApplyBlazorEntraChangesConfigAsync(programContent);
 
         Assert.Equal(1, updatedProgramContent.Split("AddAuthenticationStateSerialization").Length - 1);
+    }
+    [Theory]
+    [InlineData("blazorEntraChanges.json", "Components\\Routes.razor", "<RedirectToLogin />")]
+    [InlineData("blazorWasmEntraChanges.json", "Routes.razor", "<RedirectToLogin />")]
+    public void EntraChangesConfig_EnforcesAuthorizationDuringInteractiveNavigation(
+        string configFileName,
+        string routesFileName,
+        string redirectComponentMarkup)
+    {
+        var basePath = GetActualTemplatesBasePath();
+        var configPath = Path.Combine(basePath, TargetFramework, "CodeModificationConfigs", configFileName);
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(configPath));
+
+        JsonElement routesConfig = document.RootElement
+            .GetProperty("Files")
+            .EnumerateArray()
+            .Single(file => file.GetProperty("FileName").GetString() == routesFileName);
+        string configText = routesConfig.ToString();
+        string[] replacementLines = routesConfig
+            .GetProperty("Replacements")
+            .EnumerateArray()
+            .SelectMany(replacement => replacement.GetProperty("MultiLineBlock").EnumerateArray())
+            .Select(line => line.GetString() ?? string.Empty)
+            .ToArray();
+
+        Assert.Contains("<AuthorizeRouteView", configText);
+        Assert.Contains("context.User.Identity?.IsAuthenticated == true", configText);
+        Assert.Contains("You aren't authorized to access this resource.", configText);
+        Assert.Contains(replacementLines, line => line.Contains(redirectComponentMarkup, StringComparison.Ordinal));
+        Assert.DoesNotContain(
+            "\"MultiLineBlock\":[\"<RouteView",
+            configText.Replace(" ", string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty));
+    }
+
+    [Fact]
+    public void BlazorEntraTemplates_IncludeRedirectToLoginComponent()
+    {
+        var basePath = GetActualTemplatesBasePath();
+        var templateBasePath = Path.Combine(
+            basePath,
+            TargetFramework,
+            "BlazorEntraId",
+            "RedirectToLogin");
+
+        Assert.True(File.Exists($"{templateBasePath}.tt"));
+        Assert.True(File.Exists($"{templateBasePath}.cs"));
+        Assert.True(File.Exists($"{templateBasePath}.Interfaces.cs"));
     }
 
     #endregion

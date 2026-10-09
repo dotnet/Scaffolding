@@ -363,9 +363,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                         step.Application = context.GetOptionResult(options.ApplicationId);
                         step.UseExistingApplication = context.GetOptionResult(options.UseExistingApplication);
                     })
+                    .WithDetectBlazorWasmStep()
                     .WithRegisterAppStep()
                     .WithAddClientSecretStep()
-                    .WithDetectBlazorWasmStep()
                     .WithUpdateAppSettingsStep()
                     .WithUpdateAppAuthorizationStep()
                     .WithEntraAddPackagesStep()

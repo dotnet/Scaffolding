@@ -88,6 +88,12 @@ public class Net11TemplateExistenceTests
         AssertTemplateSetExists("net11.0\\BlazorEntraId\\LoginOrLogout");
     }
 
+    [Fact]
+    public void BlazorEntraId_RedirectToLogin_TemplateExists()
+    {
+        AssertTemplateSetExists("net11.0\\BlazorEntraId\\RedirectToLogin");
+    }
+
     #endregion
 
     #region BlazorIdentity Templates
@@ -117,6 +123,12 @@ public class Net11TemplateExistenceTests
     }
 
     [Fact]
+    public void BlazorIdentity_PasskeyAuthenticators_TemplateExists()
+    {
+        AssertTemplateSetExists("net11.0\\BlazorIdentity\\PasskeyAuthenticators");
+    }
+
+    [Fact]
     public void BlazorIdentity_PasskeyInputModel_TemplateExists()
     {
         AssertTemplateSetExists("net11.0\\BlazorIdentity\\PasskeyInputModel");
@@ -126,6 +138,19 @@ public class Net11TemplateExistenceTests
     public void BlazorIdentity_PasskeyOperation_TemplateExists()
     {
         AssertTemplateSetExists("net11.0\\BlazorIdentity\\PasskeyOperation");
+    }
+
+    [Fact]
+    public void BlazorIdentity_PasskeyAuthenticators_UsesSupportedGeneratedImplementation()
+    {
+        var basePath = GetTemplatesBasePath();
+        var filePath = Path.Combine(basePath, "net11.0", "BlazorIdentity", "PasskeyAuthenticators.cs");
+        var content = File.ReadAllText(filePath);
+
+        Assert.Contains("namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorIdentity", content);
+        Assert.Contains("Microsoft.DotNet.Scaffolding.TextTemplating.CallContext.LogicalGetData(\"Model\")", content);
+        Assert.DoesNotContain("System.Runtime.Remoting.Messaging.CallContext", content);
+        Assert.DoesNotContain("Templates.net11_0.BlazorIdentity", content);
     }
 
     #endregion

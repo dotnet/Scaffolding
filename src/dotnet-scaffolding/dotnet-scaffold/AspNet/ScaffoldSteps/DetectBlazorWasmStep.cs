@@ -1,19 +1,19 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Text.Json;
+using System.Xml;
+using System.Xml.Linq;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
-using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 {
     /// <summary>
-    /// Scaffold step for detecting if a referenced project is a Blazor WebAssembly project by inspecting package references.
-    /// Sets context properties if a Blazor WASM project is detected.
+    /// Detects a Blazor WebAssembly client referenced by the selected server project.
+    /// Rejects directly selected WebAssembly projects because Entra scaffolding requires a server host.
     /// </summary>
     internal class DetectBlazorWasmStep : ScaffoldStep
     {
@@ -23,7 +23,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         public string? ProjectPath { get; set; }
         private readonly ILogger _logger;
         private readonly IFileSystem _fileSystem;
-        private readonly ITelemetryService _telemetryService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DetectBlazorWasmStep"/> class.
@@ -32,88 +31,85 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         {
             _logger = logger;
             _fileSystem = fileSystem;
-            _telemetryService = telemetryService;
         }
         
         /// <inheritdoc />
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
-            if (ProjectPath is not null)
+            if (string.IsNullOrEmpty(ProjectPath))
             {
-                var runner = DotnetCliRunner.CreateDotNet("reference", new[] { "list", "--project", ProjectPath });
-
-                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
-
-                if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
-                {
-                    var references = ProjectReferenceParser.ParseProjectReferences(stdOut);
-                    if (references.Count is not 0)
-                    {
-                        foreach (var reference in references)
-                        {
-                            var projectInfo = ClassAnalyzers.GetProjectInfo(reference, _logger);
-
-                            var baseDirectory = Path.GetDirectoryName(ProjectPath);
-                            if (baseDirectory is not null)
-                            {
-                                var fullPath = Path.GetFullPath(reference, baseDirectory);
-
-                                var projectRunner = DotnetCliRunner.CreateDotNet("package", new[] { "list", "--project", fullPath, "--format", "json" });
-                                int packageExitCode = projectRunner.ExecuteAndCaptureOutput(out var packageStdOut, out var packageStdErr);
-
-                                if (packageExitCode == 0 && !string.IsNullOrEmpty(packageStdOut))
-                                {
-
-                                    using (var document = JsonDocument.Parse(packageStdOut))
-                                    {
-                                        var root = document.RootElement;
-                                        if (root.TryGetProperty("projects", out var projectsElement))
-                                        {
-                                            foreach (var project in projectsElement.EnumerateArray())
-                                            {
-                                                if (project.TryGetProperty("frameworks", out var frameworksElement))
-                                                {
-                                                    foreach (var framework in frameworksElement.EnumerateArray())
-                                                    {
-                                                        if (framework.TryGetProperty("topLevelPackages", out var topLevelPackages))
-                                                        {
-                                                            foreach (var pkgElement in topLevelPackages.EnumerateArray())
-                                                            {
-                                                                string id = pkgElement.GetProperty("id").GetString() ?? string.Empty;
-
-                                                                if (id.StartsWith("Microsoft.NET.Sdk.WebAssembly"))
-                                                                {
-                                                                    context.Properties["IsBlazorWasmProject"] = true;
-                                                                    context.Properties["BlazorWasmClientProjectPath"] = fullPath;
-                                                                    _logger.LogInformation($"Detected Blazor WebAssembly project via package reference: {id}");
-                                                                    return Task.FromResult(true);
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        // Detected Blazor WebAssembly project
-                        context.Properties["IsBlazorWasmProject"] = false;
-                        return Task.FromResult(true);
-
-                    }
-                    else
-                    {
-                        context.Properties["IsBlazorWasmProject"] = false;
-                        return Task.FromResult(true);
-
-                    }
-                }
-
+                _logger.LogError("A valid project path is required to detect Blazor WebAssembly.");
+                return Task.FromResult(false);
             }
 
-            return Task.FromResult(false);
+            string fullProjectPath = Path.GetFullPath(ProjectPath);
+            if (!_fileSystem.FileExists(fullProjectPath))
+            {
+                _logger.LogError("Project file '{ProjectPath}' does not exist.", fullProjectPath);
+                return Task.FromResult(false);
+            }
+
+            try
+            {
+                if (UsesBlazorWebAssemblySdk(fullProjectPath))
+                {
+                    _logger.LogError(
+                        "Entra ID scaffolding requires a server host and does not support directly selected Blazor WebAssembly projects. " +
+                        "For a hosted Blazor Web App, select the server project instead. " +
+                        "Standalone WebAssembly apps require separate MSAL authentication configuration.");
+                    return Task.FromResult(false);
+                }
+
+                if (!BlazorWebAssemblyClientProjectResolver.TryGetClient(
+                    fullProjectPath, _fileSystem, out var client, out var error))
+                {
+                    _logger.LogError("{Error}", error);
+                    return Task.FromResult(false);
+                }
+
+                if (client is not null)
+                {
+                    SetWebAssemblyProject(context, client.Value.ProjectPath);
+                    return Task.FromResult(true);
+                }
+
+                context.Properties["IsBlazorWasmProject"] = false;
+                return Task.FromResult(true);
+            }
+            catch (XmlException ex)
+            {
+                _logger.LogError(ex, "Unable to parse project file '{ProjectPath}' while detecting Blazor WebAssembly.", fullProjectPath);
+                return Task.FromResult(false);
+            }
+        }
+
+        private bool UsesBlazorWebAssemblySdk(string projectPath)
+        {
+            XDocument projectDocument = XDocument.Parse(_fileSystem.ReadAllText(projectPath));
+            XElement? projectElement = projectDocument.Root;
+            if (projectElement is null)
+            {
+                return false;
+            }
+
+            string? sdk = projectElement.Attribute("Sdk")?.Value;
+            if (sdk?.Contains("Microsoft.NET.Sdk.BlazorWebAssembly", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return true;
+            }
+
+            return projectElement
+                .Elements()
+                .Where(element => element.Name.LocalName.Equals("Sdk", StringComparison.OrdinalIgnoreCase))
+                .Select(element => element.Attribute("Name")?.Value)
+                .Any(sdkName => sdkName?.Equals("Microsoft.NET.Sdk.BlazorWebAssembly", StringComparison.OrdinalIgnoreCase) == true);
+        }
+
+        private void SetWebAssemblyProject(ScaffolderContext context, string projectPath)
+        {
+            context.Properties["IsBlazorWasmProject"] = true;
+            context.Properties["BlazorWasmClientProjectPath"] = projectPath;
+            _logger.LogInformation("Detected Blazor WebAssembly project '{ProjectPath}'.", projectPath);
         }
     }
 }

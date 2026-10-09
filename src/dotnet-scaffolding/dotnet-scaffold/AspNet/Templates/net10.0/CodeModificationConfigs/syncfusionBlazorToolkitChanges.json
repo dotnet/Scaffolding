@@ -1,0 +1,38 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CheckBlock": "AddSyncfusionBlazorToolkit",
+              "Block": "builder.Services.AddSyncfusionBlazorToolkit();",
+              "LeadingTrivia": {
+                "Newline": true
+              },
+              "TrailingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertAfter": "WebAssemblyHostBuilder.CreateDefault",
+              "CheckBlock": "AddSyncfusionBlazorToolkit",
+              "Block": "builder.Services.AddSyncfusionBlazorToolkit();",
+              "LeadingTrivia": {
+                "Newline": true
+              },
+              "TrailingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "Syncfusion.Blazor.Toolkit"
+      ]
+    }
+  ]
+}

@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -16,13 +17,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.Models;
 public class PackageTests
 {
     private readonly Mock<IEnvironmentService> _mockEnvironmentService;
-    private readonly NuGetVersionService _nugetVersionService;
+    private readonly FixtureNuGetVersionService _nugetVersionService;
 
     public PackageTests()
     {
         _mockEnvironmentService = new Mock<IEnvironmentService>();
         _mockEnvironmentService.Setup(e => e.CurrentDirectory).Returns(System.IO.Directory.GetCurrentDirectory());
-        _nugetVersionService = new NuGetVersionService(_mockEnvironmentService.Object);
+        _nugetVersionService = new FixtureNuGetVersionService(_mockEnvironmentService.Object);
     }
 
     [Fact]
@@ -42,45 +43,21 @@ public class PackageTests
         Assert.Equal("1.0.0", result.PackageVersion);
     }
 
-    [Fact]
-    public async Task WithResolvedVersionAsync_Net8Framework_ResolvesVersion()
+    [Theory]
+    [InlineData(TargetFramework.Net8, "8.0.2")]
+    [InlineData(TargetFramework.Net9, "9.0.1")]
+    [InlineData(TargetFramework.Net10, "10.0.1")]
+    [InlineData(TargetFramework.Net11, "11.0.0-rc.1")]
+    public async Task WithResolvedVersionAsync_ResolvesHighestVersionForTargetFramework(TargetFramework framework, string expected)
     {
         // Arrange
         Package package = new Package("Microsoft.Extensions.Logging", IsVersionRequired: true);
 
         // Act
-        Package result = await package.WithResolvedVersionAsync(TargetFramework.Net8, _nugetVersionService);
+        Package result = await package.WithResolvedVersionAsync(framework, _nugetVersionService);
 
         // Assert
-        Assert.NotNull(result.PackageVersion);
-        Assert.NotEqual(package, result);
-    }
-
-    [Fact]
-    public async Task WithResolvedVersionAsync_Net9Framework_ResolvesVersion()
-    {
-        // Arrange
-        Package package = new Package("Microsoft.Extensions.Logging", IsVersionRequired: true);
-
-        // Act
-        Package result = await package.WithResolvedVersionAsync(TargetFramework.Net9, _nugetVersionService);
-
-        // Assert
-        Assert.NotNull(result.PackageVersion);
-        Assert.NotEqual(package, result);
-    }
-
-    [Fact]
-    public async Task WithResolvedVersionAsync_Net10Framework_ResolvesVersion()
-    {
-        // Arrange
-        Package package = new Package("Microsoft.Extensions.Logging", IsVersionRequired: true);
-
-        // Act
-        Package result = await package.WithResolvedVersionAsync(TargetFramework.Net10, _nugetVersionService);
-
-        // Assert
-        Assert.NotNull(result.PackageVersion);
+        Assert.Equal(expected, result.PackageVersion);
         Assert.NotEqual(package, result);
     }
 
@@ -120,11 +97,9 @@ public class PackageTests
     }
 
     [Fact]
-    public async Task WithResolvedVersionAsync_UseLatestVersion_ResolvesNonVulnerableSqlitePclRawBundle()
+    public async Task WithResolvedVersionAsync_UseLatestVersion_ResolvesLatestStableSqlitePclRawBundle()
     {
-        // Arrange: SQLitePCLRaw is not versioned in lockstep with .NET, so it is resolved to the latest
-        // stable version on the feed regardless of target framework. CVE-2025-6965 (GHSA-2m69-gcr7-jv3q)
-        // flags SQLitePCLRaw.lib.e_sqlite3 <= 2.1.11, so the resolved version must be strictly greater.
+        // SQLitePCLRaw is not versioned in lockstep with .NET.
         Package package = new Package("SQLitePCLRaw.bundle_e_sqlite3", IsVersionRequired: true)
         {
             UseLatestVersion = true
@@ -137,21 +112,22 @@ public class PackageTests
         Assert.NotNull(result.PackageVersion);
         NuGetVersion resolved = NuGetVersion.Parse(result.PackageVersion!);
         Assert.False(resolved.IsPrerelease);
-        Assert.True(resolved > NuGetVersion.Parse("2.1.11"));
+        Assert.Equal(NuGetVersion.Parse("3.0.0"), resolved);
     }
 
     [Fact]
-    public async Task WithResolvedVersionAsync_Net11Framework_ResolvesVersion()
+    public async Task WithResolvedVersionAsync_UsesTargetProjectDirectory()
     {
         // Arrange
         Package package = new Package("Microsoft.Extensions.Logging", IsVersionRequired: true);
 
         // Act
-        Package result = await package.WithResolvedVersionAsync(TargetFramework.Net11, _nugetVersionService);
+        string projectPath = Path.Combine(Path.GetTempPath(), "fixture", "App.csproj");
+        Package result = await package.WithResolvedVersionAsync(TargetFramework.Net11, _nugetVersionService, projectPath);
 
         // Assert
-        Assert.NotNull(result.PackageVersion);
-        Assert.NotEqual(package, result);
+        Assert.Equal("11.0.0-rc.1", result.PackageVersion);
+        Assert.Equal(Path.GetDirectoryName(projectPath), _nugetVersionService.ProjectDirectory);
     }
 
     [Fact]
@@ -257,5 +233,24 @@ public class PackageTests
         Assert.True(modifiedPackage.IsVersionRequired);
         Assert.Equal("2.0.0", modifiedPackage.PackageVersion);
         Assert.NotEqual(package, modifiedPackage);
+    }
+
+    private sealed class FixtureNuGetVersionService(IEnvironmentService environmentService)
+        : NuGetVersionService(environmentService)
+    {
+        public string? ProjectDirectory { get; private set; }
+
+        protected override Task<IEnumerable<NuGetVersion>> GetVersionsForPackageAsync(string packageId, string? projectDirectory = null)
+        {
+            ProjectDirectory = projectDirectory;
+            string[] versions = packageId switch
+            {
+                "Microsoft.Extensions.Logging" => ["10.0.1", "8.0.1", "11.0.0-rc.1", "9.0.1", "8.0.2", "11.0.0-preview.1"],
+                "SQLitePCLRaw.bundle_e_sqlite3" => ["2.1.11", "3.0.0", "4.0.0-preview.1"],
+                _ => []
+            };
+            IEnumerable<NuGetVersion> result = Array.ConvertAll(versions, NuGetVersion.Parse);
+            return Task.FromResult(result);
+        }
     }
 }

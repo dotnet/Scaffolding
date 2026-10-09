@@ -1,0 +1,120 @@
+{
+  "Files": [
+    {
+      "FileName": "Components\\App.razor",
+      "Options": [
+        "IgniteUIAppRazorHost"
+      ],
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "$(IgniteUIHeadClosingTag)"
+          ],
+          "Block": "$(IgniteUIThemeLinkBeforeHead)",
+          "CheckBlock": "$(IgniteUIThemeStylesheetPath)",
+          "Options": [
+            "IgniteUILinkTheme"
+          ]
+        },
+        {
+          "ReplaceSnippet": [
+            "$(IgniteUIExistingThemeStylesheetPath)"
+          ],
+          "Block": "$(IgniteUIThemeStylesheetPath)",
+          "Options": [
+            "IgniteUISwapTheme"
+          ]
+        }
+      ]
+    },
+    {
+      "FileName": "Pages\\_Layout.cshtml",
+      "Options": [
+        "IgniteUILayoutCshtmlHost"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "ReplaceSnippet": [
+                "$(IgniteUIHeadClosingTag)"
+              ],
+              "Block": "$(IgniteUIThemeLinkBeforeHead)",
+              "CheckBlock": "$(IgniteUIThemeStylesheetPath)",
+              "Options": [
+                "IgniteUILinkTheme"
+              ]
+            },
+            {
+              "ReplaceSnippet": [
+                "$(IgniteUIExistingThemeStylesheetPath)"
+              ],
+              "Block": "$(IgniteUIThemeStylesheetPath)",
+              "Options": [
+                "IgniteUISwapTheme"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "FileName": "Pages\\_Host.cshtml",
+      "Options": [
+        "IgniteUIHostCshtmlHost"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "ReplaceSnippet": [
+                "$(IgniteUIHeadClosingTag)"
+              ],
+              "Block": "$(IgniteUIThemeLinkBeforeHead)",
+              "CheckBlock": "$(IgniteUIThemeStylesheetPath)",
+              "Options": [
+                "IgniteUILinkTheme"
+              ]
+            },
+            {
+              "ReplaceSnippet": [
+                "$(IgniteUIExistingThemeStylesheetPath)"
+              ],
+              "Block": "$(IgniteUIThemeStylesheetPath)",
+              "Options": [
+                "IgniteUISwapTheme"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "FileName": "wwwroot\\index.html",
+      "Options": [
+        "IgniteUIIndexHtmlHost"
+      ],
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "$(IgniteUIHeadClosingTag)"
+          ],
+          "Block": "$(IgniteUIThemeLinkBeforeHead)",
+          "CheckBlock": "$(IgniteUIThemeStylesheetPath)",
+          "Options": [
+            "IgniteUILinkTheme"
+          ]
+        },
+        {
+          "ReplaceSnippet": [
+            "$(IgniteUIExistingThemeStylesheetPath)"
+          ],
+          "Block": "$(IgniteUIThemeStylesheetPath)",
+          "Options": [
+            "IgniteUISwapTheme"
+          ]
+        }
+      ]
+    }
+  ]
+}

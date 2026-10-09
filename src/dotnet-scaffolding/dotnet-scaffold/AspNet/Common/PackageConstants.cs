@@ -82,6 +82,11 @@ internal class PackageConstants
         public static readonly Package AspNetCoreAuthenticationJwtBearerPackage = new("Microsoft.AspNetCore.Authentication.JwtBearer", IsVersionRequired: true);
         public static readonly Package AspNetCoreAuthenticationOpenIdConnectPackage = new("Microsoft.AspNetCore.Authentication.OpenIdConnect", IsVersionRequired: true);
         public static readonly Package MicrosoftIdentityWebPackage = new("Microsoft.Identity.Web");
+        // Syncfusion.Blazor.Toolkit 2.0.0+ no longer requires an external
+        // theme stylesheet in App.razor / wwwroot/index.html — styles are
+        // bundled with the package and activated through DI. Components also
+        // expose a single, unified namespace (@using Syncfusion.Blazor.Toolkit)
+        // so the scaffolder only needs to add one using directive.
         public static readonly Package SyncfusionBlazorToolkitPackage = new("Syncfusion.Blazor.Toolkit", IsVersionRequired: true)
         {
             UseLatestVersion = true

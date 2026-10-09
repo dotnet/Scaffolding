@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
@@ -534,45 +535,46 @@ public class {modelName}
     /// <para>
     /// The temporary test projects live under <see cref="Path.GetTempPath"/>, i.e. outside the
     /// repository tree, so they cannot discover the repository's root <c>NuGet.config</c> by the
-    /// normal directory walk. To keep a single source of truth — and, critically, to restore from
-    /// the exact same curated, CI-mirrored dnceng feeds the rest of the build uses — this returns
-    /// the repository root <c>NuGet.config</c> content verbatim.
+    /// normal directory walk. Feed URLs come from the repository root <c>NuGet.config</c>, but
+    /// only the dotnet-public mirror and .NET 11 product/transport feeds are included.
     /// </para>
     /// <para>
-    /// This deliberately avoids the live public <c>https://api.nuget.org</c> feed (which the repo's
-    /// own config does not use). Restoring the scaffolded preview projects directly against the live
-    /// nuget.org endpoint was the root cause of the CI flakiness: transient throttling/timeouts on
-    /// that endpoint failed the pre-/post-build restores. The dnceng mirror feeds in the repo config
-    /// are the same ones the solution build already warmed, so these restores become cache hits.
+    /// This avoids querying unrelated engineering, tooling, Visual Studio, and older-framework
+    /// feeds during package discovery. Those extra metadata requests caused CI timeouts while
+    /// adding application packages such as QuickGrid.
     /// </para>
     /// </summary>
-    public static string PreviewNuGetConfig => GetRepoRootNuGetConfig();
+    public static string PreviewNuGetConfig => GetPreviewNuGetConfig();
 
     /// <summary>
-    /// Reads the repository root <c>NuGet.config</c> so temporary test projects restore from the
-    /// identical feed set as the rest of the build. Falls back to an embedded copy of the repo's
-    /// dnceng feeds (still excluding the live nuget.org endpoint) if the file cannot be located.
+    /// Builds an isolated application feed configuration using the repository's feed URLs.
     /// </summary>
-    private static string GetRepoRootNuGetConfig()
+    private static string GetPreviewNuGetConfig()
     {
         var repoConfig = Path.Combine(GetRepoRoot(), "NuGet.config");
-        if (File.Exists(repoConfig))
+        var config = XDocument.Load(repoConfig);
+        var sources = config.Root?.Element("packageSources")
+            ?? throw new System.InvalidOperationException($"No package sources found in '{repoConfig}'.");
+        string[] requiredSourceNames = ["dotnet-public", "dotnet11", "dotnet11-transport"];
+        var selectedSources = requiredSourceNames.Select(name =>
         {
-            return File.ReadAllText(repoConfig);
-        }
+            var matches = sources.Elements("add")
+                .Where(source => source.Attribute("key")?.Value == name)
+                .ToArray();
+            if (matches.Length != 1 || string.IsNullOrWhiteSpace(matches[0].Attribute("value")?.Value))
+            {
+                throw new System.InvalidOperationException(
+                    $"Expected exactly one package source with a URL for '{name}' in '{repoConfig}'.");
+            }
 
-        // Defensive fallback mirroring the repo's dnceng feeds. Intentionally excludes
-        // https://api.nuget.org — the dotnet-public feed is a reliable mirror of it.
-        return @"<?xml version=""1.0"" encoding=""utf-8""?>
-<configuration>
-  <packageSources>
-    <clear />
-    <add key=""dotnet-public"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json"" />
-    <add key=""dotnet11"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet11/nuget/v3/index.json"" />
-    <add key=""dotnet11-transport"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet11-transport/nuget/v3/index.json"" />
-  </packageSources>
-  <disabledPackageSources />
-</configuration>";
+            return new XElement(matches[0]);
+        });
+
+        return new XDocument(
+            new XElement("configuration",
+                new XElement("packageSources", new XElement("clear"), selectedSources),
+                new XElement("disabledPackageSources", new XElement("clear"))))
+            .ToString();
     }
 
     /// <summary>

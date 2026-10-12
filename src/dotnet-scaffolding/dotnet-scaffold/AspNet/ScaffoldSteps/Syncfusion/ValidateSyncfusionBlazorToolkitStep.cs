@@ -131,6 +131,20 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
         // Microsoft.NET.Sdk.BlazorWebAssembly project, we configure the
         // client too — package on the client, services + imports on the
         // server.
+        //
+        // `BlazorWebAssemblyClientProjectResolver.TryGetClient` returns
+        //   true  + null client → no client was found, single-project.
+        //   true  + client      → exactly one client, use it.
+        //   false + error       → a referenced project is missing,
+        //                         evaluation failed, or multiple
+        //                         clients were found. In all of those
+        //                         cases the user must fix their project
+        //                         references before the scaffolder can
+        //                         safely proceed, regardless of whether
+        //                         `*.Client.csproj` happens to live next
+        //                         to the server. Silent single-project
+        //                         fallback would leave the client
+        //                         unconfigured.
         string? clientError = null;
         bool clientLookupOk = false;
         if (projectKind == ProjectKind.WebApp)
@@ -142,13 +156,22 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
                 settings.ClientProjectPath = client.Value.ProjectPath;
                 settings.Layout = SyncfusionBlazorToolkitLayout.AutoServer;
             }
-            else if (!clientLookupOk && LooksLikeMultiProjectReference(projectDirectory))
+            else if (!clientLookupOk && ProjectReferencesWebAssemblyClient(settings.Project))
             {
-                // Only fail when the project is supposed to be a
-                // multi-project layout but evaluation broke.
-                // Standalone projects with no client are perfectly
-                // valid.
-                _logger.LogError(clientError);
+                // Hard failure: missing referenced project, evaluation
+                // error, or ambiguous clients. We deliberately do not
+                // gate this on `LooksLikeMultiProjectReference()` (the
+                // old sibling-only check) — the standard Blazor Web App
+                // Auto template places the client in a sibling folder,
+                // not next to the server. We DO gate on
+                // `ProjectReferencesWebAssemblyClient` so that a
+                // resolver failure on a genuinely single-project .csproj
+                // is not surfaced as a hard error.
+                _logger.LogError(
+                    "Syncfusion Blazor Toolkit scaffolder could not resolve the Blazor WebAssembly client for '{Project}': {Error}. " +
+                    "Fix the server project's ProjectReference entries (or remove the WebAssembly client reference for a single-project setup), then re-run the scaffolder.",
+                    settings.Project,
+                    clientError);
                 _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(
                     nameof(ValidateSyncfusionBlazorToolkitStep),
                     context.Scaffolder.DisplayName,
@@ -228,6 +251,34 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
     }
 
     /// <summary>
+    /// True when the supplied .csproj file declares any
+    /// <c>&lt;ProjectReference&gt;</c> entries. This is a fast,
+    /// evaluator-free check (no MSBuild load) that lets the validate
+    /// step decide whether a missing/ambiguous Blazor WebAssembly
+    /// client is a real failure (the project actually tries to
+    /// reference one but evaluation cannot find/match it) or just a
+    /// harmless artifact of evaluating a single-project test fixture
+    /// that the resolver cannot fully load.
+    /// </summary>
+    private static bool ProjectReferencesWebAssemblyClient(string projectPath)
+    {
+        if (string.IsNullOrEmpty(projectPath) || !File.Exists(projectPath))
+        {
+            return false;
+        }
+
+        try
+        {
+            string text = File.ReadAllText(projectPath);
+            return text.Contains("<ProjectReference", StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Detects whether the supplied project is a Blazor Web App,
     /// standalone Blazor WebAssembly, Blazor Server (Microsoft.NET.Sdk.Blazor),
     /// Hybrid / MAUI Blazor Hybrid, or not a Blazor project at all.
@@ -266,23 +317,6 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
         }
 
         return ProjectKind.NotBlazor;
-    }
-
-    /// <summary>
-    /// Heuristic check used to decide whether a missing client is a
-    /// failure. A project that has a sibling .Client project on disk
-    /// but whose evaluation broke is treated as a multi-project
-    /// reference; a project with no sibling is treated as a
-    /// standalone Blazor Web App.
-    /// </summary>
-    private bool LooksLikeMultiProjectReference(string projectDirectory)
-    {
-        foreach (string csproj in Directory.EnumerateFiles(projectDirectory, "*.Client.csproj", SearchOption.TopDirectoryOnly))
-        {
-            return true;
-        }
-
-        return false;
     }
 
     private string DetectRenderMode(string projectDirectory)

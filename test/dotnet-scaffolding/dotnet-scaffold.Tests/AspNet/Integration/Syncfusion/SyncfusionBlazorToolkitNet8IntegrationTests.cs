@@ -132,7 +132,7 @@ public class SyncfusionBlazorToolkitNet8IntegrationTests : SyncfusionBlazorToolk
         var (exitCode, output, error) = await ScaffoldAsync();
         Assert.True(exitCode == 0, $"Output: {output}\nError: {error}");
 
-        var imports = File.ReadAllText(Path.Combine(_testProjectDir, "Pages", "_Imports.razor"));
+        var imports = File.ReadAllText(Path.Combine(_testProjectDir, "_Imports.razor"));
         Assert.Contains("@using Syncfusion.Blazor.Toolkit", imports);
         Assert.False(File.Exists(Path.Combine(_testProjectDir, "Components", "_Imports.razor")),
             "Components/_Imports.razor should not be created when the project only has Pages/_Imports.razor.");

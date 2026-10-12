@@ -412,8 +412,20 @@ internal class DocumentBuilder
             return originalMethod;
         }
 
-        //check for CodeChange.Block and CodeChange.CheckBlock for  block's are easy to check.
-        if (ProjectModifierHelper.StatementExists(children, codeChange.Block) || !string.IsNullOrEmpty(codeChange.CheckBlock) && ProjectModifierHelper.StatementExists(children, codeChange.CheckBlock))
+        // Check for CodeChange.Block and CodeChange.CheckBlock. The
+        // substring-based StatementExists is the default; the recipe
+        // can opt into a strict detector (a real, non-commented,
+        // non-chinned call) by setting StrictCheck = true. This is
+        // important for scaffolders whose CheckBlock happens to
+        // appear as a substring of an existing fluent chain — the
+        // old substring check would treat that as "already applied"
+        // and skip the insertion.
+        bool blockAlreadyPresent = ProjectModifierHelper.StatementExists(children, codeChange.Block);
+        bool checkBlockAlreadyPresent = !string.IsNullOrEmpty(codeChange.CheckBlock) &&
+            (codeChange.StrictCheck
+                ? StrictCheckBlockExists(originalMethod, codeChange.CheckBlock)
+                : ProjectModifierHelper.StatementExists(children, codeChange.CheckBlock));
+        if (blockAlreadyPresent || checkBlockAlreadyPresent)
         {
             return originalMethod;
         }
@@ -550,6 +562,51 @@ internal class DocumentBuilder
             .WithAdditionalAnnotations(Formatter.Annotation)
             .WithLeadingTrivia(leadingTrivia)
             .WithTrailingTrivia(trailingTrivia);
+    }
+
+    /// <summary>
+    /// Strict detector used by recipes that opt into
+    /// <c>StrictCheck = true</c>. Returns true only when one of the
+    /// direct statements under <paramref name="originalMethod"/> is a
+    /// short, standalone expression whose main call is the recipe's
+    /// <paramref name="checkBlock"/>. This rejects:
+    /// <list type="bullet">
+    ///   <item><description>commented-out occurrences (the parser has already dropped them,</description></item>
+    ///   <item><description>substrings inside a longer fluent chain, and</description></item>
+    ///   <item><description>substrings inside any other unrelated statement.</description></item>
+    /// </list>
+    /// </summary>
+    internal static bool StrictCheckBlockExists(SyntaxNode originalMethod, string checkBlock)
+    {
+        if (string.IsNullOrEmpty(checkBlock) || originalMethod is null)
+        {
+            return false;
+        }
+
+        var siblings = GetDescendantNodes(originalMethod);
+        if (siblings is null)
+        {
+            return false;
+        }
+
+        foreach (var sibling in siblings.OfType<StatementSyntax>())
+        {
+            var siblingText = sibling.ToString();
+            if (siblingText.Contains("(" + checkBlock + "(", StringComparison.Ordinal) ||
+                siblingText.Contains("." + checkBlock + "(", StringComparison.Ordinal) ||
+                siblingText.Contains("." + checkBlock + "()", StringComparison.Ordinal))
+            {
+                var trimmed = siblingText.Trim();
+                if (trimmed.Length < 200 &&
+                    trimmed.IndexOf(checkBlock + "(", StringComparison.Ordinal) >= 0 &&
+                    trimmed.IndexOf(checkBlock + "(", StringComparison.Ordinal) < trimmed.Length / 2)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

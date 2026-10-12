@@ -198,32 +198,37 @@ internal static class SyncfusionBlazorToolkitHelper
 
     /// <summary>
     /// True when the file already contains a real (non-commented)
-    /// <c>@using Syncfusion.Blazor.Toolkit</c> directive. A substring
-    /// match would mis-detect the directive appearing inside a Razor
-    /// <c>@* … *@</c> comment block.
+    /// <c>@using Syncfusion.Blazor.Toolkit</c> directive.
+    /// <para>The check is exact: a sub-namespace using such as
+    /// <c>@using Syncfusion.Blazor.Toolkit.Buttons</c> does <b>not</b>
+    /// count, and content inside Razor <c>@* … *@</c> comment blocks
+    /// (including multiline ones) is ignored. Whitespace and end-of-line
+    /// comments are tolerated.</para>
     /// </summary>
-    private static bool DirectiveAlreadyPresent(string razorContents)
+    internal static bool DirectiveAlreadyPresent(string razorContents)
     {
         if (string.IsNullOrEmpty(razorContents))
         {
             return false;
         }
 
-        foreach (string rawLine in razorContents.Split('\n'))
+        // Strip every multiline Razor comment block first so a comment
+        // spanning many lines cannot leak `@using Syncfusion.Blazor.Toolkit`
+        // out of the directive scan below.
+        string codeOnly = StripMultilineRazorComments(razorContents);
+
+        foreach (string rawLine in codeOnly.Split('\n'))
         {
             string line = rawLine.TrimEnd('\r');
-            // Strip razor block comments (single-line) before matching.
-            int blockCommentStart = line.IndexOf("@*", StringComparison.Ordinal);
-            string searchable = blockCommentStart >= 0 ? line[..blockCommentStart] : line;
 
-            // Strip end-of-line comments (@* … *@ on the same line).
-            int blockCommentEnd = searchable.IndexOf("*@", StringComparison.Ordinal);
-            if (blockCommentEnd >= 0)
+            // Drop any single-line @* ... *@ tail on the same line.
+            int inlineStart = line.IndexOf("@*", StringComparison.Ordinal);
+            if (inlineStart >= 0)
             {
-                searchable = searchable[..blockCommentEnd];
+                line = line[..inlineStart];
             }
 
-            if (searchable.IndexOf(UsingDirective, StringComparison.Ordinal) >= 0)
+            if (HasExactToolkitUsing(line))
             {
                 return true;
             }
@@ -233,10 +238,129 @@ internal static class SyncfusionBlazorToolkitHelper
     }
 
     /// <summary>
-    /// Looks for an <c>_Imports.razor</c> file in the conventional Blazor
-    /// locations. The first match wins. Returns the absolute path of the
-    /// discovered file, or null when no candidate exists.
+    /// Removes every <c>@* … *@</c> Razor block-comment region from
+    /// the input. Handles both single-line and multiline forms and
+    /// preserves line breaks so line numbers are not lost on the
+    /// remaining content.
     /// </summary>
+    private static string StripMultilineRazorComments(string source)
+    {
+        if (string.IsNullOrEmpty(source))
+        {
+            return source;
+        }
+
+        var builder = new StringBuilder(source.Length);
+        int i = 0;
+        while (i < source.Length)
+        {
+            if (i + 1 < source.Length && source[i] == '@' && source[i + 1] == '*')
+            {
+                // Skip to the matching *@. Replace each non-newline
+                // character inside the comment with a space so column
+                // counts in the remaining text are preserved.
+                i += 2;
+                while (i + 1 < source.Length && !(source[i] == '*' && source[i + 1] == '@'))
+                {
+                    if (source[i] != '\n')
+                    {
+                        builder.Append(' ');
+                    }
+                    else
+                    {
+                        builder.Append('\n');
+                    }
+                    i++;
+                }
+
+                if (i + 1 < source.Length)
+                {
+                    // Skip the closing *@.
+                    i += 2;
+                }
+                else
+                {
+                    // Unterminated comment; consume the rest.
+                    break;
+                }
+            }
+            else
+            {
+                builder.Append(source[i]);
+                i++;
+            }
+        }
+
+        return builder.ToString();
+    }
+
+    /// <summary>
+    /// True when <paramref name="line"/> contains the exact directive
+    /// <c>@using Syncfusion.Blazor.Toolkit</c>. The directive must be
+    /// the whole using clause: any non-whitespace, non-comment
+    /// character immediately after the namespace disqualifies the
+    /// match (e.g. <c>@using Syncfusion.Blazor.Toolkit.Buttons</c>).
+    /// </summary>
+    private static bool HasExactToolkitUsing(string line)
+    {
+        const string Namespace = "Syncfusion.Blazor.Toolkit";
+        int idx = line.IndexOf(Namespace, StringComparison.Ordinal);
+        if (idx < 0)
+        {
+            return false;
+        }
+
+        // The character preceding the namespace must be '@' or whitespace
+        // (i.e. we are inside a using directive, not the middle of an
+        // identifier or a string literal).
+        int atIdx = line.LastIndexOf('@', idx);
+        if (atIdx < 0)
+        {
+            return false;
+        }
+
+        // Everything between '@' and the namespace must be "using"
+        // surrounded by whitespace.
+        string between = line.Substring(atIdx + 1, idx - atIdx - 1).Trim();
+        if (!string.Equals(between, "using", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        // Reject when the namespace is followed by another identifier
+        // character — that means a sub-namespace using directive
+        // (e.g. '.Buttons') or some chained token, not our exact
+        // directive.
+        int after = idx + Namespace.Length;
+        if (after < line.Length)
+        {
+            char c = line[after];
+            if (char.IsLetterOrDigit(c) || c == '_' || c == '.')
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Looks for an <c>_Imports.razor</c> file in the conventional Blazor
+    /// locations. Conventional Blazor Web App / Blazor Server templates
+    /// place the file under <c>Components/_Imports.razor</c>; standalone
+    /// Blazor WebAssembly / Blazor Server templates place it at the
+    /// project root. Those two are the only scopes that cover every
+    /// component in the app — picking a narrower nested file
+    /// (e.g. <c>Pages/_Imports.razor</c>) would leave components under
+    /// <c>Layout</c>, <c>Shared</c>, or sibling folders without the
+    /// added <c>@using</c> directive, so we deliberately do not fall
+    /// back to arbitrary descendants here.
+    /// </summary>
+    /// <returns>
+    /// The absolute path of the discovered file, or <c>null</c> when
+    /// no conventional <c>_Imports.razor</c> exists. Callers can then
+    /// create one at the conventional location.
+    /// </returns>
     public static string? DiscoverImportsFile(string projectDirectory)
     {
         if (string.IsNullOrEmpty(projectDirectory) || !Directory.Exists(projectDirectory))
@@ -245,8 +369,7 @@ internal static class SyncfusionBlazorToolkitHelper
         }
 
         // Preferred order mirrors the conventional Blazor Web App layout,
-        // then standalone Blazor WASM (no Components folder), then a
-        // catch-all for any _Imports.razor under the project root.
+        // then standalone Blazor WASM (no Components folder).
         string[] orderedCandidates =
         [
             Path.Combine(projectDirectory, "Components", "_Imports.razor"),
@@ -261,52 +384,54 @@ internal static class SyncfusionBlazorToolkitHelper
             }
         }
 
-        // Catch-all: any _Imports.razor under the project. Enumerate
-        // manually so we stay IFileSystem-agnostic and avoid recursing
-        // into well-known excluded directories (bin, obj, node_modules).
-        return FindFirstImportsRazor(projectDirectory, projectDirectory);
+        // Deliberately do NOT fall back to an arbitrary nested
+        // _Imports.razor (e.g. Pages/_Imports.razor). Such a file
+        // does not cover the whole app; the caller should create
+        // an app-wide _Imports.razor at the conventional location
+        // instead.
+        return null;
     }
 
-    private static string? FindFirstImportsRazor(string projectDirectory, string currentDirectory)
+    /// <summary>
+    /// Returns the conventional shared <c>_Imports.razor</c> path for
+    /// a project. Used by callers that need the file path even when it
+    /// does not exist yet, so the file can be created at the right
+    /// place.
+    /// </summary>
+    public static string GetConventionalImportsFilePath(string projectDirectory)
     {
-        if (!Directory.Exists(currentDirectory))
+        if (string.IsNullOrEmpty(projectDirectory))
         {
-            return null;
+            return string.Empty;
         }
 
-        string directMatch = Path.Combine(currentDirectory, "_Imports.razor");
-        if (File.Exists(directMatch))
+        string componentsPath = Path.Combine(projectDirectory, "Components", "_Imports.razor");
+        if (Directory.Exists(Path.GetDirectoryName(componentsPath)))
         {
-            return directMatch;
+            return componentsPath;
         }
 
-        foreach (string subdirectory in Directory.EnumerateDirectories(currentDirectory, "*", SearchOption.TopDirectoryOnly))
+        return Path.Combine(projectDirectory, "_Imports.razor");
+    }
+
+    /// <summary>
+    /// True when a discovered <c>_Imports.razor</c> path lives at the
+    /// conventional shared scope (project root or <c>Components</c>).
+    /// Callers use this to decide whether to log a warning when a
+    /// narrower nested file was found.
+    /// </summary>
+    public static bool IsAtConventionalScope(string projectDirectory, string importsPath)
+    {
+        if (string.IsNullOrEmpty(projectDirectory) || string.IsNullOrEmpty(importsPath))
         {
-            string name = Path.GetFileName(subdirectory);
-            if (string.Equals(name, "bin", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(name, "obj", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(name, "node_modules", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(name, ".git", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            // Don't recurse into nested project directories; their
-            // _Imports.razor belongs to a different project.
-            if (subdirectory != projectDirectory &&
-                Directory.EnumerateFiles(subdirectory, "*.csproj", SearchOption.TopDirectoryOnly).Any())
-            {
-                continue;
-            }
-
-            string? nested = FindFirstImportsRazor(projectDirectory, subdirectory);
-            if (nested is not null)
-            {
-                return nested;
-            }
+            return false;
         }
 
-        return null;
+        string normalized = Path.GetFullPath(importsPath);
+        string rootScope = Path.GetFullPath(Path.Combine(projectDirectory, "_Imports.razor"));
+        string componentsScope = Path.GetFullPath(Path.Combine(projectDirectory, "Components", "_Imports.razor"));
+        return string.Equals(normalized, rootScope, StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(normalized, componentsScope, StringComparison.OrdinalIgnoreCase);
     }
 
     private static string? TryCreateImportsFile(string projectDirectory)
@@ -349,5 +474,207 @@ internal static class SyncfusionBlazorToolkitHelper
         // Use OS-native separators so the relative path component can be
         // matched against MSBuildWorkspace's AdditionalDocument paths.
         return relative;
+    }
+
+    /// <summary>
+    /// True when <paramref name="programText"/> contains an active
+    /// (non-commented) call to <c>AddSyncfusionBlazorToolkit()</c>
+    /// on a <c>*.Services</c> receiver. The check rejects:
+    /// <list type="bullet">
+    ///   <item><description>substrings inside <c>//</c> or <c>/* */</c> comments,</description></item>
+    ///   <item><description>chained calls (e.g. <c>AddRazorComponents().AddSyncfusionBlazorToolkit()</c>),</description></item>
+    ///   <item><description>substring occurrences inside larger identifiers.</description></item>
+    /// </list>
+    /// </summary>
+    public static bool IsActiveServiceRegistrationPresent(string? programText)
+    {
+        if (string.IsNullOrEmpty(programText))
+        {
+            return false;
+        }
+
+        string codeOnly = StripCSharpComments(programText);
+        foreach (string rawLine in codeOnly.Split('\n'))
+        {
+            string line = rawLine.TrimEnd('\r').Trim();
+            if (line.Length == 0)
+            {
+                continue;
+            }
+
+            // The standalone registration we are looking for has the
+            // shape "*.Services.AddSyncfusionBlazorToolkit();" or
+            // "*.Services.AddSyncfusionBlazorToolkit()".
+            // A chained registration has the form "...AddSyncfusionBlazorToolkit()"
+            // preceded by a member access without a trailing semicolon on
+            // its own line.
+            if (IsStandaloneServiceRegistration(line))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsStandaloneServiceRegistration(string trimmedLine)
+    {
+        if (string.IsNullOrEmpty(trimmedLine))
+        {
+            return false;
+        }
+
+        // The standalone registration we want has the shape
+        //   <receiver>.AddSyncfusionBlazorToolkit();
+        // where <receiver> is a simple dotted name (e.g.
+        // `builder.Services` or `wasmBuilder.Services`). A chained
+        // registration has the form
+        //   <receiver>...methodCall(<args>).AddSyncfusionBlazorToolkit();
+        // — distinguished by the `)` (or `(`) that immediately
+        // precedes the final `.`.
+        const string Call = "AddSyncfusionBlazorToolkit";
+        int callIdx = trimmedLine.IndexOf(Call, StringComparison.Ordinal);
+        if (callIdx < 0)
+        {
+            return false;
+        }
+
+        // Must end with a semicolon — most single-statement C#
+        // calls do, and chains that terminate this call also do, so
+        // this is necessary but not sufficient.
+        if (!trimmedLine.EndsWith(';'))
+        {
+            return false;
+        }
+
+        // Must be preceded by a `.` member access and not be a
+        // substring of a larger identifier.
+        int dotIdx = callIdx - 1;
+        if (dotIdx < 0 || trimmedLine[dotIdx] != '.')
+        {
+            return false;
+        }
+
+        if (dotIdx == 0)
+        {
+            return false;
+        }
+
+        // The character right before the `.` tells us whether the
+        // call is standalone or the last link in a chain:
+        //   standalone : ...Services.   → letter / digit
+        //   chained    : ...Args().     → ')'
+        // Reject any character that is itself the closing paren of
+        // an enclosing call (or its argument list) — that is the
+        // signature of a fluent chain.
+        char prev = trimmedLine[dotIdx - 1];
+        if (prev == ')' || prev == '(')
+        {
+            return false;
+        }
+
+        // Also reject whitespace — the receiver must be glued to
+        // the `.` (i.e. a member access, not a separate statement).
+        if (char.IsWhiteSpace(prev))
+        {
+            return false;
+        }
+
+        // The receiver before the first `.` must end with `Services`
+        // (we accept any name, but reject bare `AddSyncfusionBlazorToolkit`).
+        int firstDot = trimmedLine.IndexOf('.');
+        if (firstDot <= 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Removes <c>// … \n</c> and <c>/* … */</c> C# comment regions
+    /// from <paramref name="source"/>, preserving newlines so the
+    /// remaining line structure is stable. Used by
+    /// <see cref="IsActiveServiceRegistrationPresent"/> to make sure
+    /// commented-out registrations are not detected.
+    /// </summary>
+    private static string StripCSharpComments(string source)
+    {
+        if (string.IsNullOrEmpty(source))
+        {
+            return source;
+        }
+
+        var builder = new StringBuilder(source.Length);
+        int i = 0;
+        while (i < source.Length)
+        {
+            char c = source[i];
+            char next = i + 1 < source.Length ? source[i + 1] : '\0';
+
+            if (c == '/' && next == '/')
+            {
+                // Line comment — copy the newline at the end, drop the
+                // rest.
+                i += 2;
+                while (i < source.Length && source[i] != '\n')
+                {
+                    builder.Append(' ');
+                    i++;
+                }
+            }
+            else if (c == '/' && next == '*')
+            {
+                // Block comment — preserve newlines, drop everything
+                // else.
+                i += 2;
+                while (i + 1 < source.Length && !(source[i] == '*' && source[i + 1] == '/'))
+                {
+                    builder.Append(source[i] == '\n' ? '\n' : ' ');
+                    i++;
+                }
+                if (i + 1 < source.Length)
+                {
+                    // Drop the closing */.
+                    i += 2;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            else if (c == '"' || c == '\'')
+            {
+                // String/char literal — copy verbatim until the next
+                // unescaped terminator.
+                char quote = c;
+                builder.Append(c);
+                i++;
+                while (i < source.Length)
+                {
+                    char sc = source[i];
+                    builder.Append(sc);
+                    if (sc == '\\' && i + 1 < source.Length)
+                    {
+                        builder.Append(source[i + 1]);
+                        i += 2;
+                        continue;
+                    }
+
+                    i++;
+                    if (sc == quote)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                builder.Append(c);
+                i++;
+            }
+        }
+
+        return builder.ToString();
     }
 }

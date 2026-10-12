@@ -33,4 +33,15 @@ internal class CodeSnippet
     public string[]? MultiLineBlock { get; set; }
     public string? FileBlock { get; set; }
     public string[]? ReplaceSnippet { get; set; }
+
+    /// <summary>
+    /// When true, the document-modification pipeline uses a strict
+    /// (non-substring) detector for <c>CheckBlock</c> instead of
+    /// <c>StatementExists</c>. The strict detector only treats the
+    /// change as already applied when the call appears as a
+    /// standalone, non-commented, non-chained statement, so a
+    /// substring that happens to occur inside an existing fluent
+    /// chain does not suppress the insertion.
+    /// </summary>
+    public bool StrictCheck { get; set; } = false;
 }

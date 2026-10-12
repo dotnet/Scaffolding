@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
@@ -108,6 +109,115 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         Assert.Equal(1, nonCommented);
     }
 
+    [Fact]
+    public void EnsureImportsUsing_MultilineRazorComment_NotCountedAsPresent()
+    {
+        // The directive must NOT be detected when it appears only
+        // inside a multi-line @* … *@ Razor comment block that spans
+        // several lines. Comment-aware detection (single-line
+        // stripping alone is not enough) is required.
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project />");
+        var imports = Path.Combine(_tempDir, "_Imports.razor");
+        File.WriteAllText(imports,
+            "@using Microsoft.AspNetCore.Components\n" +
+            "@*\n" +
+            "  @using Syncfusion.Blazor.Toolkit\n" +
+            "  This is a long comment that\n" +
+            "  spans several lines\n" +
+            "*@\n");
+
+        // The helper's strict, comment-aware detector must report
+        // the directive as NOT present (the only occurrence is inside
+        // a multi-line comment) — so the helper must add one.
+        Assert.False(SyncfusionBlazorToolkitHelper.DirectiveAlreadyPresent(
+            "@*\n  @using Syncfusion.Blazor.Toolkit\n  spans lines\n*@\n"));
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureImportsUsing(project);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ImportsUpdateOutcome.Inserted, result.Outcome);
+        string text = File.ReadAllText(imports);
+
+        // The output now contains a real (un-commented) Toolkit
+        // using directive. The line-by-line counter used here is
+        // not enough to track multi-line comments, so we just check
+        // the strict, helper-level detector.
+        Assert.True(SyncfusionBlazorToolkitHelper.DirectiveAlreadyPresent(text));
+
+        // The appended line is at the END of the file (after the
+        // closing *@), so it is on its own line, not inside the
+        // comment, and the strict detector sees it.
+        string[] lines = text.Split('\n');
+        string lastNonEmpty = lines.Where(l => !string.IsNullOrWhiteSpace(l)).Last();
+        Assert.Contains("@using Syncfusion.Blazor.Toolkit", lastNonEmpty);
+    }
+
+    [Fact]
+    public void EnsureImportsUsing_SubNamespaceUsingOnly_StillInsertsExactToolkitUsing()
+    {
+        // `@using Syncfusion.Blazor.Toolkit.Buttons` must NOT count as
+        // the Toolkit directive — the scaffolder must still add the
+        // exact `@using Syncfusion.Blazor.Toolkit` line.
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project />");
+        var imports = Path.Combine(_tempDir, "_Imports.razor");
+        File.WriteAllText(imports, "@using Syncfusion.Blazor.Toolkit.Buttons\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureImportsUsing(project);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ImportsUpdateOutcome.Inserted, result.Outcome);
+        string text = File.ReadAllText(imports);
+        Assert.Contains("@using Syncfusion.Blazor.Toolkit\n", text);
+        Assert.Contains("@using Syncfusion.Blazor.Toolkit.Buttons", text);
+    }
+
+    [Fact]
+    public void DirectiveAlreadyPresent_ExactDirective_NotInsideLargerIdentifier()
+    {
+        // The exact directive must be detected. A line with
+        // "XSyncfusion.Blazor.Toolkit" (a larger identifier that
+        // happens to contain the namespace as a suffix) must NOT be
+        // treated as the directive.
+        Assert.True(SyncfusionBlazorToolkitHelper.DirectiveAlreadyPresent(
+            "@using Syncfusion.Blazor.Toolkit\n"));
+        Assert.True(SyncfusionBlazorToolkitHelper.DirectiveAlreadyPresent(
+            "@using   Syncfusion.Blazor.Toolkit   \n"));
+        Assert.False(SyncfusionBlazorToolkitHelper.DirectiveAlreadyPresent(
+            "@using Syncfusion.Blazor.Toolkit.Buttons\n"));
+        Assert.False(SyncfusionBlazorToolkitHelper.DirectiveAlreadyPresent(
+            "XSyncfusion.Blazor.Toolkit\n"));
+        Assert.False(SyncfusionBlazorToolkitHelper.DirectiveAlreadyPresent(
+            "@*\n@using Syncfusion.Blazor.Toolkit\n*@\n"));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_RecognisesStandaloneCall()
+    {
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "builder.Services.AddSyncfusionBlazorToolkit();\n"));
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "wasmBuilder.Services.AddSyncfusionBlazorToolkit();\n"));
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "var x = 1;\nbuilder.Services.AddSyncfusionBlazorToolkit();\n"));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_RejectsChainedAndCommentedCalls()
+    {
+        // Chained forms — the call is inside a longer fluent chain —
+        // are not active service registrations.
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddSyncfusionBlazorToolkit();\n"));
+        // Line comment hides the registration.
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "// builder.Services.AddSyncfusionBlazorToolkit();\n"));
+        // Block comment hides the registration.
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "/* builder.Services.AddSyncfusionBlazorToolkit(); */\n"));
+        // No registration at all.
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(""));
+    }
+
     private static int CountRealMatches(string text)
     {
         int real = 0;
@@ -128,6 +238,9 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         }
         return real;
     }
+
+    /// (no-op helper to keep the build clean)
+
 
     [Fact]
     public void EnsureImportsUsing_DetectsRealDirective_NotCommentSubstring()
@@ -191,9 +304,14 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Fact]
-    public void EnsureImportsUsing_PrefersNestedScope_OverUnrelatedFiles()
+    public void EnsureImportsUsing_PrefersConventionalScope_OverNarrowNestedFile()
     {
-        // bin/_Imports.razor must be ignored.
+        // Only a narrow nested _Imports.razor (Pages/_Imports.razor) and
+        // an excluded bin/_Imports.razor exist. The scaffolder must NOT
+        // pick the narrow Pages file (it would not cover Layout/Shared
+        // components) — it should create an app-wide _Imports.razor at
+        // the project root instead, and bin/_Imports.razor must be
+        // ignored.
         var project = Path.Combine(_tempDir, "App.csproj");
         File.WriteAllText(project, "<Project />");
         var bin = Path.Combine(_tempDir, "bin");
@@ -205,9 +323,41 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
 
         var result = SyncfusionBlazorToolkitHelper.EnsureImportsUsing(project);
 
-        Assert.Equal(Path.Combine("Pages", "_Imports.razor"), result.ImportsFile);
-        string text = File.ReadAllText(Path.Combine(pages, "_Imports.razor"));
-        Assert.Contains("@using Syncfusion.Blazor.Toolkit", text);
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ImportsUpdateOutcome.Created, result.Outcome);
+        Assert.Equal("_Imports.razor", result.ImportsFile);
+        Assert.True(File.Exists(Path.Combine(_tempDir, "_Imports.razor")));
+        // bin/_Imports.razor must NOT be touched.
+        string binText = File.ReadAllText(Path.Combine(bin, "_Imports.razor"));
+        Assert.DoesNotContain("@using Syncfusion.Blazor.Toolkit", binText);
+        // Pages/_Imports.razor must NOT be modified — the directive
+        // is added at the conventional scope instead.
+        string pagesText = File.ReadAllText(Path.Combine(pages, "_Imports.razor"));
+        Assert.DoesNotContain("@using Syncfusion.Blazor.Toolkit", pagesText);
+    }
+
+    [Fact]
+    public void EnsureImportsUsing_OnlyNested_StillCreatesConventionalScope_AndCoversApp()
+    {
+        // Project has only a Pages/_Imports.razor (which doesn't cover
+        // Layout/Shared components) and no Components folder. The
+        // scaffolder must create the project-root _Imports.razor and
+        // add the directive there so every component sees it.
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project />");
+        var pages = Path.Combine(_tempDir, "Pages");
+        Directory.CreateDirectory(pages);
+        File.WriteAllText(Path.Combine(pages, "_Imports.razor"), "@using PagesScope\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureImportsUsing(project);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ImportsUpdateOutcome.Created, result.Outcome);
+        string rootImports = File.ReadAllText(Path.Combine(_tempDir, "_Imports.razor"));
+        Assert.Contains("@using Syncfusion.Blazor.Toolkit", rootImports);
+        // Pages/_Imports.razor is left alone (the user can decide
+        // whether to keep or remove it; updating it would be the old,
+        // wrong behaviour).
+        string pagesText = File.ReadAllText(Path.Combine(pages, "_Imports.razor"));
+        Assert.DoesNotContain("@using Syncfusion.Blazor.Toolkit", pagesText);
     }
 
     [Fact]

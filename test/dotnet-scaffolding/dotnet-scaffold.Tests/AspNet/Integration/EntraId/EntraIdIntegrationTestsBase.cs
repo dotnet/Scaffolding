@@ -8,14 +8,18 @@ using System.IO;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.CodeModification;
+using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -258,6 +262,215 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
             $"blazorWasmEntraChanges.json should exist for {TargetFramework}");
     }
 
+    [Fact]
+    public async Task BlazorEntraChangesConfig_AddsLoginOrLogoutToServerNavMenu()
+    {
+        await AssertNavMenuModificationAsync("blazorEntraChanges.json", Path.Combine("Components", "Layout", "NavMenu.razor"));
+    }
+
+    [Fact]
+    public void BlazorEntraChangesConfig_AddsAntiforgeryMiddlewareOnlyForNet11()
+    {
+        var configPath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs", "blazorEntraChanges.json");
+        using var config = JsonDocument.Parse(File.ReadAllText(configPath));
+        var programConfig = Assert.Single(
+            config.RootElement.GetProperty("Files").EnumerateArray(),
+            file => file.GetProperty("FileName").GetString() == "Program.cs");
+        var codeChanges = programConfig
+            .GetProperty("Methods")
+            .GetProperty("Global")
+            .GetProperty("CodeChanges")
+            .EnumerateArray()
+            .ToArray();
+        var antiforgeryChanges = codeChanges.Where(
+            change => change.TryGetProperty("CheckBlock", out var checkBlock) &&
+                checkBlock.GetString() == "app.UseAntiforgery()").ToArray();
+
+        if (TargetFramework == "net10.0")
+        {
+            Assert.Empty(antiforgeryChanges);
+            return;
+        }
+
+        var antiforgeryChange = Assert.Single(
+            antiforgeryChanges);
+
+        Assert.Equal(
+            [
+                "app.MapStaticAssets()",
+                "app.MapRazorComponents<App>()"
+            ],
+            antiforgeryChange.GetProperty("InsertBefore").EnumerateArray().Select(line => line.GetString()));
+        Assert.Equal(
+            "app.UseAntiforgery()",
+            antiforgeryChange.GetProperty("Block").GetString());
+
+        var antiforgeryIndex = Array.IndexOf(codeChanges, antiforgeryChange);
+        var logoutEndpointIndex = Array.FindIndex(
+            codeChanges,
+            change => change.TryGetProperty("Block", out var block) &&
+                block.GetString() == "app.MapGroup(\"/authentication\").MapLoginAndLogout()");
+
+        Assert.True(antiforgeryIndex < logoutEndpointIndex);
+    }
+
+    [Fact]
+    public void LoginOrLogoutTemplate_EmitsAntiforgeryToken()
+    {
+        var templatePath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "BlazorEntraId", "LoginOrLogout.tt");
+
+        var template = File.ReadAllText(templatePath);
+        Assert.Contains("""<form action="authentication/logout" method="post">""", template);
+        Assert.Contains("<AntiforgeryToken />", template);
+        if (TargetFramework == "net11.0")
+        {
+            Assert.Contains("https://github.com/AzureAD/microsoft-identity-web/issues/4057", template);
+        }
+    }
+
+    [Fact]
+    public async Task BlazorEntraChangesConfig_GeneratesAntiforgeryMiddlewareOnce()
+    {
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        var antiforgeryMiddleware = TargetFramework == "net10.0" ? "app.UseAntiforgery();" : string.Empty;
+        File.WriteAllText(programPath, $$"""
+            var builder = WebApplication.CreateBuilder(args);
+            var app = builder.Build();
+
+            {{antiforgeryMiddleware}}
+            app.MapStaticAssets();
+            app.MapRazorComponents<App>();
+
+            app.Run();
+            """);
+        var step = new WrappedCodeModificationStep(
+            NullLogger<WrappedCodeModificationStep>.Instance,
+            _testTelemetryService)
+        {
+            CodeModifierConfigPath = Path.Combine(
+                GetActualTemplatesBasePath(),
+                TargetFramework,
+                "CodeModificationConfigs",
+                "blazorEntraChanges.json"),
+            CodeChangeOptions = [],
+            ProjectPath = _testProjectPath
+        };
+
+        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
+
+        var program = File.ReadAllText(programPath);
+        Assert.Equal(1, CountOccurrences(program, "app.UseAntiforgery();"));
+        Assert.True(
+            program.IndexOf("app.UseAntiforgery();", StringComparison.Ordinal) <
+            program.IndexOf("app.MapStaticAssets();", StringComparison.Ordinal));
+
+        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(programPath), "app.UseAntiforgery();"));
+    }
+
+    [Fact]
+    public async Task BlazorEntraChangesConfig_UsesRazorComponentsAsAntiforgeryFallback()
+    {
+        if (TargetFramework == "net10.0")
+        {
+            return;
+        }
+
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        File.WriteAllText(programPath, """
+            var builder = WebApplication.CreateBuilder(args);
+            var app = builder.Build();
+
+            app.MapRazorComponents<App>();
+
+            app.Run();
+            """);
+        var step = new WrappedCodeModificationStep(
+            NullLogger<WrappedCodeModificationStep>.Instance,
+            _testTelemetryService)
+        {
+            CodeModifierConfigPath = Path.Combine(
+                GetActualTemplatesBasePath(),
+                TargetFramework,
+                "CodeModificationConfigs",
+                "blazorEntraChanges.json"),
+            CodeChangeOptions = [],
+            ProjectPath = _testProjectPath
+        };
+
+        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
+
+        var program = File.ReadAllText(programPath);
+        Assert.Equal(1, CountOccurrences(program, "app.UseAntiforgery();"));
+        Assert.True(
+            program.IndexOf("app.UseAntiforgery();", StringComparison.Ordinal) <
+            program.IndexOf("app.MapRazorComponents<App>();", StringComparison.Ordinal));
+
+        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(programPath), "app.UseAntiforgery();"));
+    }
+
+    [Fact]
+    public async Task BlazorWasmEntraChangesConfig_AddsLoginOrLogoutToClientNavMenu()
+    {
+        await AssertNavMenuModificationAsync("blazorWasmEntraChanges.json", Path.Combine("Layout", "NavMenu.razor"));
+    }
+
+    [Fact]
+    public async Task ServerAndClientNavMenus_GenerateAndReferenceTheirOwnLoginOrLogoutComponents()
+    {
+        string serverLayoutDirectory = Path.Combine(_testProjectDir, "Components", "Layout");
+        string serverNavMenuPath = Path.Combine(serverLayoutDirectory, "NavMenu.razor");
+        string clientDirectory = Path.Combine(_testDirectory, "Client");
+        string clientLayoutDirectory = Path.Combine(clientDirectory, "Layout");
+        string clientNavMenuPath = Path.Combine(clientLayoutDirectory, "NavMenu.razor");
+        string clientProjectPath = Path.Combine(clientDirectory, "Client.csproj");
+        Directory.CreateDirectory(serverLayoutDirectory);
+        Directory.CreateDirectory(clientLayoutDirectory);
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        File.WriteAllText(clientProjectPath, ProjectContent);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), "var builder = WebApplication.CreateBuilder(args);");
+        File.WriteAllText(Path.Combine(clientDirectory, "Program.cs"), "var builder = WebAssemblyHostBuilder.CreateDefault(args);");
+        File.WriteAllText(serverNavMenuPath, GetTestNavMenuContent());
+        File.WriteAllText(clientNavMenuPath, GetTestNavMenuContent());
+        EntraIdModel entraIdModel = new()
+        {
+            ProjectInfo = new ProjectInfo(_testProjectPath),
+            BaseOutputPath = _testProjectDir
+        };
+
+        var templateProperties = EntraIdHelper.GetTextTemplatingProperties(
+            [Path.Combine("BlazorEntraId", "LoginOrLogout.tt")],
+            entraIdModel,
+            clientProjectPath).ToArray();
+        Assert.Equal(2, templateProperties.Length);
+
+        string generatedComponent = TargetFramework == "net10.0"
+            ? new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorEntraId.LoginOrLogout().TransformText()
+            : new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorEntraId.LoginOrLogout().TransformText();
+        foreach (var templateProperty in templateProperties)
+        {
+            File.WriteAllText(templateProperty.OutputPath, generatedComponent);
+        }
+
+        var serverStep = CreateCodeModificationStep("blazorEntraChanges.json", _testProjectPath);
+        var clientStep = CreateCodeModificationStep("blazorWasmEntraChanges.json", clientProjectPath);
+        Assert.True(await serverStep.ExecuteAsync(_context, CancellationToken.None));
+        Assert.True(await clientStep.ExecuteAsync(_context, CancellationToken.None));
+
+        Assert.True(File.Exists(Path.Combine(serverLayoutDirectory, "LoginOrLogout.razor")));
+        Assert.True(File.Exists(Path.Combine(clientLayoutDirectory, "LoginOrLogout.razor")));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(serverNavMenuPath), "<LoginOrLogout />"));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(clientNavMenuPath), "<LoginOrLogout />"));
+
+        Assert.True(await serverStep.ExecuteAsync(_context, CancellationToken.None));
+        Assert.True(await clientStep.ExecuteAsync(_context, CancellationToken.None));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(serverNavMenuPath), "<LoginOrLogout />"));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(clientNavMenuPath), "<LoginOrLogout />"));
+    }
+
     [Theory]
     [InlineData("builder.Services.AddRazorComponents()\n    .AddInteractiveWebAssemblyComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveWebAssemblyComponents()\n    .AddAuthenticationStateSerialization();")]
     [InlineData("builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents()\n    .AddInteractiveWebAssemblyComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents()\n    .AddInteractiveWebAssemblyComponents()\n    .AddAuthenticationStateSerialization();")]
@@ -344,6 +557,84 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
         var basePath = Path.Combine(assemblyDirectory!, "..", "..", "..", "..", "..", "src", "dotnet-scaffolding", "dotnet-scaffold", "AspNet", "Templates");
         return Path.GetFullPath(basePath);
+    }
+
+    private async Task AssertNavMenuModificationAsync(string configFileName, string navMenuPath)
+    {
+        var configPath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs", configFileName);
+        using var config = JsonDocument.Parse(File.ReadAllText(configPath));
+        var normalizedNavMenuPath = NormalizePathSeparators(navMenuPath);
+        var navMenuConfig = Assert.Single(
+            config.RootElement.GetProperty("Files").EnumerateArray(),
+            file =>
+            {
+                string? configuredFileName = file.GetProperty("FileName").GetString();
+                return configuredFileName is not null &&
+                    NormalizePathSeparators(configuredFileName) == normalizedNavMenuPath;
+            });
+        var replacement = Assert.Single(navMenuConfig.GetProperty("Replacements").EnumerateArray());
+
+        Assert.Equal("<LoginOrLogout />", replacement.GetProperty("CheckBlock").GetString());
+        Assert.Equal(["</nav>"], replacement.GetProperty("ReplaceSnippet").EnumerateArray().Select(line => line.GetString()));
+        Assert.Equal(["    <LoginOrLogout />", "    </nav>"], replacement.GetProperty("MultiLineBlock").EnumerateArray().Select(line => line.GetString()));
+
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        var navMenuOutputPath = Path.Combine(_testProjectDir, normalizedNavMenuPath);
+        Directory.CreateDirectory(Path.GetDirectoryName(navMenuOutputPath)!);
+        File.WriteAllText(navMenuOutputPath, GetTestNavMenuContent());
+        var step = CreateCodeModificationStep(configFileName, _testProjectPath);
+
+        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(navMenuOutputPath), "<LoginOrLogout />"));
+
+        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
+        Assert.Equal(1, CountOccurrences(File.ReadAllText(navMenuOutputPath), "<LoginOrLogout />"));
+    }
+
+    private WrappedCodeModificationStep CreateCodeModificationStep(string configFileName, string projectPath)
+        => new(
+            NullLogger<WrappedCodeModificationStep>.Instance,
+            _testTelemetryService)
+        {
+            CodeModifierConfigPath = Path.Combine(
+                GetActualTemplatesBasePath(),
+                TargetFramework,
+                "CodeModificationConfigs",
+                configFileName),
+            CodeChangeOptions = [],
+            ProjectPath = projectPath
+        };
+
+    private static string GetTestNavMenuContent() => """
+            <div class="top-row ps-3 navbar navbar-dark">
+                <a class="navbar-brand" href="">TestProject</a>
+            </div>
+
+            <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+            <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+                <nav class="nav flex-column">
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">Home</NavLink>
+                    </div>
+                </nav>
+            </div>
+            """;
+
+    private static string NormalizePathSeparators(string path)
+        => path.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
+
+    private static int CountOccurrences(string value, string searchValue)
+    {
+        var count = 0;
+        var index = 0;
+        while ((index = value.IndexOf(searchValue, index, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            index += searchValue.Length;
+        }
+
+        return count;
     }
 
     private async Task<string> ApplyBlazorEntraChangesConfigAsync(string programContent)

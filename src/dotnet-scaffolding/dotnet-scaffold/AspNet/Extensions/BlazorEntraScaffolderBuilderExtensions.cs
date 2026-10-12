@@ -432,7 +432,8 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             }
 
             var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["BlazorEntraId"], entraIdModel.ProjectInfo.ProjectPath);
-            var blazorEntraIdProperties = EntraIdHelper.GetTextTemplatingProperties(allBlazorIdentityFiles, entraIdModel);
+            context.Properties.TryGetValue("BlazorWasmClientProjectPath", out var blazorWasmClientProjectPath);
+            var blazorEntraIdProperties = EntraIdHelper.GetTextTemplatingProperties(allBlazorIdentityFiles, entraIdModel, blazorWasmClientProjectPath as string);
 
             if (blazorEntraIdProperties is not null && blazorEntraIdProperties.Any())
             {

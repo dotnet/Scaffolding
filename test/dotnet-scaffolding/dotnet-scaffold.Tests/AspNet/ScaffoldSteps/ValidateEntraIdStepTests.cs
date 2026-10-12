@@ -391,6 +391,25 @@ public class ValidateEntraIdStepTests
     }
 
     [Fact]
+    public void DevelopmentSettingsPreflight_UsesUpnSuffixAsDomain()
+    {
+        string projectDirectory = Path.Combine("test", "project");
+        string projectPath = Path.Combine(projectDirectory, "TestProject.csproj");
+        string devSettingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(devSettingsPath)).Returns(
+            """{"AzureAd":{"Domain":"contoso.com","ClientId":"client-id"}}""");
+        var step = new ValidateEntraIdStep(_mockFileSystem.Object, _mockLogger.Object, _testTelemetryService)
+        {
+            Username = "user@contoso.com",
+            TenantId = "tenant-id",
+            Application = "Existing application client-id"
+        };
+
+        Assert.True(step.ValidateDevelopmentSettingsPreflight(projectPath, useExistingApplication: true, overwrite: false));
+    }
+
+    [Fact]
     public void Properties_CanBeSet()
     {
         // Arrange

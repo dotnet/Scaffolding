@@ -227,10 +227,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             {
                 ["Instance"] = !string.IsNullOrWhiteSpace(instance) ? instance : "https://login.microsoftonline.com/",
                 ["TenantId"] = tenantId,
-                ["Domain"] = !string.IsNullOrWhiteSpace(domain) ? domain : $"{username}.onmicrosoft.com",
+                ["Domain"] = ResolveAzureAdDomain(domain, username),
                 ["ClientId"] = clientId,
                 ["CallbackPath"] = !string.IsNullOrWhiteSpace(callbackPath) ? callbackPath : "/signin-oidc"
             };
+        }
+
+        private static string ResolveAzureAdDomain(string? configuredDomain, string? username)
+        {
+            if (!string.IsNullOrWhiteSpace(configuredDomain))
+            {
+                return configuredDomain;
+            }
+
+            string resolvedUsername = username ?? string.Empty;
+            int atSignIndex = resolvedUsername.LastIndexOf('@');
+            return atSignIndex >= 0 && atSignIndex < resolvedUsername.Length - 1
+                ? resolvedUsername[(atSignIndex + 1)..]
+                : $"{resolvedUsername}.onmicrosoft.com";
         }
 
         internal static string? GetFirstConflictingAzureAdKey(JsonObject existingAzureAd, JsonObject generatedAzureAd)

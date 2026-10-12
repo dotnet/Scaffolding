@@ -689,6 +689,19 @@ public class UpdateAppSettingsStepTests
         _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
+    [Theory]
+    [InlineData("user@contoso.com", null, "contoso.com")]
+    [InlineData("devuser", null, "devuser.onmicrosoft.com")]
+    [InlineData("user@contoso.com", "tenant.onmicrosoft.com", "tenant.onmicrosoft.com")]
+    public void CreateAzureAdConfiguration_ResolvesDomain(
+        string username, string? domain, string expectedDomain)
+    {
+        JsonObject configuration = UpdateAppSettingsStep.CreateAzureAdConfiguration(
+            username, "tenant-id", "client-id", domain);
+
+        Assert.Equal(expectedDomain, configuration["Domain"]?.ToString());
+    }
+
     private sealed class TestLogger : ILogger<UpdateAppSettingsStep>
     {
         public List<string> InformationMessages { get; } = new();

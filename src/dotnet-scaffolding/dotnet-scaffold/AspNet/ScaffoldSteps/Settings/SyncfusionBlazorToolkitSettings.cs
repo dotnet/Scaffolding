@@ -14,27 +14,35 @@ internal class SyncfusionBlazorToolkitSettings : BaseSettings
     public bool Prerelease { get; init; }
 
     /// <summary>
-    /// Project-relative path of the _Imports.razor file where the
-    /// <c>@using Syncfusion.Blazor.Toolkit</c> directive should be
-    /// inserted, in OS-native separator form (e.g.
-    /// "Components\_Imports.razor" on Windows or "Components/_Imports.razor"
-    /// on Linux). Null when no _Imports.razor file was found in any
-    /// conventional location and the using-directive insertion should be
-    /// skipped.
+    /// Project-relative path of the <c>_Imports.razor</c> file the
+    /// scaffolder targeted on this run. <c>null</c> when the scaffolder
+    /// could not find or create a suitable file.
     /// </summary>
     public string? ImportsFile { get; set; }
 
     /// <summary>
-    /// True when no _Imports.razor file was found and the using-directive
-    /// insertion was skipped. False when the using directive was applied
-    /// (or already present from a previous run).
+    /// True when no <c>_Imports.razor</c> file could be found or created
+    /// and the using-directive insertion was skipped. False when a file
+    /// was modified successfully (or the directive was already present).
     /// </summary>
     public bool ImportsFileSkipped { get; set; }
 
     /// <summary>
+    /// True when the @using directive is now present in <see cref="ImportsFile"/>
+    /// (either it was already there, or the scaffolder added it).
+    /// </summary>
+    public bool ImportsApplied { get; set; }
+
+    /// <summary>
+    /// True when the imports step actually appended the directive to
+    /// the target file. False when the directive was already present
+    /// (a no-op) or no target file could be found.
+    /// </summary>
+    public bool ImportsInserted { get; set; }
+
+    /// <summary>
     /// True when the project already had a Syncfusion.Blazor.Toolkit
-    /// package reference before the scaffolder ran. Used by the summary
-    /// step to report a no-op (idempotent) outcome.
+    /// package reference before the scaffolder ran.
     /// </summary>
     public bool PackageAlreadyReferenced { get; set; }
 
@@ -46,28 +54,47 @@ internal class SyncfusionBlazorToolkitSettings : BaseSettings
     public bool ServicesAlreadyRegistered { get; set; }
 
     /// <summary>
-    /// Detected project layout. <see cref="SyncfusionBlazorToolkitLayout.SingleProject"/>
-    /// for plain Blazor Web App / standalone WASM and the Auto variants for
-    /// Blazor Web App with a .Client sibling. Used by the summary step to
-    /// print multi-project guidance when the scaffolder is run on the
-    /// server side of an Auto layout.
+    /// True when the shared code-modification step reported
+    /// AddSyncfusionBlazorToolkit() is present in Program.cs after the
+    /// scaffolder ran.
     /// </summary>
-    public SyncfusionBlazorToolkitLayout Layout { get; set; } = SyncfusionBlazorToolkitLayout.SingleProject;
+    public bool ServicesApplied { get; set; }
 
     /// <summary>
-    /// When the current project is the server side of an Auto layout
-    /// (Program.cs / DI here, components in <c>.Client</c>), this holds
-    /// the absolute path of the sibling .Client .csproj. Null when no
-    /// sibling was found.
+    /// True when the add-packages step actually added or updated a
+    /// Syncfusion.Blazor.Toolkit PackageReference. False when the package
+    /// was already referenced (no change) or the step was skipped.
     /// </summary>
-    public string? SiblingClientProject { get; set; }
+    public bool PackageApplied { get; set; }
+
+    /// <summary>
+    /// Path of the WebAssembly client .csproj resolved from the server's
+    /// project references. Null when the project has no client or the
+    /// resolution step failed early with an actionable error.
+    /// </summary>
+    public string? ClientProjectPath { get; set; }
+
+    /// <summary>
+    /// Render mode actually configured in the project (e.g. InteractiveServer,
+    /// InteractiveWebAssembly, InteractiveAuto, or "None" for pure SSR).
+    /// Populated from <c>App.razor</c> and Program.cs diagnostics and used
+    /// by the summary step to give accurate, hosting-specific guidance.
+    /// </summary>
+    public string DetectedRenderMode { get; set; } = "None";
+
+    /// <summary>
+    /// Detected project layout (single-project Blazor Web App, standalone
+    /// Blazor WebAssembly, server or client side of a Blazor Web App Auto
+    /// split, or Hybrid/MAUI — which is explicitly unsupported).
+    /// </summary>
+    public SyncfusionBlazorToolkitLayout Layout { get; set; } = SyncfusionBlazorToolkitLayout.SingleProject;
 }
 
 /// <summary>
 /// Layouts supported by the Syncfusion Blazor Toolkit scaffolder. The
-/// multi-project variants are detected when the current project has a
-/// sibling <c>&lt;name&gt;.Client.csproj</c> project — the canonical
-/// <c>dotnet new blazor --interactivity Auto</c> template shape.
+/// multi-project variants are detected when the server project references
+/// a Microsoft.NET.Sdk.BlazorWebAssembly project (the canonical Blazor
+/// Web App Auto template shape).
 /// </summary>
 internal enum SyncfusionBlazorToolkitLayout
 {
@@ -79,7 +106,8 @@ internal enum SyncfusionBlazorToolkitLayout
     /// <summary>
     /// Server side of a Blazor Web App Auto layout. Program.cs /
     /// <c>AddSyncfusionBlazorToolkit()</c> live here; the @using
-    /// directive should be added to the .Client project's _Imports.razor.
+    /// directive should also be added here so it is available to any
+    /// Components folder authored on the server.
     /// </summary>
     AutoServer = 1,
 
@@ -88,4 +116,11 @@ internal enum SyncfusionBlazorToolkitLayout
     /// @using directive and the static assets live here.
     /// </summary>
     AutoClient = 2,
+
+    /// <summary>
+    /// Explicitly unsupported: Hybrid / MAUI Blazor Hybrid layouts.
+    /// Scaffolder fails fast in this case because MauiProgram.cs is not
+    /// a supported host.
+    /// </summary>
+    UnsupportedHybrid = 99,
 }

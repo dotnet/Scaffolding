@@ -6,24 +6,23 @@
         "Global": {
           "CodeChanges": [
             {
-              "InsertAfter": "WebApplication.CreateBuilder",
+              "Block": "AddSyncfusionBlazorToolkit()",
+              "Parent": "WebApplication.CreateBuilder.Services",
+              "CodeChangeType": "MemberAccess",
               "CheckBlock": "AddSyncfusionBlazorToolkit",
-              "Block": "builder.Services.AddSyncfusionBlazorToolkit();",
+              "Options": [ "WebApp" ],
               "LeadingTrivia": {
-                "Newline": true
-              },
-              "TrailingTrivia": {
-                "Newline": true
+                "Newline": true,
+                "NumberOfSpaces": 4
               }
             },
             {
-              "InsertAfter": "WebAssemblyHostBuilder.CreateDefault",
+              "Block": "AddSyncfusionBlazorToolkit()",
+              "Parent": "WebAssemblyHostBuilder.CreateDefault.Services",
+              "CodeChangeType": "MemberAccess",
               "CheckBlock": "AddSyncfusionBlazorToolkit",
-              "Block": "builder.Services.AddSyncfusionBlazorToolkit();",
+              "Options": [ "StandaloneWasm" ],
               "LeadingTrivia": {
-                "Newline": true
-              },
-              "TrailingTrivia": {
                 "Newline": true
               }
             }

@@ -39,6 +39,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(ValidateEfControllerStep),
                 typeof(ValidateEntraIdStep),
                 typeof(ValidateSyncfusionBlazorToolkitStep),
+                typeof(ApplySyncfusionBlazorToolkitImportsStep),
+                typeof(VerifySyncfusionBlazorToolkitStep),
                 typeof(SummarizeSyncfusionBlazorToolkitStep),
                 typeof(ValidateIdentityStep),
                 typeof(ValidateMinimalApiStep),
@@ -217,7 +219,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.SyncfusionBlazorToolkit.Name)
                 .WithDisplayName(AspnetStrings.SyncfusionBlazorToolkit.DisplayName)
-                .WithCategory(AspnetStrings.Catagories.Syncfusion)
+                .WithCategory(AspnetStrings.Catagories.Blazor)
                 .WithDescription(AspnetStrings.SyncfusionBlazorToolkit.Description)
                 .WithExample(AspnetStrings.SyncfusionBlazorToolkit.Example, AspnetStrings.SyncfusionBlazorToolkit.ExampleDescription)
                 .WithOptions([options.Project, options.Prerelease])
@@ -229,7 +231,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.Prerelease = context.GetOptionResult(options.Prerelease);
                 })
                 .WithSyncfusionBlazorToolkitAddPackagesStep()
+                .WithSyncfusionBlazorToolkitAddClientPackagesStep()
                 .WithSyncfusionBlazorToolkitCodeChangeStep()
+                .WithSyncfusionBlazorToolkitClientCodeChangeStep()
+                .WithSyncfusionBlazorToolkitImportsStep()
+                .WithSyncfusionBlazorToolkitImportsClientStep()
+                .WithStep<VerifySyncfusionBlazorToolkitStep>()
                 .WithStep<SummarizeSyncfusionBlazorToolkitStep>();
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorPage.Crud)

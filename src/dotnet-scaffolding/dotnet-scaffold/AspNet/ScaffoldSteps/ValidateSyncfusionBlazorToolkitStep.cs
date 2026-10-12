@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Text.RegularExpressions;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -18,20 +19,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 /// Validates Syncfusion Blazor Toolkit settings and seeds the project context
 /// for the setup scaffolder.
 ///
-/// <para>The setup scaffolder requires only a valid .csproj path. It then
-/// performs a soft discovery pass for the optional host files it can
-/// modify:</para>
-/// <list type="bullet">
-///   <item>Components/_Imports.razor — preferred, then _Imports.razor at
-///         the project root, then any _Imports.razor under the project. If
-///         none is found, the using-directive step is skipped (logged as
-///         a warning) instead of failing the whole scaffolder.</item>
-/// </list>
+/// <para>Setup is intentionally minimal: only a supported Blazor
+/// application is accepted. The validation step normalizes the supplied
+/// <c>--project</c> path, rejects Hybrid / MAUI projects explicitly
+/// (because <c>MauiProgram.cs</c> is not a supported host), and detects
+/// whether the project is the server or client side of a Blazor Web App
+/// Auto split using the existing
+/// <see cref="BlazorWebAssemblyClientProjectResolver"/>.</para>
 ///
-/// <para>The package install and Program.cs service-registration steps
-/// run regardless of which optional files are present, so the scaffolder
-/// is useful in Blazor Web App, standalone Blazor WASM, and hybrid
-/// layouts.</para>
+/// <para>Detected values are surfaced on the resulting
+/// <see cref="SyncfusionBlazorToolkitSettings"/> instance so that
+/// downstream steps can pick the right code-modification recipe and the
+/// summary step can give accurate, hosting-specific guidance.</para>
 /// </summary>
 internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
 {
@@ -40,7 +39,7 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
     private readonly ITelemetryService _telemetryService;
 
     /// <summary>
-    /// Path to the project file.
+    /// Path to the project file (relative or absolute).
     /// </summary>
     public string? Project { get; set; }
 
@@ -71,11 +70,8 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
             return Task.FromResult(false);
         }
 
-        // Only the project file itself is strictly required. The
-        // _Imports.razor and theme host files are discovered with a
-        // soft-fail so the scaffolder still completes successfully when
-        // they are absent.
-        var projectDirectory = Path.GetDirectoryName(settings.Project);
+        // We need a real directory and a real file.
+        string projectDirectory = Path.GetDirectoryName(settings.Project)!;
         if (string.IsNullOrEmpty(projectDirectory) || !_fileSystem.DirectoryExists(projectDirectory))
         {
             _logger.LogError(
@@ -88,41 +84,104 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
             return Task.FromResult(false);
         }
 
-        // Soft-fail imports discovery. Components/_Imports.razor is
-        // preferred; _Imports.razor at the project root and any
-        // _Imports.razor under the project are accepted as fallbacks
-        // (older Blazor layouts, standalone WASM, hybrid layouts, and
-        // global-using scenarios). When none is present, the using
-        // insertion is skipped with a warning.
-        string? importsPath = DiscoverImportsFile(projectDirectory);
+        // Validate that the project is a supported Blazor application —
+        // not merely a .csproj that exists. Hybrid / MAUI Blazor Hybrid
+        // projects are explicitly rejected because they target
+        // MauiProgram.cs which the shared code-modification pipeline
+        // does not (and cannot, with the existing recipes) modify.
+        var projectKind = DetectProjectKind(settings.Project);
+        if (projectKind == ProjectKind.UnsupportedHybrid)
+        {
+            _logger.LogError(
+                "Syncfusion Blazor Toolkit scaffolder does not support Hybrid / MAUI Blazor Hybrid projects. " +
+                "Run the scaffolder against the Blazor WebAssembly or Blazor Web App project inside the solution, " +
+                "not on a MAUI host project ('{Project}').",
+                settings.Project);
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(
+                nameof(ValidateSyncfusionBlazorToolkitStep),
+                context.Scaffolder.DisplayName,
+                result: false));
+            return Task.FromResult(false);
+        }
+
+        if (projectKind == ProjectKind.NotBlazor)
+        {
+            _logger.LogError(
+                "Syncfusion Blazor Toolkit scaffolder requires a Blazor Web App, Blazor Server, or Blazor WebAssembly project. " +
+                "'{Project}' does not target the Microsoft.NET.Sdk.Web, Microsoft.NET.Sdk.BlazorWebAssembly, or " +
+                "Microsoft.NET.Sdk.Blazor (with Server-side rendering) SDK. Add Blazor support or pick a different project.",
+                settings.Project);
+            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(
+                nameof(ValidateSyncfusionBlazorToolkitStep),
+                context.Scaffolder.DisplayName,
+                result: false));
+            return Task.FromResult(false);
+        }
+
+        settings.Layout = projectKind switch
+        {
+            ProjectKind.StandaloneWasm => SyncfusionBlazorToolkitLayout.SingleProject,
+            _ => SyncfusionBlazorToolkitLayout.SingleProject,
+        };
+
+        // Resolve a referenced WebAssembly client (if any). This is the
+        // single source of truth for multi-project layouts: when a
+        // Blazor Web App Auto server project references a
+        // Microsoft.NET.Sdk.BlazorWebAssembly project, we configure the
+        // client too — package on the client, services + imports on the
+        // server.
+        string? clientError = null;
+        bool clientLookupOk = false;
+        if (projectKind == ProjectKind.WebApp)
+        {
+            clientLookupOk = BlazorWebAssemblyClientProjectResolver.TryGetClient(
+                settings.Project, _fileSystem, out var client, out clientError);
+            if (clientLookupOk && client is not null)
+            {
+                settings.ClientProjectPath = client.Value.ProjectPath;
+                settings.Layout = SyncfusionBlazorToolkitLayout.AutoServer;
+            }
+            else if (!clientLookupOk && LooksLikeMultiProjectReference(projectDirectory))
+            {
+                // Only fail when the project is supposed to be a
+                // multi-project layout but evaluation broke.
+                // Standalone projects with no client are perfectly
+                // valid.
+                _logger.LogError(clientError);
+                _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(
+                    nameof(ValidateSyncfusionBlazorToolkitStep),
+                    context.Scaffolder.DisplayName,
+                    result: false));
+                return Task.FromResult(false);
+            }
+        }
+
+        // Detect hosting configuration (render mode, hosting support) so
+        // the summary can give accurate next-steps guidance instead of
+        // unconditionally listing every interactive render mode.
+        settings.DetectedRenderMode = DetectRenderMode(projectDirectory);
+
+        // Pre-scaffolding flags for the summary.
+        settings.PackageAlreadyReferenced = IsPackageAlreadyReferenced(settings.Project);
+        settings.ServicesAlreadyRegistered = IsServicesAlreadyRegistered(projectDirectory);
+
+        // Pre-discover the imports file so the dedicated imports step
+        // can use the same convention. The dedicated step may still
+        // create a file if discovery fails.
+        string? importsPath = SyncfusionBlazorToolkitHelper.DiscoverImportsFile(projectDirectory);
         if (!string.IsNullOrEmpty(importsPath))
         {
-            // Use OS-native separators for the path that the CodeModifier
-            // will look up. Path.GetRelativePath returns OS-native form
-            // ("Components\_Imports.razor" on Windows,
-            // "Components/_Imports.razor" on Linux). Canonicalizing to
-            // forward slashes would silently break the file lookup on
-            // Windows and cause the @using directive to be skipped.
-            string relativePath = Path.GetRelativePath(projectDirectory, importsPath);
-            settings.ImportsFile = relativePath;
-            settings.ImportsFileSkipped = false;
+            settings.ImportsFile = Path.GetRelativePath(projectDirectory, importsPath);
         }
         else
         {
             settings.ImportsFile = null;
             settings.ImportsFileSkipped = true;
             _logger.LogWarning(
-                "Syncfusion Blazor Toolkit could not find any '_Imports.razor' file under '{ProjectDirectory}' " +
-                "(checked Components/_Imports.razor, _Imports.razor, and any nested _Imports.razor). " +
-                "The @using directive will not be added automatically. " +
-                "Add '@using Syncfusion.Blazor.Toolkit' to your _Imports file manually if your project uses one outside these locations.",
+                "Syncfusion Blazor Toolkit could not find any '_Imports.razor' under '{ProjectDirectory}'. " +
+                "The dedicated imports step will create one in the conventional location.",
                 projectDirectory);
         }
-
-        // Detect pre-existing configuration so the summary can describe
-        // an idempotent re-run instead of a fresh install.
-        settings.PackageAlreadyReferenced = IsPackageAlreadyReferenced(projectDirectory);
-        settings.ServicesAlreadyRegistered = IsServicesAlreadyRegistered(projectDirectory);
 
         context.Properties.Add(nameof(SyncfusionBlazorToolkitSettings), settings);
         context.Properties.Add(Constants.StepConstants.BaseProjectPath, projectDirectory);
@@ -142,83 +201,120 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
             return null;
         }
 
+        // Normalize the supplied --project path to a full path so
+        // downstream steps always see an absolute path that survives
+        // Path.GetDirectoryName. A relative "App.csproj" otherwise
+        // passes File.Exists but Path.GetDirectoryName returns an
+        // empty string and the scaffolder cannot find Program.cs.
+        string normalizedProject;
+        try
+        {
+            normalizedProject = Path.GetFullPath(Project);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Syncfusion Blazor Toolkit could not normalize the supplied --project path '{Project}'.",
+                Project);
+            return null;
+        }
+
         return new SyncfusionBlazorToolkitSettings
         {
-            Project = Project,
+            Project = normalizedProject,
             Prerelease = Prerelease,
         };
     }
 
     /// <summary>
-    /// Looks for an _Imports.razor file in the conventional Blazor
-    /// locations. The first match wins. Returns the absolute path of
-    /// the discovered file, or null when no candidate exists.
+    /// Detects whether the supplied project is a Blazor Web App,
+    /// standalone Blazor WebAssembly, Blazor Server (Microsoft.NET.Sdk.Blazor),
+    /// Hybrid / MAUI Blazor Hybrid, or not a Blazor project at all.
     /// </summary>
-    private string? DiscoverImportsFile(string projectDirectory)
+    private ProjectKind DetectProjectKind(string projectPath)
     {
-        // Preferred order mirrors the conventional Blazor Web App layout,
-        // then standalone Blazor WASM (no Components folder), then a
-        // catch-all for any _Imports.razor under the project root.
-        string[] candidates =
-        [
-            Path.Combine(projectDirectory, "Components", "_Imports.razor"),
-            Path.Combine(projectDirectory, "_Imports.razor"),
-        ];
-
-        foreach (string candidate in candidates)
+        string text;
+        try
         {
-            if (_fileSystem.FileExists(candidate))
-            {
-                return candidate;
-            }
+            text = File.ReadAllText(projectPath);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex,
+                "Syncfusion Blazor Toolkit could not read the project file '{Project}' to detect its SDK.",
+                projectPath);
+            return ProjectKind.Unknown;
         }
 
-        // Catch-all: any _Imports.razor under the project. Enumerate
-        // manually so we stay IFileSystem-agnostic and avoid recursing
-        // into well-known excluded directories (bin, obj, node_modules).
-        return FindFirstImportsRazor(projectDirectory, projectDirectory);
+        // MAUI / Hybrid has the most specific SDK and wins first.
+        if (Regex.IsMatch(text, "Microsoft\\.NET\\.Sdk\\.Maui", RegexOptions.IgnoreCase) ||
+            Regex.IsMatch(text, "<UseMaui\\b", RegexOptions.IgnoreCase))
+        {
+            return ProjectKind.UnsupportedHybrid;
+        }
+
+        if (Regex.IsMatch(text, "Microsoft\\.NET\\.Sdk\\.BlazorWebAssembly", RegexOptions.IgnoreCase))
+        {
+            return ProjectKind.StandaloneWasm;
+        }
+
+        if (Regex.IsMatch(text, "Microsoft\\.NET\\.Sdk\\.Web\\b", RegexOptions.IgnoreCase) ||
+            Regex.IsMatch(text, "Microsoft\\.NET\\.Sdk\\.Blazor\\b", RegexOptions.IgnoreCase))
+        {
+            return ProjectKind.WebApp;
+        }
+
+        return ProjectKind.NotBlazor;
     }
 
-    private string? FindFirstImportsRazor(string projectDirectory, string currentDirectory)
+    /// <summary>
+    /// Heuristic check used to decide whether a missing client is a
+    /// failure. A project that has a sibling .Client project on disk
+    /// but whose evaluation broke is treated as a multi-project
+    /// reference; a project with no sibling is treated as a
+    /// standalone Blazor Web App.
+    /// </summary>
+    private bool LooksLikeMultiProjectReference(string projectDirectory)
     {
-        if (!_fileSystem.DirectoryExists(currentDirectory))
+        foreach (string csproj in Directory.EnumerateFiles(projectDirectory, "*.Client.csproj", SearchOption.TopDirectoryOnly))
         {
-            return null;
+            return true;
         }
 
-        string directMatch = Path.Combine(currentDirectory, "_Imports.razor");
-        if (_fileSystem.FileExists(directMatch))
+        return false;
+    }
+
+    private string DetectRenderMode(string projectDirectory)
+    {
+        try
         {
-            return directMatch;
-        }
+            string appRazorPath = Path.Combine(projectDirectory, "Components", "App.razor");
+            if (File.Exists(appRazorPath))
+            {
+                string appText = File.ReadAllText(appRazorPath);
+                if (appText.Contains("@rendermode=\"InteractiveAuto\"", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "InteractiveAuto";
+                }
 
-        foreach (string subdirectory in _fileSystem.EnumerateDirectories(currentDirectory, "*", SearchOption.TopDirectoryOnly))
+                if (appText.Contains("@rendermode=\"InteractiveServer\"", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "InteractiveServer";
+                }
+
+                if (appText.Contains("@rendermode=\"InteractiveWebAssembly\"", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "InteractiveWebAssembly";
+                }
+            }
+
+            // Static SSR / no global render mode set.
+            return "None";
+        }
+        catch
         {
-            string name = Path.GetFileName(subdirectory);
-            if (string.Equals(name, "bin", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(name, "obj", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(name, "node_modules", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(name, ".git", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            // Don't recurse into nested project directories; their
-            // _Imports.razor belongs to a different project.
-            if (subdirectory != projectDirectory &&
-                _fileSystem.EnumerateFiles(subdirectory, "*.csproj", SearchOption.TopDirectoryOnly).Any())
-            {
-                continue;
-            }
-
-            string? nested = FindFirstImportsRazor(projectDirectory, subdirectory);
-            if (nested is not null)
-            {
-                return nested;
-            }
+            return "None";
         }
-
-        return null;
     }
 
     /// <summary>
@@ -227,18 +323,11 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
     /// a missing file, parse error, or unparseable XML is treated as
     /// "unknown" and reported as not-yet-referenced.
     /// </summary>
-    private bool IsPackageAlreadyReferenced(string projectDirectory)
+    private bool IsPackageAlreadyReferenced(string projectPath)
     {
         try
         {
-            // Look for a project file at the directory root.
-            string? csprojPath = _fileSystem.EnumerateFiles(projectDirectory, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
-            if (string.IsNullOrEmpty(csprojPath))
-            {
-                return false;
-            }
-
-            string csprojText = File.ReadAllText(csprojPath);
+            string csprojText = File.ReadAllText(projectPath);
             return csprojText.Contains("Syncfusion.Blazor.Toolkit", StringComparison.OrdinalIgnoreCase);
         }
         catch (Exception ex)
@@ -275,5 +364,14 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
                 "Idempotency detection will report services as 'not yet registered'.");
             return false;
         }
+    }
+
+    private enum ProjectKind
+    {
+        Unknown = 0,
+        WebApp = 1,
+        StandaloneWasm = 2,
+        UnsupportedHybrid = 3,
+        NotBlazor = 4,
     }
 }

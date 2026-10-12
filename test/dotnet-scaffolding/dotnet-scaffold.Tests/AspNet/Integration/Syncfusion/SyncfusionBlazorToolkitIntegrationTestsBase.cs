@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
 
@@ -11,11 +12,22 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Syncfusion;
 /// <summary>
 /// Shared base class for end-to-end integration tests of the
 /// Syncfusion Blazor Toolkit scaffolder across .NET versions.
+///
+/// <para>Per review comment 12, the test fixture writes a scoped
+/// <c>NuGet.config</c> into the temporary project directory via
+/// <see cref="ScaffoldCliHelper.GetTestNuGetConfig(string)"/> so the
+/// machine's repository-wide feed configuration does not affect the
+/// fixture's package restore.</para>
 /// </summary>
 [Trait("Suite", "ScaffoldIntegration")]
-[Trait("Family", "syncfusion-blazor-toolkit")]
+[Trait("Family", "blazor-syncfusion-toolkit")]
 public abstract class SyncfusionBlazorToolkitIntegrationTestsBase : IDisposable
 {
+    /// <summary>
+    /// Name of the scaffolder as invoked on the CLI.
+    /// </summary>
+    public const string CommandName = "blazor-syncfusion-toolkit";
+
     protected abstract string TargetFramework { get; }
     protected abstract string TestClassName { get; }
 
@@ -29,6 +41,13 @@ public abstract class SyncfusionBlazorToolkitIntegrationTestsBase : IDisposable
         _testProjectDir = Path.Combine(_testDirectory, "TestProject");
         _testProjectPath = Path.Combine(_testProjectDir, "TestProject.csproj");
         Directory.CreateDirectory(_testProjectDir);
+
+        // Comment 12: fixture-scoped NuGet.config so the test app
+        // restores from the same feeds as the rest of the build —
+        // no nuget.org pollution of the repo's NuGet.config.
+        File.WriteAllText(
+            Path.Combine(_testProjectDir, "NuGet.config"),
+            ScaffoldCliHelper.GetTestNuGetConfig(TargetFramework));
     }
 
     public void Dispose()
@@ -49,10 +68,19 @@ public abstract class SyncfusionBlazorToolkitIntegrationTestsBase : IDisposable
   </PropertyGroup>
 </Project>";
 
+    protected string BlazorWasmProjectContent => $@"<Project Sdk=""Microsoft.NET.Sdk.BlazorWebAssembly"">
+  <PropertyGroup>
+    <TargetFramework>{TargetFramework}</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>TestProject</RootNamespace>
+  </PropertyGroup>
+</Project>";
+
     /// <summary>
     /// Writes a minimal Blazor Web App layout (Components/_Imports.razor,
     /// Components/App.razor, Program.cs with MapRazorComponents) so the
-    /// scaffolder has both an _Imports host and a theme host to target.
+    /// scaffolder has an _Imports host to target. Syncfusion 2.0.0+
+    /// requires no stylesheet link, so App.razor stays minimal.
     /// </summary>
     protected void WriteBlazorWebAppScaffold()
     {
@@ -71,4 +99,29 @@ public abstract class SyncfusionBlazorToolkitIntegrationTestsBase : IDisposable
             Path.Combine(_testProjectDir, "Components", "Routes.razor"),
             ScaffoldCliHelper.GetBlazorRoutesRazor());
     }
+
+    /// <summary>
+    /// Builds the generated project under the test project directory
+    /// for the current <see cref="TargetFramework"/>. Used by runnable
+    /// baseline / outcome verification tests.
+    /// </summary>
+    protected Task<(int ExitCode, string Output, string Error)> BuildGeneratedAsync()
+        => ScaffoldCliHelper.RunBuildForFrameworkAsync(_testProjectDir, TargetFramework);
+
+    /// <summary>
+    /// Runs the Syncfusion Blazor Toolkit scaffolder against the
+    /// prepared project.
+    /// </summary>
+    /// <remarks>
+    /// The scaffolder always runs under the test runner's TFM (net11.0)
+    /// because the dotnet-scaffold tool is only built for net11.0 in
+    /// the dev build. The target framework of the generated test app
+    /// remains <see cref="TargetFramework"/>.
+    /// </remarks>
+    protected Task<(int ExitCode, string Output, string Error)> ScaffoldAsync()
+        => ScaffoldCliHelper.RunScaffoldAsync(
+            ScaffoldCliHelper.GetTestTargetFramework(),
+            CommandName,
+            "--project",
+            _testProjectPath);
 }

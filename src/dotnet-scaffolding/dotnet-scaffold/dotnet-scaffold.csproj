@@ -273,15 +273,15 @@
   </Target>
   <Target Name="CopyCodeModConfigsToPacked" AfterTargets="CreateMockToolLayout">
     <ItemGroup>
-      <_AspNetConfigs_net8 Include="$(OutputPath)AspNet\Templates\net8.0\CodeModificationConfigs\*.json" />
-      <_AspNetConfigs_net9 Include="$(OutputPath)AspNet\Templates\net9.0\CodeModificationConfigs\*.json" />
-      <_AspNetConfigs_net10 Include="$(OutputPath)AspNet\Templates\net10.0\CodeModificationConfigs\*.json" />
-      <_AspNetConfigs_net11 Include="$(OutputPath)AspNet\Templates\net11.0\CodeModificationConfigs\*.json" />
+      <_AspNetConfigs_net8 Include="$(OutputPath)AspNet\Templates\net8.0\CodeModificationConfigs\**\*.json" />
+      <_AspNetConfigs_net9 Include="$(OutputPath)AspNet\Templates\net9.0\CodeModificationConfigs\**\*.json" />
+      <_AspNetConfigs_net10 Include="$(OutputPath)AspNet\Templates\net10.0\CodeModificationConfigs\**\*.json" />
+      <_AspNetConfigs_net11 Include="$(OutputPath)AspNet\Templates\net11.0\CodeModificationConfigs\**\*.json" />
     </ItemGroup>
-    <Copy SourceFiles="@(_AspNetConfigs_net8)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net8.0" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(_AspNetConfigs_net9)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net9.0" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(_AspNetConfigs_net10)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net10.0" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(_AspNetConfigs_net11)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net11.0" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_AspNetConfigs_net8)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net8.0\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_AspNetConfigs_net9)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net9.0\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_AspNetConfigs_net10)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net10.0\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_AspNetConfigs_net11)" DestinationFolder="$(OutputPath)Aspnet\CodeModificationConfigs\net11.0\%(RecursiveDir)" SkipUnchangedFiles="true" />
   </Target>
 
   <!-- Exclude template files from publish output to prevent them from appearing in tools folder -->

@@ -7,9 +7,9 @@ using System.Text.Json;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Xunit;
 
-namespace Microsoft.DotNet.Scaffold.Tests.AspNet.Helpers;
+namespace Microsoft.DotNet.Scaffold.Tests.AspNet.Helpers.Syncfusion;
 
-public class SyncfusionBlazorToolkitHelperDiagnosticTests
+public class SyncfusionBlazorToolkitTfmConfigTests
 {
     private static string FindRepoRoot()
     {
@@ -26,18 +26,23 @@ public class SyncfusionBlazorToolkitHelperDiagnosticTests
     [InlineData("net9.0")]
     [InlineData("net10.0")]
     [InlineData("net11.0")]
-    public void Diagnostic_ResolvedJson_IsProgramCsOnly(string tfm)
+    public void RealTfmConfig_ResolvesProgramCsOnly(string tfm)
     {
         var tfmConfigPath = Path.Combine(
             FindRepoRoot(),
             "src", "dotnet-scaffolding", "dotnet-scaffold",
-            "AspNet", "Templates", tfm, "CodeModificationConfigs",
+            "AspNet", "Templates", tfm, "CodeModificationConfigs", "Syncfusion",
             "syncfusionBlazorToolkitChanges.json");
 
-        Assert.True(File.Exists(tfmConfigPath), $"Config file must exist at {tfmConfigPath}");
+        Assert.True(File.Exists(tfmConfigPath), $"TFM config file must exist at {tfmConfigPath}");
+
         var resolved = SyncfusionBlazorToolkitHelper.BuildResolvedCodeModifierConfigJson(tfmConfigPath);
         Assert.NotNull(resolved);
         using var doc = JsonDocument.Parse(resolved);
-        Assert.Equal(1, doc.RootElement.GetProperty("Files").GetArrayLength());
+        var files = doc.RootElement.GetProperty("Files");
+        Assert.Equal(1, files.GetArrayLength());
+        Assert.Equal("Program.cs", files[0].GetProperty("FileName").GetString());
+        Assert.Contains("AddSyncfusionBlazorToolkit", files[0].GetRawText());
+        Assert.DoesNotContain("fluent.min.css", resolved);
     }
 }

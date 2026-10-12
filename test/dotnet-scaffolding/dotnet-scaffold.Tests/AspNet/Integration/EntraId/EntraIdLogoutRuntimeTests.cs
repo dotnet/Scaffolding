@@ -248,6 +248,14 @@ public class EntraIdLogoutRuntimeTests
 
     private static Process StartGeneratedApplication(string testDirectory, string targetFramework, string addressFilePath)
     {
+        string applicationPath = Path.Combine(
+            testDirectory,
+            "bin",
+            "Debug",
+            targetFramework,
+            "GeneratedEntraApp.dll");
+        Assert.True(File.Exists(applicationPath), $"Generated application was not found at '{applicationPath}'.");
+
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -260,10 +268,7 @@ public class EntraIdLogoutRuntimeTests
                 CreateNoWindow = true
             }
         };
-        process.StartInfo.ArgumentList.Add("run");
-        process.StartInfo.ArgumentList.Add("--no-build");
-        process.StartInfo.ArgumentList.Add("--framework");
-        process.StartInfo.ArgumentList.Add(targetFramework);
+        process.StartInfo.ArgumentList.Add(applicationPath);
         process.StartInfo.ArgumentList.Add("--urls");
         process.StartInfo.ArgumentList.Add("http://127.0.0.1:0");
         process.StartInfo.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";

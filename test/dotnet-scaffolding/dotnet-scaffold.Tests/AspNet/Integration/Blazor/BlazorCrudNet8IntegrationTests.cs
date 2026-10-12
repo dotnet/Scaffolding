@@ -93,8 +93,8 @@ public enum EmploymentType
             // Assert — no NuGet errors and project builds after scaffolding
             Assert.False(cliOutput.Contains("error: NU"),
                 $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
-            var (afterExitCode, _, afterError) = await RunBuildAsync(_testProjectDir);
-            Assert.True(afterExitCode == 0, $"Project should still build after scaffolding. Error: {afterError}");
+            var (afterExitCode, afterOutput, afterError) = await RunBuildAsync(_testProjectDir);
+            Assert.True(afterExitCode == 0, $"Project should still build after scaffolding.\nOutput: {afterOutput}\nError: {afterError}");
         }
     }
 }

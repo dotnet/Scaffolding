@@ -508,6 +508,7 @@ public class {modelName}
     {
         var projectDir = Path.Combine(testDirectory, projectName);
         Directory.CreateDirectory(projectDir);
+        File.WriteAllText(Path.Combine(projectDir, "NuGet.config"), GetTestNuGetConfig(targetFramework));
 
         var projectPath = Path.Combine(projectDir, $"{projectName}.csproj");
         File.WriteAllText(projectPath, GetWebProjectContent(targetFramework));
@@ -546,6 +547,9 @@ public class {modelName}
     /// </summary>
     public static string PreviewNuGetConfig => GetPreviewNuGetConfig();
 
+    internal static string GetTestNuGetConfig(string targetFramework)
+        => targetFramework == "net11.0" ? PreviewNuGetConfig : StableNuGetConfig;
+
     /// <summary>
     /// Builds an isolated application feed configuration using the repository's feed URLs.
     /// </summary>
@@ -578,7 +582,7 @@ public class {modelName}
     }
 
     /// <summary>
-    /// NuGet.config content that restricts package sources to nuget.org only.
+    /// NuGet.config content that restricts package sources to the dotnet-public mirror.
     /// Prevents preview/dev feed packages from interfering with stable TFM tests
     /// (e.g., net8.0, net9.0) when the machine has preview SDK feeds configured.
     /// </summary>
@@ -586,7 +590,13 @@ public class {modelName}
 <configuration>
   <packageSources>
     <clear />
-    <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
+    <add key=""dotnet-public"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json"" />
   </packageSources>
+  <disabledPackageSources>
+    <clear />
+  </disabledPackageSources>
+  <packageSourceMapping>
+    <clear />
+  </packageSourceMapping>
 </configuration>";
 }

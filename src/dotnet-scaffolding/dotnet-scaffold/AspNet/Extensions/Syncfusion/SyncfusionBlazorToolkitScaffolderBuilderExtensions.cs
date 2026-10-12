@@ -8,10 +8,12 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion.Settings;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions.Syncfusion;
 
 /// <summary>
 /// Provides extension methods for <see cref="IScaffoldBuilder"/> to add Syncfusion Blazor

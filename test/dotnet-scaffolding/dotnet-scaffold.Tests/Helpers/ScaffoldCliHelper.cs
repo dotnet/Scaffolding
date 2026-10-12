@@ -589,4 +589,28 @@ public class {modelName}
     <clear />
   </packageSourceMapping>
 </configuration>";
+
+    /// <summary>
+    /// NuGet.config content used by Syncfusion Blazor Toolkit
+    /// integration tests. Adds nuget.org as a scoped source so the
+    /// <c>Syncfusion.Blazor.Toolkit</c> package — which is not
+    /// mirrored on the dnceng feeds used by the rest of the build —
+    /// can still be restored inside the temporary test fixture. The
+    /// extra source is scoped to the fixture only; the repository's
+    /// own <c>NuGet.config</c> deliberately does not include it.
+    /// </summary>
+    public static readonly string SyncfusionTestNuGetConfig = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
+    <add key=""dotnet-public"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json"" />
+  </packageSources>
+  <disabledPackageSources>
+    <clear />
+  </disabledPackageSources>
+  <packageSourceMapping>
+    <clear />
+  </packageSourceMapping>
+</configuration>";
 }

@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
@@ -36,14 +35,19 @@ public class EntraIdLogoutRuntimeTests
                 buildExitCode == 0,
                 $"Generated application should build.\nOutput: {buildOutput}\nError: {buildError}");
 
-            int port = GetAvailablePort();
-            using var process = StartGeneratedApplication(testDirectory, targetFramework, port);
+            string addressFilePath = Path.Combine(testDirectory, "server-address.txt");
+            using var process = StartGeneratedApplication(testDirectory, targetFramework, addressFilePath);
             Task<string> outputTask = process.StandardOutput.ReadToEndAsync();
             Task<string> errorTask = process.StandardError.ReadToEndAsync();
 
             try
             {
-                using var client = CreateClient(port);
+                var serverAddress = await WaitForServerAddressAsync(
+                    addressFilePath,
+                    process,
+                    outputTask,
+                    errorTask);
+                using var client = CreateClient(serverAddress);
                 await WaitUntilReadyAsync(client, process, outputTask, errorTask);
 
                 var signInResponse = await client.PostAsync("/test/signin", content: null);
@@ -174,6 +178,8 @@ public class EntraIdLogoutRuntimeTests
         using Microsoft.AspNetCore.Authentication;
         using Microsoft.AspNetCore.Authentication.Cookies;
         using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+        using Microsoft.AspNetCore.Hosting.Server;
+        using Microsoft.AspNetCore.Hosting.Server.Features;
         using Microsoft.Extensions.Options;
         using Microsoft.Identity.Web;
 
@@ -204,7 +210,17 @@ public class EntraIdLogoutRuntimeTests
         app.MapGet("/test/signout-state", (OpenIdConnectSignOutState state) => state.WasSignedOut);
         app.MapGroup("/authentication").MapLoginAndLogout();
         app.MapRazorComponents<App>();
-        app.Run();
+        await app.StartAsync();
+        var addressFilePath = Environment.GetEnvironmentVariable("GENERATED_APP_ADDRESS_FILE")
+            ?? throw new InvalidOperationException("Missing generated app address file path.");
+        var serverAddresses = app.Services
+            .GetRequiredService<IServer>()
+            .Features
+            .Get<IServerAddressesFeature>()
+            ?.Addresses
+            ?? throw new InvalidOperationException("Server addresses are unavailable.");
+        await File.WriteAllTextAsync(addressFilePath, serverAddresses.Single());
+        await app.WaitForShutdownAsync();
 
         public sealed class OpenIdConnectSignOutState
         {
@@ -230,7 +246,7 @@ public class EntraIdLogoutRuntimeTests
         }
         """;
 
-    private static Process StartGeneratedApplication(string testDirectory, string targetFramework, int port)
+    private static Process StartGeneratedApplication(string testDirectory, string targetFramework, string addressFilePath)
     {
         var process = new Process
         {
@@ -249,13 +265,14 @@ public class EntraIdLogoutRuntimeTests
         process.StartInfo.ArgumentList.Add("--framework");
         process.StartInfo.ArgumentList.Add(targetFramework);
         process.StartInfo.ArgumentList.Add("--urls");
-        process.StartInfo.ArgumentList.Add($"http://127.0.0.1:{port}");
+        process.StartInfo.ArgumentList.Add("http://127.0.0.1:0");
         process.StartInfo.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
+        process.StartInfo.Environment["GENERATED_APP_ADDRESS_FILE"] = addressFilePath;
         process.Start();
         return process;
     }
 
-    private static HttpClient CreateClient(int port)
+    private static HttpClient CreateClient(string serverAddress)
     {
         var handler = new HttpClientHandler
         {
@@ -264,8 +281,34 @@ public class EntraIdLogoutRuntimeTests
         };
         return new HttpClient(handler)
         {
-            BaseAddress = new Uri($"http://127.0.0.1:{port}")
+            BaseAddress = new Uri(serverAddress)
         };
+    }
+
+    private static async Task<string> WaitForServerAddressAsync(string addressFilePath, Process process, Task<string> outputTask, Task<string> errorTask)
+    {
+        for (int attempt = 0; attempt < 60; attempt++)
+        {
+            if (process.HasExited)
+            {
+                Assert.Fail(
+                    $"Generated application exited before startup.\nOutput: {await outputTask}\nError: {await errorTask}");
+            }
+
+            if (File.Exists(addressFilePath))
+            {
+                string serverAddress = await File.ReadAllTextAsync(addressFilePath);
+                if (!string.IsNullOrWhiteSpace(serverAddress))
+                {
+                    return serverAddress;
+                }
+            }
+
+            await Task.Delay(500);
+        }
+
+        Assert.Fail("Generated application did not report its server address within 30 seconds.");
+        return string.Empty;
     }
 
     private static async Task WaitUntilReadyAsync(
@@ -343,12 +386,4 @@ public class EntraIdLogoutRuntimeTests
         return WebUtility.HtmlDecode(match.Groups[1].Value);
     }
 
-    private static int GetAvailablePort()
-    {
-        var listener = new TcpListener(IPAddress.Loopback, 0);
-        listener.Start();
-        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
-        listener.Stop();
-        return port;
-    }
 }

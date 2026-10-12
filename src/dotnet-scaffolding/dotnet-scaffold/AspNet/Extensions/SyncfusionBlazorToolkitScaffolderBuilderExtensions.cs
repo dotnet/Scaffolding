@@ -132,7 +132,7 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
                 return;
             }
 
-            string codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile(
+            string? codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile(
                 "syncfusionBlazorToolkitChanges.json",
                 System.Reflection.Assembly.GetExecutingAssembly(),
                 TargetFrameworkHelpers.GetTargetFrameworkFolder(settings.Project));
@@ -185,7 +185,7 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
                 return;
             }
 
-            string codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile(
+            string? codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile(
                 "syncfusionBlazorToolkitChanges.json",
                 System.Reflection.Assembly.GetExecutingAssembly(),
                 TargetFrameworkHelpers.GetTargetFrameworkFolder(settings.ClientProjectPath));

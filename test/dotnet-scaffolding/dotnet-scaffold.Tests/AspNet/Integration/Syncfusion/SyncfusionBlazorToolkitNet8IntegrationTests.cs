@@ -54,12 +54,12 @@ public class SyncfusionBlazorToolkitNet8IntegrationTests : SyncfusionBlazorToolk
         Assert.True(second.ExitCode == 0, $"Second run failed (must be idempotent).\nOutput: {second.Output}\nError: {second.Error}");
 
         string imports = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "_Imports.razor"));
-        Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(
-            imports, "@using Syncfusion\\.Blazor\\.Toolkit").Count);
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(
+            imports, "@using Syncfusion\\.Blazor\\.Toolkit"));
 
         string programCs = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-        Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(
-            programCs, "AddSyncfusionBlazorToolkit").Count);
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(
+            programCs, "AddSyncfusionBlazorToolkit"));
 
         string appRazor = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "App.razor"));
         Assert.DoesNotContain("Syncfusion.Blazor.Toolkit/styles/fluent.min.css", appRazor);

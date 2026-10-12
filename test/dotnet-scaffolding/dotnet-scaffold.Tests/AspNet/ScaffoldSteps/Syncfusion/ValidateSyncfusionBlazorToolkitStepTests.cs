@@ -184,8 +184,8 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
         Assert.True(result);
 
-        var settings = (SyncfusionBlazorToolkitSettings)_context.Properties[nameof(SyncfusionBlazorToolkitSettings)];
-        Assert.Equal("InteractiveServer", settings.DetectedRenderMode);
+        var settings = (SyncfusionBlazorToolkitSettings?)_context.Properties[nameof(SyncfusionBlazorToolkitSettings)];
+        Assert.Equal("InteractiveServer", settings!.DetectedRenderMode);
     }
 
     private class TestTelemetryService : ITelemetryService

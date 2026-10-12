@@ -170,7 +170,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         writeContent = true;
                         azureAdObject["Instance"] = Instance;
                     }
-                    else
+                    else if (string.IsNullOrEmpty(azureAdObject["Instance"]?.ToString()))
                     {
                         writeContent = true;
                         azureAdObject["Instance"] = "https://login.microsoftonline.com/";
@@ -181,7 +181,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         writeContent = true;
                         azureAdObject["CallbackPath"] = CallbackPath;
                     }
-                    else
+                    else if (string.IsNullOrEmpty(azureAdObject["CallbackPath"]?.ToString()))
                     {
                         writeContent = true;
                         azureAdObject["CallbackPath"] = "/signin-oidc";

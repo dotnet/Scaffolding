@@ -16,9 +16,17 @@ public abstract class ScaffolderOption
     /// </summary>
     public required string DisplayName { get; init; }
     /// <summary>
-    /// CLI option name (e.g., --option).
+    /// CLI option name (e.g., --option). This is the canonical name shown in --help.
     /// </summary>
     public string? CliOption { get; init; }
+
+    /// <summary>
+    /// Additional CLI forms the option also accepts (e.g. legacy camelCase aliases
+    /// such as <c>--tenantId</c> for a canonical <c>--tenant-id</c>).
+    /// All entries are added as System.CommandLine aliases in addition to <see cref="CliOption"/>.
+    /// </summary>
+    public IEnumerable<string>? Aliases { get; init; } = null;
+
     /// <summary>
     /// Indicates if the option is required.
     /// </summary>

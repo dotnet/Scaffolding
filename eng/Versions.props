@@ -141,7 +141,6 @@
     <!-- Microsoft.AspNetCore.Authentication.Cookies -->
     <!-- this is from aspnetcore-dev (test only) -->
     <MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>6.0.0</MicrosoftAspNetCoreAuthenticationCookiesPackageVersion>
-    <MicrosoftIdentityWebPackageVersion>4.10.0</MicrosoftIdentityWebPackageVersion>
     <!-- Microsoft.AspNetCore.StaticFiles -->
     <!-- this is from aspnetcore-dev (test only) -->
     <MicrosoftAspNetCoreStaticFilesPackageVersion>6.0.0</MicrosoftAspNetCoreStaticFilesPackageVersion>

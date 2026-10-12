@@ -1,7 +1,6 @@
 <Project>
     <Import Project="$(RepoRoot)src\dotnet-scaffolding\Directory.Packages.props" />
     <ItemGroup>
-        <PackageVersion Include="Microsoft.Identity.Web" Version="$(MicrosoftIdentityWebPackageVersion)" />
         <PackageVersion Include="Moq" Version="$(MoqPackageVersion)" />
         <PackageVersion Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
         <PackageVersion Include="xunit.skippablefact" Version="$(XunitSkippableFactPackageVersion)" />

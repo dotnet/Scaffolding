@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
@@ -508,6 +509,7 @@ public class {modelName}
     {
         var projectDir = Path.Combine(testDirectory, projectName);
         Directory.CreateDirectory(projectDir);
+        File.WriteAllText(Path.Combine(projectDir, "NuGet.config"), GetTestNuGetConfig(targetFramework));
 
         var projectPath = Path.Combine(projectDir, $"{projectName}.csproj");
         File.WriteAllText(projectPath, GetWebProjectContent(targetFramework));
@@ -536,48 +538,41 @@ public class {modelName}
     /// The temporary test projects live under <see cref="Path.GetTempPath"/>, i.e. outside the
     /// repository tree, so they cannot discover the repository's root <c>NuGet.config</c> by the
     /// normal directory walk. To keep a single source of truth — and, critically, to restore from
-    /// the exact same curated, CI-mirrored dnceng feeds the rest of the build uses — this returns
-    /// the repository root <c>NuGet.config</c> content verbatim.
+    /// the exact same curated, CI-mirrored dnceng feeds the rest of the build uses — this copies
+    /// the repository root <c>NuGet.config</c> feeds.
     /// </para>
     /// <para>
     /// This deliberately avoids the live public <c>https://api.nuget.org</c> feed (which the repo's
     /// own config does not use). Restoring the scaffolded preview projects directly against the live
     /// nuget.org endpoint was the root cause of the CI flakiness: transient throttling/timeouts on
     /// that endpoint failed the pre-/post-build restores. The dnceng mirror feeds in the repo config
-    /// are the same ones the solution build already warmed, so these restores become cache hits.
+    /// are the same ones the solution build already warmed. Inherited source-disable and mapping
+    /// settings are cleared so machine-level configuration cannot change the fixture's feeds.
     /// </para>
     /// </summary>
     public static string PreviewNuGetConfig => GetRepoRootNuGetConfig();
 
+    internal static string GetTestNuGetConfig(string targetFramework)
+        => targetFramework == "net11.0" ? PreviewNuGetConfig : StableNuGetConfig;
+
     /// <summary>
     /// Reads the repository root <c>NuGet.config</c> so temporary test projects restore from the
-    /// identical feed set as the rest of the build. Falls back to an embedded copy of the repo's
-    /// dnceng feeds (still excluding the live nuget.org endpoint) if the file cannot be located.
+    /// identical feed set as the rest of the build, without inherited source-disable or mapping settings.
     /// </summary>
     private static string GetRepoRootNuGetConfig()
     {
         var repoConfig = Path.Combine(GetRepoRoot(), "NuGet.config");
-        if (File.Exists(repoConfig))
+        var config = XDocument.Load(repoConfig);
+        foreach (string sectionName in new[] { "disabledPackageSources", "packageSourceMapping" })
         {
-            return File.ReadAllText(repoConfig);
+            config.Root!.Element(sectionName)?.Remove();
+            config.Root.Add(new XElement(sectionName, new XElement("clear")));
         }
-
-        // Defensive fallback mirroring the repo's dnceng feeds. Intentionally excludes
-        // https://api.nuget.org — the dotnet-public feed is a reliable mirror of it.
-        return @"<?xml version=""1.0"" encoding=""utf-8""?>
-<configuration>
-  <packageSources>
-    <clear />
-    <add key=""dotnet-public"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json"" />
-    <add key=""dotnet11"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet11/nuget/v3/index.json"" />
-    <add key=""dotnet11-transport"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet11-transport/nuget/v3/index.json"" />
-  </packageSources>
-  <disabledPackageSources />
-</configuration>";
+        return config.ToString();
     }
 
     /// <summary>
-    /// NuGet.config content that restricts package sources to nuget.org only.
+    /// NuGet.config content that restricts package sources to the dotnet-public mirror.
     /// Prevents preview/dev feed packages from interfering with stable TFM tests
     /// (e.g., net8.0, net9.0) when the machine has preview SDK feeds configured.
     /// </summary>
@@ -585,7 +580,13 @@ public class {modelName}
 <configuration>
   <packageSources>
     <clear />
-    <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
+    <add key=""dotnet-public"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json"" />
   </packageSources>
+  <disabledPackageSources>
+    <clear />
+  </disabledPackageSources>
+  <packageSourceMapping>
+    <clear />
+  </packageSourceMapping>
 </configuration>";
 }

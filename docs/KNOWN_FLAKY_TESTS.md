@@ -42,6 +42,32 @@ outside the test's own logic:
 - **Network and CI environment.** Feed latency, throttling, and CI image differences can all
   surface as intermittent failures.
 
+### Deterministic failures are not flakes
+
+`NU1109` means a centrally pinned package version is lower than a dependency's minimum.
+For example, updating the Shared/legacy scaffolding Roslyn packages without updating the
+connected dotnet-scaffolding graph causes restore to fail before tests run. The Roslyn
+version properties now share one source in `eng/Versions.props`; the CLI coverage gate
+checks that they remain aligned. Do not suppress `NU1109`, disable transitive pinning,
+or retry it as a network failure. Validate dependency updates across all tool TFMs.
+Roslyn alignment alone is not a complete EF Design upgrade: newer EF builds can also require
+higher `Microsoft.Build.Framework` and `Microsoft.Extensions.*` versions. Update and restore
+the complete dependency graph together rather than advancing just one package.
+
+Package-selection unit tests use fixed metadata, not live feeds. Real feed restores remain
+covered by scaffolder integration tests. A deterministic unit test passing does not establish
+feed availability or prove that the latest package on a live feed is safe.
+
+The shared temporary-project helper and Blazor CRUD fixtures write explicit NuGet configuration.
+Stable targets use the dotnet-public mirror; .NET 11 uses the repository feeds. Both clear
+inherited disabled-source and package-source-mapping settings, so an unrelated user configuration
+cannot silently disable or redirect the test feeds.
+
+Blazor CRUD build assertions include both stdout and stderr, and tool command-discovery
+failures log the exit code and process output (or invalid JSON). Use those diagnostics before
+classifying a failure as transient; do not weaken generated-code assertions or update baselines
+without verifying the intended behavior.
+
 ---
 
 ## Historically flaky: net11 / preview-SDK scaffolding tests

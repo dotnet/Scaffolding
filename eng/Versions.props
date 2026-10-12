@@ -75,8 +75,9 @@
     <SystemDiagnosticsDiagnosticSourcePackageVersion8>8.0.1</SystemDiagnosticsDiagnosticSourcePackageVersion8>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
-    <MicrosoftCodeAnalysisPreviewVersion>5.3.0</MicrosoftCodeAnalysisPreviewVersion>
     <MicrosoftCodeAnalysisVersion>5.3.0</MicrosoftCodeAnalysisVersion>
+    <!-- Shared and dotnet-scaffolding projects are in the same dependency graph. Keep their central Roslyn pins aligned. -->
+    <MicrosoftCodeAnalysisPreviewVersion>$(MicrosoftCodeAnalysisVersion)</MicrosoftCodeAnalysisPreviewVersion>
     <SystemCommandLinePackageVersion>2.0.0</SystemCommandLinePackageVersion>
     <MicrosoftApplicationInsightsWorkerServicePackageVersion>2.22.0</MicrosoftApplicationInsightsWorkerServicePackageVersion>
     <MicrosoftDotNetPlatformAbstractionsVersion>3.1.6</MicrosoftDotNetPlatformAbstractionsVersion>

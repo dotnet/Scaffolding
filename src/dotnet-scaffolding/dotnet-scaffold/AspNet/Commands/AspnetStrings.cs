@@ -141,18 +141,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
 
         internal class SyncfusionBlazorToolkit
         {
-            internal const string Name = "syncfusion-blazor-toolkit";
-            internal const string DisplayName = "Syncfusion Blazor Toolkit setup";
+            internal const string Name = "blazor-syncfusion-toolkit";
+            internal const string DisplayName = "Syncfusion Blazor Toolkit";
             // Short display description, suitable for CLI UIs and tight layouts.
-            internal const string Description = "Add the Syncfusion Blazor Toolkit package, service registration, and imports to an existing Blazor app.";
+            internal const string Description = "Sets the Syncfusion Blazor Toolkit package, service registration, and imports up in an existing Blazor app.";
             // Extended guidance shown in detailed help. Setup only — no pages or sample UI.
             internal const string ExtendedDescription = "Installs Syncfusion.Blazor.Toolkit, registers AddSyncfusionBlazorToolkit(), " +
                 "and adds @using Syncfusion.Blazor.Toolkit to the project's _Imports.razor (Components folder or project root). " +
                 "Does not generate pages or sample UI. " +
                 "The 2.0.0+ package ships styles with the assembly, so no host stylesheet link is added. " +
-                "Operates on a single --project. For a Blazor Web App Auto solution, run it on the server project (services) and the .Client project (imports).";
-            internal const string Example = "dotnet scaffold aspnet syncfusion-blazor-toolkit --project ./MyBlazorApp/MyBlazorApp.csproj";
-            internal const string ExampleDescription = "Set up Syncfusion Blazor Toolkit in an existing Blazor app:";
+                "Operates on a single --project. When the project references a Blazor WebAssembly client (e.g. a Blazor Web App Auto layout), the scaffolder configures the package on the client too.";
+            internal const string Example = "dotnet scaffold aspnet blazor-syncfusion-toolkit --project ./MyBlazorApp.csproj";
+            internal const string ExampleDescription = "Configure the Syncfusion Blazor Toolkit in an existing Blazor app:";
         }
 
         internal class Catagories
@@ -163,7 +163,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string API = "API";
             internal const string Identity = "Identity";
             internal const string EntraId = "Entra ID";
-            internal const string Syncfusion = "Syncfusion";
         }
 
         internal static class Options

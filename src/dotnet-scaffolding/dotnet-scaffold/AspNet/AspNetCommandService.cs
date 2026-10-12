@@ -9,8 +9,11 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions.Syncfusion;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion.Settings;
 using Microsoft.DotNet.Tools.Scaffold.Command;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet
@@ -39,6 +42,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(ValidateEfControllerStep),
                 typeof(ValidateEntraIdStep),
                 typeof(ValidateSyncfusionBlazorToolkitStep),
+                typeof(ApplySyncfusionBlazorToolkitImportsStep),
+                typeof(VerifySyncfusionBlazorToolkitStep),
                 typeof(SummarizeSyncfusionBlazorToolkitStep),
                 typeof(ValidateIdentityStep),
                 typeof(ValidateMinimalApiStep),
@@ -217,7 +222,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.SyncfusionBlazorToolkit.Name)
                 .WithDisplayName(AspnetStrings.SyncfusionBlazorToolkit.DisplayName)
-                .WithCategory(AspnetStrings.Catagories.Syncfusion)
+                .WithCategory(AspnetStrings.Catagories.Blazor)
                 .WithDescription(AspnetStrings.SyncfusionBlazorToolkit.Description)
                 .WithExample(AspnetStrings.SyncfusionBlazorToolkit.Example, AspnetStrings.SyncfusionBlazorToolkit.ExampleDescription)
                 .WithOptions([options.Project, options.Prerelease])
@@ -229,7 +234,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.Prerelease = context.GetOptionResult(options.Prerelease);
                 })
                 .WithSyncfusionBlazorToolkitAddPackagesStep()
+                .WithSyncfusionBlazorToolkitAddClientPackagesStep()
                 .WithSyncfusionBlazorToolkitCodeChangeStep()
+                .WithSyncfusionBlazorToolkitClientCodeChangeStep()
+                .WithSyncfusionBlazorToolkitImportsStep()
+                .WithSyncfusionBlazorToolkitImportsClientStep()
+                .WithStep<VerifySyncfusionBlazorToolkitStep>()
                 .WithStep<SummarizeSyncfusionBlazorToolkitStep>();
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorPage.Crud)

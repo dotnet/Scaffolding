@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
 using Xunit;
 
@@ -55,5 +56,21 @@ public class MsIdentityToolHelperTests
     public void NotInstalledMessage_ExplainsEntraIdDependency()
     {
         Assert.Contains("Entra ID", MsIdentityToolHelper.NotInstalledMessage);
+    }
+
+    [Theory]
+    [InlineData(true, "dotnet-msidentity.exe")]
+    [InlineData(false, "dotnet-msidentity")]
+    public void GetGlobalToolCommandPath_ReturnsUserProfileToolShim(
+        bool isWindows,
+        string expectedCommandName)
+    {
+        string userProfile = Path.Combine("users", "test-user");
+
+        string commandPath = MsIdentityToolHelper.GetGlobalToolCommandPath(userProfile, isWindows);
+
+        Assert.Equal(
+            Path.Combine(userProfile, ".dotnet", "tools", expectedCommandName),
+            commandPath);
     }
 }

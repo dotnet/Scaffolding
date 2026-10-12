@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
 
 /// <summary>
 /// Helpers for the Syncfusion Blazor Toolkit setup scaffolder.

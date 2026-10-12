@@ -43,11 +43,14 @@ public abstract class SyncfusionBlazorToolkitIntegrationTestsBase : IDisposable
         Directory.CreateDirectory(_testProjectDir);
 
         // Comment 12: fixture-scoped NuGet.config so the test app
-        // restores from the same feeds as the rest of the build —
-        // no nuget.org pollution of the repo's NuGet.config.
+        // restores from the same feeds as the rest of the build and
+        // additionally has access to nuget.org for the
+        // Syncfusion.Blazor.Toolkit package. The nuget.org source is
+        // scoped to this temporary test fixture only — the
+        // repository's NuGet.config deliberately does not include it.
         File.WriteAllText(
             Path.Combine(_testProjectDir, "NuGet.config"),
-            ScaffoldCliHelper.GetTestNuGetConfig(TargetFramework));
+            ScaffoldCliHelper.SyncfusionTestNuGetConfig);
     }
 
     public void Dispose()

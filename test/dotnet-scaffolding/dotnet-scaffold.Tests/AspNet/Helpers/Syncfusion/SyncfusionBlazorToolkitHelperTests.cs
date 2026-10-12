@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
 using Xunit;
 
 namespace Microsoft.DotNet.Scaffold.Tests.AspNet.Helpers.Syncfusion;

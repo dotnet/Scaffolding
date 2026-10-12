@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
                 "The 2.0.0+ package ships styles with the assembly, so no host stylesheet link is added. " +
                 "Operates on a single --project. When the project references a Blazor WebAssembly client (e.g. a Blazor Web App Auto layout), the scaffolder configures the package on the client too.";
             internal const string Example = "dotnet scaffold aspnet blazor-syncfusion-toolkit --project ./MyBlazorApp.csproj";
-            internal const string ExampleDescription = "Set up the Syncfusion Blazor Toolkit in an existing Blazor app:";
+            internal const string ExampleDescription = "Configure the Syncfusion Blazor Toolkit in an existing Blazor app:";
         }
 
         internal class Catagories

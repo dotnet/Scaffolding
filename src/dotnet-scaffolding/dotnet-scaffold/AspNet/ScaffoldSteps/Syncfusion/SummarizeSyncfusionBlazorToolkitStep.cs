@@ -5,7 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.Extensions.Logging;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion;
 
 /// <summary>
 /// Logs a summary of what the Syncfusion Blazor Toolkit setup
@@ -32,8 +32,8 @@ internal class SummarizeSyncfusionBlazorToolkitStep : ScaffoldStep
 
     public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        if (!context.Properties.TryGetValue(nameof(ScaffoldSteps.Settings.SyncfusionBlazorToolkitSettings), out var settingsObj) ||
-            settingsObj is not ScaffoldSteps.Settings.SyncfusionBlazorToolkitSettings settings)
+        if (!context.Properties.TryGetValue(nameof(ScaffoldSteps.Syncfusion.Settings.SyncfusionBlazorToolkitSettings), out var settingsObj) ||
+            settingsObj is not ScaffoldSteps.Syncfusion.Settings.SyncfusionBlazorToolkitSettings settings)
         {
             return Task.FromResult(true);
         }
@@ -136,13 +136,13 @@ internal class SummarizeSyncfusionBlazorToolkitStep : ScaffoldStep
         {
             switch (settings.Layout)
             {
-                case ScaffoldSteps.Settings.SyncfusionBlazorToolkitLayout.AutoServer:
+                case ScaffoldSteps.Syncfusion.Settings.SyncfusionBlazorToolkitLayout.AutoServer:
                     _logger.LogInformation(
                         "  - Detected Blazor Web App Auto layout. This is the SERVER project: Program.cs (AddSyncfusionBlazorToolkit) lives here. " +
                         "The scaffolder also installed the Syncfusion.Blazor.Toolkit package on the resolved client project ('{ClientProject}').",
                         Path.GetFileName(settings.ClientProjectPath));
                     break;
-                case ScaffoldSteps.Settings.SyncfusionBlazorToolkitLayout.AutoClient:
+                case ScaffoldSteps.Syncfusion.Settings.SyncfusionBlazorToolkitLayout.AutoClient:
                     _logger.LogInformation(
                         "  - Detected Blazor Web App Auto layout. This is the CLIENT project: components live here. " +
                         "Make sure to also run the scaffolder on the SERVER project so AddSyncfusionBlazorToolkit() is registered in the host that builds the DI pipeline.");
@@ -173,7 +173,7 @@ internal class SummarizeSyncfusionBlazorToolkitStep : ScaffoldStep
     /// interactive render mode. Does not change global render modes
     /// or page render modes — only suggests the missing piece.
     /// </summary>
-    private string DescribeHostingGuidance(ScaffoldSteps.Settings.SyncfusionBlazorToolkitSettings settings)
+    private string DescribeHostingGuidance(ScaffoldSteps.Syncfusion.Settings.SyncfusionBlazorToolkitSettings settings)
     {
         return settings.DetectedRenderMode switch
         {

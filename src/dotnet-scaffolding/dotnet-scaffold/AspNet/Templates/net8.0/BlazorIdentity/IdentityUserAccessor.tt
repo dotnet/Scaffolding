@@ -1,6 +1,11 @@
 <#@  template hostSpecific="true" linePragmas="false" #>
 <#@  parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
-using <#= Model.DbContextNamespace #>;
+<#
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+#>using <#= Model.DbContextNamespace #>;
+<#} #>
+using <#= Model.UserClassNamespace #>;
 using Microsoft.AspNetCore.Identity;
 
 namespace <#= Model.BlazorIdentityNamespace #>

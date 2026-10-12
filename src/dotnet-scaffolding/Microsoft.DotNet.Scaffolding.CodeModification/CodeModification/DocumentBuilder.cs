@@ -412,20 +412,8 @@ internal class DocumentBuilder
             return originalMethod;
         }
 
-        // Check for CodeChange.Block and CodeChange.CheckBlock. The
-        // substring-based StatementExists is the default; the recipe
-        // can opt into a strict detector (a real, non-commented,
-        // non-chinned call) by setting StrictCheck = true. This is
-        // important for scaffolders whose CheckBlock happens to
-        // appear as a substring of an existing fluent chain — the
-        // old substring check would treat that as "already applied"
-        // and skip the insertion.
-        bool blockAlreadyPresent = ProjectModifierHelper.StatementExists(children, codeChange.Block);
-        bool checkBlockAlreadyPresent = !string.IsNullOrEmpty(codeChange.CheckBlock) &&
-            (codeChange.StrictCheck
-                ? StrictCheckBlockExists(originalMethod, codeChange.CheckBlock)
-                : ProjectModifierHelper.StatementExists(children, codeChange.CheckBlock));
-        if (blockAlreadyPresent || checkBlockAlreadyPresent)
+        //check for CodeChange.Block and CodeChange.CheckBlock for  block's are easy to check.
+        if (ProjectModifierHelper.StatementExists(children, codeChange.Block) || !string.IsNullOrEmpty(codeChange.CheckBlock) && ProjectModifierHelper.StatementExists(children, codeChange.CheckBlock))
         {
             return originalMethod;
         }
@@ -562,140 +550,6 @@ internal class DocumentBuilder
             .WithAdditionalAnnotations(Formatter.Annotation)
             .WithLeadingTrivia(leadingTrivia)
             .WithTrailingTrivia(trailingTrivia);
-    }
-
-    /// <summary>
-    /// Strict detector used by recipes that opt into
-    /// <c>StrictCheck = true</c>. Returns true only when one of the
-    /// direct statements under <paramref name="originalMethod"/> is a
-    /// short, standalone expression whose main call is the recipe's
-    /// <paramref name="checkBlock"/>. This rejects:
-    /// <list type="bullet">
-    ///   <item><description>commented-out occurrences (the parser has already dropped them,</description></item>
-    ///   <item><description>substrings inside a longer fluent chain, and</description></item>
-    ///   <item><description>substrings inside any other unrelated statement.</description></item>
-    /// </list>
-    /// </summary>
-    internal static bool StrictCheckBlockExists(SyntaxNode originalMethod, string checkBlock)
-    {
-        if (string.IsNullOrEmpty(checkBlock) || originalMethod is null)
-        {
-            return false;
-        }
-
-        var siblings = GetDescendantNodes(originalMethod);
-        if (siblings is null)
-        {
-            return false;
-        }
-
-        foreach (var sibling in siblings.OfType<StatementSyntax>())
-        {
-            var siblingText = sibling.ToString();
-            if (siblingText.Contains("(" + checkBlock + "(", StringComparison.Ordinal) ||
-                siblingText.Contains("." + checkBlock + "(", StringComparison.Ordinal) ||
-                siblingText.Contains("." + checkBlock + "()", StringComparison.Ordinal))
-            {
-                var trimmed = siblingText.Trim();
-                if (trimmed.Length < 200 &&
-                    trimmed.IndexOf(checkBlock + "(", StringComparison.Ordinal) >= 0 &&
-                    trimmed.IndexOf(checkBlock + "(", StringComparison.Ordinal) < trimmed.Length / 2)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Inserts a fresh statement of the form
-    /// <c>&lt;Parent&gt;.&lt;Block&gt;;</c> immediately after the matched
-    /// parent statement. Used by <see cref="AddExpressionToParent"/>
-    /// when the matched parent is itself a top-level statement, so
-    /// that the new call is a clean separate line — not an extension
-    /// of an existing fluent chain.
-    ///
-    /// <para>Idempotent: if the recipe's <c>CheckBlock</c> already
-    /// appears in its own statement (i.e. not just as a substring
-    /// inside an existing chain), the input is returned unchanged so
-    /// re-running the scaffolder is a no-op.</para>
-    /// </summary>
-    private static SyntaxNode InsertSeparateExpressionStatement(
-        SyntaxNode originalMethod,
-        StatementSyntax matchedStatement,
-        CodeSnippet change)
-    {
-        // Idempotency check: look at every direct child of the
-        // containing block / compilation unit and look for an
-        // existing statement that is exactly the call we are about
-        // to add. We deliberately require an exact statement match
-        // (rather than the substring-based StatementExists used
-        // elsewhere) so that a chain like
-        //   builder.Services.AddRazorComponents().AddSyncfusionBlazorToolkit();
-        // — which contains the substring `AddSyncfusionBlazorToolkit` —
-        // is NOT treated as "already present".
-        var siblingStatements = GetDescendantNodes(originalMethod);
-        if (siblingStatements is not null && !string.IsNullOrEmpty(change.CheckBlock))
-        {
-            foreach (var sibling in siblingStatements.OfType<StatementSyntax>())
-            {
-                var siblingText = sibling.ToString();
-                if (siblingText.Contains("(" + change.CheckBlock + "(", StringComparison.Ordinal) ||
-                    siblingText.Contains("." + change.CheckBlock + "(", StringComparison.Ordinal) ||
-                    siblingText.Contains("." + change.CheckBlock + "()", StringComparison.Ordinal))
-                {
-                    var trimmedSibling = siblingText.Trim();
-                    // Heuristic: if the statement is mostly the
-                    // call we want (it is short and contains the
-                    // check block as its main expression), treat as
-                    // already applied.
-                    if (trimmedSibling.Length < 200 &&
-                        trimmedSibling.IndexOf(change.CheckBlock + "(", StringComparison.Ordinal) >= 0 &&
-                        trimmedSibling.IndexOf(change.CheckBlock + "(", StringComparison.Ordinal) < trimmedSibling.Length / 2)
-                    {
-                        return originalMethod;
-                    }
-                }
-            }
-        }
-
-        // Build the new statement: "<Parent>.<Block>;"
-        // The recipe's Parent has already been through the
-        // variable-identifier transformation
-        // (`GetBuilderVariableIdentifierTransformation`), so e.g. the
-        // `WebApplication.CreateBuilder.Services` in the JSON becomes
-        // `builder.Services` (or `wasmBuilder.Services`, etc.) for the
-        // runtime project.
-        var parentText = change.Parent?.Trim();
-        var blockText = change.Block?.Trim();
-        if (string.IsNullOrEmpty(parentText) || string.IsNullOrEmpty(blockText))
-        {
-            return originalMethod;
-        }
-
-        // Strip a trailing `;` from the block if present so the
-        // final statement is well-formed.
-        if (blockText.EndsWith(";", StringComparison.Ordinal))
-        {
-            blockText = blockText.Substring(0, blockText.Length - 1).TrimEnd();
-        }
-
-        var statementText = $"{parentText}.{blockText};";
-        StatementSyntax newStatement = SyntaxFactory.ParseStatement(statementText)
-            .WithAdditionalAnnotations(Formatter.Annotation)
-            .WithLeadingTrivia(GetLeadingTrivia(change.LeadingTrivia))
-            .WithTrailingTrivia(GetTrailingTrivia(change.TrailingTrivia));
-
-        // For a CompilationUnit (top-level statements), the new
-        // statement has to be wrapped in a GlobalStatement so it
-        // matches the kind of its siblings.
-        SyntaxNode nodeToInsert = originalMethod is CompilationUnitSyntax
-            ? SyntaxFactory.GlobalStatement(newStatement)
-            : newStatement;
-
-        return originalMethod.InsertNodesAfter(matchedStatement, new[] { nodeToInsert });
     }
 
     private static SyntaxTriviaList GetLeadingTrivia(Formatting codeFormatting)
@@ -988,21 +842,6 @@ internal class DocumentBuilder
         if (parent is null)
         {
             return originalMethod;
-        }
-
-        // If the matched parent is a top-level statement (a global
-        // statement, an expression-statement, etc.) then extending
-        // the existing expression with another method call would
-        // collapse an existing fluent chain into the receiver of the
-        // new call. That produces output like
-        //   builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddSyncfusionBlazorToolkit();
-        // instead of a clean separate statement
-        //   builder.Services.AddSyncfusionBlazorToolkit();
-        // In that case, insert a brand new statement after the matched
-        // statement and treat the call as a no-op.
-        if (parent is StatementSyntax matchedStatement)
-        {
-            return InsertSeparateExpressionStatement(originalMethod, matchedStatement, change);
         }
 
         var children = GetDescendantNodes(parent);

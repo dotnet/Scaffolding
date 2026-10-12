@@ -21,6 +21,7 @@ public class ScaffoldCliHelperTests
             new[] { "dotnet-public", "dotnet11", "dotnet11-transport" },
             sources.Elements("add").Select(source => source.Attribute("key")!.Value));
         Assert.NotNull(config.Root.Element("disabledPackageSources")!.Element("clear"));
+        Assert.NotNull(config.Root.Element("packageSourceMapping")!.Element("clear"));
     }
 
     [Fact]

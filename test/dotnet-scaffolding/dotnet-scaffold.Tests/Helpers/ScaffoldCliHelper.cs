@@ -542,7 +542,8 @@ public class {modelName}
     /// <para>
     /// This avoids querying unrelated engineering, tooling, Visual Studio, and older-framework
     /// feeds during package discovery. Those extra metadata requests caused CI timeouts while
-    /// adding application packages such as QuickGrid.
+    /// adding application packages such as QuickGrid. Inherited source-disable and mapping
+    /// settings are cleared so machine-level configuration cannot change the fixture's feeds.
     /// </para>
     /// </summary>
     public static string PreviewNuGetConfig => GetPreviewNuGetConfig();
@@ -577,7 +578,8 @@ public class {modelName}
         return new XDocument(
             new XElement("configuration",
                 new XElement("packageSources", new XElement("clear"), selectedSources),
-                new XElement("disabledPackageSources", new XElement("clear"))))
+                new XElement("disabledPackageSources", new XElement("clear")),
+                new XElement("packageSourceMapping", new XElement("clear"))))
             .ToString();
     }
 

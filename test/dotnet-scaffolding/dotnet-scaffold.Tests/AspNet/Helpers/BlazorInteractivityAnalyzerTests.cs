@@ -26,6 +26,33 @@ public class BlazorInteractivityAnalyzerTests
                 public static IRazorComponentsBuilder AddInteractiveServerComponents(this IRazorComponentsBuilder builder) => builder;
             }
         }
+
+        namespace Microsoft.AspNetCore.Builder
+        {
+            public sealed class RazorComponentsEndpointConventionBuilder { }
+            public static class ServerRazorComponentsEndpointConventionBuilderExtensions
+            {
+                public static RazorComponentsEndpointConventionBuilder AddInteractiveServerRenderMode(this RazorComponentsEndpointConventionBuilder builder) => builder;
+            }
+        }
+        """;
+
+    // A Blazor Web App's Program.cs whose registrations all resolve. The mapped endpoints are passed in so that the chained
+    // render mode binds to the framework API; '{0}' is replaced with the endpoint render mode chain.
+    private const string ServerProgramFormat = """
+        using Microsoft.AspNetCore.Builder;
+        using Microsoft.Extensions.DependencyInjection;
+
+        static class Program
+        {{
+            static void Configure(IServiceCollection services, dynamic app, RazorComponentsEndpointConventionBuilder endpoints)
+            {{
+                services.AddRazorComponents()
+                    .AddInteractiveServerComponents();
+                app.MapRazorComponents();
+                endpoints{0};
+            }}
+        }}
         """;
 
     private const string WebAssemblyProgram = """
@@ -54,6 +81,64 @@ public class BlazorInteractivityAnalyzerTests
         Assert.True(interactivity.UsesInteractiveWebAssembly);
         Assert.False(interactivity.UsesInteractiveServer);
         Assert.True(interactivity.MapsRazorComponents);
+        Assert.False(interactivity.MapsInteractiveWebAssemblyRenderMode);
+        Assert.True(interactivity.HasPartialInteractiveWebAssembly);
+        Assert.False(interactivity.HasCompleteInteractiveWebAssembly);
+    }
+
+    [Theory]
+    [InlineData(".AddInteractiveServerRenderMode()", true)]
+    [InlineData(".ToString()", false)]
+    public async Task AnalyzeAsync_TracksTheInteractiveServerEndpointRenderModeSeparately(string endpointChain, bool mapsRenderMode)
+    {
+        var (interactivity, error) = await BlazorInteractivityAnalyzer.AnalyzeAsync(
+            CreateProgramDocument(string.Format(ServerProgramFormat, endpointChain), FrameworkApis), "Program.cs", "TestProject.csproj");
+
+        Assert.Null(error);
+        Assert.NotNull(interactivity);
+        Assert.True(interactivity.UsesInteractiveServer);
+        Assert.Equal(mapsRenderMode, interactivity.MapsInteractiveServerRenderMode);
+        Assert.Equal(mapsRenderMode, interactivity.HasCompleteInteractiveServer);
+        Assert.Equal(!mapsRenderMode, interactivity.HasPartialInteractiveServer);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_WithoutSyntaxFallback_ReportsUnresolvedEndpointRenderMode()
+    {
+        // 'AddInteractiveWebAssemblyRenderMode()' comes from a package that is not restored yet.
+        var (interactivity, error) = await BlazorInteractivityAnalyzer.AnalyzeAsync(
+            CreateProgramDocument(string.Format(ServerProgramFormat, ".AddInteractiveWebAssemblyRenderMode()"), FrameworkApis), "Program.cs", "TestProject.csproj");
+
+        Assert.Null(interactivity);
+        Assert.Contains("Unable to resolve Blazor registration 'AddInteractiveWebAssemblyRenderMode'", error);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_WithSyntaxFallback_MatchesEndpointRenderModesByName()
+    {
+        const string program = """
+            static class Program
+            {
+                static void Configure(dynamic services, dynamic app)
+                {
+                    services.AddRazorComponents()
+                        .AddInteractiveWebAssemblyComponents();
+                    app.MapRazorComponents()
+                        .AddInteractiveServerRenderMode()
+                        .AddInteractiveWebAssemblyRenderMode();
+                }
+            }
+            """;
+
+        var (interactivity, error) = await BlazorInteractivityAnalyzer.AnalyzeAsync(
+            CreateProgramDocument(program), "Program.cs", "TestProject.csproj", allowSyntaxFallback: true);
+
+        Assert.Null(error);
+        Assert.NotNull(interactivity);
+        Assert.True(interactivity.HasCompleteInteractiveWebAssembly);
+        Assert.True(interactivity.MapsInteractiveServerRenderMode);
+        Assert.False(interactivity.UsesInteractiveServer);
+        Assert.True(interactivity.HasPartialInteractiveServer);
     }
 
     [Fact]

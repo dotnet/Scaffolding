@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -84,9 +85,66 @@ public class IgniteUIBlazorHelperTests
     [InlineData(null, false, "bootstrap", "light")]
     public void TryGetLinkedTheme_ReadsTheLinkedThemeOrReturnsDefaults(string? content, bool expectedFound, string expectedTheme, string expectedVariant)
     {
-        Assert.Equal(expectedFound, IgniteUIBlazorHelper.TryGetLinkedTheme(content, out var theme, out var variant));
+        Assert.Equal(expectedFound, IgniteUIBlazorHelper.TryGetLinkedTheme(Path.Combine(s_projectDir, "Components", "App.razor"), content, out var theme, out var variant));
         Assert.Equal(expectedTheme, theme);
         Assert.Equal(expectedVariant, variant);
+    }
+
+    [Theory]
+    [InlineData("App.razor", "<!-- <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /> -->")]
+    [InlineData("App.razor", "@*\n<link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />\n*@")]
+    [InlineData("_Host.cshtml", "@* <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /> *@")]
+    [InlineData("index.html", "<!--\n<link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />\n-->")]
+    public void TryGetLinkedTheme_IgnoresCommentedOutLinks(string fileName, string content)
+    {
+        Assert.False(IgniteUIBlazorHelper.TryGetLinkedTheme(Path.Combine(s_projectDir, fileName), content, out var theme, out var variant));
+        Assert.Equal(IgniteUIBlazorHelper.DefaultTheme, theme);
+        Assert.Equal(IgniteUIBlazorHelper.DefaultThemeVariant, variant);
+    }
+
+    [Fact]
+    public void TryGetLinkedTheme_ReadsTheActiveLinkAfterACommentedOutOne()
+    {
+        const string content = "<!-- <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /> -->\n" +
+                               "<link href=\"_content/IgniteUI.Blazor/themes/light/fluent.css\" rel=\"stylesheet\" />";
+
+        Assert.True(IgniteUIBlazorHelper.TryGetLinkedTheme(Path.Combine(s_projectDir, "wwwroot", "index.html"), content, out var theme, out var variant));
+        Assert.Equal("fluent", theme);
+        Assert.Equal("light", variant);
+    }
+
+    [Fact]
+    public void TryGetLinkedTheme_TreatsRazorCommentSyntaxAsTextInHtmlPages()
+    {
+        // '@*' is not a comment in index.html, so the link after it is active.
+        const string content = "<script>/* @* */</script>\n<link href=\"_content/IgniteUI.Blazor/themes/dark/indigo.css\" rel=\"stylesheet\" />\n<!-- *@ -->";
+
+        Assert.True(IgniteUIBlazorHelper.TryGetLinkedTheme(Path.Combine(s_projectDir, "wwwroot", "index.html"), content, out var theme, out _));
+        Assert.Equal("indigo", theme);
+    }
+
+    [Fact]
+    public void GetThemeManualInstructions_NamesTheLinkToReplace_ForASwap()
+    {
+        var hostPage = Path.Combine(s_projectDir, "Components", "App.razor");
+        var (options, properties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(s_projectDir, hostPage,
+            "<head>\n    <link href=\"_content/IgniteUI.Blazor/themes/light/bootstrap.css\" rel=\"stylesheet\" />\n</head>\n", LiteMaterialDark);
+
+        Assert.Equal(
+            $"To finish the setup, replace the Ignite UI theme link <link href=\"_content/IgniteUI.Blazor/themes/light/bootstrap.css\" rel=\"stylesheet\" /> in '{hostPage}' with <link href=\"{LiteMaterialDark}\" rel=\"stylesheet\" />",
+            IgniteUIBlazorHelper.GetThemeManualInstructions(options, properties, LiteMaterialDark, hostPage));
+    }
+
+    [Fact]
+    public void GetThemeManualInstructions_NamesTheLinkToAdd_WhenNoThemeIsLinked()
+    {
+        var hostPage = Path.Combine(s_projectDir, "Components", "App.razor");
+        var (options, properties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(s_projectDir, hostPage, "<head>\n</head>\n", LiteMaterialDark);
+
+        Assert.Equal(
+            $"To finish the setup, add the following line to the <head> of the page that hosts your Blazor app: <link href=\"{LiteMaterialDark}\" rel=\"stylesheet\" />",
+            IgniteUIBlazorHelper.GetThemeManualInstructions(options, properties, LiteMaterialDark, hostPage));
+        Assert.StartsWith("To finish the setup, add the following line", IgniteUIBlazorHelper.GetThemeManualInstructions([], new Dictionary<string, string>(), LiteMaterialDark, hostPagePath: null));
     }
 
     private const string LiteMaterialDark = "_content/IgniteUI.Blazor/themes/dark/material.css";
@@ -100,7 +158,6 @@ public class IgniteUIBlazorHelperTests
         var (options, properties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(s_projectDir, hostPage, content, LiteMaterialDark);
 
         Assert.Equal(["IgniteUIAppRazorHost", IgniteUIBlazorHelper.LinkThemeRecipeOption], options);
-        Assert.Equal(LiteMaterialDark, properties["$(IgniteUIThemeStylesheetPath)"]);
         Assert.Equal("</head>", properties["$(IgniteUIHeadClosingTag)"]);
         Assert.Equal($"    <link rel=\"stylesheet\" href=\"@Assets[\"{LiteMaterialDark}\"]\" />\n</head>", properties["$(IgniteUIThemeLinkBeforeHead)"]);
     }
@@ -127,8 +184,34 @@ public class IgniteUIBlazorHelperTests
         var (options, properties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(s_projectDir, Path.Combine(s_projectDir, "wwwroot", "index.html"), content, LiteMaterialDark);
 
         Assert.Equal(["IgniteUIIndexHtmlHost", IgniteUIBlazorHelper.SwapThemeRecipeOption], options);
-        Assert.Equal(gridLiteTheme, properties["$(IgniteUIExistingThemeStylesheetPath)"]);
-        Assert.Equal(LiteMaterialDark, properties["$(IgniteUIThemeStylesheetPath)"]);
+        Assert.Equal($"<link href=\"{gridLiteTheme}\" rel=\"stylesheet\" />", properties["$(IgniteUIExistingThemeLink)"]);
+        Assert.Equal($"<link href=\"{LiteMaterialDark}\" rel=\"stylesheet\" />", properties["$(IgniteUISwappedThemeLink)"]);
+    }
+
+    [Fact]
+    public void GetThemeRecipeInputs_SwapsTheActiveLink_NotACommentedOutOne()
+    {
+        const string commented = "<!-- <link href=\"_content/IgniteUI.Blazor/themes/light/bootstrap.css\" rel=\"stylesheet\" /> -->";
+        const string active = "<link rel=\"stylesheet\" href=\"@Assets[\"_content/IgniteUI.Blazor/themes/light/fluent.css\"]\" />";
+        var content = $"<head>\n    {commented}\n    {active}\n</head>\n";
+
+        var (options, properties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(s_projectDir, Path.Combine(s_projectDir, "Components", "App.razor"), content, LiteMaterialDark);
+
+        Assert.Equal(["IgniteUIAppRazorHost", IgniteUIBlazorHelper.SwapThemeRecipeOption], options);
+        Assert.Equal(active, properties["$(IgniteUIExistingThemeLink)"]);
+        Assert.Equal($"<link rel=\"stylesheet\" href=\"@Assets[\"{LiteMaterialDark}\"]\" />", properties["$(IgniteUISwappedThemeLink)"]);
+    }
+
+    [Fact]
+    public void GetThemeRecipeInputs_LinksANewTheme_WhenTheOnlyThemeLinkIsCommentedOut()
+    {
+        // The '</head>' inside the comment is not the page's head either.
+        var content = $"<head>\n    @* <link href=\"{LiteMaterialDark}\" rel=\"stylesheet\" /></head> *@\n    <base href=\"/\" />\n  </head>\n";
+
+        var (options, properties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(s_projectDir, Path.Combine(s_projectDir, "Pages", "_Host.cshtml"), content, LiteMaterialDark);
+
+        Assert.Equal(["IgniteUIHostCshtmlHost", IgniteUIBlazorHelper.LinkThemeRecipeOption], options);
+        Assert.Equal($"    <link href=\"{LiteMaterialDark}\" rel=\"stylesheet\" />\n  </head>", properties["$(IgniteUIThemeLinkBeforeHead)"]);
     }
 
     [Theory]
@@ -153,7 +236,7 @@ public class IgniteUIBlazorHelperTests
     #region Project inspection
 
     [Theory]
-    [InlineData(true, false, true, "Interactive Server support was added", "'@rendermode InteractiveServer' to them")]
+    [InlineData(true, false, true, "Interactive Server support was enabled", "'@rendermode InteractiveServer' to them")]
     [InlineData(true, false, false, null, "'@rendermode InteractiveServer' to them")]
     [InlineData(false, true, false, null, "'@rendermode InteractiveWebAssembly' to them (such pages belong in the client project)")]
     [InlineData(true, true, false, null, "'@rendermode InteractiveAuto'")]
@@ -165,7 +248,7 @@ public class IgniteUIBlazorHelperTests
         Assert.Contains("Pages that use Ignite UI components need an interactive render mode", guidance);
         Assert.Contains(expectedRenderModes, guidance);
         Assert.Equal(server && webAssembly, guidance.Contains("InteractiveAuto"));
-        Assert.Equal(expectedAddedNote is not null, guidance.Contains("Interactive Server support was added"));
+        Assert.Equal(expectedAddedNote is not null, guidance.Contains("Interactive Server support was enabled"));
     }
 
     [Theory]
@@ -183,20 +266,14 @@ public class IgniteUIBlazorHelperTests
         => Assert.Equal(expected, IgniteUIBlazorHelper.DeclaresRenderMode(razor));
 
     [Theory]
-    [InlineData("a\r\nb\r\n", "\r\n")]
-    [InlineData("a\nb\n", "\n")]
-    [InlineData("", "\n")]
-    [InlineData(null, "\n")]
-    public void DetectLineEnding_ReturnsDominantLineEnding(string? content, string expected)
-        => Assert.Equal(expected, IgniteUIBlazorHelper.DetectLineEnding(content));
-
-    [Theory]
     [InlineData("<head></head>", true)]
     [InlineData("<HEAD></HEAD>", true)]
     [InlineData("<body></body>", false)]
+    [InlineData("<!-- </head> --><body></body>", false)]
+    [InlineData("@* </head> *@<body></body>", false)]
     [InlineData(null, false)]
-    public void ContainsHeadClosingTag_IsCaseInsensitive(string? content, bool expected)
-        => Assert.Equal(expected, IgniteUIBlazorHelper.ContainsHeadClosingTag(content));
+    public void ContainsHeadClosingTag_IsCaseInsensitiveAndIgnoresComments(string? content, bool expected)
+        => Assert.Equal(expected, IgniteUIBlazorHelper.ContainsHeadClosingTag(Path.Combine(s_projectDir, "Components", "App.razor"), content));
 
     [Fact]
     public void UsesAssetsCollection_TrueOnlyForRazorHostPagesUsingAssets()

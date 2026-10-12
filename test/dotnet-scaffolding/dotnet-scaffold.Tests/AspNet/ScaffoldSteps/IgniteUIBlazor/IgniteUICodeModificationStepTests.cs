@@ -116,4 +116,21 @@ public class IgniteUICodeModificationStepTests
         Assert.Equal(expected, step.ContainsRequiredCalls());
         _fileSystem.Verify(fs => fs.EnumerateFiles(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SearchOption>()), Times.Never);
     }
+
+    [Theory]
+    [InlineData("App.razor", "<head><!-- <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /> --></head>", true, false)]
+    [InlineData("App.razor", "<head>@*\n<link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />\n*@</head>", true, false)]
+    [InlineData("App.razor", "<head><!-- old --><link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /></head>", true, true)]
+    [InlineData("App.razor", "<head><!-- <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /> --></head>", false, true)]
+    public void ContainsRequiredCalls_IgnoresCommentedOutMarkup_WhenRequested(string fileName, string hostPage, bool ignoreMarkupComments, bool expected)
+    {
+        var hostPagePath = Path.Combine(s_projectDirectory, "Components", fileName);
+        _fileSystem.Setup(fs => fs.FileExists(hostPagePath)).Returns(true);
+        _fileSystem.Setup(fs => fs.ReadAllText(hostPagePath)).Returns(hostPage);
+        var step = CreateStep(fileName, requiredCalls: ["_content/IgniteUI.Blazor/themes/dark/material.css"]);
+        step.TargetFilePath = hostPagePath;
+        step.IgnoreMarkupComments = ignoreMarkupComments;
+
+        Assert.Equal(expected, step.ContainsRequiredCalls());
+    }
 }

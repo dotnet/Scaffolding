@@ -122,7 +122,7 @@ internal class AddRazorImportsStep : ScaffoldStep
     {
         addedNamespaces = [];
         content ??= string.Empty;
-        var lineEnding = IgniteUIBlazorHelper.DetectLineEnding(content);
+        var lineEnding = MarkupHelper.DetectLineEnding(content);
         var updated = content;
 
         foreach (var ns in namespaces)
@@ -146,6 +146,7 @@ internal class AddRazorImportsStep : ScaffoldStep
 
     /// <summary>
     /// Returns true when <paramref name="content"/> already contains an <c>@using</c> directive for <paramref name="ns"/>.
+    /// A directive inside a Razor comment (<c>@* ... *@</c>) is inactive and does not count.
     /// </summary>
     internal static bool ContainsUsing(string? content, string ns)
     {
@@ -155,6 +156,6 @@ internal class AddRazorImportsStep : ScaffoldStep
         }
 
         var pattern = $@"^\s*@using\s+{Regex.Escape(ns)}\s*;?\s*$";
-        return Regex.IsMatch(content, pattern, RegexOptions.Multiline);
+        return Regex.IsMatch(MarkupHelper.MaskComments(content, htmlComments: false, razorComments: true), pattern, RegexOptions.Multiline);
     }
 }

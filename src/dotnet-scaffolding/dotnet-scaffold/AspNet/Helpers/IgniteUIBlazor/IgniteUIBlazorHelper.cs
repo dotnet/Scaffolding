@@ -36,17 +36,48 @@ internal static class IgniteUIBlazorHelper
         @"_content/IgniteUI\.Blazor(?:\.GridLite)?/(?:css/)?themes/(?<variant>light|dark)/(?<theme>bootstrap|material|fluent|indigo)\.css",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+    /// <summary>Matches a &lt;link&gt; element.</summary>
+    private static readonly Regex LinkElementRegex = new(@"<link\b[^>]*>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
     /// <summary>
-    /// Reads the Ignite UI theme and variant that the host page already links (the first Ignite UI theme stylesheet,
-    /// IgniteUI.Blazor or GridLite-only), so that a re-run keeps them when '--theme' / '--theme-variant' are omitted.
+    /// Finds the first active (not commented-out) &lt;link&gt; element of the host page that references an Ignite UI theme
+    /// stylesheet (IgniteUI.Blazor or GridLite-only).
     /// </summary>
-    /// <returns>True when the content links an Ignite UI theme stylesheet.</returns>
-    internal static bool TryGetLinkedTheme(string? hostPageContent, out string theme, out string themeVariant)
+    /// <param name="hostPagePath">The host page path, which determines whether Razor comments apply.</param>
+    /// <param name="hostPageContent">The host page content.</param>
+    /// <param name="linkElement">The &lt;link&gt; element as written in the page.</param>
+    /// <param name="themeStylesheet">The match of <see cref="ThemeStylesheetRegex"/> within <paramref name="linkElement"/>.</param>
+    /// <returns>True when the page links an Ignite UI theme stylesheet outside of comments.</returns>
+    internal static bool TryFindThemeLink(string? hostPagePath, string? hostPageContent, out string linkElement, out Match themeStylesheet)
     {
-        var match = string.IsNullOrEmpty(hostPageContent) ? Match.Empty : ThemeStylesheetRegex.Match(hostPageContent);
-        theme = match.Success ? match.Groups["theme"].Value.ToLowerInvariant() : DefaultTheme;
-        themeVariant = match.Success ? match.Groups["variant"].Value.ToLowerInvariant() : DefaultThemeVariant;
-        return match.Success;
+        var activeContent = MarkupHelper.MaskComments(hostPagePath, hostPageContent);
+        foreach (Match link in LinkElementRegex.Matches(activeContent))
+        {
+            var match = ThemeStylesheetRegex.Match(link.Value);
+            if (match.Success)
+            {
+                linkElement = link.Value;
+                themeStylesheet = match;
+                return true;
+            }
+        }
+
+        linkElement = string.Empty;
+        themeStylesheet = Match.Empty;
+        return false;
+    }
+
+    /// <summary>
+    /// Reads the Ignite UI theme and variant that the host page already links (see <see cref="TryFindThemeLink"/>), so
+    /// that a re-run keeps them when '--theme' / '--theme-variant' are omitted. Commented-out links are ignored.
+    /// </summary>
+    /// <returns>True when the page links an Ignite UI theme stylesheet.</returns>
+    internal static bool TryGetLinkedTheme(string? hostPagePath, string? hostPageContent, out string theme, out string themeVariant)
+    {
+        var found = TryFindThemeLink(hostPagePath, hostPageContent, out _, out var match);
+        theme = found ? match.Groups["theme"].Value.ToLowerInvariant() : DefaultTheme;
+        themeVariant = found ? match.Groups["variant"].Value.ToLowerInvariant() : DefaultThemeVariant;
+        return found;
     }
 
     /// <summary>
@@ -107,7 +138,7 @@ internal static class IgniteUIBlazorHelper
         foreach (var candidate in HostPageCandidates)
         {
             var path = Path.Combine(projectDirectory, candidate);
-            if (fileSystem.FileExists(path) && ContainsHeadClosingTag(fileSystem.ReadAllText(path)))
+            if (fileSystem.FileExists(path) && ContainsHeadClosingTag(path, fileSystem.ReadAllText(path)))
             {
                 return path;
             }
@@ -153,10 +184,16 @@ internal static class IgniteUIBlazorHelper
     }
 
     /// <summary>
-    /// Returns true when the given host page content contains a closing &lt;/head&gt; tag.
+    /// Returns true when the given host page content contains a closing &lt;/head&gt; tag outside of comments.
     /// </summary>
-    internal static bool ContainsHeadClosingTag(string? content)
-        => !string.IsNullOrEmpty(content) && content.Contains("</head>", StringComparison.OrdinalIgnoreCase);
+    internal static bool ContainsHeadClosingTag(string? hostPagePath, string? content)
+        => IndexOfHeadClosingTag(hostPagePath, content) >= 0;
+
+    /// <summary>
+    /// Returns the index of the first closing &lt;/head&gt; tag outside of comments, or -1 when there is none.
+    /// </summary>
+    private static int IndexOfHeadClosingTag(string? hostPagePath, string? content)
+        => MarkupHelper.MaskComments(hostPagePath, content).IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Returns true when a .razor host page already uses the fingerprinted static asset collection
@@ -165,8 +202,7 @@ internal static class IgniteUIBlazorHelper
     internal static bool UsesAssetsCollection(string? hostPagePath, string? content)
         => !string.IsNullOrEmpty(hostPagePath) &&
            hostPagePath.EndsWith(".razor", StringComparison.OrdinalIgnoreCase) &&
-           !string.IsNullOrEmpty(content) &&
-           content.Contains("@Assets[", StringComparison.Ordinal);
+           MarkupHelper.MaskComments(hostPagePath, content).Contains("@Assets[", StringComparison.Ordinal);
 
     /// <summary>
     /// Builds the &lt;link&gt; element for the theme stylesheet.
@@ -177,6 +213,27 @@ internal static class IgniteUIBlazorHelper
             : $"<link href=\"{stylesheetPath}\" rel=\"stylesheet\" />";
 
     /// <summary>
+    /// Returns how to link the theme stylesheet manually when the theme recipe could not: replace the Ignite UI theme
+    /// &lt;link&gt; the host page already has (so that only one theme is linked), or add a &lt;link&gt; to its &lt;head&gt;.
+    /// </summary>
+    /// <param name="themeCodeChangeOptions">The theme recipe options from <see cref="GetThemeRecipeInputs"/>.</param>
+    /// <param name="themeCodeModifierProperties">The theme recipe properties from <see cref="GetThemeRecipeInputs"/>.</param>
+    /// <param name="stylesheetPath">The theme stylesheet path to link.</param>
+    /// <param name="hostPagePath">The host page, or null when none was found.</param>
+    internal static string GetThemeManualInstructions(
+        IEnumerable<string> themeCodeChangeOptions, IReadOnlyDictionary<string, string> themeCodeModifierProperties, string stylesheetPath, string? hostPagePath)
+    {
+        if (themeCodeChangeOptions.Contains(SwapThemeRecipeOption) &&
+            themeCodeModifierProperties.TryGetValue("$(IgniteUIExistingThemeLink)", out var existingLink) &&
+            themeCodeModifierProperties.TryGetValue("$(IgniteUISwappedThemeLink)", out var swappedLink))
+        {
+            return $"To finish the setup, replace the Ignite UI theme link {existingLink} in '{hostPagePath}' with {swappedLink}";
+        }
+
+        return $"To finish the setup, add the following line to the <head> of the page that hosts your Blazor app: {BuildStylesheetLink(stylesheetPath, useAssetsCollection: false)}";
+    }
+
+    /// <summary>
     /// Returns the completion guidance for a Blazor Web App: Ignite UI components need an interactive render mode, and
     /// the scaffolder does not change render modes on existing pages or on &lt;Routes&gt;. Only the render modes the app
     /// is configured for are suggested (InteractiveAuto only when both Server and WebAssembly are configured).
@@ -184,7 +241,7 @@ internal static class IgniteUIBlazorHelper
     /// </summary>
     /// <param name="usesInteractiveServer">Interactive Server is configured (including support added by the scaffolder).</param>
     /// <param name="usesInteractiveWebAssembly">Interactive WebAssembly is configured.</param>
-    /// <param name="addedInteractiveServer">The scaffolder added Interactive Server support to Program.cs.</param>
+    /// <param name="addedInteractiveServer">The scaffolder added or completed Interactive Server support in Program.cs.</param>
     /// <param name="hasGlobalRenderMode">App.razor or Routes.razor declares a render mode, e.g. on &lt;Routes /&gt;.</param>
     internal static string? GetRenderModeGuidance(bool usesInteractiveServer, bool usesInteractiveWebAssembly, bool addedInteractiveServer, bool hasGlobalRenderMode)
     {
@@ -194,7 +251,7 @@ internal static class IgniteUIBlazorHelper
         }
 
         var added = addedInteractiveServer
-            ? "Interactive Server support was added to Program.cs ('AddInteractiveServerComponents()' and 'AddInteractiveServerRenderMode()'); existing pages keep their render modes. "
+            ? "Interactive Server support was enabled in Program.cs ('AddInteractiveServerComponents()' and 'AddInteractiveServerRenderMode()'); existing pages keep their render modes. "
             : string.Empty;
         var renderModes = usesInteractiveServer && usesInteractiveWebAssembly
             ? "'@rendermode InteractiveServer', '@rendermode InteractiveWebAssembly' or '@rendermode InteractiveAuto' to them (pages that use WebAssembly or Auto belong in the client project)"
@@ -213,7 +270,7 @@ internal static class IgniteUIBlazorHelper
 
     /// <summary>Recipe option that links the theme stylesheet right before &lt;/head&gt;.</summary>
     internal const string LinkThemeRecipeOption = "IgniteUILinkTheme";
-    /// <summary>Recipe option that swaps the path of an Ignite UI theme stylesheet the host page already links.</summary>
+    /// <summary>Recipe option that swaps the theme stylesheet path in the Ignite UI theme &lt;link&gt; the host page already has.</summary>
     internal const string SwapThemeRecipeOption = "IgniteUISwapTheme";
 
     /// <summary>
@@ -229,9 +286,10 @@ internal static class IgniteUIBlazorHelper
 
     /// <summary>
     /// Analyzes the host page and returns the options and properties for the shared theme recipe
-    /// (igniteUIBlazorThemeChanges.json): swap the path of an Ignite UI theme the page already links, or insert a
-    /// &lt;link&gt; right before &lt;/head&gt; with the page's indentation, line endings and (for a .razor page that
-    /// already uses it) the fingerprinted <c>@Assets["..."]</c> syntax.
+    /// (igniteUIBlazorThemeChanges.json): swap the stylesheet path in the Ignite UI theme &lt;link&gt; element the page
+    /// already has, or insert a &lt;link&gt; right before &lt;/head&gt; with the page's indentation, line endings and (for
+    /// a .razor page that already uses it) the fingerprinted <c>@Assets["..."]</c> syntax. Commented-out markup is
+    /// ignored, so a commented-out theme link is neither swapped nor counted as linked.
     /// </summary>
     /// <param name="projectDirectory">The project directory.</param>
     /// <param name="hostPagePath">The host page found by <see cref="FindHostPage"/>.</param>
@@ -241,32 +299,30 @@ internal static class IgniteUIBlazorHelper
         string projectDirectory, string hostPagePath, string hostPageContent, string stylesheetPath)
     {
         var hostPageOption = HostPageRecipeOptions[Path.GetRelativePath(projectDirectory, hostPagePath)];
-        var properties = new Dictionary<string, string> { ["$(IgniteUIThemeStylesheetPath)"] = stylesheetPath };
-        var linkedTheme = ThemeStylesheetRegex.Match(hostPageContent);
-        if (linkedTheme.Success)
+        var properties = new Dictionary<string, string>();
+        if (TryFindThemeLink(hostPagePath, hostPageContent, out var linkElement, out var linkedTheme))
         {
-            properties["$(IgniteUIExistingThemeStylesheetPath)"] = linkedTheme.Value;
+            // Swap within the active element as written rather than the bare path, so that a commented-out link to a
+            // different theme is neither changed instead of the active one nor taken as the swapped link.
+            properties["$(IgniteUIExistingThemeLink)"] = linkElement;
+            properties["$(IgniteUISwappedThemeLink)"] = linkElement
+                .Remove(linkedTheme.Index, linkedTheme.Length)
+                .Insert(linkedTheme.Index, stylesheetPath);
             return ([hostPageOption, SwapThemeRecipeOption], properties);
         }
 
         // The recipe replaces '</head>' with the link followed by '</head>'. The tag is passed as written in the page
         // (the replacement is case-sensitive), the link gets the page's line ending, and when '</head>' starts its line
         // the link is indented one level deeper than it.
-        var headIndex = hostPageContent.IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
+        var headIndex = IndexOfHeadClosingTag(hostPagePath, hostPageContent);
         var headClosingTag = hostPageContent.Substring(headIndex, "</head>".Length);
         var lineStart = hostPageContent.LastIndexOf('\n', Math.Max(headIndex - 1, 0)) + 1;
         var headIndent = hostPageContent[lineStart..headIndex];
         var link = BuildStylesheetLink(stylesheetPath, UsesAssetsCollection(hostPagePath, hostPageContent));
         properties["$(IgniteUIHeadClosingTag)"] = headClosingTag;
         properties["$(IgniteUIThemeLinkBeforeHead)"] = string.IsNullOrWhiteSpace(headIndent)
-            ? $"{(headIndent.Contains('\t') ? "\t" : "    ")}{link}{DetectLineEnding(hostPageContent)}{headIndent}{headClosingTag}"
+            ? $"{(headIndent.Contains('\t') ? "\t" : "    ")}{link}{MarkupHelper.DetectLineEnding(hostPageContent)}{headIndent}{headClosingTag}"
             : $"{link}{headClosingTag}";
         return ([hostPageOption, LinkThemeRecipeOption], properties);
     }
-
-    /// <summary>
-    /// Detects the dominant line ending of the given text ("\r\n" or "\n").
-    /// </summary>
-    internal static string DetectLineEnding(string? content)
-        => !string.IsNullOrEmpty(content) && content.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
 }

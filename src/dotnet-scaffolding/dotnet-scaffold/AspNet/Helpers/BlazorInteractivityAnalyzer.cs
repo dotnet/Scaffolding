@@ -19,16 +19,40 @@ internal static class BlazorInteractivityAnalyzer
     /// <param name="UsesInteractiveServer">'.AddInteractiveServerComponents()' is registered.</param>
     /// <param name="UsesInteractiveWebAssembly">'.AddInteractiveWebAssemblyComponents()' is registered.</param>
     /// <param name="MapsRazorComponents">'app.MapRazorComponents&lt;...&gt;()' is called.</param>
+    /// <param name="MapsInteractiveServerRenderMode">'.AddInteractiveServerRenderMode()' is chained on the mapped components.</param>
+    /// <param name="MapsInteractiveWebAssemblyRenderMode">'.AddInteractiveWebAssemblyRenderMode()' is chained on the mapped components.</param>
     internal sealed record BlazorInteractivity(
         bool UsesRazorComponents,
         bool UsesInteractiveServer,
         bool UsesInteractiveWebAssembly,
-        bool MapsRazorComponents)
+        bool MapsRazorComponents,
+        bool MapsInteractiveServerRenderMode,
+        bool MapsInteractiveWebAssemblyRenderMode)
     {
         /// <summary>
         /// True when the app registers both Server and WebAssembly interactivity, which is what the Auto render mode needs.
         /// </summary>
         public bool UsesInteractiveAuto => UsesInteractiveServer && UsesInteractiveWebAssembly;
+
+        /// <summary>
+        /// True when Interactive Server can run: both the service registration and the endpoint render mode are configured.
+        /// </summary>
+        public bool HasCompleteInteractiveServer => UsesInteractiveServer && MapsInteractiveServerRenderMode;
+
+        /// <summary>
+        /// True when only one of the Interactive Server service registration and endpoint render mode is configured.
+        /// </summary>
+        public bool HasPartialInteractiveServer => UsesInteractiveServer != MapsInteractiveServerRenderMode;
+
+        /// <summary>
+        /// True when Interactive WebAssembly can run: both the service registration and the endpoint render mode are configured.
+        /// </summary>
+        public bool HasCompleteInteractiveWebAssembly => UsesInteractiveWebAssembly && MapsInteractiveWebAssemblyRenderMode;
+
+        /// <summary>
+        /// True when only one of the Interactive WebAssembly service registration and endpoint render mode is configured.
+        /// </summary>
+        public bool HasPartialInteractiveWebAssembly => UsesInteractiveWebAssembly != MapsInteractiveWebAssemblyRenderMode;
     }
 
     /// <summary>
@@ -52,10 +76,11 @@ internal static class BlazorInteractivityAnalyzer
         var blazorApisAvailable = semanticModel?.Compilation.GetTypeByMetadataName(BlazorCrudHelper.IRazorComponentsBuilderType) is not null;
 
         // An unresolved registration is not an absent registration. Other errors (such as unavailable
-        // generated Razor component types) need not prevent analysis of these service registrations.
+        // generated Razor component types) need not prevent analysis of these registrations.
         var unresolvedRegistration = !blazorApisAvailable || programRoot is null ? null : programRoot.DescendantNodes().OfType<SimpleNameSyntax>()
             .FirstOrDefault(name =>
-                name.Identifier.ValueText is BlazorCrudHelper.AddInteractiveServerComponentsMethod or BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod &&
+                name.Identifier.ValueText is BlazorCrudHelper.AddInteractiveServerComponentsMethod or BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod
+                    or BlazorCrudHelper.AddInteractiveServerRenderModeMethod or BlazorCrudHelper.AddInteractiveWebAssemblyRenderModeMethod &&
                 IsInvokedName(name) &&
                 semanticModel!.GetSymbolInfo(name).Symbol is null);
 
@@ -65,7 +90,9 @@ internal static class BlazorInteractivityAnalyzer
                 IsInvoked(programRoot, BlazorCrudHelper.AddRazorComponentsMethod),
                 IsInvoked(programRoot, BlazorCrudHelper.AddInteractiveServerComponentsMethod),
                 IsInvoked(programRoot, BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod),
-                IsInvoked(programRoot, BlazorCrudHelper.MapRazorComponentsMethod)), null);
+                IsInvoked(programRoot, BlazorCrudHelper.MapRazorComponentsMethod),
+                IsInvoked(programRoot, BlazorCrudHelper.AddInteractiveServerRenderModeMethod),
+                IsInvoked(programRoot, BlazorCrudHelper.AddInteractiveWebAssemblyRenderModeMethod)), null);
         }
 
         if (programDocument is null || semanticModel is null || programRoot is null || !blazorApisAvailable)
@@ -83,7 +110,9 @@ internal static class BlazorInteractivityAnalyzer
             await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, BlazorCrudHelper.AddInteractiveServerComponentsMethod, BlazorCrudHelper.IRazorComponentsBuilderType),
             await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod, BlazorCrudHelper.IRazorComponentsBuilderType),
             // The mapped component type (App) is generated from Razor and may not resolve, so the call is matched by name.
-            IsInvoked(programRoot, BlazorCrudHelper.MapRazorComponentsMethod));
+            IsInvoked(programRoot, BlazorCrudHelper.MapRazorComponentsMethod),
+            await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, BlazorCrudHelper.AddInteractiveServerRenderModeMethod, BlazorCrudHelper.RazorComponentsEndpointsConventionBuilderType),
+            await RoslynUtilities.CheckDocumentForMethodInvocationAsync(programDocument, BlazorCrudHelper.AddInteractiveWebAssemblyRenderModeMethod, BlazorCrudHelper.RazorComponentsEndpointsConventionBuilderType));
         return (interactivity, null);
     }
 

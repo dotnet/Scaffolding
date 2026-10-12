@@ -3,6 +3,7 @@
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
@@ -30,6 +31,12 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
     /// Gets or sets the text (e.g. 'AddIgniteUIBlazor(' or a stylesheet path) that the changed file must contain afterwards.
     /// </summary>
     public required IReadOnlyList<string> RequiredCalls { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether <see cref="RequiredCalls"/> found only inside markup comments (HTML comments, and Razor
+    /// comments in .razor and .cshtml files) are ignored, e.g. for a host page whose commented-out link must not count.
+    /// </summary>
+    public bool IgnoreMarkupComments { get; set; }
 
     /// <summary>
     /// Gets or sets what the change does, e.g. "'builder.Services.AddIgniteUIBlazor()'", for the incomplete-setup error.
@@ -81,14 +88,13 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
 
     /// <summary>
     /// Returns true when a <see cref="TargetFileName"/> file in the project (outside bin/ and obj/) contains every one
-    /// of the <see cref="RequiredCalls"/>.
+    /// of the <see cref="RequiredCalls"/> (outside of markup comments when <see cref="IgnoreMarkupComments"/> is set).
     /// </summary>
     internal bool ContainsRequiredCalls()
     {
         if (TargetFilePath is not null)
         {
-            return _fileSystem.FileExists(TargetFilePath) &&
-                   RequiredCalls.All(call => _fileSystem.ReadAllText(TargetFilePath).Contains(call, StringComparison.Ordinal));
+            return _fileSystem.FileExists(TargetFilePath) && ContainsRequiredCalls(TargetFilePath);
         }
 
         var projectDirectory = Path.GetDirectoryName(ProjectPath);
@@ -101,7 +107,17 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
             .Where(file => !Path.GetRelativePath(projectDirectory, file)
                 .Split(Path.DirectorySeparatorChar)
                 .Any(segment => segment.Equals("bin", StringComparison.OrdinalIgnoreCase) || segment.Equals("obj", StringComparison.OrdinalIgnoreCase)))
-            .Select(file => _fileSystem.ReadAllText(file))
-            .Any(content => RequiredCalls.All(call => content.Contains(call, StringComparison.Ordinal)));
+            .Any(ContainsRequiredCalls);
+    }
+
+    private bool ContainsRequiredCalls(string file)
+    {
+        var content = _fileSystem.ReadAllText(file);
+        if (IgnoreMarkupComments)
+        {
+            content = MarkupHelper.MaskComments(file, content);
+        }
+
+        return RequiredCalls.All(call => content.Contains(call, StringComparison.Ordinal));
     }
 }

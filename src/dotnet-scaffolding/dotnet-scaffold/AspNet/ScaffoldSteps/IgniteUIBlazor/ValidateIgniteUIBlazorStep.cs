@@ -229,18 +229,37 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
                 return null;
             }
 
-            addInteractiveServerSupport = interactivity.UsesRazorComponents && !interactivity.UsesInteractiveServer && !interactivity.UsesInteractiveWebAssembly;
+            // Each render mode needs both its service registration and its endpoint render mode. A partial Interactive
+            // Server configuration is completed with the missing half (the shared recipes skip the half that exists).
+            var hasNoInteractivity = !interactivity.UsesInteractiveServer && !interactivity.MapsInteractiveServerRenderMode &&
+                                     !interactivity.UsesInteractiveWebAssembly && !interactivity.MapsInteractiveWebAssemblyRenderMode;
+            addInteractiveServerSupport = interactivity.UsesRazorComponents && (hasNoInteractivity || interactivity.HasPartialInteractiveServer);
             if (addInteractiveServerSupport && !interactivity.MapsRazorComponents)
             {
                 _logger.LogError(
-                    $"Ignite UI components require an interactive render mode, but '{programPath}' configures none and does not map its components with 'app.MapRazorComponents<App>()', so Interactive Server support cannot be added. " +
+                    $"Ignite UI components require an interactive render mode, but '{programPath}' {(hasNoInteractivity ? "configures none" : "configures Interactive Server only partially")} and does not map its components with 'app.MapRazorComponents<App>()', so Interactive Server support cannot be added. " +
                     "Chain '.AddInteractiveServerComponents()' after 'builder.Services.AddRazorComponents()' and '.AddInteractiveServerRenderMode()' after 'app.MapRazorComponents<App>()', then re-run the scaffolder.");
+                return null;
+            }
+
+            // Interactive WebAssembly also needs the client assembly mapped, so a partial configuration is not completed
+            // automatically. It is only an error when no Interactive Server support is configured or being completed.
+            if (interactivity.UsesRazorComponents && interactivity.HasPartialInteractiveWebAssembly && !interactivity.UsesInteractiveServer && !interactivity.MapsInteractiveServerRenderMode)
+            {
+                var missing = interactivity.UsesInteractiveWebAssembly
+                    ? "'.AddInteractiveWebAssemblyRenderMode()' after 'app.MapRazorComponents<App>()'"
+                    : "'.AddInteractiveWebAssemblyComponents()' after 'builder.Services.AddRazorComponents()'";
+                _logger.LogError(
+                    $"Ignite UI components require an interactive render mode, but '{programPath}' configures Interactive WebAssembly only partially. " +
+                    $"Chain {missing}, then re-run the scaffolder.");
                 return null;
             }
 
             if (addInteractiveServerSupport)
             {
-                _logger.LogInformation("This Blazor Web App has no interactive render mode configured; Interactive Server support will be added to Program.cs. Existing pages keep their render modes.");
+                _logger.LogInformation(hasNoInteractivity
+                    ? "This Blazor Web App has no interactive render mode configured; Interactive Server support will be added to Program.cs. Existing pages keep their render modes."
+                    : $"This Blazor Web App configures Interactive Server only partially; '{(interactivity.UsesInteractiveServer ? "AddInteractiveServerRenderMode()" : "AddInteractiveServerComponents()")}' will be added to Program.cs. Existing pages keep their render modes.");
             }
         }
 
@@ -307,8 +326,8 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
             ThemeCodeModifierProperties = themeCodeModifierProperties,
             RenderModeGuidance = interactivity is { UsesRazorComponents: true }
                 ? IgniteUIBlazorHelper.GetRenderModeGuidance(
-                    interactivity.UsesInteractiveServer || addInteractiveServerSupport,
-                    interactivity.UsesInteractiveWebAssembly,
+                    interactivity.HasCompleteInteractiveServer || addInteractiveServerSupport,
+                    interactivity.HasCompleteInteractiveWebAssembly,
                     addInteractiveServerSupport,
                     HasGlobalRenderMode(hostPagePath))
                 : null
@@ -322,7 +341,10 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
     private string? FindCodeModificationConfig(string projectPath, string configFileName)
     {
         var targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(projectPath);
-        var configPath = GlobalToolFileFinder.FindCodeModificationConfigFile(configFileName, typeof(ValidateIgniteUIBlazorStep).Assembly, targetFrameworkFolder);
+        var configPath = GlobalToolFileFinder.FindCodeModificationConfigFile(
+            Path.Combine(IgniteUIBlazorScaffolderBuilderExtensions.CodeModificationConfigFolderName, configFileName),
+            typeof(ValidateIgniteUIBlazorStep).Assembly,
+            targetFrameworkFolder);
         if (string.IsNullOrEmpty(configPath))
         {
             _logger.LogError(
@@ -343,7 +365,7 @@ internal class ValidateIgniteUIBlazorStep : ScaffoldStep
     {
         if ((settings.Theme is not null && settings.ThemeVariant is not null) ||
             hostPagePath is null ||
-            !IgniteUIBlazorHelper.TryGetLinkedTheme(_fileSystem.ReadAllText(hostPagePath), out var linkedTheme, out var linkedThemeVariant))
+            !IgniteUIBlazorHelper.TryGetLinkedTheme(hostPagePath, _fileSystem.ReadAllText(hostPagePath), out var linkedTheme, out var linkedThemeVariant))
         {
             return (settings.Theme ?? IgniteUIBlazorHelper.DefaultTheme, settings.ThemeVariant ?? IgniteUIBlazorHelper.DefaultThemeVariant);
         }

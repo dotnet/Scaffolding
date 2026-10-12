@@ -18,6 +18,10 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 /// </summary>
 internal static class IgniteUIBlazorScaffolderBuilderExtensions
 {
+    /// <summary>
+    /// The folder, under each target framework's CodeModificationConfigs folder, that holds the Ignite UI for Blazor recipes.
+    /// </summary>
+    internal const string CodeModificationConfigFolderName = "IgniteUIBlazor";
     /// <summary>Code modification config for ASP.NET Core hosted Blazor projects (Blazor Web App / Blazor Server).</summary>
     internal const string CodeModificationConfigFileName = "igniteUIBlazorChanges.json";
     /// <summary>Code modification config for Blazor WebAssembly projects (standalone or the Web App client project).</summary>
@@ -72,10 +76,11 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
 
     /// <summary>
     /// Adds a step that enables Interactive Server support in the Program.cs of a Blazor Web App that configures no
-    /// interactivity, using the shared Blazor code modification recipes: 'AddInteractiveServerComponents()' on the
-    /// 'AddRazorComponents()' chain and 'AddInteractiveServerRenderMode()' on the 'MapRazorComponents&lt;App&gt;()' chain.
+    /// interactivity, or completes it when only one half is registered, using the shared Blazor code modification
+    /// recipes: 'AddInteractiveServerComponents()' on the 'AddRazorComponents()' chain and
+    /// 'AddInteractiveServerRenderMode()' on the 'MapRazorComponents&lt;App&gt;()' chain (a half that exists is skipped).
     /// Render modes on &lt;Routes&gt;, &lt;HeadOutlet&gt; and existing pages are not changed. Skipped when the app already
-    /// configures Server, WebAssembly or Auto interactivity, or is not a Blazor Web App.
+    /// configures complete Server, WebAssembly or Auto interactivity, or is not a Blazor Web App.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorInteractivityStep(this IScaffoldBuilder builder)
     {
@@ -191,9 +196,10 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
             step.TargetFileName = Path.GetFileName(model.HostPagePath) ?? string.Empty;
             step.TargetFilePath = model.HostPagePath;
             step.RequiredCalls = [model.StylesheetPath];
+            step.IgnoreMarkupComments = true;
             step.ChangeDescription = "the theme stylesheet link";
-            step.ManualInstructions =
-                $"To finish the setup, add the following line to the <head> of the page that hosts your Blazor app: {IgniteUIBlazorHelper.BuildStylesheetLink(model.StylesheetPath, useAssetsCollection: false)}";
+            step.ManualInstructions = IgniteUIBlazorHelper.GetThemeManualInstructions(
+                model.ThemeCodeChangeOptions, model.ThemeCodeModifierProperties, model.StylesheetPath, model.HostPagePath);
             step.IncompleteReason = model.HostPagePath is null
                 ? $"no host page ({string.Join(", ", IgniteUIBlazorHelper.HostPageCandidates)}) with a <head> element was found in '{model.BaseOutputPath}', so the theme stylesheet was not linked. All other setup steps completed"
                 : null;

@@ -163,6 +163,17 @@ public class AddRazorImportsStepTests
     }
 
     [Fact]
+    public void AddUsings_AddsTheUsing_WhenItIsOnlyInsideARazorComment()
+    {
+        const string content = "@*\n@using IgniteUI.Blazor.Controls\n*@\n";
+
+        var updated = AddRazorImportsStep.AddUsings(content, [Namespace], out var added);
+
+        Assert.Equal([Namespace], added);
+        Assert.Equal($"{content}@using {Namespace}\n", updated);
+    }
+
+    [Fact]
     public void AddUsings_AddsOnlyMissingNamespaces()
     {
         var updated = AddRazorImportsStep.AddUsings("@using A\n", ["A", "B", "C"], out var added);
@@ -179,6 +190,9 @@ public class AddRazorImportsStepTests
     [InlineData("@using IgniteUI.Blazor.Controls.Extra", false)]
     [InlineData("@using IgniteUI.Blazor", false)]
     [InlineData("@* @using IgniteUI.Blazor.Controls *@", false)]
+    [InlineData("@*\n@using IgniteUI.Blazor.Controls\n*@", false)]
+    [InlineData("@*\r\n  @using IgniteUI.Blazor.Controls\r\n*@\r\n@using A\r\n", false)]
+    [InlineData("@* old imports *@\n@using IgniteUI.Blazor.Controls\n", true)]
     [InlineData("", false)]
     [InlineData(null, false)]
     public void ContainsUsing_MatchesWholeDirectiveOnly(string? content, bool expected)

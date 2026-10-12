@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
 
@@ -329,7 +330,7 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         Assert.Equal(routesBefore, File.ReadAllText(routesRazorPath));
 
         // Assert — the guidance names the render mode that was added, and nothing else
-        Assert.Contains("Interactive Server support was added to Program.cs", cliOutput);
+        Assert.Contains("Interactive Server support was enabled in Program.cs", cliOutput);
         Assert.Contains("'@rendermode InteractiveServer'", cliOutput);
         Assert.DoesNotContain("InteractiveAuto", cliOutput);
         Assert.DoesNotContain("InteractiveWebAssembly", cliOutput);
@@ -341,6 +342,47 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         Assert.Equal(1, CountOccurrences(programContent, "AddInteractiveServerComponents"));
         Assert.Equal(1, CountOccurrences(programContent, "AddInteractiveServerRenderMode"));
         Assert.Equal(1, CountOccurrences(programContent, "AddIgniteUIBlazor"));
+    }
+
+    [Theory]
+    [InlineData("\n    .AddInteractiveServerComponents()", "", "AddInteractiveServerRenderMode()")]
+    [InlineData("", "\n    .AddInteractiveServerRenderMode()", "AddInteractiveServerComponents()")]
+    public async Task Scaffold_BlazorIgniteUI_Net10_WebAppWithPartialInteractiveServer_AddsTheMissingHalf(string servicesChain, string endpointsChain, string missingCall)
+    {
+        // Arrange — a Blazor Web App that registers only one half of Interactive Server, so Interactive Server pages cannot run
+        SetupBlazorWebAppProject();
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        File.WriteAllText(programPath, GetWebAppProgramCs(servicesChain, endpointsChain));
+
+        // Act
+        var cliOutput = await RunScaffoldAndAssertSuccessAsync();
+
+        // Assert — the missing half was added on its chain, and neither half is duplicated
+        Assert.Contains($"configures Interactive Server only partially; '{missingCall}' will be added", cliOutput);
+        var programContent = File.ReadAllText(programPath);
+        var servicesRegistration = programContent[programContent.IndexOf("builder.Services.AddRazorComponents()", StringComparison.Ordinal)..programContent.IndexOf("var app", StringComparison.Ordinal)];
+        Assert.Contains(".AddInteractiveServerComponents()", servicesRegistration);
+        var endpointsRegistration = programContent[programContent.IndexOf("app.MapRazorComponents<App>()", StringComparison.Ordinal)..];
+        Assert.Contains(".AddInteractiveServerRenderMode()", endpointsRegistration);
+        Assert.Equal(1, CountOccurrences(programContent, "AddInteractiveServerComponents"));
+        Assert.Equal(1, CountOccurrences(programContent, "AddInteractiveServerRenderMode"));
+        Assert.Contains("'@rendermode InteractiveServer'", cliOutput);
+        await AssertBuildsAsync("after scaffolding");
+    }
+
+    [Theory]
+    [InlineData("\n    .AddInteractiveWebAssemblyComponents()", "", "'.AddInteractiveWebAssemblyRenderMode()'")]
+    [InlineData("", "\n    .AddInteractiveWebAssemblyRenderMode()", "'.AddInteractiveWebAssemblyComponents()'")]
+    public async Task Scaffold_BlazorIgniteUI_Net10_WebAppWithPartialInteractiveWebAssemblyOnly_FailsBeforeChanges(string servicesChain, string endpointsChain, string missingCall)
+    {
+        // Arrange — a Blazor Web App whose only interactivity is half of Interactive WebAssembly
+        SetupBlazorWebAppProject();
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), GetWebAppProgramCs(servicesChain, endpointsChain));
+
+        // Act + Assert
+        var cliOutput = await ScaffoldAndAssertFailsWithoutChangesAsync();
+        Assert.Contains("configures Interactive WebAssembly only partially", cliOutput);
+        Assert.Contains(missingCall, cliOutput);
     }
 
     [Fact]
@@ -360,7 +402,7 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         Assert.Equal(1, CountOccurrences(programContent, "AddInteractiveServerComponents"));
         Assert.Equal(1, CountOccurrences(programContent, "AddInteractiveServerRenderMode"));
         Assert.DoesNotContain("InteractiveWebAssembly", programContent);
-        Assert.DoesNotContain("Interactive Server support was added", cliOutput);
+        Assert.DoesNotContain("Interactive Server support was enabled", cliOutput);
         Assert.Contains("'@rendermode InteractiveServer'", cliOutput);
         Assert.DoesNotContain("InteractiveAuto", cliOutput);
     }
@@ -440,6 +482,31 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         // Act + Assert — only '--theme-variant' is given: the variant changes and the linked theme is kept
         await RunScaffoldAndAssertSuccessAsync("--theme-variant", "light");
         AssertSingleThemeLink(appRazorPath, "_content/IgniteUI.Blazor/themes/light/fluent.css");
+    }
+
+    [Fact]
+    public async Task Scaffold_BlazorIgniteUI_Net10_SwapToACommentedOutTheme_ReportsTheLinkToReplace()
+    {
+        // Arrange — the dark material link was commented out to switch to light bootstrap
+        const string darkMaterial = "_content/IgniteUI.Blazor/themes/dark/material.css";
+        SetupBlazorWebAppProject();
+        var appRazorPath = Path.Combine(_testProjectDir, "Components", "App.razor");
+        await RunScaffoldAndAssertSuccessAsync("--theme", "material", "--theme-variant", "dark");
+        var darkMaterialLink = Regex.Match(File.ReadAllText(appRazorPath), @"<link[^>]*_content/IgniteUI[^>]*>").Value;
+        var bootstrapLink = darkMaterialLink.Replace(darkMaterial, LiteBootstrapLightStylesheet);
+        File.WriteAllText(appRazorPath, File.ReadAllText(appRazorPath).Replace(darkMaterialLink, $"<!-- {darkMaterialLink} -->\n    {bootstrapLink}"));
+
+        // Act — switch back to dark material
+        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework, "blazor-igniteui", "--project", _testProjectPath, "--theme", "material", "--theme-variant", "dark");
+
+        // Assert — the code modifier finds the swapped link in the comment and skips the swap: the run fails and names
+        // the active link to replace, instead of a link to add next to it
+        Assert.True(cliExitCode != 0, $"CLI scaffold should report the incomplete setup as a failure.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.Contains($"replace the Ignite UI theme link {bootstrapLink} in '{appRazorPath}' with {darkMaterialLink}", cliOutput + cliError);
+        Assert.DoesNotContain("add the following line", cliOutput + cliError);
+        Assert.True(IgniteUIBlazorHelper.TryGetLinkedTheme(appRazorPath, File.ReadAllText(appRazorPath), out var theme, out var themeVariant));
+        Assert.Equal(("bootstrap", "light"), (theme, themeVariant));
     }
 
     private static void AssertSingleThemeLink(string hostPagePath, string expectedStylesheet)

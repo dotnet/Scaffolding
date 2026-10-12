@@ -11,16 +11,15 @@
             "$(IgniteUIHeadClosingTag)"
           ],
           "Block": "$(IgniteUIThemeLinkBeforeHead)",
-          "CheckBlock": "$(IgniteUIThemeStylesheetPath)",
           "Options": [
             "IgniteUILinkTheme"
           ]
         },
         {
           "ReplaceSnippet": [
-            "$(IgniteUIExistingThemeStylesheetPath)"
+            "$(IgniteUIExistingThemeLink)"
           ],
-          "Block": "$(IgniteUIThemeStylesheetPath)",
+          "Block": "$(IgniteUISwappedThemeLink)",
           "Options": [
             "IgniteUISwapTheme"
           ]
@@ -40,16 +39,15 @@
                 "$(IgniteUIHeadClosingTag)"
               ],
               "Block": "$(IgniteUIThemeLinkBeforeHead)",
-              "CheckBlock": "$(IgniteUIThemeStylesheetPath)",
               "Options": [
                 "IgniteUILinkTheme"
               ]
             },
             {
               "ReplaceSnippet": [
-                "$(IgniteUIExistingThemeStylesheetPath)"
+                "$(IgniteUIExistingThemeLink)"
               ],
-              "Block": "$(IgniteUIThemeStylesheetPath)",
+              "Block": "$(IgniteUISwappedThemeLink)",
               "Options": [
                 "IgniteUISwapTheme"
               ]
@@ -71,16 +69,15 @@
                 "$(IgniteUIHeadClosingTag)"
               ],
               "Block": "$(IgniteUIThemeLinkBeforeHead)",
-              "CheckBlock": "$(IgniteUIThemeStylesheetPath)",
               "Options": [
                 "IgniteUILinkTheme"
               ]
             },
             {
               "ReplaceSnippet": [
-                "$(IgniteUIExistingThemeStylesheetPath)"
+                "$(IgniteUIExistingThemeLink)"
               ],
-              "Block": "$(IgniteUIThemeStylesheetPath)",
+              "Block": "$(IgniteUISwappedThemeLink)",
               "Options": [
                 "IgniteUISwapTheme"
               ]
@@ -100,16 +97,15 @@
             "$(IgniteUIHeadClosingTag)"
           ],
           "Block": "$(IgniteUIThemeLinkBeforeHead)",
-          "CheckBlock": "$(IgniteUIThemeStylesheetPath)",
           "Options": [
             "IgniteUILinkTheme"
           ]
         },
         {
           "ReplaceSnippet": [
-            "$(IgniteUIExistingThemeStylesheetPath)"
+            "$(IgniteUIExistingThemeLink)"
           ],
-          "Block": "$(IgniteUIThemeStylesheetPath)",
+          "Block": "$(IgniteUISwappedThemeLink)",
           "Options": [
             "IgniteUISwapTheme"
           ]

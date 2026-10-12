@@ -206,9 +206,25 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         Assert.Null(step.IncompleteReason);
         Assert.Equal(model.ThemeCodeModificationConfigPath, step.CodeModifierConfigPath);
         Assert.Equal(model.ThemeCodeChangeOptions, step.CodeChangeOptions);
-        Assert.Equal(model.StylesheetPath, step.CodeModifierProperties["$(IgniteUIThemeStylesheetPath)"]);
+        Assert.Equal(model.ThemeCodeModifierProperties["$(IgniteUIThemeLinkBeforeHead)"], step.CodeModifierProperties["$(IgniteUIThemeLinkBeforeHead)"]);
         Assert.Equal(model.HostPagePath, step.TargetFilePath);
         Assert.Equal([model.StylesheetPath], step.RequiredCalls);
+        Assert.True(step.IgnoreMarkupComments);
+        Assert.Contains($"add the following line to the <head> of the page that hosts your Blazor app: <link href=\"{model.StylesheetPath}\" rel=\"stylesheet\" />", step.ManualInstructions);
+    }
+
+    [Fact]
+    public void WithIgniteUIBlazorThemeStylesheetStep_NamesTheLinkToReplace_WhenSwappingTheTheme()
+    {
+        var model = CreateModel(swapTheme: true);
+        var step = CreateServicesStep();
+
+        ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorThemeStylesheetStep());
+
+        Assert.Equal(model.ThemeCodeChangeOptions, step.CodeChangeOptions);
+        Assert.Equal(
+            $"To finish the setup, replace the Ignite UI theme link {SwappedFromLink} in '{model.HostPagePath}' with {SwappedToLink}",
+            step.ManualInstructions);
     }
 
     [Fact]
@@ -348,7 +364,10 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
             ManualInstructions = string.Empty
         };
 
-    private static IgniteUIBlazorModel CreateModel(bool hasClient = false, bool isMauiBlazorHybridProject = false, bool hasHostPage = true, bool addInteractiveServerSupport = false, string? renderModeGuidance = null)
+    private const string SwappedFromLink = "<link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />";
+    private const string SwappedToLink = "<link href=\"_content/IgniteUI.Blazor/themes/light/bootstrap.css\" rel=\"stylesheet\" />";
+
+    private static IgniteUIBlazorModel CreateModel(bool hasClient = false, bool isMauiBlazorHybridProject = false, bool hasHostPage = true, bool addInteractiveServerSupport = false, string? renderModeGuidance = null, bool swapTheme = false)
     {
         var projectDirectory = Path.Combine("C:", "src", "MyApp");
         var clientProjectDirectory = Path.Combine("C:", "src", "MyApp.Client");
@@ -364,10 +383,12 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
             IsMauiBlazorHybridProject = isMauiBlazorHybridProject,
             HostPagePath = hasHostPage ? Path.Combine(projectDirectory, "Components", "App.razor") : null,
             ThemeCodeModificationConfigPath = hasHostPage ? Path.Combine("configs", "igniteUIBlazorThemeChanges.json") : null,
-            ThemeCodeChangeOptions = hasHostPage ? ["IgniteUIAppRazorHost", "IgniteUILinkTheme"] : [],
-            ThemeCodeModifierProperties = hasHostPage
-                ? new Dictionary<string, string> { ["$(IgniteUIThemeStylesheetPath)"] = "_content/IgniteUI.Blazor/themes/light/bootstrap.css" }
-                : new Dictionary<string, string>(),
+            ThemeCodeChangeOptions = !hasHostPage ? []
+                : swapTheme ? ["IgniteUIAppRazorHost", IgniteUIBlazorHelper.SwapThemeRecipeOption]
+                : ["IgniteUIAppRazorHost", IgniteUIBlazorHelper.LinkThemeRecipeOption],
+            ThemeCodeModifierProperties = !hasHostPage ? new Dictionary<string, string>()
+                : swapTheme ? new Dictionary<string, string> { ["$(IgniteUIExistingThemeLink)"] = SwappedFromLink, ["$(IgniteUISwappedThemeLink)"] = SwappedToLink }
+                : new Dictionary<string, string> { ["$(IgniteUIThemeLinkBeforeHead)"] = $"{SwappedToLink}</head>" },
             ImportsFilePath = Path.Combine(projectDirectory, "Components", "_Imports.razor"),
             ClientProjectPath = hasClient ? Path.Combine(clientProjectDirectory, "MyApp.Client.csproj") : null,
             ClientImportsFilePath = hasClient ? Path.Combine(clientProjectDirectory, "_Imports.razor") : null,

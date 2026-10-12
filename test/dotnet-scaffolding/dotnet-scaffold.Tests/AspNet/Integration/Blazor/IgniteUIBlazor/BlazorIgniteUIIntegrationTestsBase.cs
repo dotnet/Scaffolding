@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
+using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
@@ -77,6 +78,21 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
     {
         var configPath = GetCodeModificationConfigPath(configFileName);
         Assert.True(File.Exists(configPath), $"{configFileName} should exist for {TargetFramework} at '{configPath}'");
+    }
+
+    [Theory]
+    [InlineData("igniteUIBlazorChanges.json")]
+    [InlineData("igniteUIBlazorWasmChanges.json")]
+    [InlineData("igniteUIBlazorMauiChanges.json")]
+    [InlineData("igniteUIBlazorThemeChanges.json")]
+    public void CodeModificationConfig_IsInSourceBuiltToolLayout(string configFileName)
+    {
+        // The source-built tool mirrors the packed layout ({root}/Aspnet/CodeModificationConfigs/{tfm}/...) next to
+        // its 'tools' marker folder; the nested recipe folder must be preserved there for the lookup to resolve it.
+        var configPath = Path.Combine(ScaffoldCliHelper.GetRepoRoot(), "artifacts", "bin", "dotnet-scaffold",
+            ScaffoldCliHelper.GetBuildConfiguration(), TargetFramework, "Aspnet", "CodeModificationConfigs", TargetFramework,
+            IgniteUIBlazorScaffolderBuilderExtensions.CodeModificationConfigFolderName, configFileName);
+        Assert.True(File.Exists(configPath), $"{configFileName} should be copied to the source-built tool layout at '{configPath}'");
     }
 
     [Theory]
@@ -205,6 +221,38 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
         Assert.Single(Regex.Matches(swapped, Regex.Escape("_content/IgniteUI")));
     }
 
+    [Theory]
+    // Only a commented-out link, even to the requested theme: a new link is inserted and the comment is left as is.
+    [InlineData("    <!-- <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /> -->\n",
+        "    <!-- <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /> -->\n    <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />\n")]
+    // A commented-out link before the active one: the active link is swapped and the comment is left as is.
+    [InlineData("    <!-- <link href=\"_content/IgniteUI.Blazor/themes/light/bootstrap.css\" rel=\"stylesheet\" /> -->\n    <link href=\"_content/IgniteUI.Blazor/themes/light/fluent.css\" rel=\"stylesheet\" />\n",
+        "    <!-- <link href=\"_content/IgniteUI.Blazor/themes/light/bootstrap.css\" rel=\"stylesheet\" /> -->\n    <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />\n")]
+    public async Task ThemeRecipe_IgnoresCommentedOutLinks(string headContent, string expectedHeadContent)
+    {
+        const string darkMaterial = "_content/IgniteUI.Blazor/themes/dark/material.css";
+        var hostPagePath = Path.Combine(_testProjectDir, "wwwroot", "index.html");
+        Directory.CreateDirectory(Path.GetDirectoryName(hostPagePath)!);
+        File.WriteAllText(hostPagePath, $"<!DOCTYPE html>\n<html>\n<head>\n{headContent}</head>\n<body></body>\n</html>\n");
+        using var workspace = new AdhocWorkspace();
+        workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Create(), "TestProject", "TestProject", LanguageNames.CSharp, filePath: _testProjectPath));
+        var codeService = new Mock<ICodeService>();
+        codeService.Setup(service => service.GetWorkspaceAsync()).ReturnsAsync(workspace);
+        codeService.Setup(service => service.TryApplyChanges(It.IsAny<Solution>()))
+            .Returns((Solution solution) => workspace.TryApplyChanges(solution));
+
+        var (options, properties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(_testProjectDir, hostPagePath, File.ReadAllText(hostPagePath), darkMaterial);
+        var config = CodeModifierConfigHelper.GetCodeModifierConfig(GetCodeModificationConfigPath("igniteUIBlazorThemeChanges.json"));
+        Assert.NotNull(config);
+        config.EditCodeModifierConfig(properties);
+        Assert.True(await new ProjectModifier(_testProjectPath, codeService.Object, Mock.Of<ILogger>(), config, options).RunAsync());
+
+        var updated = File.ReadAllText(hostPagePath);
+        Assert.Contains($"<head>\n{expectedHeadContent}</head>", updated);
+        Assert.True(IgniteUIBlazorHelper.TryGetLinkedTheme(hostPagePath, updated, out var theme, out var themeVariant));
+        Assert.Equal(("material", "dark"), (theme, themeVariant));
+    }
+
     #endregion
 
     #region Helper Methods
@@ -218,7 +266,8 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
     }
 
     protected string GetCodeModificationConfigPath(string configFileName)
-        => Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs", configFileName);
+        => Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs",
+            IgniteUIBlazorScaffolderBuilderExtensions.CodeModificationConfigFolderName, configFileName);
 
     protected Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)
         => ScaffoldCliHelper.RunBuildForFrameworkAsync(workingDirectory, TargetFramework);

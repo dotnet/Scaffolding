@@ -52,6 +52,7 @@ internal class AddAspireConnectionStringStep : ScaffoldStep
         string? appSettingsFile = appSettingsFileSearch.FirstOrDefault();
         JsonNode? content;
         bool writeContent = false;
+        bool appendFinalNewLine = true;
         if (string.IsNullOrEmpty(appSettingsFile))
         {
             // Create a new appsettings.json if it doesn't exist
@@ -65,6 +66,7 @@ internal class AddAspireConnectionStringStep : ScaffoldStep
             try
             {
                 var jsonString = _fileSystem.ReadAllText(appSettingsFile);
+                appendFinalNewLine = jsonString.EndsWith('\n') || jsonString.EndsWith('\r');
                 content = JsonNode.Parse(jsonString);
             }
             catch (JsonException ex)
@@ -105,7 +107,8 @@ internal class AddAspireConnectionStringStep : ScaffoldStep
         {
             // Write the updated content to appsettings.json
             JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-            _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options) + Environment.NewLine);
+            var serializedContent = content.ToJsonString(options);
+            _fileSystem.WriteAllText(appSettingsFile, appendFinalNewLine ? serializedContent + Environment.NewLine : serializedContent);
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
             _telemetryService.TrackEvent(new AddAspireConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));
         }

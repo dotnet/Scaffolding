@@ -132,7 +132,7 @@ public class AddAspNetConnectionStringStepTests
         // Assert
         Assert.True(result);
         Assert.NotNull(capturedContent);
-        Assert.EndsWith(Environment.NewLine, capturedContent);
+        Assert.False(capturedContent.EndsWith(Environment.NewLine, StringComparison.Ordinal));
 
         JsonNode? jsonContent = JsonNode.Parse(capturedContent);
         Assert.NotNull(jsonContent);
@@ -167,7 +167,7 @@ public class AddAspNetConnectionStringStepTests
 
         _mockFileSystem.Setup(fs => fs.FileExists(appSettingsPath)).Returns(true);
         _mockFileSystem.Setup(fs => fs.ReadAllText(appSettingsPath))
-            .Returns(existingContent.ToJsonString());
+            .Returns(existingContent.ToJsonString() + Environment.NewLine);
 
         Mock<ITelemetryService> mockTelemetryService = new Mock<ITelemetryService>();
         AddAspNetConnectionStringStep step = new AddAspNetConnectionStringStep(
@@ -248,7 +248,7 @@ public class AddAspNetConnectionStringStepTests
 
         _mockFileSystem.Setup(fs => fs.FileExists(appSettingsPath)).Returns(true);
         _mockFileSystem.Setup(fs => fs.ReadAllText(appSettingsPath))
-            .Returns(existingContent.ToJsonString());
+            .Returns(existingContent.ToJsonString() + Environment.NewLine);
 
         string? capturedContent = null;
         _mockFileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))

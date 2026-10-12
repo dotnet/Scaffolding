@@ -74,7 +74,7 @@ public class UpdateAppSettingsStepTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WritesDevelopmentAppSettingsWithTrailingNewLine()
+    public async Task ExecuteAsync_PreservesMissingTrailingNewLine()
     {
         string projectPath = Path.Combine("test", "project", "TestProject.csproj");
         string baseProjectPath = Path.GetDirectoryName(projectPath)!;
@@ -109,7 +109,7 @@ public class UpdateAppSettingsStepTests
 
         Assert.True(result);
         Assert.NotNull(developmentContent);
-        Assert.EndsWith(Environment.NewLine, developmentContent);
+        Assert.False(developmentContent.EndsWith(Environment.NewLine, StringComparison.Ordinal));
 
         using JsonDocument document = JsonDocument.Parse(developmentContent);
         Assert.True(document.RootElement.TryGetProperty("AzureAd", out _));

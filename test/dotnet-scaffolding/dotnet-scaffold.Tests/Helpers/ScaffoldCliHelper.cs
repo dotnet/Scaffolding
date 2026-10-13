@@ -605,5 +605,11 @@ public class {modelName}
     <clear />
     <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
   </packageSources>
+  <disabledPackageSources>
+    <clear />
+  </disabledPackageSources>
+  <packageSourceMapping>
+    <clear />
+  </packageSourceMapping>
 </configuration>";
 }

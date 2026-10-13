@@ -496,18 +496,26 @@ internal static class SyncfusionBlazorToolkitHelper
         }
 
         // Syntax-aware: comments and string literals are never invocation
-        // nodes, so they cannot be mistaken for a real registration. A
-        // fluent chain such as
-        // `builder.Services.AddRazorComponents().AddSyncfusionBlazorToolkit()`
+        // nodes. The call must be a statement that runs at the entry
+        // point (not inside a lambda / local function that may never
+        // execute), and when the file declares a host builder the call
+        // must be made on that same builder variable. A fluent chain such
+        // as `builder.Services.AddRazorComponents().AddSyncfusionBlazorToolkit()`
         // has an invocation as its receiver and is rejected.
         SyntaxNode root = CSharpSyntaxTree.ParseText(programText).GetRoot();
+        string? builderName = FindHostBuilderDeclaration(root, [WebBuilderMarker, WasmBuilderMarker])?
+            .Declarator.Identifier.ValueText;
+
         foreach (InvocationExpressionSyntax invocation in root.DescendantNodes().OfType<InvocationExpressionSyntax>())
         {
-            if (invocation.Expression is MemberAccessExpressionSyntax call &&
+            if (invocation.Parent is ExpressionStatementSyntax &&
+                !IsInsideDeferredCode(invocation) &&
+                invocation.Expression is MemberAccessExpressionSyntax call &&
                 call.Name.Identifier.ValueText == ServiceRegistrationCall &&
                 call.Expression is MemberAccessExpressionSyntax services &&
                 services.Name.Identifier.ValueText == "Services" &&
-                services.Expression is IdentifierNameSyntax)
+                services.Expression is IdentifierNameSyntax receiver &&
+                (builderName is null || receiver.Identifier.ValueText == builderName))
             {
                 return true;
             }
@@ -515,6 +523,9 @@ internal static class SyncfusionBlazorToolkitHelper
 
         return false;
     }
+
+    private static bool IsInsideDeferredCode(SyntaxNode node) =>
+        node.Ancestors().Any(a => a is LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax);
 
     /// <summary>
     /// Removes <c>// … \n</c> and <c>/* … */</c> C# comment regions
@@ -845,8 +856,16 @@ internal static class SyncfusionBlazorToolkitHelper
         SyntaxNode root,
         string[] markers)
     {
+        var matches = new List<(LocalDeclarationStatementSyntax, VariableDeclaratorSyntax)>();
         foreach (LocalDeclarationStatementSyntax statement in root.DescendantNodes().OfType<LocalDeclarationStatementSyntax>())
         {
+            // Declarations nested in lambdas / local functions are not the
+            // application's host builder.
+            if (IsInsideDeferredCode(statement))
+            {
+                continue;
+            }
+
             foreach (VariableDeclaratorSyntax declarator in statement.Declaration.Variables)
             {
                 ExpressionSyntax? initializer = declarator.Initializer?.Value;
@@ -859,13 +878,15 @@ internal static class SyncfusionBlazorToolkitHelper
                 {
                     if (markers.Contains(invocation.Expression.ToString().Replace(" ", string.Empty), StringComparer.Ordinal))
                     {
-                        return (statement, declarator);
+                        matches.Add((statement, declarator));
+                        break;
                     }
                 }
             }
         }
 
-        return null;
+        // Ambiguous (several host builders): refuse rather than guess.
+        return matches.Count == 1 ? matches[0] : null;
     }
 
     private static bool IsExcludedDirectory(string name)

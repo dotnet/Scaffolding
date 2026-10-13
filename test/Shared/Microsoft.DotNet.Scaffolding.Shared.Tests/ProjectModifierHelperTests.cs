@@ -1,13 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
@@ -525,6 +528,284 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
             Assert.True(multiTfm.Contains("net6.0") && multiTfm.Contains("net8.0"));
             Assert.True(multiTfm2.Contains("net6.0") && multiTfm2.Contains("net8.0"));
             Assert.True(multiTfm3.Contains("net5.0") && multiTfm3.Contains("net6.0") && multiTfm3.Contains("net8.0"));
+        }
+
+        [Fact]
+        public void ProcessTfmTests()
+        {
+            var csprojVariables = new Dictionary<string, string>
+            {
+                { "$(TargetFramework)", "net8.0" },
+                { "$(Version)", "8.0" },
+                { "$(NetVersion)", "net" }
+            };
+
+            // Test simple TFM
+            var result1 = ProjectModifierHelper.ProcessTfm("net8.0", csprojVariables);
+            Assert.Equal("net8.0", result1);
+
+            // Test TFM with variable
+            var result2 = ProjectModifierHelper.ProcessTfm("$(TargetFramework)", csprojVariables);
+            Assert.Equal("net8.0", result2);
+
+            // Test TFM with multiple variables
+            csprojVariables["$(CompositeTfm)"] = "$(NetVersion)$(Version)";
+            var result3 = ProjectModifierHelper.ProcessTfm("$(CompositeTfm)", csprojVariables);
+            Assert.Equal("net8.0", result3);
+
+            // Test empty TFM
+            var result4 = ProjectModifierHelper.ProcessTfm("", csprojVariables);
+            Assert.Equal("", result4);
+
+            // Test null TFM
+            var result5 = ProjectModifierHelper.ProcessTfm(null, csprojVariables);
+            Assert.Equal("", result5);
+        }
+
+        [Fact]
+        public void ReplaceValueTests()
+        {
+            // Test basic replacement
+            var result1 = ProjectModifierHelper.ReplaceValue("Hello World", "World", "Universe");
+            Assert.Equal("Hello Universe", result1);
+
+            // Test multiple occurrences
+            var result2 = ProjectModifierHelper.ReplaceValue("test test test", "test", "exam");
+            Assert.Equal("exam exam exam", result2);
+
+            // Test with null or empty values
+            var result3 = ProjectModifierHelper.ReplaceValue("Hello", null, "World");
+            Assert.Equal("Hello", result3);
+
+            var result4 = ProjectModifierHelper.ReplaceValue("", "old", "new");
+            Assert.Equal("", result4);
+
+            // Test when old value doesn't exist
+            var result5 = ProjectModifierHelper.ReplaceValue("Hello World", "xyz", "abc");
+            Assert.Equal("Hello World", result5);
+        }
+
+        [Fact]
+        public async Task GetOriginalMethodTests()
+        {
+            var editor = await DocumentEditor.CreateAsync(CreateDocument(FullDocument));
+            var classSyntax = await CreateClassSyntax(editor);
+
+            // Test finding existing method
+            var foundMethod = ProjectModifierHelper.GetOriginalMethod(classSyntax, "Test", new Method());
+            Assert.NotNull(foundMethod);
+            Assert.IsType<MethodDeclarationSyntax>(foundMethod);
+
+            // Test finding non-existent method
+            var notFoundMethod = ProjectModifierHelper.GetOriginalMethod(classSyntax, "NonExistentMethod", new Method());
+            Assert.Null(notFoundMethod);
+
+            // Test with null class node
+            var nullResult = ProjectModifierHelper.GetOriginalMethod(null, "Test", new Method());
+            Assert.Null(nullResult);
+        }
+
+        [Fact]
+        public void UpdateVariablesCodeSnippetArrayTests()
+        {
+            var snippets = new[]
+            {
+                new CodeSnippet { Block = "builder.Build()", Parent = "builderVar" },
+                new CodeSnippet { Block = "services.AddRazorPages()", CheckBlock = "services.Check()" }
+            };
+
+            var updated = ProjectModifierHelper.UpdateVariables(snippets, "builder", "appBuilder");
+
+            Assert.NotNull(updated);
+            Assert.Equal(2, updated.Length);
+            Assert.Contains("appBuilder.Build()", updated[0].Block);
+            Assert.Equal("builderVar", updated[0].Parent);
+            Assert.Contains("AddRazorPages", updated[1].Block);
+        }
+
+        [Fact]
+        public void UpdateVariablesSingleCodeSnippetTests()
+        {
+            var snippet = new CodeSnippet
+            {
+                Block = "builder.Build()",
+                Parent = "builder.Services",
+                CheckBlock = "builder.Configuration",
+                InsertAfter = "builder.Host",
+                InsertBefore = new[] { "builder.Logging", "builder.WebHost" }
+            };
+
+            var updated = ProjectModifierHelper.UpdateVariables(snippet, "builder", "appBuilder");
+
+            Assert.Contains("appBuilder.Build()", updated.Block);
+            Assert.Contains("appBuilder.Services", updated.Parent);
+            Assert.Contains("appBuilder.Configuration", updated.CheckBlock);
+            Assert.Contains("appBuilder.Host", updated.InsertAfter);
+            Assert.Contains("appBuilder.Logging", updated.InsertBefore[0]);
+            Assert.Contains("appBuilder.WebHost", updated.InsertBefore[1]);
+        }
+
+        [Fact]
+        public async Task ModifyDocumentTextTests()
+        {
+            var document = CreateDocument("namespace Test { }");
+            var codeChanges = new[]
+            {
+                new CodeSnippet
+                {
+                    Block = "\n// Added comment",
+                    ReplaceSnippet = null
+                }
+            };
+
+            var modifiedDocument = await ProjectModifierHelper.ModifyDocumentText(document, codeChanges);
+
+            Assert.NotNull(modifiedDocument);
+            var text = await modifiedDocument.GetTextAsync();
+            Assert.Contains("// Added comment", text.ToString());
+
+            // Test with replace snippet
+            var document2 = CreateDocument("namespace OldName { }");
+            var replaceChanges = new[]
+            {
+                new CodeSnippet
+                {
+                    Block = "namespace NewName { }",
+                    CheckBlock = "NewName",
+                    ReplaceSnippet = new[] { "namespace OldName { }" }
+                }
+            };
+
+            var modifiedDocument2 = await ProjectModifierHelper.ModifyDocumentText(document2, replaceChanges);
+            Assert.NotNull(modifiedDocument2);
+            var text2 = await modifiedDocument2.GetTextAsync();
+            Assert.Contains("NewName", text2.ToString());
+            Assert.DoesNotContain("OldName", text2.ToString());
+
+            // Test with null document
+            var nullResult = await ProjectModifierHelper.ModifyDocumentText((Document)null, codeChanges);
+            Assert.Null(nullResult);
+
+            // Test with null or empty code changes
+            var noChangeResult = await ProjectModifierHelper.ModifyDocumentText(document, null);
+            Assert.Null(noChangeResult);
+        }
+
+        [Fact]
+        public async Task IsUsingTopLevelStatementsWithIModelTypesLocatorTests()
+        {
+            var minimalModelTypesLocator = new Mock<IModelTypesLocator>();
+            var programDocument = CreateDocument(MinimalProgramCsFile);
+            var nonMinimalProgramDocument = CreateDocument(ProgramCsFile);
+
+            minimalModelTypesLocator.Setup(m => m.GetAllDocuments())
+                .Returns(() => new List<Document> { programDocument.WithName("Program.cs") });
+
+            var minimalResult = await ProjectModifierHelper.IsUsingTopLevelStatements(minimalModelTypesLocator.Object);
+            Assert.True(minimalResult);
+
+            var nonMinimalModelTypesLocator = new Mock<IModelTypesLocator>();
+            nonMinimalModelTypesLocator.Setup(m => m.GetAllDocuments())
+                .Returns(() => new List<Document> { nonMinimalProgramDocument.WithName("Program.cs") });
+
+            var nonMinimalResult = await ProjectModifierHelper.IsUsingTopLevelStatements(nonMinimalModelTypesLocator.Object);
+            Assert.False(nonMinimalResult);
+        }
+
+        [Theory]
+        [InlineData(new object[] { new string[] { "IServiceCollection", "IApplicationBuilder" },
+                                   new string[] { "services", "app" } })]
+        public void VerifyParametersWithMismatchTests(string[] types, string[] vals)
+        {
+            var paramList = CreateParameterList(types, vals);
+            
+            // Test with correct parameters
+            var correctParams = ProjectModifierHelper.VerifyParameters(types, paramList);
+            Assert.NotNull(correctParams);
+            Assert.Equal(types.Length, correctParams.Count);
+
+            // Test with mismatched parameters
+            var wrongTypes = new[] { "NonExistentType" };
+            var mismatchedParams = ProjectModifierHelper.VerifyParameters(wrongTypes, paramList);
+            Assert.NotNull(mismatchedParams);
+            Assert.Empty(mismatchedParams);
+
+            // Test with empty parameter list
+            var emptyResult = ProjectModifierHelper.VerifyParameters(types, new List<ParameterSyntax>());
+            Assert.NotNull(emptyResult);
+            Assert.Empty(emptyResult);
+
+            // Test with null types
+            var nullResult = ProjectModifierHelper.VerifyParameters(null, paramList);
+            Assert.NotNull(nullResult);
+            Assert.Empty(nullResult);
+        }
+
+        [Fact]
+        public async Task UpdateDocumentTests()
+        {
+            var tempFilePath = Path.Combine(Path.GetTempPath(), $"test_{Guid.NewGuid()}.cs");
+            try
+            {
+                var document = CreateDocument("namespace Test { public class MyClass { } }");
+                document = document.WithName(tempFilePath);
+
+                var fileSystem = new Mock<IFileSystem>();
+                fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+                    .Callback<string, string>((path, content) => 
+                    {
+                        File.WriteAllText(path, content);
+                    });
+
+                await ProjectModifierHelper.UpdateDocument(document, fileSystem.Object);
+
+                // Verify WriteAllText was called with the document content
+                fileSystem.Verify(fs => fs.WriteAllText(
+                    It.Is<string>(s => s == tempFilePath),
+                    It.IsAny<string>()), 
+                    Times.Once);
+            }
+            finally
+            {
+                if (File.Exists(tempFilePath))
+                {
+                    File.Delete(tempFilePath);
+                }
+            }
+        }
+
+        [Fact]
+        public void FilterCodeBlocksWithNullOptionsTests()
+        {
+            var codeBlocks = new[]
+            {
+                new CodeBlock { Block = "Property1", Options = null },
+                new CodeBlock { Block = "Property2", Options = new[] { "MicrosoftGraph" } }
+            };
+
+            var options = new CodeChangeOptions { MicrosoftGraph = false };
+            var filtered = ProjectModifierHelper.FilterCodeBlocks(codeBlocks, options);
+
+            // Only blocks with null options should be included when option is false
+            Assert.Single(filtered);
+            Assert.Equal("Property1", filtered[0].Block);
+        }
+
+        [Fact]
+        public void FilterCodeSnippetsWithNullOptionsTests()
+        {
+            var codeSnippets = new[]
+            {
+                new CodeSnippet { Block = "Statement1", Options = null },
+                new CodeSnippet { Block = "Statement2", Options = new[] { "DownstreamApi" } }
+            };
+
+            var options = new CodeChangeOptions { DownstreamApi = false };
+            var filtered = ProjectModifierHelper.FilterCodeSnippets(codeSnippets, options);
+
+            // Only snippets with null options should be included when option is false
+            Assert.Single(filtered);
+            Assert.Equal("Statement1", filtered[0].Block);
         }
 
         private static readonly ModelType startupModel = new ModelType

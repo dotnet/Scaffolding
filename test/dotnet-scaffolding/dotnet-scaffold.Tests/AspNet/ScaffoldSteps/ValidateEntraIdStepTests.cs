@@ -248,6 +248,154 @@ public class ValidateEntraIdStepTests
         Assert.False(step.UseExistingApplication);
     }
 
+    [Fact]
+    public void DevelopmentSettingsPreflight_RejectsExistingClientIdBeforeNewRegistration()
+    {
+        string developmentSettingsPath = Path.Combine(
+            Path.GetDirectoryName(_testProjectPath)!,
+            "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns(
+            """
+            {
+              "AzureAd": {
+                "ClientId": "existing-client-id"
+              }
+            }
+            """);
+        var step = CreateValidStep();
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: false,
+            overwrite: false);
+
+        Assert.False(result);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_FailsOnDevelopmentSettingsConflictBeforeModelInitialization()
+    {
+        string developmentSettingsPath = Path.Combine(
+            Path.GetDirectoryName(_testProjectPath)!,
+            "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns(
+            """
+            {
+              "AzureAd": {
+                "ClientId": "existing-client-id"
+              }
+            }
+            """);
+        ValidateEntraIdStep step = CreateValidStep();
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        Assert.False(_context.Properties.ContainsKey("EntraIdModel"));
+        Assert.False(_context.Properties.ContainsKey("EntraIdSettings"));
+    }
+
+    [Fact]
+    public void DevelopmentSettingsPreflight_AllowsConflictsWithOverwrite()
+    {
+        string developmentSettingsPath = Path.Combine(
+            Path.GetDirectoryName(_testProjectPath)!,
+            "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns(
+            """
+            {
+              "AzureAd": {
+                "Instance": "https://login.microsoftonline.us/",
+                "CallbackPath": "/custom-signin",
+                "ClientId": "existing-client-id"
+              }
+            }
+            """);
+        var step = CreateValidStep();
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: false,
+            overwrite: true);
+
+        Assert.True(result);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public void DevelopmentSettingsPreflight_AllowsMatchingExistingRegistrationValues()
+    {
+        const string applicationId = "existing-client-id";
+        string developmentSettingsPath = Path.Combine(
+            Path.GetDirectoryName(_testProjectPath)!,
+            "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns(
+            $$"""
+            {
+              "AzureAd": {
+                "Instance": "https://login.microsoftonline.com/",
+                "TenantId": "test-tenant-id",
+                "Domain": "example.com",
+                "ClientId": "{{applicationId}}",
+                "CallbackPath": "/signin-oidc"
+              }
+            }
+            """);
+        ValidateEntraIdStep step = CreateValidStep();
+        step.Application = applicationId;
+        step.UseExistingApplication = true;
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: true,
+            overwrite: false);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void DevelopmentSettingsPreflight_RejectsMalformedJsonEvenWithOverwrite()
+    {
+        string developmentSettingsPath = Path.Combine(
+            Path.GetDirectoryName(_testProjectPath)!,
+            "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns("{ malformed json");
+        var step = CreateValidStep();
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: false,
+            overwrite: true);
+
+        Assert.False(result);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public void Overwrite_DefaultsToFalse()
+    {
+        var step = new ValidateEntraIdStep(_mockFileSystem.Object, _mockLogger.Object, _testTelemetryService);
+
+        Assert.False(step.Overwrite);
+    }
+
+    private ValidateEntraIdStep CreateValidStep()
+    {
+        return new ValidateEntraIdStep(_mockFileSystem.Object, _mockLogger.Object, _testTelemetryService)
+        {
+            Project = _testProjectPath,
+            Username = "test@example.com",
+            TenantId = "test-tenant-id"
+        };
+    }
+
     private class TestTelemetryService : ITelemetryService
     {
         public List<(string EventName, IReadOnlyDictionary<string, string> Properties, IReadOnlyDictionary<string, double> Measurements)> TrackedEvents { get; } = new();

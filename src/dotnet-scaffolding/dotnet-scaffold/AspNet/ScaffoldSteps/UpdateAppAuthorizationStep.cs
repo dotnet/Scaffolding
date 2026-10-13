@@ -5,6 +5,7 @@
     using Microsoft.DotNet.Scaffolding.Core.Steps;
     using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
     using Microsoft.DotNet.Scaffolding.Internal.Services;
+    using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
     using Microsoft.Extensions.Logging;
 
     namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
@@ -16,6 +17,7 @@
             public string[]? WebRedirectUris { get; set; } 
             public string[]? SpaRedirectUris { get; set; }
             public bool AutoConfigureLocalUrls { get; set; } = true;
+            public string CallbackPath { get; set; } = UpdateAppSettingsStep.DefaultCallbackPath;
 
             private readonly ILogger _logger;
             private readonly IFileSystem _fileSystem;
@@ -71,7 +73,7 @@
                 return Task.FromResult(true);
             }
 
-            private void ConfigureLocalRedirectUris(string projectPath)
+            internal void ConfigureLocalRedirectUris(string projectPath)
             {
                 try
                 {
@@ -111,7 +113,7 @@
                                         {
                                             var baseUrl = url.Trim();
                                             localUrls.Add(baseUrl);
-                                            localUrls.Add($"{baseUrl}/signin-oidc");
+                                            localUrls.Add($"{baseUrl}{CallbackPath}");
                                         }
                                         catch
                                         {
@@ -150,11 +152,11 @@
                 var defaultUris = new[]
                 {
                     "https://localhost:5001",
-                    "https://localhost:5001/signin-oidc",
+                    $"https://localhost:5001{CallbackPath}",
                     "https://localhost:7001",
-                    "https://localhost:7001/signin-oidc",
+                    $"https://localhost:7001{CallbackPath}",
                     "https://localhost:44300",
-                    "https://localhost:44300/signin-oidc"
+                    $"https://localhost:44300{CallbackPath}"
                 };
 
                 WebRedirectUris = (WebRedirectUris ?? Array.Empty<string>())
@@ -166,4 +168,3 @@
             }
         }
     }
-

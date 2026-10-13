@@ -156,17 +156,12 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
                 settings.ClientProjectPath = client.Value.ProjectPath;
                 settings.Layout = SyncfusionBlazorToolkitLayout.AutoServer;
             }
-            else if (!clientLookupOk && ProjectReferencesWebAssemblyClient(settings.Project))
+            else if (!clientLookupOk)
             {
                 // Hard failure: missing referenced project, evaluation
-                // error, or ambiguous clients. We deliberately do not
-                // gate this on `LooksLikeMultiProjectReference()` (the
-                // old sibling-only check) — the standard Blazor Web App
-                // Auto template places the client in a sibling folder,
-                // not next to the server. We DO gate on
-                // `ProjectReferencesWebAssemblyClient` so that a
-                // resolver failure on a genuinely single-project .csproj
-                // is not surfaced as a hard error.
+                // error, or ambiguous clients. We do not pre-filter on the
+                // raw .csproj text: references can come from imported
+                // .props/.targets, and the resolver evaluates MSBuild.
                 _logger.LogError(
                     "Syncfusion Blazor Toolkit scaffolder could not resolve the Blazor WebAssembly client for '{Project}': {Error}. " +
                     "Fix the server project's ProjectReference entries (or remove the WebAssembly client reference for a single-project setup), then re-run the scaffolder.",
@@ -248,34 +243,6 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
             Project = normalizedProject,
             Prerelease = Prerelease,
         };
-    }
-
-    /// <summary>
-    /// True when the supplied .csproj file declares any
-    /// <c>&lt;ProjectReference&gt;</c> entries. This is a fast,
-    /// evaluator-free check (no MSBuild load) that lets the validate
-    /// step decide whether a missing/ambiguous Blazor WebAssembly
-    /// client is a real failure (the project actually tries to
-    /// reference one but evaluation cannot find/match it) or just a
-    /// harmless artifact of evaluating a single-project test fixture
-    /// that the resolver cannot fully load.
-    /// </summary>
-    private static bool ProjectReferencesWebAssemblyClient(string projectPath)
-    {
-        if (string.IsNullOrEmpty(projectPath) || !File.Exists(projectPath))
-        {
-            return false;
-        }
-
-        try
-        {
-            string text = File.ReadAllText(projectPath);
-            return text.Contains("<ProjectReference", StringComparison.OrdinalIgnoreCase);
-        }
-        catch
-        {
-            return false;
-        }
     }
 
     /// <summary>
@@ -390,7 +357,7 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
             }
 
             string programText = File.ReadAllText(programPath);
-            return programText.Contains("AddSyncfusionBlazorToolkit", StringComparison.OrdinalIgnoreCase);
+            return SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(programText);
         }
         catch (Exception ex)
         {

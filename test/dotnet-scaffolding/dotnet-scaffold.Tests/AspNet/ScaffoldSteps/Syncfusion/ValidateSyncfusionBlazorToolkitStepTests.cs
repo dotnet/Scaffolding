@@ -30,6 +30,12 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
 
     public ValidateSyncfusionBlazorToolkitStepTests()
     {
+        // The step now evaluates the project with MSBuild (no textual gate).
+        if (!Microsoft.Build.Locator.MSBuildLocator.IsRegistered)
+        {
+            Microsoft.Build.Locator.MSBuildLocator.RegisterDefaults();
+        }
+
         _tempDir = Path.Combine(Path.GetTempPath(), "sfbt-validate-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempDir);
         _projectPath = Path.GetFullPath(Path.Combine(_tempDir, "Test.csproj"));

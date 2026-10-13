@@ -523,12 +523,10 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Fact]
-    public void EnsureServiceRegistration_BlankFile_FallsBackToAppendingAtEnd()
+    public void EnsureServiceRegistration_BlankFile_SkipsAndLeavesFileUntouched()
     {
-        // If Program.cs is empty (or has no recognisable host-builder
-        // line) the helper must still write a working file. Falling
-        // back to end-of-file preserves the previous behaviour for
-        // this edge case.
+        // No host-builder declaration to anchor on: appending at the end
+        // would register after Build()/Run(), so the file must be left alone.
         var project = Path.Combine(_tempDir, "App.csproj");
         File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
         var program = Path.Combine(_tempDir, "Program.cs");
@@ -538,10 +536,61 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
             project,
             SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
 
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.Equal("", File.ReadAllText(program));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_MultilineBuilderDeclaration_InsertsAfterWholeStatement()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program,
+            "var builder = WebApplication.CreateBuilder(new WebApplicationOptions\n" +
+            "{\n" +
+            "    Args = args,\n" +
+            "});\n" +
+            "var app = builder.Build();\n" +
+            "app.Run();\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
         Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
         string text = File.ReadAllText(program);
-        Assert.Contains("builder.Services.AddSyncfusionBlazorToolkit();", text);
-        Assert.Contains("using Syncfusion.Blazor.Toolkit;", text);
+        Assert.Contains("});\nbuilder.Services.AddSyncfusionBlazorToolkit();\nvar app", text);
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_StringLiteralMentioningCall_IsNotTreatedAsRegistered()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program,
+            "var note = \"builder.Services.AddSyncfusionBlazorToolkit();\";\n" +
+            "var builder = WebApplication.CreateBuilder(args);\n" +
+            "var app = builder.Build();\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+    }
+
+    [Theory]
+    [InlineData("var note = \"builder.Services.AddSyncfusionBlazorToolkit();\";", false)]
+    [InlineData("var note = @\"builder.Services.AddSyncfusionBlazorToolkit();\";", false)]
+    [InlineData("// builder.Services.AddSyncfusionBlazorToolkit();", false)]
+    [InlineData("builder.Services.AddSyncfusionBlazorToolkit();", true)]
+    [InlineData("builder.Services\n    .AddSyncfusionBlazorToolkit();", true)]
+    [InlineData("builder.Services.AddRazorComponents().AddSyncfusionBlazorToolkit();", false)]
+    public void IsActiveServiceRegistrationPresent_IgnoresLiteralsAndComments(string code, bool expected)
+    {
+        Assert.Equal(expected, SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(code));
     }
 
     [Fact]
@@ -708,22 +757,20 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Fact]
-    public void EnsureServiceRegistration_MissingProgramCs_CreatesMinimal()
+    public void EnsureServiceRegistration_MissingProgramCs_SkipsAndCreatesNothing()
     {
+        // The real entry point may live elsewhere (e.g. Hosting.cs). Creating
+        // a top-level Program.cs there would trigger CS8802.
         var project = Path.Combine(_tempDir, "App.csproj");
         File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
-        // No Program.cs on disk.
+        File.WriteAllText(Path.Combine(_tempDir, "Hosting.cs"), WebAppProgramCs);
 
         var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
             project,
             SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
 
-        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Created, result.Outcome);
-        string program = Path.Combine(_tempDir, "Program.cs");
-        Assert.True(File.Exists(program));
-        string text = File.ReadAllText(program);
-        Assert.Contains("WebApplication.CreateBuilder", text);
-        Assert.Contains("AddSyncfusionBlazorToolkit", text);
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.False(File.Exists(Path.Combine(_tempDir, "Program.cs")));
     }
 
     [Fact]
@@ -772,9 +819,9 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
             SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
 
         // Neither bin/Program.cs nor obj/Program.cs counts, so the
-        // helper must create a fresh Program.cs at the project root.
-        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Created, result.Outcome);
-        Assert.True(File.Exists(Path.Combine(_tempDir, "Program.cs")));
+        // helper skips and must not create a Program.cs.
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.False(File.Exists(Path.Combine(_tempDir, "Program.cs")));
     }
 
     [Fact]
@@ -797,10 +844,10 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
             project,
             SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
 
-        // Sibling's Program.cs is ignored — the helper creates a new
+        // Sibling's Program.cs is ignored — the helper skips and does not create a
         // Program.cs at the project root.
-        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Created, result.Outcome);
-        Assert.True(File.Exists(Path.Combine(_tempDir, "Program.cs")));
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.False(File.Exists(Path.Combine(_tempDir, "Program.cs")));
     }
 
     [Fact]

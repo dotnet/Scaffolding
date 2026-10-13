@@ -43,6 +43,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(ValidateEntraIdStep),
                 typeof(ValidateSyncfusionBlazorToolkitStep),
                 typeof(ApplySyncfusionBlazorToolkitImportsStep),
+                typeof(ApplySyncfusionBlazorToolkitProgramCsStep),
                 typeof(VerifySyncfusionBlazorToolkitStep),
                 typeof(SummarizeSyncfusionBlazorToolkitStep),
                 typeof(ValidateIdentityStep),
@@ -235,8 +236,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 })
                 .WithSyncfusionBlazorToolkitAddPackagesStep()
                 .WithSyncfusionBlazorToolkitAddClientPackagesStep()
-                .WithSyncfusionBlazorToolkitCodeChangeStep()
-                .WithSyncfusionBlazorToolkitClientCodeChangeStep()
+                .WithSyncfusionBlazorToolkitProgramCsStep()
+                .WithSyncfusionBlazorToolkitClientProgramCsStep()
                 .WithSyncfusionBlazorToolkitImportsStep()
                 .WithSyncfusionBlazorToolkitImportsClientStep()
                 .WithStep<VerifySyncfusionBlazorToolkitStep>()

@@ -29,7 +29,7 @@ public class SyncfusionBlazorToolkitNet8IntegrationTests : SyncfusionBlazorToolk
         // Program.cs received both the AddSyncfusionBlazorToolkit call
         // and the using directive, and the call survives a build.
         string programCs = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-        Assert.Contains("AddSyncfusionBlazorToolkit", programCs);
+        AssertValidServiceRegistration(programCs);
         Assert.Contains("using Syncfusion.Blazor.Toolkit", programCs);
 
         // Components/_Imports.razor received the @using directive.
@@ -109,7 +109,7 @@ public class SyncfusionBlazorToolkitNet8IntegrationTests : SyncfusionBlazorToolk
         Assert.True(exitCode == 0, $"Output: {output}\nError: {error}");
 
         string programCs = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-        Assert.Contains("AddSyncfusionBlazorToolkit", programCs);
+        AssertValidServiceRegistration(programCs);
         Assert.Contains("using Syncfusion.Blazor.Toolkit", programCs);
 
         string imports = File.ReadAllText(Path.Combine(_testProjectDir, "_Imports.razor"));

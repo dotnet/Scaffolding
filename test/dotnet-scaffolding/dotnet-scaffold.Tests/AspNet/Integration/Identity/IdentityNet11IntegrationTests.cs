@@ -61,7 +61,7 @@ public class IdentityNet11IntegrationTests : IdentityIntegrationTestsBase
             $"Identity/Pages should contain .tt template files for {TargetFramework}");
     }
 
-    [Fact(Skip = "net11.0 preview SDK not yet supported")]
+    [Fact]
     public async Task Scaffold_Identity_Net11_CliInvocation()
     {
         var projectContent = ProjectContent.Replace(
@@ -94,21 +94,18 @@ public class IdentityNet11IntegrationTests : IdentityIntegrationTestsBase
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("TestDbContext", programContent);
 
-        // Identity pages may not be generated if T4 template execution fails
         var identityPagesDir = Path.Combine(_testProjectDir, "Areas", "Identity", "Pages");
-        if (Directory.Exists(identityPagesDir))
-        {
-            var accountDir = Path.Combine(identityPagesDir, "Account");
-            Assert.True(Directory.Exists(accountDir), "Account directory should be created.");
-            Assert.True(File.Exists(Path.Combine(accountDir, "Login.cshtml")), "Login.cshtml should be created.");
-            Assert.True(File.Exists(Path.Combine(accountDir, "Login.cshtml.cs")), "Login.cshtml.cs should be created.");
-            Assert.True(File.Exists(Path.Combine(accountDir, "Register.cshtml")), "Register.cshtml should be created.");
-            Assert.True(File.Exists(Path.Combine(accountDir, "Register.cshtml.cs")), "Register.cshtml.cs should be created.");
-            Assert.True(File.Exists(Path.Combine(accountDir, "Logout.cshtml")), "Logout.cshtml should be created.");
-            var manageDir = Path.Combine(accountDir, "Manage");
-            Assert.True(Directory.Exists(manageDir), "Manage directory should be created.");
-            Assert.True(File.Exists(Path.Combine(manageDir, "Index.cshtml")), "Manage/Index.cshtml should be created.");
-        }
+        Assert.True(Directory.Exists(identityPagesDir), "Identity pages directory should be created.");
+        var accountDir = Path.Combine(identityPagesDir, "Account");
+        Assert.True(Directory.Exists(accountDir), "Account directory should be created.");
+        Assert.True(File.Exists(Path.Combine(accountDir, "Login.cshtml")), "Login.cshtml should be created.");
+        Assert.True(File.Exists(Path.Combine(accountDir, "Login.cshtml.cs")), "Login.cshtml.cs should be created.");
+        Assert.True(File.Exists(Path.Combine(accountDir, "Register.cshtml")), "Register.cshtml should be created.");
+        Assert.True(File.Exists(Path.Combine(accountDir, "Register.cshtml.cs")), "Register.cshtml.cs should be created.");
+        Assert.True(File.Exists(Path.Combine(accountDir, "Logout.cshtml")), "Logout.cshtml should be created.");
+        var manageDir = Path.Combine(accountDir, "Manage");
+        Assert.True(Directory.Exists(manageDir), "Manage directory should be created.");
+        Assert.True(File.Exists(Path.Combine(manageDir, "Index.cshtml")), "Manage/Index.cshtml should be created.");
 
         // Assert no NuGet errors during scaffolding
         Assert.False(cliOutput.Contains("error: NU"),

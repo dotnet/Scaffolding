@@ -37,7 +37,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                 <ValidationMessage For="() => Input.TwoFactorCode" class="text-danger" />
             </div>
             <div class="checkbox mb-3">
-                <label for="remember-machine" class="form-label">
+                <label class="form-label">
                     <InputCheckbox @bind-Value="Input.RememberMachine" />
                     Remember this machine
                 </label>

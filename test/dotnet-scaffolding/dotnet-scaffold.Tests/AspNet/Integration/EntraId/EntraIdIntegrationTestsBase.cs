@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet;
@@ -257,6 +258,35 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
             $"blazorWasmEntraChanges.json should exist for {TargetFramework}");
     }
 
+    [Theory]
+    [InlineData("builder.Services.AddRazorComponents()\n    .AddInteractiveWebAssemblyComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveWebAssemblyComponents()\n    .AddAuthenticationStateSerialization();")]
+    [InlineData("builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents()\n    .AddInteractiveWebAssemblyComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents()\n    .AddInteractiveWebAssemblyComponents()\n    .AddAuthenticationStateSerialization();")]
+    [InlineData("builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents();")]
+    public async Task BlazorEntraChangesConfig_AddsAuthenticationStateSerializationForWasmProjects(string programContent, string expectedRegistration)
+    {
+        var isServerOnly = !programContent.Contains("AddInteractiveWebAssemblyComponents", StringComparison.Ordinal);
+        programContent = programContent.Replace("\n", Environment.NewLine, StringComparison.Ordinal);
+        expectedRegistration = expectedRegistration.Replace("\n", Environment.NewLine, StringComparison.Ordinal);
+        var updatedProgramContent = await ApplyBlazorEntraChangesConfigAsync(programContent);
+
+        Assert.Contains(expectedRegistration, updatedProgramContent, StringComparison.Ordinal);
+        if (isServerOnly)
+        {
+            Assert.DoesNotContain("AddAuthenticationStateSerialization", updatedProgramContent, StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public async Task BlazorEntraChangesConfig_DoesNotDuplicateAuthenticationStateSerialization()
+    {
+        var programContent = "builder.Services.AddRazorComponents()\n    .AddInteractiveWebAssemblyComponents()\n    .AddAuthenticationStateSerialization();"
+            .Replace("\n", Environment.NewLine, StringComparison.Ordinal);
+
+        var updatedProgramContent = await ApplyBlazorEntraChangesConfigAsync(programContent);
+
+        Assert.Equal(1, updatedProgramContent.Split("AddAuthenticationStateSerialization").Length - 1);
+    }
+
     #endregion
 
     #region Validation Combination Tests
@@ -314,6 +344,25 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
         var basePath = Path.Combine(assemblyDirectory!, "..", "..", "..", "..", "..", "src", "dotnet-scaffolding", "dotnet-scaffold", "AspNet", "Templates");
         return Path.GetFullPath(basePath);
+    }
+
+    private async Task<string> ApplyBlazorEntraChangesConfigAsync(string programContent)
+    {
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        File.WriteAllText(programPath, programContent);
+        var configPath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs", "blazorEntraChanges.json");
+        var step = new CodeModificationStep(NullLogger<CodeModificationStep>.Instance)
+        {
+            CodeModifierConfigPath = configPath,
+            CodeChangeOptions = [],
+            ProjectPath = _testProjectPath
+        };
+
+        var result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.True(result);
+        return File.ReadAllText(programPath);
     }
 
     protected Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)

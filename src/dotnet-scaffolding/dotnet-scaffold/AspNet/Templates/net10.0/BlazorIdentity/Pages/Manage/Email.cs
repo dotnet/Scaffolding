@@ -53,7 +53,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "\"text\" value=\"@email\" id=\"email\" class=\"form-control\" placeholder=\"Enter your em" +
                     "ail\" disabled />\r\n                    <div class=\"input-group-append\">\r\n        " +
                     "                <span class=\"h-100 input-group-text text-success font-weight-bol" +
-                    "d\">?</span>\r\n                    </div>\r\n                    <label for=\"email\" " +
+                    "d\">\u2713</span>\r\n                    </div>\r\n                    <label for=\"email\" " +
                     "class=\"form-label\">Email</label>\r\n                </div>\r\n            }\r\n       " +
                     "     else\r\n            {\r\n                <div class=\"form-floating mb-3\">\r\n    " +
                     "                <input type=\"text\" value=\"@email\" id=\"email\" class=\"form-control" +

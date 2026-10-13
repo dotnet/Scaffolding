@@ -1,0 +1,3 @@
+<Project>
+  <!-- Stop importing the repository's Arcade and test targets so baselines build as ordinary applications. -->
+</Project>

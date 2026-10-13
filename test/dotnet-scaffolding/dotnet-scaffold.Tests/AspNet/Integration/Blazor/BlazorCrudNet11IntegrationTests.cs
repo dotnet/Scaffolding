@@ -13,7 +13,7 @@ public class BlazorCrudNet11IntegrationTests : BlazorCrudIntegrationTestsBase
     protected override string TargetFramework => "net11.0";
     protected override string TestClassName => nameof(BlazorCrudNet11IntegrationTests);
 
-    [Fact(Skip = "net11.0 preview SDK not yet supported")]
+    [Fact]
     public async Task Scaffold_BlazorCrud_Net11_CliInvocation()
     {
         var projectContent = ProjectContent.Replace(
@@ -49,8 +49,8 @@ public enum EmploymentType
         // Write NuGet.config with preview feeds so net11.0 packages can be resolved
         File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
 
-        var (beforeExitCode, _, beforeError) = await RunBuildAsync(_testProjectDir);
-        Assert.True(beforeExitCode == 0, $"Project should build before scaffolding. Error: {beforeError}");
+        var (beforeExitCode, beforeOutput, beforeError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(beforeExitCode == 0, $"Project should build before scaffolding.\nOutput: {beforeOutput}\nError: {beforeError}");
 
         var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
@@ -93,7 +93,7 @@ public enum EmploymentType
             $"Scaffolding should not contain failures for {TargetFramework}.\nOutput: {cliOutput}\nError: {cliError}");
 
         // Verify project builds after scaffolding
-        var (afterExitCode, _, afterError) = await RunBuildAsync(_testProjectDir);
-        Assert.True(afterExitCode == 0, $"Project should still build after scaffolding. Error: {afterError}");
+        var (afterExitCode, afterOutput, afterError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(afterExitCode == 0, $"Project should still build after scaffolding.\nOutput: {afterOutput}\nError: {afterError}");
     }
 }

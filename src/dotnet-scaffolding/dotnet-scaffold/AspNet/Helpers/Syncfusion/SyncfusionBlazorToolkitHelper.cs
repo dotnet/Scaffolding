@@ -6,6 +6,7 @@ using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
@@ -503,9 +504,19 @@ internal static class SyncfusionBlazorToolkitHelper
         // as `builder.Services.AddRazorComponents().AddSyncfusionBlazorToolkit()`
         // has an invocation as its receiver and is rejected.
         SyntaxNode root = CSharpSyntaxTree.ParseText(programText).GetRoot();
-        string? builderName = FindHostBuilderDeclaration(root, [WebBuilderMarker, WasmBuilderMarker])?
-            .Declarator.Identifier.ValueText;
 
+        // Every host builder declared in the file must be registered. With
+        // several builders a registration on just one of them (or on an
+        // unrelated receiver) must not count, otherwise an ambiguous file
+        // would pass verification. Only when the file declares no
+        // recognisable host builder at all (custom bootstrap) is a
+        // registration on any receiver accepted.
+        List<string> builderNames = FindHostBuilderDeclarations(root, [WebBuilderMarker, WasmBuilderMarker])
+            .Select(d => d.Declarator.Identifier.ValueText)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        List<string> registeredReceivers = [];
         foreach (InvocationExpressionSyntax invocation in root.DescendantNodes().OfType<InvocationExpressionSyntax>())
         {
             if (invocation.Parent is ExpressionStatementSyntax &&
@@ -514,14 +525,15 @@ internal static class SyncfusionBlazorToolkitHelper
                 call.Name.Identifier.ValueText == ServiceRegistrationCall &&
                 call.Expression is MemberAccessExpressionSyntax services &&
                 services.Name.Identifier.ValueText == "Services" &&
-                services.Expression is IdentifierNameSyntax receiver &&
-                (builderName is null || receiver.Identifier.ValueText == builderName))
+                services.Expression is IdentifierNameSyntax receiver)
             {
-                return true;
+                registeredReceivers.Add(receiver.Identifier.ValueText);
             }
         }
 
-        return false;
+        return builderNames.Count == 0
+            ? registeredReceivers.Count > 0
+            : builderNames.All(name => registeredReceivers.Contains(name, StringComparer.Ordinal));
     }
 
     private static bool IsInsideDeferredCode(SyntaxNode node) =>
@@ -669,20 +681,6 @@ internal static class SyncfusionBlazorToolkitHelper
         StandaloneWasm = 1,
     }
 
-    /// <summary>
-    /// The set of file names that are treated as the application entry
-    /// point by <see cref="DiscoverProgramCs"/>. <c>Program.cs</c> is the
-    /// .NET 6+ default; the remaining entries are accepted as alternates
-    /// for older / non-standard layouts so the scaffolder still works
-    /// when the file lives at a custom name.
-    /// </summary>
-    public static readonly string[] ProgramCsFileNameCandidates =
-    [
-        "Program.cs",
-        "Program.vb",
-        "Startup.cs",
-    ];
-
     private const string ServiceRegistrationCall = "AddSyncfusionBlazorToolkit";
     private const string DefaultBuilderVariableName = "builder";
     private const string ToolKitUsingDirective = "using Syncfusion.Blazor.Toolkit;";
@@ -727,7 +725,7 @@ internal static class SyncfusionBlazorToolkitHelper
             return (ServiceRegistrationOutcome.Skipped, null);
         }
 
-        string? programPath = DiscoverProgramCs(projectDirectory);
+        string? programPath = DiscoverEntryPoint(projectPath, out _);
         if (string.IsNullOrEmpty(programPath))
         {
             return (ServiceRegistrationOutcome.Skipped, null);
@@ -752,69 +750,122 @@ internal static class SyncfusionBlazorToolkitHelper
     }
 
     /// <summary>
-    /// Locates the application entry-point file inside
-    /// <paramref name="projectDirectory"/>. The root <c>Program.cs</c>
-    /// is preferred; one-level subdirectories are searched as fallbacks.
-    /// <c>bin</c> / <c>obj</c> / <c>node_modules</c> / <c>.git</c> and any
-    /// other directory that hosts a <c>.csproj</c> are excluded so
-    /// sibling projects never claim the entry point of the project the
-    /// scaffolder was invoked against.
+    /// Locates the application entry-point source file from the project's
+    /// MSBuild-evaluated <c>Compile</c> items, i.e. from what is actually
+    /// compiled (SDK globbing, <c>Remove</c>/<c>Update</c>, imported
+    /// <c>.props</c>/<c>.targets</c> and <c>DefaultItemExcludes</c> all
+    /// applied) rather than from file names on disk.
+    ///
+    /// <para>The entry point is the single compiled file that declares a
+    /// host builder (<c>WebApplication.CreateBuilder</c> /
+    /// <c>WebAssemblyHostBuilder.CreateDefault</c>); this also finds
+    /// <c>Hosting.cs</c>-style layouts. When no compiled file declares one,
+    /// a single compiled <c>Program.cs</c> is returned so a custom
+    /// bootstrap that is already registered can still be recognised.</para>
+    ///
+    /// <para>Fails closed: returns <c>null</c> with a diagnostic when
+    /// evaluation fails, a source file cannot be read, or the answer is
+    /// ambiguous (several compiled files declare a host builder).</para>
     /// </summary>
-    public static string? DiscoverProgramCs(string projectDirectory)
+    public static string? DiscoverEntryPoint(string? projectPath, out string? error)
     {
-        if (string.IsNullOrEmpty(projectDirectory) || !Directory.Exists(projectDirectory))
+        error = null;
+        if (string.IsNullOrEmpty(projectPath) || !File.Exists(projectPath))
         {
+            error = $"The project file '{projectPath}' was not found.";
             return null;
         }
 
-        // 1. Root-level entry point — the conventional .NET 6+ layout.
-        foreach (string candidate in ProgramCsFileNameCandidates)
+        var projectService = new MSBuildProjectService(projectPath);
+        if (!projectService.TryGetEvaluatedItems("Compile", out var items, out string? evaluationError))
         {
-            string root = Path.Combine(projectDirectory, candidate);
-            if (File.Exists(root))
+            error = $"Unable to evaluate the compiled sources of '{projectPath}'. {evaluationError}";
+            return null;
+        }
+
+        List<string> sources = items
+            .Select(item => item.FullPath)
+            .Where(path => path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && File.Exists(path))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var hostFiles = new List<string>();
+        foreach (string path in sources)
+        {
+            string text;
+            try
             {
-                return root;
+                text = File.ReadAllText(path);
             }
-        }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                error = $"Unable to read compiled source '{path}': {ex.Message}";
+                return null;
+            }
 
-        // 2. One-level subdirectory fallback. We walk the immediate
-        //    children (excluding build/output/VCS folders and any
-        //    directory that itself contains a .csproj — that would be
-        //    a sibling project, not the current project's entry point).
-        IEnumerable<string> subdirs;
-        try
-        {
-            subdirs = Directory.EnumerateDirectories(projectDirectory);
-        }
-        catch
-        {
-            return null;
-        }
-
-        foreach (string subdir in subdirs)
-        {
-            string name = Path.GetFileName(subdir);
-            if (IsExcludedDirectory(name))
+            if (!text.Contains("CreateBuilder", StringComparison.Ordinal) &&
+                !text.Contains("CreateDefault", StringComparison.Ordinal))
             {
                 continue;
             }
 
-            if (DirectoryContainsProjectFile(subdir))
+            SyntaxNode root = CSharpSyntaxTree.ParseText(text).GetRoot();
+            if (FindHostBuilderDeclarations(root, [WebBuilderMarker, WasmBuilderMarker]).Count > 0)
             {
-                continue;
-            }
-
-            foreach (string candidate in ProgramCsFileNameCandidates)
-            {
-                string candidatePath = Path.Combine(subdir, candidate);
-                if (File.Exists(candidatePath))
-                {
-                    return candidatePath;
-                }
+                hostFiles.Add(path);
             }
         }
 
+        if (hostFiles.Count == 1)
+        {
+            return hostFiles[0];
+        }
+
+        if (hostFiles.Count > 1)
+        {
+            error = $"Several compiled files declare a host builder, so the application entry point is ambiguous: {string.Join(", ", hostFiles)}.";
+            return null;
+        }
+
+        List<string> conventional = sources
+            .Where(path => string.Equals(Path.GetFileName(path), "Program.cs", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (conventional.Count == 1)
+        {
+            return conventional[0];
+        }
+
+        error = $"No compiled source of '{projectPath}' declares a host builder " +
+            "('WebApplication.CreateBuilder(...)' or 'WebAssemblyHostBuilder.CreateDefault(...)').";
         return null;
+    }
+
+    /// <summary>
+    /// True when the project's MSBuild-evaluated <c>PackageReference</c>
+    /// items include <c>Syncfusion.Blazor.Toolkit</c> (exact id). Reflects
+    /// references that come from imported <c>.props</c>/<c>.targets</c> and
+    /// is not fooled by comments or similarly named packages. Returns
+    /// <c>false</c> with a diagnostic when evaluation fails.
+    /// </summary>
+    public static bool TryIsPackageReferenced(string? projectPath, out bool referenced, out string? error)
+    {
+        referenced = false;
+        error = null;
+        if (string.IsNullOrEmpty(projectPath) || !File.Exists(projectPath))
+        {
+            error = $"The project file '{projectPath}' was not found.";
+            return false;
+        }
+
+        var projectService = new MSBuildProjectService(projectPath);
+        if (!projectService.TryGetEvaluatedItems("PackageReference", out var items, out string? evaluationError))
+        {
+            error = $"Unable to evaluate the package references of '{projectPath}'. {evaluationError}";
+            return false;
+        }
+
+        referenced = items.Any(item => string.Equals(item.Include, "Syncfusion.Blazor.Toolkit", StringComparison.OrdinalIgnoreCase));
+        return true;
     }
 
     /// <summary>
@@ -856,7 +907,17 @@ internal static class SyncfusionBlazorToolkitHelper
         SyntaxNode root,
         string[] markers)
     {
-        var matches = new List<(LocalDeclarationStatementSyntax, VariableDeclaratorSyntax)>();
+        var matches = FindHostBuilderDeclarations(root, markers);
+
+        // Ambiguous (several host builders): refuse rather than guess.
+        return matches.Count == 1 ? matches[0] : null;
+    }
+
+    private static List<(LocalDeclarationStatementSyntax Statement, VariableDeclaratorSyntax Declarator)> FindHostBuilderDeclarations(
+        SyntaxNode root,
+        string[] markers)
+    {
+        var matches = new List<(LocalDeclarationStatementSyntax Statement, VariableDeclaratorSyntax Declarator)>();
         foreach (LocalDeclarationStatementSyntax statement in root.DescendantNodes().OfType<LocalDeclarationStatementSyntax>())
         {
             // Declarations nested in lambdas / local functions are not the
@@ -885,38 +946,7 @@ internal static class SyncfusionBlazorToolkitHelper
             }
         }
 
-        // Ambiguous (several host builders): refuse rather than guess.
-        return matches.Count == 1 ? matches[0] : null;
-    }
-
-    private static bool IsExcludedDirectory(string name)
-    {
-        if (string.IsNullOrEmpty(name))
-        {
-            return true;
-        }
-
-        return name.Equals("bin", StringComparison.OrdinalIgnoreCase)
-            || name.Equals("obj", StringComparison.OrdinalIgnoreCase)
-            || name.Equals("node_modules", StringComparison.OrdinalIgnoreCase)
-            || name.Equals(".git", StringComparison.OrdinalIgnoreCase)
-            || name.Equals(".vs", StringComparison.OrdinalIgnoreCase)
-            || name.Equals(".idea", StringComparison.OrdinalIgnoreCase)
-            || name.Equals("Properties", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static bool DirectoryContainsProjectFile(string directory)
-    {
-        try
-        {
-            return Directory.EnumerateFiles(directory, "*.csproj").Any()
-                || Directory.EnumerateFiles(directory, "*.vbproj").Any()
-                || Directory.EnumerateFiles(directory, "*.fsproj").Any();
-        }
-        catch
-        {
-            return false;
-        }
+        return matches;
     }
 
     private static bool TryAppendServiceRegistration(string programPath, string existingText, string builderName)
@@ -972,16 +1002,19 @@ internal static class SyncfusionBlazorToolkitHelper
 
     /// <summary>
     /// Returns <paramref name="source"/> with
-    /// <paramref name="usingDirective"/> prepended as the first line of
-    /// the file when it is not already present (and not commented out).
-    /// When the directive is already present the original source is
-    /// returned unchanged.
+    /// <paramref name="usingDirective"/> added when it is not already
+    /// present. Placement is syntax-aware: the directive goes after the
+    /// last existing <c>extern alias</c>/<c>using</c> (so it never lands
+    /// before an <c>extern alias</c>, which would be CS0439, and stays
+    /// grouped with the other usings). Without any, it goes after the
+    /// file's leading header comments and preprocessor lines, immediately
+    /// before the first code token. An already-present (non-commented)
+    /// directive leaves the source unchanged.
     /// </summary>
     private static string EnsureUsingDirective(string source, string usingDirective)
     {
         if (string.IsNullOrEmpty(source))
         {
-            // Empty file — write the using directive on its own.
             return usingDirective + Environment.NewLine;
         }
 
@@ -990,48 +1023,48 @@ internal static class SyncfusionBlazorToolkitHelper
             return source;
         }
 
-        // Use the comment-stripped view so a commented-out using does
-        // not count as already-present.
-        string codeOnly = StripCSharpComments(source);
-        foreach (string rawLine in codeOnly.Split('\n'))
+        CompilationUnitSyntax root = CSharpSyntaxTree.ParseText(source).GetCompilationUnitRoot();
+        string wanted = usingDirective.TrimEnd(';').Replace("using", string.Empty, StringComparison.Ordinal).Trim();
+        foreach (UsingDirectiveSyntax existing in root.Usings)
         {
-            string line = rawLine.TrimEnd('\r').Trim();
-            if (string.Equals(line, usingDirective, StringComparison.Ordinal))
+            if (existing.Alias is null &&
+                existing.StaticKeyword.IsKind(SyntaxKind.None) &&
+                existing.Name?.ToString().Replace(" ", string.Empty) == wanted)
             {
                 return source;
             }
         }
 
-        // Use the same line ending as the rest of the file so we do
-        // not introduce a mixed-ending section. CRLF on Windows, LF
-        // on Linux/macOS, falling back to the platform newline when
-        // the file uses neither.
-        string newline = source.Contains("\r\n", StringComparison.Ordinal)
-            ? "\r\n"
-            : "\n";
+        string newline = source.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
 
-        StringBuilder sb = new(source.Length + usingDirective.Length + 4);
-        sb.Append(usingDirective);
-        sb.Append(newline);
-        // If the existing file already starts with a newline, do not
-        // double it.
-        if (!StartsWithNewline(source))
+        int lastDirectiveEnd = -1;
+        foreach (ExternAliasDirectiveSyntax extern_ in root.Externs)
         {
-            sb.Append(newline);
+            lastDirectiveEnd = Math.Max(lastDirectiveEnd, extern_.FullSpan.End);
         }
 
-        sb.Append(source);
-        return sb.ToString();
-    }
-
-    private static bool StartsWithNewline(string source)
-    {
-        if (string.IsNullOrEmpty(source))
+        foreach (UsingDirectiveSyntax existing in root.Usings)
         {
-            return false;
+            lastDirectiveEnd = Math.Max(lastDirectiveEnd, existing.FullSpan.End);
         }
 
-        return source[0] == '\n' || source[0] == '\r';
-    }
+        if (lastDirectiveEnd >= 0)
+        {
+            string before = source[..lastDirectiveEnd];
+            string prefix = before.EndsWith('\n') ? string.Empty : newline;
+            return before + prefix + usingDirective + newline + source[lastDirectiveEnd..];
+        }
 
+        // No usings: insert at the start of the first code token's line,
+        // i.e. after any header comment / #nullable / #pragma lines.
+        SyntaxToken first = root.GetFirstToken(includeZeroWidth: false);
+        int insertAt = first.IsKind(SyntaxKind.None) ? source.Length : first.SpanStart;
+        int lineStart = source.LastIndexOf('\n', Math.Max(0, insertAt - 1)) + 1;
+        if (lineStart > insertAt)
+        {
+            lineStart = insertAt;
+        }
+
+        return source[..lineStart] + usingDirective + newline + newline + source[lineStart..];
+    }
 }

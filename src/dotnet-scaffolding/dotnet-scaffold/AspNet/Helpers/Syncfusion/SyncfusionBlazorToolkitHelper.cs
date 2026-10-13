@@ -480,9 +480,29 @@ internal static class SyncfusionBlazorToolkitHelper
     }
 
     /// <summary>
-    /// True when <paramref name="programText"/> registers the Toolkit on
-    /// the application's startup path. A registration counts only when it
-    /// is:
+    /// Outcome of inspecting an entry point for the Toolkit registration.
+    /// </summary>
+    private enum RegistrationState
+    {
+        /// <summary>Every host builder is registered before its <c>Build()</c>.</summary>
+        Registered = 0,
+
+        /// <summary>A host builder is positively identified and a confirmed
+        /// <c>Build()</c> boundary exists, but the registration is missing,
+        /// late, conditional or malformed.</summary>
+        NotRegistered = 1,
+
+        /// <summary>The framework host builder could not be identified, or
+        /// its <c>Build()</c> boundary could not be established. Nothing can
+        /// be concluded, so callers must neither report success nor
+        /// modify the file.</summary>
+        Unverifiable = 2,
+    }
+
+    /// <summary>
+    /// True only when <paramref name="programText"/> conclusively registers
+    /// the Toolkit on the application's startup path. A registration counts
+    /// only when it is:
     /// <list type="bullet">
     ///   <item><description>a real, parameterless
     ///   <c>&lt;builder&gt;.Services.AddSyncfusionBlazorToolkit()</c>
@@ -490,49 +510,66 @@ internal static class SyncfusionBlazorToolkitHelper
     ///   with arguments),</description></item>
     ///   <item><description>a direct statement of the startup scope -
     ///   top-level statements or the body of a static <c>Main</c> - so it
-    ///   always executes (not inside <c>if</c>/<c>try</c>/loops, lambdas,
-    ///   local functions, or ordinary helper methods), and</description></item>
-    ///   <item><description>made on the host-builder variable after its
-    ///   declaration and before the statement that calls
-    ///   <c>Build()</c> on it.</description></item>
+    ///   always executes,</description></item>
+    ///   <item><description>made on a variable that is positively resolved
+    ///   (through using aliases and qualified names) to the framework's
+    ///   <c>Microsoft.AspNetCore.Builder.WebApplication</c> or
+    ///   <c>WebAssemblyHostBuilder</c> creation call, after its
+    ///   declaration, and</description></item>
+    ///   <item><description>before a confirmed statement that calls
+    ///   <c>Build()</c> on that variable.</description></item>
     /// </list>
-    /// When the file declares several host builders, each must satisfy
-    /// this. When it declares none (custom bootstrap), a registration on
-    /// any receiver in the startup scope is accepted.
+    /// Fails closed: when no host builder can be identified, or no
+    /// <c>Build()</c> boundary exists, the result is <c>false</c>.
     /// </summary>
-    public static bool IsActiveServiceRegistrationPresent(string? programText)
+    public static bool IsActiveServiceRegistrationPresent(string? programText) =>
+        EvaluateRegistration(programText) == RegistrationState.Registered;
+
+    private static RegistrationState EvaluateRegistration(string? programText)
     {
         if (string.IsNullOrEmpty(programText))
         {
-            return false;
+            return RegistrationState.Unverifiable;
         }
 
         SyntaxNode root = CSharpSyntaxTree.ParseText(programText).GetRoot();
         List<HostBuilderDeclaration> builders = FindHostBuilderDeclarations(root, ProgramHostKind.WebApp, ProgramHostKind.StandaloneWasm);
         if (builders.Count == 0)
         {
-            return GetStartupStatementLists(root)
-                .Any(scope => scope.Any(statement => GetRegistrationReceiver(statement) is not null));
+            return RegistrationState.Unverifiable;
         }
 
-        return builders.All(IsRegisteredBeforeBuild);
+        var states = builders.Select(EvaluateBuilder).ToList();
+        if (states.Contains(RegistrationState.Unverifiable))
+        {
+            return RegistrationState.Unverifiable;
+        }
+
+        return states.All(state => state == RegistrationState.Registered)
+            ? RegistrationState.Registered
+            : RegistrationState.NotRegistered;
     }
 
-    private static bool IsRegisteredBeforeBuild(HostBuilderDeclaration builder)
+    private static RegistrationState EvaluateBuilder(HostBuilderDeclaration builder)
     {
         int declarationIndex = builder.Scope.IndexOf(builder.Statement);
         int buildIndex = builder.Scope.FindIndex(declarationIndex + 1, statement => CallsBuildOn(statement, builder.Name));
-        int end = buildIndex < 0 ? builder.Scope.Count : buildIndex;
+        if (buildIndex < 0)
+        {
+            // No host-construction boundary: an incomplete or unsupported
+            // bootstrap. Do not claim the registration is effective.
+            return RegistrationState.Unverifiable;
+        }
 
-        for (int i = declarationIndex + 1; i < end; i++)
+        for (int i = declarationIndex + 1; i < buildIndex; i++)
         {
             if (string.Equals(GetRegistrationReceiver(builder.Scope[i]), builder.Name, StringComparison.Ordinal))
             {
-                return true;
+                return RegistrationState.Registered;
             }
         }
 
-        return false;
+        return RegistrationState.NotRegistered;
     }
 
     private static bool CallsBuildOn(StatementSyntax statement, string builderName) =>
@@ -791,9 +828,14 @@ internal static class SyncfusionBlazorToolkitHelper
 
         string text = File.ReadAllText(programPath);
         string relativePath = ToRelativePath(projectDirectory, programPath);
-        if (IsActiveServiceRegistrationPresent(text))
+        switch (EvaluateRegistration(text))
         {
-            return (ServiceRegistrationOutcome.AlreadyPresent, relativePath);
+            case RegistrationState.Registered:
+                return (ServiceRegistrationOutcome.AlreadyPresent, relativePath);
+            case RegistrationState.Unverifiable:
+                // Host builder or Build() boundary could not be established:
+                // leave the file untouched and let the caller report it.
+                return (ServiceRegistrationOutcome.Skipped, relativePath);
         }
 
         if (!TryAppendServiceRegistration(programPath, text, hostKind))
@@ -983,13 +1025,14 @@ internal static class SyncfusionBlazorToolkitHelper
     private static List<HostBuilderDeclaration> FindHostBuilderDeclarations(SyntaxNode root, params ProgramHostKind[] kinds)
     {
         var matches = new List<HostBuilderDeclaration>();
+        var types = new HostTypeResolver(root);
         foreach (List<StatementSyntax> scope in GetStartupStatementLists(root))
         {
             foreach (LocalDeclarationStatementSyntax statement in scope.OfType<LocalDeclarationStatementSyntax>())
             {
                 foreach (VariableDeclaratorSyntax declarator in statement.Declaration.Variables)
                 {
-                    ProgramHostKind? kind = GetHostBuilderKind(declarator.Initializer?.Value);
+                    ProgramHostKind? kind = types.GetHostBuilderKind(declarator.Initializer?.Value);
                     if (kind is not null && kinds.Contains(kind.Value))
                     {
                         matches.Add(new HostBuilderDeclaration(declarator.Identifier.ValueText, statement, scope));
@@ -1001,32 +1044,97 @@ internal static class SyncfusionBlazorToolkitHelper
         return matches;
     }
 
-    private static ProgramHostKind? GetHostBuilderKind(ExpressionSyntax? initializer)
+    private const string WebApplicationType = "Microsoft.AspNetCore.Builder.WebApplication";
+    private const string WasmHostBuilderType = "Microsoft.AspNetCore.Components.WebAssembly.Hosting.WebAssemblyHostBuilder";
+
+    /// <summary>
+    /// Resolves the type named in <c>Type.CreateBuilder(...)</c> /
+    /// <c>Type.CreateDefault(...)</c> to the framework's host-builder types
+    /// without a compilation: using aliases (<c>using WebApp =
+    /// Microsoft.AspNetCore.Builder.WebApplication;</c>, including
+    /// <c>global using</c> and chains of aliases), <c>global::</c> and fully
+    /// qualified names are followed, and the resulting full name must equal
+    /// the framework type. A bare <c>WebApplication</c> /
+    /// <c>WebAssemblyHostBuilder</c> (supplied by the SDK's implicit usings
+    /// or an ordinary using) is accepted only when the file does not
+    /// declare a type or alias of that name. Anything else - a different
+    /// namespace, an alias to a non-framework type, a look-alike - is not a
+    /// host builder.
+    /// </summary>
+    private sealed class HostTypeResolver
     {
-        while (initializer is ParenthesizedExpressionSyntax parenthesized)
+        private readonly Dictionary<string, string> _aliases = new(StringComparer.Ordinal);
+        private readonly HashSet<string> _declaredTypes = new(StringComparer.Ordinal);
+
+        public HostTypeResolver(SyntaxNode root)
         {
-            initializer = parenthesized.Expression;
+            foreach (UsingDirectiveSyntax directive in root.DescendantNodes().OfType<UsingDirectiveSyntax>())
+            {
+                if (directive.Alias is not null && directive.StaticKeyword.IsKind(SyntaxKind.None))
+                {
+                    _aliases[directive.Alias.Name.Identifier.ValueText] = Normalize(directive.NamespaceOrType.ToString());
+                }
+            }
+
+            foreach (BaseTypeDeclarationSyntax type in root.DescendantNodes().OfType<BaseTypeDeclarationSyntax>())
+            {
+                _declaredTypes.Add(type.Identifier.ValueText);
+            }
+
+            foreach (DelegateDeclarationSyntax type in root.DescendantNodes().OfType<DelegateDeclarationSyntax>())
+            {
+                _declaredTypes.Add(type.Identifier.ValueText);
+            }
         }
 
-        if (initializer is not InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax access })
+        public ProgramHostKind? GetHostBuilderKind(ExpressionSyntax? initializer)
         {
-            return null;
+            while (initializer is ParenthesizedExpressionSyntax parenthesized)
+            {
+                initializer = parenthesized.Expression;
+            }
+
+            if (initializer is not InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax access })
+            {
+                return null;
+            }
+
+            string method = access.Name.Identifier.ValueText;
+            string type = Resolve(Normalize(access.Expression.ToString()));
+
+            return (type, method) switch
+            {
+                (WebApplicationType, "CreateBuilder") => ProgramHostKind.WebApp,
+                (WasmHostBuilderType, "CreateDefault") => ProgramHostKind.StandaloneWasm,
+                ("WebApplication", "CreateBuilder") when !_declaredTypes.Contains("WebApplication") => ProgramHostKind.WebApp,
+                ("WebAssemblyHostBuilder", "CreateDefault") when !_declaredTypes.Contains("WebAssemblyHostBuilder") => ProgramHostKind.StandaloneWasm,
+                _ => null,
+            };
         }
 
-        // `WebApplication.X` or a qualified `Microsoft.AspNetCore.Builder.WebApplication.X`.
-        string? typeName = access.Expression switch
+        private string Resolve(string name)
         {
-            IdentifierNameSyntax identifier => identifier.Identifier.ValueText,
-            MemberAccessExpressionSyntax qualified => qualified.Name.Identifier.ValueText,
-            _ => null,
-        };
+            // Follow alias chains (bounded, to survive cyclic aliases).
+            for (int i = 0; i < 8; i++)
+            {
+                int dot = name.IndexOf('.');
+                string head = dot < 0 ? name : name[..dot];
+                if (!_aliases.TryGetValue(head, out string? target))
+                {
+                    break;
+                }
 
-        return (typeName, access.Name.Identifier.ValueText) switch
+                name = dot < 0 ? target : target + name[dot..];
+            }
+
+            return name;
+        }
+
+        private static string Normalize(string name)
         {
-            ("WebApplication", "CreateBuilder") => ProgramHostKind.WebApp,
-            ("WebAssemblyHostBuilder", "CreateDefault") => ProgramHostKind.StandaloneWasm,
-            _ => null,
-        };
+            string compact = string.Concat(name.Where(c => !char.IsWhiteSpace(c)));
+            return compact.StartsWith("global::", StringComparison.Ordinal) ? compact["global::".Length..] : compact;
+        }
     }
 
     private static bool TryAppendServiceRegistration(string programPath, string existingText, ProgramHostKind hostKind)

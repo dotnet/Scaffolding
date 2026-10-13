@@ -1111,12 +1111,126 @@ internal static class SyncfusionBlazorToolkitHelper
         string registrationLine = $"{builderName}.Services.{ServiceRegistrationCall}();";
 
         // Build the new file content: ensure the using directive is
-        // present, preserve the existing body, and append the service
-        // registration call at the bottom on its own line.
+        // present, then insert the service registration call
+        // immediately after the host-builder declaration so the
+        // services are wired up before any later `builder.Build()`
+        // call consumes them. If the host-builder line cannot be
+        // located (empty or unparseable file), fall back to appending
+        // at the end of the file — preserves the previous behaviour
+        // for the edge case.
         string withUsing = EnsureUsingDirective(existingText, ToolKitUsingDirective);
-        string withRegistration = AppendLine(withUsing, registrationLine);
+        string withRegistration = InsertAfterBuilderLine(withUsing, registrationLine)
+            ?? AppendLine(withUsing, registrationLine);
 
         File.WriteAllText(programPath, withRegistration);
+    }
+
+    /// <summary>
+    /// Inserts <paramref name="registrationLine"/> immediately after
+    /// the first host-builder assignment line in <paramref name="source"/>
+    /// (the line that contains <c>WebApplication.CreateBuilder</c> or
+    /// <c>WebAssemblyHostBuilder.CreateDefault</c>), preserving the
+    /// file's existing line ending (CRLF or LF).
+    ///
+    /// <para>Returns <c>null</c> when the file does not contain a
+    /// recognisable host-builder assignment; callers should fall back
+    /// to appending the registration at the end of the file in that
+    /// case.</para>
+    ///
+    /// <para>Commented-out host-builder lines are ignored (we use the
+    /// comment-stripped view of the file to detect the marker), so a
+    /// file with only a commented-out <c>var builder = ...</c> line
+    /// behaves the same as a file with no marker at all.</para>
+    /// </summary>
+    private static string? InsertAfterBuilderLine(string source, string registrationLine)
+    {
+        if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(registrationLine))
+        {
+            return null;
+        }
+
+        string[] rawLines = source.Split('\n');
+        string codeOnly = StripCSharpComments(source);
+        string[] codeLines = codeOnly.Split('\n');
+
+        for (int i = 0; i < codeLines.Length; i++)
+        {
+            string codeLine = codeLines[i].TrimEnd('\r').Trim();
+            if (codeLine.Length == 0)
+            {
+                continue;
+            }
+
+            bool isHostBuilderLine =
+                codeLine.Contains("WebApplication.CreateBuilder", StringComparison.Ordinal)
+                || codeLine.Contains("WebAssemblyHostBuilder.CreateDefault", StringComparison.Ordinal);
+
+            if (!isHostBuilderLine || codeLine.IndexOf('=') <= 0)
+            {
+                continue;
+            }
+
+            // We found the host-builder line in the comment-stripped
+            // view at index `i`. Map back to the original (non-stripped)
+            // rawLines — they have the same length because
+            // StripCSharpComments preserves newlines — and insert
+            // `registrationLine` after the original line.
+            if (i >= rawLines.Length)
+            {
+                return null;
+            }
+
+            // The inserted line must use the same newline as the
+            // surrounding file so we do not introduce a mixed-ending
+            // section. Fall back to the platform newline if the file
+            // uses an unrecognised line ending. We probe the
+            // un-split source because Split('\n') leaves the trailing
+            // \r attached to each line, so checking EndsWith("\r\n")
+            // on a single raw line would miss CRLF.
+            string newline = source.Contains("\r\n", StringComparison.Ordinal)
+                ? "\r\n"
+                : "\n";
+
+            StringBuilder sb = new(source.Length + registrationLine.Length + 4);
+            // Re-assemble the lines we have copied so far, restoring
+            // the newline separator that Split('\n') consumed.
+            for (int j = 0; j < i; j++)
+            {
+                sb.Append(rawLines[j]);
+                sb.Append('\n');
+            }
+            // Append the host-builder line itself (without its
+            // trailing newline — we strip and replace it below).
+            sb.Append(rawLines[i]);
+
+            // Strip the trailing newline from the host-builder line
+            // (Split('\n') leaves it attached) so the registration
+            // starts on the very next line.
+            int trailingNewline = sb.ToString().EndsWith("\r\n", StringComparison.Ordinal) ? 2
+                : sb.ToString().EndsWith("\n", StringComparison.Ordinal) ? 1
+                : 0;
+            if (trailingNewline > 0)
+            {
+                sb.Length -= trailingNewline;
+            }
+
+            sb.Append(newline);
+            sb.Append(registrationLine);
+            sb.Append(newline);
+
+            for (int j = i + 1; j < rawLines.Length; j++)
+            {
+                sb.Append(rawLines[j]);
+                if (j < rawLines.Length - 1)
+                {
+                    sb.Append('\n');
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -1151,14 +1265,22 @@ internal static class SyncfusionBlazorToolkitHelper
             }
         }
 
+        // Use the same line ending as the rest of the file so we do
+        // not introduce a mixed-ending section. CRLF on Windows, LF
+        // on Linux/macOS, falling back to the platform newline when
+        // the file uses neither.
+        string newline = source.Contains("\r\n", StringComparison.Ordinal)
+            ? "\r\n"
+            : "\n";
+
         StringBuilder sb = new(source.Length + usingDirective.Length + 4);
         sb.Append(usingDirective);
-        sb.Append(Environment.NewLine);
+        sb.Append(newline);
         // If the existing file already starts with a newline, do not
         // double it.
         if (!StartsWithNewline(source))
         {
-            sb.Append(Environment.NewLine);
+            sb.Append(newline);
         }
 
         sb.Append(source);

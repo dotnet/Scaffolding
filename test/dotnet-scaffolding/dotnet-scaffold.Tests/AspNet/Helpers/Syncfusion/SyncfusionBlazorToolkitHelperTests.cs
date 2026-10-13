@@ -423,6 +423,152 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Fact]
+    public void EnsureServiceRegistration_WebApp_InsertsAfterBuilderLine_NotAtEnd()
+    {
+        // The service registration call must land immediately after
+        // the `var builder = WebApplication.CreateBuilder(...)`
+        // declaration, not at the end of the file. A late insertion
+        // happens *after* `builder.Build()` and therefore never
+        // participates in the application's DI container.
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program, WebAppProgramCs);
+
+        SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        string text = File.ReadAllText(program);
+        string[] lines = text.Split('\n');
+
+        int builderLine = -1;
+        int registrationLine = -1;
+        int buildLine = -1;
+        for (int i = 0; i < lines.Length; i++)
+        {
+            string trimmed = lines[i].TrimEnd('\r').Trim();
+            if (trimmed.StartsWith("var builder = WebApplication.CreateBuilder", StringComparison.Ordinal))
+            {
+                builderLine = i;
+            }
+            else if (trimmed == "builder.Services.AddSyncfusionBlazorToolkit();")
+            {
+                registrationLine = i;
+            }
+            else if (trimmed == "var app = builder.Build();")
+            {
+                buildLine = i;
+            }
+        }
+
+        Assert.True(builderLine >= 0, $"Program.cs must still contain the var builder = ... line. Lines: [{string.Join(" | ", lines.Select(l => l.TrimEnd('\r')))}]");
+        Assert.True(registrationLine >= 0, $"Program.cs must contain the registration line. Lines: [{string.Join(" | ", lines.Select(l => l.TrimEnd('\r')))}]");
+        Assert.True(buildLine >= 0, $"Program.cs must still contain the var app = builder.Build(); line. Lines: [{string.Join(" | ", lines.Select(l => l.TrimEnd('\r')))}]");
+        // The registration must come AFTER the builder declaration
+        // and BEFORE the build/run call. Anything else means the
+        // services will not be wired into the container.
+        Assert.True(registrationLine > builderLine,
+            $"Registration line (index {registrationLine}) must come after the var builder line (index {builderLine}).");
+        Assert.True(registrationLine < buildLine,
+            $"Registration line (index {registrationLine}) must come before the var app = builder.Build(); line (index {buildLine}).");
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_StandaloneWasm_InsertsAfterBuilderLine_NotAtEnd()
+    {
+        // Same as the Web App test, but for the standalone Blazor
+        // WebAssembly host. The registration must land right after
+        // `var builder = WebAssemblyHostBuilder.CreateDefault(args);`
+        // so it precedes `await builder.Build().RunAsync();`.
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\" />");
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program, StandaloneWasmProgramCs);
+
+        SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.StandaloneWasm);
+
+        string text = File.ReadAllText(program);
+        string[] lines = text.Split('\n');
+
+        int builderLine = -1;
+        int registrationLine = -1;
+        int runLine = -1;
+        for (int i = 0; i < lines.Length; i++)
+        {
+            string trimmed = lines[i].TrimEnd('\r').Trim();
+            if (trimmed.StartsWith("var builder = WebAssemblyHostBuilder.CreateDefault", StringComparison.Ordinal))
+            {
+                builderLine = i;
+            }
+            else if (trimmed == "builder.Services.AddSyncfusionBlazorToolkit();")
+            {
+                registrationLine = i;
+            }
+            else if (trimmed.StartsWith("await builder.Build().RunAsync", StringComparison.Ordinal))
+            {
+                runLine = i;
+            }
+        }
+
+        Assert.True(builderLine >= 0, $"Program.cs must still contain the var builder = ... line. Lines: [{string.Join(" | ", lines.Select(l => l.TrimEnd('\r')))}]");
+        Assert.True(registrationLine >= 0, $"Program.cs must contain the registration line. Lines: [{string.Join(" | ", lines.Select(l => l.TrimEnd('\r')))}]");
+        Assert.True(runLine >= 0, $"Program.cs must still contain the await builder.Build().RunAsync(); line. Lines: [{string.Join(" | ", lines.Select(l => l.TrimEnd('\r')))}]");
+        Assert.True(registrationLine > builderLine,
+            $"Registration line (index {registrationLine}) must come after the var builder line (index {builderLine}).");
+        Assert.True(registrationLine < runLine,
+            $"Registration line (index {registrationLine}) must come before the await builder.Build().RunAsync(); line (index {runLine}).");
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_BlankFile_FallsBackToAppendingAtEnd()
+    {
+        // If Program.cs is empty (or has no recognisable host-builder
+        // line) the helper must still write a working file. Falling
+        // back to end-of-file preserves the previous behaviour for
+        // this edge case.
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program, "");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+        string text = File.ReadAllText(program);
+        Assert.Contains("builder.Services.AddSyncfusionBlazorToolkit();", text);
+        Assert.Contains("using Syncfusion.Blazor.Toolkit;", text);
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_PreservesCrlfLineEndings()
+    {
+        // The file uses CRLF line endings; the inserted registration
+        // must keep using CRLF so we do not end up with a file that
+        // mixes CRLF and LF.
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program, WebAppProgramCs.Replace("\n", "\r\n"));
+
+        SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        string text = File.ReadAllText(program);
+        // The inserted registration must use CRLF, matching the rest
+        // of the file.
+        Assert.Contains("builder.Services.AddSyncfusionBlazorToolkit();\r\n", text);
+        // The file must not contain an LF-only wrapped version of the
+        // registration line.
+        Assert.DoesNotContain("\nbuilder.Services.AddSyncfusionBlazorToolkit();\n", text);
+    }
+
+    [Fact]
     public void EnsureServiceRegistration_StandaloneWasm_AppendsCallAndUsing()
     {
         // Reproduces the user-reported failure: a Blazor WebAssembly

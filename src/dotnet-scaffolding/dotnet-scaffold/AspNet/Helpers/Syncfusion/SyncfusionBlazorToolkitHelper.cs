@@ -3,6 +3,9 @@
 
 using System.Text;
 using System.Text.Json;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
@@ -492,102 +495,25 @@ internal static class SyncfusionBlazorToolkitHelper
             return false;
         }
 
-        string codeOnly = StripCSharpComments(programText);
-        foreach (string rawLine in codeOnly.Split('\n'))
+        // Syntax-aware: comments and string literals are never invocation
+        // nodes, so they cannot be mistaken for a real registration. A
+        // fluent chain such as
+        // `builder.Services.AddRazorComponents().AddSyncfusionBlazorToolkit()`
+        // has an invocation as its receiver and is rejected.
+        SyntaxNode root = CSharpSyntaxTree.ParseText(programText).GetRoot();
+        foreach (InvocationExpressionSyntax invocation in root.DescendantNodes().OfType<InvocationExpressionSyntax>())
         {
-            string line = rawLine.TrimEnd('\r').Trim();
-            if (line.Length == 0)
-            {
-                continue;
-            }
-
-            // The standalone registration we are looking for has the
-            // shape "*.Services.AddSyncfusionBlazorToolkit();" or
-            // "*.Services.AddSyncfusionBlazorToolkit()".
-            // A chained registration has the form "...AddSyncfusionBlazorToolkit()"
-            // preceded by a member access without a trailing semicolon on
-            // its own line.
-            if (IsStandaloneServiceRegistration(line))
+            if (invocation.Expression is MemberAccessExpressionSyntax call &&
+                call.Name.Identifier.ValueText == ServiceRegistrationCall &&
+                call.Expression is MemberAccessExpressionSyntax services &&
+                services.Name.Identifier.ValueText == "Services" &&
+                services.Expression is IdentifierNameSyntax)
             {
                 return true;
             }
         }
 
         return false;
-    }
-
-    private static bool IsStandaloneServiceRegistration(string trimmedLine)
-    {
-        if (string.IsNullOrEmpty(trimmedLine))
-        {
-            return false;
-        }
-
-        // The standalone registration we want has the shape
-        //   <receiver>.AddSyncfusionBlazorToolkit();
-        // where <receiver> is a simple dotted name (e.g.
-        // `builder.Services` or `wasmBuilder.Services`). A chained
-        // registration has the form
-        //   <receiver>...methodCall(<args>).AddSyncfusionBlazorToolkit();
-        // — distinguished by the `)` (or `(`) that immediately
-        // precedes the final `.`.
-        const string Call = "AddSyncfusionBlazorToolkit";
-        int callIdx = trimmedLine.IndexOf(Call, StringComparison.Ordinal);
-        if (callIdx < 0)
-        {
-            return false;
-        }
-
-        // Must end with a semicolon — most single-statement C#
-        // calls do, and chains that terminate this call also do, so
-        // this is necessary but not sufficient.
-        if (!trimmedLine.EndsWith(';'))
-        {
-            return false;
-        }
-
-        // Must be preceded by a `.` member access and not be a
-        // substring of a larger identifier.
-        int dotIdx = callIdx - 1;
-        if (dotIdx < 0 || trimmedLine[dotIdx] != '.')
-        {
-            return false;
-        }
-
-        if (dotIdx == 0)
-        {
-            return false;
-        }
-
-        // The character right before the `.` tells us whether the
-        // call is standalone or the last link in a chain:
-        //   standalone : ...Services.   → letter / digit
-        //   chained    : ...Args().     → ')'
-        // Reject any character that is itself the closing paren of
-        // an enclosing call (or its argument list) — that is the
-        // signature of a fluent chain.
-        char prev = trimmedLine[dotIdx - 1];
-        if (prev == ')' || prev == '(')
-        {
-            return false;
-        }
-
-        // Also reject whitespace — the receiver must be glued to
-        // the `.` (i.e. a member access, not a separate statement).
-        if (char.IsWhiteSpace(prev))
-        {
-            return false;
-        }
-
-        // The receiver before the first `.` must end with `Services`
-        // (we accept any name, but reject bare `AddSyncfusionBlazorToolkit`).
-        int firstDot = trimmedLine.IndexOf('.');
-        if (firstDot <= 0)
-        {
-            return false;
-        }
-
-        return true;
     }
 
     /// <summary>
@@ -702,15 +628,12 @@ internal static class SyncfusionBlazorToolkitHelper
         Inserted = 1,
 
         /// <summary>
-        /// No <c>Program.cs</c> existed; a minimal one was created with
-        /// the call in place.
-        /// </summary>
-        Created = 2,
-
-        /// <summary>
-        /// The step could not find or create a <c>Program.cs</c> and the
-        /// service registration was skipped. The caller is expected to
-        /// log this so the user can act on it.
+        /// No safe entry point was found (no <c>Program.cs</c>, or no
+        /// recognisable host-builder declaration in it), so nothing was
+        /// written. The caller is expected to log this so the user can
+        /// add the registration to their existing entry point. A new
+        /// <c>Program.cs</c> is deliberately never generated: it would
+        /// compete with the real entry point (CS8802).
         /// </summary>
         Skipped = 3,
     }
@@ -736,11 +659,6 @@ internal static class SyncfusionBlazorToolkitHelper
     }
 
     /// <summary>
-    /// The conventional file name expected for the application entry point.
-    /// </summary>
-    public const string ProgramCsFileName = "Program.cs";
-
-    /// <summary>
     /// The set of file names that are treated as the application entry
     /// point by <see cref="DiscoverProgramCs"/>. <c>Program.cs</c> is the
     /// .NET 6+ default; the remaining entries are accepted as alternates
@@ -764,8 +682,7 @@ internal static class SyncfusionBlazorToolkitHelper
     /// matching <c>using</c> directive) into the project's
     /// <c>Program.cs</c>. The function works against a Blazor Web App /
     /// Server host and against a standalone Blazor WebAssembly host, and
-    /// works whether <c>Program.cs</c> already exists or has to be
-    /// created from scratch. It also works when <c>Program.cs</c> lives
+    /// requires an existing entry point (it never creates one). It also works when <c>Program.cs</c> lives
     /// in a subdirectory of the project or has a non-default name
     /// (<c>Startup.cs</c>, <c>Program.vb</c>).
     /// </summary>
@@ -800,51 +717,27 @@ internal static class SyncfusionBlazorToolkitHelper
         }
 
         string? programPath = DiscoverProgramCs(projectDirectory);
-        bool created = false;
         if (string.IsNullOrEmpty(programPath))
         {
-            programPath = TryCreateMinimalProgramCs(projectDirectory, hostKind);
-            if (string.IsNullOrEmpty(programPath))
-            {
-                return (ServiceRegistrationOutcome.Skipped, null);
-            }
-
-            created = true;
+            return (ServiceRegistrationOutcome.Skipped, null);
         }
 
         string text = File.ReadAllText(programPath);
+        string relativePath = ToRelativePath(projectDirectory, programPath);
         if (IsActiveServiceRegistrationPresent(text))
         {
-            if (created)
-            {
-                // The minimal template we just wrote already contains
-                // a working AddSyncfusionBlazorToolkit() call. Reporting
-                // "Created" instead of "AlreadyPresent" makes the
-                // distinction between a fresh file and a re-run clearer
-                // for the summary step.
-                return (
-                    ServiceRegistrationOutcome.Created,
-                    ToRelativePath(projectDirectory, programPath));
-            }
-
-            return (
-                ServiceRegistrationOutcome.AlreadyPresent,
-                ToRelativePath(projectDirectory, programPath));
-        }
-
-        if (created)
-        {
-            // Defensive: the minimal template should already include
-            // the call. If it does not, fall through to the regular
-            // insertion path so we never leave the project without a
-            // registration.
+            return (ServiceRegistrationOutcome.AlreadyPresent, relativePath);
         }
 
         string builderName = DetectBuilderVariableName(text, hostKind) ?? DefaultBuilderVariableName;
-        AppendServiceRegistration(programPath, text, builderName);
-        return (
-            created ? ServiceRegistrationOutcome.Created : ServiceRegistrationOutcome.Inserted,
-            ToRelativePath(projectDirectory, programPath));
+        if (!TryAppendServiceRegistration(programPath, text, builderName))
+        {
+            // No host-builder declaration to anchor on. Appending at the
+            // end of the file would land after Build()/Run() and break DI.
+            return (ServiceRegistrationOutcome.Skipped, relativePath);
+        }
+
+        return (ServiceRegistrationOutcome.Inserted, relativePath);
     }
 
     /// <summary>
@@ -914,54 +807,6 @@ internal static class SyncfusionBlazorToolkitHelper
     }
 
     /// <summary>
-    /// Creates a minimal <c>Program.cs</c> in
-    /// <paramref name="projectDirectory"/> matching
-    /// <paramref name="hostKind"/>, and returns its absolute path. The
-    /// minimal template already contains a working
-    /// <c>AddSyncfusionBlazorToolkit()</c> registration so callers do
-    /// not need to perform a separate insertion pass.
-    /// </summary>
-    /// <returns>
-    /// The path of the freshly-created <c>Program.cs</c>, or
-    /// <c>null</c> if the file could not be created.
-    /// </returns>
-    public static string? TryCreateMinimalProgramCs(string projectDirectory, ProgramHostKind hostKind)
-    {
-        if (string.IsNullOrEmpty(projectDirectory) || !Directory.Exists(projectDirectory))
-        {
-            return null;
-        }
-
-        string programPath = Path.Combine(projectDirectory, ProgramCsFileName);
-        if (File.Exists(programPath))
-        {
-            // A file already exists but the discovery pass missed it
-            // (for example, because it lives in a deeper subdirectory
-            // than we searched). Return the existing file unchanged so
-            // the caller can perform the regular insertion path.
-            return programPath;
-        }
-
-        string builderName = hostKind == ProgramHostKind.StandaloneWasm
-            ? "wasmBuilder"
-            : DefaultBuilderVariableName;
-
-        string template = hostKind == ProgramHostKind.StandaloneWasm
-            ? BuildStandaloneWasmMinimalProgramCs(builderName)
-            : BuildWebAppMinimalProgramCs(builderName);
-
-        try
-        {
-            File.WriteAllText(programPath, template);
-            return programPath;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    /// <summary>
     /// Scans the contents of a <c>Program.cs</c> file for the variable
     /// name the host builder was assigned to. Supports both the
     /// Blazor Web App / Server pattern
@@ -979,83 +824,48 @@ internal static class SyncfusionBlazorToolkitHelper
             return null;
         }
 
-        string codeOnly = StripCSharpComments(programText);
         string marker = hostKind == ProgramHostKind.StandaloneWasm
-            ? "WebAssemblyHostBuilder.CreateDefault"
-            : "WebApplication.CreateBuilder";
+            ? WasmBuilderMarker
+            : WebBuilderMarker;
 
-        foreach (string rawLine in codeOnly.Split('\n'))
+        SyntaxNode root = CSharpSyntaxTree.ParseText(programText).GetRoot();
+        return FindHostBuilderDeclaration(root, [marker])?.Declarator.Identifier.ValueText;
+    }
+
+    private const string WebBuilderMarker = "WebApplication.CreateBuilder";
+    private const string WasmBuilderMarker = "WebAssemblyHostBuilder.CreateDefault";
+
+    /// <summary>
+    /// Finds the first local declaration whose initializer calls one of
+    /// <paramref name="markers"/> (e.g. <c>WebApplication.CreateBuilder</c>).
+    /// Working on the syntax tree means the declaration may span several
+    /// lines, and comments / string literals are never matched.
+    /// </summary>
+    private static (LocalDeclarationStatementSyntax Statement, VariableDeclaratorSyntax Declarator)? FindHostBuilderDeclaration(
+        SyntaxNode root,
+        string[] markers)
+    {
+        foreach (LocalDeclarationStatementSyntax statement in root.DescendantNodes().OfType<LocalDeclarationStatementSyntax>())
         {
-            string line = rawLine.TrimEnd('\r').Trim();
-            if (line.Length == 0)
+            foreach (VariableDeclaratorSyntax declarator in statement.Declaration.Variables)
             {
-                continue;
-            }
+                ExpressionSyntax? initializer = declarator.Initializer?.Value;
+                if (initializer is null)
+                {
+                    continue;
+                }
 
-            // Recognise the assignment shape:
-            //   var NAME = ...Marker...(...);
-            //   WebApplicationBuilder NAME = ...Marker...(...);
-            //   NAME NAME = ...Marker...(...);
-            int markerIdx = line.IndexOf(marker, StringComparison.Ordinal);
-            if (markerIdx < 0)
-            {
-                continue;
-            }
-
-            int equalsIdx = line.IndexOf('=');
-            if (equalsIdx <= 0)
-            {
-                continue;
-            }
-
-            string leftHandSide = line[..equalsIdx].Trim();
-            if (leftHandSide.Length == 0)
-            {
-                continue;
-            }
-
-            // Pull the last identifier on the LHS — this is the
-            // declared variable name, regardless of whether the
-            // declaration is `var x = ...` or
-            // `WebApplicationBuilder x = ...`.
-            int lastSpace = leftHandSide.LastIndexOf(' ');
-            if (lastSpace < 0 || lastSpace == leftHandSide.Length - 1)
-            {
-                continue;
-            }
-
-            string candidate = leftHandSide[(lastSpace + 1)..];
-            if (IsValidIdentifier(candidate))
-            {
-                return candidate;
+                foreach (InvocationExpressionSyntax invocation in initializer.DescendantNodesAndSelf().OfType<InvocationExpressionSyntax>())
+                {
+                    if (markers.Contains(invocation.Expression.ToString().Replace(" ", string.Empty), StringComparer.Ordinal))
+                    {
+                        return (statement, declarator);
+                    }
+                }
             }
         }
 
         return null;
-    }
-
-    private static bool IsValidIdentifier(string value)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            return false;
-        }
-
-        if (!char.IsLetter(value[0]) && value[0] != '_')
-        {
-            return false;
-        }
-
-        for (int i = 1; i < value.Length; i++)
-        {
-            char c = value[i];
-            if (!char.IsLetterOrDigit(c) && c != '_')
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private static bool IsExcludedDirectory(string name)
@@ -1088,58 +898,32 @@ internal static class SyncfusionBlazorToolkitHelper
         }
     }
 
-    private static string BuildWebAppMinimalProgramCs(string builderName)
-    {
-        return
-            $"var {builderName} = WebApplication.CreateBuilder(args);\n" +
-            $"{builderName}.Services.AddSyncfusionBlazorToolkit();\n" +
-            $"var app = {builderName}.Build();\n" +
-            $"app.Run();\n";
-    }
-
-    private static string BuildStandaloneWasmMinimalProgramCs(string builderName)
-    {
-        return
-            $"var {builderName} = WebAssemblyHostBuilder.CreateDefault(args);\n" +
-            $"{builderName}.Services.AddSyncfusionBlazorToolkit();\n" +
-            $"await {builderName}.Build().RunAsync();\n";
-    }
-
-    private static void AppendServiceRegistration(string programPath, string existingText, string builderName)
+    private static bool TryAppendServiceRegistration(string programPath, string existingText, string builderName)
     {
         string registrationLine = $"{builderName}.Services.{ServiceRegistrationCall}();";
 
-        // Build the new file content: ensure the using directive is
-        // present, then insert the service registration call
-        // immediately after the host-builder declaration so the
-        // services are wired up before any later `builder.Build()`
-        // call consumes them. If the host-builder line cannot be
-        // located (empty or unparseable file), fall back to appending
-        // at the end of the file — preserves the previous behaviour
-        // for the edge case.
-        string withUsing = EnsureUsingDirective(existingText, ToolKitUsingDirective);
-        string withRegistration = InsertAfterBuilderLine(withUsing, registrationLine)
-            ?? AppendLine(withUsing, registrationLine);
+        // Insert the call immediately after the host-builder statement so
+        // the services are wired up before `Build()` consumes them.
+        string? withRegistration = InsertAfterBuilderLine(existingText, registrationLine);
+        if (withRegistration is null)
+        {
+            return false;
+        }
 
-        File.WriteAllText(programPath, withRegistration);
+        File.WriteAllText(programPath, EnsureUsingDirective(withRegistration, ToolKitUsingDirective));
+        return true;
     }
 
     /// <summary>
-    /// Inserts <paramref name="registrationLine"/> immediately after
-    /// the first host-builder assignment line in <paramref name="source"/>
-    /// (the line that contains <c>WebApplication.CreateBuilder</c> or
-    /// <c>WebAssemblyHostBuilder.CreateDefault</c>), preserving the
-    /// file's existing line ending (CRLF or LF).
+    /// Inserts <paramref name="registrationLine"/> on the line after the
+    /// complete host-builder declaration statement (the one calling
+    /// <c>WebApplication.CreateBuilder</c> or
+    /// <c>WebAssemblyHostBuilder.CreateDefault</c>), however many lines
+    /// that statement spans, preserving the file's line ending.
     ///
-    /// <para>Returns <c>null</c> when the file does not contain a
-    /// recognisable host-builder assignment; callers should fall back
-    /// to appending the registration at the end of the file in that
-    /// case.</para>
-    ///
-    /// <para>Commented-out host-builder lines are ignored (we use the
-    /// comment-stripped view of the file to detect the marker), so a
-    /// file with only a commented-out <c>var builder = ...</c> line
-    /// behaves the same as a file with no marker at all.</para>
+    /// <para>Returns <c>null</c> when no such declaration exists; the
+    /// caller must then leave the file untouched rather than guess a
+    /// location (appending after <c>Build()</c> would register too late).</para>
     /// </summary>
     private static string? InsertAfterBuilderLine(string source, string registrationLine)
     {
@@ -1148,88 +932,21 @@ internal static class SyncfusionBlazorToolkitHelper
             return null;
         }
 
-        string[] rawLines = source.Split('\n');
-        string codeOnly = StripCSharpComments(source);
-        string[] codeLines = codeOnly.Split('\n');
-
-        for (int i = 0; i < codeLines.Length; i++)
+        SyntaxNode root = CSharpSyntaxTree.ParseText(source).GetRoot();
+        var found = FindHostBuilderDeclaration(root, [WebBuilderMarker, WasmBuilderMarker]);
+        if (found is null)
         {
-            string codeLine = codeLines[i].TrimEnd('\r').Trim();
-            if (codeLine.Length == 0)
-            {
-                continue;
-            }
-
-            bool isHostBuilderLine =
-                codeLine.Contains("WebApplication.CreateBuilder", StringComparison.Ordinal)
-                || codeLine.Contains("WebAssemblyHostBuilder.CreateDefault", StringComparison.Ordinal);
-
-            if (!isHostBuilderLine || codeLine.IndexOf('=') <= 0)
-            {
-                continue;
-            }
-
-            // We found the host-builder line in the comment-stripped
-            // view at index `i`. Map back to the original (non-stripped)
-            // rawLines — they have the same length because
-            // StripCSharpComments preserves newlines — and insert
-            // `registrationLine` after the original line.
-            if (i >= rawLines.Length)
-            {
-                return null;
-            }
-
-            // The inserted line must use the same newline as the
-            // surrounding file so we do not introduce a mixed-ending
-            // section. Fall back to the platform newline if the file
-            // uses an unrecognised line ending. We probe the
-            // un-split source because Split('\n') leaves the trailing
-            // \r attached to each line, so checking EndsWith("\r\n")
-            // on a single raw line would miss CRLF.
-            string newline = source.Contains("\r\n", StringComparison.Ordinal)
-                ? "\r\n"
-                : "\n";
-
-            StringBuilder sb = new(source.Length + registrationLine.Length + 4);
-            // Re-assemble the lines we have copied so far, restoring
-            // the newline separator that Split('\n') consumed.
-            for (int j = 0; j < i; j++)
-            {
-                sb.Append(rawLines[j]);
-                sb.Append('\n');
-            }
-            // Append the host-builder line itself (without its
-            // trailing newline — we strip and replace it below).
-            sb.Append(rawLines[i]);
-
-            // Strip the trailing newline from the host-builder line
-            // (Split('\n') leaves it attached) so the registration
-            // starts on the very next line.
-            int trailingNewline = sb.ToString().EndsWith("\r\n", StringComparison.Ordinal) ? 2
-                : sb.ToString().EndsWith("\n", StringComparison.Ordinal) ? 1
-                : 0;
-            if (trailingNewline > 0)
-            {
-                sb.Length -= trailingNewline;
-            }
-
-            sb.Append(newline);
-            sb.Append(registrationLine);
-            sb.Append(newline);
-
-            for (int j = i + 1; j < rawLines.Length; j++)
-            {
-                sb.Append(rawLines[j]);
-                if (j < rawLines.Length - 1)
-                {
-                    sb.Append('\n');
-                }
-            }
-
-            return sb.ToString();
+            return null;
         }
 
-        return null;
+        string newline = source.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+
+        // FullSpan.End includes trailing trivia (comment + end-of-line).
+        int insertAt = found.Value.Statement.FullSpan.End;
+        string before = source[..insertAt];
+        string after = source[insertAt..];
+        string prefix = before.EndsWith('\n') ? string.Empty : newline;
+        return before + prefix + registrationLine + newline + after;
     }
 
     /// <summary>
@@ -1286,30 +1003,6 @@ internal static class SyncfusionBlazorToolkitHelper
         return sb.ToString();
     }
 
-    private static string AppendLine(string source, string line)
-    {
-        StringBuilder sb = new(source.Length + line.Length + 2);
-        sb.Append(source);
-        // Guarantee exactly one separator between the existing body
-        // and the appended line.
-        if (source.Length == 0)
-        {
-            sb.Append(line);
-        }
-        else
-        {
-            if (!EndsWithNewline(source))
-            {
-                sb.Append(Environment.NewLine);
-            }
-
-            sb.Append(line);
-            sb.Append(Environment.NewLine);
-        }
-
-        return sb.ToString();
-    }
-
     private static bool StartsWithNewline(string source)
     {
         if (string.IsNullOrEmpty(source))
@@ -1320,14 +1013,4 @@ internal static class SyncfusionBlazorToolkitHelper
         return source[0] == '\n' || source[0] == '\r';
     }
 
-    private static bool EndsWithNewline(string source)
-    {
-        if (string.IsNullOrEmpty(source))
-        {
-            return false;
-        }
-
-        char last = source[source.Length - 1];
-        return last == '\n' || last == '\r';
-    }
 }

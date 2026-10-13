@@ -36,6 +36,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 var projectDirectory = Path.Combine(fileProvider.Root, MsBuildProjectStrings.RootProjectFolder);
                 var projectPath = Path.Combine(projectDirectory, MsBuildProjectStrings.RootProjectName);
                 var projectContext = new MsBuildProjectContextBuilder(projectPath, "Dummy").Build();
+                var projectReference = Assert.Single(projectContext.ProjectReferenceInformation);
 
                 var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
                     projectContext.ProjectName,
@@ -45,6 +46,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                     projectContext.ProjectReferenceInformation,
                     projectContext.ProjectReferences);
 
+                Assert.Equal("Custom.Library.Root", projectReference.RootNamespace);
                 Assert.Equal("Custom.Library.Root.Layout.MainLayout", result);
                 var referencedAssemblyPath = Path.Combine(
                     fileProvider.Root,

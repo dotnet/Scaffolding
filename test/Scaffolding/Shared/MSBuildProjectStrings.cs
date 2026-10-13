@@ -994,7 +994,7 @@ namespace Test
 </Project>
 ";
         public const string Net7Library = @"
-<Project Sdk=""Microsoft.NET.Sdk"">
+<Project Sdk=""Microsoft.NET.Sdk.Razor"">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -1002,6 +1002,10 @@ namespace Test
     <Nullable>enable</Nullable>
     <RootNamespace>Custom.Library.Root</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include=""Microsoft.AspNetCore.App"" />
+  </ItemGroup>
 
 </Project>
 ";

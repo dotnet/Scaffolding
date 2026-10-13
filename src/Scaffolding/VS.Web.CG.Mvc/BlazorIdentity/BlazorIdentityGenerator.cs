@@ -173,6 +173,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             var rootIdentityNamespace = $"{commandlineModel.RootNamespace}.Components.Account";
             // MainLayout can live in the server project, a WebAssembly client, or a referenced shared Razor project.
             var layoutNamespace = ResolveLayoutNamespace(
+                ProjectContext.ProjectName,
                 commandlineModel.RootNamespace,
                 AppInfo.ApplicationBasePath,
                 FileSystem,
@@ -333,16 +334,22 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         }
 
         internal static string ResolveLayoutNamespace(
+            string projectName,
             string rootNamespace,
             string applicationBasePath,
             IFileSystem fileSystem,
             IEnumerable<ProjectReferenceInformation> projectReferences,
             IEnumerable<string> directProjectReferences)
         {
+            projectName = string.IsNullOrEmpty(projectName) ? rootNamespace : projectName;
             var mainLayoutInServerProject = Path.Combine(applicationBasePath, "Components", "Layout", "MainLayout.razor");
             if (fileSystem.FileExists(mainLayoutInServerProject))
             {
-                return $"{rootNamespace}.Components.Layout.MainLayout";
+                var razorNamespace = ResolveRazorNamespace(
+                    mainLayoutInServerProject,
+                    applicationBasePath,
+                    fileSystem);
+                return $"{razorNamespace ?? $"{rootNamespace}.Components.Layout"}.MainLayout";
             }
 
             var directReferencePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -353,14 +360,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
             var clientProjectNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                $"{rootNamespace}.Client"
+                $"{projectName}.Client"
             };
-            if (rootNamespace.EndsWith(".Web", StringComparison.OrdinalIgnoreCase))
+            if (projectName.EndsWith(".Web", StringComparison.OrdinalIgnoreCase))
             {
-                clientProjectNames.Add($"{rootNamespace.Substring(0, rootNamespace.Length - ".Web".Length)}.Client");
+                clientProjectNames.Add($"{projectName.Substring(0, projectName.Length - ".Web".Length)}.Client");
             }
 
-            var layoutCandidates = new List<(string Namespace, bool IsClientProject)>();
+            var layoutCandidates = new List<LayoutCandidate>();
             foreach (var projectReference in projectReferences ?? Enumerable.Empty<ProjectReferenceInformation>())
             {
                 if (!directReferencePaths.Contains(Path.GetFullPath(projectReference.FullPath)))
@@ -374,11 +381,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     continue;
                 }
 
+                if (!projectReference.IsRazorProject)
+                {
+                    continue;
+                }
+
+                var razorComponentPaths = new HashSet<string>(
+                    (projectReference.RazorComponentItems ?? new List<string>())
+                        .Select(path => Path.IsPathRooted(path)
+                            ? Path.GetFullPath(path)
+                            : Path.GetFullPath(Path.Combine(projectDirectory, path))),
+                    StringComparer.OrdinalIgnoreCase);
                 var mainLayoutPaths = new[]
                 {
                     Path.Combine(projectDirectory, "Components", "Layout", "MainLayout.razor"),
                     Path.Combine(projectDirectory, "Layout", "MainLayout.razor")
-                }.Where(fileSystem.FileExists);
+                }.Where(path => fileSystem.FileExists(path) &&
+                    razorComponentPaths.Contains(Path.GetFullPath(path)));
                 foreach (var mainLayoutPath in mainLayoutPaths)
                 {
                     var relativeDirectory = Path.GetDirectoryName(Path.GetRelativePath(projectDirectory, mainLayoutPath));
@@ -391,42 +410,54 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     var razorNamespace = ResolveRazorNamespace(mainLayoutPath, projectDirectory, fileSystem);
                     var isClientProject = clientProjectNames.Contains(projectReference.ProjectName);
 
-                    layoutCandidates.Add((
-                        $"{razorNamespace ?? $"{referencedRootNamespace}{namespaceSuffix}"}.MainLayout",
-                        isClientProject));
+                    layoutCandidates.Add(new LayoutCandidate
+                    {
+                        ComponentPath = Path.GetFullPath(mainLayoutPath),
+                        Namespace = $"{razorNamespace ?? $"{referencedRootNamespace}{namespaceSuffix}"}.MainLayout",
+                        ProjectPath = Path.GetFullPath(projectReference.FullPath),
+                        IsClientProject = isClientProject
+                    });
                 }
             }
 
             var clientCandidates = layoutCandidates
                 .Where(candidate => candidate.IsClientProject)
-                .Select(candidate => candidate.Namespace)
-                .Distinct(StringComparer.Ordinal)
+                .GroupBy(candidate => candidate.ComponentPath, StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
                 .ToList();
             if (clientCandidates.Count == 1)
             {
-                return clientCandidates[0];
+                return clientCandidates[0].Namespace;
             }
             if (clientCandidates.Count > 1)
             {
                 throw new InvalidOperationException(
-                    $"Multiple MainLayout components were found in referenced client projects: {string.Join(", ", clientCandidates)}");
+                    $"Multiple MainLayout components were found in referenced client projects: {FormatLayoutCandidates(clientCandidates)}");
             }
 
             var sharedCandidates = layoutCandidates
-                .Select(candidate => candidate.Namespace)
-                .Distinct(StringComparer.Ordinal)
+                .GroupBy(candidate => candidate.ComponentPath, StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
                 .ToList();
             if (sharedCandidates.Count == 1)
             {
-                return sharedCandidates[0];
+                return sharedCandidates[0].Namespace;
             }
             if (sharedCandidates.Count > 1)
             {
                 throw new InvalidOperationException(
-                    $"Multiple MainLayout components were found in referenced projects: {string.Join(", ", sharedCandidates)}");
+                    $"Multiple MainLayout components were found in referenced projects: {FormatLayoutCandidates(sharedCandidates)}");
             }
 
             return $"{rootNamespace}.Client.Layout.MainLayout";
+        }
+
+        private static string FormatLayoutCandidates(IEnumerable<LayoutCandidate> candidates)
+        {
+            return string.Join(
+                ", ",
+                candidates.Select(candidate =>
+                    $"{candidate.Namespace} ({candidate.ComponentPath}, project: {candidate.ProjectPath})"));
         }
 
         private static string ResolveRazorNamespace(
@@ -466,7 +497,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
         private static string ReadRazorNamespace(string path, IFileSystem fileSystem)
         {
-            const string namespaceDirective = "@namespace ";
+            const string namespaceDirective = "@namespace";
             var contents = fileSystem.ReadAllText(path);
             if (string.IsNullOrEmpty(contents))
             {
@@ -476,9 +507,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             return contents
                 .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
                 .Select(line => line.Trim())
-                .Where(line => line.StartsWith(namespaceDirective, StringComparison.Ordinal))
+                .Where(line =>
+                    line.StartsWith(namespaceDirective, StringComparison.Ordinal) &&
+                    line.Length > namespaceDirective.Length &&
+                    char.IsWhiteSpace(line[namespaceDirective.Length]))
                 .Select(line => line.Substring(namespaceDirective.Length).Trim())
                 .FirstOrDefault(namespaceValue => !string.IsNullOrEmpty(namespaceValue));
+        }
+
+        private sealed class LayoutCandidate
+        {
+            public string ComponentPath { get; set; }
+
+            public bool IsClientProject { get; set; }
+
+            public string Namespace { get; set; }
+
+            public string ProjectPath { get; set; }
         }
 
         private void ShowFileList()

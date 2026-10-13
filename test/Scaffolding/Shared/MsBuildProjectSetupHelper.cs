@@ -87,7 +87,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             fileProvider.Add($"{MsBuildProjectStrings.RootProjectFolder}/Program.cs", MsBuildProjectStrings.MinimalProgramcsFile);
             fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}/{MsBuildProjectStrings.Library2ProjectName}", MsBuildProjectStrings.Net7Library);
             fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}/Blog.cs", MsBuildProjectStrings.BlogModelText);
-            fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}/Layout/MainLayout.razor", "@inherits LayoutComponentBase");
+            fileProvider.Add($"{MsBuildProjectStrings.LibraryProjectFolder}/Layout/MainLayout.razor", "<main />");
 
             RestoreAndBuild(fileProvider.Root, outputHelper, $"{MsBuildProjectStrings.RootProjectFolder}/{MsBuildProjectStrings.RootProjectName}");
         }

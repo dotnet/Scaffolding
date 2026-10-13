@@ -76,6 +76,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
                 var referencedProject = projectContext.ProjectReferenceInformation.FirstOrDefault(x => x.CompilationItems.Contains("Blog.cs"));
                 Assert.NotNull(referencedProject);
                 Assert.Equal("Custom.Library.Root", referencedProject.RootNamespace);
+                Assert.True(referencedProject.IsRazorProject);
+                Assert.Contains(Path.Combine("Layout", "MainLayout.razor"), referencedProject.RazorComponentItems);
             }
         }
 

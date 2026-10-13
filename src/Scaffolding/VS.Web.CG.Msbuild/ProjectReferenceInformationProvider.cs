@@ -81,6 +81,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
         private static ProjectReferenceInformation GetProjectInformation(Project project)
         {
             var compileItems = project.GetItems("Compile").Select(i => i.EvaluatedInclude);
+            var isRazorProject = string.Equals(
+                project.GetPropertyValue("UsingMicrosoftNETSdkRazor"),
+                "true",
+                StringComparison.OrdinalIgnoreCase);
+            var razorComponentItems = GetRazorComponentItems(project);
             var fullPath = project.FullPath;
             var name = project.GetProperty("ProjectName")
                 ?.EvaluatedValue
@@ -99,9 +104,30 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
                 ProjectName = name,
                 AssemblyName = assemblyName,
                 RootNamespace = string.IsNullOrEmpty(rootNamespace) ? name : rootNamespace,
+                IsRazorProject = isRazorProject,
+                RazorComponentItems = razorComponentItems.ToList(),
                 CompilationItems = compileItems.ToList(),
                 FullPath = fullPath
             };
+        }
+
+        private static IEnumerable<string> GetRazorComponentItems(Project project)
+        {
+            var razorComponentItems = project.GetItems("RazorComponent")
+                .Select(item => item.EvaluatedInclude);
+            var defaultRazorComponentItemsEnabled = !string.Equals(
+                project.GetPropertyValue("EnableDefaultRazorComponentItems"),
+                "false",
+                StringComparison.OrdinalIgnoreCase);
+            if (!defaultRazorComponentItemsEnabled)
+            {
+                return razorComponentItems;
+            }
+
+            var defaultRazorComponentItems = project.GetItems("Content")
+                .Select(item => item.EvaluatedInclude)
+                .Where(path => string.Equals(Path.GetExtension(path), ".razor", StringComparison.OrdinalIgnoreCase));
+            return razorComponentItems.Concat(defaultRazorComponentItems);
         }
     }
 }

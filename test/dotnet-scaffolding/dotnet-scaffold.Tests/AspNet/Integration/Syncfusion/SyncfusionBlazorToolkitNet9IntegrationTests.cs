@@ -101,7 +101,7 @@ public class SyncfusionBlazorToolkitNet9IntegrationTests : SyncfusionBlazorToolk
         var (exitCode, output, error) = await ScaffoldAsync();
         Assert.True(exitCode == 0, $"Output: {output}\nError: {error}");
 
-        var imports = File.ReadAllText(Path.Combine(_testProjectDir, "Pages", "_Imports.razor"));
+        var imports = File.ReadAllText(Path.Combine(_testProjectDir, "_Imports.razor"));
         Assert.Contains("@using Syncfusion.Blazor.Toolkit", imports);
     }
 }

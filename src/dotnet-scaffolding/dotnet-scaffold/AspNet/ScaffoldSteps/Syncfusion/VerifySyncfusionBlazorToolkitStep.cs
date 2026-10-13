@@ -57,7 +57,7 @@ internal class VerifySyncfusionBlazorToolkitStep : ScaffoldStep
             // is reported as missing.
             bool serverHasRegistration = SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(programText);
             settings.ServicesApplied = serverHasRegistration;
-            if (!serverHasRegistration && !settings.ServicesAlreadyRegistered)
+            if (!serverHasRegistration)
             {
                 _logger.LogError(
                     "Syncfusion Blazor Toolkit: 'AddSyncfusionBlazorToolkit()' is not registered on the server project '{Project}'. " +

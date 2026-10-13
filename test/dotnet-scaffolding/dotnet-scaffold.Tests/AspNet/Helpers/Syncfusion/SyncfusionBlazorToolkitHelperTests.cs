@@ -594,6 +594,64 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Fact]
+    public void IsActiveServiceRegistrationPresent_RejectsCallOnWrongBuilder()
+    {
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "var builder = WebApplication.CreateBuilder(args);\nother.Services.AddSyncfusionBlazorToolkit();\n"));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_RejectsCallInsideUnexecutedLocalFunction()
+    {
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "var builder = WebApplication.CreateBuilder(args);\n" +
+            "void Unused() { builder.Services.AddSyncfusionBlazorToolkit(); }\n" +
+            "var app = builder.Build();\n"));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_AmbiguousHostBuilders_SkipsWithoutWriting()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        var program = Path.Combine(_tempDir, "Program.cs");
+        const string text =
+            "var a = WebApplication.CreateBuilder(args);\n" +
+            "var b = WebApplication.CreateBuilder(args);\n" +
+            "var app = a.Build();\n";
+        File.WriteAllText(program, text);
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.Equal(text, File.ReadAllText(program));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_BuilderInsideLocalFunction_IsIgnored()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program,
+            "void Helper() { var other = WebApplication.CreateBuilder(); }\n" +
+            "var builder = WebApplication.CreateBuilder(args);\n" +
+            "var app = builder.Build();\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+        string text = File.ReadAllText(program);
+        Assert.True(text.IndexOf("builder.Services.AddSyncfusionBlazorToolkit();", StringComparison.Ordinal)
+            > text.IndexOf("var builder =", StringComparison.Ordinal));
+        Assert.DoesNotContain("other.Services", text);
+    }
+
+    [Fact]
     public void EnsureServiceRegistration_PreservesCrlfLineEndings()
     {
         // The file uses CRLF line endings; the inserted registration

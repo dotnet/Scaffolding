@@ -29,6 +29,14 @@ public class SyncfusionBlazorToolkitTfmConfigTests
     [InlineData("net11.0")]
     public void RealTfmConfig_ResolvesProgramCsOnly(string tfm)
     {
+        // The shared code-modification recipe is preserved in the
+        // embedded config file for any external consumer, but its
+        // CodeChanges list is empty — the Syncfusion scaffolder now
+        // registers AddSyncfusionBlazorToolkit() via the dedicated
+        // ApplySyncfusionBlazorToolkitProgramCsStep. This test
+        // therefore asserts only the structural contract: the file
+        // exists, resolves to a single Program.cs entry, and contains
+        // no stale stylesheet link.
         var tfmConfigPath = Path.Combine(
             FindRepoRoot(),
             "src", "dotnet-scaffolding", "dotnet-scaffold",
@@ -43,7 +51,6 @@ public class SyncfusionBlazorToolkitTfmConfigTests
         var files = doc.RootElement.GetProperty("Files");
         Assert.Equal(1, files.GetArrayLength());
         Assert.Equal("Program.cs", files[0].GetProperty("FileName").GetString());
-        Assert.Contains("AddSyncfusionBlazorToolkit", files[0].GetRawText());
         Assert.DoesNotContain("fluent.min.css", resolved);
     }
 }

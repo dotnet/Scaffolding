@@ -63,6 +63,29 @@ internal class SyncfusionBlazorToolkitSettings : BaseSettings
     public bool ServicesApplied { get; set; }
 
     /// <summary>
+    /// True when the Program.cs service-registration step actually
+    /// appended the call (or created a new file with the call in
+    /// place). False when the call was already present (a no-op) or no
+    /// target file could be found.
+    /// </summary>
+    public bool ServicesInserted { get; set; }
+
+    /// <summary>
+    /// Project-relative path of the <c>Program.cs</c> file the
+    /// scaffolder targeted on this run. <c>null</c> when the scaffolder
+    /// could not find or create a suitable file.
+    /// </summary>
+    public string? ProgramCsFile { get; set; }
+
+    /// <summary>
+    /// True when no <c>Program.cs</c> file could be found or created
+    /// and the service-registration insertion was skipped. False when
+    /// a file was modified successfully (or the registration was
+    /// already present).
+    /// </summary>
+    public bool ProgramCsFileSkipped { get; set; }
+
+    /// <summary>
     /// True when the add-packages step actually added or updated a
     /// Syncfusion.Blazor.Toolkit PackageReference. False when the package
     /// was already referenced (no change) or the step was skipped.

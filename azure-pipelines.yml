@@ -87,7 +87,6 @@ extends:
                   _SignType: real
                   _DotNetPublishToBlobFeed : true
                   # _Script: eng\validate-sdk.cmd
-                  # _ValidateSdkArgs: -gitHubPat $(BotAccount-dotnet-maestro-bot-PAT) -barToken $(MaestroAccessToken)
             steps:
             - checkout: self
               clean: true

@@ -135,8 +135,10 @@ internal class ApplySyncfusionBlazorToolkitProgramCsStep : ScaffoldStep
                 // register after Build(). The user adds the call themselves.
                 _logger.LogError(
                     "Syncfusion Blazor Toolkit: could not find a safe place to register services for '{Project}'. " +
-                    "No single compiled source with a 'WebApplication.CreateBuilder(...)' / 'WebAssemblyHostBuilder.CreateDefault(...)' " +
-                    "declaration was found (target: '{ProgramCs}'). No files were created or changed. Add " +
+                    "The entry point (target: '{ProgramCs}') must declare the framework host builder " +
+                    "('WebApplication.CreateBuilder(...)' / 'WebAssemblyHostBuilder.CreateDefault(...)', aliases allowed) as a " +
+                    "top-level or Main statement and call 'Build()' on it; otherwise registration cannot be verified. " +
+                    "No files were created or changed. Add " +
                     "'builder.Services.AddSyncfusionBlazorToolkit();' to your existing application entry point, " +
                     "before 'Build()', and re-run the scaffolder.",
                     projectToOperateOn,

@@ -202,27 +202,22 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     public void IsActiveServiceRegistrationPresent_RecognisesStandaloneCall()
     {
         Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            "builder.Services.AddSyncfusionBlazorToolkit();\n"));
+            "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddSyncfusionBlazorToolkit();\nvar app = builder.Build();\n"));
         Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            "wasmBuilder.Services.AddSyncfusionBlazorToolkit();\n"));
-        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            "var x = 1;\nbuilder.Services.AddSyncfusionBlazorToolkit();\n"));
+            "var wasmBuilder = WebAssemblyHostBuilder.CreateDefault(args);\nwasmBuilder.Services.AddSyncfusionBlazorToolkit();\nawait wasmBuilder.Build().RunAsync();\n"));
     }
 
     [Fact]
     public void IsActiveServiceRegistrationPresent_RejectsChainedAndCommentedCalls()
     {
-        // Chained forms — the call is inside a longer fluent chain —
-        // are not active service registrations.
+        const string head = "var builder = WebApplication.CreateBuilder(args);\n";
+        const string tail = "var app = builder.Build();\n";
         Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            "builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddSyncfusionBlazorToolkit();\n"));
-        // Line comment hides the registration.
+            head + "builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddSyncfusionBlazorToolkit();\n" + tail));
         Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            "// builder.Services.AddSyncfusionBlazorToolkit();\n"));
-        // Block comment hides the registration.
+            head + "// builder.Services.AddSyncfusionBlazorToolkit();\n" + tail));
         Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            "/* builder.Services.AddSyncfusionBlazorToolkit(); */\n"));
-        // No registration at all.
+            head + "/* builder.Services.AddSyncfusionBlazorToolkit(); */\n" + tail));
         Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(""));
     }
 
@@ -598,7 +593,8 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     [InlineData("builder.Services.AddRazorComponents().AddSyncfusionBlazorToolkit();", false)]
     public void IsActiveServiceRegistrationPresent_IgnoresLiteralsAndComments(string code, bool expected)
     {
-        Assert.Equal(expected, SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(code));
+        Assert.Equal(expected, SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "var builder = WebApplication.CreateBuilder(args);\n" + code + "\nvar app = builder.Build();\n"));
     }
 
     [Fact]
@@ -975,10 +971,11 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     {
         const string two =
             "var a = WebApplication.CreateBuilder(args);\nvar b = WebApplication.CreateBuilder(args);\n";
+        const string builds = "a.Build();\nb.Build();\n";
         Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            two + "a.Services.AddSyncfusionBlazorToolkit();\n"));
+            two + "a.Services.AddSyncfusionBlazorToolkit();\n" + builds));
         Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            two + "a.Services.AddSyncfusionBlazorToolkit();\nb.Services.AddSyncfusionBlazorToolkit();\n"));
+            two + "a.Services.AddSyncfusionBlazorToolkit();\nb.Services.AddSyncfusionBlazorToolkit();\n" + builds));
     }
 
     [Theory]
@@ -1104,6 +1101,134 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         Assert.True(text.IndexOf("AddSyncfusionBlazorToolkit();", StringComparison.Ordinal)
             < text.IndexOf("builder.Build()", StringComparison.Ordinal));
         Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(text));
+    }
+
+    // ------------------------------------------------------------------
+    // Aliased / qualified host builder types; fail closed when unresolved
+    // ------------------------------------------------------------------
+
+    private const string AliasHeader =
+        "using WebApp = Microsoft.AspNetCore.Builder.WebApplication;\nusing Syncfusion.Blazor.Toolkit;\n";
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_AliasedBuilder_RegistrationAfterBuild_IsRejected()
+    {
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            AliasHeader +
+            "var builder = WebApp.CreateBuilder(args);\n" +
+            "var app = builder.Build();\n" +
+            "builder.Services.AddSyncfusionBlazorToolkit();\n" +
+            "app.Run();\n"));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_AliasedBuilder_RegistrationBeforeBuild_IsAccepted()
+    {
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            AliasHeader +
+            "var builder = WebApp.CreateBuilder(args);\n" +
+            "builder.Services.AddSyncfusionBlazorToolkit();\n" +
+            "var app = builder.Build();\n"));
+    }
+
+    [Theory]
+    [InlineData("global::Microsoft.AspNetCore.Builder.WebApplication")]
+    [InlineData("Microsoft.AspNetCore.Builder.WebApplication")]
+    [InlineData("WebApplication")]
+    public void DetectBuilderVariableName_ResolvesFrameworkTypeSpellings(string type)
+    {
+        Assert.Equal("b", SyncfusionBlazorToolkitHelper.DetectBuilderVariableName(
+            $"var b = {type}.CreateBuilder(args);\n",
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp));
+    }
+
+    [Theory]
+    [InlineData("using WebApp = Contoso.Hosting.WebApplication;\nvar b = WebApp.CreateBuilder(args);\n")]
+    [InlineData("var b = Contoso.WebApplication.CreateBuilder(args);\n")]
+    [InlineData("class WebApplication { public static object CreateBuilder(string[] a) => null; }\nvar b = WebApplication.CreateBuilder(args);\n")]
+    public void DetectBuilderVariableName_LookAlikeTypes_AreNotTheFrameworkBuilder(string code)
+    {
+        Assert.Null(SyncfusionBlazorToolkitHelper.DetectBuilderVariableName(
+            code, SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_AliasedWasmBuilder_IsResolved()
+    {
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "using Host = Microsoft.AspNetCore.Components.WebAssembly.Hosting.WebAssemblyHostBuilder;\n" +
+            "var b = Host.CreateDefault(args);\nb.Services.AddSyncfusionBlazorToolkit();\nawait b.Build().RunAsync();\n"));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_UnresolvedBuilder_IsNotAcceptedJustBecauseACallExists()
+    {
+        // The host builder cannot be identified (custom factory): a matching
+        // statement must not be treated as proof of registration.
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "var builder = MyHost.Create(args);\nvar app = builder.Build();\nbuilder.Services.AddSyncfusionBlazorToolkit();\n"));
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "builder.Services.AddSyncfusionBlazorToolkit();\n"));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_NoBuildBoundary_IsNotConclusive()
+    {
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddSyncfusionBlazorToolkit();\n"));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_UnresolvedBuilderWithLateCall_SkipsAndDoesNotModifyFile()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        const string text =
+            "var builder = MyHost.Create(args);\nvar app = builder.Build();\nbuilder.Services.AddSyncfusionBlazorToolkit();\n";
+        File.WriteAllText(program, text);
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project, SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.Equal(text, File.ReadAllText(program));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_NoBuildBoundary_SkipsAndDoesNotModifyFile()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        const string text = "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddSyncfusionBlazorToolkit();\n";
+        File.WriteAllText(program, text);
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project, SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.Equal(text, File.ReadAllText(program));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_AliasedBuilderWithLateCall_InsertsBeforeBuildAndKeepsAliasUsing()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program,
+            AliasHeader +
+            "var builder = WebApp.CreateBuilder(args);\nvar app = builder.Build();\nbuilder.Services.AddSyncfusionBlazorToolkit();\napp.Run();\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project, SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+        string text = File.ReadAllText(program);
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(text));
+        Assert.Contains("using WebApp = Microsoft.AspNetCore.Builder.WebApplication;", text);
+        Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(text, "using Syncfusion\\.Blazor\\.Toolkit;").Count);
     }
 
     // ------------------------------------------------------------------

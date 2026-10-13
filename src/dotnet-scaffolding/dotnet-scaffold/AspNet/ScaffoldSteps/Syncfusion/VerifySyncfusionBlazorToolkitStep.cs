@@ -39,15 +39,17 @@ internal class VerifySyncfusionBlazorToolkitStep : ScaffoldStep
 
         bool allOk = true;
 
-        // Re-inspect the project after the code-modification step has
-        // run. A pre-scaffolding "already registered" flag is not the
-        // same as "registration is now present" if the scaffolder
-        // silently skipped the code-modification step.
+        // Re-inspect the project after the Program.cs step has run. A
+        // pre-scaffolding "already registered" flag is not the same as
+        // "registration is now present" if the scaffolder silently
+        // skipped the Program.cs step.
         try
         {
             string projectDirectory = Path.GetDirectoryName(settings.Project) ?? string.Empty;
-            string programPath = Path.Combine(projectDirectory, "Program.cs");
-            string programText = File.Exists(programPath) ? File.ReadAllText(programPath) : string.Empty;
+            string? programPath = SyncfusionBlazorToolkitHelper.DiscoverProgramCs(projectDirectory);
+            string programText = programPath is not null && File.Exists(programPath)
+                ? File.ReadAllText(programPath)
+                : string.Empty;
 
             // `IsActiveServiceRegistrationPresent` rejects commented-out
             // calls and chained forms, so a project that ends up with

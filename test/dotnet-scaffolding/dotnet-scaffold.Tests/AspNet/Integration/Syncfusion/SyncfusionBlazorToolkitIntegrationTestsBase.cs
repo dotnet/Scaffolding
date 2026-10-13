@@ -127,4 +127,28 @@ public abstract class SyncfusionBlazorToolkitIntegrationTestsBase : IDisposable
             CommandName,
             "--project",
             _testProjectPath);
+
+    /// <summary>
+    /// Asserts that the inserted service registration is a valid
+    /// standalone call against a declared builder variable, not the
+    /// broken
+    /// <c>WebAssemblyHostBuilder.CreateDefault.Services.AddSyncfusionBlazorToolkit();</c>
+    /// line that the pre-fix JSON recipe produced. The strict
+    /// detector in <c>IsActiveServiceRegistrationPresent</c> rejects
+    /// the broken form, so this test would have failed before the fix
+    /// even without the additional explicit assertions.
+    /// </summary>
+    protected static void AssertValidServiceRegistration(string programCs)
+    {
+        Assert.Contains("AddSyncfusionBlazorToolkit", programCs);
+        Assert.DoesNotContain(
+            "WebApplication.CreateBuilder.Services",
+            programCs);
+        Assert.DoesNotContain(
+            "WebAssemblyHostBuilder.CreateDefault.Services",
+            programCs);
+        // The standalone call must be present, not just any mention of
+        // the method name (e.g. a chained call does not count).
+        Assert.Contains("builder.Services.AddSyncfusionBlazorToolkit();", programCs);
+    }
 }

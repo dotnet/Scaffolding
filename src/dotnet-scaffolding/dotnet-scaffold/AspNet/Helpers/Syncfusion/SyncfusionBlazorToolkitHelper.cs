@@ -598,6 +598,8 @@ internal static class SyncfusionBlazorToolkitHelper
     /// <see cref="IsActiveServiceRegistrationPresent"/> to make sure
     /// commented-out registrations are not detected.
     /// </summary>
+    internal static string StripCSharpCommentsForTest(string source) => StripCSharpComments(source);
+
     private static string StripCSharpComments(string source)
     {
         if (string.IsNullOrEmpty(source))
@@ -676,5 +678,657 @@ internal static class SyncfusionBlazorToolkitHelper
         }
 
         return builder.ToString();
+    }
+
+    // ---------------------------------------------------------------------
+    // Program.cs service registration helpers
+    // ---------------------------------------------------------------------
+
+    /// <summary>
+    /// Outcome of <see cref="EnsureServiceRegistration"/>. The values
+    /// mirror the categories reported in the scaffolder summary.
+    /// </summary>
+    public enum ServiceRegistrationOutcome
+    {
+        /// <summary>
+        /// A real, uncommented <c>AddSyncfusionBlazorToolkit()</c> call was
+        /// already present in the project's <c>Program.cs</c>. No write
+        /// happened.
+        /// </summary>
+        AlreadyPresent = 0,
+
+        /// <summary>
+        /// The call was appended to an existing <c>Program.cs</c>.
+        /// </summary>
+        Inserted = 1,
+
+        /// <summary>
+        /// No <c>Program.cs</c> existed; a minimal one was created with
+        /// the call in place.
+        /// </summary>
+        Created = 2,
+
+        /// <summary>
+        /// The step could not find or create a <c>Program.cs</c> and the
+        /// service registration was skipped. The caller is expected to
+        /// log this so the user can act on it.
+        /// </summary>
+        Skipped = 3,
+    }
+
+    /// <summary>
+    /// Identifies the Blazor hosting model the <c>Program.cs</c> targets.
+    /// Drives the choice of minimal scaffold used when a <c>Program.cs</c>
+    /// has to be created from scratch and the builder variable name to
+    /// register the service on.
+    /// </summary>
+    public enum ProgramHostKind
+    {
+        /// <summary>
+        /// Blazor Web App / Server — uses <c>WebApplication.CreateBuilder</c>.
+        /// </summary>
+        WebApp = 0,
+
+        /// <summary>
+        /// Standalone Blazor WebAssembly — uses
+        /// <c>WebAssemblyHostBuilder.CreateDefault</c>.
+        /// </summary>
+        StandaloneWasm = 1,
+    }
+
+    /// <summary>
+    /// The conventional file name expected for the application entry point.
+    /// </summary>
+    public const string ProgramCsFileName = "Program.cs";
+
+    /// <summary>
+    /// The set of file names that are treated as the application entry
+    /// point by <see cref="DiscoverProgramCs"/>. <c>Program.cs</c> is the
+    /// .NET 6+ default; the remaining entries are accepted as alternates
+    /// for older / non-standard layouts so the scaffolder still works
+    /// when the file lives at a custom name.
+    /// </summary>
+    public static readonly string[] ProgramCsFileNameCandidates =
+    [
+        "Program.cs",
+        "Program.vb",
+        "Startup.cs",
+    ];
+
+    private const string ServiceRegistrationCall = "AddSyncfusionBlazorToolkit";
+    private const string DefaultBuilderVariableName = "builder";
+    private const string ToolKitUsingDirective = "using Syncfusion.Blazor.Toolkit;";
+
+    /// <summary>
+    /// Idempotently writes
+    /// <c>builder.Services.AddSyncfusionBlazorToolkit();</c> (and the
+    /// matching <c>using</c> directive) into the project's
+    /// <c>Program.cs</c>. The function works against a Blazor Web App /
+    /// Server host and against a standalone Blazor WebAssembly host, and
+    /// works whether <c>Program.cs</c> already exists or has to be
+    /// created from scratch. It also works when <c>Program.cs</c> lives
+    /// in a subdirectory of the project or has a non-default name
+    /// (<c>Startup.cs</c>, <c>Program.vb</c>).
+    /// </summary>
+    /// <param name="projectPath">
+    /// Absolute path to the project's <c>.csproj</c> / <c>.vbproj</c>.
+    /// Used to locate the project directory and to default the
+    /// <c>Program.cs</c> location.
+    /// </param>
+    /// <param name="hostKind">
+    /// Hosting model — controls the minimal <c>Program.cs</c> template
+    /// when a file has to be created and the builder variable name to
+    /// look for when one already exists.
+    /// </param>
+    /// <returns>
+    /// A tuple of (outcome, project-relative path of the file the
+    /// scaffolder targeted, or <c>null</c> when the file could not be
+    /// found or created).
+    /// </returns>
+    public static (ServiceRegistrationOutcome Outcome, string? ProgramCsRelative) EnsureServiceRegistration(
+        string? projectPath,
+        ProgramHostKind hostKind)
+    {
+        if (string.IsNullOrEmpty(projectPath))
+        {
+            return (ServiceRegistrationOutcome.Skipped, null);
+        }
+
+        string? projectDirectory = Path.GetDirectoryName(projectPath);
+        if (string.IsNullOrEmpty(projectDirectory) || !Directory.Exists(projectDirectory))
+        {
+            return (ServiceRegistrationOutcome.Skipped, null);
+        }
+
+        string? programPath = DiscoverProgramCs(projectDirectory);
+        bool created = false;
+        if (string.IsNullOrEmpty(programPath))
+        {
+            programPath = TryCreateMinimalProgramCs(projectDirectory, hostKind);
+            if (string.IsNullOrEmpty(programPath))
+            {
+                return (ServiceRegistrationOutcome.Skipped, null);
+            }
+
+            created = true;
+        }
+
+        string text = File.ReadAllText(programPath);
+        if (IsActiveServiceRegistrationPresent(text))
+        {
+            if (created)
+            {
+                // The minimal template we just wrote already contains
+                // a working AddSyncfusionBlazorToolkit() call. Reporting
+                // "Created" instead of "AlreadyPresent" makes the
+                // distinction between a fresh file and a re-run clearer
+                // for the summary step.
+                return (
+                    ServiceRegistrationOutcome.Created,
+                    ToRelativePath(projectDirectory, programPath));
+            }
+
+            return (
+                ServiceRegistrationOutcome.AlreadyPresent,
+                ToRelativePath(projectDirectory, programPath));
+        }
+
+        if (created)
+        {
+            // Defensive: the minimal template should already include
+            // the call. If it does not, fall through to the regular
+            // insertion path so we never leave the project without a
+            // registration.
+        }
+
+        string builderName = DetectBuilderVariableName(text, hostKind) ?? DefaultBuilderVariableName;
+        AppendServiceRegistration(programPath, text, builderName);
+        return (
+            created ? ServiceRegistrationOutcome.Created : ServiceRegistrationOutcome.Inserted,
+            ToRelativePath(projectDirectory, programPath));
+    }
+
+    /// <summary>
+    /// Locates the application entry-point file inside
+    /// <paramref name="projectDirectory"/>. The root <c>Program.cs</c>
+    /// is preferred; one-level subdirectories are searched as fallbacks.
+    /// <c>bin</c> / <c>obj</c> / <c>node_modules</c> / <c>.git</c> and any
+    /// other directory that hosts a <c>.csproj</c> are excluded so
+    /// sibling projects never claim the entry point of the project the
+    /// scaffolder was invoked against.
+    /// </summary>
+    public static string? DiscoverProgramCs(string projectDirectory)
+    {
+        if (string.IsNullOrEmpty(projectDirectory) || !Directory.Exists(projectDirectory))
+        {
+            return null;
+        }
+
+        // 1. Root-level entry point — the conventional .NET 6+ layout.
+        foreach (string candidate in ProgramCsFileNameCandidates)
+        {
+            string root = Path.Combine(projectDirectory, candidate);
+            if (File.Exists(root))
+            {
+                return root;
+            }
+        }
+
+        // 2. One-level subdirectory fallback. We walk the immediate
+        //    children (excluding build/output/VCS folders and any
+        //    directory that itself contains a .csproj — that would be
+        //    a sibling project, not the current project's entry point).
+        IEnumerable<string> subdirs;
+        try
+        {
+            subdirs = Directory.EnumerateDirectories(projectDirectory);
+        }
+        catch
+        {
+            return null;
+        }
+
+        foreach (string subdir in subdirs)
+        {
+            string name = Path.GetFileName(subdir);
+            if (IsExcludedDirectory(name))
+            {
+                continue;
+            }
+
+            if (DirectoryContainsProjectFile(subdir))
+            {
+                continue;
+            }
+
+            foreach (string candidate in ProgramCsFileNameCandidates)
+            {
+                string candidatePath = Path.Combine(subdir, candidate);
+                if (File.Exists(candidatePath))
+                {
+                    return candidatePath;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Creates a minimal <c>Program.cs</c> in
+    /// <paramref name="projectDirectory"/> matching
+    /// <paramref name="hostKind"/>, and returns its absolute path. The
+    /// minimal template already contains a working
+    /// <c>AddSyncfusionBlazorToolkit()</c> registration so callers do
+    /// not need to perform a separate insertion pass.
+    /// </summary>
+    /// <returns>
+    /// The path of the freshly-created <c>Program.cs</c>, or
+    /// <c>null</c> if the file could not be created.
+    /// </returns>
+    public static string? TryCreateMinimalProgramCs(string projectDirectory, ProgramHostKind hostKind)
+    {
+        if (string.IsNullOrEmpty(projectDirectory) || !Directory.Exists(projectDirectory))
+        {
+            return null;
+        }
+
+        string programPath = Path.Combine(projectDirectory, ProgramCsFileName);
+        if (File.Exists(programPath))
+        {
+            // A file already exists but the discovery pass missed it
+            // (for example, because it lives in a deeper subdirectory
+            // than we searched). Return the existing file unchanged so
+            // the caller can perform the regular insertion path.
+            return programPath;
+        }
+
+        string builderName = hostKind == ProgramHostKind.StandaloneWasm
+            ? "wasmBuilder"
+            : DefaultBuilderVariableName;
+
+        string template = hostKind == ProgramHostKind.StandaloneWasm
+            ? BuildStandaloneWasmMinimalProgramCs(builderName)
+            : BuildWebAppMinimalProgramCs(builderName);
+
+        try
+        {
+            File.WriteAllText(programPath, template);
+            return programPath;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Scans the contents of a <c>Program.cs</c> file for the variable
+    /// name the host builder was assigned to. Supports both the
+    /// Blazor Web App / Server pattern
+    /// (<c>var builder = WebApplication.CreateBuilder(...)</c>) and the
+    /// standalone Blazor WebAssembly pattern
+    /// (<c>var builder = WebAssemblyHostBuilder.CreateDefault(...)</c>).
+    /// Returns <c>null</c> when no host builder is detected, in which
+    /// case callers should fall back to the conventional
+    /// <c>builder</c> name.
+    /// </summary>
+    public static string? DetectBuilderVariableName(string? programText, ProgramHostKind hostKind)
+    {
+        if (string.IsNullOrEmpty(programText))
+        {
+            return null;
+        }
+
+        string codeOnly = StripCSharpComments(programText);
+        string marker = hostKind == ProgramHostKind.StandaloneWasm
+            ? "WebAssemblyHostBuilder.CreateDefault"
+            : "WebApplication.CreateBuilder";
+
+        foreach (string rawLine in codeOnly.Split('\n'))
+        {
+            string line = rawLine.TrimEnd('\r').Trim();
+            if (line.Length == 0)
+            {
+                continue;
+            }
+
+            // Recognise the assignment shape:
+            //   var NAME = ...Marker...(...);
+            //   WebApplicationBuilder NAME = ...Marker...(...);
+            //   NAME NAME = ...Marker...(...);
+            int markerIdx = line.IndexOf(marker, StringComparison.Ordinal);
+            if (markerIdx < 0)
+            {
+                continue;
+            }
+
+            int equalsIdx = line.IndexOf('=');
+            if (equalsIdx <= 0)
+            {
+                continue;
+            }
+
+            string leftHandSide = line[..equalsIdx].Trim();
+            if (leftHandSide.Length == 0)
+            {
+                continue;
+            }
+
+            // Pull the last identifier on the LHS — this is the
+            // declared variable name, regardless of whether the
+            // declaration is `var x = ...` or
+            // `WebApplicationBuilder x = ...`.
+            int lastSpace = leftHandSide.LastIndexOf(' ');
+            if (lastSpace < 0 || lastSpace == leftHandSide.Length - 1)
+            {
+                continue;
+            }
+
+            string candidate = leftHandSide[(lastSpace + 1)..];
+            if (IsValidIdentifier(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private static bool IsValidIdentifier(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return false;
+        }
+
+        if (!char.IsLetter(value[0]) && value[0] != '_')
+        {
+            return false;
+        }
+
+        for (int i = 1; i < value.Length; i++)
+        {
+            char c = value[i];
+            if (!char.IsLetterOrDigit(c) && c != '_')
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool IsExcludedDirectory(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return true;
+        }
+
+        return name.Equals("bin", StringComparison.OrdinalIgnoreCase)
+            || name.Equals("obj", StringComparison.OrdinalIgnoreCase)
+            || name.Equals("node_modules", StringComparison.OrdinalIgnoreCase)
+            || name.Equals(".git", StringComparison.OrdinalIgnoreCase)
+            || name.Equals(".vs", StringComparison.OrdinalIgnoreCase)
+            || name.Equals(".idea", StringComparison.OrdinalIgnoreCase)
+            || name.Equals("Properties", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool DirectoryContainsProjectFile(string directory)
+    {
+        try
+        {
+            return Directory.EnumerateFiles(directory, "*.csproj").Any()
+                || Directory.EnumerateFiles(directory, "*.vbproj").Any()
+                || Directory.EnumerateFiles(directory, "*.fsproj").Any();
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string BuildWebAppMinimalProgramCs(string builderName)
+    {
+        return
+            $"var {builderName} = WebApplication.CreateBuilder(args);\n" +
+            $"{builderName}.Services.AddSyncfusionBlazorToolkit();\n" +
+            $"var app = {builderName}.Build();\n" +
+            $"app.Run();\n";
+    }
+
+    private static string BuildStandaloneWasmMinimalProgramCs(string builderName)
+    {
+        return
+            $"var {builderName} = WebAssemblyHostBuilder.CreateDefault(args);\n" +
+            $"{builderName}.Services.AddSyncfusionBlazorToolkit();\n" +
+            $"await {builderName}.Build().RunAsync();\n";
+    }
+
+    private static void AppendServiceRegistration(string programPath, string existingText, string builderName)
+    {
+        string registrationLine = $"{builderName}.Services.{ServiceRegistrationCall}();";
+
+        // Build the new file content: ensure the using directive is
+        // present, then insert the service registration call
+        // immediately after the host-builder declaration so the
+        // services are wired up before any later `builder.Build()`
+        // call consumes them. If the host-builder line cannot be
+        // located (empty or unparseable file), fall back to appending
+        // at the end of the file — preserves the previous behaviour
+        // for the edge case.
+        string withUsing = EnsureUsingDirective(existingText, ToolKitUsingDirective);
+        string withRegistration = InsertAfterBuilderLine(withUsing, registrationLine)
+            ?? AppendLine(withUsing, registrationLine);
+
+        File.WriteAllText(programPath, withRegistration);
+    }
+
+    /// <summary>
+    /// Inserts <paramref name="registrationLine"/> immediately after
+    /// the first host-builder assignment line in <paramref name="source"/>
+    /// (the line that contains <c>WebApplication.CreateBuilder</c> or
+    /// <c>WebAssemblyHostBuilder.CreateDefault</c>), preserving the
+    /// file's existing line ending (CRLF or LF).
+    ///
+    /// <para>Returns <c>null</c> when the file does not contain a
+    /// recognisable host-builder assignment; callers should fall back
+    /// to appending the registration at the end of the file in that
+    /// case.</para>
+    ///
+    /// <para>Commented-out host-builder lines are ignored (we use the
+    /// comment-stripped view of the file to detect the marker), so a
+    /// file with only a commented-out <c>var builder = ...</c> line
+    /// behaves the same as a file with no marker at all.</para>
+    /// </summary>
+    private static string? InsertAfterBuilderLine(string source, string registrationLine)
+    {
+        if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(registrationLine))
+        {
+            return null;
+        }
+
+        string[] rawLines = source.Split('\n');
+        string codeOnly = StripCSharpComments(source);
+        string[] codeLines = codeOnly.Split('\n');
+
+        for (int i = 0; i < codeLines.Length; i++)
+        {
+            string codeLine = codeLines[i].TrimEnd('\r').Trim();
+            if (codeLine.Length == 0)
+            {
+                continue;
+            }
+
+            bool isHostBuilderLine =
+                codeLine.Contains("WebApplication.CreateBuilder", StringComparison.Ordinal)
+                || codeLine.Contains("WebAssemblyHostBuilder.CreateDefault", StringComparison.Ordinal);
+
+            if (!isHostBuilderLine || codeLine.IndexOf('=') <= 0)
+            {
+                continue;
+            }
+
+            // We found the host-builder line in the comment-stripped
+            // view at index `i`. Map back to the original (non-stripped)
+            // rawLines — they have the same length because
+            // StripCSharpComments preserves newlines — and insert
+            // `registrationLine` after the original line.
+            if (i >= rawLines.Length)
+            {
+                return null;
+            }
+
+            // The inserted line must use the same newline as the
+            // surrounding file so we do not introduce a mixed-ending
+            // section. Fall back to the platform newline if the file
+            // uses an unrecognised line ending. We probe the
+            // un-split source because Split('\n') leaves the trailing
+            // \r attached to each line, so checking EndsWith("\r\n")
+            // on a single raw line would miss CRLF.
+            string newline = source.Contains("\r\n", StringComparison.Ordinal)
+                ? "\r\n"
+                : "\n";
+
+            StringBuilder sb = new(source.Length + registrationLine.Length + 4);
+            // Re-assemble the lines we have copied so far, restoring
+            // the newline separator that Split('\n') consumed.
+            for (int j = 0; j < i; j++)
+            {
+                sb.Append(rawLines[j]);
+                sb.Append('\n');
+            }
+            // Append the host-builder line itself (without its
+            // trailing newline — we strip and replace it below).
+            sb.Append(rawLines[i]);
+
+            // Strip the trailing newline from the host-builder line
+            // (Split('\n') leaves it attached) so the registration
+            // starts on the very next line.
+            int trailingNewline = sb.ToString().EndsWith("\r\n", StringComparison.Ordinal) ? 2
+                : sb.ToString().EndsWith("\n", StringComparison.Ordinal) ? 1
+                : 0;
+            if (trailingNewline > 0)
+            {
+                sb.Length -= trailingNewline;
+            }
+
+            sb.Append(newline);
+            sb.Append(registrationLine);
+            sb.Append(newline);
+
+            for (int j = i + 1; j < rawLines.Length; j++)
+            {
+                sb.Append(rawLines[j]);
+                if (j < rawLines.Length - 1)
+                {
+                    sb.Append('\n');
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Returns <paramref name="source"/> with
+    /// <paramref name="usingDirective"/> prepended as the first line of
+    /// the file when it is not already present (and not commented out).
+    /// When the directive is already present the original source is
+    /// returned unchanged.
+    /// </summary>
+    private static string EnsureUsingDirective(string source, string usingDirective)
+    {
+        if (string.IsNullOrEmpty(source))
+        {
+            // Empty file — write the using directive on its own.
+            return usingDirective + Environment.NewLine;
+        }
+
+        if (string.IsNullOrEmpty(usingDirective))
+        {
+            return source;
+        }
+
+        // Use the comment-stripped view so a commented-out using does
+        // not count as already-present.
+        string codeOnly = StripCSharpComments(source);
+        foreach (string rawLine in codeOnly.Split('\n'))
+        {
+            string line = rawLine.TrimEnd('\r').Trim();
+            if (string.Equals(line, usingDirective, StringComparison.Ordinal))
+            {
+                return source;
+            }
+        }
+
+        // Use the same line ending as the rest of the file so we do
+        // not introduce a mixed-ending section. CRLF on Windows, LF
+        // on Linux/macOS, falling back to the platform newline when
+        // the file uses neither.
+        string newline = source.Contains("\r\n", StringComparison.Ordinal)
+            ? "\r\n"
+            : "\n";
+
+        StringBuilder sb = new(source.Length + usingDirective.Length + 4);
+        sb.Append(usingDirective);
+        sb.Append(newline);
+        // If the existing file already starts with a newline, do not
+        // double it.
+        if (!StartsWithNewline(source))
+        {
+            sb.Append(newline);
+        }
+
+        sb.Append(source);
+        return sb.ToString();
+    }
+
+    private static string AppendLine(string source, string line)
+    {
+        StringBuilder sb = new(source.Length + line.Length + 2);
+        sb.Append(source);
+        // Guarantee exactly one separator between the existing body
+        // and the appended line.
+        if (source.Length == 0)
+        {
+            sb.Append(line);
+        }
+        else
+        {
+            if (!EndsWithNewline(source))
+            {
+                sb.Append(Environment.NewLine);
+            }
+
+            sb.Append(line);
+            sb.Append(Environment.NewLine);
+        }
+
+        return sb.ToString();
+    }
+
+    private static bool StartsWithNewline(string source)
+    {
+        if (string.IsNullOrEmpty(source))
+        {
+            return false;
+        }
+
+        return source[0] == '\n' || source[0] == '\r';
+    }
+
+    private static bool EndsWithNewline(string source)
+    {
+        if (string.IsNullOrEmpty(source))
+        {
+            return false;
+        }
+
+        char last = source[source.Length - 1];
+        return last == '\n' || last == '\r';
     }
 }

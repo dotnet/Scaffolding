@@ -26,7 +26,7 @@ public class SyncfusionBlazorToolkitNet9IntegrationTests : SyncfusionBlazorToolk
         Assert.Contains("Syncfusion.Blazor.Toolkit", csproj);
 
         string programCs = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-        Assert.Contains("AddSyncfusionBlazorToolkit", programCs);
+        AssertValidServiceRegistration(programCs);
         Assert.Contains("using Syncfusion.Blazor.Toolkit", programCs);
 
         string imports = File.ReadAllText(Path.Combine(_testProjectDir, "Components", "_Imports.razor"));

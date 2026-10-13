@@ -4,40 +4,9 @@
       "FileName": "Program.cs",
       "Methods": {
         "Global": {
-          "CodeChanges": [
-            {
-              "Block": "WebApplication.CreateBuilder.Services.AddSyncfusionBlazorToolkit();",
-              "InsertBefore": [ "var app = builder.Build();" ],
-              "CheckBlock": "builder.Services.AddSyncfusionBlazorToolkit",
-              "Options": [ "WebApp" ],
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
-              "Block": "WebAssemblyHostBuilder.CreateDefault.Services.AddSyncfusionBlazorToolkit();",
-              "InsertBefore": [ "await builder.Build().RunAsync();" ],
-              "CheckBlock": "builder.Services.AddSyncfusionBlazorToolkit",
-              "Options": [ "StandaloneWasm" ],
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
-              "Block": "WebAssemblyHostBuilder.CreateDefault.Services.AddSyncfusionBlazorToolkit();",
-              "InsertBefore": [ "builder.Build().RunAsync();" ],
-              "CheckBlock": "builder.Services.AddSyncfusionBlazorToolkit",
-              "Options": [ "StandaloneWasm" ],
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            }
-          ]
+          "CodeChanges": []
         }
-      },
-      "Usings": [
-        "Syncfusion.Blazor.Toolkit"
-      ]
+      }
     }
   ]
 }

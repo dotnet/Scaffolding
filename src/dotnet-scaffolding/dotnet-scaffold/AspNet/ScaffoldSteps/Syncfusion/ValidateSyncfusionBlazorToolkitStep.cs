@@ -383,8 +383,8 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
     {
         try
         {
-            string programPath = Path.Combine(projectDirectory, "Program.cs");
-            if (!_fileSystem.FileExists(programPath))
+            string? programPath = SyncfusionBlazorToolkitHelper.DiscoverProgramCs(projectDirectory);
+            if (string.IsNullOrEmpty(programPath) || !_fileSystem.FileExists(programPath))
             {
                 return false;
             }

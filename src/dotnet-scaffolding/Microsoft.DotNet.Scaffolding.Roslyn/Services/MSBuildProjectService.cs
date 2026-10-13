@@ -80,6 +80,37 @@ public class MSBuildProjectService : IMSBuildProjectService
     }
 
     /// <summary>
+    /// Gets the evaluated items of the given type (for example <c>Compile</c> or <c>PackageReference</c>),
+    /// after SDK default globbing, imports, conditions and Remove/Update operations are applied.
+    /// </summary>
+    /// <param name="itemType">The MSBuild item type to read.</param>
+    /// <param name="items">The evaluated (Include, FullPath) pairs, or an empty list on evaluation failure.</param>
+    /// <param name="error">The project evaluation diagnostic on failure, or null on success.</param>
+    /// <returns>True if evaluation succeeds; otherwise, false.</returns>
+    public bool TryGetEvaluatedItems(
+        string itemType,
+        out IReadOnlyList<(string Include, string FullPath)> items,
+        out string? error)
+    {
+        try
+        {
+            using var projects = new ProjectCollection();
+            var project = new Project(_projectPath, null, null, projects);
+            items = project.GetItems(itemType)
+                .Select(item => (item.EvaluatedInclude, item.GetMetadataValue("FullPath")))
+                .ToList();
+            error = null;
+            return true;
+        }
+        catch (InvalidProjectFileException ex)
+        {
+            items = [];
+            error = ex.Message;
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Gets the evaluated values of the requested MSBuild properties.
     /// </summary>
     /// <remarks>

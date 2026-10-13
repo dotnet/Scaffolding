@@ -182,7 +182,7 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
 
         // Pre-scaffolding flags for the summary.
         settings.PackageAlreadyReferenced = IsPackageAlreadyReferenced(settings.Project);
-        settings.ServicesAlreadyRegistered = IsServicesAlreadyRegistered(projectDirectory);
+        settings.ServicesAlreadyRegistered = IsServicesAlreadyRegistered(settings.Project);
 
         // Pre-discover the imports file so the dedicated imports step
         // can use the same convention. The dedicated step may still
@@ -327,42 +327,39 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
     /// </summary>
     private bool IsPackageAlreadyReferenced(string projectPath)
     {
-        try
+        if (!SyncfusionBlazorToolkitHelper.TryIsPackageReferenced(projectPath, out bool referenced, out string? error))
         {
-            string csprojText = File.ReadAllText(projectPath);
-            return csprojText.Contains("Syncfusion.Blazor.Toolkit", StringComparison.OrdinalIgnoreCase);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex,
-                "Syncfusion Blazor Toolkit could not inspect the project file for an existing package reference. " +
-                "Idempotency detection will report the package as 'not yet referenced'.");
+            _logger.LogWarning(
+                "Syncfusion Blazor Toolkit could not evaluate the project for an existing package reference: {Error} " +
+                "Idempotency detection will report the package as 'not yet referenced'.",
+                error);
             return false;
         }
+
+        return referenced;
     }
 
     /// <summary>
-    /// Inspects Program.cs for an existing
+    /// Inspects the evaluated application entry point for an existing
     /// <c>AddSyncfusionBlazorToolkit</c> service registration. Returns
-    /// false when Program.cs is missing or cannot be read.
+    /// false when no entry point is found or it cannot be read.
     /// </summary>
-    private bool IsServicesAlreadyRegistered(string projectDirectory)
+    private bool IsServicesAlreadyRegistered(string projectPath)
     {
         try
         {
-            string? programPath = SyncfusionBlazorToolkitHelper.DiscoverProgramCs(projectDirectory);
-            if (string.IsNullOrEmpty(programPath) || !_fileSystem.FileExists(programPath))
+            string? programPath = SyncfusionBlazorToolkitHelper.DiscoverEntryPoint(projectPath, out _);
+            if (string.IsNullOrEmpty(programPath))
             {
                 return false;
             }
 
-            string programText = File.ReadAllText(programPath);
-            return SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(programText);
+            return SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(File.ReadAllText(programPath));
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex,
-                "Syncfusion Blazor Toolkit could not inspect Program.cs for an existing service registration. " +
+                "Syncfusion Blazor Toolkit could not inspect the entry point for an existing service registration. " +
                 "Idempotency detection will report services as 'not yet registered'.");
             return false;
         }

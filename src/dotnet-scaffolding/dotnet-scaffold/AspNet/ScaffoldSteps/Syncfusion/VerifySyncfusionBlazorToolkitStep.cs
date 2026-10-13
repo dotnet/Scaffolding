@@ -45,36 +45,48 @@ internal class VerifySyncfusionBlazorToolkitStep : ScaffoldStep
         // skipped the Program.cs step.
         try
         {
-            string projectDirectory = Path.GetDirectoryName(settings.Project) ?? string.Empty;
-            string? programPath = SyncfusionBlazorToolkitHelper.DiscoverProgramCs(projectDirectory);
-            string programText = programPath is not null && File.Exists(programPath)
-                ? File.ReadAllText(programPath)
-                : string.Empty;
-
-            // `IsActiveServiceRegistrationPresent` rejects commented-out
-            // calls and chained forms, so a project that ends up with
-            //   builder.Services.AddRazorComponents().AddSyncfusionBlazorToolkit();
-            // is reported as missing.
-            bool serverHasRegistration = SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(programText);
-            settings.ServicesApplied = serverHasRegistration;
-            if (!serverHasRegistration)
+            // Entry point and package are resolved from the MSBuild-evaluated
+            // project (compiled sources / PackageReference items), not from
+            // file names or raw .csproj text.
+            string? programPath = SyncfusionBlazorToolkitHelper.DiscoverEntryPoint(settings.Project, out string? entryPointError);
+            bool serverHasRegistration = false;
+            if (programPath is null)
             {
                 _logger.LogError(
-                    "Syncfusion Blazor Toolkit: 'AddSyncfusionBlazorToolkit()' is not registered on the server project '{Project}'. " +
-                    "Add 'builder.Services.AddSyncfusionBlazorToolkit();' (or 'wasmBuilder.Services.AddSyncfusionBlazorToolkit();' for standalone Blazor WebAssembly) to Program.cs and re-run the scaffolder.",
-                    settings.Project);
-                allOk = false;
+                    "Syncfusion Blazor Toolkit: could not determine the application entry point of '{Project}'. {Error} " +
+                    "Add 'builder.Services.AddSyncfusionBlazorToolkit();' to the entry point, before 'Build()', and re-run the scaffolder.",
+                    settings.Project,
+                    entryPointError);
+            }
+            else
+            {
+                // `IsActiveServiceRegistrationPresent` rejects commented-out
+                // calls, chained forms, deferred code and registrations that
+                // do not cover every host builder in the file.
+                serverHasRegistration = SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(File.ReadAllText(programPath));
+                if (!serverHasRegistration)
+                {
+                    _logger.LogError(
+                        "Syncfusion Blazor Toolkit: 'AddSyncfusionBlazorToolkit()' is not registered on the server project '{Project}'. " +
+                        "Add 'builder.Services.AddSyncfusionBlazorToolkit();' (or 'wasmBuilder.Services.AddSyncfusionBlazorToolkit();' for standalone Blazor WebAssembly) to '{ProgramCs}' and re-run the scaffolder.",
+                        settings.Project,
+                        programPath);
+                }
             }
 
-            // Package reference check — accept the package whether it was
-            // added by the scaffolder or already existed.
-            if (File.Exists(settings.Project))
+            settings.ServicesApplied = serverHasRegistration;
+            allOk &= serverHasRegistration;
+
+            if (!SyncfusionBlazorToolkitHelper.TryIsPackageReferenced(settings.Project, out bool packageReferenced, out string? packageError))
             {
-                string csprojText = File.ReadAllText(settings.Project);
-                settings.PackageApplied = csprojText.Contains(
-                    "Syncfusion.Blazor.Toolkit",
-                    StringComparison.OrdinalIgnoreCase);
-                if (!settings.PackageApplied)
+                _logger.LogError("Syncfusion Blazor Toolkit: {Error}", packageError);
+                settings.PackageApplied = false;
+                allOk = false;
+            }
+            else
+            {
+                settings.PackageApplied = packageReferenced;
+                if (!packageReferenced)
                 {
                     _logger.LogError(
                         "Syncfusion Blazor Toolkit: NuGet package reference 'Syncfusion.Blazor.Toolkit' is missing from '{Project}'. " +
@@ -86,8 +98,10 @@ internal class VerifySyncfusionBlazorToolkitStep : ScaffoldStep
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex,
-                "Syncfusion Blazor Toolkit verification step could not re-inspect the project state.");
+            // Fail closed: if the state cannot be re-inspected, it is not verified.
+            _logger.LogError(ex,
+                "Syncfusion Blazor Toolkit verification step could not re-inspect the project state; the setup is not verified.");
+            allOk = false;
         }
 
         // When a Blazor WebAssembly client was resolved by the validate
@@ -101,8 +115,12 @@ internal class VerifySyncfusionBlazorToolkitStep : ScaffoldStep
             {
                 if (File.Exists(settings.ClientProjectPath))
                 {
-                    string clientText = File.ReadAllText(settings.ClientProjectPath);
-                    if (!clientText.Contains("Syncfusion.Blazor.Toolkit", StringComparison.OrdinalIgnoreCase))
+                    if (!SyncfusionBlazorToolkitHelper.TryIsPackageReferenced(settings.ClientProjectPath, out bool clientHasPackage, out string? clientPackageError))
+                    {
+                        _logger.LogError("Syncfusion Blazor Toolkit: {Error}", clientPackageError);
+                        allOk = false;
+                    }
+                    else if (!clientHasPackage)
                     {
                         _logger.LogError(
                             "Syncfusion Blazor Toolkit: NuGet package reference 'Syncfusion.Blazor.Toolkit' is missing from the resolved client project '{Client}'. " +
@@ -145,8 +163,9 @@ internal class VerifySyncfusionBlazorToolkitStep : ScaffoldStep
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex,
-                    "Syncfusion Blazor Toolkit verification step could not re-inspect the resolved client project.");
+                _logger.LogError(ex,
+                    "Syncfusion Blazor Toolkit verification step could not re-inspect the resolved client project; the setup is not verified.");
+                allOk = false;
             }
         }
 

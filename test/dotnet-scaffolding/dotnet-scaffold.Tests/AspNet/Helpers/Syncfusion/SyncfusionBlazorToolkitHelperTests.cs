@@ -1228,7 +1228,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         string text = File.ReadAllText(program);
         Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(text));
         Assert.Contains("using WebApp = Microsoft.AspNetCore.Builder.WebApplication;", text);
-        Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(text, "using Syncfusion\\.Blazor\\.Toolkit;").Count);
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(text, "using Syncfusion\\.Blazor\\.Toolkit;"));
     }
 
     // ------------------------------------------------------------------

@@ -16,8 +16,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
 /// styles with the assembly, so no host stylesheet link is added.</para>
 ///
 /// <para>Service registration is performed exclusively by the shared
-/// JSON/Roslyn code-modification pipeline (see
-/// <c>syncfusionBlazorToolkitChanges.json</c> for net8–net11). This helper is
+/// JSON/Roslyn code-modification pipeline. This helper is
 /// only used by the dedicated imports step and by the add-packages step that
 /// keeps the package on the client up-to-date.</para>
 /// </summary>

@@ -480,14 +480,25 @@ internal static class SyncfusionBlazorToolkitHelper
     }
 
     /// <summary>
-    /// True when <paramref name="programText"/> contains an active
-    /// (non-commented) call to <c>AddSyncfusionBlazorToolkit()</c>
-    /// on a <c>*.Services</c> receiver. The check rejects:
+    /// True when <paramref name="programText"/> registers the Toolkit on
+    /// the application's startup path. A registration counts only when it
+    /// is:
     /// <list type="bullet">
-    ///   <item><description>substrings inside <c>//</c> or <c>/* */</c> comments,</description></item>
-    ///   <item><description>chained calls (e.g. <c>AddRazorComponents().AddSyncfusionBlazorToolkit()</c>),</description></item>
-    ///   <item><description>substring occurrences inside larger identifiers.</description></item>
+    ///   <item><description>a real, parameterless
+    ///   <c>&lt;builder&gt;.Services.AddSyncfusionBlazorToolkit()</c>
+    ///   statement (not a comment, string literal, fluent chain, or call
+    ///   with arguments),</description></item>
+    ///   <item><description>a direct statement of the startup scope -
+    ///   top-level statements or the body of a static <c>Main</c> - so it
+    ///   always executes (not inside <c>if</c>/<c>try</c>/loops, lambdas,
+    ///   local functions, or ordinary helper methods), and</description></item>
+    ///   <item><description>made on the host-builder variable after its
+    ///   declaration and before the statement that calls
+    ///   <c>Build()</c> on it.</description></item>
     /// </list>
+    /// When the file declares several host builders, each must satisfy
+    /// this. When it declares none (custom bootstrap), a registration on
+    /// any receiver in the startup scope is accepted.
     /// </summary>
     public static bool IsActiveServiceRegistrationPresent(string? programText)
     {
@@ -496,48 +507,96 @@ internal static class SyncfusionBlazorToolkitHelper
             return false;
         }
 
-        // Syntax-aware: comments and string literals are never invocation
-        // nodes. The call must be a statement that runs at the entry
-        // point (not inside a lambda / local function that may never
-        // execute), and when the file declares a host builder the call
-        // must be made on that same builder variable. A fluent chain such
-        // as `builder.Services.AddRazorComponents().AddSyncfusionBlazorToolkit()`
-        // has an invocation as its receiver and is rejected.
         SyntaxNode root = CSharpSyntaxTree.ParseText(programText).GetRoot();
-
-        // Every host builder declared in the file must be registered. With
-        // several builders a registration on just one of them (or on an
-        // unrelated receiver) must not count, otherwise an ambiguous file
-        // would pass verification. Only when the file declares no
-        // recognisable host builder at all (custom bootstrap) is a
-        // registration on any receiver accepted.
-        List<string> builderNames = FindHostBuilderDeclarations(root, [WebBuilderMarker, WasmBuilderMarker])
-            .Select(d => d.Declarator.Identifier.ValueText)
-            .Distinct(StringComparer.Ordinal)
-            .ToList();
-
-        List<string> registeredReceivers = [];
-        foreach (InvocationExpressionSyntax invocation in root.DescendantNodes().OfType<InvocationExpressionSyntax>())
+        List<HostBuilderDeclaration> builders = FindHostBuilderDeclarations(root, ProgramHostKind.WebApp, ProgramHostKind.StandaloneWasm);
+        if (builders.Count == 0)
         {
-            if (invocation.Parent is ExpressionStatementSyntax &&
-                !IsInsideDeferredCode(invocation) &&
-                invocation.Expression is MemberAccessExpressionSyntax call &&
-                call.Name.Identifier.ValueText == ServiceRegistrationCall &&
-                call.Expression is MemberAccessExpressionSyntax services &&
-                services.Name.Identifier.ValueText == "Services" &&
-                services.Expression is IdentifierNameSyntax receiver)
+            return GetStartupStatementLists(root)
+                .Any(scope => scope.Any(statement => GetRegistrationReceiver(statement) is not null));
+        }
+
+        return builders.All(IsRegisteredBeforeBuild);
+    }
+
+    private static bool IsRegisteredBeforeBuild(HostBuilderDeclaration builder)
+    {
+        int declarationIndex = builder.Scope.IndexOf(builder.Statement);
+        int buildIndex = builder.Scope.FindIndex(declarationIndex + 1, statement => CallsBuildOn(statement, builder.Name));
+        int end = buildIndex < 0 ? builder.Scope.Count : buildIndex;
+
+        for (int i = declarationIndex + 1; i < end; i++)
+        {
+            if (string.Equals(GetRegistrationReceiver(builder.Scope[i]), builder.Name, StringComparison.Ordinal))
             {
-                registeredReceivers.Add(receiver.Identifier.ValueText);
+                return true;
             }
         }
 
-        return builderNames.Count == 0
-            ? registeredReceivers.Count > 0
-            : builderNames.All(name => registeredReceivers.Contains(name, StringComparer.Ordinal));
+        return false;
     }
 
-    private static bool IsInsideDeferredCode(SyntaxNode node) =>
-        node.Ancestors().Any(a => a is LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax);
+    private static bool CallsBuildOn(StatementSyntax statement, string builderName) =>
+        statement.DescendantNodesAndSelf().OfType<InvocationExpressionSyntax>().Any(invocation =>
+            invocation.Expression is MemberAccessExpressionSyntax access &&
+            access.Name.Identifier.ValueText == "Build" &&
+            access.Expression is IdentifierNameSyntax receiver &&
+            receiver.Identifier.ValueText == builderName);
+
+    /// <summary>
+    /// For a statement of the exact form
+    /// <c>x.Services.AddSyncfusionBlazorToolkit();</c> (no arguments, not
+    /// chained) returns the receiver <c>x</c>; otherwise <c>null</c>.
+    /// </summary>
+    private static string? GetRegistrationReceiver(StatementSyntax statement)
+    {
+        if (statement is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax invocation } &&
+            invocation.ArgumentList.Arguments.Count == 0 &&
+            invocation.Expression is MemberAccessExpressionSyntax call &&
+            call.Name is IdentifierNameSyntax { Identifier.ValueText: ServiceRegistrationCall } &&
+            call.Expression is MemberAccessExpressionSyntax services &&
+            services.Name.Identifier.ValueText == "Services" &&
+            services.Expression is IdentifierNameSyntax receiver)
+        {
+            return receiver.Identifier.ValueText;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The statement lists that make up the application's startup path:
+    /// the file's top-level statements and the body of every static
+    /// <c>Main</c> method. Statements inside any other method, lambda or
+    /// local function are deliberately not part of it.
+    /// </summary>
+    private static List<List<StatementSyntax>> GetStartupStatementLists(SyntaxNode root)
+    {
+        var lists = new List<List<StatementSyntax>>();
+
+        if (root is CompilationUnitSyntax unit)
+        {
+            List<StatementSyntax> topLevel = unit.Members
+                .OfType<GlobalStatementSyntax>()
+                .Select(global => global.Statement)
+                .ToList();
+            if (topLevel.Count > 0)
+            {
+                lists.Add(topLevel);
+            }
+        }
+
+        foreach (MethodDeclarationSyntax method in root.DescendantNodes().OfType<MethodDeclarationSyntax>())
+        {
+            if (method.Identifier.ValueText == "Main" &&
+                method.Modifiers.Any(SyntaxKind.StaticKeyword) &&
+                method.Body is not null)
+            {
+                lists.Add(method.Body.Statements.ToList());
+            }
+        }
+
+        return lists;
+    }
 
     /// <summary>
     /// Removes <c>// … \n</c> and <c>/* … */</c> C# comment regions
@@ -682,7 +741,6 @@ internal static class SyncfusionBlazorToolkitHelper
     }
 
     private const string ServiceRegistrationCall = "AddSyncfusionBlazorToolkit";
-    private const string DefaultBuilderVariableName = "builder";
     private const string ToolKitUsingDirective = "using Syncfusion.Blazor.Toolkit;";
 
     /// <summary>
@@ -738,11 +796,11 @@ internal static class SyncfusionBlazorToolkitHelper
             return (ServiceRegistrationOutcome.AlreadyPresent, relativePath);
         }
 
-        string builderName = DetectBuilderVariableName(text, hostKind) ?? DefaultBuilderVariableName;
-        if (!TryAppendServiceRegistration(programPath, text, builderName))
+        if (!TryAppendServiceRegistration(programPath, text, hostKind))
         {
-            // No host-builder declaration to anchor on. Appending at the
-            // end of the file would land after Build()/Run() and break DI.
+            // No single host-builder declaration on the startup path to
+            // anchor on. Appending at the end of the file would land after
+            // Build()/Run() and break DI, so leave the file untouched.
             return (ServiceRegistrationOutcome.Skipped, relativePath);
         }
 
@@ -758,8 +816,11 @@ internal static class SyncfusionBlazorToolkitHelper
     ///
     /// <para>The entry point is the single compiled file that declares a
     /// host builder (<c>WebApplication.CreateBuilder</c> /
-    /// <c>WebAssemblyHostBuilder.CreateDefault</c>); this also finds
-    /// <c>Hosting.cs</c>-style layouts. When no compiled file declares one,
+    /// <c>WebAssemblyHostBuilder.CreateDefault</c>) on the startup path
+    /// (top-level statements or a static <c>Main</c>); this also finds
+    /// <c>Hosting.cs</c>-style layouts. A builder created inside an
+    /// unrelated helper method does not make a file the entry point.
+    /// When no compiled file declares one,
     /// a single compiled <c>Program.cs</c> is returned so a custom
     /// bootstrap that is already registered can still be recognised.</para>
     ///
@@ -810,7 +871,7 @@ internal static class SyncfusionBlazorToolkitHelper
             }
 
             SyntaxNode root = CSharpSyntaxTree.ParseText(text).GetRoot();
-            if (FindHostBuilderDeclarations(root, [WebBuilderMarker, WasmBuilderMarker]).Count > 0)
+            if (FindHostBuilderDeclarations(root, ProgramHostKind.WebApp, ProgramHostKind.StandaloneWasm).Count > 0)
             {
                 hostFiles.Add(path);
             }
@@ -886,61 +947,52 @@ internal static class SyncfusionBlazorToolkitHelper
             return null;
         }
 
-        string marker = hostKind == ProgramHostKind.StandaloneWasm
-            ? WasmBuilderMarker
-            : WebBuilderMarker;
-
         SyntaxNode root = CSharpSyntaxTree.ParseText(programText).GetRoot();
-        return FindHostBuilderDeclaration(root, [marker])?.Declarator.Identifier.ValueText;
+        return FindHostBuilderDeclaration(root, hostKind)?.Name;
     }
 
-    private const string WebBuilderMarker = "WebApplication.CreateBuilder";
-    private const string WasmBuilderMarker = "WebAssemblyHostBuilder.CreateDefault";
+    /// <summary>
+    /// A host-builder variable declared as a direct statement of the
+    /// startup scope, e.g. <c>var builder = WebApplication.CreateBuilder(args);</c>.
+    /// </summary>
+    private sealed record HostBuilderDeclaration(
+        string Name,
+        LocalDeclarationStatementSyntax Statement,
+        List<StatementSyntax> Scope);
 
     /// <summary>
-    /// Finds the first local declaration whose initializer calls one of
-    /// <paramref name="markers"/> (e.g. <c>WebApplication.CreateBuilder</c>).
-    /// Working on the syntax tree means the declaration may span several
-    /// lines, and comments / string literals are never matched.
+    /// The single host-builder declaration of the requested kind(s), or
+    /// <c>null</c> when there is none or it is ambiguous (refuse rather
+    /// than guess).
     /// </summary>
-    private static (LocalDeclarationStatementSyntax Statement, VariableDeclaratorSyntax Declarator)? FindHostBuilderDeclaration(
-        SyntaxNode root,
-        string[] markers)
+    private static HostBuilderDeclaration? FindHostBuilderDeclaration(SyntaxNode root, params ProgramHostKind[] kinds)
     {
-        var matches = FindHostBuilderDeclarations(root, markers);
-
-        // Ambiguous (several host builders): refuse rather than guess.
+        List<HostBuilderDeclaration> matches = FindHostBuilderDeclarations(root, kinds);
         return matches.Count == 1 ? matches[0] : null;
     }
 
-    private static List<(LocalDeclarationStatementSyntax Statement, VariableDeclaratorSyntax Declarator)> FindHostBuilderDeclarations(
-        SyntaxNode root,
-        string[] markers)
+    /// <summary>
+    /// Host-builder declarations that are direct statements of the startup
+    /// scope and whose initializer <em>is</em> the host-builder creation
+    /// call (optionally parenthesised). Matching is structural, so line
+    /// breaks inside the member access do not matter, and a creation call
+    /// nested inside an unrelated wrapper such as
+    /// <c>Wrap(WebApplication.CreateBuilder(args))</c> is not mistaken for
+    /// the builder itself.
+    /// </summary>
+    private static List<HostBuilderDeclaration> FindHostBuilderDeclarations(SyntaxNode root, params ProgramHostKind[] kinds)
     {
-        var matches = new List<(LocalDeclarationStatementSyntax Statement, VariableDeclaratorSyntax Declarator)>();
-        foreach (LocalDeclarationStatementSyntax statement in root.DescendantNodes().OfType<LocalDeclarationStatementSyntax>())
+        var matches = new List<HostBuilderDeclaration>();
+        foreach (List<StatementSyntax> scope in GetStartupStatementLists(root))
         {
-            // Declarations nested in lambdas / local functions are not the
-            // application's host builder.
-            if (IsInsideDeferredCode(statement))
+            foreach (LocalDeclarationStatementSyntax statement in scope.OfType<LocalDeclarationStatementSyntax>())
             {
-                continue;
-            }
-
-            foreach (VariableDeclaratorSyntax declarator in statement.Declaration.Variables)
-            {
-                ExpressionSyntax? initializer = declarator.Initializer?.Value;
-                if (initializer is null)
+                foreach (VariableDeclaratorSyntax declarator in statement.Declaration.Variables)
                 {
-                    continue;
-                }
-
-                foreach (InvocationExpressionSyntax invocation in initializer.DescendantNodesAndSelf().OfType<InvocationExpressionSyntax>())
-                {
-                    if (markers.Contains(invocation.Expression.ToString().Replace(" ", string.Empty), StringComparer.Ordinal))
+                    ProgramHostKind? kind = GetHostBuilderKind(declarator.Initializer?.Value);
+                    if (kind is not null && kinds.Contains(kind.Value))
                     {
-                        matches.Add((statement, declarator));
-                        break;
+                        matches.Add(new HostBuilderDeclaration(declarator.Identifier.ValueText, statement, scope));
                     }
                 }
             }
@@ -949,55 +1001,58 @@ internal static class SyncfusionBlazorToolkitHelper
         return matches;
     }
 
-    private static bool TryAppendServiceRegistration(string programPath, string existingText, string builderName)
+    private static ProgramHostKind? GetHostBuilderKind(ExpressionSyntax? initializer)
     {
-        string registrationLine = $"{builderName}.Services.{ServiceRegistrationCall}();";
+        while (initializer is ParenthesizedExpressionSyntax parenthesized)
+        {
+            initializer = parenthesized.Expression;
+        }
 
-        // Insert the call immediately after the host-builder statement so
-        // the services are wired up before `Build()` consumes them.
-        string? withRegistration = InsertAfterBuilderLine(existingText, registrationLine);
-        if (withRegistration is null)
+        if (initializer is not InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax access })
+        {
+            return null;
+        }
+
+        // `WebApplication.X` or a qualified `Microsoft.AspNetCore.Builder.WebApplication.X`.
+        string? typeName = access.Expression switch
+        {
+            IdentifierNameSyntax identifier => identifier.Identifier.ValueText,
+            MemberAccessExpressionSyntax qualified => qualified.Name.Identifier.ValueText,
+            _ => null,
+        };
+
+        return (typeName, access.Name.Identifier.ValueText) switch
+        {
+            ("WebApplication", "CreateBuilder") => ProgramHostKind.WebApp,
+            ("WebAssemblyHostBuilder", "CreateDefault") => ProgramHostKind.StandaloneWasm,
+            _ => null,
+        };
+    }
+
+    private static bool TryAppendServiceRegistration(string programPath, string existingText, ProgramHostKind hostKind)
+    {
+        SyntaxNode root = CSharpSyntaxTree.ParseText(existingText).GetRoot();
+        HostBuilderDeclaration? builder = FindHostBuilderDeclaration(root, hostKind);
+        if (builder is null)
         {
             return false;
         }
 
+        // The variable name comes from the same declaration used as the
+        // insertion anchor, so the generated call always targets it.
+        string registrationLine = $"{builder.Name}.Services.{ServiceRegistrationCall}();";
+
+        // Insert immediately after the (possibly multi-line) host-builder
+        // statement so the services are wired up before `Build()`.
+        string newline = existingText.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+        int insertAt = builder.Statement.FullSpan.End; // includes trailing trivia
+        string before = existingText[..insertAt];
+        string after = existingText[insertAt..];
+        string prefix = before.EndsWith('\n') ? string.Empty : newline;
+        string withRegistration = before + prefix + registrationLine + newline + after;
+
         File.WriteAllText(programPath, EnsureUsingDirective(withRegistration, ToolKitUsingDirective));
         return true;
-    }
-
-    /// <summary>
-    /// Inserts <paramref name="registrationLine"/> on the line after the
-    /// complete host-builder declaration statement (the one calling
-    /// <c>WebApplication.CreateBuilder</c> or
-    /// <c>WebAssemblyHostBuilder.CreateDefault</c>), however many lines
-    /// that statement spans, preserving the file's line ending.
-    ///
-    /// <para>Returns <c>null</c> when no such declaration exists; the
-    /// caller must then leave the file untouched rather than guess a
-    /// location (appending after <c>Build()</c> would register too late).</para>
-    /// </summary>
-    private static string? InsertAfterBuilderLine(string source, string registrationLine)
-    {
-        if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(registrationLine))
-        {
-            return null;
-        }
-
-        SyntaxNode root = CSharpSyntaxTree.ParseText(source).GetRoot();
-        var found = FindHostBuilderDeclaration(root, [WebBuilderMarker, WasmBuilderMarker]);
-        if (found is null)
-        {
-            return null;
-        }
-
-        string newline = source.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
-
-        // FullSpan.End includes trailing trivia (comment + end-of-line).
-        int insertAt = found.Value.Statement.FullSpan.End;
-        string before = source[..insertAt];
-        string after = source[insertAt..];
-        string prefix = before.EndsWith('\n') ? string.Empty : newline;
-        return before + prefix + registrationLine + newline + after;
     }
 
     /// <summary>

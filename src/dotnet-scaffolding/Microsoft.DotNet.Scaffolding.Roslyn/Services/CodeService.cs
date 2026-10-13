@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 using System.Text;
+using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -20,6 +21,31 @@ namespace Microsoft.DotNet.Scaffolding.Roslyn.Services;
 /// </summary>
 public class CodeService : ICodeService, IDisposable
 {
+    // Static ctor: register MSBuildLocator's defaults before any instance
+    // method on this class is JIT-compiled. The class is referenced from
+    // <c>CodeModificationStep</c> (and via the chain from the Syncfusion
+    // scaffolder's <c>WrappedCodeModificationStep</c>) only when a code-
+    // modification step actually runs. JIT-compiling <c>GetAllDocumentsAsync</c>
+    // pulls in <c>Microsoft.CodeAnalysis.MSBuild.dll</c> as a transitive
+    // dependency, which in turn loads <c>Microsoft.Build.dll</c> from the
+    // user's Visual Studio install (typically v15.1.0.0). Once that assembly
+    // is loaded, <c>MSBuildLocator.RegisterMSBuildPath</c> throws
+    // "MSBuild assemblies were already loaded" — preventing the Syncfusion
+    // scaffolder's code-modification step from running on machines with
+    // Visual Studio installed. Registering MSBuild in the static ctor runs
+    // *before* the first instance method is JIT-compiled, so it is the
+    // earliest deterministic point at which MSBuildLocator can be called
+    // safely. The registration is idempotent (guarded by
+    // <see cref="MSBuildLocator.IsRegistered"/>) so it is safe even when
+    // <c>MsBuildInitializer</c> later also runs.
+    static CodeService()
+    {
+        if (!MSBuildLocator.IsRegistered)
+        {
+            MSBuildLocator.RegisterDefaults();
+        }
+    }
+
     private readonly ILogger _logger;
     private MSBuildWorkspace? _msBuildWorkspace;
     private AdhocWorkspace? _fallbackWorkspace;

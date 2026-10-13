@@ -3,6 +3,10 @@
 
 using System.Text;
 using System.Text.Json;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
@@ -476,118 +480,159 @@ internal static class SyncfusionBlazorToolkitHelper
     }
 
     /// <summary>
-    /// True when <paramref name="programText"/> contains an active
-    /// (non-commented) call to <c>AddSyncfusionBlazorToolkit()</c>
-    /// on a <c>*.Services</c> receiver. The check rejects:
-    /// <list type="bullet">
-    ///   <item><description>substrings inside <c>//</c> or <c>/* */</c> comments,</description></item>
-    ///   <item><description>chained calls (e.g. <c>AddRazorComponents().AddSyncfusionBlazorToolkit()</c>),</description></item>
-    ///   <item><description>substring occurrences inside larger identifiers.</description></item>
-    /// </list>
+    /// Outcome of inspecting an entry point for the Toolkit registration.
     /// </summary>
-    public static bool IsActiveServiceRegistrationPresent(string? programText)
+    private enum RegistrationState
+    {
+        /// <summary>Every host builder is registered before its <c>Build()</c>.</summary>
+        Registered = 0,
+
+        /// <summary>A host builder is positively identified and a confirmed
+        /// <c>Build()</c> boundary exists, but the registration is missing,
+        /// late, conditional or malformed.</summary>
+        NotRegistered = 1,
+
+        /// <summary>The framework host builder could not be identified, or
+        /// its <c>Build()</c> boundary could not be established. Nothing can
+        /// be concluded, so callers must neither report success nor
+        /// modify the file.</summary>
+        Unverifiable = 2,
+    }
+
+    /// <summary>
+    /// True only when <paramref name="programText"/> conclusively registers
+    /// the Toolkit on the application's startup path. A registration counts
+    /// only when it is:
+    /// <list type="bullet">
+    ///   <item><description>a real, parameterless
+    ///   <c>&lt;builder&gt;.Services.AddSyncfusionBlazorToolkit()</c>
+    ///   statement (not a comment, string literal, fluent chain, or call
+    ///   with arguments),</description></item>
+    ///   <item><description>a direct statement of the startup scope -
+    ///   top-level statements or the body of a static <c>Main</c> - so it
+    ///   always executes,</description></item>
+    ///   <item><description>made on a variable that is positively resolved
+    ///   (through using aliases and qualified names) to the framework's
+    ///   <c>Microsoft.AspNetCore.Builder.WebApplication</c> or
+    ///   <c>WebAssemblyHostBuilder</c> creation call, after its
+    ///   declaration, and</description></item>
+    ///   <item><description>before a confirmed statement that calls
+    ///   <c>Build()</c> on that variable.</description></item>
+    /// </list>
+    /// Fails closed: when no host builder can be identified, or no
+    /// <c>Build()</c> boundary exists, the result is <c>false</c>.
+    /// </summary>
+    public static bool IsActiveServiceRegistrationPresent(string? programText) =>
+        EvaluateRegistration(programText) == RegistrationState.Registered;
+
+    private static RegistrationState EvaluateRegistration(string? programText)
     {
         if (string.IsNullOrEmpty(programText))
         {
-            return false;
+            return RegistrationState.Unverifiable;
         }
 
-        string codeOnly = StripCSharpComments(programText);
-        foreach (string rawLine in codeOnly.Split('\n'))
+        SyntaxNode root = CSharpSyntaxTree.ParseText(programText).GetRoot();
+        List<HostBuilderDeclaration> builders = FindHostBuilderDeclarations(root, ProgramHostKind.WebApp, ProgramHostKind.StandaloneWasm);
+        if (builders.Count == 0)
         {
-            string line = rawLine.TrimEnd('\r').Trim();
-            if (line.Length == 0)
-            {
-                continue;
-            }
-
-            // The standalone registration we are looking for has the
-            // shape "*.Services.AddSyncfusionBlazorToolkit();" or
-            // "*.Services.AddSyncfusionBlazorToolkit()".
-            // A chained registration has the form "...AddSyncfusionBlazorToolkit()"
-            // preceded by a member access without a trailing semicolon on
-            // its own line.
-            if (IsStandaloneServiceRegistration(line))
-            {
-                return true;
-            }
+            return RegistrationState.Unverifiable;
         }
 
-        return false;
+        var states = builders.Select(EvaluateBuilder).ToList();
+        if (states.Contains(RegistrationState.Unverifiable))
+        {
+            return RegistrationState.Unverifiable;
+        }
+
+        return states.All(state => state == RegistrationState.Registered)
+            ? RegistrationState.Registered
+            : RegistrationState.NotRegistered;
     }
 
-    private static bool IsStandaloneServiceRegistration(string trimmedLine)
+    private static RegistrationState EvaluateBuilder(HostBuilderDeclaration builder)
     {
-        if (string.IsNullOrEmpty(trimmedLine))
+        int declarationIndex = builder.Scope.IndexOf(builder.Statement);
+        int buildIndex = builder.Scope.FindIndex(declarationIndex + 1, statement => CallsBuildOn(statement, builder.Name));
+        if (buildIndex < 0)
         {
-            return false;
+            // No host-construction boundary: an incomplete or unsupported
+            // bootstrap. Do not claim the registration is effective.
+            return RegistrationState.Unverifiable;
         }
 
-        // The standalone registration we want has the shape
-        //   <receiver>.AddSyncfusionBlazorToolkit();
-        // where <receiver> is a simple dotted name (e.g.
-        // `builder.Services` or `wasmBuilder.Services`). A chained
-        // registration has the form
-        //   <receiver>...methodCall(<args>).AddSyncfusionBlazorToolkit();
-        // — distinguished by the `)` (or `(`) that immediately
-        // precedes the final `.`.
-        const string Call = "AddSyncfusionBlazorToolkit";
-        int callIdx = trimmedLine.IndexOf(Call, StringComparison.Ordinal);
-        if (callIdx < 0)
+        for (int i = declarationIndex + 1; i < buildIndex; i++)
         {
-            return false;
+            if (string.Equals(GetRegistrationReceiver(builder.Scope[i]), builder.Name, StringComparison.Ordinal))
+            {
+                return RegistrationState.Registered;
+            }
         }
 
-        // Must end with a semicolon — most single-statement C#
-        // calls do, and chains that terminate this call also do, so
-        // this is necessary but not sufficient.
-        if (!trimmedLine.EndsWith(';'))
+        return RegistrationState.NotRegistered;
+    }
+
+    private static bool CallsBuildOn(StatementSyntax statement, string builderName) =>
+        statement.DescendantNodesAndSelf().OfType<InvocationExpressionSyntax>().Any(invocation =>
+            invocation.Expression is MemberAccessExpressionSyntax access &&
+            access.Name.Identifier.ValueText == "Build" &&
+            access.Expression is IdentifierNameSyntax receiver &&
+            receiver.Identifier.ValueText == builderName);
+
+    /// <summary>
+    /// For a statement of the exact form
+    /// <c>x.Services.AddSyncfusionBlazorToolkit();</c> (no arguments, not
+    /// chained) returns the receiver <c>x</c>; otherwise <c>null</c>.
+    /// </summary>
+    private static string? GetRegistrationReceiver(StatementSyntax statement)
+    {
+        if (statement is ExpressionStatementSyntax { Expression: InvocationExpressionSyntax invocation } &&
+            invocation.ArgumentList.Arguments.Count == 0 &&
+            invocation.Expression is MemberAccessExpressionSyntax call &&
+            call.Name is IdentifierNameSyntax { Identifier.ValueText: ServiceRegistrationCall } &&
+            call.Expression is MemberAccessExpressionSyntax services &&
+            services.Name.Identifier.ValueText == "Services" &&
+            services.Expression is IdentifierNameSyntax receiver)
         {
-            return false;
+            return receiver.Identifier.ValueText;
         }
 
-        // Must be preceded by a `.` member access and not be a
-        // substring of a larger identifier.
-        int dotIdx = callIdx - 1;
-        if (dotIdx < 0 || trimmedLine[dotIdx] != '.')
+        return null;
+    }
+
+    /// <summary>
+    /// The statement lists that make up the application's startup path:
+    /// the file's top-level statements and the body of every static
+    /// <c>Main</c> method. Statements inside any other method, lambda or
+    /// local function are deliberately not part of it.
+    /// </summary>
+    private static List<List<StatementSyntax>> GetStartupStatementLists(SyntaxNode root)
+    {
+        var lists = new List<List<StatementSyntax>>();
+
+        if (root is CompilationUnitSyntax unit)
         {
-            return false;
+            List<StatementSyntax> topLevel = unit.Members
+                .OfType<GlobalStatementSyntax>()
+                .Select(global => global.Statement)
+                .ToList();
+            if (topLevel.Count > 0)
+            {
+                lists.Add(topLevel);
+            }
         }
 
-        if (dotIdx == 0)
+        foreach (MethodDeclarationSyntax method in root.DescendantNodes().OfType<MethodDeclarationSyntax>())
         {
-            return false;
+            if (method.Identifier.ValueText == "Main" &&
+                method.Modifiers.Any(SyntaxKind.StaticKeyword) &&
+                method.Body is not null)
+            {
+                lists.Add(method.Body.Statements.ToList());
+            }
         }
 
-        // The character right before the `.` tells us whether the
-        // call is standalone or the last link in a chain:
-        //   standalone : ...Services.   → letter / digit
-        //   chained    : ...Args().     → ')'
-        // Reject any character that is itself the closing paren of
-        // an enclosing call (or its argument list) — that is the
-        // signature of a fluent chain.
-        char prev = trimmedLine[dotIdx - 1];
-        if (prev == ')' || prev == '(')
-        {
-            return false;
-        }
-
-        // Also reject whitespace — the receiver must be glued to
-        // the `.` (i.e. a member access, not a separate statement).
-        if (char.IsWhiteSpace(prev))
-        {
-            return false;
-        }
-
-        // The receiver before the first `.` must end with `Services`
-        // (we accept any name, but reject bare `AddSyncfusionBlazorToolkit`).
-        int firstDot = trimmedLine.IndexOf('.');
-        if (firstDot <= 0)
-        {
-            return false;
-        }
-
-        return true;
+        return lists;
     }
 
     /// <summary>
@@ -702,15 +747,12 @@ internal static class SyncfusionBlazorToolkitHelper
         Inserted = 1,
 
         /// <summary>
-        /// No <c>Program.cs</c> existed; a minimal one was created with
-        /// the call in place.
-        /// </summary>
-        Created = 2,
-
-        /// <summary>
-        /// The step could not find or create a <c>Program.cs</c> and the
-        /// service registration was skipped. The caller is expected to
-        /// log this so the user can act on it.
+        /// No safe entry point was found (no <c>Program.cs</c>, or no
+        /// recognisable host-builder declaration in it), so nothing was
+        /// written. The caller is expected to log this so the user can
+        /// add the registration to their existing entry point. A new
+        /// <c>Program.cs</c> is deliberately never generated: it would
+        /// compete with the real entry point (CS8802).
         /// </summary>
         Skipped = 3,
     }
@@ -735,27 +777,7 @@ internal static class SyncfusionBlazorToolkitHelper
         StandaloneWasm = 1,
     }
 
-    /// <summary>
-    /// The conventional file name expected for the application entry point.
-    /// </summary>
-    public const string ProgramCsFileName = "Program.cs";
-
-    /// <summary>
-    /// The set of file names that are treated as the application entry
-    /// point by <see cref="DiscoverProgramCs"/>. <c>Program.cs</c> is the
-    /// .NET 6+ default; the remaining entries are accepted as alternates
-    /// for older / non-standard layouts so the scaffolder still works
-    /// when the file lives at a custom name.
-    /// </summary>
-    public static readonly string[] ProgramCsFileNameCandidates =
-    [
-        "Program.cs",
-        "Program.vb",
-        "Startup.cs",
-    ];
-
     private const string ServiceRegistrationCall = "AddSyncfusionBlazorToolkit";
-    private const string DefaultBuilderVariableName = "builder";
     private const string ToolKitUsingDirective = "using Syncfusion.Blazor.Toolkit;";
 
     /// <summary>
@@ -764,8 +786,7 @@ internal static class SyncfusionBlazorToolkitHelper
     /// matching <c>using</c> directive) into the project's
     /// <c>Program.cs</c>. The function works against a Blazor Web App /
     /// Server host and against a standalone Blazor WebAssembly host, and
-    /// works whether <c>Program.cs</c> already exists or has to be
-    /// created from scratch. It also works when <c>Program.cs</c> lives
+    /// requires an existing entry point (it never creates one). It also works when <c>Program.cs</c> lives
     /// in a subdirectory of the project or has a non-default name
     /// (<c>Startup.cs</c>, <c>Program.vb</c>).
     /// </summary>
@@ -799,166 +820,155 @@ internal static class SyncfusionBlazorToolkitHelper
             return (ServiceRegistrationOutcome.Skipped, null);
         }
 
-        string? programPath = DiscoverProgramCs(projectDirectory);
-        bool created = false;
+        string? programPath = DiscoverEntryPoint(projectPath, out _);
         if (string.IsNullOrEmpty(programPath))
         {
-            programPath = TryCreateMinimalProgramCs(projectDirectory, hostKind);
-            if (string.IsNullOrEmpty(programPath))
-            {
-                return (ServiceRegistrationOutcome.Skipped, null);
-            }
-
-            created = true;
+            return (ServiceRegistrationOutcome.Skipped, null);
         }
 
         string text = File.ReadAllText(programPath);
-        if (IsActiveServiceRegistrationPresent(text))
+        string relativePath = ToRelativePath(projectDirectory, programPath);
+        switch (EvaluateRegistration(text))
         {
-            if (created)
-            {
-                // The minimal template we just wrote already contains
-                // a working AddSyncfusionBlazorToolkit() call. Reporting
-                // "Created" instead of "AlreadyPresent" makes the
-                // distinction between a fresh file and a re-run clearer
-                // for the summary step.
-                return (
-                    ServiceRegistrationOutcome.Created,
-                    ToRelativePath(projectDirectory, programPath));
-            }
-
-            return (
-                ServiceRegistrationOutcome.AlreadyPresent,
-                ToRelativePath(projectDirectory, programPath));
+            case RegistrationState.Registered:
+                return (ServiceRegistrationOutcome.AlreadyPresent, relativePath);
+            case RegistrationState.Unverifiable:
+                // Host builder or Build() boundary could not be established:
+                // leave the file untouched and let the caller report it.
+                return (ServiceRegistrationOutcome.Skipped, relativePath);
         }
 
-        if (created)
+        if (!TryAppendServiceRegistration(programPath, text, hostKind))
         {
-            // Defensive: the minimal template should already include
-            // the call. If it does not, fall through to the regular
-            // insertion path so we never leave the project without a
-            // registration.
+            // No single host-builder declaration on the startup path to
+            // anchor on. Appending at the end of the file would land after
+            // Build()/Run() and break DI, so leave the file untouched.
+            return (ServiceRegistrationOutcome.Skipped, relativePath);
         }
 
-        string builderName = DetectBuilderVariableName(text, hostKind) ?? DefaultBuilderVariableName;
-        AppendServiceRegistration(programPath, text, builderName);
-        return (
-            created ? ServiceRegistrationOutcome.Created : ServiceRegistrationOutcome.Inserted,
-            ToRelativePath(projectDirectory, programPath));
+        return (ServiceRegistrationOutcome.Inserted, relativePath);
     }
 
     /// <summary>
-    /// Locates the application entry-point file inside
-    /// <paramref name="projectDirectory"/>. The root <c>Program.cs</c>
-    /// is preferred; one-level subdirectories are searched as fallbacks.
-    /// <c>bin</c> / <c>obj</c> / <c>node_modules</c> / <c>.git</c> and any
-    /// other directory that hosts a <c>.csproj</c> are excluded so
-    /// sibling projects never claim the entry point of the project the
-    /// scaffolder was invoked against.
+    /// Locates the application entry-point source file from the project's
+    /// MSBuild-evaluated <c>Compile</c> items, i.e. from what is actually
+    /// compiled (SDK globbing, <c>Remove</c>/<c>Update</c>, imported
+    /// <c>.props</c>/<c>.targets</c> and <c>DefaultItemExcludes</c> all
+    /// applied) rather than from file names on disk.
+    ///
+    /// <para>The entry point is the single compiled file that declares a
+    /// host builder (<c>WebApplication.CreateBuilder</c> /
+    /// <c>WebAssemblyHostBuilder.CreateDefault</c>) on the startup path
+    /// (top-level statements or a static <c>Main</c>); this also finds
+    /// <c>Hosting.cs</c>-style layouts. A builder created inside an
+    /// unrelated helper method does not make a file the entry point.
+    /// When no compiled file declares one,
+    /// a single compiled <c>Program.cs</c> is returned so a custom
+    /// bootstrap that is already registered can still be recognised.</para>
+    ///
+    /// <para>Fails closed: returns <c>null</c> with a diagnostic when
+    /// evaluation fails, a source file cannot be read, or the answer is
+    /// ambiguous (several compiled files declare a host builder).</para>
     /// </summary>
-    public static string? DiscoverProgramCs(string projectDirectory)
+    public static string? DiscoverEntryPoint(string? projectPath, out string? error)
     {
-        if (string.IsNullOrEmpty(projectDirectory) || !Directory.Exists(projectDirectory))
+        error = null;
+        if (string.IsNullOrEmpty(projectPath) || !File.Exists(projectPath))
         {
+            error = $"The project file '{projectPath}' was not found.";
             return null;
         }
 
-        // 1. Root-level entry point — the conventional .NET 6+ layout.
-        foreach (string candidate in ProgramCsFileNameCandidates)
+        var projectService = new MSBuildProjectService(projectPath);
+        if (!projectService.TryGetEvaluatedItems("Compile", out var items, out string? evaluationError))
         {
-            string root = Path.Combine(projectDirectory, candidate);
-            if (File.Exists(root))
+            error = $"Unable to evaluate the compiled sources of '{projectPath}'. {evaluationError}";
+            return null;
+        }
+
+        List<string> sources = items
+            .Select(item => item.FullPath)
+            .Where(path => path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) && File.Exists(path))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var hostFiles = new List<string>();
+        foreach (string path in sources)
+        {
+            string text;
+            try
             {
-                return root;
+                text = File.ReadAllText(path);
             }
-        }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                error = $"Unable to read compiled source '{path}': {ex.Message}";
+                return null;
+            }
 
-        // 2. One-level subdirectory fallback. We walk the immediate
-        //    children (excluding build/output/VCS folders and any
-        //    directory that itself contains a .csproj — that would be
-        //    a sibling project, not the current project's entry point).
-        IEnumerable<string> subdirs;
-        try
-        {
-            subdirs = Directory.EnumerateDirectories(projectDirectory);
-        }
-        catch
-        {
-            return null;
-        }
-
-        foreach (string subdir in subdirs)
-        {
-            string name = Path.GetFileName(subdir);
-            if (IsExcludedDirectory(name))
+            if (!text.Contains("CreateBuilder", StringComparison.Ordinal) &&
+                !text.Contains("CreateDefault", StringComparison.Ordinal))
             {
                 continue;
             }
 
-            if (DirectoryContainsProjectFile(subdir))
+            SyntaxNode root = CSharpSyntaxTree.ParseText(text).GetRoot();
+            if (FindHostBuilderDeclarations(root, ProgramHostKind.WebApp, ProgramHostKind.StandaloneWasm).Count > 0)
             {
-                continue;
-            }
-
-            foreach (string candidate in ProgramCsFileNameCandidates)
-            {
-                string candidatePath = Path.Combine(subdir, candidate);
-                if (File.Exists(candidatePath))
-                {
-                    return candidatePath;
-                }
+                hostFiles.Add(path);
             }
         }
 
+        if (hostFiles.Count == 1)
+        {
+            return hostFiles[0];
+        }
+
+        if (hostFiles.Count > 1)
+        {
+            error = $"Several compiled files declare a host builder, so the application entry point is ambiguous: {string.Join(", ", hostFiles)}.";
+            return null;
+        }
+
+        List<string> conventional = sources
+            .Where(path => string.Equals(Path.GetFileName(path), "Program.cs", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (conventional.Count == 1)
+        {
+            return conventional[0];
+        }
+
+        error = $"No compiled source of '{projectPath}' declares a host builder " +
+            "('WebApplication.CreateBuilder(...)' or 'WebAssemblyHostBuilder.CreateDefault(...)').";
         return null;
     }
 
     /// <summary>
-    /// Creates a minimal <c>Program.cs</c> in
-    /// <paramref name="projectDirectory"/> matching
-    /// <paramref name="hostKind"/>, and returns its absolute path. The
-    /// minimal template already contains a working
-    /// <c>AddSyncfusionBlazorToolkit()</c> registration so callers do
-    /// not need to perform a separate insertion pass.
+    /// True when the project's MSBuild-evaluated <c>PackageReference</c>
+    /// items include <c>Syncfusion.Blazor.Toolkit</c> (exact id). Reflects
+    /// references that come from imported <c>.props</c>/<c>.targets</c> and
+    /// is not fooled by comments or similarly named packages. Returns
+    /// <c>false</c> with a diagnostic when evaluation fails.
     /// </summary>
-    /// <returns>
-    /// The path of the freshly-created <c>Program.cs</c>, or
-    /// <c>null</c> if the file could not be created.
-    /// </returns>
-    public static string? TryCreateMinimalProgramCs(string projectDirectory, ProgramHostKind hostKind)
+    public static bool TryIsPackageReferenced(string? projectPath, out bool referenced, out string? error)
     {
-        if (string.IsNullOrEmpty(projectDirectory) || !Directory.Exists(projectDirectory))
+        referenced = false;
+        error = null;
+        if (string.IsNullOrEmpty(projectPath) || !File.Exists(projectPath))
         {
-            return null;
+            error = $"The project file '{projectPath}' was not found.";
+            return false;
         }
 
-        string programPath = Path.Combine(projectDirectory, ProgramCsFileName);
-        if (File.Exists(programPath))
+        var projectService = new MSBuildProjectService(projectPath);
+        if (!projectService.TryGetEvaluatedItems("PackageReference", out var items, out string? evaluationError))
         {
-            // A file already exists but the discovery pass missed it
-            // (for example, because it lives in a deeper subdirectory
-            // than we searched). Return the existing file unchanged so
-            // the caller can perform the regular insertion path.
-            return programPath;
+            error = $"Unable to evaluate the package references of '{projectPath}'. {evaluationError}";
+            return false;
         }
 
-        string builderName = hostKind == ProgramHostKind.StandaloneWasm
-            ? "wasmBuilder"
-            : DefaultBuilderVariableName;
-
-        string template = hostKind == ProgramHostKind.StandaloneWasm
-            ? BuildStandaloneWasmMinimalProgramCs(builderName)
-            : BuildWebAppMinimalProgramCs(builderName);
-
-        try
-        {
-            File.WriteAllText(programPath, template);
-            return programPath;
-        }
-        catch
-        {
-            return null;
-        }
+        referenced = items.Any(item => string.Equals(item.Include, "Syncfusion.Blazor.Toolkit", StringComparison.OrdinalIgnoreCase));
+        return true;
     }
 
     /// <summary>
@@ -979,271 +989,195 @@ internal static class SyncfusionBlazorToolkitHelper
             return null;
         }
 
-        string codeOnly = StripCSharpComments(programText);
-        string marker = hostKind == ProgramHostKind.StandaloneWasm
-            ? "WebAssemblyHostBuilder.CreateDefault"
-            : "WebApplication.CreateBuilder";
-
-        foreach (string rawLine in codeOnly.Split('\n'))
-        {
-            string line = rawLine.TrimEnd('\r').Trim();
-            if (line.Length == 0)
-            {
-                continue;
-            }
-
-            // Recognise the assignment shape:
-            //   var NAME = ...Marker...(...);
-            //   WebApplicationBuilder NAME = ...Marker...(...);
-            //   NAME NAME = ...Marker...(...);
-            int markerIdx = line.IndexOf(marker, StringComparison.Ordinal);
-            if (markerIdx < 0)
-            {
-                continue;
-            }
-
-            int equalsIdx = line.IndexOf('=');
-            if (equalsIdx <= 0)
-            {
-                continue;
-            }
-
-            string leftHandSide = line[..equalsIdx].Trim();
-            if (leftHandSide.Length == 0)
-            {
-                continue;
-            }
-
-            // Pull the last identifier on the LHS — this is the
-            // declared variable name, regardless of whether the
-            // declaration is `var x = ...` or
-            // `WebApplicationBuilder x = ...`.
-            int lastSpace = leftHandSide.LastIndexOf(' ');
-            if (lastSpace < 0 || lastSpace == leftHandSide.Length - 1)
-            {
-                continue;
-            }
-
-            string candidate = leftHandSide[(lastSpace + 1)..];
-            if (IsValidIdentifier(candidate))
-            {
-                return candidate;
-            }
-        }
-
-        return null;
-    }
-
-    private static bool IsValidIdentifier(string value)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            return false;
-        }
-
-        if (!char.IsLetter(value[0]) && value[0] != '_')
-        {
-            return false;
-        }
-
-        for (int i = 1; i < value.Length; i++)
-        {
-            char c = value[i];
-            if (!char.IsLetterOrDigit(c) && c != '_')
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static bool IsExcludedDirectory(string name)
-    {
-        if (string.IsNullOrEmpty(name))
-        {
-            return true;
-        }
-
-        return name.Equals("bin", StringComparison.OrdinalIgnoreCase)
-            || name.Equals("obj", StringComparison.OrdinalIgnoreCase)
-            || name.Equals("node_modules", StringComparison.OrdinalIgnoreCase)
-            || name.Equals(".git", StringComparison.OrdinalIgnoreCase)
-            || name.Equals(".vs", StringComparison.OrdinalIgnoreCase)
-            || name.Equals(".idea", StringComparison.OrdinalIgnoreCase)
-            || name.Equals("Properties", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static bool DirectoryContainsProjectFile(string directory)
-    {
-        try
-        {
-            return Directory.EnumerateFiles(directory, "*.csproj").Any()
-                || Directory.EnumerateFiles(directory, "*.vbproj").Any()
-                || Directory.EnumerateFiles(directory, "*.fsproj").Any();
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    private static string BuildWebAppMinimalProgramCs(string builderName)
-    {
-        return
-            $"var {builderName} = WebApplication.CreateBuilder(args);\n" +
-            $"{builderName}.Services.AddSyncfusionBlazorToolkit();\n" +
-            $"var app = {builderName}.Build();\n" +
-            $"app.Run();\n";
-    }
-
-    private static string BuildStandaloneWasmMinimalProgramCs(string builderName)
-    {
-        return
-            $"var {builderName} = WebAssemblyHostBuilder.CreateDefault(args);\n" +
-            $"{builderName}.Services.AddSyncfusionBlazorToolkit();\n" +
-            $"await {builderName}.Build().RunAsync();\n";
-    }
-
-    private static void AppendServiceRegistration(string programPath, string existingText, string builderName)
-    {
-        string registrationLine = $"{builderName}.Services.{ServiceRegistrationCall}();";
-
-        // Build the new file content: ensure the using directive is
-        // present, then insert the service registration call
-        // immediately after the host-builder declaration so the
-        // services are wired up before any later `builder.Build()`
-        // call consumes them. If the host-builder line cannot be
-        // located (empty or unparseable file), fall back to appending
-        // at the end of the file — preserves the previous behaviour
-        // for the edge case.
-        string withUsing = EnsureUsingDirective(existingText, ToolKitUsingDirective);
-        string withRegistration = InsertAfterBuilderLine(withUsing, registrationLine)
-            ?? AppendLine(withUsing, registrationLine);
-
-        File.WriteAllText(programPath, withRegistration);
+        SyntaxNode root = CSharpSyntaxTree.ParseText(programText).GetRoot();
+        return FindHostBuilderDeclaration(root, hostKind)?.Name;
     }
 
     /// <summary>
-    /// Inserts <paramref name="registrationLine"/> immediately after
-    /// the first host-builder assignment line in <paramref name="source"/>
-    /// (the line that contains <c>WebApplication.CreateBuilder</c> or
-    /// <c>WebAssemblyHostBuilder.CreateDefault</c>), preserving the
-    /// file's existing line ending (CRLF or LF).
-    ///
-    /// <para>Returns <c>null</c> when the file does not contain a
-    /// recognisable host-builder assignment; callers should fall back
-    /// to appending the registration at the end of the file in that
-    /// case.</para>
-    ///
-    /// <para>Commented-out host-builder lines are ignored (we use the
-    /// comment-stripped view of the file to detect the marker), so a
-    /// file with only a commented-out <c>var builder = ...</c> line
-    /// behaves the same as a file with no marker at all.</para>
+    /// A host-builder variable declared as a direct statement of the
+    /// startup scope, e.g. <c>var builder = WebApplication.CreateBuilder(args);</c>.
     /// </summary>
-    private static string? InsertAfterBuilderLine(string source, string registrationLine)
+    private sealed record HostBuilderDeclaration(
+        string Name,
+        LocalDeclarationStatementSyntax Statement,
+        List<StatementSyntax> Scope);
+
+    /// <summary>
+    /// The single host-builder declaration of the requested kind(s), or
+    /// <c>null</c> when there is none or it is ambiguous (refuse rather
+    /// than guess).
+    /// </summary>
+    private static HostBuilderDeclaration? FindHostBuilderDeclaration(SyntaxNode root, params ProgramHostKind[] kinds)
     {
-        if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(registrationLine))
+        List<HostBuilderDeclaration> matches = FindHostBuilderDeclarations(root, kinds);
+        return matches.Count == 1 ? matches[0] : null;
+    }
+
+    /// <summary>
+    /// Host-builder declarations that are direct statements of the startup
+    /// scope and whose initializer <em>is</em> the host-builder creation
+    /// call (optionally parenthesised). Matching is structural, so line
+    /// breaks inside the member access do not matter, and a creation call
+    /// nested inside an unrelated wrapper such as
+    /// <c>Wrap(WebApplication.CreateBuilder(args))</c> is not mistaken for
+    /// the builder itself.
+    /// </summary>
+    private static List<HostBuilderDeclaration> FindHostBuilderDeclarations(SyntaxNode root, params ProgramHostKind[] kinds)
+    {
+        var matches = new List<HostBuilderDeclaration>();
+        var types = new HostTypeResolver(root);
+        foreach (List<StatementSyntax> scope in GetStartupStatementLists(root))
         {
-            return null;
+            foreach (LocalDeclarationStatementSyntax statement in scope.OfType<LocalDeclarationStatementSyntax>())
+            {
+                foreach (VariableDeclaratorSyntax declarator in statement.Declaration.Variables)
+                {
+                    ProgramHostKind? kind = types.GetHostBuilderKind(declarator.Initializer?.Value);
+                    if (kind is not null && kinds.Contains(kind.Value))
+                    {
+                        matches.Add(new HostBuilderDeclaration(declarator.Identifier.ValueText, statement, scope));
+                    }
+                }
+            }
         }
 
-        string[] rawLines = source.Split('\n');
-        string codeOnly = StripCSharpComments(source);
-        string[] codeLines = codeOnly.Split('\n');
+        return matches;
+    }
 
-        for (int i = 0; i < codeLines.Length; i++)
+    private const string WebApplicationType = "Microsoft.AspNetCore.Builder.WebApplication";
+    private const string WasmHostBuilderType = "Microsoft.AspNetCore.Components.WebAssembly.Hosting.WebAssemblyHostBuilder";
+
+    /// <summary>
+    /// Resolves the type named in <c>Type.CreateBuilder(...)</c> /
+    /// <c>Type.CreateDefault(...)</c> to the framework's host-builder types
+    /// without a compilation: using aliases (<c>using WebApp =
+    /// Microsoft.AspNetCore.Builder.WebApplication;</c>, including
+    /// <c>global using</c> and chains of aliases), <c>global::</c> and fully
+    /// qualified names are followed, and the resulting full name must equal
+    /// the framework type. A bare <c>WebApplication</c> /
+    /// <c>WebAssemblyHostBuilder</c> (supplied by the SDK's implicit usings
+    /// or an ordinary using) is accepted only when the file does not
+    /// declare a type or alias of that name. Anything else - a different
+    /// namespace, an alias to a non-framework type, a look-alike - is not a
+    /// host builder.
+    /// </summary>
+    private sealed class HostTypeResolver
+    {
+        private readonly Dictionary<string, string> _aliases = new(StringComparer.Ordinal);
+        private readonly HashSet<string> _declaredTypes = new(StringComparer.Ordinal);
+
+        public HostTypeResolver(SyntaxNode root)
         {
-            string codeLine = codeLines[i].TrimEnd('\r').Trim();
-            if (codeLine.Length == 0)
+            foreach (UsingDirectiveSyntax directive in root.DescendantNodes().OfType<UsingDirectiveSyntax>())
             {
-                continue;
+                if (directive.Alias is not null && directive.StaticKeyword.IsKind(SyntaxKind.None))
+                {
+                    _aliases[directive.Alias.Name.Identifier.ValueText] = Normalize(directive.NamespaceOrType.ToString());
+                }
             }
 
-            bool isHostBuilderLine =
-                codeLine.Contains("WebApplication.CreateBuilder", StringComparison.Ordinal)
-                || codeLine.Contains("WebAssemblyHostBuilder.CreateDefault", StringComparison.Ordinal);
-
-            if (!isHostBuilderLine || codeLine.IndexOf('=') <= 0)
+            foreach (BaseTypeDeclarationSyntax type in root.DescendantNodes().OfType<BaseTypeDeclarationSyntax>())
             {
-                continue;
+                _declaredTypes.Add(type.Identifier.ValueText);
             }
 
-            // We found the host-builder line in the comment-stripped
-            // view at index `i`. Map back to the original (non-stripped)
-            // rawLines — they have the same length because
-            // StripCSharpComments preserves newlines — and insert
-            // `registrationLine` after the original line.
-            if (i >= rawLines.Length)
+            foreach (DelegateDeclarationSyntax type in root.DescendantNodes().OfType<DelegateDeclarationSyntax>())
+            {
+                _declaredTypes.Add(type.Identifier.ValueText);
+            }
+        }
+
+        public ProgramHostKind? GetHostBuilderKind(ExpressionSyntax? initializer)
+        {
+            while (initializer is ParenthesizedExpressionSyntax parenthesized)
+            {
+                initializer = parenthesized.Expression;
+            }
+
+            if (initializer is not InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax access })
             {
                 return null;
             }
 
-            // The inserted line must use the same newline as the
-            // surrounding file so we do not introduce a mixed-ending
-            // section. Fall back to the platform newline if the file
-            // uses an unrecognised line ending. We probe the
-            // un-split source because Split('\n') leaves the trailing
-            // \r attached to each line, so checking EndsWith("\r\n")
-            // on a single raw line would miss CRLF.
-            string newline = source.Contains("\r\n", StringComparison.Ordinal)
-                ? "\r\n"
-                : "\n";
+            string method = access.Name.Identifier.ValueText;
+            string type = Resolve(Normalize(access.Expression.ToString()));
 
-            StringBuilder sb = new(source.Length + registrationLine.Length + 4);
-            // Re-assemble the lines we have copied so far, restoring
-            // the newline separator that Split('\n') consumed.
-            for (int j = 0; j < i; j++)
+            return (type, method) switch
             {
-                sb.Append(rawLines[j]);
-                sb.Append('\n');
-            }
-            // Append the host-builder line itself (without its
-            // trailing newline — we strip and replace it below).
-            sb.Append(rawLines[i]);
-
-            // Strip the trailing newline from the host-builder line
-            // (Split('\n') leaves it attached) so the registration
-            // starts on the very next line.
-            int trailingNewline = sb.ToString().EndsWith("\r\n", StringComparison.Ordinal) ? 2
-                : sb.ToString().EndsWith("\n", StringComparison.Ordinal) ? 1
-                : 0;
-            if (trailingNewline > 0)
-            {
-                sb.Length -= trailingNewline;
-            }
-
-            sb.Append(newline);
-            sb.Append(registrationLine);
-            sb.Append(newline);
-
-            for (int j = i + 1; j < rawLines.Length; j++)
-            {
-                sb.Append(rawLines[j]);
-                if (j < rawLines.Length - 1)
-                {
-                    sb.Append('\n');
-                }
-            }
-
-            return sb.ToString();
+                (WebApplicationType, "CreateBuilder") => ProgramHostKind.WebApp,
+                (WasmHostBuilderType, "CreateDefault") => ProgramHostKind.StandaloneWasm,
+                ("WebApplication", "CreateBuilder") when !_declaredTypes.Contains("WebApplication") => ProgramHostKind.WebApp,
+                ("WebAssemblyHostBuilder", "CreateDefault") when !_declaredTypes.Contains("WebAssemblyHostBuilder") => ProgramHostKind.StandaloneWasm,
+                _ => null,
+            };
         }
 
-        return null;
+        private string Resolve(string name)
+        {
+            // Follow alias chains (bounded, to survive cyclic aliases).
+            for (int i = 0; i < 8; i++)
+            {
+                int dot = name.IndexOf('.');
+                string head = dot < 0 ? name : name[..dot];
+                if (!_aliases.TryGetValue(head, out string? target))
+                {
+                    break;
+                }
+
+                name = dot < 0 ? target : target + name[dot..];
+            }
+
+            return name;
+        }
+
+        private static string Normalize(string name)
+        {
+            string compact = string.Concat(name.Where(c => !char.IsWhiteSpace(c)));
+            return compact.StartsWith("global::", StringComparison.Ordinal) ? compact["global::".Length..] : compact;
+        }
+    }
+
+    private static bool TryAppendServiceRegistration(string programPath, string existingText, ProgramHostKind hostKind)
+    {
+        SyntaxNode root = CSharpSyntaxTree.ParseText(existingText).GetRoot();
+        HostBuilderDeclaration? builder = FindHostBuilderDeclaration(root, hostKind);
+        if (builder is null)
+        {
+            return false;
+        }
+
+        // The variable name comes from the same declaration used as the
+        // insertion anchor, so the generated call always targets it.
+        string registrationLine = $"{builder.Name}.Services.{ServiceRegistrationCall}();";
+
+        // Insert immediately after the (possibly multi-line) host-builder
+        // statement so the services are wired up before `Build()`.
+        string newline = existingText.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+        int insertAt = builder.Statement.FullSpan.End; // includes trailing trivia
+        string before = existingText[..insertAt];
+        string after = existingText[insertAt..];
+        string prefix = before.EndsWith('\n') ? string.Empty : newline;
+        string withRegistration = before + prefix + registrationLine + newline + after;
+
+        File.WriteAllText(programPath, EnsureUsingDirective(withRegistration, ToolKitUsingDirective));
+        return true;
     }
 
     /// <summary>
     /// Returns <paramref name="source"/> with
-    /// <paramref name="usingDirective"/> prepended as the first line of
-    /// the file when it is not already present (and not commented out).
-    /// When the directive is already present the original source is
-    /// returned unchanged.
+    /// <paramref name="usingDirective"/> added when it is not already
+    /// present. Placement is syntax-aware: the directive goes after the
+    /// last existing <c>extern alias</c>/<c>using</c> (so it never lands
+    /// before an <c>extern alias</c>, which would be CS0439, and stays
+    /// grouped with the other usings). Without any, it goes after the
+    /// file's leading header comments and preprocessor lines, immediately
+    /// before the first code token. An already-present (non-commented)
+    /// directive leaves the source unchanged.
     /// </summary>
     private static string EnsureUsingDirective(string source, string usingDirective)
     {
         if (string.IsNullOrEmpty(source))
         {
-            // Empty file — write the using directive on its own.
             return usingDirective + Environment.NewLine;
         }
 
@@ -1252,82 +1186,48 @@ internal static class SyncfusionBlazorToolkitHelper
             return source;
         }
 
-        // Use the comment-stripped view so a commented-out using does
-        // not count as already-present.
-        string codeOnly = StripCSharpComments(source);
-        foreach (string rawLine in codeOnly.Split('\n'))
+        CompilationUnitSyntax root = CSharpSyntaxTree.ParseText(source).GetCompilationUnitRoot();
+        string wanted = usingDirective.TrimEnd(';').Replace("using", string.Empty, StringComparison.Ordinal).Trim();
+        foreach (UsingDirectiveSyntax existing in root.Usings)
         {
-            string line = rawLine.TrimEnd('\r').Trim();
-            if (string.Equals(line, usingDirective, StringComparison.Ordinal))
+            if (existing.Alias is null &&
+                existing.StaticKeyword.IsKind(SyntaxKind.None) &&
+                existing.Name?.ToString().Replace(" ", string.Empty) == wanted)
             {
                 return source;
             }
         }
 
-        // Use the same line ending as the rest of the file so we do
-        // not introduce a mixed-ending section. CRLF on Windows, LF
-        // on Linux/macOS, falling back to the platform newline when
-        // the file uses neither.
-        string newline = source.Contains("\r\n", StringComparison.Ordinal)
-            ? "\r\n"
-            : "\n";
+        string newline = source.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
 
-        StringBuilder sb = new(source.Length + usingDirective.Length + 4);
-        sb.Append(usingDirective);
-        sb.Append(newline);
-        // If the existing file already starts with a newline, do not
-        // double it.
-        if (!StartsWithNewline(source))
+        int lastDirectiveEnd = -1;
+        foreach (ExternAliasDirectiveSyntax extern_ in root.Externs)
         {
-            sb.Append(newline);
+            lastDirectiveEnd = Math.Max(lastDirectiveEnd, extern_.FullSpan.End);
         }
 
-        sb.Append(source);
-        return sb.ToString();
-    }
-
-    private static string AppendLine(string source, string line)
-    {
-        StringBuilder sb = new(source.Length + line.Length + 2);
-        sb.Append(source);
-        // Guarantee exactly one separator between the existing body
-        // and the appended line.
-        if (source.Length == 0)
+        foreach (UsingDirectiveSyntax existing in root.Usings)
         {
-            sb.Append(line);
-        }
-        else
-        {
-            if (!EndsWithNewline(source))
-            {
-                sb.Append(Environment.NewLine);
-            }
-
-            sb.Append(line);
-            sb.Append(Environment.NewLine);
+            lastDirectiveEnd = Math.Max(lastDirectiveEnd, existing.FullSpan.End);
         }
 
-        return sb.ToString();
-    }
-
-    private static bool StartsWithNewline(string source)
-    {
-        if (string.IsNullOrEmpty(source))
+        if (lastDirectiveEnd >= 0)
         {
-            return false;
+            string before = source[..lastDirectiveEnd];
+            string prefix = before.EndsWith('\n') ? string.Empty : newline;
+            return before + prefix + usingDirective + newline + source[lastDirectiveEnd..];
         }
 
-        return source[0] == '\n' || source[0] == '\r';
-    }
-
-    private static bool EndsWithNewline(string source)
-    {
-        if (string.IsNullOrEmpty(source))
+        // No usings: insert at the start of the first code token's line,
+        // i.e. after any header comment / #nullable / #pragma lines.
+        SyntaxToken first = root.GetFirstToken(includeZeroWidth: false);
+        int insertAt = first.IsKind(SyntaxKind.None) ? source.Length : first.SpanStart;
+        int lineStart = source.LastIndexOf('\n', Math.Max(0, insertAt - 1)) + 1;
+        if (lineStart > insertAt)
         {
-            return false;
+            lineStart = insertAt;
         }
 
-        char last = source[source.Length - 1];
-        return last == '\n' || last == '\r';
+        return source[..lineStart] + usingDirective + newline + newline + source[lineStart..];
     }
 }

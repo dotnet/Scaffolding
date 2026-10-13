@@ -30,6 +30,12 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
 
     public ValidateSyncfusionBlazorToolkitStepTests()
     {
+        // The step now evaluates the project with MSBuild (no textual gate).
+        if (!Microsoft.Build.Locator.MSBuildLocator.IsRegistered)
+        {
+            Microsoft.Build.Locator.MSBuildLocator.RegisterDefaults();
+        }
+
         _tempDir = Path.Combine(Path.GetTempPath(), "sfbt-validate-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempDir);
         _projectPath = Path.GetFullPath(Path.Combine(_tempDir, "Test.csproj"));
@@ -188,6 +194,52 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
 
         var settings = (SyncfusionBlazorToolkitSettings?)_context.Properties[nameof(SyncfusionBlazorToolkitSettings)];
         Assert.Equal("InteractiveServer", settings!.DetectedRenderMode);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsFalse_WhenImportedPropsReferenceMissingClient()
+    {
+        // The ProjectReference is declared in an imported .props file, never in
+        // the .csproj text. The step must still evaluate it and abort when the
+        // referenced client project is missing.
+        File.WriteAllText(Path.Combine(_tempDir, "refs.props"),
+            "<Project><ItemGroup><ProjectReference Include=\"Missing/Missing.csproj\" /></ItemGroup></Project>");
+        File.WriteAllText(_projectPath,
+            "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><Import Project=\"refs.props\" /></Project>");
+
+        _mockFileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns<string>(File.Exists);
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(It.IsAny<string>())).Returns(true);
+
+        var step = CreateStep();
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        Assert.False(_context.Properties.ContainsKey(nameof(SyncfusionBlazorToolkitSettings)));
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ResolvesClient_WhenReferenceComesFromImportedProps()
+    {
+        string clientDir = Path.Combine(_tempDir, "Client");
+        Directory.CreateDirectory(clientDir);
+        string clientProject = Path.Combine(clientDir, "Client.csproj");
+        File.WriteAllText(clientProject,
+            "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>");
+        File.WriteAllText(Path.Combine(_tempDir, "refs.props"),
+            "<Project><ItemGroup><ProjectReference Include=\"Client/Client.csproj\" /></ItemGroup></Project>");
+        File.WriteAllText(_projectPath,
+            "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>" +
+            "<Import Project=\"refs.props\" /></Project>");
+
+        _mockFileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns<string>(File.Exists);
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(It.IsAny<string>())).Returns(true);
+
+        var step = CreateStep();
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.True(result);
+        var settings = (SyncfusionBlazorToolkitSettings)_context.Properties[nameof(SyncfusionBlazorToolkitSettings)]!;
+        Assert.Equal(clientProject, settings.ClientProjectPath);
     }
 
     private class TestTelemetryService : ITelemetryService

@@ -15,8 +15,16 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
 {
     private readonly string _tempDir;
 
+    private const string WebProjectXml =
+        "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>";
+
     public SyncfusionBlazorToolkitHelperTests()
     {
+        if (!Microsoft.Build.Locator.MSBuildLocator.IsRegistered)
+        {
+            Microsoft.Build.Locator.MSBuildLocator.RegisterDefaults();
+        }
+
         _tempDir = Path.Combine(Path.GetTempPath(), "sfbt-helper-tests-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempDir);
     }
@@ -194,27 +202,22 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     public void IsActiveServiceRegistrationPresent_RecognisesStandaloneCall()
     {
         Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            "builder.Services.AddSyncfusionBlazorToolkit();\n"));
+            "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddSyncfusionBlazorToolkit();\nvar app = builder.Build();\n"));
         Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            "wasmBuilder.Services.AddSyncfusionBlazorToolkit();\n"));
-        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            "var x = 1;\nbuilder.Services.AddSyncfusionBlazorToolkit();\n"));
+            "var wasmBuilder = WebAssemblyHostBuilder.CreateDefault(args);\nwasmBuilder.Services.AddSyncfusionBlazorToolkit();\nawait wasmBuilder.Build().RunAsync();\n"));
     }
 
     [Fact]
     public void IsActiveServiceRegistrationPresent_RejectsChainedAndCommentedCalls()
     {
-        // Chained forms — the call is inside a longer fluent chain —
-        // are not active service registrations.
+        const string head = "var builder = WebApplication.CreateBuilder(args);\n";
+        const string tail = "var app = builder.Build();\n";
         Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            "builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddSyncfusionBlazorToolkit();\n"));
-        // Line comment hides the registration.
+            head + "builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddSyncfusionBlazorToolkit();\n" + tail));
         Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            "// builder.Services.AddSyncfusionBlazorToolkit();\n"));
-        // Block comment hides the registration.
+            head + "// builder.Services.AddSyncfusionBlazorToolkit();\n" + tail));
         Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
-            "/* builder.Services.AddSyncfusionBlazorToolkit(); */\n"));
-        // No registration at all.
+            head + "/* builder.Services.AddSyncfusionBlazorToolkit(); */\n" + tail));
         Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(""));
     }
 
@@ -406,7 +409,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     public void EnsureServiceRegistration_WebApp_AppendsCallAndUsing()
     {
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(project, WebProjectXml);
         var program = Path.Combine(_tempDir, "Program.cs");
         File.WriteAllText(program, WebAppProgramCs);
 
@@ -431,7 +434,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         // happens *after* `builder.Build()` and therefore never
         // participates in the application's DI container.
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(project, WebProjectXml);
         var program = Path.Combine(_tempDir, "Program.cs");
         File.WriteAllText(program, WebAppProgramCs);
 
@@ -482,7 +485,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         // `var builder = WebAssemblyHostBuilder.CreateDefault(args);`
         // so it precedes `await builder.Build().RunAsync();`.
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\" />");
+        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>");
         var program = Path.Combine(_tempDir, "Program.cs");
         File.WriteAllText(program, StandaloneWasmProgramCs);
 
@@ -523,14 +526,12 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Fact]
-    public void EnsureServiceRegistration_BlankFile_FallsBackToAppendingAtEnd()
+    public void EnsureServiceRegistration_BlankFile_SkipsAndLeavesFileUntouched()
     {
-        // If Program.cs is empty (or has no recognisable host-builder
-        // line) the helper must still write a working file. Falling
-        // back to end-of-file preserves the previous behaviour for
-        // this edge case.
+        // No host-builder declaration to anchor on: appending at the end
+        // would register after Build()/Run(), so the file must be left alone.
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(project, WebProjectXml);
         var program = Path.Combine(_tempDir, "Program.cs");
         File.WriteAllText(program, "");
 
@@ -538,10 +539,120 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
             project,
             SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
 
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.Equal("", File.ReadAllText(program));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_MultilineBuilderDeclaration_InsertsAfterWholeStatement()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program,
+            "var builder = WebApplication.CreateBuilder(new WebApplicationOptions\n" +
+            "{\n" +
+            "    Args = args,\n" +
+            "});\n" +
+            "var app = builder.Build();\n" +
+            "app.Run();\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
         Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
         string text = File.ReadAllText(program);
-        Assert.Contains("builder.Services.AddSyncfusionBlazorToolkit();", text);
-        Assert.Contains("using Syncfusion.Blazor.Toolkit;", text);
+        Assert.Contains("});\nbuilder.Services.AddSyncfusionBlazorToolkit();\nvar app", text);
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_StringLiteralMentioningCall_IsNotTreatedAsRegistered()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program,
+            "var note = \"builder.Services.AddSyncfusionBlazorToolkit();\";\n" +
+            "var builder = WebApplication.CreateBuilder(args);\n" +
+            "var app = builder.Build();\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+    }
+
+    [Theory]
+    [InlineData("var note = \"builder.Services.AddSyncfusionBlazorToolkit();\";", false)]
+    [InlineData("var note = @\"builder.Services.AddSyncfusionBlazorToolkit();\";", false)]
+    [InlineData("// builder.Services.AddSyncfusionBlazorToolkit();", false)]
+    [InlineData("builder.Services.AddSyncfusionBlazorToolkit();", true)]
+    [InlineData("builder.Services\n    .AddSyncfusionBlazorToolkit();", true)]
+    [InlineData("builder.Services.AddRazorComponents().AddSyncfusionBlazorToolkit();", false)]
+    public void IsActiveServiceRegistrationPresent_IgnoresLiteralsAndComments(string code, bool expected)
+    {
+        Assert.Equal(expected, SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "var builder = WebApplication.CreateBuilder(args);\n" + code + "\nvar app = builder.Build();\n"));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_RejectsCallOnWrongBuilder()
+    {
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "var builder = WebApplication.CreateBuilder(args);\nother.Services.AddSyncfusionBlazorToolkit();\n"));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_RejectsCallInsideUnexecutedLocalFunction()
+    {
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "var builder = WebApplication.CreateBuilder(args);\n" +
+            "void Unused() { builder.Services.AddSyncfusionBlazorToolkit(); }\n" +
+            "var app = builder.Build();\n"));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_AmbiguousHostBuilders_SkipsWithoutWriting()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        const string text =
+            "var a = WebApplication.CreateBuilder(args);\n" +
+            "var b = WebApplication.CreateBuilder(args);\n" +
+            "var app = a.Build();\n";
+        File.WriteAllText(program, text);
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.Equal(text, File.ReadAllText(program));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_BuilderInsideLocalFunction_IsIgnored()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program,
+            "void Helper() { var other = WebApplication.CreateBuilder(); }\n" +
+            "var builder = WebApplication.CreateBuilder(args);\n" +
+            "var app = builder.Build();\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+        string text = File.ReadAllText(program);
+        Assert.True(text.IndexOf("builder.Services.AddSyncfusionBlazorToolkit();", StringComparison.Ordinal)
+            > text.IndexOf("var builder =", StringComparison.Ordinal));
+        Assert.DoesNotContain("other.Services", text);
     }
 
     [Fact]
@@ -551,7 +662,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         // must keep using CRLF so we do not end up with a file that
         // mixes CRLF and LF.
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(project, WebProjectXml);
         var program = Path.Combine(_tempDir, "Program.cs");
         File.WriteAllText(program, WebAppProgramCs.Replace("\n", "\r\n"));
 
@@ -578,7 +689,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         // which is invalid C#. The dedicated step must write a valid
         // line that uses the discovered builder variable.
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\" />");
+        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>");
         var program = Path.Combine(_tempDir, "Program.cs");
         File.WriteAllText(program, StandaloneWasmProgramCs);
 
@@ -599,7 +710,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     public void EnsureServiceRegistration_HonoursCustomBuilderVariableName()
     {
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(project, WebProjectXml);
         var program = Path.Combine(_tempDir, "Program.cs");
         File.WriteAllText(program,
             "var appBuilder = WebApplication.CreateBuilder(args);\n" +
@@ -621,7 +732,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     public void EnsureServiceRegistration_AlreadyPresent_IsIdempotentNoOp()
     {
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(project, WebProjectXml);
         var program = Path.Combine(_tempDir, "Program.cs");
         File.WriteAllText(program,
             "using Syncfusion.Blazor.Toolkit;\n" +
@@ -654,7 +765,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         // The pre-existing commented-out registration must NOT count
         // as a real registration; the step must append a real line.
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(project, WebProjectXml);
         var program = Path.Combine(_tempDir, "Program.cs");
         File.WriteAllText(program,
             "var builder = WebApplication.CreateBuilder(args);\n" +
@@ -688,7 +799,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         // standalone statement) so the helper must still append a
         // standalone call.
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(project, WebProjectXml);
         var program = Path.Combine(_tempDir, "Program.cs");
         File.WriteAllText(program,
             "var builder = WebApplication.CreateBuilder(args);\n" +
@@ -708,22 +819,20 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Fact]
-    public void EnsureServiceRegistration_MissingProgramCs_CreatesMinimal()
+    public void EnsureServiceRegistration_MissingProgramCs_SkipsAndCreatesNothing()
     {
+        // The real entry point may live elsewhere (e.g. Hosting.cs). Creating
+        // a top-level Program.cs there would trigger CS8802.
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
-        // No Program.cs on disk.
+        File.WriteAllText(project, WebProjectXml);
+        File.WriteAllText(Path.Combine(_tempDir, "Hosting.cs"), WebAppProgramCs);
 
         var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
             project,
             SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
 
-        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Created, result.Outcome);
-        string program = Path.Combine(_tempDir, "Program.cs");
-        Assert.True(File.Exists(program));
-        string text = File.ReadAllText(program);
-        Assert.Contains("WebApplication.CreateBuilder", text);
-        Assert.Contains("AddSyncfusionBlazorToolkit", text);
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.False(File.Exists(Path.Combine(_tempDir, "Program.cs")));
     }
 
     [Fact]
@@ -733,7 +842,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         // it should add correspondingly". The helper must find
         // Program.cs in a one-level subdirectory of the project.
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(project, WebProjectXml);
         var srcDir = Path.Combine(_tempDir, "src");
         Directory.CreateDirectory(srcDir);
         var program = Path.Combine(srcDir, "Program.cs");
@@ -753,7 +862,7 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     public void EnsureServiceRegistration_ExcludedBinAndObjDirectories_Ignored()
     {
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(project, WebProjectXml);
         // bin/ and obj/ are output folders — a Program.cs in them must
         // NOT be treated as the project's entry point.
         Directory.CreateDirectory(Path.Combine(_tempDir, "bin"));
@@ -772,35 +881,123 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
             SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
 
         // Neither bin/Program.cs nor obj/Program.cs counts, so the
-        // helper must create a fresh Program.cs at the project root.
-        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Created, result.Outcome);
-        Assert.True(File.Exists(Path.Combine(_tempDir, "Program.cs")));
+        // helper skips and must not create a Program.cs.
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.False(File.Exists(Path.Combine(_tempDir, "Program.cs")));
     }
 
     [Fact]
-    public void EnsureServiceRegistration_SiblingProjectCsprojInSubdir_NotClaimed()
+    public void EnsureServiceRegistration_FileRemovedFromCompile_NotClaimed()
     {
-        // A subdirectory that itself contains a .csproj is a sibling
-        // project; the helper must not treat a Program.cs there as
-        // belonging to the project under scaffold.
+        // Discovery follows the evaluated Compile items: a Program.cs the
+        // project excludes (e.g. a sibling project's folder) is not its
+        // entry point, whatever its file name.
         var project = Path.Combine(_tempDir, "App.csproj");
-        File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(project,
+            "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>" +
+            "<ItemGroup><Compile Remove=\"Sibling/**\" /></ItemGroup></Project>");
         var sibling = Path.Combine(_tempDir, "Sibling");
         Directory.CreateDirectory(sibling);
-        File.WriteAllText(Path.Combine(sibling, "Sibling.csproj"), "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
         File.WriteAllText(Path.Combine(sibling, "Program.cs"),
-            "var builder = WebApplication.CreateBuilder(args);\n" +
-            "var app = builder.Build();\n" +
-            "app.Run();\n");
+            "var builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\napp.Run();\n");
 
         var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
             project,
             SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
 
-        // Sibling's Program.cs is ignored — the helper creates a new
-        // Program.cs at the project root.
-        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Created, result.Outcome);
-        Assert.True(File.Exists(Path.Combine(_tempDir, "Program.cs")));
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.False(File.Exists(Path.Combine(_tempDir, "Program.cs")));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_EntryPointNamedHostingCs_IsFoundAndRegistered()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var hosting = Path.Combine(_tempDir, "Hosting.cs");
+        File.WriteAllText(hosting, "var builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\napp.Run();\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+        Assert.Equal("Hosting.cs", result.ProgramCsRelative);
+        Assert.Contains("builder.Services.AddSyncfusionBlazorToolkit();", File.ReadAllText(hosting));
+        Assert.False(File.Exists(Path.Combine(_tempDir, "Program.cs")));
+    }
+
+    [Fact]
+    public void DiscoverEntryPoint_SeveralCompiledHostFiles_IsAmbiguous()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        File.WriteAllText(Path.Combine(_tempDir, "Program.cs"), "var builder = WebApplication.CreateBuilder(args);\n");
+        File.WriteAllText(Path.Combine(_tempDir, "Hosting.cs"), "var builder = WebApplication.CreateBuilder(args);\n");
+
+        Assert.Null(SyncfusionBlazorToolkitHelper.DiscoverEntryPoint(project, out var error));
+        Assert.NotNull(error);
+    }
+
+    [Fact]
+    public void TryIsPackageReferenced_UsesEvaluatedItems()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project,
+            "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>" +
+            "<!-- Syncfusion.Blazor.Toolkit -->" +
+            "<ItemGroup><PackageReference Include=\"Syncfusion.Blazor.Toolkit.Extras\" Version=\"1.0.0\" /></ItemGroup></Project>");
+        Assert.True(SyncfusionBlazorToolkitHelper.TryIsPackageReferenced(project, out bool referenced, out _));
+        Assert.False(referenced);
+
+        File.WriteAllText(Path.Combine(_tempDir, "Directory.Build.props"),
+            "<Project><ItemGroup><PackageReference Include=\"Syncfusion.Blazor.Toolkit\" Version=\"2.0.0\" /></ItemGroup></Project>");
+        Assert.True(SyncfusionBlazorToolkitHelper.TryIsPackageReferenced(project, out referenced, out _));
+        Assert.True(referenced);
+    }
+
+    [Fact]
+    public void TryIsPackageReferenced_EvaluationFailure_ReportsError()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project><Import Project=\"missing.props\" /></Project>");
+
+        Assert.False(SyncfusionBlazorToolkitHelper.TryIsPackageReferenced(project, out _, out var error));
+        Assert.NotNull(error);
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_RequiresEveryHostBuilder()
+    {
+        const string two =
+            "var a = WebApplication.CreateBuilder(args);\nvar b = WebApplication.CreateBuilder(args);\n";
+        const string builds = "a.Build();\nb.Build();\n";
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            two + "a.Services.AddSyncfusionBlazorToolkit();\n" + builds));
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            two + "a.Services.AddSyncfusionBlazorToolkit();\nb.Services.AddSyncfusionBlazorToolkit();\n" + builds));
+    }
+
+    [Theory]
+    [InlineData("extern alias X;\nvar builder = WebApplication.CreateBuilder(args);\n", "extern alias X;", "using Syncfusion.Blazor.Toolkit;")]
+    [InlineData("using System;\nvar builder = WebApplication.CreateBuilder(args);\n", "using System;", "using Syncfusion.Blazor.Toolkit;")]
+    [InlineData("// header\nvar builder = WebApplication.CreateBuilder(args);\n", "// header", "using Syncfusion.Blazor.Toolkit;")]
+    [InlineData("#nullable enable\nvar builder = WebApplication.CreateBuilder(args);\n", "#nullable enable", "using Syncfusion.Blazor.Toolkit;")]
+    public void EnsureServiceRegistration_UsingIsPlacedAfterExternsUsingsAndHeader(string program, string mustComeFirst, string directive)
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var path = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(path, program);
+
+        SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        string text = File.ReadAllText(path);
+        Assert.True(text.IndexOf(mustComeFirst, StringComparison.Ordinal) < text.IndexOf(directive, StringComparison.Ordinal));
+        Assert.True(text.IndexOf(directive, StringComparison.Ordinal) < text.IndexOf("var builder", StringComparison.Ordinal));
+        Assert.Equal(1, text.Split(directive).Length - 1);
     }
 
     [Fact]
@@ -851,19 +1048,278 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
             SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp));
     }
 
-    [Fact]
-    public void DiscoverProgramCs_PrefersRootThenSubdirectory()
+    // ------------------------------------------------------------------
+    // Registration must be on the startup path, parameterless, before Build()
+    // ------------------------------------------------------------------
+
+    private const string BuilderDecl = "var builder = WebApplication.CreateBuilder(args);\n";
+
+    [Theory]
+    [InlineData("if (false)\n{\n    builder.Services.AddSyncfusionBlazorToolkit();\n}\nvar app = builder.Build();\napp.Run();\n")]
+    [InlineData("try { builder.Services.AddSyncfusionBlazorToolkit(); } catch { }\nvar app = builder.Build();\n")]
+    [InlineData("for (var i = 0; i < 1; i++) builder.Services.AddSyncfusionBlazorToolkit();\nvar app = builder.Build();\n")]
+    [InlineData("var app = builder.Build();\nbuilder.Services.AddSyncfusionBlazorToolkit();\napp.Run();\n")]
+    [InlineData("builder.Services.AddSyncfusionBlazorToolkit(true);\nvar app = builder.Build();\n")]
+    [InlineData("var app = builder.Build();\napp.Run();\nstatic void Helper(WebApplicationBuilder b) { b.Services.AddSyncfusionBlazorToolkit(); }\n")]
+    public void IsActiveServiceRegistrationPresent_RejectsRegistrationThatDoesNotConfigureTheHost(string body)
     {
-        Directory.CreateDirectory(Path.Combine(_tempDir, "src"));
-        File.WriteAllText(Path.Combine(_tempDir, "src", "Program.cs"), "subdir");
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(BuilderDecl + body));
+    }
 
-        // Subdirectory only.
-        var subOnly = SyncfusionBlazorToolkitHelper.DiscoverProgramCs(_tempDir);
-        Assert.Equal(Path.Combine(_tempDir, "src", "Program.cs"), subOnly);
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_RejectsOrdinaryHelperMethodThatIsNeverCalled()
+    {
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            BuilderDecl +
+            "var app = builder.Build();\n" +
+            "class Setup { public void Configure(WebApplicationBuilder builder) { builder.Services.AddSyncfusionBlazorToolkit(); } }\n"));
+    }
 
-        // Root-level wins when both exist.
-        File.WriteAllText(Path.Combine(_tempDir, "Program.cs"), "root");
-        var rootWins = SyncfusionBlazorToolkitHelper.DiscoverProgramCs(_tempDir);
-        Assert.Equal(Path.Combine(_tempDir, "Program.cs"), rootWins);
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_AcceptsRegistrationInStaticMain()
+    {
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "class P { static void Main(string[] a) { var builder = WebApplication.CreateBuilder(a);\n" +
+            "builder.Services.AddSyncfusionBlazorToolkit();\nbuilder.Build(); } }"));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_RegistrationAfterBuild_IsNotTreatedAsPresent()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program,
+            BuilderDecl + "var app = builder.Build();\nbuilder.Services.AddSyncfusionBlazorToolkit();\napp.Run();\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+        string text = File.ReadAllText(program);
+        Assert.True(text.IndexOf("AddSyncfusionBlazorToolkit();", StringComparison.Ordinal)
+            < text.IndexOf("builder.Build()", StringComparison.Ordinal));
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(text));
+    }
+
+    // ------------------------------------------------------------------
+    // Aliased / qualified host builder types; fail closed when unresolved
+    // ------------------------------------------------------------------
+
+    private const string AliasHeader =
+        "using WebApp = Microsoft.AspNetCore.Builder.WebApplication;\nusing Syncfusion.Blazor.Toolkit;\n";
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_AliasedBuilder_RegistrationAfterBuild_IsRejected()
+    {
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            AliasHeader +
+            "var builder = WebApp.CreateBuilder(args);\n" +
+            "var app = builder.Build();\n" +
+            "builder.Services.AddSyncfusionBlazorToolkit();\n" +
+            "app.Run();\n"));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_AliasedBuilder_RegistrationBeforeBuild_IsAccepted()
+    {
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            AliasHeader +
+            "var builder = WebApp.CreateBuilder(args);\n" +
+            "builder.Services.AddSyncfusionBlazorToolkit();\n" +
+            "var app = builder.Build();\n"));
+    }
+
+    [Theory]
+    [InlineData("global::Microsoft.AspNetCore.Builder.WebApplication")]
+    [InlineData("Microsoft.AspNetCore.Builder.WebApplication")]
+    [InlineData("WebApplication")]
+    public void DetectBuilderVariableName_ResolvesFrameworkTypeSpellings(string type)
+    {
+        Assert.Equal("b", SyncfusionBlazorToolkitHelper.DetectBuilderVariableName(
+            $"var b = {type}.CreateBuilder(args);\n",
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp));
+    }
+
+    [Theory]
+    [InlineData("using WebApp = Contoso.Hosting.WebApplication;\nvar b = WebApp.CreateBuilder(args);\n")]
+    [InlineData("var b = Contoso.WebApplication.CreateBuilder(args);\n")]
+    [InlineData("class WebApplication { public static object CreateBuilder(string[] a) => null; }\nvar b = WebApplication.CreateBuilder(args);\n")]
+    public void DetectBuilderVariableName_LookAlikeTypes_AreNotTheFrameworkBuilder(string code)
+    {
+        Assert.Null(SyncfusionBlazorToolkitHelper.DetectBuilderVariableName(
+            code, SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_AliasedWasmBuilder_IsResolved()
+    {
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "using Host = Microsoft.AspNetCore.Components.WebAssembly.Hosting.WebAssemblyHostBuilder;\n" +
+            "var b = Host.CreateDefault(args);\nb.Services.AddSyncfusionBlazorToolkit();\nawait b.Build().RunAsync();\n"));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_UnresolvedBuilder_IsNotAcceptedJustBecauseACallExists()
+    {
+        // The host builder cannot be identified (custom factory): a matching
+        // statement must not be treated as proof of registration.
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "var builder = MyHost.Create(args);\nvar app = builder.Build();\nbuilder.Services.AddSyncfusionBlazorToolkit();\n"));
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "builder.Services.AddSyncfusionBlazorToolkit();\n"));
+    }
+
+    [Fact]
+    public void IsActiveServiceRegistrationPresent_NoBuildBoundary_IsNotConclusive()
+    {
+        Assert.False(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(
+            "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddSyncfusionBlazorToolkit();\n"));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_UnresolvedBuilderWithLateCall_SkipsAndDoesNotModifyFile()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        const string text =
+            "var builder = MyHost.Create(args);\nvar app = builder.Build();\nbuilder.Services.AddSyncfusionBlazorToolkit();\n";
+        File.WriteAllText(program, text);
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project, SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.Equal(text, File.ReadAllText(program));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_NoBuildBoundary_SkipsAndDoesNotModifyFile()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        const string text = "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddSyncfusionBlazorToolkit();\n";
+        File.WriteAllText(program, text);
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project, SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.Equal(text, File.ReadAllText(program));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_AliasedBuilderWithLateCall_InsertsBeforeBuildAndKeepsAliasUsing()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program,
+            AliasHeader +
+            "var builder = WebApp.CreateBuilder(args);\nvar app = builder.Build();\nbuilder.Services.AddSyncfusionBlazorToolkit();\napp.Run();\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project, SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+        string text = File.ReadAllText(program);
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(text));
+        Assert.Contains("using WebApp = Microsoft.AspNetCore.Builder.WebApplication;", text);
+        Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(text, "using Syncfusion\\.Blazor\\.Toolkit;").Count);
+    }
+
+    // ------------------------------------------------------------------
+    // Host builder must BE the initializer, matched structurally
+    // ------------------------------------------------------------------
+
+    [Fact]
+    public void DetectBuilderVariableName_WrapperAroundCreateBuilder_IsNotTheHostBuilder()
+    {
+        Assert.Null(SyncfusionBlazorToolkitHelper.DetectBuilderVariableName(
+            "var wrappedBuilder = Wrap(WebApplication.CreateBuilder(args));\n",
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_WrappedBuilder_SkipsWithoutWriting()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        const string text = "var wrappedBuilder = Wrap(WebApplication.CreateBuilder(args));\nvar app = wrappedBuilder.Build();\n";
+        File.WriteAllText(program, text);
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+        Assert.Equal(text, File.ReadAllText(program));
+    }
+
+    [Theory]
+    [InlineData("var builder = WebApplication\n    .CreateBuilder(args);\n")]
+    [InlineData("var builder = WebApplication\t.CreateBuilder(args);\n")]
+    [InlineData("var builder = (WebApplication.CreateBuilder(args));\n")]
+    [InlineData("var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);\n")]
+    public void DetectBuilderVariableName_IsIndependentOfFormatting(string code)
+    {
+        Assert.Equal("builder", SyncfusionBlazorToolkitHelper.DetectBuilderVariableName(
+            code, SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp));
+    }
+
+    // ------------------------------------------------------------------
+    // Entry point must be on the startup path
+    // ------------------------------------------------------------------
+
+    [Fact]
+    public void DiscoverEntryPoint_BuilderOnlyInUnusedHelperMethod_IsNotAnEntryPoint()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        File.WriteAllText(Path.Combine(_tempDir, "HostingFactory.cs"),
+            "public static class HostingFactory\n{\n" +
+            "    public static WebApplication CreateUnusedApp(string[] args)\n    {\n" +
+            "        var builder = WebApplication.CreateBuilder(args);\n" +
+            "        builder.Services.AddSyncfusionBlazorToolkit();\n" +
+            "        return builder.Build();\n    }\n}\n");
+
+        Assert.Null(SyncfusionBlazorToolkitHelper.DiscoverEntryPoint(project, out string? error));
+        Assert.NotNull(error);
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
+    }
+
+    [Fact]
+    public void DiscoverEntryPoint_StartupFileWinsOverHelperBuilderInAnotherFile()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        File.WriteAllText(Path.Combine(_tempDir, "Hosting.cs"), BuilderDecl + "var app = builder.Build();\napp.Run();\n");
+        File.WriteAllText(Path.Combine(_tempDir, "Other.cs"),
+            "public static class F { public static WebApplication M(string[] args) { var builder = WebApplication.CreateBuilder(args); return builder.Build(); } }\n");
+
+        string? entry = SyncfusionBlazorToolkitHelper.DiscoverEntryPoint(project, out _);
+
+        Assert.Equal(Path.Combine(_tempDir, "Hosting.cs"), entry);
+    }
+
+    [Fact]
+    public void TryIsPackageReferenced_CommentAndSimilarIdAreNotTheToolkit()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project,
+            "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>" +
+            "<!-- Syncfusion.Blazor.Toolkit -->" +
+            "<ItemGroup><PackageReference Include=\"Syncfusion.Blazor.Toolkit.Extras\" Version=\"1.0.0\" /></ItemGroup></Project>");
+
+        Assert.True(SyncfusionBlazorToolkitHelper.TryIsPackageReferenced(project, out bool referenced, out _));
+        Assert.False(referenced);
     }
 }

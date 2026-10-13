@@ -28,8 +28,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion;
 ///
 /// <para>Detection is done by <see cref="SyncfusionBlazorToolkitHelper"/>:
 /// the function locates <c>Program.cs</c> in the project root or one
-/// level of subdirectories, creates a minimal scaffold when none
-/// exists, and re-runs are no-ops when the registration is already
+/// level of subdirectories, fails with guidance when none exists
+/// (it never creates one), and re-runs are no-ops when the registration is already
 /// present. The configured builder variable name is reused so projects
 /// that pick a non-default name (<c>appBuilder</c>, <c>wasmBuilder</c>,
 /// etc.) keep working.</para>
@@ -114,8 +114,7 @@ internal class ApplySyncfusionBlazorToolkitProgramCsStep : ScaffoldStep
             settings.ProgramCsFileSkipped = outcome == SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped;
             settings.ServicesApplied = outcome != SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped;
             settings.ServicesInserted =
-                outcome == SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted ||
-                outcome == SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Created;
+                outcome == SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted;
         }
 
         switch (outcome)
@@ -130,18 +129,21 @@ internal class ApplySyncfusionBlazorToolkitProgramCsStep : ScaffoldStep
                     "Syncfusion Blazor Toolkit: added AddSyncfusionBlazorToolkit() to '{ProgramCs}'.",
                     appliedRelativePath);
                 break;
-            case SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Created:
-                _logger.LogInformation(
-                    "Syncfusion Blazor Toolkit: created '{ProgramCs}' with AddSyncfusionBlazorToolkit() pre-registered.",
-                    appliedRelativePath);
-                break;
             case SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped:
             default:
-                _logger.LogWarning(
-                    "Syncfusion Blazor Toolkit: no suitable Program.cs found or created for '{Project}'. " +
-                    "Add 'builder.Services.AddSyncfusionBlazorToolkit();' to your Program.cs manually if your project uses one.",
-                    projectToOperateOn);
-                break;
+                // Fail closed: never invent a second entry point (CS8802) or
+                // register after Build(). The user adds the call themselves.
+                _logger.LogError(
+                    "Syncfusion Blazor Toolkit: could not find a safe place to register services for '{Project}'. " +
+                    "The entry point (target: '{ProgramCs}') must declare the framework host builder " +
+                    "('WebApplication.CreateBuilder(...)' / 'WebAssemblyHostBuilder.CreateDefault(...)', aliases allowed) as a " +
+                    "top-level or Main statement and call 'Build()' on it; otherwise registration cannot be verified. " +
+                    "No files were created or changed. Add " +
+                    "'builder.Services.AddSyncfusionBlazorToolkit();' to your existing application entry point, " +
+                    "before 'Build()', and re-run the scaffolder.",
+                    projectToOperateOn,
+                    appliedRelativePath ?? "Program.cs");
+                return Task.FromResult(false);
         }
 
         return Task.FromResult(true);

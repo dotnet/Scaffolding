@@ -59,14 +59,14 @@ If you're new, look for issues tagged **`good first issue`** or **`help wanted`*
 
 Before you begin, ensure you have the following installed:
 
-1. **Preview .NET SDK**: 
+1. **Preview .NET SDK**:
    - Download a preview version that matches the version in `global.json` at the root of the repository
    - Reference: https://github.com/dotnet/sdk/blob/main/documentation/package-table.md
-   
+
 2. **Development Environment**:
    - Visual Studio 2022 (latest preview) **OR**
    - Visual Studio Code with C# Dev Kit extension
-   
+
 3. **Git**: For cloning the repository and version control
 
 4. **Azure CLI** (if working on Azure-related features):
@@ -143,6 +143,7 @@ Scaffolding/
   - `src/dotnet-scaffolding/dotnet-scaffold/Aspire/CodeModificationConfigs/{version}/`
   - Contains JSON files that define code modifications
   - Examples: `blazorEntraChanges.json`, `identityChanges.json`
+  - Scaffolder-specific recipes can be grouped in a subfolder, e.g. `CodeModificationConfigs/IgniteUIBlazor/` (see [Adding New Scaffolders](#adding-new-scaffolders))
 
 - **ScaffoldSteps**: Located in `src/dotnet-scaffolding/dotnet-scaffold/AspNet/ScaffoldSteps/`
   - Contains the logic for each scaffolding step
@@ -162,7 +163,7 @@ Scaffolding/
    ```bash
    # Visual Studio
    start All.sln
-   
+
    # Visual Studio Code
    code .
    ```
@@ -321,6 +322,19 @@ src/dotnet-scaffolding/dotnet-scaffold/Aspire/CodeModificationConfigs/{version}/
 5. Register your scaffolder in `AspNetCommandService.cs`
 6. Add unit tests in `test/.../AspNet/`
 
+Keep the layer-based structure (`Extensions`, `Helpers`, `Models`, `ScaffoldSteps`, `ScaffoldSteps/Settings`, `Templates/{version}/CodeModificationConfigs`). When a scaffolder adds files that are only used by it, group them in a scaffolder-specific subfolder within each layer. Do the same in tests. Reusable functionality stays directly in the shared layer folder. For example, the Ignite UI for Blazor scaffolder uses:
+
+```
+AspNet/Extensions/IgniteUIBlazor/
+AspNet/Helpers/IgniteUIBlazor/
+AspNet/Models/IgniteUIBlazor/
+AspNet/ScaffoldSteps/IgniteUIBlazor/
+AspNet/ScaffoldSteps/Settings/IgniteUIBlazor/
+AspNet/Templates/{version}/CodeModificationConfigs/IgniteUIBlazor/
+```
+
+Subfolders of `CodeModificationConfigs` are preserved in the build output, in the source-built tool layout used by `dotnet run`, and in the package (`AspNet/CodeModificationConfigs/{version}/IgniteUIBlazor/`). Look up a nested recipe with its path relative to `CodeModificationConfigs`, for example `GlobalToolFileFinder.FindCodeModificationConfigFile(Path.Combine("IgniteUIBlazor", "igniteUIBlazorChanges.json"), ...)`.
+
 ### Modifying Existing Scaffolders
 
 1. Locate the scaffolder in `AspNet/Templates/{version}/`
@@ -454,23 +468,23 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet
         {
             // Arrange
             var input = "test";
-            
+
             // Act
             var result = MyScaffolder.Generate(input);
-            
+
             // Assert
             Assert.NotNull(result);
             Assert.Contains("expected", result);
         }
-        
+
         [Fact]
         public void Should_ThrowException_When_InvalidInput()
         {
             // Arrange
             var input = "";
-            
+
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => 
+            Assert.Throws<ArgumentException>(() =>
                 MyScaffolder.Generate(input));
         }
     }
@@ -572,7 +586,7 @@ For larger changes, perform integration testing:
 ### Creating a Pull Request
 
 1. **Fork the repository** (if you haven't already)
-   
+
 2. **Create a feature branch**:
    ```bash
    git checkout -b feature/my-awesome-feature
@@ -662,6 +676,7 @@ For feature requests:
 - **Getting Started**: [docs/Getting-Started.md](docs/Getting-Started.md)
 - **Known Flaky/Skipped Tests**: [docs/KNOWN_FLAKY_TESTS.md](docs/KNOWN_FLAKY_TESTS.md)
 - **Entra ID Scaffolder**: [docs/ENTRA_ID_SCAFFOLDER_DOCUMENTATION.md](docs/ENTRA_ID_SCAFFOLDER_DOCUMENTATION.md)
+- **Ignite UI for Blazor Scaffolder**: [docs/IGNITEUI_BLAZOR_SCAFFOLDER_DOCUMENTATION.md](docs/IGNITEUI_BLAZOR_SCAFFOLDER_DOCUMENTATION.md)
 - **Main README**: [README.md](README.md)
 
 ### Related Projects

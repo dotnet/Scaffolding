@@ -47,6 +47,8 @@ public class CliOptionInventoryTests
         Constants.CliOptions.TenantIdOption,            // --tenantId
         Constants.CliOptions.UseExistingApplicationOption, // --use-existing-application
         Constants.CliOptions.ApplicationIdOption,       // --applicationId
+        Constants.CliOptions.IgniteUIThemeOption,        // --theme
+        Constants.CliOptions.IgniteUIThemeVariantOption, // --theme-variant
     };
 
     /// <summary>
@@ -85,6 +87,7 @@ public class CliOptionInventoryTests
         ["blazor-identity"] = new() { "--project", "--dataContext", "--dbProvider", "--overwrite", "--prerelease" },
         ["identity"] = new() { "--project", "--dataContext", "--dbProvider", "--overwrite", "--prerelease" },
         ["entra-id"] = new() { "--username", "--project", "--tenantId", "--use-existing-application", "--applicationId" },
+        ["blazor-igniteui"] = new() { "--project", "--theme", "--theme-variant", "--prerelease" },
     };
 
     /// <summary>
@@ -136,6 +139,8 @@ public class CliOptionInventoryTests
             options.Username.CliOption!,
             options.TenantId.CliOption!,
             options.ApplicationId.CliOption!,
+            options.IgniteUITheme.CliOption!,
+            options.IgniteUIThemeVariant.CliOption!,
         };
 
         var missingFromManifest = declaredFlags.Except(AllAspNetCliFlags).ToList();
@@ -191,6 +196,8 @@ public class CliOptionInventoryTests
             options.Username.CliOption!,
             options.TenantId.CliOption!,
             options.ApplicationId.CliOption!,
+            options.IgniteUITheme.CliOption!,
+            options.IgniteUIThemeVariant.CliOption!,
         };
 
         var staleFlags = AllAspNetCliFlags.Except(declaredFlags).ToList();

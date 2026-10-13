@@ -372,38 +372,14 @@ internal class ValidateIdentityStep : ScaffoldStep
         ProjectInfo projectInfo, string programPath)
     {
         var programDocument = await projectInfo.CodeService!.GetDocumentAsync("Program.cs");
-        var semanticModel = programDocument is null ? null : await programDocument.GetSemanticModelAsync();
-        var programRoot = programDocument is null ? null : await programDocument.GetSyntaxRootAsync();
-        if (programDocument is null || semanticModel is null || programRoot is null ||
-            semanticModel.Compilation.GetTypeByMetadataName(BlazorCrudHelper.IRazorComponentsBuilderType) is null)
+        var (interactivity, error) = await BlazorInteractivityAnalyzer.AnalyzeAsync(programDocument, programPath, projectInfo.ProjectPath);
+        if (interactivity is null)
         {
-            _logger.LogError(
-                $"Unable to analyze Blazor registrations in '{programPath}'. Ensure the project's SDK and references are available and 'dotnet restore' succeeds.");
+            _logger.LogError(error);
             return null;
         }
 
-        // An unresolved registration is not an absent registration. Other errors (such as unavailable
-        // generated Razor component types) need not prevent analysis of these service registrations.
-        var unresolvedRegistration = programRoot.DescendantNodes().OfType<SimpleNameSyntax>()
-            .FirstOrDefault(name =>
-                name.Identifier.ValueText is BlazorCrudHelper.AddInteractiveServerComponentsMethod or BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod &&
-                (name.Parent is InvocationExpressionSyntax ||
-                 name.Parent is MemberAccessExpressionSyntax { Parent: InvocationExpressionSyntax } ||
-                 name.Parent is MemberBindingExpressionSyntax { Parent: InvocationExpressionSyntax }) &&
-                semanticModel.GetSymbolInfo(name).Symbol is null);
-        if (unresolvedRegistration is not null)
-        {
-            _logger.LogError(
-                $"Unable to resolve Blazor registration '{unresolvedRegistration}' in '{programPath}'. Check the registration's imports and package references, then run 'dotnet build \"{projectInfo.ProjectPath}\"' for diagnostics.");
-            return null;
-        }
-
-        var usesInteractiveServer = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(
-            programDocument, BlazorCrudHelper.AddInteractiveServerComponentsMethod, BlazorCrudHelper.IRazorComponentsBuilderType);
-        var usesInteractiveWebAssembly = await RoslynUtilities.CheckDocumentForMethodInvocationAsync(
-            programDocument, BlazorCrudHelper.AddInteractiveWebAssemblyComponentsMethod, BlazorCrudHelper.IRazorComponentsBuilderType);
-
-        return (usesInteractiveServer, usesInteractiveWebAssembly);
+        return (interactivity.UsesInteractiveServer, interactivity.UsesInteractiveWebAssembly);
     }
 
     private (string ProjectPath, string RootNamespace)? GetBlazorWebAssemblyClientProject(string? projectPath)

@@ -36,7 +36,10 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     internal const string MauiRegistrationFileName = "MauiProgram.cs";
 
     /// <summary>
-    /// Adds a step that installs the IgniteUI.Blazor.Lite and IgniteUI.Blazor.GridLite NuGet packages into the project.
+    /// Adds a step that installs the IgniteUI.Blazor.Lite and IgniteUI.Blazor.GridLite NuGet packages. For a Blazor Web
+    /// App with a Blazor WebAssembly client project they are installed only in the client: the server project gets their
+    /// assemblies and static web assets (such as the theme stylesheets) through its reference to the client. Package
+    /// references the server project already has are left as is.
     /// </summary>
     public static IScaffoldBuilder WithIgniteUIBlazorAddPackagesStep(this IScaffoldBuilder builder)
     {
@@ -45,34 +48,18 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
             var step = config.Step;
             var model = GetModel(config.Context);
             var settings = GetSettings(config.Context);
-            step.ProjectPath = model.ProjectPath;
+            step.ProjectPath = GetPackagesProjectPath(model);
             step.Prerelease = settings.Prerelease;
             step.Packages = GetPackages();
         });
     }
 
     /// <summary>
-    /// Adds a step that installs the IgniteUI.Blazor.Lite and IgniteUI.Blazor.GridLite NuGet packages into the Blazor
-    /// WebAssembly client project of a Blazor Web App. Skipped when the project has no client project.
+    /// Returns the project that the Ignite UI packages are installed in: the Blazor WebAssembly client project when one
+    /// was resolved, otherwise the project passed via '--project'.
     /// </summary>
-    public static IScaffoldBuilder WithIgniteUIBlazorWasmAddPackagesStep(this IScaffoldBuilder builder)
-    {
-        return builder.WithStep<WrappedAddPackagesStep>(config =>
-        {
-            var step = config.Step;
-            var model = GetModel(config.Context);
-            if (string.IsNullOrEmpty(model.ClientProjectPath))
-            {
-                step.SkipStep = true;
-                return;
-            }
-
-            var settings = GetSettings(config.Context);
-            step.ProjectPath = model.ClientProjectPath;
-            step.Prerelease = settings.Prerelease;
-            step.Packages = GetPackages();
-        });
-    }
+    internal static string GetPackagesProjectPath(IgniteUIBlazorModel model)
+        => string.IsNullOrEmpty(model.ClientProjectPath) ? model.ProjectPath : model.ClientProjectPath;
 
     /// <summary>
     /// Adds a step that enables Interactive Server support in the Program.cs of a Blazor Web App that configures no

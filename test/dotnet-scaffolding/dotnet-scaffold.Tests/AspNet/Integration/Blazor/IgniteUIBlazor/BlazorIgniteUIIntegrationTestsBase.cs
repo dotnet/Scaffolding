@@ -293,8 +293,12 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
     /// Builds (and therefore restores) the project before scaffolding. Pass false to verify that the scaffolder works on
     /// a project that has never been restored.
     /// </param>
+    /// <param name="clientProjectPath">
+    /// The Blazor WebAssembly client project of a Blazor Web App, which receives the packages instead of the targeted
+    /// server project; null when the targeted project receives them.
+    /// </param>
     /// <returns>The scaffolder's console output, for additional assertions by the caller.</returns>
-    protected async Task<string> ScaffoldAllPackagesAndAssertAsync(bool buildBeforeScaffolding = true)
+    protected async Task<string> ScaffoldAllPackagesAndAssertAsync(bool buildBeforeScaffolding = true, string? clientProjectPath = null)
     {
         if (buildBeforeScaffolding)
         {
@@ -307,10 +311,14 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
             TargetFramework, "blazor-igniteui", "--project", _testProjectPath);
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
-        // packages
-        var projectContent = File.ReadAllText(_testProjectPath);
-        Assert.Contains(LitePackageName, projectContent);
-        Assert.Contains(GridLitePackageName, projectContent);
+        // packages: in the client when there is one (the server gets them through its reference to the client)
+        var packagesProjectContent = File.ReadAllText(clientProjectPath ?? _testProjectPath);
+        Assert.Contains(LitePackageName, packagesProjectContent);
+        Assert.Contains(GridLitePackageName, packagesProjectContent);
+        if (clientProjectPath is not null)
+        {
+            Assert.DoesNotContain("IgniteUI.Blazor", File.ReadAllText(_testProjectPath));
+        }
 
         // service registration
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));

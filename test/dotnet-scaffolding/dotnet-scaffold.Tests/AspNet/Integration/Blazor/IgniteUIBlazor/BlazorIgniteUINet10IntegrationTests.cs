@@ -73,20 +73,24 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         Assert.False(File.Exists(Path.Combine(_testProjectDir, "obj", "project.assets.json")));
         Assert.False(File.Exists(Path.Combine(clientProjectDir, "obj", "project.assets.json")));
 
-        // Act + Assert (server)
-        var cliOutput = await ScaffoldAllPackagesAndAssertAsync(buildBeforeScaffolding: false);
+        // Act + Assert (server) — set up without direct Ignite UI package references in the server project
+        var clientProjectPath = Path.Combine(clientProjectDir, "TestProject.Client.csproj");
+        var cliOutput = await ScaffoldAllPackagesAndAssertAsync(buildBeforeScaffolding: false, clientProjectPath);
         Assert.Contains("Found Blazor WebAssembly client project", cliOutput);
+
+        // Assert (server build) — the client's Ignite UI assemblies and theme stylesheets flow to the server through
+        // its project reference: the assemblies are in its output and the stylesheets are among its static web assets
+        var serverOutputDirectory = Path.Combine(_testProjectDir, "bin", "Debug", TargetFramework);
+        Assert.NotEmpty(Directory.EnumerateFiles(serverOutputDirectory, "IgniteUI.Blazor*.dll"));
+        var staticWebAssets = File.ReadAllText(Path.Combine(serverOutputDirectory, "TestProject.staticwebassets.endpoints.json"));
+        Assert.Contains("_content/IgniteUI.Blazor/themes/light/bootstrap.css", staticWebAssets);
 
         // Assert (hosting) — the WebAssembly configuration is kept, and the guidance only suggests WebAssembly
         Assert.DoesNotContain("AddInteractiveServer", File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs")));
         Assert.Contains("'@rendermode InteractiveWebAssembly'", cliOutput);
         Assert.DoesNotContain("InteractiveAuto", cliOutput);
 
-        // Assert (client) — packages, service registration and @using were applied to the client project too
-        var clientProjectContent = File.ReadAllText(Path.Combine(clientProjectDir, "TestProject.Client.csproj"));
-        Assert.Contains(LitePackageName, clientProjectContent);
-        Assert.Contains(GridLitePackageName, clientProjectContent);
-
+        // Assert (client) — the service registration and @using were applied to the client project too
         var clientProgramContent = File.ReadAllText(Path.Combine(clientProjectDir, "Program.cs"));
         Assert.Contains("using IgniteUI.Blazor.Controls;", clientProgramContent);
         Assert.Contains("builder.Services.AddIgniteUIBlazor();", clientProgramContent);
@@ -687,6 +691,26 @@ app.Run();
     /// Writes a Blazor Web App server project that references a Blazor WebAssembly client project.
     /// </summary>
     /// <returns>The client project directory.</returns>
+    [Fact]
+    public async Task Scaffold_BlazorIgniteUI_Net10_SplitWebApp_KeepsExistingServerPackageReferences()
+    {
+        // Arrange — the server project already references an Ignite UI package (e.g. added by an earlier setup)
+        var clientProjectDir = SetupSplitWebApp();
+        var (addExitCode, addOutput, addError) = await ScaffoldCliHelper.RunDotNetAsync(_testProjectDir, "add", "package", LitePackageName);
+        Assert.True(addExitCode == 0, $"Adding the package to the server should succeed.\nOutput: {addOutput}\nError: {addError}");
+        var serverProjectBefore = File.ReadAllText(_testProjectPath);
+
+        // Act
+        await RunScaffoldAndAssertSuccessAsync();
+
+        // Assert — the packages are installed in the client, and the server's existing reference is left as is
+        var clientProjectContent = File.ReadAllText(Path.Combine(clientProjectDir, "TestProject.Client.csproj"));
+        Assert.Contains(LitePackageName, clientProjectContent);
+        Assert.Contains(GridLitePackageName, clientProjectContent);
+        Assert.Equal(serverProjectBefore, File.ReadAllText(_testProjectPath));
+        await AssertBuildsAsync("after scaffolding");
+    }
+
     private string SetupSplitWebApp()
     {
         SetupBlazorWebAppProject();

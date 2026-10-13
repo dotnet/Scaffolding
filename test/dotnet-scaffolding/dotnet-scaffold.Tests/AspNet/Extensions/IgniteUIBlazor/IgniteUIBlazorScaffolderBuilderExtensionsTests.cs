@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Core.Model;
@@ -38,17 +39,6 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
         var mockBuilder = CreateBuilder<WrappedAddPackagesStep>();
 
         IScaffoldBuilder result = mockBuilder.Object.WithIgniteUIBlazorAddPackagesStep();
-
-        Assert.NotNull(result);
-        VerifyStepAdded<WrappedAddPackagesStep>(mockBuilder);
-    }
-
-    [Fact]
-    public void WithIgniteUIBlazorWasmAddPackagesStep_AddsWrappedAddPackagesStep()
-    {
-        var mockBuilder = CreateBuilder<WrappedAddPackagesStep>();
-
-        IScaffoldBuilder result = mockBuilder.Object.WithIgniteUIBlazorWasmAddPackagesStep();
 
         Assert.NotNull(result);
         VerifyStepAdded<WrappedAddPackagesStep>(mockBuilder);
@@ -112,7 +102,7 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void WithIgniteUIBlazorWasmAddPackagesStep_TargetsClientFromModel(bool hasClient)
+    public void WithIgniteUIBlazorAddPackagesStep_InstallsInTheClientWhenOneExists(bool hasClient)
     {
         var model = CreateModel(hasClient);
         var step = new WrappedAddPackagesStep(
@@ -124,14 +114,12 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
             ProjectPath = string.Empty
         };
 
-        ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorWasmAddPackagesStep());
+        ConfigureStep(step, CreateContext(model), builder => builder.WithIgniteUIBlazorAddPackagesStep());
 
-        Assert.Equal(!hasClient, step.SkipStep);
-        if (hasClient)
-        {
-            Assert.Equal(model.ClientProjectPath, step.ProjectPath);
-            Assert.Equal(2, step.Packages.Count);
-        }
+        // The server project gets the packages' assemblies and static web assets through its reference to the client.
+        Assert.False(step.SkipStep);
+        Assert.Equal(hasClient ? model.ClientProjectPath : model.ProjectPath, step.ProjectPath);
+        Assert.Equal(["IgniteUI.Blazor.Lite", "IgniteUI.Blazor.GridLite"], step.Packages.Select(p => p.Name));
     }
 
     [Theory]

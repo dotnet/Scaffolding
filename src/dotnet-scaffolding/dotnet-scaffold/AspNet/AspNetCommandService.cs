@@ -395,7 +395,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.Prerelease = context.GetOptionResult(options.Prerelease);
                 })
                 .WithIgniteUIBlazorAddPackagesStep()
-                .WithIgniteUIBlazorWasmAddPackagesStep()
                 .WithIgniteUIBlazorInteractivityStep()
                 .WithIgniteUIBlazorCodeChangeStep()
                 .WithIgniteUIBlazorWasmCodeChangeStep()

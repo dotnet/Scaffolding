@@ -100,6 +100,8 @@ When `--theme` or `--theme-variant` is omitted, the theme or variant of the Igni
 
 `IgniteUI.Blazor.Lite` and `IgniteUI.Blazor.GridLite` are added with `dotnet add package`. The packages are not versioned in lockstep with .NET, so the latest stable version is installed (or the latest prerelease with `--prerelease`).
 
+For a Blazor Web App with a WebAssembly client project, the packages are installed in the client project only. The server project gets their assemblies and static web assets, including the theme stylesheets, through its reference to the client, so it needs no direct package references. Package references the server project already has are left as they are.
+
 ### 2. Service registration (`Program.cs` / `MauiProgram.cs`)
 
 The scaffolder registers the Ignite UI services required by the `IgniteUI.Blazor.Lite` components (the GridLite grid needs no registration of its own):
@@ -140,7 +142,7 @@ If an Ignite UI theme is already linked (including a GridLite-only one), only it
 
 ### 5. Blazor Web App with a WebAssembly client project
 
-**Always target the server project**, i.e. the project that references `MyApp.Client`. While validating the options, before any file is changed, the scaffolder evaluates the server project's `ProjectReference` items with MSBuild and evaluates each referenced project. A referenced project that uses the `Microsoft.NET.Sdk.BlazorWebAssembly` SDK is the Blazor WebAssembly client. The packages, the service registration and the `@using` directive are applied to it as well (using `igniteUIBlazorWasmChanges.json` for its `Program.cs`). The host page only exists in the server project, so the stylesheet is linked once, in the server host page. The tool logs `Found Blazor WebAssembly client project '...'; it will be configured as well.` when a client was found.
+**Always target the server project**, i.e. the project that references `MyApp.Client`. While validating the options, before any file is changed, the scaffolder evaluates the server project's `ProjectReference` items with MSBuild and evaluates each referenced project. A referenced project that uses the `Microsoft.NET.Sdk.BlazorWebAssembly` SDK is the Blazor WebAssembly client. The packages are installed in the client only (the server gets them through its reference to the client), and the service registration and the `@using` directive are applied to both projects (using `igniteUIBlazorWasmChanges.json` for the client's `Program.cs`). The host page only exists in the server project, so the stylesheet is linked once, in the server host page. The tool logs `Found Blazor WebAssembly client project '...'; it will be configured as well.` when a client was found.
 
 Discovery reads the project files only, so neither project has to be restored or built first. A server project that references no WebAssembly project (Blazor Server, or a Blazor Web App without a `.Client` project) is configured on its own.
 
@@ -234,7 +236,7 @@ To keep only one component set, remove the other package after scaffolding:
 - Without the grid: `dotnet remove package IgniteUI.Blazor.GridLite`.
 - Without the core components: `dotnet remove package IgniteUI.Blazor.Lite`, remove `builder.Services.AddIgniteUIBlazor();` from `Program.cs` (or `MauiProgram.cs`), and change the theme link to the GridLite-only theme, `_content/IgniteUI.Blazor.GridLite/themes/{variant}/{theme}.css`.
 
-For a Blazor Web App with a WebAssembly client project, apply the same changes to the client project, except the theme link, which is only in the server host page. Re-running the scaffolder installs both component sets again.
+For a Blazor Web App with a WebAssembly client project, the packages are referenced by the client project, so remove them there; remove the service registration from both projects' `Program.cs`; and change the theme link, which is only in the server host page. Re-running the scaffolder installs both component sets again.
 
 ---
 

@@ -17,6 +17,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
     {
         internal const string DefaultInstance = "https://login.microsoftonline.com/";
         internal const string DefaultCallbackPath = "/signin-oidc";
+        internal const string AzureAdSectionName = "AzureAd";
+
+        private static readonly string[] ManagedAzureAdKeys = ["Instance", "TenantId", "Domain", "ClientId", "CallbackPath"];
 
         /// <summary>
         /// Path to the project file.
@@ -107,7 +110,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     Domain,
                     Instance,
                     CallbackPath);
-                JsonNode? existingAzureAd = developmentSettings["AzureAd"];
+                JsonNode? existingAzureAd = GetAzureAdSection(developmentSettings, out string azureAdSectionName);
+                if (existingAzureAd is JsonObject existingAzureAdToValidate)
+                {
+                    EnsureUnambiguousManagedKeys(existingAzureAdToValidate);
+                }
 
                 if (!Overwrite && existingAzureAd is JsonObject existingAzureAdObject)
                 {
@@ -137,12 +144,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 JsonObject targetAzureAd = existingAzureAd as JsonObject ?? new JsonObject();
                 foreach ((string key, JsonNode? value) in generatedAzureAd)
                 {
-                    targetAzureAd[key] = value?.DeepClone();
+                    // Update an existing key in place (keeping its casing) so the file never gets two keys that
+                    // ASP.NET Core configuration would treat as duplicates.
+                    string propertyName = FindPropertyName(targetAzureAd, key, "The AzureAd section") ?? key;
+                    targetAzureAd[propertyName] = value?.DeepClone();
                 }
 
                 if (existingAzureAd is not JsonObject)
                 {
-                    developmentSettings["AzureAd"] = targetAzureAd;
+                    developmentSettings[azureAdSectionName] = targetAzureAd;
                 }
 
                 var options = new JsonSerializerOptions { WriteIndented = true };
@@ -168,21 +178,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             if (!_fileSystem.FileExists(developmentSettingsPath))
             {
                 _logger.LogInformation($"Creating new appsettings.Development.json file at {developmentSettingsPath}");
-                return new JsonObject(new JsonNodeOptions { PropertyNameCaseInsensitive = true });
+                return new JsonObject();
             }
 
-            JsonNode? parsedSettings = ParseDevelopmentSettings(_fileSystem.ReadAllText(developmentSettingsPath));
-            if (parsedSettings is null)
-            {
-                return new JsonObject(new JsonNodeOptions { PropertyNameCaseInsensitive = true });
-            }
-
-            if (parsedSettings is not JsonObject developmentSettings)
-            {
-                throw new JsonException("The root JSON value must be an object.");
-            }
-
-            return developmentSettings;
+            // An existing file is never treated as empty: a null or other non-object root fails here.
+            return ParseDevelopmentSettings(_fileSystem.ReadAllText(developmentSettingsPath));
         }
 
         private void LogConflict(string key)
@@ -197,16 +197,90 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             _logger.LogInformation("The generated AzureAd app registration and settings are intended for development environments.");
         }
 
-        internal static JsonNode? ParseDevelopmentSettings(string json)
+        /// <summary>
+        /// Parses an existing appsettings.Development.json file, accepting the comments and trailing commas that
+        /// ASP.NET Core configuration accepts. Property names stay case-sensitive, so sections such as "Logging" and
+        /// "logging" that ASP.NET Core treats as distinct keys are preserved. Managed AzureAd settings are matched
+        /// case-insensitively by <see cref="GetAzureAdSection"/> and <see cref="EnsureUnambiguousManagedKeys"/>.
+        /// </summary>
+        /// <exception cref="JsonException">The JSON is malformed, or its root is not an object (including <c>null</c>),
+        /// which ASP.NET Core configuration rejects.</exception>
+        internal static JsonObject ParseDevelopmentSettings(string json)
         {
-            return JsonNode.Parse(
+            JsonNode? parsedSettings = JsonNode.Parse(
                 json,
-                new JsonNodeOptions { PropertyNameCaseInsensitive = true },
-                new JsonDocumentOptions
+                nodeOptions: null,
+                documentOptions: new JsonDocumentOptions
                 {
                     CommentHandling = JsonCommentHandling.Skip,
                     AllowTrailingCommas = true
                 });
+
+            if (parsedSettings is not JsonObject developmentSettings)
+            {
+                throw new JsonException("The root JSON value must be an object.");
+            }
+
+            return developmentSettings;
+        }
+
+        /// <summary>
+        /// Returns the AzureAd section, matched case-insensitively as ASP.NET Core configuration does.
+        /// </summary>
+        /// <param name="developmentSettings">The parsed development settings.</param>
+        /// <param name="sectionName">The existing section name, or "AzureAd" when the section is missing.</param>
+        /// <exception cref="JsonException">More than one section name matches, or the file has duplicate property names.</exception>
+        internal static JsonNode? GetAzureAdSection(JsonObject developmentSettings, out string sectionName)
+        {
+            sectionName = FindPropertyName(developmentSettings, AzureAdSectionName, "The file") ?? AzureAdSectionName;
+            return developmentSettings[sectionName];
+        }
+
+        /// <summary>
+        /// Verifies that each managed AzureAd key appears at most once, ignoring case.
+        /// </summary>
+        /// <exception cref="JsonException">A managed key appears more than once with different casing.</exception>
+        internal static void EnsureUnambiguousManagedKeys(JsonObject azureAd)
+        {
+            foreach (string key in ManagedAzureAdKeys)
+            {
+                FindPropertyName(azureAd, key, "The AzureAd section");
+            }
+        }
+
+        /// <summary>
+        /// Returns the name of the property that matches <paramref name="name"/> case-insensitively, or null.
+        /// </summary>
+        /// <exception cref="JsonException">More than one property matches, so the value to use is ambiguous, or the
+        /// object has duplicate property names.</exception>
+        private static string? FindPropertyName(JsonObject jsonObject, string name, string location)
+        {
+            string? match = null;
+            try
+            {
+                foreach ((string propertyName, _) in jsonObject)
+                {
+                    if (!string.Equals(propertyName, name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    if (match is not null)
+                    {
+                        throw new JsonException(
+                            $"{location} contains both '{match}' and '{propertyName}', which differ only by letter case. " +
+                            "Keep one of them and run the scaffolder again.");
+                    }
+
+                    match = propertyName;
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                throw new JsonException($"{location} contains duplicate property names: {ex.Message}", ex);
+            }
+
+            return match;
         }
 
         internal static JsonObject CreateAzureAdConfiguration(
@@ -233,9 +307,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         {
             foreach ((string key, JsonNode? value) in generatedAzureAd)
             {
-                string? existingValue = existingAzureAd[key]?.ToString();
+                JsonNode? existingNode = GetManagedValue(existingAzureAd, key);
+                string? existingValue = existingNode?.ToString();
                 if (!string.IsNullOrEmpty(existingValue) &&
-                    !JsonNode.DeepEquals(existingAzureAd[key], value))
+                    !JsonNode.DeepEquals(existingNode, value))
                 {
                     return key;
                 }
@@ -264,13 +339,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         {
             foreach ((string key, JsonNode? value) in generatedAzureAd)
             {
-                if (!JsonNode.DeepEquals(existingAzureAd[key], value))
+                if (!JsonNode.DeepEquals(GetManagedValue(existingAzureAd, key), value))
                 {
                     return false;
                 }
             }
 
             return true;
+        }
+
+        private static JsonNode? GetManagedValue(JsonObject azureAd, string key)
+        {
+            string? propertyName = FindPropertyName(azureAd, key, "The AzureAd section");
+            return propertyName is null ? null : azureAd[propertyName];
         }
     }
 }

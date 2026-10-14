@@ -226,6 +226,79 @@ public class UpdateAppSettingsStepTests
     }
 
     [Theory]
+    [InlineData("null", false)]
+    [InlineData("null", true)]
+    [InlineData("/* development settings */ null", false)]
+    [InlineData("[]", true)]
+    [InlineData("\"text\"", false)]
+    [InlineData("42", true)]
+    public async Task ExecuteAsync_FailsWithoutWrite_WhenDevelopmentSettingsRootIsNotObject(string settings, bool overwrite)
+    {
+        SetExistingSettingsJson(settings);
+
+        (bool result, TestLogger logger) = await ExecuteAsync(overwrite: overwrite);
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("root JSON value must be an object", StringComparison.Ordinal));
+        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_PreservesSectionsThatDifferOnlyByCase()
+    {
+        SetExistingSettingsJson("""{"Logging":{"A":"1"},"logging":{"B":"2"}}""");
+
+        (bool result, _) = await ExecuteAsync();
+
+        Assert.True(result);
+        JsonNode writtenSettings = ParseWrittenSettings();
+        Assert.Equal("1", writtenSettings["Logging"]?["A"]?.ToString());
+        Assert.Equal("2", writtenSettings["logging"]?["B"]?.ToString());
+        AssertManagedValuesMatch(writtenSettings["AzureAd"]!);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_UpdatesCaseVariantAzureAdKeysInPlace()
+    {
+        SetExistingSettingsJson(
+            """
+            {
+              "azuread": {
+                "clientid": "existing-client-id",
+                "signedOutCallbackPath": "/custom-signout"
+              }
+            }
+            """);
+
+        (bool result, _) = await ExecuteAsync(overwrite: true);
+
+        Assert.True(result);
+        JsonObject writtenSettings = ParseWrittenSettings().AsObject();
+        Assert.False(writtenSettings.ContainsKey("AzureAd"));
+        JsonObject azureAd = Assert.IsType<JsonObject>(writtenSettings["azuread"]);
+        Assert.Equal(ClientId, azureAd["clientid"]?.ToString());
+        Assert.False(azureAd.ContainsKey("ClientId"));
+        Assert.Equal(TenantId, azureAd["TenantId"]?.ToString());
+        Assert.Equal("/custom-signout", azureAd["signedOutCallbackPath"]?.ToString());
+    }
+
+    [Theory]
+    [InlineData("""{"AzureAd":{"ClientId":"new-client-id"},"azuread":{"TenantId":"new-tenant-id"}}""", "'AzureAd' and 'azuread'", false)]
+    [InlineData("""{"AzureAd":{"ClientId":"new-client-id"},"azuread":{"TenantId":"new-tenant-id"}}""", "'AzureAd' and 'azuread'", true)]
+    [InlineData("""{"AzureAd":{"ClientId":"new-client-id","clientId":"other-client-id"}}""", "'ClientId' and 'clientId'", false)]
+    [InlineData("""{"AzureAd":{"ClientId":"new-client-id","clientId":"other-client-id"}}""", "'ClientId' and 'clientId'", true)]
+    public async Task ExecuteAsync_ReportsAmbiguousCaseVariantsWithoutWrite(string settings, string expectedNames, bool overwrite)
+    {
+        SetExistingSettingsJson(settings);
+
+        (bool result, TestLogger logger) = await ExecuteAsync(overwrite: overwrite);
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains(expectedNames, StringComparison.Ordinal));
+        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
     [InlineData("developer@contoso.com", null, "contoso.com")]
     [InlineData("developer", null, "developer.onmicrosoft.com")]
     [InlineData("developer@contoso.com", "tenant.onmicrosoft.com", "tenant.onmicrosoft.com")]
@@ -270,6 +343,12 @@ public class UpdateAppSettingsStepTests
     {
         _fileSystem.Setup(fs => fs.FileExists(_developmentSettingsPath)).Returns(true);
         _fileSystem.Setup(fs => fs.ReadAllText(_developmentSettingsPath)).Returns(settings.ToJsonString());
+    }
+
+    private void SetExistingSettingsJson(string settings)
+    {
+        _fileSystem.Setup(fs => fs.FileExists(_developmentSettingsPath)).Returns(true);
+        _fileSystem.Setup(fs => fs.ReadAllText(_developmentSettingsPath)).Returns(settings);
     }
 
     private JsonNode ParseWrittenSettings()

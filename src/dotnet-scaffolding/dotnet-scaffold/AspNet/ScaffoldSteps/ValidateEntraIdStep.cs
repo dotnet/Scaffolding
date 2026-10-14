@@ -184,11 +184,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return true;
             }
 
-            JsonNode? parsedSettings;
+            // Validate everything the update step will rely on before any app registration work, even with
+            // --overwrite: a non-object root (including null) or ambiguous AzureAd names can't be updated safely.
+            JsonNode? azureAdNode;
             try
             {
-                parsedSettings = UpdateAppSettingsStep.ParseDevelopmentSettings(
+                JsonObject developmentSettings = UpdateAppSettingsStep.ParseDevelopmentSettings(
                     _fileSystem.ReadAllText(developmentSettingsPath));
+                azureAdNode = UpdateAppSettingsStep.GetAzureAdSection(developmentSettings, out _);
+                if (azureAdNode is JsonObject azureAdToValidate)
+                {
+                    UpdateAppSettingsStep.EnsureUnambiguousManagedKeys(azureAdToValidate);
+                }
             }
             catch (JsonException ex)
             {
@@ -201,20 +208,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return false;
             }
 
-            if (parsedSettings is null)
-            {
-                return true;
-            }
-
-            if (parsedSettings is not JsonObject developmentSettings)
-            {
-                _logger.LogError(
-                    $"Failed to parse appsettings.Development.json file at {developmentSettingsPath}: " +
-                    "root JSON value must be an object.");
-                return false;
-            }
-
-            JsonNode? azureAdNode = developmentSettings["AzureAd"];
             if (overwrite || azureAdNode is null)
             {
                 return true;

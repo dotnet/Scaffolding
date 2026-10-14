@@ -11,11 +11,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion.Settin
 internal class SyncfusionBlazorToolkitSettings : BaseSettings
 {
     /// <summary>
-    /// Indicates if prerelease packages should be used.
-    /// </summary>
-    public bool Prerelease { get; init; }
-
-    /// <summary>
     /// Project-relative path of the <c>_Imports.razor</c> file the
     /// scaffolder targeted on this run. <c>null</c> when the scaffolder
     /// could not find or create a suitable file.

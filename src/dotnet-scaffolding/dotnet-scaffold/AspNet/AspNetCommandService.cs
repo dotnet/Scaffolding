@@ -226,13 +226,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithCategory(AspnetStrings.Catagories.Blazor)
                 .WithDescription(AspnetStrings.SyncfusionBlazorToolkit.Description)
                 .WithExample(AspnetStrings.SyncfusionBlazorToolkit.Example, AspnetStrings.SyncfusionBlazorToolkit.ExampleDescription)
-                .WithOptions([options.Project, options.Prerelease])
+                .WithOptions([options.Project])
                 .WithStep<ValidateSyncfusionBlazorToolkitStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
                     step.Project = context.GetOptionResult(options.Project);
-                    step.Prerelease = context.GetOptionResult(options.Prerelease);
                 })
                 .WithSyncfusionBlazorToolkitAddPackagesStep()
                 .WithSyncfusionBlazorToolkitAddClientPackagesStep()

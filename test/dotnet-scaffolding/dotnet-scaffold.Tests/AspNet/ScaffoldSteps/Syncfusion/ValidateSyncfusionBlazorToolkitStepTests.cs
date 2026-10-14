@@ -67,7 +67,6 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
             _testTelemetryService)
         {
             Project = _projectPath,
-            Prerelease = false,
         };
     }
 

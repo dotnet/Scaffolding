@@ -63,14 +63,18 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
                 !string.IsNullOrEmpty(settings.Project))
             {
                 step.ProjectPath = settings.Project;
-                step.Prerelease = settings.Prerelease;
                 step.Packages = packages;
             }
             else
             {
+                // Not a user-facing prerequisite and not another scaffolder:
+                // 'SyncfusionBlazorToolkitSettings' is the in-memory state the
+                // first step of this scaffolder (ValidateSyncfusionBlazorToolkitStep)
+                // stores in the context. Reaching this point means that step
+                // did not run or did not succeed, i.e. a step-ordering bug.
                 throw new InvalidOperationException(
-                    "Syncfusion Blazor Toolkit scaffolder requires 'SyncfusionBlazorToolkitSettings' to be present " +
-                    "in 'ScaffolderContext.Properties' before the add-packages step can run. " +
+                    "Internal error: the add-packages step ran before the Syncfusion Blazor Toolkit validation step " +
+                    "stored its project settings. The validation step must run first and succeed. " +
                     "Aborting the add-packages step.");
             }
         });
@@ -97,7 +101,6 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
             }
 
             step.ProjectPath = settings.ClientProjectPath;
-            step.Prerelease = settings.Prerelease;
             step.Packages = new List<Package>
             {
                 PackageConstants.AspNetCorePackages.SyncfusionBlazorToolkitPackage

@@ -23,7 +23,6 @@ public class SyncfusionBlazorToolkitSettingsTests
         Assert.False(settings.ImportsApplied);
         Assert.Null(settings.ClientProjectPath);
         Assert.Equal("None", settings.DetectedRenderMode);
-        Assert.False(settings.Prerelease);
     }
 
     [Fact]
@@ -32,7 +31,6 @@ public class SyncfusionBlazorToolkitSettingsTests
         var settings = new SyncfusionBlazorToolkitSettings
         {
             Project = "C:/absolute/Test.csproj",
-            Prerelease = true,
             ImportsFile = Path.Combine("Components", "_Imports.razor"),
             ImportsFileSkipped = false,
             ImportsApplied = true,
@@ -50,7 +48,6 @@ public class SyncfusionBlazorToolkitSettingsTests
         Assert.True(settings.PackageApplied);
         Assert.True(settings.ServicesApplied);
         Assert.True(settings.ServicesAlreadyRegistered);
-        Assert.True(settings.Prerelease);
         Assert.Equal("InteractiveServer", settings.DetectedRenderMode);
         Assert.Equal(SyncfusionBlazorToolkitLayout.AutoServer, settings.Layout);
     }

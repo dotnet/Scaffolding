@@ -34,6 +34,7 @@ internal static class ScaffolderBaselineRunner
         {
             File.Copy(Path.Combine(repoRoot, "global.json"), Path.Combine(workingDirectory, "global.json"));
             File.Copy(Path.Combine(repoRoot, "NuGet.config"), Path.Combine(workingDirectory, "NuGet.config"));
+            await ScaffoldCliHelper.UseInstalledSdkAsync(workingDirectory, framework);
             GeneratedProjectBaseline.CopyProject(baseline, expected);
             await RunDotNetAsync(output, expected, "restore");
             await RunDotNetAsync(output, expected, "build", "--no-restore");

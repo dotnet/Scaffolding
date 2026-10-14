@@ -8,6 +8,8 @@
 | --- | --- | --- | --- |
 | `net10.0\BlazorWebApp` | `blazor` | `--name BlazorWebApp --framework net10.0 --no-restore` | `11.0.100-rc.2.26475.136` |
 | `net11.0\BlazorWebApp` | `blazor` | `--name BlazorWebApp --framework net11.0 --no-restore` | `11.0.100-rc.2.26475.136` |
+| `net10.0\EmptyWebApp` | `web` | `--name EmptyWebApp --framework net10.0 --no-restore` | `11.0.100-rc.2.26478.115` |
+| `net11.0\EmptyWebApp` | `web` | `--name EmptyWebApp --framework net11.0 --no-restore` | `11.0.100-rc.2.26478.115` |
 
 From this directory, update all existing inputs with the currently active SDK (or pass `-SdkVersion` to select another installed SDK):
 
@@ -40,6 +42,8 @@ To add an input instead, run `.\New-InputBaseline.ps1 -Framework net11.0 -Name E
 
 `<scaffolder>\<framework>\<template>` contains runnable expected output for a representative default path. Baseline tests run the tool on the test assembly's target framework and build and compare projects targeting each input's framework. Focused integration tests cover configuration variations and other tool-host versions.
 
+`IdentityApi\<framework>\EmptyWebApp` covers the default SQLite-backed Identity API scaffolder on .NET 10 and .NET 11. Its endpoint source comes from the framework's `IdentityApiEndpointRouteBuilderExtensions.cs`, with only the mapping class/method renamed and attribution added. The template and both output baselines are checked against the pinned framework source fingerprint; startup, packages, user/context classes, configuration, and all other project files are compared by the shared baseline runner.
+
 Comparison includes every file except files under `bin` and `obj` directories. Common source and text formats use line-ending normalization, and `.csproj` comparisons ignore `PackageReference` version values. Other files are compared byte-for-byte; database files and `.vs` files are not excluded.
 
 To add coverage, reuse or add a shared input, check in a runnable expected project, and call `ScaffolderBaselineRunner.RunAsync` with named arguments for the scaffolder directory, framework, input template, and callback that runs the scaffolder on the copied input. The runner handles setup, builds, comparison, and cleanup.
@@ -51,3 +55,5 @@ Update the expected project first and run it to verify the desired behavior, the
 ## Build isolation
 
 `Directory.Build.props`, `Directory.Build.targets`, and `Directory.Packages.props` apply to both input and output projects, keeping repository build targets and central package settings out of these standalone apps.
+
+Temporary baseline workspaces use a matching-major installed SDK when available, or a compatible newer SDK otherwise, through `ScaffoldCliHelper.UseInstalledSdkAsync`. This changes only the temporary workspace's `global.json` and avoids installing SDKs or letting a newer preview SDK select unavailable reference packs for an older target.

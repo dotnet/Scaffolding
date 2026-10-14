@@ -111,7 +111,7 @@ jobs:
         _Family: 'razorpages-crud|razorpage-empty'
         _FamilyLabel: RazorPages
       Identity:
-        _Family: 'identity|blazor-identity'
+        _Family: 'identity|Family=blazor-identity|Family=identity-api'
         _FamilyLabel: Identity
       EntraId:
         _Family: 'entra-id'

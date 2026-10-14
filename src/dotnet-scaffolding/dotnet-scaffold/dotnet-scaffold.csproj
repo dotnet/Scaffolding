@@ -49,6 +49,8 @@
     <!-- DbContext templates for net8.0: use copy from net9.0 since net8.0 folder doesn't have .tt templates -->
     <None Pack="true" Include="$(RepoRoot)src\dotnet-scaffolding\Microsoft.DotNet.Scaffolding.TextTemplating\DbContext\net9.0\NewDbContext.tt" PackagePath="AspNet\Templates\net8.0\DbContext\" />
     <None Pack="true" Include="AspNet\Templates\**\*.tt" PackagePath="AspNet\Templates\" />
+    <None Pack="true" Include="AspNet\Templates\net10.0\IdentityApi\*.txt" PackagePath="AspNet\Templates\net10.0\IdentityApi\" />
+    <None Pack="true" Include="AspNet\Templates\net10.0\IdentityApi\*.txt" PackagePath="AspNet\Templates\net11.0\IdentityApi\" />
     <None Pack="true" Include="README.md" PackagePath="\" />
     <!-- Pack AspNet CodeModificationConfigs into AspNet folder -->
     <None Pack="true" Include="AspNet\Templates\net8.0\CodeModificationConfigs\*.json">
@@ -177,6 +179,10 @@
     <None Include="AspNet\Templates\net10.0\**\*.*" Exclude="AspNet\Templates\net10.0\**\*.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net10.0\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="AspNet\Templates\net10.0\IdentityApi\*.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net11.0\IdentityApi\%(Filename)%(Extension)</Link>
     </None>
     <!-- Include net11.0 templates in build output (exclude .cs since they are compiled) -->
     <None Include="AspNet\Templates\net11.0\**\*.*" Exclude="AspNet\Templates\net11.0\**\*.cs">

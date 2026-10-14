@@ -312,6 +312,187 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         }
 
         [Fact]
+        public void ResolveLayoutNamespaceIgnoresCommentMarkerInCodeBlockString()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            fileSystem
+                .Setup(fs => fs.ReadAllText(mainLayoutPath))
+                .Returns("@code {" + Environment.NewLine +
+                    "    private const string CommentMarker = \"@*\";" + Environment.NewLine +
+                    "}" + Environment.NewLine +
+                    Environment.NewLine +
+                    "@namespace Active.Strings" + Environment.NewLine +
+                    "<main />");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("Active.Strings.MainLayout", result);
+        }
+
+        [Fact]
+        public void ResolveLayoutNamespaceUsesFirstCommentTerminator()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            fileSystem
+                .Setup(fs => fs.ReadAllText(mainLayoutPath))
+                .Returns("@* Documentation: write @* to begin a Razor comment. *@" + Environment.NewLine +
+                    Environment.NewLine +
+                    "@namespace Active.Nested" + Environment.NewLine +
+                    "<main />");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("Active.Nested.MainLayout", result);
+        }
+
+        [Fact]
+        public void ResolveLayoutNamespaceIgnoresCommentMarkerInExplicitCodeBlockString()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            fileSystem
+                .Setup(fs => fs.ReadAllText(mainLayoutPath))
+                .Returns("@{" + Environment.NewLine +
+                    "    var commentMarker = \"@*\";" + Environment.NewLine +
+                    "}" + Environment.NewLine +
+                    "@namespace Active.Block" + Environment.NewLine +
+                    "<main />");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("Active.Block.MainLayout", result);
+        }
+
+        [Fact]
+        public void ResolveLayoutNamespaceIgnoresCommentMarkerInExplicitExpressionString()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            fileSystem
+                .Setup(fs => fs.ReadAllText(mainLayoutPath))
+                .Returns("@(\"@*\")" + Environment.NewLine +
+                    "@namespace Active.Expression" + Environment.NewLine +
+                    "<main />");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("Active.Expression.MainLayout", result);
+        }
+
+        [Fact]
+        public void ResolveLayoutNamespaceIgnoresNamespaceTextInCodeBlockRawString()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            fileSystem
+                .Setup(fs => fs.ReadAllText(mainLayoutPath))
+                .Returns("@code {" + Environment.NewLine +
+                    "    private const string Documentation = \"\"\"" + Environment.NewLine +
+                    "@namespace Phantom.RawString" + Environment.NewLine +
+                    "@*" + Environment.NewLine +
+                    "\"\"\";" + Environment.NewLine +
+                    "}" + Environment.NewLine +
+                    "@namespace Active.RawString" + Environment.NewLine +
+                    "<main />");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("Active.RawString.MainLayout", result);
+        }
+
+        [Fact]
+        public void ResolveLayoutNamespaceIgnoresCommentMarkerInImplicitExpressionString()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            fileSystem
+                .Setup(fs => fs.ReadAllText(mainLayoutPath))
+                .Returns("@GetDocumentation(\"@*\")" + Environment.NewLine +
+                    "@namespace Active.ImplicitExpression" + Environment.NewLine +
+                    "<main />");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("Active.ImplicitExpression.MainLayout", result);
+        }
+
+        [Fact]
+        public void ResolveLayoutNamespaceIgnoresCommentMarkerInControlBlockString()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            fileSystem
+                .Setup(fs => fs.ReadAllText(mainLayoutPath))
+                .Returns("@if (GetDocumentation() == \"@*\")" + Environment.NewLine +
+                    "{" + Environment.NewLine +
+                    "    <main />" + Environment.NewLine +
+                    "}" + Environment.NewLine +
+                    "@namespace Active.ControlBlock");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("Active.ControlBlock.MainLayout", result);
+        }
+
+        [Fact]
         public void ResolveLayoutNamespaceIgnoresCommentedImportsNamespaceDirective()
         {
             var fileSystem = new Mock<IFileSystem>();

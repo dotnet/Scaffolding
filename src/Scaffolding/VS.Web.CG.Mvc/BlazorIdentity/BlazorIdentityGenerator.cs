@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.Scaffolding.Shared;
@@ -47,6 +48,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private static readonly StringComparer PathComparer = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? StringComparer.OrdinalIgnoreCase
             : StringComparer.Ordinal;
+        private static readonly StringComparison PathComparison = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
         private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
 
         private IEnumerable<string> _templateFolders;
@@ -357,7 +361,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 return $"{razorNamespace ?? $"{rootNamespace}.Components.Layout"}.MainLayout";
             }
 
-            var directReferencePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var directReferencePaths = new HashSet<string>(PathComparer);
             foreach (var directProjectReference in directProjectReferences ?? Enumerable.Empty<string>())
             {
                 directReferencePaths.Add(Path.GetFullPath(directProjectReference));
@@ -396,7 +400,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                         .Select(path => Path.IsPathRooted(path)
                             ? Path.GetFullPath(path)
                             : Path.GetFullPath(Path.Combine(projectDirectory, path))),
-                    StringComparer.OrdinalIgnoreCase);
+                    PathComparer);
                 var mainLayoutPaths = new[]
                 {
                     Path.Combine(projectDirectory, "Components", "Layout", "MainLayout.razor"),
@@ -483,7 +487,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             var currentDirectory = Path.GetDirectoryName(componentPath);
             while (!string.IsNullOrEmpty(currentDirectory) &&
-                   currentDirectory.StartsWith(projectDirectory, StringComparison.OrdinalIgnoreCase))
+                   currentDirectory.StartsWith(projectDirectory, PathComparison))
             {
                 var importsPath = Path.Combine(currentDirectory, "_Imports.razor");
                 if (fileSystem.FileExists(importsPath))
@@ -497,7 +501,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     }
                 }
 
-                if (string.Equals(currentDirectory, projectDirectory, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(currentDirectory, projectDirectory, PathComparison))
                 {
                     break;
                 }
@@ -546,36 +550,193 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private static string RemoveRazorComments(string contents)
         {
             var result = new StringBuilder(contents.Length);
-            var commentDepth = 0;
             for (var index = 0; index < contents.Length; index++)
             {
                 if (index + 1 < contents.Length &&
                     contents[index] == '@' &&
-                    contents[index + 1] == '*')
-                {
-                    commentDepth++;
-                    result.Append("  ");
-                    index++;
-                    continue;
-                }
-
-                if (commentDepth > 0 &&
-                    index + 1 < contents.Length &&
-                    contents[index] == '*' &&
                     contents[index + 1] == '@')
                 {
-                    commentDepth--;
-                    result.Append("  ");
+                    result.Append("@@");
                     index++;
                     continue;
                 }
 
-                result.Append(commentDepth == 0 || contents[index] == '\r' || contents[index] == '\n'
-                    ? contents[index]
-                    : ' ');
+                if (index + 1 < contents.Length &&
+                    contents[index] == '@' &&
+                    contents[index + 1] == '*')
+                {
+                    var commentEnd = contents.IndexOf("*@", index + 2, StringComparison.Ordinal);
+                    var endIndex = commentEnd < 0 ? contents.Length : commentEnd + 2;
+                    AppendWhitespacePreservingLines(result, contents, index, endIndex);
+                    index = endIndex - 1;
+                    continue;
+                }
+
+                if (contents[index] == '@')
+                {
+                    var codeEnd = FindEmbeddedCSharpEnd(contents, index);
+                    if (codeEnd > index)
+                    {
+                        AppendWhitespacePreservingLines(result, contents, index, codeEnd);
+                        index = codeEnd - 1;
+                        continue;
+                    }
+                }
+
+                result.Append(contents[index]);
             }
 
             return result.ToString();
+        }
+
+        private static int FindEmbeddedCSharpEnd(string contents, int transitionIndex)
+        {
+            var codeIndex = transitionIndex + 1;
+            if (codeIndex >= contents.Length)
+            {
+                return transitionIndex;
+            }
+
+            if (contents[codeIndex] == '{')
+            {
+                return FindMatchingCSharpDelimiter(
+                    contents,
+                    codeIndex,
+                    SyntaxKind.OpenBraceToken,
+                    SyntaxKind.CloseBraceToken);
+            }
+
+            if (contents[codeIndex] == '(')
+            {
+                return FindMatchingCSharpDelimiter(
+                    contents,
+                    codeIndex,
+                    SyntaxKind.OpenParenToken,
+                    SyntaxKind.CloseParenToken);
+            }
+
+            if (!SyntaxFacts.IsIdentifierStartCharacter(contents[codeIndex]))
+            {
+                return transitionIndex;
+            }
+
+            var identifierEnd = codeIndex + 1;
+            while (identifierEnd < contents.Length &&
+                   SyntaxFacts.IsIdentifierPartCharacter(contents[identifierEnd]))
+            {
+                identifierEnd++;
+            }
+
+            var identifier = contents.Substring(codeIndex, identifierEnd - codeIndex);
+            if (string.Equals(identifier, "code", StringComparison.Ordinal) ||
+                string.Equals(identifier, "functions", StringComparison.Ordinal))
+            {
+                var blockStart = SkipWhitespace(contents, identifierEnd);
+                return blockStart < contents.Length && contents[blockStart] == '{'
+                    ? FindMatchingCSharpDelimiter(
+                        contents,
+                        blockStart,
+                        SyntaxKind.OpenBraceToken,
+                        SyntaxKind.CloseBraceToken)
+                    : transitionIndex;
+            }
+
+            if (IsRazorControlBlock(identifier))
+            {
+                var conditionStart = SkipWhitespace(contents, identifierEnd);
+                if (conditionStart < contents.Length && contents[conditionStart] == '(')
+                {
+                    var conditionEnd = FindMatchingCSharpDelimiter(
+                        contents,
+                        conditionStart,
+                        SyntaxKind.OpenParenToken,
+                        SyntaxKind.CloseParenToken);
+                    var blockStart = SkipWhitespace(contents, conditionEnd);
+                    if (blockStart < contents.Length && contents[blockStart] == '{')
+                    {
+                        return FindMatchingCSharpDelimiter(
+                            contents,
+                            blockStart,
+                            SyntaxKind.OpenBraceToken,
+                            SyntaxKind.CloseBraceToken);
+                    }
+                    return conditionEnd;
+                }
+            }
+
+            if (string.Equals(identifier, "namespace", StringComparison.Ordinal))
+            {
+                return transitionIndex;
+            }
+
+            var expression = SyntaxFactory.ParseExpression(contents.Substring(codeIndex));
+            var firstToken = expression.GetFirstToken();
+            return !firstToken.IsMissing &&
+                   firstToken.SpanStart == 0 &&
+                   string.Equals(firstToken.ValueText, identifier, StringComparison.Ordinal)
+                ? codeIndex + expression.Span.End
+                : transitionIndex;
+        }
+
+        private static bool IsRazorControlBlock(string identifier)
+        {
+            return string.Equals(identifier, "if", StringComparison.Ordinal) ||
+                string.Equals(identifier, "for", StringComparison.Ordinal) ||
+                string.Equals(identifier, "foreach", StringComparison.Ordinal) ||
+                string.Equals(identifier, "while", StringComparison.Ordinal) ||
+                string.Equals(identifier, "switch", StringComparison.Ordinal) ||
+                string.Equals(identifier, "lock", StringComparison.Ordinal) ||
+                string.Equals(identifier, "using", StringComparison.Ordinal);
+        }
+
+        private static int SkipWhitespace(string contents, int startIndex)
+        {
+            while (startIndex < contents.Length && char.IsWhiteSpace(contents[startIndex]))
+            {
+                startIndex++;
+            }
+
+            return startIndex;
+        }
+
+        private static int FindMatchingCSharpDelimiter(
+            string contents,
+            int openDelimiterIndex,
+            SyntaxKind openDelimiter,
+            SyntaxKind closeDelimiter)
+        {
+            var depth = 0;
+            foreach (var token in SyntaxFactory.ParseTokens(contents.Substring(openDelimiterIndex)))
+            {
+                if (token.IsKind(openDelimiter))
+                {
+                    depth++;
+                }
+                else if (token.IsKind(closeDelimiter))
+                {
+                    depth--;
+                    if (depth == 0)
+                    {
+                        return openDelimiterIndex + token.Span.End;
+                    }
+                }
+            }
+
+            return contents.Length;
+        }
+
+        private static void AppendWhitespacePreservingLines(
+            StringBuilder result,
+            string contents,
+            int startIndex,
+            int endIndex)
+        {
+            for (var index = startIndex; index < endIndex; index++)
+            {
+                result.Append(contents[index] == '\r' || contents[index] == '\n'
+                    ? contents[index]
+                    : ' ');
+            }
         }
 
         private sealed class LayoutCandidate

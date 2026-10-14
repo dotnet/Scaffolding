@@ -109,13 +109,9 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_NormalizesRelativeProjectPath_ToFullPath()
     {
-        // A relative --project value such as "App.csproj" used to pass
-        // File.Exists but leave Path.GetDirectoryName returning empty.
-        // The fix normalizes the path to a full path before storing it
-        // on the settings.
-        // We simulate the relative input by switching the test process's
-        // working directory to _tempDir via Directory.SetCurrentDirectory
-        // so Path.GetFullPath("Test.csproj") resolves to our test file.
+        // A relative --project value such as "App.csproj" passes File.Exists but has no directory
+        // part, so the step must store the full path. The relative input is simulated by switching
+        // the working directory to _tempDir so Path.GetFullPath("Test.csproj") resolves to our file.
         string projectFileName = "Test.csproj";
         string fullPath = Path.Combine(_tempDir, projectFileName);
         File.WriteAllText(fullPath, WebProjectXml);

@@ -141,9 +141,8 @@ public class SyncfusionBlazorToolkitNet8IntegrationTests : SyncfusionBlazorToolk
     [Fact]
     public async Task Scaffold_BlazorSyncfusionToolkit_Net8_RollsBackPackageVersion_OnRerun()
     {
-        // Comment 9: package-version update path must work — a rerun
-        // against a project that already references an older version
-        // must bump it via the add-packages step.
+        // A rerun against a project that already references an older version
+        // must update it to the current one via the add-packages step.
         WriteBlazorWebAppScaffold();
         File.WriteAllText(_testProjectPath,
             BlazorWebProjectContent.Replace(

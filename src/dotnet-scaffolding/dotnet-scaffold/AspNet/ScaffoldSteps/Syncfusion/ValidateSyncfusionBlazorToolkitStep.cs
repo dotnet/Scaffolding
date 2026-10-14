@@ -17,21 +17,12 @@ using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion;
 
 /// <summary>
-/// Validates Syncfusion Blazor Toolkit settings and seeds the project context
-/// for the setup scaffolder.
-///
-/// <para>Setup is intentionally minimal: only a supported Blazor
-/// application is accepted. The validation step normalizes the supplied
-/// <c>--project</c> path, rejects Hybrid / MAUI projects explicitly
-/// (because <c>MauiProgram.cs</c> is not a supported host), and detects
-/// whether the project is the server or client side of a Blazor Web App
-/// Auto split using the existing
-/// <see cref="BlazorWebAssemblyClientProjectResolver"/>.</para>
-///
-/// <para>Detected values are surfaced on the resulting
-/// <see cref="SyncfusionBlazorToolkitSettings"/> instance so that
-/// downstream steps can pick the right code-modification recipe and the
-/// summary step can give accurate, hosting-specific guidance.</para>
+/// First step of the Syncfusion Blazor Toolkit scaffolder. It normalizes the <c>--project</c>
+/// path, classifies the project once from evaluated MSBuild state (a Blazor Web App, a standalone
+/// Blazor WebAssembly app, or unsupported such as a Web API or MAUI Hybrid app), resolves a
+/// referenced WebAssembly client, and records the starting state (package version, existing
+/// registration, hosting support) on <see cref="SyncfusionBlazorToolkitSettings"/> for the steps
+/// that follow.
 /// </summary>
 internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
 {

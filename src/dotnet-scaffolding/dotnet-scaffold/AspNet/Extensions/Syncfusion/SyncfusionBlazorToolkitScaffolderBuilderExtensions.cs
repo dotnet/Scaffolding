@@ -14,31 +14,16 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion.Settings;
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions.Syncfusion;
 
 /// <summary>
-/// Provides extension methods for <see cref="IScaffoldBuilder"/> to add Syncfusion Blazor
-/// Toolkit setup scaffolding steps. The setup scaffolder only adds the NuGet package and
-/// applies a small set of code changes (a dedicated Program.cs service-registration
-/// step and a dedicated imports step); it does not generate any Razor pages or inject
-/// a host stylesheet.
-///
-/// <para><b>Syncfusion.Blazor.Toolkit 2.0.0+ behavior:</b> Styles ship with the
-/// assembly and are activated through <c>AddSyncfusionBlazorToolkit()</c>, so no
-/// external <c>&lt;link&gt;</c> tag is injected into <c>App.razor</c> or
-/// <c>wwwroot/index.html</c>. Components expose a single namespace
-/// (<c>@using Syncfusion.Blazor.Toolkit</c>), so only one using directive is
-/// added regardless of which components the project uses.</para>
-///
-/// <para>Configuration flows in the following order:</para>
+/// Steps of the Syncfusion Blazor Toolkit scaffolder, in the order they run:
 /// <list type="number">
-///   <item><description>Validate (normalize path, validate project kind, detect client / hosting).</description></item>
-///   <item><description>Add server NuGet package.</description></item>
-///   <item><description>Add client NuGet package (only when a WebAssembly client is resolved).</description></item>
-///   <item><description>Register <c>AddSyncfusionBlazorToolkit()</c> in the server's <c>Program.cs</c>.</description></item>
-///   <item><description>Register <c>AddSyncfusionBlazorToolkit()</c> in the resolved client's <c>Program.cs</c> (if any).</description></item>
-///   <item><description>Dedicated imports step for the server project's <c>_Imports.razor</c>.</description></item>
-///   <item><description>Dedicated imports step for the resolved client's <c>_Imports.razor</c>.</description></item>
-///   <item><description>Verification step captures the actual post-state of the project.</description></item>
-///   <item><description>Summary step reports the outcome.</description></item>
+///   <item><description>Validate the project and record its starting state.</description></item>
+///   <item><description>Add the NuGet package to the server project, and to the referenced WebAssembly client when there is one.</description></item>
+///   <item><description>Register <c>AddSyncfusionBlazorToolkit()</c> in the server entry point, and in the client's when there is one.</description></item>
+///   <item><description>Add <c>@using Syncfusion.Blazor.Toolkit</c> to the server's <c>_Imports.razor</c>, and to the client's.</description></item>
+///   <item><description>Verify the resulting project state.</description></item>
+///   <item><description>Summarize what changed.</description></item>
 /// </list>
+/// Nothing else is generated: no pages, sample UI, or stylesheet link (2.0.0+ ships its styles with the assembly).
 /// </summary>
 internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
 {

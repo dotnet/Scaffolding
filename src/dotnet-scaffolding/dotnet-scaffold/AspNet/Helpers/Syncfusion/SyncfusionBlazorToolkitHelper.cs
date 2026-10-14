@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text;
-using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,103 +14,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
 /// Helpers for the Syncfusion Blazor Toolkit setup scaffolder.
 ///
 /// <para>Setup is limited to the NuGet package, <c>AddSyncfusionBlazorToolkit()</c>
-/// in <c>Program.cs</c>, and a single <c>@using Syncfusion.Blazor.Toolkit</c> in
+/// in the application entry point, and a single <c>@using Syncfusion.Blazor.Toolkit</c> in
 /// the project's <c>_Imports.razor</c>. Syncfusion.Blazor.Toolkit 2.0.0+ ships
 /// styles with the assembly, so no host stylesheet link is added.</para>
 ///
-/// <para>Service registration is performed exclusively by the shared
-/// JSON/Roslyn code-modification pipeline. This helper is
-/// only used by the dedicated imports step and by the add-packages step that
-/// keeps the package on the client up-to-date.</para>
+/// <para>The dedicated scaffold steps call into this class to read the
+/// project's evaluated state (compiled sources, package references), to detect an
+/// existing registration or import, and to write the registration and import.</para>
 /// </summary>
 internal static class SyncfusionBlazorToolkitHelper
 {
     internal const string UsingDirective = "@using Syncfusion.Blazor.Toolkit";
-
-    /// <summary>
-    /// Loads the Program.cs-only code-modification config. Imports are applied
-    /// by a dedicated executable step (see
-    /// <see cref="EnsureImportsUsing"/>) so the using is written whether
-    /// <c>_Imports.razor</c> lives under <c>Components</c> or at the project
-    /// root, and so that detection does not depend on the Roslyn workspace.
-    /// </summary>
-    public static string? BuildResolvedCodeModifierConfigJson(
-        string codeModificationFilePath,
-        ILogger? logger = null)
-    {
-        if (string.IsNullOrEmpty(codeModificationFilePath) || !File.Exists(codeModificationFilePath))
-        {
-            logger?.LogWarning(
-                "Syncfusion Blazor Toolkit code-modification config file '{ConfigPath}' was not found. " +
-                "Skipping code-modification step.",
-                codeModificationFilePath);
-            return null;
-        }
-
-        string jsonText;
-        try
-        {
-            jsonText = File.ReadAllText(codeModificationFilePath);
-        }
-        catch (Exception ex)
-        {
-            logger?.LogError(ex,
-                "Syncfusion Blazor Toolkit failed to read the code-modification config file '{ConfigPath}'.",
-                codeModificationFilePath);
-            return null;
-        }
-
-        if (string.IsNullOrWhiteSpace(jsonText))
-        {
-            logger?.LogWarning(
-                "Syncfusion Blazor Toolkit code-modification config file '{ConfigPath}' is empty.",
-                codeModificationFilePath);
-            return null;
-        }
-
-        try
-        {
-            using JsonDocument doc = JsonDocument.Parse(jsonText);
-            if (!doc.RootElement.TryGetProperty("Files", out JsonElement filesElement) ||
-                filesElement.ValueKind != JsonValueKind.Array)
-            {
-                logger?.LogError(
-                    "Syncfusion Blazor Toolkit code-modification config file '{ConfigPath}' is missing the required 'Files' array.",
-                    codeModificationFilePath);
-                return null;
-            }
-
-            using var stream = new MemoryStream();
-            using (var writer = new Utf8JsonWriter(stream))
-            {
-                writer.WriteStartObject();
-                writer.WritePropertyName("Files");
-                writer.WriteStartArray();
-                foreach (JsonElement fileEntry in filesElement.EnumerateArray())
-                {
-                    if (fileEntry.ValueKind == JsonValueKind.Object &&
-                        fileEntry.TryGetProperty("FileName", out JsonElement fileNameElement) &&
-                        fileNameElement.ValueKind == JsonValueKind.String &&
-                        string.Equals(fileNameElement.GetString(), "Program.cs", StringComparison.OrdinalIgnoreCase))
-                    {
-                        fileEntry.WriteTo(writer);
-                    }
-                }
-
-                writer.WriteEndArray();
-                writer.WriteEndObject();
-            }
-
-            return Encoding.UTF8.GetString(stream.ToArray());
-        }
-        catch (JsonException ex)
-        {
-            logger?.LogError(ex,
-                "Syncfusion Blazor Toolkit code-modification config file '{ConfigPath}' is not valid JSON.",
-                codeModificationFilePath);
-            return null;
-        }
-    }
 
     /// <summary>
     /// Result of attempting to insert the
@@ -189,13 +102,13 @@ internal static class SyncfusionBlazorToolkitHelper
             return (ImportsUpdateOutcome.Created, ToRelativePath(projectDirectory, createdPath));
         }
 
-        string existing = File.ReadAllText(importsPath);
+        string existing = ReadTextPreservingEncoding(importsPath, out Encoding encoding);
         if (DirectiveAlreadyPresent(existing))
         {
             return (ImportsUpdateOutcome.AlreadyPresent, ToRelativePath(projectDirectory, importsPath));
         }
 
-        AppendUsingDirective(importsPath, existing);
+        AppendUsingDirective(importsPath, existing, encoding);
         return (ImportsUpdateOutcome.Inserted, ToRelativePath(projectDirectory, importsPath));
     }
 
@@ -454,7 +367,30 @@ internal static class SyncfusionBlazorToolkitHelper
         return rootTarget;
     }
 
-    private static void AppendUsingDirective(string importsPath, string existing)
+    /// <summary>
+    /// Reads a text file and reports its encoding. <c>File.ReadAllText</c> silently drops a
+    /// UTF-8 byte-order mark, so writing the text back with <c>File.WriteAllText</c> would strip a
+    /// BOM the user's file had. Callers write back with the returned encoding instead.
+    /// </summary>
+    private static string ReadTextPreservingEncoding(string path, out Encoding encoding)
+    {
+        using var reader = new StreamReader(path, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), detectEncodingFromByteOrderMarks: true);
+        string text = reader.ReadToEnd();
+        // `CurrentEncoding` reflects a detected BOM only after the first read.
+        encoding = reader.CurrentEncoding is UTF8Encoding
+            ? new UTF8Encoding(encoderShouldEmitUTF8Identifier: HasUtf8Bom(path))
+            : reader.CurrentEncoding;
+        return text;
+    }
+
+    private static bool HasUtf8Bom(string path)
+    {
+        Span<byte> head = stackalloc byte[3];
+        using FileStream stream = File.OpenRead(path);
+        return stream.Read(head) == 3 && head[0] == 0xEF && head[1] == 0xBB && head[2] == 0xBF;
+    }
+
+    private static void AppendUsingDirective(string importsPath, string existing, Encoding encoding)
     {
         string separator = existing.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
         string text = existing;
@@ -463,7 +399,7 @@ internal static class SyncfusionBlazorToolkitHelper
             text += separator;
         }
 
-        File.WriteAllText(importsPath, text + UsingDirective + separator);
+        File.WriteAllText(importsPath, text + UsingDirective + separator, encoding);
     }
 
     private static void WriteUsingDirective(string importsPath, bool appendNewlineAtEnd)
@@ -826,7 +762,7 @@ internal static class SyncfusionBlazorToolkitHelper
             return (ServiceRegistrationOutcome.Skipped, null);
         }
 
-        string text = File.ReadAllText(programPath);
+        string text = ReadTextPreservingEncoding(programPath, out Encoding programEncoding);
         string relativePath = ToRelativePath(projectDirectory, programPath);
         switch (EvaluateRegistration(text))
         {
@@ -838,7 +774,7 @@ internal static class SyncfusionBlazorToolkitHelper
                 return (ServiceRegistrationOutcome.Skipped, relativePath);
         }
 
-        if (!TryAppendServiceRegistration(programPath, text, hostKind))
+        if (!TryAppendServiceRegistration(programPath, text, hostKind, programEncoding))
         {
             // No single host-builder declaration on the startup path to
             // anchor on. Appending at the end of the file would land after
@@ -1175,7 +1111,7 @@ internal static class SyncfusionBlazorToolkitHelper
         }
     }
 
-    private static bool TryAppendServiceRegistration(string programPath, string existingText, ProgramHostKind hostKind)
+    private static bool TryAppendServiceRegistration(string programPath, string existingText, ProgramHostKind hostKind, Encoding encoding)
     {
         SyntaxNode root = CSharpSyntaxTree.ParseText(existingText).GetRoot();
         HostBuilderDeclaration? builder = FindHostBuilderDeclaration(root, hostKind);
@@ -1197,7 +1133,7 @@ internal static class SyncfusionBlazorToolkitHelper
         string prefix = before.EndsWith('\n') ? string.Empty : newline;
         string withRegistration = before + prefix + registrationLine + newline + after;
 
-        File.WriteAllText(programPath, EnsureUsingDirective(withRegistration, ToolKitUsingDirective));
+        File.WriteAllText(programPath, EnsureUsingDirective(withRegistration, ToolKitUsingDirective), encoding);
         return true;
     }
 

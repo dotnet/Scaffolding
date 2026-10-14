@@ -10,28 +10,14 @@ using Microsoft.Extensions.Logging;
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion;
 
 /// <summary>
-/// Dedicated executable step that writes
-/// <c>builder.Services.AddSyncfusionBlazorToolkit();</c> into the
-/// project's <c>Program.cs</c> and the
-/// <c>using Syncfusion.Blazor.Toolkit;</c> directive at the top of the
-/// file.
+/// Registers <c>AddSyncfusionBlazorToolkit()</c> on the application's host builder, before
+/// <c>Build()</c>, and adds <c>using Syncfusion.Blazor.Toolkit;</c> to the same file.
 ///
-/// <para>This step replaces the shared JSON/Roslyn code-modification
-/// recipe (which produced invalid C# for standalone Blazor
-/// WebAssembly projects because the framework's
-/// <c>WebApplication.CreateBuilder</c> → <c>builder</c> variable-name
-/// transformation does not recognise the
-/// <c>WebAssemblyHostBuilder.CreateDefault</c> pattern). The shared
-/// recipe is preserved in the embedded config files for any external
-/// consumer but its <c>CodeChanges</c> list is now empty.</para>
-///
-/// <para>Detection is done by <see cref="SyncfusionBlazorToolkitHelper"/>:
-/// the function locates <c>Program.cs</c> in the project root or one
-/// level of subdirectories, fails with guidance when none exists
-/// (it never creates one), and re-runs are no-ops when the registration is already
-/// present. The configured builder variable name is reused so projects
-/// that pick a non-default name (<c>appBuilder</c>, <c>wasmBuilder</c>,
-/// etc.) keep working.</para>
+/// <para>The entry point is found from the project's compiled sources (see
+/// <see cref="SyncfusionBlazorToolkitHelper.DiscoverEntryPoint"/>), the builder variable
+/// name is reused as written, and a re-run is a no-op when the registration is already in
+/// place. When no safe entry point or host builder can be identified the step changes
+/// nothing and fails with guidance; it never creates a <c>Program.cs</c>.</para>
 /// </summary>
 internal class ApplySyncfusionBlazorToolkitProgramCsStep : ScaffoldStep
 {

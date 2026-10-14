@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -42,6 +44,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private ConsoleLogger ConsoleLogger { get; set; }
         private ICodeGenAssemblyLoadContext AssemblyLoadContextLoader { get; set; }
         private const string Main = nameof(Main);
+        private static readonly StringComparer PathComparer = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? StringComparer.OrdinalIgnoreCase
+            : StringComparer.Ordinal;
         private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
 
         private IEnumerable<string> _templateFolders;
@@ -422,7 +427,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             var clientCandidates = layoutCandidates
                 .Where(candidate => candidate.IsClientProject)
-                .GroupBy(candidate => candidate.ComponentPath, StringComparer.OrdinalIgnoreCase)
+                .GroupBy(GetLayoutCandidateIdentity, PathComparer)
                 .Select(group => group.First())
                 .ToList();
             if (clientCandidates.Count == 1)
@@ -436,7 +441,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
 
             var sharedCandidates = layoutCandidates
-                .GroupBy(candidate => candidate.ComponentPath, StringComparer.OrdinalIgnoreCase)
+                .GroupBy(GetLayoutCandidateIdentity, PathComparer)
                 .Select(group => group.First())
                 .ToList();
             if (sharedCandidates.Count == 1)
@@ -450,6 +455,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
 
             return $"{rootNamespace}.Client.Layout.MainLayout";
+        }
+
+        private static string GetLayoutCandidateIdentity(LayoutCandidate candidate)
+        {
+            return $"{candidate.ProjectPath}\0{candidate.ComponentPath}";
         }
 
         private static string FormatLayoutCandidates(IEnumerable<LayoutCandidate> candidates)
@@ -481,7 +491,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     razorNamespace = ReadRazorNamespace(importsPath, fileSystem);
                     if (!string.IsNullOrEmpty(razorNamespace))
                     {
-                        return razorNamespace;
+                        return razorNamespace + GetNamespaceSuffix(
+                            currentDirectory,
+                            Path.GetDirectoryName(componentPath));
                     }
                 }
 
@@ -495,6 +507,22 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             return null;
         }
 
+        private static string GetNamespaceSuffix(string importsDirectory, string componentDirectory)
+        {
+            var relativeDirectory = Path.GetRelativePath(importsDirectory, componentDirectory);
+            if (string.IsNullOrEmpty(relativeDirectory) || relativeDirectory == ".")
+            {
+                return string.Empty;
+            }
+
+            var namespaceSegments = relativeDirectory.Split(
+                new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
+                StringSplitOptions.RemoveEmptyEntries);
+            return namespaceSegments.Length == 0
+                ? string.Empty
+                : $".{string.Join(".", namespaceSegments)}";
+        }
+
         private static string ReadRazorNamespace(string path, IFileSystem fileSystem)
         {
             const string namespaceDirective = "@namespace";
@@ -504,7 +532,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 return null;
             }
 
-            return contents
+            return RemoveRazorComments(contents)
                 .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
                 .Select(line => line.Trim())
                 .Where(line =>
@@ -513,6 +541,41 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     char.IsWhiteSpace(line[namespaceDirective.Length]))
                 .Select(line => line.Substring(namespaceDirective.Length).Trim())
                 .FirstOrDefault(namespaceValue => !string.IsNullOrEmpty(namespaceValue));
+        }
+
+        private static string RemoveRazorComments(string contents)
+        {
+            var result = new StringBuilder(contents.Length);
+            var commentDepth = 0;
+            for (var index = 0; index < contents.Length; index++)
+            {
+                if (index + 1 < contents.Length &&
+                    contents[index] == '@' &&
+                    contents[index + 1] == '*')
+                {
+                    commentDepth++;
+                    result.Append("  ");
+                    index++;
+                    continue;
+                }
+
+                if (commentDepth > 0 &&
+                    index + 1 < contents.Length &&
+                    contents[index] == '*' &&
+                    contents[index + 1] == '@')
+                {
+                    commentDepth--;
+                    result.Append("  ");
+                    index++;
+                    continue;
+                }
+
+                result.Append(commentDepth == 0 || contents[index] == '\r' || contents[index] == '\n'
+                    ? contents[index]
+                    : ' ');
+            }
+
+            return result.ToString();
         }
 
         private sealed class LayoutCandidate

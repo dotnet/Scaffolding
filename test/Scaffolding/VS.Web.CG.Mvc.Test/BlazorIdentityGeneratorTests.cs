@@ -263,6 +263,82 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         }
 
         [Fact]
+        public void ResolveLayoutNamespaceAppendsDirectoryToInheritedNamespaceDirective()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            var importsPath = Path.Combine(sharedProjectDirectory, "_Imports.razor");
+            fileSystem.Setup(fs => fs.FileExists(importsPath)).Returns(true);
+            fileSystem.Setup(fs => fs.ReadAllText(mainLayoutPath)).Returns("<main>@Body</main>");
+            fileSystem.Setup(fs => fs.ReadAllText(importsPath)).Returns("@namespace Custom.Shared");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("Custom.Shared.Layout.MainLayout", result);
+        }
+
+        [Fact]
+        public void ResolveLayoutNamespaceUsesActiveComponentNamespaceAfterCommentedDirective()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            fileSystem
+                .Setup(fs => fs.ReadAllText(mainLayoutPath))
+                .Returns("@*" + Environment.NewLine +
+                    "@namespace Phantom.Layout" + Environment.NewLine +
+                    "*@" + Environment.NewLine +
+                    "@namespace Active.Layout" + Environment.NewLine +
+                    "<main>@Body</main>");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("Active.Layout.MainLayout", result);
+        }
+
+        [Fact]
+        public void ResolveLayoutNamespaceIgnoresCommentedImportsNamespaceDirective()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            var importsPath = Path.Combine(sharedProjectDirectory, "_Imports.razor");
+            fileSystem.Setup(fs => fs.FileExists(importsPath)).Returns(true);
+            fileSystem.Setup(fs => fs.ReadAllText(mainLayoutPath)).Returns("<main>@Body</main>");
+            fileSystem
+                .Setup(fs => fs.ReadAllText(importsPath))
+                .Returns("@*" + Environment.NewLine +
+                    "@namespace Phantom.Layout" + Environment.NewLine +
+                    "*@");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("MyApp.Shared.Layout.MainLayout", result);
+        }
+
+        [Fact]
         public void ResolveLayoutNamespaceIgnoresLayoutInNonRazorProject()
         {
             var fileSystem = new Mock<IFileSystem>();
@@ -331,6 +407,55 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         }
 
         [Fact]
+        public void ResolveLayoutNamespaceRejectsProjectsSharingPhysicalLayout()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "SharedSource");
+            SetupLayout(fileSystem, sharedProjectDirectory);
+            var firstReference = CreateProjectReference(sharedProjectDirectory, "First.Shared");
+            var secondReference = CreateProjectReference(sharedProjectDirectory, "Second.Shared");
+            var projectReferences = new[] { firstReference, secondReference };
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+                BlazorIdentityGenerator.ResolveLayoutNamespace(
+                    "MyApp.Web",
+                    "MyApp.Web",
+                    Path.Combine("src", "MyApp.Web"),
+                    fileSystem.Object,
+                    projectReferences,
+                    projectReferences.Select(reference => reference.FullPath)));
+
+            Assert.Contains("Multiple MainLayout components were found", exception.Message);
+            Assert.Contains(firstReference.FullPath, exception.Message);
+            Assert.Contains(secondReference.FullPath, exception.Message);
+        }
+
+        [Fact]
+        public void ResolveLayoutNamespaceRejectsClientProjectsSharingPhysicalLayout()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var clientProjectDirectory = Path.Combine("src", "ClientSource");
+            SetupLayout(fileSystem, clientProjectDirectory);
+            var firstReference = CreateProjectReference(clientProjectDirectory, "MyApp.Client");
+            var secondReference = CreateProjectReference(clientProjectDirectory, "MyApp.Client");
+            secondReference.FullPath = Path.Combine(clientProjectDirectory, "Alternate.Client.csproj");
+            var projectReferences = new[] { firstReference, secondReference };
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+                BlazorIdentityGenerator.ResolveLayoutNamespace(
+                    "MyApp.Web",
+                    "MyApp.Web",
+                    Path.Combine("src", "MyApp.Web"),
+                    fileSystem.Object,
+                    projectReferences,
+                    projectReferences.Select(reference => reference.FullPath)));
+
+            Assert.Contains("Multiple MainLayout components were found in referenced client projects", exception.Message);
+            Assert.Contains(firstReference.FullPath, exception.Message);
+            Assert.Contains(secondReference.FullPath, exception.Message);
+        }
+
+        [Fact]
         public void ResolveLayoutNamespaceUsesProjectNameForClientPriority()
         {
             var fileSystem = new Mock<IFileSystem>();
@@ -388,6 +513,30 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             fileSystem.Setup(fs => fs.FileExists(importsPath)).Returns(true);
             fileSystem.Setup(fs => fs.ReadAllText(mainLayoutPath)).Returns("<main>@Body</main>");
             fileSystem.Setup(fs => fs.ReadAllText(importsPath)).Returns("@namespace Custom.Server.Layout");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                applicationBasePath,
+                fileSystem.Object,
+                Array.Empty<ProjectReferenceInformation>(),
+                Array.Empty<string>());
+
+            Assert.Equal("Custom.Server.Layout.MainLayout", result);
+        }
+
+        [Fact]
+        public void ResolveLayoutNamespaceAppendsDirectoryToInheritedServerNamespaceDirective()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var applicationBasePath = Path.Combine("src", "MyApp.Web");
+            var componentsDirectory = Path.Combine(applicationBasePath, "Components");
+            var mainLayoutPath = Path.Combine(componentsDirectory, "Layout", "MainLayout.razor");
+            var importsPath = Path.Combine(componentsDirectory, "_Imports.razor");
+            fileSystem.Setup(fs => fs.FileExists(mainLayoutPath)).Returns(true);
+            fileSystem.Setup(fs => fs.FileExists(importsPath)).Returns(true);
+            fileSystem.Setup(fs => fs.ReadAllText(mainLayoutPath)).Returns("<main>@Body</main>");
+            fileSystem.Setup(fs => fs.ReadAllText(importsPath)).Returns("@namespace Custom.Server");
 
             var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
                 "MyApp.Web",

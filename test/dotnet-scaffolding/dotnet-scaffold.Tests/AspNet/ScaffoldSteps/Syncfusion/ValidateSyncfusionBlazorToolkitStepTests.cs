@@ -109,17 +109,17 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_NormalizesRelativeProjectPath_ToFullPath()
     {
-        // A relative --project value such as "App.csproj" passes File.Exists but has no directory
-        // part, so the step must store the full path. The relative input is simulated by switching
-        // the working directory to _tempDir so Path.GetFullPath("Test.csproj") resolves to our file.
         string projectFileName = "Test.csproj";
-        string fullPath = Path.Combine(_tempDir, projectFileName);
-        File.WriteAllText(fullPath, WebProjectXml);
+        File.WriteAllText(Path.Combine(_tempDir, projectFileName), WebProjectXml);
 
         string originalCwd = Directory.GetCurrentDirectory();
         Directory.SetCurrentDirectory(_tempDir);
         try
         {
+            // Resolve after changing directory: on macOS the temp path /var/... is a symlink to
+            // /private/var/..., so the working directory reports the /private form.
+            string expectedFullPath = Path.GetFullPath(projectFileName);
+
             _mockFileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns(false);
             _mockFileSystem.Setup(fs => fs.FileExists(It.IsRegex("Test\\.csproj$"))).Returns(true);
             _mockFileSystem.Setup(fs => fs.DirectoryExists(It.IsAny<string>())).Returns(true);
@@ -135,7 +135,7 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
             Assert.True(_context.Properties.TryGetValue(
                 nameof(SyncfusionBlazorToolkitSettings), out var settingsObj));
             var settings = Assert.IsType<SyncfusionBlazorToolkitSettings>(settingsObj);
-            Assert.Equal(fullPath, settings.Project);
+            Assert.Equal(expectedFullPath, settings.Project);
         }
         finally
         {

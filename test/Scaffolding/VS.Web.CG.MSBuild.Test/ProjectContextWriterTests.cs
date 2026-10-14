@@ -73,7 +73,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
                 Assert.True(projectContext.PackageDependencies.Where(x => x.Name.Equals("Microsoft.VisualStudio.Web.CodeGeneration.Design")).Any());
                 Assert.True(projectContext.ProjectReferences.Any());
                 Assert.True(projectContext.ProjectReferenceInformation.Any());
-                Assert.True(projectContext.ProjectReferenceInformation.FirstOrDefault(x => x.CompilationItems.Contains("Blog.cs")) != null);
+                var referencedProject = projectContext.ProjectReferenceInformation.FirstOrDefault(x => x.CompilationItems.Contains("Blog.cs"));
+                Assert.NotNull(referencedProject);
+                Assert.Equal("Custom.Library.Root", referencedProject.RootNamespace);
+                Assert.True(referencedProject.IsRazorProject);
+                Assert.Contains(Path.Combine("Layout", "MainLayout.razor"), referencedProject.RazorComponentItems);
             }
         }
 

@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion.Settings;
@@ -19,71 +20,43 @@ internal class SyncfusionBlazorToolkitSettings : BaseSettings
 
     /// <summary>
     /// True when no <c>_Imports.razor</c> file could be found or created
-    /// and the using-directive insertion was skipped. False when a file
-    /// was modified successfully (or the directive was already present).
+    /// and the using-directive insertion was skipped.
     /// </summary>
     public bool ImportsFileSkipped { get; set; }
 
     /// <summary>
-    /// True when the @using directive is now present in <see cref="ImportsFile"/>
-    /// (either it was already there, or the scaffolder added it).
+    /// True when the @using directive is present in <see cref="ImportsFile"/>
+    /// after the imports step (it was already there, or the scaffolder added it).
     /// </summary>
     public bool ImportsApplied { get; set; }
 
     /// <summary>
-    /// True when the imports step actually appended the directive to
-    /// the target file. False when the directive was already present
-    /// (a no-op) or no target file could be found.
-    /// </summary>
-    public bool ImportsInserted { get; set; }
-
-    /// <summary>
-    /// True when the project already had a Syncfusion.Blazor.Toolkit
-    /// package reference before the scaffolder ran.
-    /// </summary>
-    public bool PackageAlreadyReferenced { get; set; }
-
-    /// <summary>
-    /// True when the target Program.cs already registers the
-    /// <c>AddSyncfusionBlazorToolkit</c> service before the scaffolder
-    /// ran. Used by the summary step to report partial configuration.
+    /// True when the Toolkit service registration was already in the entry
+    /// point before the scaffolder ran.
     /// </summary>
     public bool ServicesAlreadyRegistered { get; set; }
 
     /// <summary>
-    /// True when the shared code-modification step reported
-    /// AddSyncfusionBlazorToolkit() is present in Program.cs after the
-    /// scaffolder ran.
+    /// True when the Toolkit service registration is in the entry point
+    /// after the scaffolder ran (verified, not assumed).
     /// </summary>
     public bool ServicesApplied { get; set; }
 
     /// <summary>
-    /// True when the Program.cs service-registration step actually
-    /// appended the call (or created a new file with the call in
-    /// place). False when the call was already present (a no-op) or no
-    /// target file could be found.
-    /// </summary>
-    public bool ServicesInserted { get; set; }
-
-    /// <summary>
-    /// Project-relative path of the <c>Program.cs</c> file the
-    /// scaffolder targeted on this run. <c>null</c> when the scaffolder
-    /// could not find or create a suitable file.
+    /// Project-relative path of the entry point (usually <c>Program.cs</c>) the
+    /// scaffolder targeted. <c>null</c> when no safe entry point was found.
     /// </summary>
     public string? ProgramCsFile { get; set; }
 
     /// <summary>
-    /// True when no <c>Program.cs</c> file could be found or created
-    /// and the service-registration insertion was skipped. False when
-    /// a file was modified successfully (or the registration was
-    /// already present).
+    /// True when no entry point could be found and the service-registration
+    /// insertion was skipped.
     /// </summary>
     public bool ProgramCsFileSkipped { get; set; }
 
     /// <summary>
-    /// True when the add-packages step actually added or updated a
-    /// Syncfusion.Blazor.Toolkit PackageReference. False when the package
-    /// was already referenced (no change) or the step was skipped.
+    /// True when the Toolkit package is referenced after the scaffolder ran,
+    /// confirmed from the project's evaluated package references.
     /// </summary>
     public bool PackageApplied { get; set; }
 
@@ -95,12 +68,29 @@ internal class SyncfusionBlazorToolkitSettings : BaseSettings
     public string? ClientProjectPath { get; set; }
 
     /// <summary>
-    /// Render mode actually configured in the project (e.g. InteractiveServer,
-    /// InteractiveWebAssembly, InteractiveAuto, or "None" for pure SSR).
-    /// Populated from <c>App.razor</c> and Program.cs diagnostics and used
-    /// by the summary step to give accurate, hosting-specific guidance.
+    /// The application kind, decided once by the validate step from evaluated
+    /// project state and reused by every later step instead of re-reading the
+    /// project file.
     /// </summary>
-    public string DetectedRenderMode { get; set; } = "None";
+    public BlazorAppKind AppKind { get; set; } = BlazorAppKind.NotBlazor;
+
+    /// <summary>
+    /// Interactive hosting the entry point has actually registered (services and
+    /// endpoint render modes), plus the global render mode set in <c>App.razor</c>.
+    /// "No global render mode" is not "no interactivity": components may opt in per page.
+    /// </summary>
+    public BlazorHostingFacts Hosting { get; set; } = BlazorHostingFacts.Unknown;
+
+    /// <summary>
+    /// What this run actually changed in each project it touched. Used by the summary
+    /// so it never reports a modified project as a no-op.
+    /// </summary>
+    public ProjectChanges Server { get; } = new();
+
+    /// <summary>
+    /// Same as <see cref="Server"/> for the referenced WebAssembly client project, when there is one.
+    /// </summary>
+    public ProjectChanges Client { get; } = new();
 
     /// <summary>
     /// Detected project layout (single-project Blazor Web App, standalone
@@ -143,4 +133,32 @@ internal enum SyncfusionBlazorToolkitLayout
     /// a supported host.
     /// </summary>
     UnsupportedHybrid = 99,
+}
+
+/// <summary>
+/// Facts recorded while the scaffolder ran against one project.
+/// </summary>
+internal sealed class ProjectChanges
+{
+    /// <summary>Toolkit version referenced before the scaffolder ran; <c>null</c> when it was not referenced.</summary>
+    public string? PackageVersionBefore { get; set; }
+
+    /// <summary>Toolkit version referenced after the scaffolder ran; <c>null</c> when it is not referenced.</summary>
+    public string? PackageVersionAfter { get; set; }
+
+    /// <summary>True when the add-package step changed the reference (added it or changed its version).</summary>
+    public bool PackageChanged =>
+        !string.Equals(PackageVersionBefore, PackageVersionAfter, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>True when the Toolkit is referenced after the run.</summary>
+    public bool PackageReferenced => PackageVersionAfter is not null;
+
+    /// <summary>True when the service-registration step wrote to the entry point.</summary>
+    public bool ServicesInserted { get; set; }
+
+    /// <summary>True when the imports step wrote to (or created) <c>_Imports.razor</c>.</summary>
+    public bool ImportsInserted { get; set; }
+
+    /// <summary>True when anything in this project was modified by the run.</summary>
+    public bool AnyChange => PackageChanged || ServicesInserted || ImportsInserted;
 }

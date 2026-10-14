@@ -38,38 +38,6 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private const string SampleConfig = """
-        {
-          "Files": [
-            {
-              "FileName": "Program.cs",
-              "Usings": [ "Syncfusion.Blazor.Toolkit" ]
-            }
-          ]
-        }
-        """;
-
-    [Fact]
-    public void BuildResolvedCodeModifierConfigJson_KeepsOnlyProgramCs()
-    {
-        var configPath = WriteConfig(SampleConfig);
-        var json = SyncfusionBlazorToolkitHelper.BuildResolvedCodeModifierConfigJson(configPath);
-        Assert.NotNull(json);
-        using var doc = JsonDocument.Parse(json);
-        var files = doc.RootElement.GetProperty("Files");
-        Assert.Equal(1, files.GetArrayLength());
-        Assert.Equal("Program.cs", files[0].GetProperty("FileName").GetString());
-        Assert.DoesNotContain("fluent.min.css", json);
-    }
-
-    [Fact]
-    public void BuildResolvedCodeModifierConfigJson_MissingFile_ReturnsNull()
-    {
-        var json = SyncfusionBlazorToolkitHelper.BuildResolvedCodeModifierConfigJson(
-            Path.Combine(_tempDir, "does-not-exist.json"));
-        Assert.Null(json);
-    }
-
     [Fact]
     public void EnsureImportsUsing_AppendsDirective_AndIsIdempotent()
     {
@@ -682,12 +650,9 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     [Fact]
     public void EnsureServiceRegistration_StandaloneWasm_AppendsCallAndUsing()
     {
-        // Reproduces the user-reported failure: a Blazor WebAssembly
-        // project whose Program.cs uses WebAssemblyHostBuilder.CreateDefault.
-        // Before the fix, the shared JSON recipe wrote
-        //   WebAssemblyHostBuilder.CreateDefault.Services.AddSyncfusionBlazorToolkit();
-        // which is invalid C#. The dedicated step must write a valid
-        // line that uses the discovered builder variable.
+        // A Blazor WebAssembly project whose Program.cs uses WebAssemblyHostBuilder.CreateDefault
+        // must get a registration on the declared builder variable, not on the
+        // `WebAssemblyHostBuilder.CreateDefault` expression (which is not valid C#).
         var project = Path.Combine(_tempDir, "App.csproj");
         File.WriteAllText(project, "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>");
         var program = Path.Combine(_tempDir, "Program.cs");
@@ -819,20 +784,38 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Fact]
-    public void EnsureServiceRegistration_MissingProgramCs_SkipsAndCreatesNothing()
+    public void EnsureServiceRegistration_EntryPointInOtherFile_EditsItAndNeverCreatesProgramCs()
     {
-        // The real entry point may live elsewhere (e.g. Hosting.cs). Creating
-        // a top-level Program.cs there would trigger CS8802.
+        // The entry point lives in Hosting.cs. It is found from the compiled
+        // sources and edited in place; a top-level Program.cs must never be
+        // created next to it (that would trigger CS8802).
         var project = Path.Combine(_tempDir, "App.csproj");
         File.WriteAllText(project, WebProjectXml);
-        File.WriteAllText(Path.Combine(_tempDir, "Hosting.cs"), WebAppProgramCs);
+        var hosting = Path.Combine(_tempDir, "Hosting.cs");
+        File.WriteAllText(hosting, WebAppProgramCs);
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+        Assert.Equal("Hosting.cs", result.ProgramCsRelative);
+        Assert.False(File.Exists(Path.Combine(_tempDir, "Program.cs")));
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(File.ReadAllText(hosting)));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_NoCompiledSources_SkipsAndCreatesNothing()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
 
         var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
             project,
             SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
 
         Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
-        Assert.False(File.Exists(Path.Combine(_tempDir, "Program.cs")));
+        Assert.Empty(Directory.GetFiles(_tempDir, "*.cs"));
     }
 
     [Fact]
@@ -979,10 +962,10 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Theory]
-    [InlineData("extern alias X;\nvar builder = WebApplication.CreateBuilder(args);\n", "extern alias X;", "using Syncfusion.Blazor.Toolkit;")]
-    [InlineData("using System;\nvar builder = WebApplication.CreateBuilder(args);\n", "using System;", "using Syncfusion.Blazor.Toolkit;")]
-    [InlineData("// header\nvar builder = WebApplication.CreateBuilder(args);\n", "// header", "using Syncfusion.Blazor.Toolkit;")]
-    [InlineData("#nullable enable\nvar builder = WebApplication.CreateBuilder(args);\n", "#nullable enable", "using Syncfusion.Blazor.Toolkit;")]
+    [InlineData("extern alias X;\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\napp.Run();\n", "extern alias X;", "using Syncfusion.Blazor.Toolkit;")]
+    [InlineData("using System;\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\napp.Run();\n", "using System;", "using Syncfusion.Blazor.Toolkit;")]
+    [InlineData("// header\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\napp.Run();\n", "// header", "using Syncfusion.Blazor.Toolkit;")]
+    [InlineData("#nullable enable\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\napp.Run();\n", "#nullable enable", "using Syncfusion.Blazor.Toolkit;")]
     public void EnsureServiceRegistration_UsingIsPlacedAfterExternsUsingsAndHeader(string program, string mustComeFirst, string directive)
     {
         var project = Path.Combine(_tempDir, "App.csproj");
@@ -998,6 +981,71 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         Assert.True(text.IndexOf(mustComeFirst, StringComparison.Ordinal) < text.IndexOf(directive, StringComparison.Ordinal));
         Assert.True(text.IndexOf(directive, StringComparison.Ordinal) < text.IndexOf("var builder", StringComparison.Ordinal));
         Assert.Equal(1, text.Split(directive).Length - 1);
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_EscapedBuilderIdentifier_KeepsTheEscape()
+    {
+        // `@class` is a valid identifier whose ValueText is `class`. The generated
+        // statement must keep the source spelling, or it would not compile.
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program,
+            "var @class = WebApplication.CreateBuilder(args);\nvar app = @class.Build();\napp.Run();\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+        string text = File.ReadAllText(program);
+        Assert.Contains("@class.Services.AddSyncfusionBlazorToolkit();", text);
+        Assert.DoesNotContain("\nclass.Services", text);
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(text));
+    }
+
+    [Fact]
+    public void EnsureImportsUsing_PreservesAUtf8ByteOrderMark()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project />");
+        var imports = Path.Combine(_tempDir, "_Imports.razor");
+        File.WriteAllText(imports, "@using System.Net.Http\n", new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+
+        SyncfusionBlazorToolkitHelper.EnsureImportsUsing(project);
+
+        byte[] bytes = File.ReadAllBytes(imports);
+        Assert.Equal(new byte[] { 0xEF, 0xBB, 0xBF }, bytes[..3]);
+        Assert.Contains("@using Syncfusion.Blazor.Toolkit", File.ReadAllText(imports));
+    }
+
+    [Fact]
+    public void EnsureImportsUsing_DoesNotAddABomToAFileWithoutOne()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, "<Project />");
+        var imports = Path.Combine(_tempDir, "_Imports.razor");
+        File.WriteAllText(imports, "@using System.Net.Http\n", new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+
+        SyncfusionBlazorToolkitHelper.EnsureImportsUsing(project);
+
+        Assert.NotEqual(0xEF, File.ReadAllBytes(imports)[0]);
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_PreservesAUtf8ByteOrderMark()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program, WebAppProgramCs, new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project, SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+        Assert.Equal(new byte[] { 0xEF, 0xBB, 0xBF }, File.ReadAllBytes(program)[..3]);
     }
 
     [Fact]

@@ -92,12 +92,37 @@ public class MSBuildProjectService : IMSBuildProjectService
         out IReadOnlyList<(string Include, string FullPath)> items,
         out string? error)
     {
+        if (!TryGetEvaluatedItems(itemType, "FullPath", out var withMetadata, out error))
+        {
+            items = [];
+            return false;
+        }
+
+        items = withMetadata.Select(item => (item.Include, item.Metadata)).ToList();
+        return true;
+    }
+
+    /// <summary>
+    /// Gets the evaluated items of the given type together with one metadata value
+    /// (for example the <c>Version</c> of a <c>PackageReference</c>).
+    /// </summary>
+    /// <param name="itemType">The MSBuild item type to read.</param>
+    /// <param name="metadataName">The metadata to read; empty string when the item has none.</param>
+    /// <param name="items">The evaluated (Include, Metadata) pairs, or an empty list on evaluation failure.</param>
+    /// <param name="error">The project evaluation diagnostic on failure, or null on success.</param>
+    /// <returns>True if evaluation succeeds; otherwise, false.</returns>
+    public bool TryGetEvaluatedItems(
+        string itemType,
+        string metadataName,
+        out IReadOnlyList<(string Include, string Metadata)> items,
+        out string? error)
+    {
         try
         {
             using var projects = new ProjectCollection();
             var project = new Project(_projectPath, null, null, projects);
             items = project.GetItems(itemType)
-                .Select(item => (item.EvaluatedInclude, item.GetMetadataValue("FullPath")))
+                .Select(item => (item.EvaluatedInclude, item.GetMetadataValue(metadataName)))
                 .ToList();
             error = null;
             return true;

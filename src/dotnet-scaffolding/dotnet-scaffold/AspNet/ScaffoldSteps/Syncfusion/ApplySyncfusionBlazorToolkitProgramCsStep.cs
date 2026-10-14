@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Text.RegularExpressions;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
@@ -11,28 +10,14 @@ using Microsoft.Extensions.Logging;
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion;
 
 /// <summary>
-/// Dedicated executable step that writes
-/// <c>builder.Services.AddSyncfusionBlazorToolkit();</c> into the
-/// project's <c>Program.cs</c> and the
-/// <c>using Syncfusion.Blazor.Toolkit;</c> directive at the top of the
-/// file.
+/// Registers <c>AddSyncfusionBlazorToolkit()</c> on the application's host builder, before
+/// <c>Build()</c>, and adds <c>using Syncfusion.Blazor.Toolkit;</c> to the same file.
 ///
-/// <para>This step replaces the shared JSON/Roslyn code-modification
-/// recipe (which produced invalid C# for standalone Blazor
-/// WebAssembly projects because the framework's
-/// <c>WebApplication.CreateBuilder</c> → <c>builder</c> variable-name
-/// transformation does not recognise the
-/// <c>WebAssemblyHostBuilder.CreateDefault</c> pattern). The shared
-/// recipe is preserved in the embedded config files for any external
-/// consumer but its <c>CodeChanges</c> list is now empty.</para>
-///
-/// <para>Detection is done by <see cref="SyncfusionBlazorToolkitHelper"/>:
-/// the function locates <c>Program.cs</c> in the project root or one
-/// level of subdirectories, fails with guidance when none exists
-/// (it never creates one), and re-runs are no-ops when the registration is already
-/// present. The configured builder variable name is reused so projects
-/// that pick a non-default name (<c>appBuilder</c>, <c>wasmBuilder</c>,
-/// etc.) keep working.</para>
+/// <para>The entry point is found from the project's compiled sources (see
+/// <see cref="SyncfusionBlazorToolkitHelper.DiscoverEntryPoint"/>), the builder variable
+/// name is reused as written, and a re-run is a no-op when the registration is already in
+/// place. When no safe entry point or host builder can be identified the step changes
+/// nothing and fails with guidance; it never creates a <c>Program.cs</c>.</para>
 /// </summary>
 internal class ApplySyncfusionBlazorToolkitProgramCsStep : ScaffoldStep
 {
@@ -75,16 +60,13 @@ internal class ApplySyncfusionBlazorToolkitProgramCsStep : ScaffoldStep
             return Task.FromResult(false);
         }
 
-        var hostKind = DetectProgramHostKind(projectToOperateOn);
-        if (hostKind is null)
-        {
-            _logger.LogError(
-                "Syncfusion Blazor Toolkit Program.cs step could not determine the hosting model for '{Project}'. " +
-                "The project must declare Microsoft.NET.Sdk.Web, Microsoft.NET.Sdk.Blazor, or " +
-                "Microsoft.NET.Sdk.BlazorWebAssembly. Aborting the Program.cs step.",
-                projectToOperateOn);
-            return Task.FromResult(false);
-        }
+        // The kind was decided once by the validate step. A client run targets the project the
+        // resolver found by its UsingMicrosoftNETSdkBlazorWebAssembly property, so it is WebAssembly by construction.
+        bool isServerRun = string.IsNullOrEmpty(TargetProjectPath);
+        SyncfusionBlazorToolkitHelper.ProgramHostKind hostKind =
+            !isServerRun || settings.AppKind == BlazorAppKind.StandaloneWasm
+                ? SyncfusionBlazorToolkitHelper.ProgramHostKind.StandaloneWasm
+                : SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp;
 
         SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome outcome;
         string? appliedRelativePath;
@@ -92,7 +74,7 @@ internal class ApplySyncfusionBlazorToolkitProgramCsStep : ScaffoldStep
         {
             (outcome, appliedRelativePath) = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
                 projectToOperateOn,
-                hostKind.Value);
+                hostKind);
         }
         catch (Exception ex)
         {
@@ -102,20 +84,18 @@ internal class ApplySyncfusionBlazorToolkitProgramCsStep : ScaffoldStep
             return Task.FromResult(false);
         }
 
-        // Persist the outcome so the summary step can distinguish
-        // "applied", "already present", and "skipped" instead of
-        // guessing from pre-scaffolding flags. Only the server-side
-        // run (TargetProjectPath == null) updates the shared settings
-        // so the client run does not overwrite the server's outcome.
-        bool isServerRun = string.IsNullOrEmpty(TargetProjectPath);
+        // Persist what actually happened so the summary can report it per project.
+        // Only the server run updates the shared entry-point fields; each run records
+        // its own insertion on its own project.
         if (isServerRun)
         {
             settings.ProgramCsFile = appliedRelativePath;
             settings.ProgramCsFileSkipped = outcome == SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped;
             settings.ServicesApplied = outcome != SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped;
-            settings.ServicesInserted =
-                outcome == SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted;
         }
+
+        ProjectChanges changes = isServerRun ? settings.Server : settings.Client;
+        changes.ServicesInserted = outcome == SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted;
 
         switch (outcome)
         {
@@ -147,45 +127,5 @@ internal class ApplySyncfusionBlazorToolkitProgramCsStep : ScaffoldStep
         }
 
         return Task.FromResult(true);
-    }
-
-    /// <summary>
-    /// Detects whether the supplied project is a Blazor Web App / Server
-    /// (<c>WebApplication.CreateBuilder</c> host) or a standalone
-    /// Blazor WebAssembly (<c>WebAssemblyHostBuilder.CreateDefault</c>
-    /// host) by reading the SDK declaration in the .csproj. Returns
-    /// <c>null</c> when the SDK does not match either pattern — the
-    /// caller treats that as a hard failure because no recipe can
-    /// produce a sensible <c>Program.cs</c> for it.
-    /// </summary>
-    private static SyncfusionBlazorToolkitHelper.ProgramHostKind? DetectProgramHostKind(string projectPath)
-    {
-        if (string.IsNullOrEmpty(projectPath) || !File.Exists(projectPath))
-        {
-            return null;
-        }
-
-        string text;
-        try
-        {
-            text = File.ReadAllText(projectPath);
-        }
-        catch
-        {
-            return null;
-        }
-
-        if (Regex.IsMatch(text, "Microsoft\\.NET\\.Sdk\\.BlazorWebAssembly", RegexOptions.IgnoreCase))
-        {
-            return SyncfusionBlazorToolkitHelper.ProgramHostKind.StandaloneWasm;
-        }
-
-        if (Regex.IsMatch(text, "Microsoft\\.NET\\.Sdk\\.Web\\b", RegexOptions.IgnoreCase) ||
-            Regex.IsMatch(text, "Microsoft\\.NET\\.Sdk\\.Blazor\\b", RegexOptions.IgnoreCase))
-        {
-            return SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp;
-        }
-
-        return null;
     }
 }

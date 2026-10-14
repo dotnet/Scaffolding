@@ -10,14 +10,10 @@ using Xunit;
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Syncfusion;
 
 /// <summary>
-/// Shared base class for end-to-end integration tests of the
-/// Syncfusion Blazor Toolkit scaffolder across .NET versions.
-///
-/// <para>Per review comment 12, the test fixture writes a scoped
-/// <c>NuGet.config</c> into the temporary project directory via
-/// <see cref="ScaffoldCliHelper.GetTestNuGetConfig(string)"/> so the
-/// machine's repository-wide feed configuration does not affect the
-/// fixture's package restore.</para>
+/// Shared base class for end-to-end integration tests of the Syncfusion Blazor Toolkit
+/// scaffolder across .NET versions. Each test gets a temporary project with its own
+/// <c>NuGet.config</c> (<see cref="ScaffoldCliHelper.SyncfusionTestNuGetConfig"/>) so the
+/// machine's feed configuration does not affect package restore.
 /// </summary>
 [Trait("Suite", "ScaffoldIntegration")]
 [Trait("Family", "blazor-syncfusion-toolkit")]
@@ -42,12 +38,8 @@ public abstract class SyncfusionBlazorToolkitIntegrationTestsBase : IDisposable
         _testProjectPath = Path.Combine(_testProjectDir, "TestProject.csproj");
         Directory.CreateDirectory(_testProjectDir);
 
-        // Comment 12: fixture-scoped NuGet.config so the test app
-        // restores from the same feeds as the rest of the build and
-        // additionally has access to nuget.org for the
-        // Syncfusion.Blazor.Toolkit package. The nuget.org source is
-        // scoped to this temporary test fixture only — the
-        // repository's NuGet.config deliberately does not include it.
+        // Fixture-scoped NuGet.config: Syncfusion.Blazor.Toolkit is published to nuget.org, which the
+        // repository's own NuGet.config deliberately does not include.
         File.WriteAllText(
             Path.Combine(_testProjectDir, "NuGet.config"),
             ScaffoldCliHelper.SyncfusionTestNuGetConfig);
@@ -129,14 +121,9 @@ public abstract class SyncfusionBlazorToolkitIntegrationTestsBase : IDisposable
             _testProjectPath);
 
     /// <summary>
-    /// Asserts that the inserted service registration is a valid
-    /// standalone call against a declared builder variable, not the
-    /// broken
-    /// <c>WebAssemblyHostBuilder.CreateDefault.Services.AddSyncfusionBlazorToolkit();</c>
-    /// line that the pre-fix JSON recipe produced. The strict
-    /// detector in <c>IsActiveServiceRegistrationPresent</c> rejects
-    /// the broken form, so this test would have failed before the fix
-    /// even without the additional explicit assertions.
+    /// Asserts that the registration is a standalone call on a declared builder variable
+    /// (<c>builder.Services.AddSyncfusionBlazorToolkit();</c>), not a mention of the method
+    /// name or a call on the builder-creation expression itself.
     /// </summary>
     protected static void AssertValidServiceRegistration(string programCs)
     {

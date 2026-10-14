@@ -4,10 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions.Syncfusion;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion;
@@ -28,6 +30,10 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
     private readonly string _tempDir;
     private readonly string _projectPath;
 
+    // A project needs a TargetFramework to be evaluated by MSBuild at all.
+    private const string WebProjectXml =
+        "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>";
+
     public ValidateSyncfusionBlazorToolkitStepTests()
     {
         // The step now evaluates the project with MSBuild (no textual gate).
@@ -39,7 +45,9 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
         _tempDir = Path.Combine(Path.GetTempPath(), "sfbt-validate-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempDir);
         _projectPath = Path.GetFullPath(Path.Combine(_tempDir, "Test.csproj"));
-        File.WriteAllText(_projectPath, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(_projectPath, WebProjectXml);
+        // A Blazor Web App contains Razor components; a bare Microsoft.NET.Sdk.Web project is a Web API.
+        File.WriteAllText(Path.Combine(_tempDir, "Home.razor"), "<h1>Home</h1>\n");
 
         _mockFileSystem = new Mock<IFileSystem>();
         _mockLogger = new Mock<ILogger<ValidateSyncfusionBlazorToolkitStep>>();
@@ -58,6 +66,11 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
         }
         GC.SuppressFinalize(this);
     }
+
+    // Messages the step logged at error level, so a failing assertion explains itself.
+    private string LoggedErrors() => string.Join(" | ", _mockLogger.Invocations
+        .Where(i => i.Method.Name == "Log" && i.Arguments[0] is LogLevel.Error)
+        .Select(i => i.Arguments[2]?.ToString()));
 
     private ValidateSyncfusionBlazorToolkitStep CreateStep()
     {
@@ -96,16 +109,12 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_NormalizesRelativeProjectPath_ToFullPath()
     {
-        // A relative --project value such as "App.csproj" used to pass
-        // File.Exists but leave Path.GetDirectoryName returning empty.
-        // The fix normalizes the path to a full path before storing it
-        // on the settings.
-        // We simulate the relative input by switching the test process's
-        // working directory to _tempDir via Directory.SetCurrentDirectory
-        // so Path.GetFullPath("Test.csproj") resolves to our test file.
+        // A relative --project value such as "App.csproj" passes File.Exists but has no directory
+        // part, so the step must store the full path. The relative input is simulated by switching
+        // the working directory to _tempDir so Path.GetFullPath("Test.csproj") resolves to our file.
         string projectFileName = "Test.csproj";
         string fullPath = Path.Combine(_tempDir, projectFileName);
-        File.WriteAllText(fullPath, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(fullPath, WebProjectXml);
 
         string originalCwd = Directory.GetCurrentDirectory();
         Directory.SetCurrentDirectory(_tempDir);
@@ -122,7 +131,7 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
             };
 
             bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-            Assert.True(result);
+            Assert.True(result, LoggedErrors());
             Assert.True(_context.Properties.TryGetValue(
                 nameof(SyncfusionBlazorToolkitSettings), out var settingsObj));
             var settings = Assert.IsType<SyncfusionBlazorToolkitSettings>(settingsObj);
@@ -157,6 +166,40 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
     }
 
     [Fact]
+    public async Task ExecuteAsync_ReturnsFalse_ForWebApiThatUsesTheWebSdk()
+    {
+        // Microsoft.NET.Sdk.Web is also the SDK of Web API / minimal API apps.
+        string apiDir = Path.Combine(_tempDir, "Api");
+        Directory.CreateDirectory(apiDir);
+        string apiProject = Path.Combine(apiDir, "Api.csproj");
+        File.WriteAllText(apiProject, WebProjectXml);
+        File.WriteAllText(Path.Combine(apiDir, "Program.cs"), "var b = WebApplication.CreateBuilder(args);\nb.Build().Run();\n");
+
+        _mockFileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns<string>(File.Exists);
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(It.IsAny<string>())).Returns(true);
+
+        var step = new ValidateSyncfusionBlazorToolkitStep(_mockFileSystem.Object, _mockLogger.Object, _testTelemetryService)
+        {
+            Project = apiProject,
+        };
+
+        Assert.False(await step.ExecuteAsync(_context, CancellationToken.None));
+        Assert.False(_context.Properties.ContainsKey(nameof(SyncfusionBlazorToolkitSettings)));
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsFalse_WhenTheProjectCannotBeEvaluated()
+    {
+        // An unreadable/unevaluable project is rejected explicitly, not classified as "unknown" and let through.
+        File.WriteAllText(_projectPath, "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><Import Project=\"missing.props\" /></Project>");
+        _mockFileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns<string>(File.Exists);
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(It.IsAny<string>())).Returns(true);
+
+        Assert.False(await CreateStep().ExecuteAsync(_context, CancellationToken.None));
+        Assert.Contains("could not determine the project type", LoggedErrors());
+    }
+
+    [Fact]
     public async Task ExecuteAsync_ReturnsFalse_ForNonBlazorProject()
     {
         string consoleProject = Path.Combine(_tempDir, "ConsoleApp.csproj");
@@ -176,23 +219,74 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
     }
 
     [Fact]
-    public async Task ExecuteAsync_DetectsInteractiveServerRenderMode()
+    public async Task ExecuteAsync_ReadsHostingFromEntryPointAndGlobalRenderModeFromAppRazor()
     {
+        // Hosting support (what Program.cs registers) and the global render mode (App.razor)
+        // are separate facts; neither is inferred from the other.
+        File.WriteAllText(_projectPath, WebProjectXml);
+        File.WriteAllText(Path.Combine(_tempDir, "Program.cs"),
+            "var builder = WebApplication.CreateBuilder(args);\n" +
+            "builder.Services.AddRazorComponents().AddInteractiveServerComponents();\n" +
+            "var app = builder.Build();\n" +
+            "app.MapRazorComponents<App>().AddInteractiveServerRenderMode();\n" +
+            "app.Run();\n");
         string components = Path.Combine(_tempDir, "Components");
         Directory.CreateDirectory(components);
-        File.WriteAllText(Path.Combine(components, "App.razor"),
-            "<HeadOutlet @rendermode=\"InteractiveServer\" />\n");
+        File.WriteAllText(Path.Combine(components, "App.razor"), "<Routes @rendermode=\"InteractiveServer\" />\n");
+        File.WriteAllText(Path.Combine(components, "Home.razor"), "<h1>Home</h1>\n");
 
-        _mockFileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns(false);
-        _mockFileSystem.Setup(fs => fs.FileExists(_projectPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_tempDir)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns<string>(File.Exists);
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(It.IsAny<string>())).Returns(true);
 
-        var step = CreateStep();
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-        Assert.True(result);
+        bool result = await CreateStep().ExecuteAsync(_context, CancellationToken.None);
+        Assert.True(result, LoggedErrors());
 
-        var settings = (SyncfusionBlazorToolkitSettings?)_context.Properties[nameof(SyncfusionBlazorToolkitSettings)];
-        Assert.Equal("InteractiveServer", settings!.DetectedRenderMode);
+        var settings = (SyncfusionBlazorToolkitSettings)_context.Properties[nameof(SyncfusionBlazorToolkitSettings)]!;
+        Assert.Equal(BlazorAppKind.WebApp, settings.AppKind);
+        Assert.Equal(BlazorHostingModes.Server, settings.Hosting.Supported);
+        Assert.Equal("InteractiveServer", settings.Hosting.GlobalRenderMode);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_NoGlobalRenderMode_DoesNotMeanNoInteractivity()
+    {
+        File.WriteAllText(Path.Combine(_tempDir, "Program.cs"),
+            "var builder = WebApplication.CreateBuilder(args);\n" +
+            "builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddInteractiveWebAssemblyComponents();\n" +
+            "var app = builder.Build();\n" +
+            "app.MapRazorComponents<App>().AddInteractiveServerRenderMode().AddInteractiveWebAssemblyRenderMode();\n" +
+            "app.Run();\n");
+        File.WriteAllText(Path.Combine(_tempDir, "Home.razor"), "<h1>Home</h1>\n");
+
+        _mockFileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns<string>(File.Exists);
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(It.IsAny<string>())).Returns(true);
+
+        bool result = await CreateStep().ExecuteAsync(_context, CancellationToken.None);
+        Assert.True(result, LoggedErrors());
+
+        var settings = (SyncfusionBlazorToolkitSettings)_context.Properties[nameof(SyncfusionBlazorToolkitSettings)]!;
+        Assert.Equal("None", settings.Hosting.GlobalRenderMode);
+        Assert.Equal(BlazorHostingModes.Server | BlazorHostingModes.WebAssembly, settings.Hosting.Supported);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_RecordsInstalledPackageVersionBeforeTheRun()
+    {
+        File.WriteAllText(_projectPath,
+            "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>" +
+            "<ItemGroup><PackageReference Include=\"Syncfusion.Blazor.Toolkit\" Version=\"1.0.2\" /></ItemGroup></Project>");
+        File.WriteAllText(Path.Combine(_tempDir, "Home.razor"), "<h1>Home</h1>\n");
+        File.WriteAllText(Path.Combine(_tempDir, "Program.cs"),
+            "var builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\napp.Run();\n");
+
+        _mockFileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns<string>(File.Exists);
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(It.IsAny<string>())).Returns(true);
+
+        bool result = await CreateStep().ExecuteAsync(_context, CancellationToken.None);
+        Assert.True(result, LoggedErrors());
+
+        var settings = (SyncfusionBlazorToolkitSettings)_context.Properties[nameof(SyncfusionBlazorToolkitSettings)]!;
+        Assert.Equal("1.0.2", settings.Server.PackageVersionBefore);
     }
 
     [Fact]

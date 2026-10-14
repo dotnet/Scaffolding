@@ -19,7 +19,8 @@ internal static class ScaffolderBaselineRunner
         string framework,
         string template,
         Func<string, Task<(int ExitCode, string Output, string Error)>> scaffold,
-        PrepareBaselineInput? prepareInput = null)
+        PrepareBaselineInput? prepareInput = null,
+        string? nugetConfig = null)
     {
         var repoRoot = ScaffoldCliHelper.GetRepoRoot();
         var baselines = Path.Combine(repoRoot, "test", "dotnet-scaffolding", "baselines");
@@ -33,7 +34,18 @@ internal static class ScaffolderBaselineRunner
         try
         {
             File.Copy(Path.Combine(repoRoot, "global.json"), Path.Combine(workingDirectory, "global.json"));
-            File.Copy(Path.Combine(repoRoot, "NuGet.config"), Path.Combine(workingDirectory, "NuGet.config"));
+            // Defaults to the repository feeds. A scaffolder whose package is not on those feeds
+            // (for example one published only to nuget.org) supplies its own scoped config.
+            var nugetConfigPath = Path.Combine(workingDirectory, "NuGet.config");
+            if (nugetConfig is null)
+            {
+                File.Copy(Path.Combine(repoRoot, "NuGet.config"), nugetConfigPath);
+            }
+            else
+            {
+                File.WriteAllText(nugetConfigPath, nugetConfig);
+            }
+
             GeneratedProjectBaseline.CopyProject(baseline, expected);
             await RunDotNetAsync(output, expected, "restore");
             await RunDotNetAsync(output, expected, "build", "--no-restore");

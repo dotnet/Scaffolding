@@ -237,8 +237,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
 
             internal static class Overwrite
             {
-                internal const string DisplayName = "Overwrite existing files?";
-                internal const string Description = "Overwrite existing Identity files if they already exist. Use --overwrite to enable, omit the flag to preserve existing files (default: false).";
+                internal const string DisplayName = "Overwrite existing generated content?";
+                internal const string Description = "Overwrite existing Identity files or managed configuration values. Use --overwrite to enable, omit the flag to preserve existing content (default: false).";
             }
 
             internal static class Username

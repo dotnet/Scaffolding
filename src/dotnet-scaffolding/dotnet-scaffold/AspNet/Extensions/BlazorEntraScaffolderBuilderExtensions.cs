@@ -159,10 +159,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
                 step.ClientId = clientId;
             }
 
-            if (context.Properties.TryGetValue("ClientSecret", out var clientSecretObj) && clientSecretObj is string clientSecret)
-            {
-                step.ClientSecret = clientSecret;
-            }
+            step.Overwrite = entraSettings.Overwrite;
         });
     }
 
@@ -199,6 +196,12 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             else
             {
                 step.SkipStep = true;
+            }
+
+            if (context.Properties.TryGetValue("CallbackPath", out var callbackPathObj) &&
+                callbackPathObj is string callbackPath)
+            {
+                step.CallbackPath = callbackPath;
             }
         });
     }
@@ -450,6 +453,5 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         return builder;
     }
 }
-
 
 

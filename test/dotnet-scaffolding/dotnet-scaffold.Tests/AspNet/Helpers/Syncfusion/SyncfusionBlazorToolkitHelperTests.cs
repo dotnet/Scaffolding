@@ -819,20 +819,38 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Fact]
-    public void EnsureServiceRegistration_MissingProgramCs_SkipsAndCreatesNothing()
+    public void EnsureServiceRegistration_EntryPointInOtherFile_EditsItAndNeverCreatesProgramCs()
     {
-        // The real entry point may live elsewhere (e.g. Hosting.cs). Creating
-        // a top-level Program.cs there would trigger CS8802.
+        // The entry point lives in Hosting.cs. It is found from the compiled
+        // sources and edited in place; a top-level Program.cs must never be
+        // created next to it (that would trigger CS8802).
         var project = Path.Combine(_tempDir, "App.csproj");
         File.WriteAllText(project, WebProjectXml);
-        File.WriteAllText(Path.Combine(_tempDir, "Hosting.cs"), WebAppProgramCs);
+        var hosting = Path.Combine(_tempDir, "Hosting.cs");
+        File.WriteAllText(hosting, WebAppProgramCs);
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+        Assert.Equal("Hosting.cs", result.ProgramCsRelative);
+        Assert.False(File.Exists(Path.Combine(_tempDir, "Program.cs")));
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(File.ReadAllText(hosting)));
+    }
+
+    [Fact]
+    public void EnsureServiceRegistration_NoCompiledSources_SkipsAndCreatesNothing()
+    {
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
 
         var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
             project,
             SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
 
         Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Skipped, result.Outcome);
-        Assert.False(File.Exists(Path.Combine(_tempDir, "Program.cs")));
+        Assert.Empty(Directory.GetFiles(_tempDir, "*.cs"));
     }
 
     [Fact]
@@ -979,10 +997,10 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Theory]
-    [InlineData("extern alias X;\nvar builder = WebApplication.CreateBuilder(args);\n", "extern alias X;", "using Syncfusion.Blazor.Toolkit;")]
-    [InlineData("using System;\nvar builder = WebApplication.CreateBuilder(args);\n", "using System;", "using Syncfusion.Blazor.Toolkit;")]
-    [InlineData("// header\nvar builder = WebApplication.CreateBuilder(args);\n", "// header", "using Syncfusion.Blazor.Toolkit;")]
-    [InlineData("#nullable enable\nvar builder = WebApplication.CreateBuilder(args);\n", "#nullable enable", "using Syncfusion.Blazor.Toolkit;")]
+    [InlineData("extern alias X;\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\napp.Run();\n", "extern alias X;", "using Syncfusion.Blazor.Toolkit;")]
+    [InlineData("using System;\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\napp.Run();\n", "using System;", "using Syncfusion.Blazor.Toolkit;")]
+    [InlineData("// header\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\napp.Run();\n", "// header", "using Syncfusion.Blazor.Toolkit;")]
+    [InlineData("#nullable enable\nvar builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();\napp.Run();\n", "#nullable enable", "using Syncfusion.Blazor.Toolkit;")]
     public void EnsureServiceRegistration_UsingIsPlacedAfterExternsUsingsAndHeader(string program, string mustComeFirst, string directive)
     {
         var project = Path.Combine(_tempDir, "App.csproj");

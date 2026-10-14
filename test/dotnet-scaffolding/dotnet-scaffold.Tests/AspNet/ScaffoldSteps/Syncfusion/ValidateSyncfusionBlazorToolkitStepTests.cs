@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
@@ -28,6 +29,10 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
     private readonly string _tempDir;
     private readonly string _projectPath;
 
+    // A project needs a TargetFramework to be evaluated by MSBuild at all.
+    private const string WebProjectXml =
+        "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup></Project>";
+
     public ValidateSyncfusionBlazorToolkitStepTests()
     {
         // The step now evaluates the project with MSBuild (no textual gate).
@@ -39,7 +44,7 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
         _tempDir = Path.Combine(Path.GetTempPath(), "sfbt-validate-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_tempDir);
         _projectPath = Path.GetFullPath(Path.Combine(_tempDir, "Test.csproj"));
-        File.WriteAllText(_projectPath, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(_projectPath, WebProjectXml);
 
         _mockFileSystem = new Mock<IFileSystem>();
         _mockLogger = new Mock<ILogger<ValidateSyncfusionBlazorToolkitStep>>();
@@ -58,6 +63,11 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
         }
         GC.SuppressFinalize(this);
     }
+
+    // Messages the step logged at error level, so a failing assertion explains itself.
+    private string LoggedErrors() => string.Join(" | ", _mockLogger.Invocations
+        .Where(i => i.Method.Name == "Log" && i.Arguments[0] is LogLevel.Error)
+        .Select(i => i.Arguments[2]?.ToString()));
 
     private ValidateSyncfusionBlazorToolkitStep CreateStep()
     {
@@ -105,7 +115,7 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
         // so Path.GetFullPath("Test.csproj") resolves to our test file.
         string projectFileName = "Test.csproj";
         string fullPath = Path.Combine(_tempDir, projectFileName);
-        File.WriteAllText(fullPath, "<Project Sdk=\"Microsoft.NET.Sdk.Web\" />");
+        File.WriteAllText(fullPath, WebProjectXml);
 
         string originalCwd = Directory.GetCurrentDirectory();
         Directory.SetCurrentDirectory(_tempDir);
@@ -122,7 +132,7 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
             };
 
             bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-            Assert.True(result);
+            Assert.True(result, LoggedErrors());
             Assert.True(_context.Properties.TryGetValue(
                 nameof(SyncfusionBlazorToolkitSettings), out var settingsObj));
             var settings = Assert.IsType<SyncfusionBlazorToolkitSettings>(settingsObj);
@@ -189,7 +199,7 @@ public class ValidateSyncfusionBlazorToolkitStepTests : IDisposable
 
         var step = CreateStep();
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-        Assert.True(result);
+        Assert.True(result, LoggedErrors());
 
         var settings = (SyncfusionBlazorToolkitSettings?)_context.Properties[nameof(SyncfusionBlazorToolkitSettings)];
         Assert.Equal("InteractiveServer", settings!.DetectedRenderMode);

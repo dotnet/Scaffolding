@@ -225,7 +225,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithDisplayName(AspnetStrings.SyncfusionBlazorToolkit.DisplayName)
                 .WithCategory(AspnetStrings.Catagories.Blazor)
                 .WithDescription(AspnetStrings.SyncfusionBlazorToolkit.Description)
-                .WithExample(AspnetStrings.SyncfusionBlazorToolkit.Example, AspnetStrings.SyncfusionBlazorToolkit.ExampleDescription)
+                .WithExample(AspnetStrings.SyncfusionBlazorToolkit.SyncfusionBlazorToolkitExample, AspnetStrings.SyncfusionBlazorToolkit.SyncfusionBlazorToolkitExampleDescription)
                 .WithOptions([options.Project])
                 .WithStep<ValidateSyncfusionBlazorToolkitStep>(config =>
                 {

@@ -999,6 +999,7 @@ internal static class SyncfusionBlazorToolkitHelper
     /// </summary>
     private sealed record HostBuilderDeclaration(
         string Name,
+        string SourceName,
         LocalDeclarationStatementSyntax Statement,
         List<StatementSyntax> Scope);
 
@@ -1035,7 +1036,9 @@ internal static class SyncfusionBlazorToolkitHelper
                     ProgramHostKind? kind = types.GetHostBuilderKind(declarator.Initializer?.Value);
                     if (kind is not null && kinds.Contains(kind.Value))
                     {
-                        matches.Add(new HostBuilderDeclaration(declarator.Identifier.ValueText, statement, scope));
+                        // `Name` is the unescaped identifier (used to compare), `SourceName` keeps
+                        // the source spelling (`@class`) for any code that is generated.
+                        matches.Add(new HostBuilderDeclaration(declarator.Identifier.ValueText, declarator.Identifier.Text, statement, scope));
                     }
                 }
             }
@@ -1148,7 +1151,7 @@ internal static class SyncfusionBlazorToolkitHelper
 
         // The variable name comes from the same declaration used as the
         // insertion anchor, so the generated call always targets it.
-        string registrationLine = $"{builder.Name}.Services.{ServiceRegistrationCall}();";
+        string registrationLine = $"{builder.SourceName}.Services.{ServiceRegistrationCall}();";
 
         // Insert immediately after the (possibly multi-line) host-builder
         // statement so the services are wired up before `Build()`.

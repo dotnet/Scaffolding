@@ -1,10 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Text.RegularExpressions;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
@@ -80,45 +80,46 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
             return Task.FromResult(false);
         }
 
-        // Validate that the project is a supported Blazor application —
-        // not merely a .csproj that exists. Hybrid / MAUI Blazor Hybrid
-        // projects are explicitly rejected because they target
-        // MauiProgram.cs which the shared code-modification pipeline
-        // does not (and cannot, with the existing recipes) modify.
-        var projectKind = DetectProjectKind(settings.Project);
-        if (projectKind == ProjectKind.UnsupportedHybrid)
+        // This step evaluates projects with MSBuild before any Roslyn workspace exists, so it must
+        // register MSBuild through the shared policy first (as ClassAnalyzers.GetProjectInfo does for
+        // the other validate steps). Registration fails once Microsoft.Build is already loaded.
+        new MsBuildInitializer(_logger).Initialize();
+
+        // Classify the project once, from evaluated MSBuild state. Every later step
+        // reads the result from the settings instead of re-reading the project file.
+        BlazorProjectInfo projectInfo = BlazorProjectClassifier.Classify(settings.Project);
+        settings.AppKind = projectInfo.Kind;
+
+        if (projectInfo.Error is not null)
+        {
+            _logger.LogError(
+                "Syncfusion Blazor Toolkit scaffolder could not determine the project type of '{Project}': {Error}",
+                settings.Project,
+                projectInfo.Error);
+            return Fail(context);
+        }
+
+        if (projectInfo.Kind == BlazorAppKind.Hybrid)
         {
             _logger.LogError(
                 "Syncfusion Blazor Toolkit scaffolder does not support Hybrid / MAUI Blazor Hybrid projects. " +
                 "Run the scaffolder against the Blazor WebAssembly or Blazor Web App project inside the solution, " +
                 "not on a MAUI host project ('{Project}').",
                 settings.Project);
-            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(
-                nameof(ValidateSyncfusionBlazorToolkitStep),
-                context.Scaffolder.DisplayName,
-                result: false));
-            return Task.FromResult(false);
+            return Fail(context);
         }
 
-        if (projectKind == ProjectKind.NotBlazor)
+        if (projectInfo.Kind == BlazorAppKind.NotBlazor)
         {
             _logger.LogError(
                 "Syncfusion Blazor Toolkit scaffolder requires a Blazor Web App, Blazor Server, or Blazor WebAssembly project. " +
-                "'{Project}' does not target the Microsoft.NET.Sdk.Web, Microsoft.NET.Sdk.BlazorWebAssembly, or " +
-                "Microsoft.NET.Sdk.Blazor (with Server-side rendering) SDK. Add Blazor support or pick a different project.",
+                "'{Project}' is not one: a Blazor Web App is an executable Microsoft.NET.Sdk.Web project that contains Razor " +
+                "components, and a standalone app uses Microsoft.NET.Sdk.BlazorWebAssembly. Add Blazor support or pick a different project.",
                 settings.Project);
-            _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(
-                nameof(ValidateSyncfusionBlazorToolkitStep),
-                context.Scaffolder.DisplayName,
-                result: false));
-            return Task.FromResult(false);
+            return Fail(context);
         }
 
-        settings.Layout = projectKind switch
-        {
-            ProjectKind.StandaloneWasm => SyncfusionBlazorToolkitLayout.SingleProject,
-            _ => SyncfusionBlazorToolkitLayout.SingleProject,
-        };
+        settings.Layout = SyncfusionBlazorToolkitLayout.SingleProject;
 
         // Resolve a referenced WebAssembly client (if any). This is the
         // single source of truth for multi-project layouts: when a
@@ -142,7 +143,7 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
         //                         unconfigured.
         string? clientError = null;
         bool clientLookupOk = false;
-        if (projectKind == ProjectKind.WebApp)
+        if (projectInfo.Kind == BlazorAppKind.WebApp)
         {
             clientLookupOk = BlazorWebAssemblyClientProjectResolver.TryGetClient(
                 settings.Project, _fileSystem, out var client, out clientError);
@@ -170,13 +171,17 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
             }
         }
 
-        // Detect hosting configuration (render mode, hosting support) so
-        // the summary can give accurate next-steps guidance instead of
-        // unconditionally listing every interactive render mode.
-        settings.DetectedRenderMode = DetectRenderMode(projectDirectory);
+        // Hosting support the entry point has actually registered, kept separate from
+        // the application kind and from the global page render mode.
+        settings.Hosting = InspectHosting(settings.Project, projectDirectory);
 
-        // Pre-scaffolding flags for the summary.
-        settings.PackageAlreadyReferenced = IsPackageAlreadyReferenced(settings.Project);
+        // Baselines for the summary: what each project had BEFORE this run.
+        settings.Server.PackageVersionBefore = ReadPackageVersion(settings.Project);
+        if (!string.IsNullOrEmpty(settings.ClientProjectPath))
+        {
+            settings.Client.PackageVersionBefore = ReadPackageVersion(settings.ClientProjectPath);
+        }
+
         settings.ServicesAlreadyRegistered = IsServicesAlreadyRegistered(settings.Project);
 
         // Pre-discover the imports file so the dedicated imports step
@@ -239,98 +244,52 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
         };
     }
 
-    /// <summary>
-    /// Detects whether the supplied project is a Blazor Web App,
-    /// standalone Blazor WebAssembly, Blazor Server (Microsoft.NET.Sdk.Blazor),
-    /// Hybrid / MAUI Blazor Hybrid, or not a Blazor project at all.
-    /// </summary>
-    private ProjectKind DetectProjectKind(string projectPath)
+    private BlazorHostingFacts InspectHosting(string projectPath, string projectDirectory)
     {
-        string text;
         try
         {
-            text = File.ReadAllText(projectPath);
+            string? entryPoint = SyncfusionBlazorToolkitHelper.DiscoverEntryPoint(projectPath, out _);
+            string? entryPointText = entryPoint is null ? null : File.ReadAllText(entryPoint);
+
+            string appRazor = Path.Combine(projectDirectory, "Components", "App.razor");
+            string? appRazorText = File.Exists(appRazor) ? File.ReadAllText(appRazor) : null;
+
+            return BlazorHostingInspector.Inspect(entryPointText, appRazorText);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             _logger.LogWarning(ex,
-                "Syncfusion Blazor Toolkit could not read the project file '{Project}' to detect its SDK.",
-                projectPath);
-            return ProjectKind.Unknown;
-        }
-
-        // MAUI / Hybrid has the most specific SDK and wins first.
-        if (Regex.IsMatch(text, "Microsoft\\.NET\\.Sdk\\.Maui", RegexOptions.IgnoreCase) ||
-            Regex.IsMatch(text, "<UseMaui\\b", RegexOptions.IgnoreCase))
-        {
-            return ProjectKind.UnsupportedHybrid;
-        }
-
-        if (Regex.IsMatch(text, "Microsoft\\.NET\\.Sdk\\.BlazorWebAssembly", RegexOptions.IgnoreCase))
-        {
-            return ProjectKind.StandaloneWasm;
-        }
-
-        if (Regex.IsMatch(text, "Microsoft\\.NET\\.Sdk\\.Web\\b", RegexOptions.IgnoreCase) ||
-            Regex.IsMatch(text, "Microsoft\\.NET\\.Sdk\\.Blazor\\b", RegexOptions.IgnoreCase))
-        {
-            return ProjectKind.WebApp;
-        }
-
-        return ProjectKind.NotBlazor;
-    }
-
-    private string DetectRenderMode(string projectDirectory)
-    {
-        try
-        {
-            string appRazorPath = Path.Combine(projectDirectory, "Components", "App.razor");
-            if (File.Exists(appRazorPath))
-            {
-                string appText = File.ReadAllText(appRazorPath);
-                if (appText.Contains("@rendermode=\"InteractiveAuto\"", StringComparison.OrdinalIgnoreCase))
-                {
-                    return "InteractiveAuto";
-                }
-
-                if (appText.Contains("@rendermode=\"InteractiveServer\"", StringComparison.OrdinalIgnoreCase))
-                {
-                    return "InteractiveServer";
-                }
-
-                if (appText.Contains("@rendermode=\"InteractiveWebAssembly\"", StringComparison.OrdinalIgnoreCase))
-                {
-                    return "InteractiveWebAssembly";
-                }
-            }
-
-            // Static SSR / no global render mode set.
-            return "None";
-        }
-        catch
-        {
-            return "None";
+                "Syncfusion Blazor Toolkit could not read the entry point or App.razor to inspect hosting support. " +
+                "Hosting guidance will be omitted.");
+            return BlazorHostingFacts.Unknown;
         }
     }
 
     /// <summary>
-    /// Inspects the project file for an existing
-    /// <c>Syncfusion.Blazor.Toolkit</c> PackageReference. Best-effort:
-    /// a missing file, parse error, or unparseable XML is treated as
-    /// "unknown" and reported as not-yet-referenced.
+    /// The evaluated Toolkit package version of a project: <c>null</c> when it is
+    /// not referenced (or cannot be evaluated - the verify step reports that).
     /// </summary>
-    private bool IsPackageAlreadyReferenced(string projectPath)
+    private string? ReadPackageVersion(string projectPath)
     {
-        if (!SyncfusionBlazorToolkitHelper.TryIsPackageReferenced(projectPath, out bool referenced, out string? error))
+        if (!SyncfusionBlazorToolkitHelper.TryGetReferencedPackageVersion(projectPath, out string? version, out string? error))
         {
             _logger.LogWarning(
-                "Syncfusion Blazor Toolkit could not evaluate the project for an existing package reference: {Error} " +
-                "Idempotency detection will report the package as 'not yet referenced'.",
+                "Syncfusion Blazor Toolkit could not evaluate the package references of '{Project}': {Error}",
+                projectPath,
                 error);
-            return false;
+            return null;
         }
 
-        return referenced;
+        return version;
+    }
+
+    private Task<bool> Fail(ScaffolderContext context)
+    {
+        _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(
+            nameof(ValidateSyncfusionBlazorToolkitStep),
+            context.Scaffolder.DisplayName,
+            result: false));
+        return Task.FromResult(false);
     }
 
     /// <summary>
@@ -357,14 +316,5 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
                 "Idempotency detection will report services as 'not yet registered'.");
             return false;
         }
-    }
-
-    private enum ProjectKind
-    {
-        Unknown = 0,
-        WebApp = 1,
-        StandaloneWasm = 2,
-        UnsupportedHybrid = 3,
-        NotBlazor = 4,
     }
 }

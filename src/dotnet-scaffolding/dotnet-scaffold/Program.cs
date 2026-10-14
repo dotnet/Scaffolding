@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.CommandLine;
-using Microsoft.Build.Locator;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
@@ -14,26 +13,6 @@ using Microsoft.DotNet.Tools.Scaffold.Command;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.AppBuilder;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
-
-// Register MSBuildLocator as early as possible — BEFORE any code below
-// is JIT-compiled. The Syncfusion Blazor Toolkit scaffolder and the
-// shared code-modification step both go through `CodeService` and
-// `Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace`, whose JIT
-// transitively pulls `Microsoft.Build` into the process. Once
-// `Microsoft.Build` is loaded, `MSBuildLocator.RegisterMSBuildPath`
-// throws "MSBuild assemblies were already loaded". Doing the
-// registration here, as the very first executable statement, makes
-// sure the MSBuild resolver is in place before any other code can
-// cause `Microsoft.Build` to be loaded.
-//
-// `MSBuildLocator.RegisterDefaults()` enumerates the system's
-// installed MSBuild instances (Visual Studio, Build Tools, the .NET
-// SDK, etc.) and wires the appropriate one. `IsRegistered` is a
-// guard so we don't double-register.
-if (!MSBuildLocator.IsRegistered)
-{
-    MSBuildLocator.RegisterDefaults();
-}
 
 // Handle --full-help option before building the runner
 // This allows users to invoke: dotnet scaffold --full-help

@@ -77,7 +77,7 @@ internal class VerifySyncfusionBlazorToolkitStep : ScaffoldStep
             settings.ServicesApplied = serverHasRegistration;
             allOk &= serverHasRegistration;
 
-            if (!SyncfusionBlazorToolkitHelper.TryIsPackageReferenced(settings.Project, out bool packageReferenced, out string? packageError))
+            if (!SyncfusionBlazorToolkitHelper.TryGetReferencedPackageVersion(settings.Project, out string? serverVersion, out string? packageError))
             {
                 _logger.LogError("Syncfusion Blazor Toolkit: {Error}", packageError);
                 settings.PackageApplied = false;
@@ -85,8 +85,10 @@ internal class VerifySyncfusionBlazorToolkitStep : ScaffoldStep
             }
             else
             {
-                settings.PackageApplied = packageReferenced;
-                if (!packageReferenced)
+                // Recorded so the summary can tell a new reference or a version change from a no-op.
+                settings.Server.PackageVersionAfter = serverVersion;
+                settings.PackageApplied = serverVersion is not null;
+                if (serverVersion is null)
                 {
                     _logger.LogError(
                         "Syncfusion Blazor Toolkit: NuGet package reference 'Syncfusion.Blazor.Toolkit' is missing from '{Project}'. " +
@@ -115,18 +117,22 @@ internal class VerifySyncfusionBlazorToolkitStep : ScaffoldStep
             {
                 if (File.Exists(settings.ClientProjectPath))
                 {
-                    if (!SyncfusionBlazorToolkitHelper.TryIsPackageReferenced(settings.ClientProjectPath, out bool clientHasPackage, out string? clientPackageError))
+                    if (!SyncfusionBlazorToolkitHelper.TryGetReferencedPackageVersion(settings.ClientProjectPath, out string? clientVersion, out string? clientPackageError))
                     {
                         _logger.LogError("Syncfusion Blazor Toolkit: {Error}", clientPackageError);
                         allOk = false;
                     }
-                    else if (!clientHasPackage)
+                    else
                     {
-                        _logger.LogError(
-                            "Syncfusion Blazor Toolkit: NuGet package reference 'Syncfusion.Blazor.Toolkit' is missing from the resolved client project '{Client}'. " +
-                            "Add a PackageReference to Syncfusion.Blazor.Toolkit and re-run the scaffolder.",
-                            settings.ClientProjectPath);
-                        allOk = false;
+                        settings.Client.PackageVersionAfter = clientVersion;
+                        if (clientVersion is null)
+                        {
+                            _logger.LogError(
+                                "Syncfusion Blazor Toolkit: NuGet package reference 'Syncfusion.Blazor.Toolkit' is missing from the resolved client project '{Client}'. " +
+                                "Add a PackageReference to Syncfusion.Blazor.Toolkit and re-run the scaffolder.",
+                                settings.ClientProjectPath);
+                            allOk = false;
+                        }
                     }
                 }
                 else

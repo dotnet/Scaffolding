@@ -972,6 +972,41 @@ internal static class SyncfusionBlazorToolkitHelper
     }
 
     /// <summary>
+    /// The version of the evaluated <c>Syncfusion.Blazor.Toolkit</c> package
+    /// reference: <c>null</c> when it is not referenced, an empty string when it is
+    /// referenced without a version (central package management). Returns
+    /// <c>false</c> with a diagnostic when evaluation fails.
+    /// </summary>
+    public static bool TryGetReferencedPackageVersion(string? projectPath, out string? version, out string? error)
+    {
+        version = null;
+        error = null;
+        if (string.IsNullOrEmpty(projectPath) || !File.Exists(projectPath))
+        {
+            error = $"The project file '{projectPath}' was not found.";
+            return false;
+        }
+
+        var projectService = new MSBuildProjectService(projectPath);
+        if (!projectService.TryGetEvaluatedItems("PackageReference", "Version", out var items, out string? evaluationError))
+        {
+            error = $"Unable to evaluate the package references of '{projectPath}'. {evaluationError}";
+            return false;
+        }
+
+        foreach (var item in items)
+        {
+            if (string.Equals(item.Include, "Syncfusion.Blazor.Toolkit", StringComparison.OrdinalIgnoreCase))
+            {
+                version = item.Metadata;
+                return true;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Scans the contents of a <c>Program.cs</c> file for the variable
     /// name the host builder was assigned to. Supports both the
     /// Blazor Web App / Server pattern

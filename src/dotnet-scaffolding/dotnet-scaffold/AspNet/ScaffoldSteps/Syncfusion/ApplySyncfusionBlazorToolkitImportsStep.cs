@@ -75,22 +75,20 @@ internal class ApplySyncfusionBlazorToolkitImportsStep : ScaffoldStep
             return Task.FromResult(false);
         }
 
-        // Persist the outcome so the summary step can distinguish
-        // "applied", "already present", and "skipped" instead of
-        // guessing from pre-scaffolding flags. Only the server
-        // imports step (TargetProjectPath == null) updates the shared
-        // settings so the client step does not overwrite the
-        // server's outcome.
+        // Persist what actually happened. The shared fields describe the server project;
+        // each run records its own insertion on its own project.
         bool isServerRun = string.IsNullOrEmpty(TargetProjectPath);
         if (isServerRun)
         {
             settings.ImportsFile = appliedRelativePath;
             settings.ImportsFileSkipped = outcome == SyncfusionBlazorToolkitHelper.ImportsUpdateOutcome.Skipped;
             settings.ImportsApplied = outcome != SyncfusionBlazorToolkitHelper.ImportsUpdateOutcome.Skipped;
-            settings.ImportsInserted =
-                outcome == SyncfusionBlazorToolkitHelper.ImportsUpdateOutcome.Inserted ||
-                outcome == SyncfusionBlazorToolkitHelper.ImportsUpdateOutcome.Created;
         }
+
+        ProjectChanges changes = isServerRun ? settings.Server : settings.Client;
+        changes.ImportsInserted =
+            outcome == SyncfusionBlazorToolkitHelper.ImportsUpdateOutcome.Inserted ||
+            outcome == SyncfusionBlazorToolkitHelper.ImportsUpdateOutcome.Created;
 
         switch (outcome)
         {

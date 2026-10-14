@@ -1019,6 +1019,28 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
     }
 
     [Fact]
+    public void EnsureServiceRegistration_EscapedBuilderIdentifier_KeepsTheEscape()
+    {
+        // `@class` is a valid identifier whose ValueText is `class`. The generated
+        // statement must keep the source spelling, or it would not compile.
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project, WebProjectXml);
+        var program = Path.Combine(_tempDir, "Program.cs");
+        File.WriteAllText(program,
+            "var @class = WebApplication.CreateBuilder(args);\nvar app = @class.Build();\napp.Run();\n");
+
+        var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(
+            project,
+            SyncfusionBlazorToolkitHelper.ProgramHostKind.WebApp);
+
+        Assert.Equal(SyncfusionBlazorToolkitHelper.ServiceRegistrationOutcome.Inserted, result.Outcome);
+        string text = File.ReadAllText(program);
+        Assert.Contains("@class.Services.AddSyncfusionBlazorToolkit();", text);
+        Assert.DoesNotContain("\nclass.Services", text);
+        Assert.True(SyncfusionBlazorToolkitHelper.IsActiveServiceRegistrationPresent(text));
+    }
+
+    [Fact]
     public void EnsureServiceRegistration_EmptyProjectPath_ReturnsSkipped()
     {
         var result = SyncfusionBlazorToolkitHelper.EnsureServiceRegistration(

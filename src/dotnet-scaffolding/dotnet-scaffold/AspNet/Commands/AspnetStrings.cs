@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string Name = "blazor-syncfusion-toolkit";
             internal const string DisplayName = "Syncfusion Blazor Toolkit";
             // Short display description, suitable for CLI UIs and tight layouts.
-            internal const string Description = "Sets the Syncfusion Blazor Toolkit package, service registration, and imports up in an existing Blazor app.";
+            internal const string Description = "Sets up the Syncfusion Blazor Toolkit (package, service registration, and imports) in an existing Blazor app.";
             // Extended guidance shown in detailed help. Setup only — no pages or sample UI.
             internal const string ExtendedDescription = "Installs Syncfusion.Blazor.Toolkit, registers AddSyncfusionBlazorToolkit(), " +
                 "and adds @using Syncfusion.Blazor.Toolkit to the project's _Imports.razor (Components folder or project root). " +

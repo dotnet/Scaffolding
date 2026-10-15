@@ -43,7 +43,7 @@ public class UpdateAppAuthorizationStepTests
         {
             commands.Add(command);
             return command.StartsWith("ad app show", StringComparison.Ordinal)
-                ? new(0, """["https://production.contoso.com/signin-oidc","HTTPS://LOCALHOST:7188/signin-oidc"]""", null)
+                ? new(0, """["https://production.contoso.com/signin-oidc","https://localhost:7188/signin-oidc"]""", null)
                 : new(0, null, null);
         };
 
@@ -60,14 +60,45 @@ public class UpdateAppAuthorizationStepTests
             command =>
             {
                 Assert.Contains("\"https://production.contoso.com/signin-oidc\"", command);
-                Assert.Contains("\"HTTPS://LOCALHOST:7188/signin-oidc\"", command);
+                Assert.Contains("\"https://localhost:7188/signin-oidc\"", command);
                 Assert.Equal(
                     1,
                     CountOccurrences(
                         command,
                         "https://localhost:7188/signin-oidc",
-                        StringComparison.OrdinalIgnoreCase));
+                        StringComparison.Ordinal));
             });
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_PreservesExistingWebRedirectUrisThatDifferOnlyByPathCase()
+    {
+        // Arrange
+        string? updateCommand = null;
+        _step.AutoConfigureLocalUrls = false;
+        _step.UseExistingApplication = true;
+        _step.AzCliCommand = command =>
+        {
+            if (command.StartsWith("ad app show", StringComparison.Ordinal))
+            {
+                return new(
+                    0,
+                    """["https://example.com/App/signin-oidc","https://example.com/app/signin-oidc"]""",
+                    null);
+            }
+
+            updateCommand = command;
+            return new(0, null, null);
+        };
+
+        // Act
+        bool result = await _step.ExecuteAsync(CreateContext());
+
+        // Assert
+        Assert.True(result);
+        Assert.NotNull(updateCommand);
+        Assert.Contains("\"https://example.com/App/signin-oidc\"", updateCommand);
+        Assert.Contains("\"https://example.com/app/signin-oidc\"", updateCommand);
     }
 
     [Fact]

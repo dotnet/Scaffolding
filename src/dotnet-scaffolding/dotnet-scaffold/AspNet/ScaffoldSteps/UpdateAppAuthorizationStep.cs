@@ -106,7 +106,7 @@
 
                     WebRedirectUris = existingUris
                         .Concat(WebRedirectUris ?? Array.Empty<string>())
-                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Distinct(StringComparer.Ordinal)
                         .ToArray();
                     return true;
                 }
@@ -177,7 +177,7 @@
                     {
                         WebRedirectUris = (WebRedirectUris ?? Array.Empty<string>())
                             .Concat(localUrls)
-                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .Distinct(StringComparer.Ordinal)
                             .ToArray();
                     
                         _logger.LogInformation($"Configured {localUrls.Count} local redirect URIs from launchSettings.json");
@@ -205,7 +205,7 @@
 
                 WebRedirectUris = (WebRedirectUris ?? Array.Empty<string>())
                     .Concat(defaultUris)
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Distinct(StringComparer.Ordinal)
                     .ToArray();
             
                 _logger.LogInformation("Added default localhost redirect URIs");

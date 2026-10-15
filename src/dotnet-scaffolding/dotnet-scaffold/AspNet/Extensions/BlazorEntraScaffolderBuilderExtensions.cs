@@ -191,6 +191,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             }
 
             step.ProjectPath = entraSettings.Project;
+            step.UseExistingApplication = entra.UseExistingApplication;
 
             if (context.Properties.TryGetValue("ClientId", out var clientIdObj) && clientIdObj is string clientId)
             {
@@ -450,6 +451,5 @@ internal static class BlazorEntraScaffolderBuilderExtensions
         return builder;
     }
 }
-
 
 

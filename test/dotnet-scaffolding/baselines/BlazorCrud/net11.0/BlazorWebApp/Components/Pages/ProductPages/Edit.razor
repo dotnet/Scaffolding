@@ -24,7 +24,7 @@ else
                 <input type="hidden" name="Product.Id" value="@Product.Id" />
                 <div class="mb-3">
                     <label for="name" class="form-label">Name:</label>
-                    <InputText id="name" @bind-Value="Product.Name" class="form-control" />
+                    <InputText id="name" @bind-Value="Product.Name" class="form-control"/>
                     <ValidationMessage For="() => Product.Name" class="text-danger" />
                 </div>
                 <button type="submit" class="btn btn-primary">Save</button>

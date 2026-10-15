@@ -37,7 +37,7 @@
     <div class="col-md-4">
         <EditForm method="post" Model="<#= modelName #>" OnValidSubmit="Add<#= modelName #>" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
+            <ValidationSummary class="text-danger" role="alert" />
             <#
                 foreach (var property in entityProperties)
                 {

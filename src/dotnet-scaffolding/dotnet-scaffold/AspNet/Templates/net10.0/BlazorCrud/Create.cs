@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud
             this.Write("\" OnValidSubmit=\"Add");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("\" FormName=\"create\" Enhance>\r\n            <DataAnnotationsValidator />\r\n         " +
-                    "   <ValidationSummary class=\"text-danger\" role=\"alert\"/>\r\n            ");
+                    "   <ValidationSummary class=\"text-danger\" role=\"alert\" />\r\n            ");
 
                 foreach (var property in entityProperties)
                 {
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud
                     var isNullableEnum = Model.IsNullableEnumType(property.Type);
                     var inputTypeName = Model.GetInputType(propertyShortTypeName, isEnum);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
-                    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
+                    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? " aria-required=\"true\"" : string.Empty;
                     var divWhitespace = new string(' ', 16);
                     var requiredSpanAttributeHtml = property.HasRequiredAttribute() ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
             
@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud
                         this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
                         this.Write("\" class=\"");
                         this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
-                        this.Write("\" ");
+                        this.Write("\"");
                         this.Write(this.ToStringHelper.ToStringWithCulture(ariaRequiredAttributeHtml));
                         this.Write(">\r\n");
                             if (isNullableEnum) {

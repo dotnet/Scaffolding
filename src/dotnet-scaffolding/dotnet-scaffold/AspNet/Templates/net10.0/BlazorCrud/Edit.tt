@@ -47,7 +47,7 @@ else
         <div class="col-md-4">
             <EditForm method="post" Model="<#= modelName #>" OnValidSubmit="Update<#= modelName #>" FormName="edit" Enhance>
                 <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
+                <ValidationSummary role="alert" />
                 <input type="hidden" name="<#= modelName #>.<#= primaryKeyName #>" value="@<#= modelName #>.<#= primaryKeyName #>" />
 <#
                 foreach (var property in entityProperties)

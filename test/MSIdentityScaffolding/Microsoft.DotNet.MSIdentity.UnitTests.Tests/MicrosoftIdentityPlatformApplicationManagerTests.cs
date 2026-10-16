@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
 using Microsoft.DotNet.MSIdentity.Tool;
 using Microsoft.Graph.Models;
@@ -13,6 +14,60 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 {
     public class MicrosoftIdentityPlatformApplicationManagerTests
     {
+        [Theory]
+        [InlineData("11111111-2222-3333-4444-555555555555")]
+        [InlineData("contoso.onmicrosoft.com")]
+        public void CreateApplication_ExplicitWorkforceTenantWithoutAudience_DefaultsToSingleTenant(string tenantId)
+        {
+            var parameters = new ApplicationParameters
+            {
+                TenantId = tenantId
+            };
+
+            var application = MicrosoftIdentityPlatformApplicationManager.CreateApplication(parameters);
+
+            Assert.Equal("AzureADMyOrg", application.SignInAudience);
+        }
+
+        [Theory]
+        [InlineData("MultiOrg", "AzureADMultipleOrgs")]
+        [InlineData("MultiOrgAndPersonal", "AzureADandPersonalMicrosoftAccount")]
+        [InlineData("Personal", "PersonalMicrosoftAccount")]
+        public void CreateApplication_ExplicitAudience_PreservesRequestedAudience(string audience, string expected)
+        {
+            var parameters = new ApplicationParameters
+            {
+                TenantId = "contoso.onmicrosoft.com",
+                SignInAudience = audience
+            };
+
+            var application = MicrosoftIdentityPlatformApplicationManager.CreateApplication(parameters);
+
+            Assert.Equal(expected, application.SignInAudience);
+        }
+
+        [Theory]
+        [InlineData(null, false, false, "AzureADandPersonalMicrosoftAccount")]
+        [InlineData("COMMON", false, false, "AzureADandPersonalMicrosoftAccount")]
+        [InlineData("organizations", false, false, "AzureADandPersonalMicrosoftAccount")]
+        [InlineData("consumers", false, false, "AzureADandPersonalMicrosoftAccount")]
+        [InlineData("contoso.onmicrosoft.com", true, false, "AzureADandPersonalMicrosoftAccount")]
+        [InlineData("contoso.onmicrosoft.com", false, true, "AzureADMyOrg")]
+        public void CreateApplication_OutsideWorkforceDefault_PreservesExistingBehavior(
+            string tenantId, bool isB2C, bool isCiam, string expected)
+        {
+            var parameters = new ApplicationParameters
+            {
+                TenantId = tenantId,
+                IsB2C = isB2C,
+                IsCiam = isCiam
+            };
+
+            var application = MicrosoftIdentityPlatformApplicationManager.CreateApplication(parameters);
+
+            Assert.Equal(expected, application.SignInAudience);
+        }
+
         [Theory]
         [MemberData(nameof(UriList))]
         public void ValidateUrisTests(List<string> urisToValidate, List<string> validUris)

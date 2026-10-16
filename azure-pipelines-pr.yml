@@ -1,3 +1,4 @@
+# CI timing experiment baseline: keep the production job graph and tests unchanged.
 trigger:
   batch: true
   branches:

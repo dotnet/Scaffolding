@@ -1,4 +1,4 @@
-# CI timing experiment baseline: keep the production job graph and tests unchanged.
+# CI timing experiment: preserve every OS/configuration test run.
 trigger:
   batch: true
   branches:
@@ -193,10 +193,11 @@ stages:
 - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
   - stage: integration
     displayName: Scaffold Integration Matrix
-    dependsOn: build
+    dependsOn: []
     jobs:
     - template: /eng/pipelines/scaffold-integration-matrix.yml
       parameters:
         buildConfig: Release
         poolName: $(DncEngPublicBuildPool)
         poolDemands: ImageOverride -equals 1es-windows-2022-open
+        reuseBuildOutputs: true

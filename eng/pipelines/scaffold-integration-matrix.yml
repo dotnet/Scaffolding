@@ -18,6 +18,9 @@ parameters:
 - name: poolVmImage
   type: string
   default: ''
+- name: reuseBuildOutputs
+  type: boolean
+  default: false
 
 jobs:
 # CLI Option Coverage gate — fast, non-matrix
@@ -67,6 +70,12 @@ jobs:
       --logger "trx;LogFileName=CLIOptionCoverage.trx"
       --results-directory $(Build.ArtifactStagingDirectory)/TestResults
     displayName: Run CLI Option Coverage Tests
+  - ${{ if parameters.reuseBuildOutputs }}:
+    - task: PublishPipelineArtifact@1
+      displayName: Publish Integration Binaries
+      inputs:
+        targetPath: $(Build.SourcesDirectory)\artifacts\bin
+        artifact: ScaffoldIntegrationBinaries
   - task: PublishTestResults@2
     displayName: Publish CLI Option Coverage Results
     condition: always()
@@ -140,11 +149,25 @@ jobs:
       packageType: sdk
       version: 10.x
       installationPath: $(Build.SourcesDirectory)/.dotnet
-  - script: eng\common\build.cmd
-      -configuration ${{ parameters.buildConfig }}
-      -prepareMachine
-      -restore -build -ci
-    displayName: Build
+  - ${{ if parameters.reuseBuildOutputs }}:
+    # Restore on each agent so generated assets reference its own package cache.
+    - script: eng\common\build.cmd
+        -configuration ${{ parameters.buildConfig }}
+        -prepareMachine
+        -restore -ci
+      displayName: Restore Integration Dependencies
+    - task: DownloadPipelineArtifact@2
+      displayName: Download Integration Binaries
+      inputs:
+        buildType: current
+        artifactName: ScaffoldIntegrationBinaries
+        targetPath: $(Build.SourcesDirectory)\artifacts\bin
+  - ${{ else }}:
+    - script: eng\common\build.cmd
+        -configuration ${{ parameters.buildConfig }}
+        -prepareMachine
+        -restore -build -ci
+      displayName: Build
   - script: >
       dotnet test test/dotnet-scaffolding/dotnet-scaffold.Tests/dotnet-scaffold.Tests.csproj
       --no-build

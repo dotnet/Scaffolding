@@ -330,6 +330,7 @@ public class HtmlRecipeTests : IDisposable
 
     [Fact]
     [Trait("Suite", "ScaffoldIntegration")]
+    [Trait("Family", "blazor-empty")]
     public async Task ExecuteAsync_StandaloneBlazorWebAssemblyRecipeSupportsSubstitutionsAndReruns()
     {
         var create = await ScaffoldCliHelper.RunDotNetAsync(_directory,

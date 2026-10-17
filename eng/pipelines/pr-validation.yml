@@ -1,0 +1,107 @@
+# Release unit tests on every OS; all scaffold integration cases once on Windows.
+jobs:
+- template: /eng/common/templates/jobs/jobs.yml
+  parameters:
+    enablePublishBuildArtifacts: true
+    enablePublishTestResults: true
+    jobs:
+    - job: PRWindows
+      displayName: Windows Release
+      timeoutInMinutes: 30
+      pool:
+        name: $(DncEngPublicBuildPool)
+        demands: ImageOverride -equals 1es-windows-2022-open
+      variables:
+        _BuildConfig: Release
+        _PublishType: none
+        _SignType: test
+        _DotNetPublishToBlobFeed: false
+      steps:
+      - checkout: self
+        clean: true
+      - task: UseDotNet@2
+        displayName: Install .NET 8 SDK
+        inputs:
+          packageType: sdk
+          version: 8.x
+          installationPath: $(Build.SourcesDirectory)/.dotnet
+      - task: UseDotNet@2
+        displayName: Install .NET 9 SDK
+        inputs:
+          packageType: sdk
+          version: 9.x
+          installationPath: $(Build.SourcesDirectory)/.dotnet
+      - task: UseDotNet@2
+        displayName: Install .NET 10 SDK
+        inputs:
+          packageType: sdk
+          version: 10.x
+          installationPath: $(Build.SourcesDirectory)/.dotnet
+      - script: eng\common\build.cmd
+          -configuration Release
+          -prepareMachine
+          -restore -build -test -sign -pack -ci
+          /p:ExcludeScaffoldIntegrationTests=true
+        displayName: Build, unit tests, and packaging
+      - task: PublishPipelineArtifact@1
+        displayName: Publish Integration Binaries
+        inputs:
+          targetPath: $(Build.SourcesDirectory)\artifacts\bin
+          artifact: ScaffoldIntegrationBinaries
+
+    - job: PRLinux
+      displayName: Linux Release
+      timeoutInMinutes: 30
+      pool:
+        name: $(DncEngPublicBuildPool)
+        demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+      variables:
+        _BuildConfig: Release
+      steps:
+      - checkout: self
+        clean: true
+      - task: UseDotNet@2
+        displayName: Install .NET 10 SDK
+        inputs:
+          packageType: sdk
+          version: 10.x
+          installationPath: $(Build.SourcesDirectory)/.dotnet
+      - script: eng/common/build.sh
+          --configuration Release
+          --prepareMachine
+          --restore --build --test --ci
+          /p:ExcludeScaffoldIntegrationTests=true
+        displayName: Build and unit tests
+      - template: /eng/pipelines/scaffold-smoke.yml
+
+    - job: PRMacOS
+      displayName: macOS Release
+      timeoutInMinutes: 30
+      pool:
+        vmImage: macOS-latest
+      variables:
+        _BuildConfig: Release
+      steps:
+      - checkout: self
+        clean: true
+      - task: UseDotNet@2
+        displayName: Install .NET 10 SDK
+        inputs:
+          packageType: sdk
+          version: 10.x
+          installationPath: $(Build.SourcesDirectory)/.dotnet
+      - script: eng/common/build.sh
+          --configuration Release
+          --prepareMachine
+          --restore --build --test --ci
+          /p:ExcludeScaffoldIntegrationTests=true
+        displayName: Build and unit tests
+      - template: /eng/pipelines/scaffold-smoke.yml
+
+- template: /eng/pipelines/scaffold-integration-matrix.yml
+  parameters:
+    buildConfig: Release
+    poolName: $(DncEngPublicBuildPool)
+    poolDemands: ImageOverride -equals 1es-windows-2022-open
+    reuseBuildOutputs: true
+    producerJob: PRWindows

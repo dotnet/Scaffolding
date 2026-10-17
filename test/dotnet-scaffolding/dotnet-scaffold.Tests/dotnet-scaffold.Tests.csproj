@@ -5,6 +5,10 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(ExcludeScaffoldIntegrationTests)' == 'true'">
+    <TestRunnerAdditionalArguments>$(TestRunnerAdditionalArguments) -notrait Suite=ScaffoldIntegration</TestRunnerAdditionalArguments>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

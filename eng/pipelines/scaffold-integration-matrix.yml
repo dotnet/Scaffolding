@@ -1,5 +1,5 @@
 # Template: Scaffold Integration Matrix
-# Runs integration tests sharded by scaffolder Family, with all Framework TFMs per job.
+# Defaults to family shards; callers can supply balanced integration selections.
 # Usage: Reference from azure-pipelines-pr.yml and azure-pipelines.yml
 
 parameters:
@@ -24,6 +24,30 @@ parameters:
 - name: producerJob
   type: string
   default: ''
+- name: integrationMatrix
+  type: object
+  default:
+    API:
+      _Family: 'Family=apicontroller|Family=minimalapi'
+      _FamilyLabel: API
+    Blazor:
+      _Family: 'Family=blazor-crud|Family=blazor-empty'
+      _FamilyLabel: Blazor
+    MVC:
+      _Family: 'Family=mvccontroller|Family=mvccontroller-crud|Family=razorviews|Family=razorview-empty|Family=area'
+      _FamilyLabel: MVC
+    RazorPages:
+      _Family: 'Family=razorpages-crud|Family=razorpage-empty'
+      _FamilyLabel: RazorPages
+    Identity:
+      _Family: 'Family=identity|Family=blazor-identity'
+      _FamilyLabel: Identity
+    EntraId:
+      _Family: 'Family=entra-id'
+      _FamilyLabel: EntraId
+    Aspire:
+      _Family: 'Family=aspire-caching|Family=aspire-database|Family=aspire-storage'
+      _FamilyLabel: Aspire
 
 jobs:
 # CLI Option Coverage gate — fast, non-matrix
@@ -95,7 +119,7 @@ jobs:
         artifactName: TestResults-CLIOptionCoverage
         artifactType: Container
 
-# Integration test matrix — one job per scaffolder family
+# Integration test matrix
 - job: ScaffoldIntegration
   displayName: 'Integration: '
   dependsOn: ${{ coalesce(parameters.producerJob, 'CLIOptionCoverage') }}
@@ -110,28 +134,7 @@ jobs:
     ${{ if ne(parameters.poolVmImage, '') }}:
       vmImage: ${{ parameters.poolVmImage }}
   strategy:
-    matrix:
-      API:
-        _Family: 'Family=apicontroller|Family=minimalapi'
-        _FamilyLabel: API
-      Blazor:
-        _Family: 'Family=blazor-crud|Family=blazor-empty'
-        _FamilyLabel: Blazor
-      MVC:
-        _Family: 'Family=mvccontroller|Family=mvccontroller-crud|Family=razorviews|Family=razorview-empty|Family=area'
-        _FamilyLabel: MVC
-      RazorPages:
-        _Family: 'Family=razorpages-crud|Family=razorpage-empty'
-        _FamilyLabel: RazorPages
-      Identity:
-        _Family: 'Family=identity|Family=blazor-identity'
-        _FamilyLabel: Identity
-      EntraId:
-        _Family: 'Family=entra-id'
-        _FamilyLabel: EntraId
-      Aspire:
-        _Family: 'Family=aspire-caching|Family=aspire-database|Family=aspire-storage'
-        _FamilyLabel: Aspire
+    matrix: ${{ parameters.integrationMatrix }}
   steps:
   - checkout: self
     clean: true

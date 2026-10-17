@@ -479,7 +479,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet
 
 #### Running Tests
 
-The PR pipeline runs Release unit tests on Windows, Linux, and macOS. Scaffold integration tests run in Windows family shards; Linux and macOS additionally run three scaffold-and-build smoke tests (Minimal API, Blazor CRUD, and MVC areas). Debug and exhaustive cross-platform integration coverage run in the daily full-validation pipeline, or when `fullValidation` is selected when queueing the pipeline. This intentionally reduces per-PR OS/configuration coverage; it does not remove tests from the full suite.
+The PR pipeline runs Release unit tests on Windows, Linux, and macOS. Scaffold integration tests run in six balanced Windows shards; Linux and macOS additionally run three scaffold-and-build smoke tests (Minimal API, Blazor CRUD, and MVC areas). A discovery guard verifies that the unit/shard selections cover every CLI test case exactly once. Debug and exhaustive cross-platform integration coverage run in the daily full-validation pipeline, or when `fullValidation` is selected when queueing the pipeline. This intentionally reduces per-PR OS/configuration coverage; it does not remove tests from the full suite.
 
 **You must run the test suite and confirm it passes before opening a pull request.** A PR with failing or unrun tests will not be merged, and CI will run these same tests on your branch.
 

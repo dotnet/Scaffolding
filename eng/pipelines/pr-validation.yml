@@ -1,4 +1,27 @@
 # Release unit tests on every OS; all scaffold integration cases once on Windows.
+parameters:
+- name: integrationMatrix
+  type: object
+  default:
+    LegacyIdentityMvc:
+      _Family: '(Family=identity|Family=blazor-identity|Family=mvccontroller|Family=mvccontroller-crud|Family=razorviews|Family=razorview-empty|Family=area)&(FullyQualifiedName~Net8IntegrationTests|FullyQualifiedName~Net9IntegrationTests)'
+      _FamilyLabel: LegacyIdentityMvc
+    CurrentIdentityApi:
+      _Family: '(Family=identity|Family=blazor-identity|Family=apicontroller|Family=minimalapi)&(FullyQualifiedName~Net10IntegrationTests|FullyQualifiedName~Net11IntegrationTests)'
+      _FamilyLabel: CurrentIdentityApi
+    InteractivityLegacyPages:
+      _Family: 'FullyQualifiedName~BlazorIdentityInteractivityIntegrationTests|((Family=razorpages-crud|Family=razorpage-empty)&(FullyQualifiedName~Net8IntegrationTests|FullyQualifiedName~Net9IntegrationTests))'
+      _FamilyLabel: InteractivityLegacyPages
+    BaselinesConfiguration:
+      _Family: '(FullyQualifiedName!~Net8IntegrationTests&FullyQualifiedName!~Net9IntegrationTests&FullyQualifiedName!~Net10IntegrationTests&FullyQualifiedName!~Net11IntegrationTests&FullyQualifiedName!~BlazorIdentityInteractivityIntegrationTests)|Family=entra-id|Family=aspire-caching|Family=aspire-database|Family=aspire-storage'
+      _FamilyLabel: BaselinesConfiguration
+    BlazorLegacyApi:
+      _Family: '((Family=blazor-crud|Family=blazor-empty)&(FullyQualifiedName~Net8IntegrationTests|FullyQualifiedName~Net9IntegrationTests|FullyQualifiedName~Net10IntegrationTests|FullyQualifiedName~Net11IntegrationTests))|((Family=apicontroller|Family=minimalapi)&(FullyQualifiedName~Net8IntegrationTests|FullyQualifiedName~Net9IntegrationTests))'
+      _FamilyLabel: BlazorLegacyApi
+    CurrentMvcPages:
+      _Family: '(Family=mvccontroller|Family=mvccontroller-crud|Family=razorviews|Family=razorview-empty|Family=area|Family=razorpages-crud|Family=razorpage-empty)&(FullyQualifiedName~Net10IntegrationTests|FullyQualifiedName~Net11IntegrationTests)'
+      _FamilyLabel: CurrentMvcPages
+
 jobs:
 - template: /eng/common/templates/jobs/jobs.yml
   parameters:
@@ -43,6 +66,12 @@ jobs:
           -restore -build -test -sign -pack -ci
           /p:ExcludeScaffoldIntegrationTests=true
         displayName: Build, unit tests, and packaging
+      - pwsh: |
+          & "$(Build.SourcesDirectory)/eng/validate-integration-partitions.ps1" `
+            -Matrix ($env:SCAFFOLD_INTEGRATION_MATRIX | ConvertFrom-Json)
+        displayName: Verify every CLI test belongs to exactly one PR selection
+        env:
+          SCAFFOLD_INTEGRATION_MATRIX: ${{ convertToJson(parameters.integrationMatrix) }}
       - task: PublishPipelineArtifact@1
         displayName: Publish Integration Binaries
         inputs:
@@ -105,3 +134,4 @@ jobs:
     poolDemands: ImageOverride -equals 1es-windows-2022-open
     reuseBuildOutputs: true
     producerJob: PRWindows
+    integrationMatrix: ${{ parameters.integrationMatrix }}

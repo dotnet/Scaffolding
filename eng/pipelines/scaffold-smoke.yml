@@ -1,0 +1,22 @@
+steps:
+- script: >
+    dotnet test test/dotnet-scaffolding/dotnet-scaffold.Tests/dotnet-scaffold.Tests.csproj
+    --no-build
+    -c Release
+    --filter "Suite=CrossPlatformSmoke"
+    --logger "trx;LogFileName=Smoke.trx"
+    --results-directory "$(Build.ArtifactStagingDirectory)/SmokeResults"
+  displayName: Scaffold and build API, Blazor CRUD, and MVC smoke tests
+- pwsh: |
+    & "$(Build.SourcesDirectory)/eng/validate-smoke-results.ps1" `
+      -ResultsPath "$(Build.ArtifactStagingDirectory)/SmokeResults/Smoke.trx"
+  displayName: Require all three smoke tests to pass
+- task: PublishTestResults@2
+  displayName: Publish smoke results
+  condition: always()
+  inputs:
+    testResultsFormat: VSTest
+    testResultsFiles: '$(Build.ArtifactStagingDirectory)/SmokeResults/*.trx'
+    testRunTitle: 'Cross-platform smoke - $(Agent.OS)'
+    failTaskOnFailedTests: true
+    failTaskOnMissingResultsFile: true

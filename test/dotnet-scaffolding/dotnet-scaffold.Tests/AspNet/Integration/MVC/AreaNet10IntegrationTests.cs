@@ -14,6 +14,7 @@ public class AreaNet10IntegrationTests : AreaIntegrationTestsBase
     protected override string TestClassName => nameof(AreaNet10IntegrationTests);
 
     [Fact]
+    [Trait("Suite", "CrossPlatformSmoke")]
     public async Task Scaffold_Area_Net10_CliInvocation()
     {
         File.WriteAllText(_testProjectPath, ProjectContent);

@@ -14,6 +14,7 @@ public class BlazorCrudNet10IntegrationTests : BlazorCrudIntegrationTestsBase
     protected override string TestClassName => nameof(BlazorCrudNet10IntegrationTests);
 
     [Fact]
+    [Trait("Suite", "CrossPlatformSmoke")]
     public async Task Scaffold_BlazorCrud_Net10_CliInvocation()
     {
         File.WriteAllText(_testProjectPath, ProjectContent);

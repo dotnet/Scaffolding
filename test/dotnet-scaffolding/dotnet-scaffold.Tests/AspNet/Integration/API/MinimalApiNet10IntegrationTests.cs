@@ -14,6 +14,7 @@ public class MinimalApiNet10IntegrationTests : MinimalApiIntegrationTestsBase
     protected override string TestClassName => nameof(MinimalApiNet10IntegrationTests);
 
     [Fact]
+    [Trait("Suite", "CrossPlatformSmoke")]
     public async Task Scaffold_MinimalApi_Net10_CliInvocation()
     {
         // Arrange — set up project with Program.cs and a model class

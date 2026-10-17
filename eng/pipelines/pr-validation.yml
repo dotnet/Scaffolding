@@ -12,10 +12,10 @@ jobs:
         name: $(DncEngPublicBuildPool)
         demands: ImageOverride -equals 1es-windows-2022-open
       variables:
-        _BuildConfig: Release
-        _PublishType: none
-        _SignType: test
-        _DotNetPublishToBlobFeed: false
+      - _BuildConfig: Release
+      - _PublishType: none
+      - _SignType: test
+      - _DotNetPublishToBlobFeed: false
       steps:
       - checkout: self
         clean: true
@@ -56,7 +56,7 @@ jobs:
         name: $(DncEngPublicBuildPool)
         demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
       variables:
-        _BuildConfig: Release
+      - _BuildConfig: Release
       steps:
       - checkout: self
         clean: true
@@ -80,7 +80,7 @@ jobs:
       pool:
         vmImage: macOS-latest
       variables:
-        _BuildConfig: Release
+      - _BuildConfig: Release
       steps:
       - checkout: self
         clean: true

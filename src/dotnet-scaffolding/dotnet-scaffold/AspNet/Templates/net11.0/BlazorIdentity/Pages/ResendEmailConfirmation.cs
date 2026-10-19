@@ -65,9 +65,12 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "Encoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        var callbackUrl" +
                     " = NavigationManager.GetUriWithQueryParameters(\r\n            NavigationManager.T" +
                     "oAbsoluteUri(\"Account/ConfirmEmail\").AbsoluteUri,\r\n            new Dictionary<st" +
-                    "ring, object?> { [\"userId\"] = userId, [\"code\"] = code });\r\n        await EmailSe" +
-                    "nder.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(cal" +
-                    "lbackUrl));\r\n\r\n        message = \"Verification email sent. Please check your ema" +
+                    "ring, object?> { [\"userId\"] = userId, [\"code\"] = code });\r\n" +
+                    "        var storedEmail = await UserManager.GetEmailAsync(user);\r\n" +
+                    "        if (string.IsNullOrEmpty(storedEmail))\r\n        {\r\n" +
+                    "            throw new InvalidOperationException(\"Users must have an email.\");\r\n" +
+                    "        }\r\n\r\n        await EmailSender.SendConfirmationLinkAsync(user, storedEmail, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n" +
+                    "        message = \"Verification email sent. Please check your ema" +
                     "il.\";\r\n    }\r\n\r\n    private sealed class InputModel\r\n    {\r\n        [Required]\r\n" +
                     "        [EmailAddress]\r\n        public string Email { get; set; } = \"\";\r\n    }\r\n" +
                     "}\r\n");

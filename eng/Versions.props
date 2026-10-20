@@ -75,7 +75,9 @@
     <SystemDiagnosticsDiagnosticSourcePackageVersion8>8.0.1</SystemDiagnosticsDiagnosticSourcePackageVersion8>
     <SpectreConsoleFlowVersion>0.5.638</SpectreConsoleFlowVersion>
     <SpectreConsoleVersion>0.47.0</SpectreConsoleVersion>
-    <MicrosoftCodeAnalysisVersion>5.3.0</MicrosoftCodeAnalysisVersion>
+    <MicrosoftCodeAnalysisVersion>5.9.0</MicrosoftCodeAnalysisVersion>
+    <!-- Roslyn 5.9's MSBuild workspace assets require .NET 10 or later. -->
+    <MicrosoftCodeAnalysisVersion Condition="'$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net9.0'">5.3.0</MicrosoftCodeAnalysisVersion>
     <!-- Shared and dotnet-scaffolding projects are in the same dependency graph. Keep their central Roslyn pins aligned. -->
     <MicrosoftCodeAnalysisPreviewVersion>$(MicrosoftCodeAnalysisVersion)</MicrosoftCodeAnalysisPreviewVersion>
     <SystemCommandLinePackageVersion>2.0.0</SystemCommandLinePackageVersion>
@@ -100,14 +102,14 @@
     <MicrosoftAspNetCoreRazorLanguagePackageVersion>6.0.24</MicrosoftAspNetCoreRazorLanguagePackageVersion>
     <!-- Microsoft.Build - TFM-specific versions -->
     <!-- net8.0 uses 17.8.x, net9.0 uses 17.12.x, net10/11 use 18.x -->
-    <MicrosoftBuildPackageVersion>18.4.0</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>18.9.6</MicrosoftBuildPackageVersion>
     <MicrosoftBuildPackageVersion9>17.13.26</MicrosoftBuildPackageVersion9>
     <MicrosoftBuildPackageVersion8>17.11.48</MicrosoftBuildPackageVersion8>
-    <MicrosoftBuildTasksCorePackageVersion>18.4.0</MicrosoftBuildTasksCorePackageVersion>
+    <MicrosoftBuildTasksCorePackageVersion>18.9.6</MicrosoftBuildTasksCorePackageVersion>
     <MicrosoftBuildTasksCorePackageVersion9>17.13.26</MicrosoftBuildTasksCorePackageVersion9>
     <MicrosoftBuildTasksCorePackageVersion8>17.11.48</MicrosoftBuildTasksCorePackageVersion8>
     <!-- Microsoft.Build.Utilities - TFM-specific versions -->
-    <MicrosoftBuildUtilitiesCorePackageVersion>18.4.0</MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>18.9.6</MicrosoftBuildUtilitiesCorePackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion9>17.13.26</MicrosoftBuildUtilitiesCorePackageVersion9>
     <MicrosoftBuildUtilitiesCorePackageVersion8>17.11.48</MicrosoftBuildUtilitiesCorePackageVersion8>
     <MicrosoftBuildLocatorPackageVersion>1.9.1</MicrosoftBuildLocatorPackageVersion>
@@ -159,6 +161,6 @@
     <MicrosoftIdentityClientExtensionsMsalVersion>4.73.1</MicrosoftIdentityClientExtensionsMsalVersion>
     <NuGetProjectModelVersion>7.3.1</NuGetProjectModelVersion>
     <SystemCommandLineVersion>2.0.0</SystemCommandLineVersion>
-    <SystemSecurityCryptographyProtectedDataVersion>10.0.3</SystemSecurityCryptographyProtectedDataVersion>
+    <SystemSecurityCryptographyProtectedDataVersion>10.0.8</SystemSecurityCryptographyProtectedDataVersion>
   </PropertyGroup>
 </Project>

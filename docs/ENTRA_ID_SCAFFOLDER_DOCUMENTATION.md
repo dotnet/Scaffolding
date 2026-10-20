@@ -51,6 +51,13 @@ The Entra ID Scaffolder is part of the modern .NET scaffolding system that helps
 - Automatically generates and stores client secrets securely
 - Uses the underlying `dotnet msidentity` tool for Azure AD operations
 
+When creating a new registration for a specific workforce tenant, the identity
+tool defaults to single-tenant accounts (`AzureADMyOrg`) unless an audience is
+explicitly supplied through its application parameters. Reusing an existing
+registration does not change its audience. This default requires a version of
+`dotnet msidentity` containing the single-tenant default fix; updating the
+scaffolder alone does not update an already installed identity tool.
+
 ### 2. **Code Generation**
 - Generates authentication-related code files from templates
 - Adds appropriate authentication middleware configuration

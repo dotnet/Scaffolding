@@ -6,6 +6,7 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -128,12 +129,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     {
                         ClientId = match.Groups[1].Value;
                         context.Properties["ClientId"] = ClientId;
+                        context.Properties[EntraRegistrationCleanup.CreatedClientIdKey] = ClientId;
                         _logger.LogInformation($"Captured client ID: {ClientId}");
                     }
                     else
                     {
-                        _logger.LogWarning("Could not extract client ID from output");
+                        _logger.LogError("Could not extract the created client ID. Check the selected tenant for an application created during this run and remove it before retrying.");
+                        return false;
                     }
+                }
+                if (string.IsNullOrEmpty(ClientId))
+                {
+                    _logger.LogError("Registration returned no client ID. Check the selected tenant for an application created during this run before retrying.");
+                    return false;
                 }
                 return true;
             }

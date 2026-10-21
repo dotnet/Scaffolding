@@ -1,2 +1,40 @@
 New and improved scaffolding experience. 
 More details coming soon!
+
+### Entra ID account selection
+
+Entra ID scaffolding currently uses both `dotnet msidentity` and the Azure CLI.
+Before creating or updating an application, scaffolding verifies that the Azure
+CLI's active tenant and user match the selected `--tenantId` and `--username`.
+Service principal logins cannot be used in place of the selected user.
+
+If validation fails, run `az login --tenant <tenant-id> --allow-no-subscriptions`,
+sign in as the selected user, and verify the active identity with
+`az account show` before retrying. Scaffolding does not switch the CLI account
+automatically.
+
+Authorization is configured before creating a development client secret or
+updating app settings. If authorization, secret configuration, or app-settings
+persistence fails, scaffolding attempts to delete only the application created
+during that run, including its
+password credentials. Existing applications are never deleted. Cleanup failures
+identify the application and tenant requiring manual removal.
+
+Cleanup uses `dotnet msidentity` with the selected tenant and username, not the
+ambient Azure CLI account. Deleting the application also deletes its service
+principal in its home tenant, as described in
+[Microsoft Entra application removal documentation](https://learn.microsoft.com/en-us/entra/identity-platform/howto-remove-app).
+Service principals in other tenants are outside this cleanup scope.
+No new password credential is created when using an existing application.
+
+The CLI identity is checked again immediately before authorization. These checks
+do not lock the global CLI session: another process could still change it between
+validation and the update. Avoid changing the CLI account during scaffolding.
+This is the issue's CLI-validation fallback, not a retained Graph credential.
+
+Once the new application's identifier has been recorded, cleanup is best-effort
+and covers authorization, credential setup, and app-settings persistence, not
+subsequent package installation or code generation failures. If registration
+fails without returning an identifier, inspect the selected tenant manually.
+Cleanup does not restore local files or remove saved user secrets; after a
+failed run, check local configuration before retrying.

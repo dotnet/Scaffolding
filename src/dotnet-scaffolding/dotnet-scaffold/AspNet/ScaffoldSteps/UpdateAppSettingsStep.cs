@@ -7,7 +7,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.Extensions.Logging;
-using Spectre.Console;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 {
@@ -78,6 +78,27 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// <returns>Task representing the asynchronous operation.</returns>
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
+            var succeeded = false;
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                succeeded = UpdateSettings();
+                return Task.FromResult(succeeded);
+            }
+            finally
+            {
+                if (!succeeded)
+                {
+                    CleanupRegistration(context);
+                }
+            }
+        }
+
+        protected virtual void CleanupRegistration(ScaffolderContext context)
+            => EntraRegistrationCleanup.TryCleanup(context, TenantId, Username, _logger);
+
+        private bool UpdateSettings()
+        {
             try
             {
                 var baseProjectPath = Path.GetDirectoryName(ProjectPath);
@@ -85,7 +106,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 if (string.IsNullOrEmpty(ProjectPath) || baseProjectPath is null || !_fileSystem.DirectoryExists(baseProjectPath))
                 {
                     _logger.LogError($"Invalid project path: {ProjectPath}");
-                    return Task.FromResult(false);
+                    return false;
                 }                
 
                 // Find or create appsettings.json file
@@ -104,7 +125,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 // If appsettings.json doesn't exist, create a new one
                 if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
                 {
-                    appSettingsFile = Path.Combine(ProjectPath, "appsettings.json");
+                    appSettingsFile = Path.Combine(baseProjectPath, "appsettings.json");
                     content = new JsonObject();
                     writeContent = true;
                     _logger.LogInformation($"Creating new appsettings.json file at {appSettingsFile}");
@@ -120,14 +141,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     catch (JsonException ex)
                     {
                         _logger.LogError($"Failed to parse appsettings.json file at {appSettingsFile}: {ex.Message}");
-                        return Task.FromResult(false);
+                        return false;
                     }
                 }
 
                 if (content is null)
                 {
                     _logger.LogError($"Failed to parse or create appsettings.json file at {appSettingsFile}");
-                    return Task.FromResult(false);
+                    return false;
                 }
 
                 // Look for the "AzureAd" node or create it if it doesn't exist
@@ -189,6 +210,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     // Update the AzureAd node
                     content[azureAdNodeName] = azureAdObject;
                 }
+                else
+                {
+                    _logger.LogError("The AzureAd section in {AppSettingsFile} must be a JSON object.", appSettingsFile);
+                    return false;
+                }
 
                 // Write the updated content if changes were made
                 if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
@@ -201,14 +227,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with AzureAd configuration");
 
                         // Also check for appsettings.Development.json and update it if present
-                        UpdateDevelopmentSettings(ProjectPath, content);
-
-                        return Task.FromResult(true);
+                        return UpdateDevelopmentSettings(baseProjectPath, content);
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError($"Failed to write appsettings.json: {ex.Message}");
-                        return Task.FromResult(false);
+                        return false;
                     }
                 }
                 else
@@ -216,14 +240,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     _logger.LogInformation("No changes needed for AzureAd configuration in appsettings.json");
                 }
 
-                return Task.FromResult(true);
+                return true;
             }
             catch (Exception e)
             {
-                AnsiConsole.WriteLine(e.ToString());
+                _logger.LogError(e, "Failed to persist Entra ID application settings.");
             }
 
-            return Task.FromResult(false);
+            return false;
             
         }
 
@@ -232,7 +256,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// </summary>
         /// <param name="baseProjectPath">Base project path.</param>
         /// <param name="content">Content of the appsettings.json file.</param>
-        private void UpdateDevelopmentSettings(string baseProjectPath, JsonNode content)
+        private bool UpdateDevelopmentSettings(string baseProjectPath, JsonNode content)
         {
             var devSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
 
@@ -249,13 +273,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     {
                         devContent = JsonNode.Parse(devJsonString);
                     }
-                    catch
+                    catch (JsonException ex)
                     {
-                        // If there's an error parsing, create a new object
-                        devContent = new JsonObject();
+                        _logger.LogError(ex, "Failed to parse appsettings.Development.json at {Path}.", devSettingsPath);
+                        return false;
                     }
 
-                    if (devContent != null && content["AzureAd"] != null)
+                    if (devContent is not JsonObject)
+                    {
+                        _logger.LogError("appsettings.Development.json at {Path} must contain a JSON object.", devSettingsPath);
+                        return false;
+                    }
+
+                    if (content["AzureAd"] != null)
                     {
                         // Copy the AzureAd section to development settings
                         devContent["AzureAd"] = content["AzureAd"]?.DeepClone();
@@ -266,10 +296,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning($"Failed to update appsettings.Development.json: {ex.Message}");
-                    // Continue execution even if this fails
+                    _logger.LogError(ex, "Failed to update appsettings.Development.json.");
+                    return false;
                 }
             }
+            return true;
         }
     }
 }

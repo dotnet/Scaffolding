@@ -37,6 +37,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(ValidateBlazorCrudStep),
                 typeof(ValidateEfControllerStep),
                 typeof(ValidateEntraIdStep),
+                typeof(ValidateAzureCliIdentityStep),
                 typeof(ValidateIdentityStep),
                 typeof(ValidateMinimalApiStep),
                 typeof(ValidateRazorPagesStep),
@@ -363,11 +364,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                         step.Application = context.GetOptionResult(options.ApplicationId);
                         step.UseExistingApplication = context.GetOptionResult(options.UseExistingApplication);
                     })
+                    .WithValidateAzureCliIdentityStep()
                     .WithRegisterAppStep()
+                    .WithUpdateAppAuthorizationStep()
                     .WithAddClientSecretStep()
                     .WithDetectBlazorWasmStep()
                     .WithUpdateAppSettingsStep()
-                    .WithUpdateAppAuthorizationStep()
                     .WithEntraAddPackagesStep()
                     .WithEntraBlazorWasmAddPackagesStep()
                     .WithEntraIdCodeChangeStep()

@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.IO;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
+using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.Extensions.Logging;
@@ -118,7 +121,7 @@ public class AddClientSecretStepTests
         };
 
         // Assert
-        Assert.Equal("Authentication:AzureAd:ClientSecret", step.SecretName);
+        Assert.Equal("AzureAd:ClientCredentials:0:ClientSecret", step.SecretName);
     }
 
     [Fact]
@@ -296,5 +299,80 @@ public class AddClientSecretStepTests
 
         // Assert
         Assert.Equal(customSecretName, step.SecretName);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ExistingApplication_DoesNotCreateOrStoreCredential()
+    {
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        var environmentService = new Mock<IEnvironmentService>(MockBehavior.Strict);
+        var step = new AddClientSecretStep(
+            NullLogger<AddClientSecretStep>.Instance, _mockFileSystem.Object, environmentService.Object)
+        {
+            ProjectPath = _testProjectPath,
+            UseExistingApplication = true
+        };
+
+        Assert.True(await step.ExecuteAsync(_context));
+        Assert.Null(step.ClientSecret);
+        Assert.False(_context.Properties.ContainsKey("ClientSecret"));
+        environmentService.VerifyNoOtherCalls();
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public void StoreClientSecret_InitializesProjectAndPreservesExistingSecrets()
+    {
+        string projectDirectory = Path.Combine(Path.GetTempPath(), $"EntraCredentialTests-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(projectDirectory);
+        string projectPath = Path.Combine(projectDirectory, "Test.csproj");
+        File.WriteAllText(projectPath, "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup></Project>");
+        var step = new AddClientSecretStep(
+            NullLogger<AddClientSecretStep>.Instance, _mockFileSystem.Object, Mock.Of<IEnvironmentService>())
+        {
+            ProjectPath = projectPath
+        };
+
+        try
+        {
+            Assert.True(step.InitializeUserSecrets());
+            string? secretsId = XDocument.Load(projectPath).Root?.Element("PropertyGroup")?.Element("UserSecretsId")?.Value;
+            Assert.False(string.IsNullOrEmpty(secretsId));
+            var seed = DotnetCliRunner.CreateDotNet("user-secrets", ["set", "Unrelated:Setting", "preserved", "--project", projectPath]);
+            Assert.Equal(0, seed.ExecuteAndCaptureOutput(out _, out _));
+
+            Assert.True(step.StoreClientSecret("test-only-credential"));
+            Assert.True(step.InitializeUserSecrets());
+            Assert.True(step.StoreClientSecret("replacement-test-credential"));
+            Assert.Equal(secretsId, XDocument.Load(projectPath).Root?.Element("PropertyGroup")?.Element("UserSecretsId")?.Value);
+
+            var list = DotnetCliRunner.CreateDotNet("user-secrets", ["list", "--json", "--project", projectPath]);
+            Assert.Equal(0, list.ExecuteAndCaptureOutput(out string? output, out _));
+            using var secrets = JsonDocument.Parse(output!, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip });
+            Assert.Equal("ClientSecret", secrets.RootElement.GetProperty("AzureAd:ClientCredentials:0:SourceType").GetString());
+            Assert.Equal("replacement-test-credential", secrets.RootElement.GetProperty("AzureAd:ClientCredentials:0:ClientSecret").GetString());
+            Assert.Equal("preserved", secrets.RootElement.GetProperty("Unrelated:Setting").GetString());
+            Assert.DoesNotContain("test-credential", File.ReadAllText(projectPath));
+            Assert.False(File.Exists(Path.Combine(projectDirectory, "appsettings.json")));
+        }
+        finally
+        {
+            var clear = DotnetCliRunner.CreateDotNet("user-secrets", ["clear", "--project", projectPath]);
+            clear.ExecuteAndCaptureOutput(out _, out _);
+            Directory.Delete(projectDirectory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void StoreClientSecret_ReturnsFalse_WhenProjectCannotBeLoaded()
+    {
+        var step = new AddClientSecretStep(
+            NullLogger<AddClientSecretStep>.Instance, _mockFileSystem.Object, Mock.Of<IEnvironmentService>())
+        {
+            ProjectPath = Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}.csproj")
+        };
+
+        Assert.False(step.InitializeUserSecrets());
+        Assert.False(step.StoreClientSecret("test-only-credential"));
     }
 }

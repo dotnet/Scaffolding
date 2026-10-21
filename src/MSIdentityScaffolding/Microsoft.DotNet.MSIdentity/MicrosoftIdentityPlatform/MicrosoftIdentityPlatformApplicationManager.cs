@@ -44,12 +44,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 }
 
                 // Create the app.
-                Application application = new Application()
-                {
-                    DisplayName = applicationParameters.ApplicationDisplayName,
-                    SignInAudience = applicationParameters.IsCiam ? "AzureADMyOrg" : AppParameterAudienceToMicrosoftIdentityPlatformAppAudience(applicationParameters.SignInAudience!),
-                    Description = applicationParameters.Description
-                };
+                Application application = CreateApplication(applicationParameters);
 
                 if (applicationParameters.IsWebApi.GetValueOrDefault())
                 {
@@ -866,7 +861,28 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             };
         }
 
-        private string AppParameterAudienceToMicrosoftIdentityPlatformAppAudience(string audience)
+        internal static Application CreateApplication(ApplicationParameters applicationParameters)
+        {
+            string? audience = applicationParameters.SignInAudience;
+            string? tenantId = applicationParameters.TenantId;
+            bool defaultToSingleTenant = string.IsNullOrEmpty(audience)
+                && !applicationParameters.IsB2C
+                && !string.IsNullOrWhiteSpace(tenantId)
+                && !string.Equals(tenantId, "common", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(tenantId, "organizations", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(tenantId, "consumers", StringComparison.OrdinalIgnoreCase);
+
+            return new Application
+            {
+                DisplayName = applicationParameters.ApplicationDisplayName,
+                SignInAudience = applicationParameters.IsCiam || defaultToSingleTenant
+                    ? "AzureADMyOrg"
+                    : AppParameterAudienceToMicrosoftIdentityPlatformAppAudience(audience),
+                Description = applicationParameters.Description
+            };
+        }
+
+        private static string AppParameterAudienceToMicrosoftIdentityPlatformAppAudience(string? audience)
         {
             return audience switch
             {

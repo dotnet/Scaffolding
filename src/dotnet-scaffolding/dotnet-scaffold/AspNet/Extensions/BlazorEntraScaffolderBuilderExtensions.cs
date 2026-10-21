@@ -46,6 +46,7 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             }
 
             step.ProjectPath = entraSettings.Project;
+            step.UseExistingApplication = entraSettings.UseExistingApplication;
 
             if (string.IsNullOrEmpty(entraSettings.Username))
             {

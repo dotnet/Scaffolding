@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             }
             else
             {
-                _logger.LogInformation("Registering project...");
+                _logger.LogInformation("Registering an application for local development and testing. Use a separate app registration for production.");
                 // Initialize user secrets
                 bool success = RegisterApp(context);
                 if (!success)

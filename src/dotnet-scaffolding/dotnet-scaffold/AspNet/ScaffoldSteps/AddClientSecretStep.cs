@@ -3,6 +3,7 @@
 
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
@@ -32,7 +33,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// <summary>
         /// Gets or sets the secret name in user secrets.
         /// </summary>
-        public string? SecretName { get; set; } = "Authentication:AzureAd:ClientSecret";
+        public string? SecretName { get; set; } = "AzureAd:ClientCredentials:0:ClientSecret";
+        public bool UseExistingApplication { get; set; }
         /// <summary>
         /// Gets or sets the username for Azure AD.
         /// </summary>
@@ -69,11 +71,22 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return Task.FromResult(false);
             }
 
-            _logger.LogInformation("Initializing user secrets for project...");
+            if (UseExistingApplication)
+            {
+                _logger.LogInformation("Using an existing application. No password credential will be created. Configure a supported AzureAd:ClientCredentials credential locally if one is not already configured.");
+                _logger.LogWarning("Use a separate production app registration with managed identity/federated identity credentials or a certificate. Client secrets are for local development only.");
+                return Task.FromResult(true);
+            }
+
+            _logger.LogInformation("Configuring a client credential for local development only...");
 
             if (MsIdentityToolHelper.EnsureMsIdentityIsInstalled(_logger, GetCliEnvVars()))
             {
-                // Initialize user secrets
+                if (!InitializeUserSecrets())
+                {
+                    return Task.FromResult(false);
+                }
+
                 bool success = AddClientSecret(context);
                 if (!success)
                 {
@@ -82,6 +95,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 }
 
                 _logger.LogInformation("Successfully configured user secrets for the project.");
+                _logger.LogWarning("This development client secret is not suitable for production. Use a separate production app registration with managed identity/federated identity credentials or a certificate.");
                 return Task.FromResult(true);
             }
             return Task.FromResult(false);
@@ -101,8 +115,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 
                 if (exitCode != 0)
                 {
-                    _logger.LogError($"Error adding client secret: {stdErr}");
-                    _logger.LogError(MsIdentityToolHelper.NotInstalledMessage);
+                    _logger.LogError("Error adding client secret. The msidentity command exited with code {ExitCode}.", exitCode);
                     return false;
                 }
 
@@ -124,9 +137,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                                     string? clientSecret = valueElement.GetString();
                                     if (!string.IsNullOrEmpty(clientSecret))
                                     {
-                                        _logger.LogInformation("Successfully extracted client secret from JSON output");
+                                        if (!StoreClientSecret(clientSecret))
+                                        {
+                                            _logger.LogError("A development password credential was created but could not be saved. Remove the unused credential from the app registration before retrying.");
+                                            return false;
+                                        }
+
                                         context.Properties["ClientSecret"] = clientSecret;
-                                        ClientSecret = clientSecret; // Also store in the property
+                                        ClientSecret = clientSecret;
                                         return true;
                                     }
                                 }
@@ -134,9 +152,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                             _logger.LogError("JSON response doesn't contain expected success state or secret value");
                         }
                     }
-                    catch (JsonException ex)
+                    catch (JsonException)
                     {
-                        _logger.LogError($"Failed to parse JSON output: {ex.Message}");
+                        _logger.LogError("Failed to parse the client secret command's JSON response.");
                     }
                 }
                 else
@@ -144,12 +162,50 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     _logger.LogError("No output received from client secret command");
                 }
             } 
-            catch(Exception e)
+            catch (Exception e) when (e is IOException or InvalidOperationException)
             {
-                _logger.LogError($"Error adding client secret: {e.Message}");
+                _logger.LogError("Unable to create or store the development client credential.");
             }
 
             return false;
+        }
+
+        internal bool InitializeUserSecrets()
+        {
+            var runner = DotnetCliRunner.CreateDotNet("user-secrets", ["init", "--project", ProjectPath]);
+            int exitCode = runner.ExecuteAndCaptureOutput(out _, out _);
+            if (exitCode != 0)
+            {
+                _logger.LogError("Failed to initialize user secrets for the project (exit code {ExitCode}).", exitCode);
+                return false;
+            }
+
+            return true;
+        }
+
+        internal bool StoreClientSecret(string clientSecret)
+        {
+            if (string.IsNullOrWhiteSpace(SecretName))
+            {
+                _logger.LogError("A user-secrets key is required for the development client credential.");
+                return false;
+            }
+
+            // Send the credential over stdin so it never appears in command-line diagnostics.
+            string input = JsonSerializer.Serialize(new Dictionary<string, string>
+            {
+                ["AzureAd:ClientCredentials:0:SourceType"] = "ClientSecret",
+                [SecretName] = clientSecret
+            });
+            var runner = DotnetCliRunner.CreateDotNet("user-secrets", ["set", "--project", ProjectPath]);
+            int exitCode = runner.ExecuteAndCaptureOutput(out _, out _, input);
+            if (exitCode != 0)
+            {
+                _logger.LogError("Failed to save the development client credential in user secrets (exit code {ExitCode}).", exitCode);
+                return false;
+            }
+
+            return true;
         }
 
         Dictionary<string, string> GetCliEnvVars()

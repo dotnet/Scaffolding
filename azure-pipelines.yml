@@ -22,7 +22,6 @@ variables:
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - template: /eng/common/templates-official/variables/pool-providers.yml@self
-  - group: DotNet-AspNet-SDLValidation-Params
 
 resources:
   repositories:
@@ -64,7 +63,7 @@ extends:
           codeSign: true
           jobs:
           - job: Windows_NT
-            timeoutInMinutes: 180
+            timeoutInMinutes: 300
             pool:
               name: $(DncEngInternalBuildPool)
               image: 1es-windows-2022
@@ -72,8 +71,6 @@ extends:
             - _Script: eng\common\cibuild.cmd
             - _ValidateSdkArgs: ''
             - _InternalBuildArgs: ''
-            # DotNet-Symbol-Server-Pats provides: microsoft-symbol-server-pat, symweb-symbol-server-pat
-            - group: DotNet-Symbol-Server-Pats
             - _InternalBuildArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
                 /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
                 /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
@@ -129,6 +126,7 @@ extends:
       jobs:
       - template: /eng/pipelines/scaffold-integration-matrix.yml@self
         parameters:
+          isOfficial: true
           buildConfig: Release
           poolName: $(DncEngInternalBuildPool)
           poolImage: 1es-windows-2022
@@ -144,19 +142,8 @@ extends:
         # Sourcelink validation isn't passing for Arcade due to some regressions. This should be
         # enabled back once this issue is resolved: https://github.com/dotnet/arcade/issues/2912
         enableSourceLinkValidation: false
+        validateDependsOn:
+        - build
+        - integration
         publishDependsOn:
         - Validate
-        # This is to enable SDL runs part of Post-Build Validation Stage
-        SDLValidationParameters:
-          enable: true
-          continueOnError: false
-          params: ' -SourceToolsList @("policheck","credscan")
-          -TsaInstanceURL $(_TsaInstanceURL)
-          -TsaProjectName $(_TsaProjectName)
-          -TsaNotificationEmail $(_TsaNotificationEmail)
-          -TsaCodebaseAdmin $(_TsaCodebaseAdmin)
-          -TsaBugAreaPath $(_TsaBugAreaPath)
-          -TsaIterationPath $(_TsaIterationPath)
-          -TsaRepositoryName "Scaffolding"
-          -TsaCodebaseName "Scaffolding"
-          -TsaPublish $True'

@@ -25,13 +25,20 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
     protected override string TestClassName => nameof(EntraIdInteractiveE2ETests);
 
     [SkippableFact]
-    public async Task Scaffold_Interactive_Server_Builds()
+    public async Task Scaffold_Interactive_Server_RewritesRoutesAndBuilds()
     {
         var entraSettings = GetRequiredExternalEntraSettings();
 
-        // Arrange — minimal ASP.NET Web project
-        File.WriteAllText(_testProjectPath, ProjectContent);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetMinimalProgramCs());
+        var created = await ScaffoldCliHelper.RunDotNetAsync(
+            _testDirectory, "new", "blazor", "-n", "TestProject", "-o", _testProjectDir,
+            "-f", TargetFramework, "--interactivity", "Server", "--all-interactive", "--no-restore");
+        Assert.True(created.ExitCode == 0, $"dotnet new failed: {created.Output}\n{created.Error}");
+        string routesPath = Path.Combine(_testProjectDir, "Components", "Routes.razor");
+        string redirectPath = Path.Combine(_testProjectDir, "Components", "RedirectToLogin.razor");
+        Assert.Contains("AddInteractiveServerComponents",
+            File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs")));
+        Assert.Contains("<RouteView ", File.ReadAllText(routesPath));
+        Assert.False(File.Exists(redirectPath));
 
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
         Assert.True(preExitCode == 0, $"Project should build before scaffolding. Error: {preError}");
@@ -48,7 +55,13 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
 
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
-        // Assert — project builds after scaffolding
+        string routes = File.ReadAllText(routesPath);
+        Assert.Contains("<AuthorizeRouteView", routes);
+        Assert.Contains("<NotAuthorized>", routes);
+        Assert.Contains("<RedirectToLogin />", routes);
+        Assert.DoesNotContain("<RouteView ", routes);
+        Assert.Contains("authentication/login?returnUrl=", File.ReadAllText(redirectPath));
+
         var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
         Assert.True(postExitCode == 0, $"Project should build after scaffolding. Error: {postError}");
     }

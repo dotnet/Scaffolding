@@ -100,6 +100,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 
                 JsonNode? content;
                 bool writeContent = false;
+                bool appendFinalNewLine = true;
 
                 // If appsettings.json doesn't exist, create a new one
                 if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
@@ -113,6 +114,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 {
                     // Read existing appsettings.json
                     var jsonString = _fileSystem.ReadAllText(appSettingsFile);
+                    appendFinalNewLine = jsonString.EndsWith('\n') || jsonString.EndsWith('\r');
                     try
                     {
                         content = JsonNode.Parse(jsonString);
@@ -197,7 +199,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 
                     try
                     {
-                        _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
+                        var serializedContent = content.ToJsonString(options);
+                        _fileSystem.WriteAllText(appSettingsFile, appendFinalNewLine ? serializedContent + Environment.NewLine : serializedContent);
                         _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with AzureAd configuration");
 
                         // Also check for appsettings.Development.json and update it if present
@@ -261,7 +264,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         devContent["AzureAd"] = content["AzureAd"]?.DeepClone();
 
                         var options = new JsonSerializerOptions { WriteIndented = true };
-                        _fileSystem.WriteAllText(devSettingsPath, devContent.ToJsonString(options));
+                        var serializedContent = devContent.ToJsonString(options);
+                        var appendFinalNewLine = devJsonString.EndsWith('\n') || devJsonString.EndsWith('\r');
+                        _fileSystem.WriteAllText(devSettingsPath, appendFinalNewLine ? serializedContent + Environment.NewLine : serializedContent);
                     }
                 }
                 catch (Exception ex)

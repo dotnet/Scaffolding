@@ -38,7 +38,7 @@ The Entra ID Scaffolder is part of the modern .NET scaffolding system that helps
 - **Automates Complex Setup**: Handles app registration, code generation, and configuration automatically
 - **Leverages Azure CLI**: Uses your existing Azure credentials from the Azure CLI
 - **Reduces Errors**: Ensures consistent and correct authentication implementation
-- **Blazor Focus**: Optimized for Blazor Server and Blazor WebAssembly applications
+- **Blazor Focus**: Optimized for server-hosted Blazor Web Apps, including interactive WebAssembly and Auto
 - **Interactive Experience**: Offers choices for creating new or selecting existing app registrations
 
 ---
@@ -97,7 +97,9 @@ The Entra ID Scaffolder is part of the modern .NET scaffolding system that helps
 
 ### Project Requirements
 - An **existing** ASP.NET Core project (.csproj file)
-- Currently optimized for **Blazor** applications (Blazor Server and Blazor WebAssembly)
+- Currently optimized for server-hosted **Blazor Web Apps** (Server, WebAssembly, and Auto)
+- For apps with a WebAssembly client, select the **server project**, not the `.Client` project
+- Standalone Blazor WebAssembly apps require separate MSAL configuration and are not supported by this scaffolder
 - Project must be targeting **.NET 10.0 or later**
 
 ### Before You Begin
@@ -310,9 +312,9 @@ dotnet scaffold aspnet entra-id \
 dotnet run
 ```
 
-### Scenario 2: Add Auth to Existing Blazor WebAssembly Project
+### Scenario 2: Add Auth to an Existing Blazor Web App with WebAssembly Interactivity
 
-Retrofit authentication into an existing Blazor WASM application.
+Retrofit authentication into an existing server-hosted Blazor Web App. Select the server project; its referenced WebAssembly client is detected automatically.
 
 ```bash
 cd MyBlazorWasmApp
@@ -530,9 +532,9 @@ dotnet scaffold aspnet entra-id \
   --use-existing-application false
 ```
 
-### Scenario 3: Add Auth to Blazor WebAssembly Project (Interactive)
+### Scenario 3: Add Auth to a Blazor Web App with WebAssembly Interactivity (Interactive)
 
-Retrofit authentication into an existing Blazor WASM application.
+Retrofit authentication into a server-hosted Blazor Web App. In interactive mode, select the server project, not the `.Client` project.
 
 ```bash
 cd MyBlazorWasmApp
@@ -648,9 +650,15 @@ The Entra ID Scaffolder is currently optimized for:
 
 ### Blazor Applications (Primary Support)
 - **Blazor Server**: Server-side Blazor applications
-- **Blazor WebAssembly**: Client-side Blazor applications
-  - Standalone applications
-  - Hosted applications (with Web API backend)
+- **Blazor Web Apps with WebAssembly or Auto interactivity**: Select the server project that references the WebAssembly client.
+  - The server configures Entra authentication and serializes authentication state.
+  - The client deserializes that state; it does not use standalone MSAL authentication.
+  - The router uses `AuthorizeRouteView`, with `RedirectToLogin` generated in the project that owns the router.
+
+**Not supported:** Standalone Blazor WebAssembly apps and directly selected WebAssembly client projects.
+They are rejected before Azure app registration or client-secret creation. For a hosted Blazor Web App,
+select its server project instead. Standalone apps need separate MSAL authentication configuration;
+`AddAuthenticationStateDeserialization()` alone cannot authenticate them because there is no Blazor server host serializing the state.
 
 ### Framework Support
 - **.NET 10.0+**: **Required** (.NET 10 or higher)
@@ -1018,6 +1026,27 @@ dotnet user-secrets set "Authentication:AzureAd:ClientSecret" "your-secret" --pr
    - Follow Microsoft Identity platform updates
    - Review .NET authentication security advisories
    - Test auth flows after major framework updates
+
+---
+
+## External Integration Tests
+
+The interactive Entra ID E2E tests are opt-in because they invoke Azure-backed
+scaffolding with an existing app registration. Normal CI runs skip them unless
+`DOTNET_SCAFFOLD_RUN_ENTRA_E2E=1` and all of these environment variables are set:
+
+- `DOTNET_SCAFFOLD_ENTRA_USERNAME`
+- `DOTNET_SCAFFOLD_ENTRA_TENANT_ID`
+- `DOTNET_SCAFFOLD_ENTRA_APPLICATION_ID`
+
+Use a dedicated test app registration and an authenticated Azure CLI session.
+These tests can update the registration and create client secrets.
+
+The Server test generates a Blazor app with `--interactivity Server --all-interactive`.
+It verifies that scaffolding replaces `RouteView` with `AuthorizeRouteView` in
+`Components/Routes.razor`, references the generated `Components/RedirectToLogin.razor`,
+and builds the project before and after scaffolding. WebAssembly and Auto tests
+check the corresponding hosted-client router and authentication-state registrations.
 
 ---
 

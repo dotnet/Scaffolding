@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
@@ -121,9 +122,35 @@ public class TextTemplatingStepTests
         }
     }
 
-    private static TextTemplatingStep CreateStep(Type templateType, string outputPath)
+    [Fact]
+    public async Task ExecuteAsync_IncludesRootCauseInErrorMessage_WhenTemplateInstantiationThrows()
     {
-        return new TextTemplatingStep(NullLogger<TextTemplatingStep>.Instance)
+        string outputPath = GetTempOutputPath();
+        try
+        {
+            var mockLogger = new Mock<ILogger<TextTemplatingStep>>();
+            var step = CreateStep(typeof(ThrowingCtorTransformation), outputPath, mockLogger.Object);
+
+            bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+            Assert.False(result);
+            Assert.False(File.Exists(outputPath));
+            Assert.Contains(mockLogger.Invocations, invocation =>
+                invocation.Method.Name == nameof(ILogger.Log)
+                && invocation.Arguments.Count >= 3
+                && invocation.Arguments[0] is LogLevel level
+                && level == LogLevel.Error
+                && invocation.Arguments[2]?.ToString()?.Contains("Reason: ctor exploded", StringComparison.Ordinal) == true);
+        }
+        finally
+        {
+            DeleteIfExists(outputPath);
+        }
+    }
+
+    private static TextTemplatingStep CreateStep(Type templateType, string outputPath, ILogger<TextTemplatingStep>? logger = null)
+    {
+        return new TextTemplatingStep(logger ?? NullLogger<TextTemplatingStep>.Instance)
         {
             TextTemplatingProperties =
             [
@@ -160,6 +187,10 @@ public class TextTemplatingStepTests
         public IDictionary<string, object> Session { get; set; } = new Dictionary<string, object>();
         public CompilerErrorCollection Errors { get; } = new CompilerErrorCollection();
 
+        public SuccessfulTransformation()
+        {
+        }
+
         public void Initialize()
         {
         }
@@ -175,6 +206,10 @@ public class TextTemplatingStepTests
         public IDictionary<string, object> Session { get; set; } = new Dictionary<string, object>();
         public CompilerErrorCollection Errors { get; } = new CompilerErrorCollection();
 
+        public EmptyOutputTransformation()
+        {
+        }
+
         public void Initialize()
         {
         }
@@ -182,21 +217,6 @@ public class TextTemplatingStepTests
         public string TransformText()
         {
             return string.Empty;
-        }
-    }
-
-    private sealed class NullOutputTransformation : ITextTransformation
-    {
-        public IDictionary<string, object> Session { get; set; } = new Dictionary<string, object>();
-        public CompilerErrorCollection Errors { get; } = new CompilerErrorCollection();
-
-        public void Initialize()
-        {
-        }
-
-        public string TransformText()
-        {
-            return null!;
         }
     }
 
@@ -218,5 +238,40 @@ public class TextTemplatingStepTests
         {
             return "generated-content";
         }
+    }
+
+    private sealed class NullOutputTransformation : ITextTransformation
+    {
+        public IDictionary<string, object> Session { get; set; } = new Dictionary<string, object>();
+        public CompilerErrorCollection Errors { get; } = new CompilerErrorCollection();
+
+        public void Initialize()
+        {
+        }
+
+        public string TransformText()
+        {
+            return null!;
+        }
+    }
+
+    private sealed class ThrowingCtorTransformation : ITextTransformation
+    {
+        public ThrowingCtorTransformation()
+        {
+            throw new InvalidOperationException("ctor exploded");
+        }
+
+        public IDictionary<string, object> Session
+        {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
+        }
+
+        public CompilerErrorCollection Errors => throw new NotSupportedException();
+
+        public void Initialize() => throw new NotSupportedException();
+
+        public string TransformText() => throw new NotSupportedException();
     }
 }

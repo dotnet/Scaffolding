@@ -109,8 +109,9 @@ public class TextTemplatingStep : ScaffoldStep
                 or ArgumentException
                 or NotSupportedException)
             {
-                _logger.LogError(ex, "Failed to process template '{TemplatePath}' using type '{TemplateType}' for output '{OutputPath}'.",
-                    templatingProperty.TemplatePath, templatingProperty.TemplateType.FullName, templatingProperty.OutputPath);
+                var failureReason = ex.GetBaseException().Message;
+                _logger.LogError(ex, "Failed to process template '{TemplatePath}' using type '{TemplateType}' for output '{OutputPath}'. Reason: {FailureReason}",
+                    templatingProperty.TemplatePath, templatingProperty.TemplateType.FullName, templatingProperty.OutputPath, failureReason);
                 return Task.FromResult(false);
             }
         }

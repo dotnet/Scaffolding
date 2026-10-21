@@ -38,7 +38,7 @@ public class UpdateAppAuthorizationStepTests
         var commands = new List<string>();
         _step.AutoConfigureLocalUrls = false;
         _step.UseExistingApplication = true;
-        _step.WebRedirectUris = ["https://localhost:7188/signin-oidc"];
+        _step.WebRedirectUris = ["https://localhost:7188/signin-oidc", "http://localhost:5012/signin-oidc"];
         _step.AzCliCommand = command =>
         {
             commands.Add(command);
@@ -61,6 +61,7 @@ public class UpdateAppAuthorizationStepTests
             {
                 Assert.Contains("\"https://production.contoso.com/signin-oidc\"", command);
                 Assert.Contains("\"https://localhost:7188/signin-oidc\"", command);
+                Assert.Contains("\"http://localhost:5012/signin-oidc\"", command);
                 Assert.Equal(
                     1,
                     CountOccurrences(
@@ -122,6 +123,39 @@ public class UpdateAppAuthorizationStepTests
         Assert.False(result);
         Assert.Single(commands);
         Assert.StartsWith("ad app show", commands[0]);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" \t\r\n")]
+    [InlineData("null")]
+    [InlineData("[")]
+    [InlineData("{}")]
+    [InlineData("\"https://production.contoso.com/signin-oidc\"")]
+    public async Task ExecuteAsync_DoesNotUpdateWhenExistingWebRedirectUriOutputIsInvalid(string? output)
+    {
+        // Arrange
+        var commands = new List<string>();
+        _step.AutoConfigureLocalUrls = false;
+        _step.UseExistingApplication = true;
+        _step.WebRedirectUris = ["https://localhost:7188/signin-oidc"];
+        _step.AzCliCommand = command =>
+        {
+            commands.Add(command);
+            return new(0, output, null);
+        };
+
+        // Act
+        bool result = await _step.ExecuteAsync(CreateContext());
+
+        // Assert
+        Assert.False(result);
+        Assert.Collection(
+            commands,
+            command => Assert.Equal(
+                "ad app show --id client-id --query web.redirectUris --output json",
+                command));
     }
 
     [Fact]

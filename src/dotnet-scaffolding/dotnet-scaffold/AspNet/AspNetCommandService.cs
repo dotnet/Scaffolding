@@ -365,10 +365,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                         step.UseExistingApplication = context.GetOptionResult(options.UseExistingApplication);
                     })
                     .WithValidateAzureCliIdentityStep()
+                    .WithDetectBlazorWasmStep()
                     .WithRegisterAppStep()
                     .WithUpdateAppAuthorizationStep()
                     .WithAddClientSecretStep()
-                    .WithDetectBlazorWasmStep()
                     .WithUpdateAppSettingsStep()
                     .WithEntraAddPackagesStep()
                     .WithEntraBlazorWasmAddPackagesStep()

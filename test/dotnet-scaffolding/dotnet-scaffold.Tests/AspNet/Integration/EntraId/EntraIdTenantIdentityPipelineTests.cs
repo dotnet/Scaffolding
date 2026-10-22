@@ -24,6 +24,7 @@ public class EntraIdTenantIdentityPipelineTests
         var steps = new List<Type>();
         Capture<ValidateEntraIdStep>(builder, steps);
         Capture<ValidateAzureCliIdentityStep>(builder, steps);
+        Capture<DetectBlazorWasmStep>(builder, steps);
         Capture<RegisterAppStep>(builder, steps);
         Capture<UpdateAppAuthorizationStep>(builder, steps);
         Capture<AddClientSecretStep>(builder, steps);
@@ -37,7 +38,7 @@ public class EntraIdTenantIdentityPipelineTests
 
         Assert.Equal(new[]
         {
-            typeof(ValidateEntraIdStep), typeof(ValidateAzureCliIdentityStep), typeof(RegisterAppStep),
+            typeof(ValidateEntraIdStep), typeof(ValidateAzureCliIdentityStep), typeof(DetectBlazorWasmStep), typeof(RegisterAppStep),
             typeof(UpdateAppAuthorizationStep), typeof(AddClientSecretStep), typeof(UpdateAppSettingsStep)
         }, steps);
         Assert.Contains(typeof(ValidateAzureCliIdentityStep), service.GetScaffoldSteps());

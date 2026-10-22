@@ -20,9 +20,7 @@ internal class ValidateAzureCliIdentityStep(ILogger<ValidateAzureCliIdentityStep
         return Task.FromResult(ValidateIdentity(TenantId, Username, logger, ReadAccount));
     }
 
-    internal static bool ValidateIdentity(
-        string? tenantId, string? username, ILogger logger,
-        Func<(int ExitCode, string? Output, string? Error)> readAccount)
+    internal static bool ValidateIdentity(string? tenantId, string? username, ILogger logger, Func<(int ExitCode, string? Output, string? Error)> readAccount)
     {
         if (string.IsNullOrWhiteSpace(tenantId) || string.IsNullOrWhiteSpace(username))
         {

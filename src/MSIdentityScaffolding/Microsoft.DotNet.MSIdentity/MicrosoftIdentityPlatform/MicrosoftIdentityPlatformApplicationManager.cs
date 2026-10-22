@@ -26,11 +26,22 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         private const string BlazorWasmCallbackPath = "authentication/login-callback";
         GraphServiceClient? _graphServiceClient;
 
+        public MicrosoftIdentityPlatformApplicationManager()
+        {
+        }
+
+        internal MicrosoftIdentityPlatformApplicationManager(GraphServiceClient graphServiceClient)
+        {
+            _graphServiceClient = graphServiceClient;
+        }
+
         internal async Task<ApplicationParameters?> CreateNewAppAsync(
             TokenCredential tokenCredential,
             ApplicationParameters applicationParameters,
             IConsoleLogger consoleLogger)
         {
+            string? createdApplicationId = null;
+            string? createdClientId = null;
             try
             {
                 var graphServiceClient = GetGraphServiceClient(tokenCredential, applicationParameters);
@@ -73,9 +84,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
                 if (createdApplication is null)
                 {
-                    consoleLogger.LogFailureAndExit(Resources.FailedToCreateApp);
+                    throw new InvalidOperationException(Resources.FailedToCreateApp);
                 }
 
+                createdApplicationId = createdApplication.Id;
+                createdClientId = createdApplication.AppId;
                 await AddCurrentUserAsOwner(graphServiceClient, createdApplication);
 
                 // Create service principal, necessary for Web API applications
@@ -114,8 +127,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 // log json console message inside this method since we need the Microsoft.Graph.Application
                 if (createdApplication is null)
                 {
-                    consoleLogger.LogFailureAndExit(Resources.FailedToCreateApp);
-                    return null;
+                    throw new InvalidOperationException(Resources.FailedToCreateApp);
                 }
 
                 ApplicationParameters? effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
@@ -137,6 +149,21 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             }
             catch (Exception ex)
             {
+                if (!string.IsNullOrEmpty(createdApplicationId))
+                {
+                    try
+                    {
+                        await _graphServiceClient!.Applications[createdApplicationId].DeleteAsync();
+                        consoleLogger.LogMessage($"Removed application '{createdClientId}' after registration failed.");
+                    }
+                    catch (Exception cleanupException)
+                    {
+                        consoleLogger.LogJsonMessage(State.Fail, output:
+                            $"Failed to remove application '{createdClientId}' (object ID '{createdApplicationId}') " +
+                            $"in tenant '{applicationParameters.TenantId}' after registration failed: {cleanupException.Message}. " +
+                            "Remove this application manually in the selected tenant.");
+                    }
+                }
                 var errorMessage = string.IsNullOrEmpty(ex.Message) ? ex.ToString() : ex.Message;
                 consoleLogger.LogFailureAndExit(errorMessage);
                 return null;
@@ -337,7 +364,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
             if (servicePrincipal is null)
             {
-                consoleLogger.LogFailureAndExit(Resources.FailedToGetServicePrincipal);
+                throw new InvalidOperationException(Resources.FailedToGetServicePrincipal);
             }
 
             return servicePrincipal!;

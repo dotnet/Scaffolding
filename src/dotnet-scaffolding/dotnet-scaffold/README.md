@@ -31,10 +31,25 @@ The CLI identity is checked again immediately before authorization. These checks
 do not lock the global CLI session: another process could still change it between
 validation and the update. Avoid changing the CLI account during scaffolding.
 This is the issue's CLI-validation fallback, not a retained Graph credential.
+It validates the Azure CLI account, not the effective account returned by
+MSIdentity's separate interactive authentication. When prompted by MSIdentity,
+sign in as the selected user; its current authentication implementation does not
+enforce the returned username. Preflight therefore does not guarantee the
+effective identity of every operation.
+
+Project detection runs before registration so a detection failure cannot leave
+a newly created application or credential.
+
+MSIdentity also attempts to delete a partially created registration using its
+returned object ID and the same Graph client if a subsequent registration
+operation fails. This requires the updated MSIdentity tool, not just an updated
+scaffolder. If deletion fails, its diagnostics identify the resource for manual
+removal; no deletion targets are discovered by display name.
 
 Once the new application's identifier has been recorded, cleanup is best-effort
 and covers authorization, credential setup, and app-settings persistence, not
 subsequent package installation or code generation failures. If registration
-fails without returning an identifier, inspect the selected tenant manually.
+fails before Graph returns an identifier (for example, an ambiguous network
+failure during creation), inspect the selected tenant manually.
 Cleanup does not restore local files or remove saved user secrets; after a
 failed run, check local configuration before retrying.

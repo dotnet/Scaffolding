@@ -72,6 +72,13 @@ The Entra ID Scaffolder is part of the modern .NET scaffolding system that helps
 - Validates inputs and provides helpful error messages
 - Guides you through the authentication setup process
 
+### 6. **Authorization Code Flow**
+- Configures the default OpenID Connect scheme to use authorization code flow and leaves PKCE enabled through the ASP.NET Core defaults
+- Disables implicit ID-token and access-token issuance on the selected app registration
+- Uses named `PostConfigure<OpenIdConnectOptions>` configuration so existing authentication calls, formatting, and downstream-API registration chains are preserved on reruns
+- Requires a confidential client credential for code redemption; see [Development credentials and production deployment](#development-credentials-and-production-deployment)
+- Applies to .NET 10 and .NET 11 Blazor Web Apps, including static SSR, Interactive Server, Interactive WebAssembly, and Interactive Auto
+
 ---
 
 ## Prerequisites

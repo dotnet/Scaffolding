@@ -288,6 +288,174 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         Assert.Equal(1, updatedProgramContent.Split("AddAuthenticationStateSerialization").Length - 1);
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData(".AddInteractiveServerComponents()")]
+    [InlineData(".AddInteractiveWebAssemblyComponents()")]
+    [InlineData(".AddInteractiveServerComponents().AddInteractiveWebAssemblyComponents()")]
+    public async Task BlazorEntraChangesConfig_ConfiguresAuthorizationCodeFlow(string renderModeServices)
+    {
+        var programContent = BlazorServerProgramContent.Replace(
+            ".AddInteractiveServerComponents()", renderModeServices, StringComparison.Ordinal);
+        var updatedProgramContent = await ApplyBlazorEntraChangesConfigAsync(programContent);
+
+        var normalizedProgramContent = RemoveWhitespace(updatedProgramContent);
+        Assert.Contains("usingMicrosoft.IdentityModel.Protocols.OpenIdConnect;", normalizedProgramContent, StringComparison.Ordinal);
+        Assert.Contains(
+            "builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme).AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));",
+            normalizedProgramContent,
+            StringComparison.Ordinal);
+        Assert.Contains(AuthorizationCodeFlowConfiguration, normalizedProgramContent, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task BlazorEntraChangesConfig_DoesNotDuplicateAuthorizationCodeFlowOnRerun()
+    {
+        var firstRunContent = await ApplyBlazorEntraChangesConfigAsync(BlazorServerProgramContent);
+        var secondRunContent = await ApplyBlazorEntraChangesConfigAsync(firstRunContent);
+
+        Assert.Equal(1, secondRunContent.Split("AddMicrosoftIdentityWebApp").Length - 1);
+        Assert.Equal(1, secondRunContent.Split("OpenIdConnectResponseType.Code").Length - 1);
+        Assert.Equal(1, secondRunContent.Split("using Microsoft.IdentityModel.Protocols.OpenIdConnect;").Length - 1);
+    }
+
+    [Theory]
+    [InlineData(".AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));")]
+    [InlineData(".AddMicrosoftIdentityWebApp(\n        builder.Configuration.GetSection(\"AzureAd\"));")]
+    [InlineData(".AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"))\n    .EnableTokenAcquisitionToCallDownstreamApi()\n    .AddInMemoryTokenCaches();")]
+    [InlineData(".AddMicrosoftIdentityWebApp(options =>\n    {\n        builder.Configuration.Bind(\"AzureAd\", options);\n        options.ResponseType = OpenIdConnectResponseType.IdToken;\n    });")]
+    public async Task BlazorEntraChangesConfig_UpgradesExistingRegistrationWithoutRewritingIt(string registration)
+    {
+        var implicitFlowRegistration = string.Join(Environment.NewLine,
+            "builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
+            "    " + registration,
+            string.Empty,
+            "var app = builder.Build();");
+        var programContent = BlazorServerProgramContent.Replace("var app = builder.Build();", implicitFlowRegistration, StringComparison.Ordinal);
+
+        var updatedProgramContent = await ApplyBlazorEntraChangesConfigAsync(programContent);
+        var secondRunContent = await ApplyBlazorEntraChangesConfigAsync(updatedProgramContent);
+
+        Assert.Contains(RemoveWhitespace(registration), RemoveWhitespace(secondRunContent), StringComparison.Ordinal);
+        Assert.Equal(1, secondRunContent.Split("AddMicrosoftIdentityWebApp").Length - 1);
+        Assert.Equal(1, secondRunContent.Split("PostConfigure<OpenIdConnectOptions>").Length - 1);
+        Assert.Contains(AuthorizationCodeFlowConfiguration, RemoveWhitespace(secondRunContent), StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("// Reference: OpenIdConnectResponseType.Code is the desired migration.")]
+    [InlineData("Console.WriteLine(OpenIdConnectResponseType.Code);")]
+    public async Task BlazorEntraChangesConfig_UnrelatedCodeFlowReferenceDoesNotPreventConfiguration(string reference)
+    {
+        var programContent = string.Join(Environment.NewLine,
+            "var builder = WebApplication.CreateBuilder(args);",
+            "builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
+            "    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));",
+            reference,
+            "var app = builder.Build();");
+
+        var updatedProgramContent = await ApplyBlazorEntraChangesConfigAsync(programContent);
+        var secondRunContent = await ApplyBlazorEntraChangesConfigAsync(updatedProgramContent);
+
+        Assert.Contains(reference, secondRunContent, StringComparison.Ordinal);
+        Assert.Equal(1, secondRunContent.Split("PostConfigure<OpenIdConnectOptions>").Length - 1);
+        Assert.Contains(AuthorizationCodeFlowConfiguration, RemoveWhitespace(secondRunContent), StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(\n        builder.Configuration.GetSection(\"AzureAd\"));")]
+    [InlineData("builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"))\n    .EnableTokenAcquisitionToCallDownstreamApi()\n    .AddInMemoryTokenCaches();")]
+    [InlineData("builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(options =>\n    {\n        builder.Configuration.Bind(\"AzureAd\", options);\n        options.ResponseType = OpenIdConnectResponseType.IdToken;\n    });")]
+    public async Task BlazorEntraChangesConfig_GeneratedAppChallengesWithCodeAndPkce(string registration)
+    {
+        var programContent = $$"""
+            using Microsoft.AspNetCore.Authentication;
+            using Microsoft.AspNetCore.Http;
+            using Microsoft.AspNetCore.WebUtilities;
+            using Microsoft.Extensions.Options;
+            using Microsoft.IdentityModel.Protocols;
+            using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["AzureAd:Instance"] = "https://login.microsoftonline.com/",
+                ["AzureAd:TenantId"] = "11111111-2222-3333-4444-555555555555",
+                ["AzureAd:ClientId"] = "22222222-2222-3333-4444-555555555555",
+                ["AzureAd:ResponseType"] = "id_token",
+                ["AzureAd:ClientCredentials:0:SourceType"] = "ClientSecret",
+                ["AzureAd:ClientCredentials:0:ClientSecret"] = "test-only-credential"
+            });
+            {{registration}}
+            // An unrelated reference must not suppress the authorization code configuration.
+            Console.WriteLine(OpenIdConnectResponseType.Code);
+            builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
+            {
+                options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration
+                {
+                    AuthorizationEndpoint = "https://identity.example.test/authorize",
+                    TokenEndpoint = "https://identity.example.test/token",
+                    Issuer = "https://identity.example.test/"
+                });
+            });
+            builder.Services.AddAuthentication().AddOpenIdConnect("Unrelated", options =>
+            {
+                options.ClientId = "unrelated-client";
+                options.ResponseType = OpenIdConnectResponseType.IdToken;
+                options.Configuration = new OpenIdConnectConfiguration
+                {
+                    AuthorizationEndpoint = "https://identity.example.test/unrelated",
+                    Issuer = "https://identity.example.test/"
+                };
+            });
+            var app = builder.Build();
+            await using var disposableApp = app;
+            using var scope = app.Services.CreateScope();
+            var optionsMonitor = scope.ServiceProvider.GetRequiredService<IOptionsMonitor<OpenIdConnectOptions>>();
+            var options = optionsMonitor.Get(OpenIdConnectDefaults.AuthenticationScheme);
+            var unrelated = optionsMonitor.Get("Unrelated");
+            var http = new DefaultHttpContext { RequestServices = scope.ServiceProvider };
+            http.Request.Scheme = "https";
+            http.Request.Host = new HostString("localhost", 5001);
+            await http.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme);
+            var query = QueryHelpers.ParseQuery(new Uri(http.Response.Headers.Location.ToString()).Query);
+            if (http.Response.StatusCode != 302 ||
+                query["response_type"] != "code" ||
+                !query.TryGetValue("code_challenge_method", out var method) || method != "S256" ||
+                !query.TryGetValue("code_challenge", out var challenge) || string.IsNullOrEmpty(challenge) ||
+                !options.UsePkce ||
+                unrelated.ResponseType != OpenIdConnectResponseType.IdToken)
+            {
+                Console.Error.WriteLine("Expected authorization code flow with PKCE/S256 without changing unrelated schemes.");
+                return 1;
+            }
+            Console.WriteLine("Authorization code flow with PKCE/S256 verified.");
+            return 0;
+            """;
+
+        var firstRunContent = await ApplyBlazorEntraChangesConfigAsync(programContent);
+        await ApplyBlazorEntraChangesConfigAsync(firstRunContent);
+        File.WriteAllText(_testProjectPath, $$"""
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <PropertyGroup>
+                <TargetFramework>{{TargetFramework}}</TargetFramework>
+                <ImplicitUsings>enable</ImplicitUsings>
+                <Nullable>enable</Nullable>
+              </PropertyGroup>
+              <ItemGroup>
+                <PackageReference Include="Microsoft.Identity.Web" Version="4.16.1" />
+              </ItemGroup>
+            </Project>
+            """);
+
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunDotNetAsync(
+            _testProjectDir, "run", "--project", _testProjectPath, "--framework", TargetFramework);
+
+        Assert.True(exitCode == 0, $"Generated authentication must build and use code flow with PKCE.\nOutput: {output}\nError: {error}");
+        Assert.Contains("Authorization code flow with PKCE/S256 verified.", output, StringComparison.Ordinal);
+    }
+
     #endregion
 
     #region Validation Combination Tests
@@ -365,6 +533,28 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         Assert.True(result);
         return File.ReadAllText(programPath);
     }
+
+    private static readonly string BlazorServerProgramContent = string.Join(Environment.NewLine,
+        "var builder = WebApplication.CreateBuilder(args);",
+        string.Empty,
+        "builder.Services.AddRazorComponents()",
+        "    .AddInteractiveServerComponents();",
+        string.Empty,
+        "var app = builder.Build();",
+        string.Empty,
+        "app.UseAntiforgery();",
+        string.Empty,
+        "app.MapRazorComponents<App>()",
+        "    .AddInteractiveServerRenderMode();",
+        string.Empty,
+        "app.Run();",
+        string.Empty);
+
+    private static string RemoveWhitespace(string value)
+        => new string(value.Where(c => !char.IsWhiteSpace(c)).ToArray());
+
+    private const string AuthorizationCodeFlowConfiguration =
+        "builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme,options=>{options.ResponseType=OpenIdConnectResponseType.Code;});";
 
     protected Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)
         => ScaffoldCliHelper.RunBuildForFrameworkAsync(workingDirectory, TargetFramework);

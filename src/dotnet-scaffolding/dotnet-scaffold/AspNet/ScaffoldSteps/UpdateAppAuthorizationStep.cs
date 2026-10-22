@@ -42,8 +42,9 @@
 
                 var runner = AzCliRunner.Create();
 
-                // Build the Azure CLI command with all parameters
-                var command = $"ad app update --id {ClientId} --enable-id-token-issuance true";
+                // Build the Azure CLI command with all parameters.
+                // Sign-in uses the authorization code flow with PKCE, so implicit grant issuance is disabled.
+                var command = BuildBaseUpdateCommand(ClientId);
 
                 // Add Web redirect URIs if provided
                 if (WebRedirectUris != null && WebRedirectUris.Length > 0)
@@ -66,10 +67,18 @@
                     return Task.FromResult(false);
                 }
 
-                _logger.LogInformation($"Updated App registration with ID token configuration and redirect URIs");
+                _logger.LogInformation("Updated app registration for the authorization code flow: disabled implicit ID token and access token issuance and configured redirect URIs.");
 
                 return Task.FromResult(true);
             }
+
+            /// <summary>
+            /// Builds the Azure CLI command that configures the app registration for the authorization code flow.
+            /// Implicit grant issuance is disabled for both ID tokens and access tokens; the ASP.NET Core
+            /// OpenID Connect handler redeems the authorization code using PKCE and the confidential client credential.
+            /// </summary>
+            internal static string BuildBaseUpdateCommand(string clientId)
+                => $"ad app update --id {clientId} --enable-id-token-issuance false --enable-access-token-issuance false";
 
             private void ConfigureLocalRedirectUris(string projectPath)
             {

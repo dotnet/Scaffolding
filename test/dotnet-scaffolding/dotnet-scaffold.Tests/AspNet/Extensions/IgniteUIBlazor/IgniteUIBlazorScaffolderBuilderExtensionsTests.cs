@@ -246,7 +246,7 @@ public class IgniteUIBlazorScaffolderBuilderExtensionsTests
             Assert.False(step.ContinueOnError);
             Assert.Equal(model.ProjectPath, step.ProjectPath);
             Assert.Equal("Program.cs", step.TargetFileName);
-            Assert.Equal(["AddInteractiveServerComponents(", "AddInteractiveServerRenderMode("], step.RequiredCalls);
+            Assert.Equal(["AddInteractiveServerComponents", "AddInteractiveServerRenderMode"], step.RequiredCalls);
             Assert.Equal(IgniteUIBlazorScaffolderBuilderExtensions.GetInteractiveServerCodeModificationJson(), step.CodeModifierConfigJsonText);
         }
     }

@@ -45,24 +45,25 @@ internal static class IgniteUIBlazorHelper
     /// </summary>
     /// <param name="hostPagePath">The host page path, which determines whether Razor comments apply.</param>
     /// <param name="hostPageContent">The host page content.</param>
-    /// <param name="linkElement">The &lt;link&gt; element as written in the page.</param>
+    /// <param name="linkElement">The match of the &lt;link&gt; element as written in the page (its index is into the page).</param>
     /// <param name="themeStylesheet">The match of <see cref="ThemeStylesheetRegex"/> within <paramref name="linkElement"/>.</param>
     /// <returns>True when the page links an Ignite UI theme stylesheet outside of comments.</returns>
-    internal static bool TryFindThemeLink(string? hostPagePath, string? hostPageContent, out string linkElement, out Match themeStylesheet)
+    internal static bool TryFindThemeLink(string? hostPagePath, string? hostPageContent, out Match linkElement, out Match themeStylesheet)
     {
+        // Comments are masked without changing indices or the active markup, so the match is the element as written.
         var activeContent = MarkupHelper.MaskComments(hostPagePath, hostPageContent);
         foreach (Match link in LinkElementRegex.Matches(activeContent))
         {
             var match = ThemeStylesheetRegex.Match(link.Value);
             if (match.Success)
             {
-                linkElement = link.Value;
+                linkElement = link;
                 themeStylesheet = match;
                 return true;
             }
         }
 
-        linkElement = string.Empty;
+        linkElement = Match.Empty;
         themeStylesheet = Match.Empty;
         return false;
     }
@@ -227,6 +228,20 @@ internal static class IgniteUIBlazorHelper
             themeCodeModifierProperties.TryGetValue("$(IgniteUIExistingThemeLink)", out var existingLink) &&
             themeCodeModifierProperties.TryGetValue("$(IgniteUISwappedThemeLink)", out var swappedLink))
         {
+            // The swapped text can span whole lines around the link (see GetThemeSwap); name just the link elements,
+            // i.e. the <link> element in which the two texts first differ.
+            var firstDifference = 0;
+            while (firstDifference < Math.Min(existingLink.Length, swappedLink.Length) && existingLink[firstDifference] == swappedLink[firstDifference])
+            {
+                firstDifference++;
+            }
+
+            if (LinkElementRegex.Matches(existingLink).FirstOrDefault(link => link.Index <= firstDifference && firstDifference < link.Index + link.Length) is { } link)
+            {
+                swappedLink = swappedLink.Substring(link.Index, link.Length + swappedLink.Length - existingLink.Length);
+                existingLink = link.Value;
+            }
+
             return $"To finish the setup, replace the Ignite UI theme link {existingLink} in '{hostPagePath}' with {swappedLink}";
         }
 
@@ -304,10 +319,9 @@ internal static class IgniteUIBlazorHelper
         {
             // Swap within the active element as written rather than the bare path, so that a commented-out link to a
             // different theme is neither changed instead of the active one nor taken as the swapped link.
-            properties["$(IgniteUIExistingThemeLink)"] = linkElement;
-            properties["$(IgniteUISwappedThemeLink)"] = linkElement
-                .Remove(linkedTheme.Index, linkedTheme.Length)
-                .Insert(linkedTheme.Index, stylesheetPath);
+            var (existing, swapped) = GetThemeSwap(hostPageContent, linkElement.Index, linkElement.Length, linkElement.Index + linkedTheme.Index, linkedTheme.Length, stylesheetPath);
+            properties["$(IgniteUIExistingThemeLink)"] = existing;
+            properties["$(IgniteUISwappedThemeLink)"] = swapped;
             return ([hostPageOption, SwapThemeRecipeOption], properties);
         }
 
@@ -325,4 +339,73 @@ internal static class IgniteUIBlazorHelper
             : $"{link}{headClosingTag}";
         return ([hostPageOption, LinkThemeRecipeOption], properties);
     }
+
+    /// <summary>
+    /// Returns the host page text that the swap recipe replaces and its replacement: the active theme &lt;link&gt; with
+    /// the requested stylesheet path. The recipe skips a change whose replacement the page already contains (ignoring
+    /// whitespace), even inside a comment, and replaces every occurrence of the replaced text. So when the page also has
+    /// the requested link (e.g. commented out) or another copy of the active one, the text is widened by whole lines
+    /// around the active link until the replacement is new to the page and the replaced text occurs only there.
+    /// </summary>
+    /// <param name="content">The host page content.</param>
+    /// <param name="linkIndex">The index of the active theme &lt;link&gt; element in <paramref name="content"/>.</param>
+    /// <param name="linkLength">The length of the &lt;link&gt; element.</param>
+    /// <param name="stylesheetIndex">The index of the linked theme stylesheet path in <paramref name="content"/>.</param>
+    /// <param name="stylesheetLength">The length of the linked theme stylesheet path.</param>
+    /// <param name="stylesheetPath">The theme stylesheet path to link.</param>
+    private static (string Existing, string Swapped) GetThemeSwap(
+        string content, int linkIndex, int linkLength, int stylesheetIndex, int stylesheetLength, string stylesheetPath)
+    {
+        var trimmedContent = TrimRecipeWhitespace(content);
+        var (start, end) = (linkIndex, linkIndex + linkLength);
+        while (true)
+        {
+            var existing = content[start..end];
+            var swapped = existing.Remove(stylesheetIndex - start, stylesheetLength).Insert(stylesheetIndex - start, stylesheetPath);
+            if (swapped == existing ||
+                (start == 0 && end == content.Length) ||
+                (!trimmedContent.Contains(TrimRecipeWhitespace(swapped), StringComparison.Ordinal) &&
+                 content.IndexOf(existing, StringComparison.Ordinal) == content.LastIndexOf(existing, StringComparison.Ordinal)))
+            {
+                return (existing, swapped);
+            }
+
+            // Widen by a line at each end: to the start of the previous line, or of the current one when the text starts
+            // within it.
+            if (start > 0)
+            {
+                var previous = content[start - 1] == '\n' ? start - 2 : start - 1;
+                start = previous < 0 ? 0 : content.LastIndexOf('\n', previous) + 1;
+            }
+
+            // To the end of the next line, or of the current one when the text ends within it, without its line break.
+            if (end < content.Length)
+            {
+                var next = end;
+                if (content[next] == '\r')
+                {
+                    next++;
+                }
+
+                if (next < content.Length && content[next] == '\n')
+                {
+                    next++;
+                }
+
+                var lineBreak = content.IndexOf('\n', next);
+                end = lineBreak < 0 ? content.Length : lineBreak;
+                if (end > next && content[end - 1] == '\r')
+                {
+                    end--;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Removes the characters that the code modifier ignores when it checks whether a change is already applied
+    /// (see ProjectModifierHelper.TrimStatement in Microsoft.DotNet.Scaffolding.CodeModification).
+    /// </summary>
+    private static string TrimRecipeWhitespace(string text)
+        => string.Concat(text.Where(c => c is not (' ' or '\r' or '\n' or ';')));
 }

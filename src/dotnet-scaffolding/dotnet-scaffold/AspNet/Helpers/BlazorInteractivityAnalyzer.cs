@@ -116,7 +116,11 @@ internal static class BlazorInteractivityAnalyzer
         return (interactivity, null);
     }
 
-    private static bool IsInvoked(SyntaxNode root, string methodName)
+    /// <summary>
+    /// Returns true when a method named <paramref name="methodName"/> is invoked in <paramref name="root"/>. Comments,
+    /// string literals and disabled preprocessor blocks are not syntax nodes, so calls in them do not count.
+    /// </summary>
+    internal static bool IsInvoked(SyntaxNode root, string methodName)
         => root.DescendantNodes().OfType<SimpleNameSyntax>().Any(name => name.Identifier.ValueText == methodName && IsInvokedName(name));
 
     private static bool IsInvokedName(SimpleNameSyntax name)

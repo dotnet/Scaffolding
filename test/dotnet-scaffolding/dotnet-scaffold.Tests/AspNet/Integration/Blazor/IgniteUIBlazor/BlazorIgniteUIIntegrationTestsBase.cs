@@ -228,6 +228,12 @@ public abstract class BlazorIgniteUIIntegrationTestsBase : IDisposable
     // A commented-out link before the active one: the active link is swapped and the comment is left as is.
     [InlineData("    <!-- <link href=\"_content/IgniteUI.Blazor/themes/light/bootstrap.css\" rel=\"stylesheet\" /> -->\n    <link href=\"_content/IgniteUI.Blazor/themes/light/fluent.css\" rel=\"stylesheet\" />\n",
         "    <!-- <link href=\"_content/IgniteUI.Blazor/themes/light/bootstrap.css\" rel=\"stylesheet\" /> -->\n    <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />\n")]
+    // A commented-out link to the requested theme before the active one: the active link is still swapped.
+    [InlineData("    <!-- <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /> -->\n    <link href=\"_content/IgniteUI.Blazor/themes/light/fluent.css\" rel=\"stylesheet\" />\n",
+        "    <!-- <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /> -->\n    <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />\n")]
+    // A commented-out copy of the active link after it: only the active link is swapped.
+    [InlineData("    <link href=\"_content/IgniteUI.Blazor/themes/light/fluent.css\" rel=\"stylesheet\" />\n    <!-- <link href=\"_content/IgniteUI.Blazor/themes/light/fluent.css\" rel=\"stylesheet\" /> -->\n",
+        "    <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />\n    <!-- <link href=\"_content/IgniteUI.Blazor/themes/light/fluent.css\" rel=\"stylesheet\" /> -->\n")]
     public async Task ThemeRecipe_IgnoresCommentedOutLinks(string headContent, string expectedHeadContent)
     {
         const string darkMaterial = "_content/IgniteUI.Blazor/themes/dark/material.css";

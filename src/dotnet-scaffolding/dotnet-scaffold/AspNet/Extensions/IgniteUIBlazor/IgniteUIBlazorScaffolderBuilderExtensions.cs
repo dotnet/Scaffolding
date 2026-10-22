@@ -85,7 +85,7 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
             step.ProjectPath = model.ProjectPath;
             step.CodeChangeOptions = [];
             step.TargetFileName = RegistrationFileName;
-            step.RequiredCalls = [$"{BlazorCrudHelper.AddInteractiveServerComponentsMethod}(", $"{BlazorCrudHelper.AddInteractiveServerRenderModeMethod}("];
+            step.RequiredCalls = [BlazorCrudHelper.AddInteractiveServerComponentsMethod, BlazorCrudHelper.AddInteractiveServerRenderModeMethod];
             step.ChangeDescription = "Interactive Server support";
             step.ManualInstructions = "Chain '.AddInteractiveServerComponents()' after 'builder.Services.AddRazorComponents()' and '.AddInteractiveServerRenderMode()' after 'app.MapRazorComponents<App>()', then re-run the scaffolder to complete the remaining steps.";
         });
@@ -241,7 +241,7 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
     {
         step.CodeModifierConfigPath = codeModificationConfigPath;
         step.TargetFileName = registrationFileName;
-        step.RequiredCalls = ["AddIgniteUIBlazor("];
+        step.RequiredCalls = ["AddIgniteUIBlazor"];
         step.ChangeDescription = "'builder.Services.AddIgniteUIBlazor()'";
         step.ManualInstructions = $"Add 'using {IgniteUIBlazorHelper.ControlsNamespace};' and 'builder.Services.AddIgniteUIBlazor();' where the app's services are registered (before the app is built), then re-run the scaffolder to complete the remaining steps.";
         step.ProjectPath = projectPath;

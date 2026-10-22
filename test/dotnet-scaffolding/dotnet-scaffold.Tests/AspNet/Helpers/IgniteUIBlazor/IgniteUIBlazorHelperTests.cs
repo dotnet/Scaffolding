@@ -203,6 +203,27 @@ public class IgniteUIBlazorHelperTests
     }
 
     [Fact]
+    public void GetThemeRecipeInputs_WidensTheSwap_WhenTheRequestedLinkIsCommentedOut()
+    {
+        // The recipe skips a replacement that the page already contains, even inside a comment, so the swapped text
+        // is widened by a line around the active link (here the line after it, which the link ends).
+        var hostPage = Path.Combine(s_projectDir, "Components", "App.razor");
+        const string commented = "<!-- <link rel=\"stylesheet\" href=\"@Assets[\"_content/IgniteUI.Blazor/themes/dark/material.css\"]\" /> -->";
+        const string active = "<link rel=\"stylesheet\" href=\"@Assets[\"_content/IgniteUI.Blazor/themes/dark/fluent.css\"]\" />";
+        const string swapped = "<link rel=\"stylesheet\" href=\"@Assets[\"_content/IgniteUI.Blazor/themes/dark/material.css\"]\" />";
+        var content = $"<head>\r\n    <HeadOutlet />\r\n    {commented}\r\n    {active}\r\n</head>\r\n";
+
+        var (options, properties) = IgniteUIBlazorHelper.GetThemeRecipeInputs(s_projectDir, hostPage, content, LiteMaterialDark);
+
+        Assert.Equal(["IgniteUIAppRazorHost", IgniteUIBlazorHelper.SwapThemeRecipeOption], options);
+        Assert.Equal($"    {active}\r\n</head>", properties["$(IgniteUIExistingThemeLink)"]);
+        Assert.Equal($"    {swapped}\r\n</head>", properties["$(IgniteUISwappedThemeLink)"]);
+        Assert.Equal(
+            $"To finish the setup, replace the Ignite UI theme link {active} in '{hostPage}' with {swapped}",
+            IgniteUIBlazorHelper.GetThemeManualInstructions(options, properties, LiteMaterialDark, hostPage));
+    }
+
+    [Fact]
     public void GetThemeRecipeInputs_LinksANewTheme_WhenTheOnlyThemeLinkIsCommentedOut()
     {
         // The '</head>' inside the comment is not the page's head either.

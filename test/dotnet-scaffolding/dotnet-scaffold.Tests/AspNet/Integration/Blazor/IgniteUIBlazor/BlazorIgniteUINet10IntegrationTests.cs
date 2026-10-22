@@ -489,7 +489,7 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
     }
 
     [Fact]
-    public async Task Scaffold_BlazorIgniteUI_Net10_SwapToACommentedOutTheme_ReportsTheLinkToReplace()
+    public async Task Scaffold_BlazorIgniteUI_Net10_SwapToACommentedOutTheme_SwapsTheActiveLink()
     {
         // Arrange — the dark material link was commented out to switch to light bootstrap
         const string darkMaterial = "_content/IgniteUI.Blazor/themes/dark/material.css";
@@ -501,16 +501,15 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         File.WriteAllText(appRazorPath, File.ReadAllText(appRazorPath).Replace(darkMaterialLink, $"<!-- {darkMaterialLink} -->\n    {bootstrapLink}"));
 
         // Act — switch back to dark material
-        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework, "blazor-igniteui", "--project", _testProjectPath, "--theme", "material", "--theme-variant", "dark");
+        await RunScaffoldAndAssertSuccessAsync("--theme", "material", "--theme-variant", "dark");
 
-        // Assert — the code modifier finds the swapped link in the comment and skips the swap: the run fails and names
-        // the active link to replace, instead of a link to add next to it
-        Assert.True(cliExitCode != 0, $"CLI scaffold should report the incomplete setup as a failure.\nOutput: {cliOutput}\nError: {cliError}");
-        Assert.Contains($"replace the Ignite UI theme link {bootstrapLink} in '{appRazorPath}' with {darkMaterialLink}", cliOutput + cliError);
-        Assert.DoesNotContain("add the following line", cliOutput + cliError);
-        Assert.True(IgniteUIBlazorHelper.TryGetLinkedTheme(appRazorPath, File.ReadAllText(appRazorPath), out var theme, out var themeVariant));
-        Assert.Equal(("bootstrap", "light"), (theme, themeVariant));
+        // Assert — the swap is widened past the commented-out copy of the requested link, so the active link is swapped
+        // and the comment is left as is
+        var content = File.ReadAllText(appRazorPath);
+        Assert.Contains($"<!-- {darkMaterialLink} -->\n    {darkMaterialLink}", content);
+        Assert.DoesNotContain(LiteBootstrapLightStylesheet, content);
+        Assert.True(IgniteUIBlazorHelper.TryGetLinkedTheme(appRazorPath, content, out var theme, out var themeVariant));
+        Assert.Equal(("material", "dark"), (theme, themeVariant));
     }
 
     private static void AssertSingleThemeLink(string hostPagePath, string expectedStylesheet)

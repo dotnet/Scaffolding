@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
@@ -28,7 +29,9 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
     public string? TargetFilePath { get; set; }
 
     /// <summary>
-    /// Gets or sets the text (e.g. 'AddIgniteUIBlazor(' or a stylesheet path) that the changed file must contain afterwards.
+    /// Gets or sets what the changed file must contain afterwards: in a C# file, the names of the methods (e.g.
+    /// 'AddIgniteUIBlazor') that it must invoke in active code, so that commented-out calls and string literals do not
+    /// count; in any other file, the text (e.g. a stylesheet path) that it must contain.
     /// </summary>
     public required IReadOnlyList<string> RequiredCalls { get; set; }
 
@@ -88,7 +91,8 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
 
     /// <summary>
     /// Returns true when a <see cref="TargetFileName"/> file in the project (outside bin/ and obj/) contains every one
-    /// of the <see cref="RequiredCalls"/> (outside of markup comments when <see cref="IgnoreMarkupComments"/> is set).
+    /// of the <see cref="RequiredCalls"/>: as invocations in a C# file, otherwise as text (outside of markup comments
+    /// when <see cref="IgnoreMarkupComments"/> is set).
     /// </summary>
     internal bool ContainsRequiredCalls()
     {
@@ -113,6 +117,12 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
     private bool ContainsRequiredCalls(string file)
     {
         var content = _fileSystem.ReadAllText(file);
+        if (Path.GetExtension(file).Equals(".cs", StringComparison.OrdinalIgnoreCase))
+        {
+            var root = CSharpSyntaxTree.ParseText(content).GetRoot();
+            return RequiredCalls.All(call => BlazorInteractivityAnalyzer.IsInvoked(root, call));
+        }
+
         if (IgnoreMarkupComments)
         {
             content = MarkupHelper.MaskComments(file, content);

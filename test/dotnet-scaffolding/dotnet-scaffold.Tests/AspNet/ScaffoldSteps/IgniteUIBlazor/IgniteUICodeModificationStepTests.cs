@@ -27,7 +27,7 @@ public class IgniteUICodeModificationStepTests
             CodeModifierConfigPath = configPath,
             ProjectPath = s_projectPath,
             TargetFileName = targetFileName,
-            RequiredCalls = requiredCalls.Length == 0 ? ["AddIgniteUIBlazor("] : requiredCalls,
+            RequiredCalls = requiredCalls.Length == 0 ? ["AddIgniteUIBlazor"] : requiredCalls,
             ChangeDescription = "'builder.Services.AddIgniteUIBlazor()'",
             ManualInstructions = "Add 'builder.Services.AddIgniteUIBlazor();'."
         };
@@ -67,8 +67,23 @@ public class IgniteUICodeModificationStepTests
     {
         SetupFiles("Program.cs", ("Program.cs", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents();\napp.MapRazorComponents<App>();"));
 
-        Assert.False(CreateStep(requiredCalls: ["AddInteractiveServerComponents(", "AddInteractiveServerRenderMode("]).ContainsRequiredCalls());
-        Assert.True(CreateStep(requiredCalls: ["AddInteractiveServerComponents("]).ContainsRequiredCalls());
+        Assert.False(CreateStep(requiredCalls: ["AddInteractiveServerComponents", "AddInteractiveServerRenderMode"]).ContainsRequiredCalls());
+        Assert.True(CreateStep(requiredCalls: ["AddInteractiveServerComponents"]).ContainsRequiredCalls());
+    }
+
+    [Theory]
+    [InlineData("var builder = WebApplication.CreateBuilder(args);\n// builder.Services.AddIgniteUIBlazor();\nvar app = builder.Build();", false)]
+    [InlineData("var builder = WebApplication.CreateBuilder(args);\n/* builder.Services.AddIgniteUIBlazor(); */\nvar app = builder.Build();", false)]
+    [InlineData("var builder = WebApplication.CreateBuilder(args);\nConsole.WriteLine(\"builder.Services.AddIgniteUIBlazor();\");\nvar app = builder.Build();", false)]
+    [InlineData("var builder = WebApplication.CreateBuilder(args);\n#if false\nbuilder.Services.AddIgniteUIBlazor();\n#endif\nvar app = builder.Build();", false)]
+    [InlineData("var builder = WebApplication.CreateBuilder(args);\nvar addIgniteUIBlazor = builder.Services.AddIgniteUIBlazor;\nvar app = builder.Build();", false)]
+    [InlineData("var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddIgniteUIBlazor ();\nvar app = builder.Build();", true)]
+    [InlineData("var builder = WebApplication.CreateBuilder(args);\nbuilder.Services\n    .AddRazorComponents()\n    .Services.AddIgniteUIBlazor();\nvar app = builder.Build();", true)]
+    public void ContainsRequiredCalls_OnlyCountsInvocationsInActiveCSharpCode(string program, bool expected)
+    {
+        SetupFiles("Program.cs", ("Program.cs", program));
+
+        Assert.Equal(expected, CreateStep().ContainsRequiredCalls());
     }
 
     [Fact]

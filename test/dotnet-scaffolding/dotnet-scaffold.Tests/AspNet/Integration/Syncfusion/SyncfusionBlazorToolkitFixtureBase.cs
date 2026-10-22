@@ -11,13 +11,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Syncfusion;
 
 /// <summary>
 /// Shared base class for end-to-end integration tests of the Syncfusion Blazor Toolkit
-/// scaffolder across .NET versions. Each test gets a temporary project with its own
+/// scaffolder across .NET versions. Intentionally not named <c>*IntegrationTestsBase</c>: these fixtures
+/// use <see cref="ScaffoldCliHelper.SyncfusionTestNuGetConfig"/> (adds nuget.org) rather than the shared
+/// repo-feed config validated by the generic fixture NuGet.config test. Each test gets a temporary project with its own
 /// <c>NuGet.config</c> (<see cref="ScaffoldCliHelper.SyncfusionTestNuGetConfig"/>) so the
 /// machine's feed configuration does not affect package restore.
 /// </summary>
 [Trait("Suite", "ScaffoldIntegration")]
 [Trait("Family", "blazor-syncfusion-toolkit")]
-public abstract class SyncfusionBlazorToolkitIntegrationTestsBase : IDisposable
+public abstract class SyncfusionBlazorToolkitFixtureBase : IDisposable
 {
     /// <summary>
     /// Name of the scaffolder as invoked on the CLI.
@@ -31,7 +33,7 @@ public abstract class SyncfusionBlazorToolkitIntegrationTestsBase : IDisposable
     protected readonly string _testProjectDir;
     protected readonly string _testProjectPath;
 
-    protected SyncfusionBlazorToolkitIntegrationTestsBase()
+    protected SyncfusionBlazorToolkitFixtureBase()
     {
         _testDirectory = Path.Combine(Path.GetTempPath(), TestClassName, Guid.NewGuid().ToString());
         _testProjectDir = Path.Combine(_testDirectory, "TestProject");

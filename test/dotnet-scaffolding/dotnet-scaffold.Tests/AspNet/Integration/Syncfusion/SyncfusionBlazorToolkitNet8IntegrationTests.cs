@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Syncfusion;
 
-public class SyncfusionBlazorToolkitNet8IntegrationTests : SyncfusionBlazorToolkitIntegrationTestsBase
+public class SyncfusionBlazorToolkitNet8IntegrationTests : SyncfusionBlazorToolkitFixtureBase
 {
     protected override string TargetFramework => "net8.0";
     protected override string TestClassName => nameof(SyncfusionBlazorToolkitNet8IntegrationTests);

@@ -35,6 +35,8 @@ public interface IFileSystem
 
     void CopyFile(string sourcePath, string destinationPath, bool overwrite);
 
+    void MoveFile(string sourcePath, string destinationPath, bool overwrite);
+
     string GetTempPath();
 
     DateTime GetLastWriteTime(string filePath);

@@ -156,7 +156,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 }
 
                 var options = new JsonSerializerOptions { WriteIndented = true };
-                _fileSystem.WriteAllText(developmentSettingsPath, developmentSettings.ToJsonString(options));
+                WriteDevelopmentSettings(developmentSettingsPath, developmentSettings.ToJsonString(options));
                 _logger.LogInformation($"Updated '{Path.GetFileName(developmentSettingsPath)}' with AzureAd development configuration.");
                 LogDevelopmentEnvironmentNotice();
                 return Task.FromResult(true);
@@ -183,6 +183,31 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 
             // An existing file is never treated as empty: a null or other non-object root fails here.
             return ParseDevelopmentSettings(_fileSystem.ReadAllText(developmentSettingsPath));
+        }
+
+        private void WriteDevelopmentSettings(string developmentSettingsPath, string content)
+        {
+            // A same-directory rename commits the complete file without truncating the existing settings.
+            string temporaryPath = $"{developmentSettingsPath}.{Guid.NewGuid():N}.tmp";
+            try
+            {
+                _fileSystem.WriteAllText(temporaryPath, content);
+                _fileSystem.MoveFile(temporaryPath, developmentSettingsPath, overwrite: true);
+            }
+            finally
+            {
+                try
+                {
+                    if (_fileSystem.FileExists(temporaryPath))
+                    {
+                        _fileSystem.DeleteFile(temporaryPath);
+                    }
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    _logger.LogWarning($"Failed to delete temporary settings file '{temporaryPath}': {ex.Message}");
+                }
+            }
         }
 
         private void LogConflict(string key)
@@ -229,9 +254,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// </summary>
         /// <param name="developmentSettings">The parsed development settings.</param>
         /// <param name="sectionName">The existing section name, or "AzureAd" when the section is missing.</param>
-        /// <exception cref="JsonException">More than one section name matches, or the file has duplicate property names.</exception>
+        /// <exception cref="JsonException">A flattened managed key is present, more than one section name matches,
+        /// or the file has duplicate property names.</exception>
         internal static JsonNode? GetAzureAdSection(JsonObject developmentSettings, out string sectionName)
         {
+            foreach (string key in ManagedAzureAdKeys)
+            {
+                string? flattenedName = FindPropertyName(developmentSettings, $"{AzureAdSectionName}:{key}", "The file");
+                if (flattenedName is not null)
+                {
+                    throw new JsonException(
+                        $"The file contains the flattened managed key '{flattenedName}'. " +
+                        $"Move this value into a single '{AzureAdSectionName}' object as '{key}' before running the scaffolder.");
+                }
+            }
+
             sectionName = FindPropertyName(developmentSettings, AzureAdSectionName, "The file") ?? AzureAdSectionName;
             return developmentSettings[sectionName];
         }

@@ -483,6 +483,55 @@ public class ValidateEntraIdStepTests
         Assert.False(step.Overwrite);
     }
 
+    [Theory]
+    [InlineData("AzureAd:Instance", false)]
+    [InlineData("AzureAd:Instance", true)]
+    [InlineData("AzureAd:TenantId", false)]
+    [InlineData("AzureAd:TenantId", true)]
+    [InlineData("AzureAd:Domain", false)]
+    [InlineData("AzureAd:Domain", true)]
+    [InlineData("AzureAd:ClientId", false)]
+    [InlineData("AzureAd:ClientId", true)]
+    [InlineData("AzureAd:CallbackPath", false)]
+    [InlineData("AzureAd:CallbackPath", true)]
+    [InlineData("azuread:clientid", false)]
+    [InlineData("azuread:clientid", true)]
+    public void DevelopmentSettingsPreflight_RejectsFlattenedManagedKeys(string key, bool overwrite)
+    {
+        SetDevelopmentSettings($$"""{"{{key}}":"existing-value"}""");
+        ValidateEntraIdStep step = CreateValidStepWithTestLogger();
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: false,
+            overwrite: overwrite);
+
+        Assert.False(result);
+        AssertErrorLogged($"flattened managed key '{key}'");
+        AssertErrorLogged("Move this value into a single 'AzureAd' object");
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_RejectsFlattenedManagedKeysBeforeModelInitialization(bool overwrite)
+    {
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        SetDevelopmentSettings("""{"AzureAd:ClientId":"existing-client-id","AzureAd":{"ClientId":"existing-client-id"}}""");
+        ValidateEntraIdStep step = CreateValidStepWithTestLogger();
+        step.Application = "existing-client-id";
+        step.UseExistingApplication = true;
+        step.Overwrite = overwrite;
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        AssertErrorLogged("flattened managed key 'AzureAd:ClientId'");
+        Assert.False(_context.Properties.ContainsKey("EntraIdModel"));
+        Assert.False(_context.Properties.ContainsKey("EntraIdSettings"));
+    }
+
     private void SetDevelopmentSettings(string settings)
     {
         string developmentSettingsPath = Path.Combine(

@@ -24,6 +24,7 @@ public class UpdateAppSettingsStepTests
     private const string Username = "developer@contoso.com";
 
     private readonly Mock<IFileSystem> _fileSystem = new();
+    private readonly Dictionary<string, string> _files = new();
     private readonly ScaffolderContext _context;
     private readonly string _projectDirectory = Path.Combine("test", "project");
     private readonly string _projectPath;
@@ -43,8 +44,21 @@ public class UpdateAppSettingsStepTests
         _context = new ScaffolderContext(scaffolder.Object);
 
         _fileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _fileSystem.Setup(fs => fs.WriteAllText(_developmentSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => _writtenContent = content);
+        _fileSystem.Setup(fs => fs.FileExists(It.IsAny<string>()))
+            .Returns<string>(path => _files.ContainsKey(path));
+        _fileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>()))
+            .Returns<string>(path => _files[path]);
+        _fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<string, string>((path, content) => _files[path] = content);
+        _fileSystem.Setup(fs => fs.MoveFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            .Callback<string, string, bool>((source, destination, _) =>
+            {
+                _writtenContent = _files[source];
+                _files[destination] = _writtenContent;
+                _files.Remove(source);
+            });
+        _fileSystem.Setup(fs => fs.DeleteFile(It.IsAny<string>()))
+            .Callback<string>(path => _files.Remove(path));
     }
 
     [Fact]
@@ -72,6 +86,12 @@ public class UpdateAppSettingsStepTests
             Times.Never);
         _fileSystem.Verify(fs => fs.ReadAllText(_appSettingsPath), Times.Never);
         _fileSystem.Verify(fs => fs.WriteAllText(_appSettingsPath, It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.WriteAllText(_developmentSettingsPath, It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.MoveFile(
+            It.Is<string>(path => Path.GetDirectoryName(path) == _projectDirectory && path != _developmentSettingsPath),
+            _developmentSettingsPath,
+            true), Times.Once);
+        Assert.Single(_files);
     }
 
     [Theory]
@@ -176,17 +196,130 @@ public class UpdateAppSettingsStepTests
         _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
-    [Fact]
-    public async Task ExecuteAsync_FailsWhenDevelopmentSettingsWriteFails()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_PreservesOriginalSettingsWhenTemporaryWriteFails(bool fileExists)
     {
-        _fileSystem.Setup(fs => fs.FileExists(_developmentSettingsPath)).Returns(false);
-        _fileSystem.Setup(fs => fs.WriteAllText(_developmentSettingsPath, It.IsAny<string>()))
-            .Throws(new IOException("write failed"));
+        const string originalContent = """{"Logging":{"LogLevel":{"Default":"Debug"}}}""";
+        if (fileExists)
+        {
+            SetExistingSettingsJson(originalContent);
+        }
+        string? temporaryPath = null;
+        _fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<string, string>((path, content) =>
+            {
+                temporaryPath = path;
+                _files[path] = content[..(content.Length / 2)];
+                throw new IOException("write failed after partial output");
+            });
 
         (bool result, TestLogger logger) = await ExecuteAsync();
 
         Assert.False(result);
         Assert.Contains(logger.ErrorMessages, message => message.Contains("write failed", StringComparison.Ordinal));
+        Assert.NotNull(temporaryPath);
+        Assert.Equal(fileExists, _files.ContainsKey(_developmentSettingsPath));
+        if (fileExists)
+        {
+            Assert.Equal(originalContent, _files[_developmentSettingsPath]);
+        }
+        Assert.False(_files.ContainsKey(temporaryPath));
+        _fileSystem.Verify(fs => fs.DeleteFile(temporaryPath), Times.Once);
+        _fileSystem.Verify(fs => fs.MoveFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_PreservesOriginalSettingsWhenReplacementFails(bool fileExists)
+    {
+        const string originalContent = """{"Logging":{"LogLevel":{"Default":"Debug"}}}""";
+        if (fileExists)
+        {
+            SetExistingSettingsJson(originalContent);
+        }
+        string? temporaryPath = null;
+        _fileSystem.Setup(fs => fs.MoveFile(It.IsAny<string>(), _developmentSettingsPath, true))
+            .Callback<string, string, bool>((source, _, _) =>
+            {
+                temporaryPath = source;
+                Assert.NotNull(JsonNode.Parse(_files[source])?["AzureAd"]);
+                throw new IOException("replacement failed");
+            });
+
+        (bool result, TestLogger logger) = await ExecuteAsync();
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("replacement failed", StringComparison.Ordinal));
+        Assert.NotNull(temporaryPath);
+        Assert.Equal(fileExists, _files.ContainsKey(_developmentSettingsPath));
+        if (fileExists)
+        {
+            Assert.Equal(originalContent, _files[_developmentSettingsPath]);
+        }
+        Assert.False(_files.ContainsKey(temporaryPath));
+        _fileSystem.Verify(fs => fs.DeleteFile(temporaryPath), Times.Once);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReportsCleanupFailureWithoutHidingWriteFailure()
+    {
+        _fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<string, string>((path, _) =>
+            {
+                _files[path] = "{";
+                throw new IOException("write failed");
+            });
+        _fileSystem.Setup(fs => fs.DeleteFile(It.IsAny<string>()))
+            .Throws(new IOException("cleanup failed"));
+
+        (bool result, TestLogger logger) = await ExecuteAsync();
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("write failed", StringComparison.Ordinal));
+        Assert.Contains(logger.WarningMessages, message => message.Contains("cleanup failed", StringComparison.Ordinal));
+        Assert.False(_files.ContainsKey(_developmentSettingsPath));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_SavesCompleteSettingsUsingRealFileSystem(bool fileExists)
+    {
+        string projectDirectory = Path.Combine(Path.GetTempPath(), $"UpdateAppSettingsStepTests-{Guid.NewGuid():N}");
+        string settingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
+        Directory.CreateDirectory(projectDirectory);
+        try
+        {
+            if (fileExists)
+            {
+                File.WriteAllText(settingsPath, """{"Logging":{"LogLevel":{"Default":"Debug"}}}""");
+            }
+            var step = new UpdateAppSettingsStep(new TestLogger(), new FileSystem(), Mock.Of<ITelemetryService>())
+            {
+                ProjectPath = Path.Combine(projectDirectory, "TestProject.csproj"),
+                Username = Username,
+                TenantId = TenantId,
+                ClientId = ClientId
+            };
+
+            bool result = await step.ExecuteAsync(_context);
+
+            Assert.True(result);
+            JsonNode settings = JsonNode.Parse(File.ReadAllText(settingsPath))!;
+            AssertManagedValuesMatch(settings["AzureAd"]!);
+            if (fileExists)
+            {
+                Assert.Equal("Debug", settings["Logging"]?["LogLevel"]?["Default"]?.ToString());
+            }
+            Assert.Equal(settingsPath, Assert.Single(Directory.GetFiles(projectDirectory)));
+        }
+        finally
+        {
+            Directory.Delete(projectDirectory, recursive: true);
+        }
     }
 
     [Fact]
@@ -299,6 +432,52 @@ public class UpdateAppSettingsStepTests
     }
 
     [Theory]
+    [InlineData("AzureAd:Instance", false)]
+    [InlineData("AzureAd:Instance", true)]
+    [InlineData("AzureAd:TenantId", false)]
+    [InlineData("AzureAd:TenantId", true)]
+    [InlineData("AzureAd:Domain", false)]
+    [InlineData("AzureAd:Domain", true)]
+    [InlineData("AzureAd:ClientId", false)]
+    [InlineData("AzureAd:ClientId", true)]
+    [InlineData("AzureAd:CallbackPath", false)]
+    [InlineData("AzureAd:CallbackPath", true)]
+    [InlineData("azuread:clientid", false)]
+    [InlineData("azuread:clientid", true)]
+    public async Task ExecuteAsync_RejectsFlattenedManagedKeysWithoutWrite(string key, bool overwrite)
+    {
+        SetExistingSettings(new JsonObject { [key] = "existing-value" });
+        string originalContent = _files[_developmentSettingsPath];
+
+        (bool result, TestLogger logger) = await ExecuteAsync(overwrite: overwrite);
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains($"flattened managed key '{key}'", StringComparison.Ordinal));
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("Move this value into a single 'AzureAd' object", StringComparison.Ordinal));
+        Assert.Equal(originalContent, _files[_developmentSettingsPath]);
+        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.MoveFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_RejectsFlattenedManagedKeyEvenWhenNestedSettingsMatch(bool overwrite)
+    {
+        SetExistingSettings(new JsonObject
+        {
+            ["AzureAd:ClientId"] = ClientId,
+            ["AzureAd"] = CreateExpectedAzureAd()
+        });
+
+        (bool result, TestLogger logger) = await ExecuteAsync(overwrite: overwrite);
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("flattened managed key 'AzureAd:ClientId'", StringComparison.Ordinal));
+        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
     [InlineData("developer@contoso.com", null, "contoso.com")]
     [InlineData("developer", null, "developer.onmicrosoft.com")]
     [InlineData("developer@contoso.com", "tenant.onmicrosoft.com", "tenant.onmicrosoft.com")]
@@ -341,14 +520,12 @@ public class UpdateAppSettingsStepTests
 
     private void SetExistingSettings(JsonObject settings)
     {
-        _fileSystem.Setup(fs => fs.FileExists(_developmentSettingsPath)).Returns(true);
-        _fileSystem.Setup(fs => fs.ReadAllText(_developmentSettingsPath)).Returns(settings.ToJsonString());
+        SetExistingSettingsJson(settings.ToJsonString());
     }
 
     private void SetExistingSettingsJson(string settings)
     {
-        _fileSystem.Setup(fs => fs.FileExists(_developmentSettingsPath)).Returns(true);
-        _fileSystem.Setup(fs => fs.ReadAllText(_developmentSettingsPath)).Returns(settings);
+        _files[_developmentSettingsPath] = settings;
     }
 
     private JsonNode ParseWrittenSettings()
@@ -380,6 +557,7 @@ public class UpdateAppSettingsStepTests
     private sealed class TestLogger : ILogger<UpdateAppSettingsStep>
     {
         public List<string> ErrorMessages { get; } = [];
+        public List<string> WarningMessages { get; } = [];
 
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
 
@@ -395,6 +573,10 @@ public class UpdateAppSettingsStepTests
             if (logLevel == LogLevel.Error)
             {
                 ErrorMessages.Add(formatter(state, exception));
+            }
+            else if (logLevel == LogLevel.Warning)
+            {
+                WarningMessages.Add(formatter(state, exception));
             }
         }
     }

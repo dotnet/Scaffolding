@@ -87,6 +87,12 @@ public class FileSystem : IFileSystem
     }
 
     /// <inheritdoc />
+    public void MoveFile(string sourcePath, string destinationPath, bool overwrite)
+    {
+        File.Move(sourcePath, destinationPath, overwrite);
+    }
+
+    /// <inheritdoc />
     public string GetTempPath()
     {
         return Path.GetTempPath();

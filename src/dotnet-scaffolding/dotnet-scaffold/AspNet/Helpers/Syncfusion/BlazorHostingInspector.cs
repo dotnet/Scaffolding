@@ -35,9 +35,11 @@ internal static class BlazorHostingInspector
 
     /// <summary>
     /// Reads the registrations from the entry point's syntax. Matching is by
-    /// invoked method name inside the whole file, which also covers fluent
-    /// chains (<c>AddRazorComponents().AddInteractiveServerComponents()</c>)
-    /// and registrations split across statements or helper methods.
+    /// invoked method name within the startup statements (top-level statements
+    /// or a static <c>Main</c>), which also covers fluent chains
+    /// (<c>AddRazorComponents().AddInteractiveServerComponents()</c>) and
+    /// registrations split across statements. Calls in lambdas, local
+    /// functions and other methods are not proven to run and are ignored.
     /// </summary>
     public static BlazorHostingFacts Inspect(string? entryPointText, string? appRazorText)
     {
@@ -47,7 +49,10 @@ internal static class BlazorHostingInspector
         if (!string.IsNullOrEmpty(entryPointText))
         {
             SyntaxNode root = CSharpSyntaxTree.ParseText(entryPointText).GetRoot();
-            foreach (InvocationExpressionSyntax invocation in root.DescendantNodes().OfType<InvocationExpressionSyntax>())
+
+            // Only calls that run during startup count: top-level statements or a static Main. Calls inside
+            // lambdas, local functions or other methods are not proven to run, so they are not reported.
+            foreach (InvocationExpressionSyntax invocation in GetStartupInvocations(root))
             {
                 string? name = invocation.Expression switch
                 {
@@ -67,6 +72,27 @@ internal static class BlazorHostingInspector
         }
 
         return new BlazorHostingFacts(registered, mapped, ReadGlobalRenderMode(appRazorText));
+    }
+
+    private static IEnumerable<InvocationExpressionSyntax> GetStartupInvocations(SyntaxNode root)
+    {
+        foreach (var scope in SyncfusionBlazorToolkitHelper.GetStartupStatementLists(root))
+        {
+            foreach (StatementSyntax statement in scope)
+            {
+                if (statement is LocalFunctionStatementSyntax)
+                {
+                    continue;
+                }
+
+                foreach (InvocationExpressionSyntax invocation in statement.DescendantNodesAndSelf(
+                    node => node is not (LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax))
+                    .OfType<InvocationExpressionSyntax>())
+                {
+                    yield return invocation;
+                }
+            }
+        }
     }
 
     /// <summary>

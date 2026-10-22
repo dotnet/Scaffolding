@@ -35,6 +35,9 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
     /// </summary>
     public string? Project { get; set; }
 
+    /// <summary>Whether prerelease Toolkit packages may be installed (<c>--prerelease</c>).</summary>
+    public bool Prerelease { get; set; }
+
     public ValidateSyncfusionBlazorToolkitStep(
         IFileSystem fileSystem,
         ILogger<ValidateSyncfusionBlazorToolkitStep> logger,
@@ -232,6 +235,7 @@ internal class ValidateSyncfusionBlazorToolkitStep : ScaffoldStep
         return new SyncfusionBlazorToolkitSettings
         {
             Project = normalizedProject,
+            Prerelease = Prerelease,
         };
     }
 

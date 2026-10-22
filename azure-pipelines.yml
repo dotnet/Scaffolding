@@ -63,7 +63,7 @@ extends:
           codeSign: true
           jobs:
           - job: Windows_NT
-            timeoutInMinutes: 180
+            timeoutInMinutes: 300
             pool:
               name: $(DncEngInternalBuildPool)
               image: 1es-windows-2022

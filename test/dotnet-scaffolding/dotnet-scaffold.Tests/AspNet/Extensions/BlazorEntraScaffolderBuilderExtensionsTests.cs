@@ -3,15 +3,54 @@
 using System;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
+using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Moq;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Extensions;
 
 public class BlazorEntraScaffolderBuilderExtensionsTests
 {
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WithAddClientSecretStep_ForwardsExistingApplicationSetting(bool useExistingApplication)
+    {
+        var builder = new Mock<IScaffoldBuilder>();
+        Action<ScaffoldStepConfigurator<AddClientSecretStep>>? configure = null;
+        builder.Setup(b => b.WithStep<AddClientSecretStep>(It.IsAny<Action<ScaffoldStepConfigurator<AddClientSecretStep>>>()))
+            .Callback<Action<ScaffoldStepConfigurator<AddClientSecretStep>>, Action<ScaffoldStepConfigurator<AddClientSecretStep>>>((action, _) => configure = action)
+            .Returns(builder.Object);
+        var context = new ScaffolderContext(Mock.Of<IScaffolder>());
+        context.Properties[nameof(EntraIdSettings)] = new EntraIdSettings
+        {
+            Project = "Test.csproj",
+            Username = "test@example.com",
+            TenantId = "tenant",
+            UseExistingApplication = useExistingApplication
+        };
+        context.Properties[nameof(EntraIdModel)] = new EntraIdModel
+        {
+            Username = "test@example.com",
+            TenantId = "tenant"
+        };
+        var step = new AddClientSecretStep(NullLogger<AddClientSecretStep>.Instance, Mock.Of<IFileSystem>(), Mock.Of<IEnvironmentService>())
+        {
+            ProjectPath = string.Empty
+        };
+
+        builder.Object.WithAddClientSecretStep();
+        Assert.NotNull(configure);
+        configure(new ScaffoldStepConfigurator<AddClientSecretStep> { Step = step, Context = context });
+
+        Assert.Equal(useExistingApplication, step.UseExistingApplication);
+    }
+
     [Fact]
     public void WithAddClientSecretStep_ReturnsBuilder()
     {

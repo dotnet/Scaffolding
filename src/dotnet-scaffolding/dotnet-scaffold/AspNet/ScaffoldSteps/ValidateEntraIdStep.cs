@@ -218,13 +218,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return false;
             }
 
-            JsonNode? azureAdNode = devSettingsObject["AzureAd"];
-            if (overwrite || azureAdNode is null)
+            if (overwrite)
             {
                 return true;
             }
 
-            if (azureAdNode is not JsonObject azureAdObject)
+            JsonNode? azureAdNode = devSettingsObject["AzureAd"];
+            if (azureAdNode is not null && azureAdNode is not JsonObject)
             {
                 _logger.LogError("Conflicting AzureAd value for key 'AzureAd' already exists in appsettings.Development.json. Re-run with '--overwrite' to replace existing managed settings.");
                 return false;
@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             // A new registration's ClientId is unknown, so any existing value conflicts.
             string? clientId = useExistingApplication ? Application?.Split(" ").Last() : null;
             var expectedSettings = UpdateAppSettingsStep.CreateAzureAdConfiguration(Username, TenantId, clientId);
-            string? conflictingKey = UpdateAppSettingsStep.GetFirstConflictingAzureAdKey(azureAdObject, expectedSettings);
+            string? conflictingKey = UpdateAppSettingsStep.GetFirstConflictingAzureAdKey(devSettingsObject, expectedSettings);
             if (conflictingKey is not null)
             {
                 _logger.LogError($"Conflicting AzureAd value for key '{conflictingKey}' already exists in appsettings.Development.json. Re-run with '--overwrite' to replace existing managed settings.");

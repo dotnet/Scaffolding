@@ -148,9 +148,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 
                 JsonNode? existingAzureAd = developmentSettings["AzureAd"];
 
-                if (!Overwrite && existingAzureAd is JsonObject existingAzureAdObject)
+                if (!Overwrite)
                 {
-                    string? conflictingKey = GetFirstConflictingAzureAdKey(existingAzureAdObject, azureAdConfig);
+                    string? conflictingKey = GetFirstConflictingAzureAdKey(developmentSettings, azureAdConfig);
                     if (!string.IsNullOrEmpty(conflictingKey))
                     {
                         _logger.LogError($"Conflicting AzureAd value for key '{conflictingKey}' already exists in appsettings.Development.json. Re-run with '--overwrite' to replace existing managed settings.");
@@ -165,6 +165,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 }
 
                 if (existingAzureAd is JsonObject existingAzureAdObjectForNoWrite &&
+                    !HasFlatManagedAzureAdSettings(developmentSettings, azureAdConfig) &&
                     HasMatchingManagedAzureAdSettings(existingAzureAdObjectForNoWrite, azureAdConfig))
                 {
                     _logger.LogInformation("No changes needed for AzureAd configuration in appsettings.Development.json.");
@@ -177,6 +178,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     JsonObject jsonObject => jsonObject,
                     _ => new JsonObject()
                 };
+
+                RemoveFlatManagedAzureAdSettings(developmentSettings, azureAdConfig);
 
                 foreach (var setting in azureAdConfig)
                 {
@@ -247,20 +250,57 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 : $"{resolvedUsername}.onmicrosoft.com";
         }
 
-        internal static string? GetFirstConflictingAzureAdKey(JsonObject existingAzureAd, JsonObject generatedAzureAd)
+        internal static string? GetFirstConflictingAzureAdKey(JsonObject developmentSettings, JsonObject generatedAzureAd)
         {
+            JsonObject? existingAzureAd = developmentSettings["AzureAd"] as JsonObject;
+
             foreach (var setting in generatedAzureAd)
             {
-                string? existingValue = existingAzureAd[setting.Key]?.ToString();
+                JsonNode? nestedValue = existingAzureAd?[setting.Key];
+                if (IsConflictingValue(nestedValue, setting.Value))
+                {
+                    return setting.Key;
+                }
 
-                if (!string.IsNullOrEmpty(existingValue) &&
-                    !JsonNode.DeepEquals(existingAzureAd[setting.Key], setting.Value))
+                JsonNode? flatValue = developmentSettings[$"AzureAd:{setting.Key}"];
+                if (IsConflictingValue(flatValue, setting.Value))
                 {
                     return setting.Key;
                 }
             }
 
             return null;
+        }
+
+        private static bool IsConflictingValue(JsonNode? existingValue, JsonNode? generatedValue)
+        {
+            return !string.IsNullOrEmpty(existingValue?.ToString()) &&
+                !JsonNode.DeepEquals(existingValue, generatedValue);
+        }
+
+        private static bool HasFlatManagedAzureAdSettings(
+            JsonObject developmentSettings,
+            JsonObject generatedAzureAd)
+        {
+            foreach (var setting in generatedAzureAd)
+            {
+                if (developmentSettings.ContainsKey($"AzureAd:{setting.Key}"))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static void RemoveFlatManagedAzureAdSettings(
+            JsonObject developmentSettings,
+            JsonObject generatedAzureAd)
+        {
+            foreach (var setting in generatedAzureAd)
+            {
+                developmentSettings.Remove($"AzureAd:{setting.Key}");
+            }
         }
 
         private static bool HasMatchingManagedAzureAdSettings(JsonObject existingAzureAd, JsonObject generatedAzureAd)

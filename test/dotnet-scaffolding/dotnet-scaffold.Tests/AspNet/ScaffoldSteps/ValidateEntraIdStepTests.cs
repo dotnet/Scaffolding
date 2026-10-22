@@ -275,6 +275,8 @@ public class ValidateEntraIdStepTests
     [InlineData("""{"azuread":{"domain":"different-domain"}}""", false, false, "Domain", false)]
     [InlineData("""{"azuread":{"callbackpath":"/different-callback"}}""", false, false, "CallbackPath", false)]
     [InlineData("""{"azuread":"invalid-shape"}""", false, false, "AzureAd", false)]
+    [InlineData("""{"AzureAd:ClientId":"existing-client-id"}""", false, false, "ClientId", false)]
+    [InlineData("""{"azuread:clientid":"different-client-id"}""", true, false, "ClientId", false)]
     [InlineData("""{ /* development settings */ "azuread": { "clientid": "existing-client-id" } }""", false, false, "ClientId", false)]
     [InlineData("""{ "AzureAd": { "ClientId": "existing-client-id", }, }""", false, false, "ClientId", false)]
     public async Task ExecuteAsync_PreflightFailure_StopsRegistrationAndClientSecretSteps(

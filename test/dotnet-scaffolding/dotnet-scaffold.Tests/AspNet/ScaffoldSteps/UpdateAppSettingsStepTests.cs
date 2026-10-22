@@ -195,6 +195,65 @@ public class UpdateAppSettingsStepTests
     }
 
     [Theory]
+    [InlineData(false, "client-id", true)]
+    [InlineData(false, "old-client-id", false)]
+    [InlineData(true, "old-client-id", true)]
+    public async Task ExecuteAsync_NormalizesFlatManagedAzureAdKeys(
+        bool overwrite, string existingClientId, bool expectedResult)
+    {
+        string settings =
+            $$"""
+            {
+              "AzureAd:ClientId": "{{existingClientId}}",
+              "AzureAd:SignedOutCallbackPath": "/custom-signout",
+              "Logging": { "LogLevel": { "Default": "Information" } }
+            }
+            """;
+        using var originalConfiguration = LoadConfiguration(settings);
+        Assert.Equal(existingClientId, originalConfiguration["AzureAd:ClientId"]);
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(settings);
+
+        string? writtenContent = null;
+        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
+            .Callback<string, string>((_, content) => writtenContent = content);
+        var step = new UpdateAppSettingsStep(
+            NullLogger<UpdateAppSettingsStep>.Instance,
+            _mockFileSystem.Object,
+            Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = _projectPath,
+            Username = "devuser",
+            TenantId = "tenant-id",
+            ClientId = "client-id",
+            Overwrite = overwrite
+        };
+
+        Assert.Equal(expectedResult, await step.ExecuteAsync(_context, CancellationToken.None));
+
+        if (!expectedResult)
+        {
+            Assert.Null(writtenContent);
+            _mockFileSystem.Verify(
+                fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
+            return;
+        }
+
+        Assert.NotNull(writtenContent);
+        using var configuration = LoadConfiguration(writtenContent);
+        Assert.Equal("client-id", configuration["AzureAd:ClientId"]);
+        Assert.Equal("tenant-id", configuration["AzureAd:TenantId"]);
+        Assert.Equal("/custom-signout", configuration["AzureAd:SignedOutCallbackPath"]);
+        Assert.Equal("Information", configuration["Logging:LogLevel:Default"]);
+
+        JsonObject json = Assert.IsType<JsonObject>(JsonNode.Parse(writtenContent));
+        Assert.False(json.ContainsKey("AzureAd:ClientId"));
+        Assert.True(json.ContainsKey("AzureAd:SignedOutCallbackPath"));
+    }
+
+    [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]
     [InlineData(false, true)]

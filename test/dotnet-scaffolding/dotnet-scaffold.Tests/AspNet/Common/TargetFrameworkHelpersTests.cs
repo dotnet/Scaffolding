@@ -38,6 +38,19 @@ public class TargetFrameworkHelpersTests : IDisposable
         }
     }
 
+    [Theory]
+    [InlineData(TargetFramework.Net8, 9, false)]
+    [InlineData(TargetFramework.Net9, 9, true)]
+    [InlineData(TargetFramework.Net9, 10, false)]
+    [InlineData(TargetFramework.Net10, 10, true)]
+    [InlineData(TargetFramework.Net11, 9, true)]
+    [InlineData(null, 9, false)]
+    [InlineData((TargetFramework)(-1), 9, false)]
+    public void IsNetVersionOrLater_ComparesMajorVersions(TargetFramework? targetFramework, int minimumMajorVersion, bool expected)
+    {
+        Assert.Equal(expected, targetFramework.IsNetVersionOrLater(minimumMajorVersion));
+    }
+
     [Fact]
     public void GetTargetFrameworkForProject_Net8Project_ReturnsNet8()
     {

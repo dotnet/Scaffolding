@@ -22,6 +22,10 @@ internal class PackageConstants
         public static readonly Package EfCoreToolsPackage = new("Microsoft.EntityFrameworkCore.Tools", IsVersionRequired: true);
         public static readonly Package EfCoreDesignPackage = new("Microsoft.EntityFrameworkCore.Design", IsVersionRequired: true);
         public static readonly Package SqlServerPackage = new("Microsoft.EntityFrameworkCore.SqlServer", IsVersionRequired: true);
+        public static readonly Package SqlClientExtensionsAzurePackage = new("Microsoft.Data.SqlClient.Extensions.Azure", IsVersionRequired: true)
+        {
+            UseLatestVersion = true
+        };
         public static readonly Package SqlitePackage = new("Microsoft.EntityFrameworkCore.Sqlite", IsVersionRequired: true);
         public static readonly Package CosmosPackage = new("Microsoft.EntityFrameworkCore.Cosmos", IsVersionRequired: true);
         public static readonly Package PostgresPackage = new("Npgsql.EntityFrameworkCore.PostgreSQL", IsVersionRequired: true);

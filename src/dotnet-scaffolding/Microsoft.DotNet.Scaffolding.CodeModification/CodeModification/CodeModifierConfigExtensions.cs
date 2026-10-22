@@ -14,11 +14,7 @@ internal static class CodeModifierConfigExtensions
         }
 
         //modify CodeSnippets 'CheckBlock', 'Parent', and 'Block'
-        var methods = codeModifierConfig.Files.SelectMany(x => x.Methods?.Values ?? Enumerable.Empty<Method>());
-        var replacementCodeSnippets = codeModifierConfig.Files.SelectMany(x => x.Replacements ?? Enumerable.Empty<CodeSnippet>());
-        var codeSnippets = methods.SelectMany(x => x.CodeChanges ?? Enumerable.Empty<CodeSnippet>()).ToList();
-        codeSnippets.AddRange(replacementCodeSnippets);
-        foreach (var codeSnippet in codeSnippets)
+        foreach (var codeSnippet in codeModifierConfig.GetCodeSnippets())
         {
             codeSnippet.CheckBlock = ReplaceString(codeSnippet.CheckBlock, codeModifierProperties);
             codeSnippet.Parent = ReplaceString(codeSnippet.Parent, codeModifierProperties);
@@ -36,6 +32,14 @@ internal static class CodeModifierConfigExtensions
         {
             file.Usings = ReplaceStrings(file.Usings, codeModifierProperties) ?? file.Usings;
         }
+    }
+
+    internal static IEnumerable<CodeSnippet> GetCodeSnippets(this CodeModifierConfig codeModifierConfig)
+    {
+        var files = codeModifierConfig.Files ?? [];
+        var methods = files.SelectMany(file => file.Methods?.Values ?? Enumerable.Empty<Method>());
+        return methods.SelectMany(method => method.CodeChanges ?? [])
+            .Concat(files.SelectMany(file => file.Replacements ?? []));
     }
 
     internal static string? ReplaceString(string? input, IDictionary<string, string> codeModifierProperties)

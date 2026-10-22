@@ -763,9 +763,9 @@ public class FullHelpPrinterTests
         public IEnumerable<ScaffolderOption> Options => _options;
         public IEnumerable<(string Example, string? Description)> Examples => _examples;
 
-        public Task ExecuteAsync(ScaffolderContext context)
+        public Task<bool> ExecuteAsync(ScaffolderContext context)
         {
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 

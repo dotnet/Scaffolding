@@ -43,7 +43,7 @@ public class RazorPagesCrudNet11IntegrationTests : RazorPagesCrudIntegrationTest
             $"Expected RazorPages template file '{fileName}' not found for {TargetFramework}");
     }
 
-    [Fact(Skip = "net11.0 preview SDK silently no-ops the Program.cs code-modification step; re-enable once root cause is fixed.")]
+    [Fact]
     public async Task Scaffold_RazorPagesCrud_Net11_CliInvocation()
     {
         // Arrange — write project + Program.cs + model class
@@ -76,30 +76,29 @@ public class RazorPagesCrudNet11IntegrationTests : RazorPagesCrudIntegrationTest
             "--prerelease");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
-        // Assert — expected files were created (skip if scaffolding encountered errors)
-        bool scaffoldingSucceeded = !cliOutput.Contains("An error occurred") && !cliOutput.Contains("Failed");
-        if (scaffoldingSucceeded)
+        var combinedOutput = cliOutput + cliError;
+        Assert.DoesNotContain("An error occurred", combinedOutput);
+        Assert.DoesNotContain("Failed", combinedOutput);
+
+        // Assert — expected files were created
+        var razorPagesDir = Path.Combine(_testProjectDir, "Pages", "TestModelPages");
+        Assert.True(Directory.Exists(razorPagesDir), "Pages/TestModelPages directory should be created.");
+        foreach (var page in new[] { "Create", "Delete", "Details", "Edit", "Index" })
         {
-            var razorPagesDir = Path.Combine(_testProjectDir, "Pages", "TestModelPages");
-            Assert.True(Directory.Exists(razorPagesDir), "Pages/TestModelPages directory should be created.");
-            foreach (var page in new[] { "Create", "Delete", "Details", "Edit", "Index" })
-            {
-                Assert.True(File.Exists(Path.Combine(razorPagesDir, $"{page}.cshtml")), $"{page}.cshtml should be created.");
-                Assert.True(File.Exists(Path.Combine(razorPagesDir, $"{page}.cshtml.cs")), $"{page}.cshtml.cs should be created.");
-            }
-            Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
-                "DbContext file 'Data/TestDbContext.cs' should be created.");
-            var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-            Assert.Contains("TestDbContext", programContent);
-
-            // Assert no NuGet errors during scaffolding
-            Assert.False(cliOutput.Contains("error: NU"),
-                $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
-
-            // Assert — project builds after scaffolding
-            var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
-            Assert.True(postExitCode == 0,
-                $"Project should build after scaffolding.\nExit code: {postExitCode}\nOutput: {postOutput}\nError: {postError}");
+            Assert.True(File.Exists(Path.Combine(razorPagesDir, $"{page}.cshtml")), $"{page}.cshtml should be created.");
+            Assert.True(File.Exists(Path.Combine(razorPagesDir, $"{page}.cshtml.cs")), $"{page}.cshtml.cs should be created.");
         }
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
+            "DbContext file 'Data/TestDbContext.cs' should be created.");
+        var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+        Assert.Contains("TestDbContext", programContent);
+
+        // Assert no NuGet errors during scaffolding
+        Assert.DoesNotContain("error: NU", combinedOutput);
+
+        // Assert — project builds after scaffolding
+        var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(postExitCode == 0,
+            $"Project should build after scaffolding.\nExit code: {postExitCode}\nOutput: {postOutput}\nError: {postError}");
     }
 }

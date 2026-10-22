@@ -131,6 +131,17 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
         scaffoldRunner.AddHandler(handle);
     }
 
+    /// <inheritdoc/>
+    public void AddHandler(Func<ParseResult, CancellationToken, Task<int>> handle)
+    {
+        if (_appServices is null)
+        {
+            throw new InvalidOperationException("Build must be called before adding a root command handler.");
+        }
+
+        IScaffoldRunner scaffoldRunner = _appServices.GetRequiredService<IScaffoldRunner>();
+        scaffoldRunner.AddHandler(handle);
+    }
 
     // Adds default services required for scaffolding
     private void AddDefaultServices()

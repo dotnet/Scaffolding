@@ -1,0 +1,106 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertBefore": [ "builder.Build()" ],
+              "Block": "builder.Services.AddAuthorizationCore()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertBefore": [ "builder.Build()" ],
+              "Block": "builder.Services.AddCascadingAuthenticationState()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertBefore": [ "builder.Build()" ],
+              "Block": "builder.Services.AddAuthenticationStateDeserialization()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "FileName": "Routes.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "<RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" />"
+          ],
+          "MultiLineBlock": [
+            "<AuthorizeRouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\">",
+            "            <NotAuthorized>",
+            "                <RedirectToLogin />",
+            "            </NotAuthorized>",
+            "        </AuthorizeRouteView>"
+          ],
+          "CheckBlock": "<NotAuthorized>"
+        }
+      ]
+    },
+    {
+      "FileName": "NavMenu.razor.css",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            ".nav-item {"
+          ],
+          "CheckBlock": "bi-lock-nav-menu",
+          "FileBlock": "..\\..\\Shared\\CodeBlocks\\IdentityNavMenu.css"
+        }
+      ]
+    },
+    {
+      "FileName": "Layout\\NavMenu.razor",
+      "Replacements": [
+        {
+          "CheckBlock": "@implements IDisposable",
+          "ReplaceSnippet": [
+            "<div class=\"top-row ps-3 navbar navbar-dark\">"
+          ],
+          "MultiLineBlock": [
+            "@implements IDisposable",
+            "@inject NavigationManager NavigationManager",
+            "<div class=\"top-row ps-3 navbar navbar-dark\">"
+          ]
+        },
+        {
+          "CheckBlock": "<AuthorizeView>",
+          "ReplaceSnippet": [
+            "</nav>"
+          ],
+          "FileBlock": "..\\..\\Shared\\CodeBlocks\\IdentityNavMenu.razor"
+        },
+        {
+          "CheckBlock": "OnInitialized()",
+          "FileBlock": "..\\..\\Shared\\CodeBlocks\\IdentityNavMenuCode.razor"
+        }
+      ]
+    },
+    {
+      "FileName": "_Imports.razor",
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "@using Microsoft.AspNetCore.Components.Forms"
+          ],
+          "MultiLineBlock": [
+            "@using Microsoft.AspNetCore.Components.Forms",
+            "@using Microsoft.AspNetCore.Components.Authorization"
+          ],
+          "CheckBlock": "Microsoft.AspNetCore.Components.Authorization"
+        }
+      ]
+    }
+  ]
+}

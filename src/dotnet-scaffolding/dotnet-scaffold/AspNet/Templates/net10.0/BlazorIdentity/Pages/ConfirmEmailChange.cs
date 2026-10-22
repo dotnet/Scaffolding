@@ -51,7 +51,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "thStatus(\r\n                \"Account/Login\", \"Error: Invalid email change confirm" +
                     "ation link.\", HttpContext);\r\n            return;\r\n        }\r\n\r\n        var user " +
                     "= await UserManager.FindByIdAsync(UserId);\r\n        if (user is null)\r\n        {" +
-                    "\r\n            message = \"Unable to find user with Id \'{userId}\'\";\r\n            r" +
+                    "\r\n            message = $\"Error: Unable to find user with Id \'{UserId}\'\";\r\n            r" +
                     "eturn;\r\n        }\r\n\r\n        var code = Encoding.UTF8.GetString(WebEncoders.Base" +
                     "64UrlDecode(Code));\r\n        var result = await UserManager.ChangeEmailAsync(use" +
                     "r, Email, code);\r\n        if (!result.Succeeded)\r\n        {\r\n            message" +

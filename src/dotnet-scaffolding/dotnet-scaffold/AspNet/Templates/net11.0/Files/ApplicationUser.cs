@@ -28,9 +28,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Files
             this.Write("using Microsoft.AspNetCore.Identity;\r\n");
  if (!string.IsNullOrEmpty(Model.UserClassNamespace))
 {
-            this.Write("namespace ");
+            this.Write("\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
-            this.Write(";");
+            this.Write(";\r\n");
 
 }
 

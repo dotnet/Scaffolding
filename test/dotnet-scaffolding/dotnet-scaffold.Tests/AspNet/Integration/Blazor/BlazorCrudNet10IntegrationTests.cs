@@ -20,7 +20,21 @@ public class BlazorCrudNet10IntegrationTests : BlazorCrudIntegrationTestsBase
         File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
         var modelsDir = Path.Combine(_testProjectDir, "Models");
         Directory.CreateDirectory(modelsDir);
-        File.WriteAllText(Path.Combine(modelsDir, "TestModel.cs"), ScaffoldCliHelper.GetModelClassContent("TestProject", "TestModel"));
+        File.WriteAllText(Path.Combine(modelsDir, "TestModel.cs"), @"namespace TestProject.Models;
+
+public class TestModel
+{
+    public int Id { get; set; }
+    public EmploymentType EmploymentType { get; set; }
+    public EmploymentType? OptionalEmploymentType { get; set; }
+}
+
+public enum EmploymentType
+{
+    Permanent,
+    Contract
+}
+");
 
         // Set up Blazor project structure required for scaffolded code to compile
         var componentsDir = Path.Combine(_testProjectDir, "Components");
@@ -29,8 +43,8 @@ public class BlazorCrudNet10IntegrationTests : BlazorCrudIntegrationTestsBase
         File.WriteAllText(Path.Combine(componentsDir, "App.razor"), ScaffoldCliHelper.GetBlazorAppRazor());
         File.WriteAllText(Path.Combine(componentsDir, "Routes.razor"), ScaffoldCliHelper.GetBlazorRoutesRazor());
 
-        var (beforeExitCode, _, beforeError) = await RunBuildAsync(_testProjectDir);
-        Assert.True(beforeExitCode == 0, $"Project should build before scaffolding. Error: {beforeError}");
+        var (beforeExitCode, beforeOutput, beforeError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(beforeExitCode == 0, $"Project should build before scaffolding.\nOutput: {beforeOutput}\nError: {beforeError}");
 
         var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
@@ -48,14 +62,16 @@ public class BlazorCrudNet10IntegrationTests : BlazorCrudIntegrationTestsBase
         Assert.DoesNotContain("Failed", combinedOutput);
         Assert.DoesNotContain("No modifications made for file: Program.cs", combinedOutput);
 
-        // Assert — generated pages exist, Edit page includes persistent-state wiring,
-        // and the resulting project still compiles.
+        // Assert — enum inputs and persistent-state wiring were generated and the resulting project compiles.
         var blazorPagesDir = Path.Combine(_testProjectDir, "Components", "Pages", "TestModelPages");
         Assert.True(Directory.Exists(blazorPagesDir), "Components/Pages/TestModelPages directory should be created.");
         foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
         {
             Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
         }
+        var createContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Create.razor"));
+        Assert.Contains("<InputSelect id=\"employmenttype\"", createContent);
+        Assert.Contains("<InputSelect id=\"optionalemploymenttype\"", createContent);
         var editContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Edit.razor")).Replace("\r\n", "\n");
         Assert.Contains("[SupplyParameterFromForm]\n    private TestModel? TestModel", editContent);
         Assert.Contains("[PersistentState]\n    public TestModel? TestModelState", editContent);
@@ -70,7 +86,7 @@ public class BlazorCrudNet10IntegrationTests : BlazorCrudIntegrationTestsBase
         Assert.DoesNotContain("error: NU", combinedOutput);
 
         // Verify project builds after scaffolding
-        var (afterExitCode, _, afterError) = await RunBuildAsync(_testProjectDir);
-        Assert.True(afterExitCode == 0, $"Project should still build after scaffolding. Error: {afterError}");
+        var (afterExitCode, afterOutput, afterError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(afterExitCode == 0, $"Project should still build after scaffolding.\nOutput: {afterOutput}\nError: {afterError}");
     }
 }

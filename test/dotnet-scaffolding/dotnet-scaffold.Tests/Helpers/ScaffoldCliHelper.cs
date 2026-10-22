@@ -5,7 +5,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
@@ -20,12 +22,20 @@ internal static class ScaffoldCliHelper
     /// Gets the repository root directory by navigating up from the test assembly output path.
     /// The Arcade build layout is: {repoRoot}/artifacts/bin/{project}/{Config}/{TFM}/{assembly}.dll
     /// </summary>
-    private static string GetRepoRoot()
+    internal static string GetRepoRoot()
     {
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation)!;
         // Navigate from artifacts/bin/dotnet-scaffold.Tests/{Config}/{TFM}/ up to repo root
         return Path.GetFullPath(Path.Combine(assemblyDirectory, "..", "..", "..", "..", ".."));
+    }
+
+    internal static string GetTestTargetFramework()
+    {
+        var framework = Assembly.GetExecutingAssembly().GetCustomAttribute<TargetFrameworkAttribute>()
+            ?? throw new System.InvalidOperationException("The test assembly has no target framework attribute.");
+        var version = new FrameworkName(framework.FrameworkName).Version;
+        return $"net{version.Major}.{version.Minor}";
     }
 
     /// <summary>
@@ -152,6 +162,9 @@ internal static class ScaffoldCliHelper
         return "Debug";
     }
 
+    internal static string[] GetPrereleaseArguments(string projectTargetFramework)
+        => projectTargetFramework == "net11.0" ? ["--prerelease"] : [];
+
     /// <summary>
     /// Runs a dotnet-scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspnet {command} {args}</c>.
     /// Uses <c>--no-build</c> because the solution must already be built before running tests.
@@ -255,12 +268,14 @@ internal static class ScaffoldCliHelper
     /// Runs <c>dotnet build</c> in the specified working directory.
     /// </summary>
     public static async Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)
+        => await RunDotNetAsync(workingDirectory, "build");
+
+    internal static async Task<(int ExitCode, string Output, string Error)> RunDotNetAsync(string workingDirectory, params string[] arguments)
     {
-        var buildProcess = new Process
+        using var buildProcess = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                Arguments = "build",
                 WorkingDirectory = workingDirectory,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -269,11 +284,16 @@ internal static class ScaffoldCliHelper
             }
         };
         ConfigureDotNetEnvironment(buildProcess.StartInfo);
+        foreach (var argument in arguments)
+        {
+            buildProcess.StartInfo.ArgumentList.Add(argument);
+        }
+
         buildProcess.Start();
-        string output = await buildProcess.StandardOutput.ReadToEndAsync();
-        string error = await buildProcess.StandardError.ReadToEndAsync();
+        var outputTask = buildProcess.StandardOutput.ReadToEndAsync();
+        var errorTask = buildProcess.StandardError.ReadToEndAsync();
         await buildProcess.WaitForExitAsync();
-        return (buildProcess.ExitCode, output, error);
+        return (buildProcess.ExitCode, await outputTask, await errorTask);
     }
 
     /// <summary>
@@ -411,27 +431,33 @@ public class {modelName}
     /// to add authentication UI (login/logout/register links).
     /// </summary>
     public static string GetNavMenuRazor() =>
-        @"<div class=""top-row ps-3 navbar navbar-dark"">
-    <div class=""container-fluid"">
-        <a class=""navbar-brand"" href="""">TestProject</a>
-    </div>
-</div>
+                """
+                <div class="top-row ps-3 navbar navbar-dark">
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="">TestProject</a>
+                    </div>
+                </div>
 
-<nav class=""nav-scrollable"">
-    <ul class=""nav flex-column"">
-        <div class=""nav-item px-3"">
-            <NavLink class=""nav-link"" href="""" Match=""NavLinkMatch.All"">
-                <span class=""bi bi-house-door-fill-nav-menu"" aria-hidden=""true""></span> Home
-            </NavLink>
-        </div>
-        <div class=""nav-item px-3"">
-            <NavLink class=""nav-link"" href=""weather"">
-                <span class=""bi bi-list-nested-nav-menu"" aria-hidden=""true""></span> Weather
-            </NavLink>
-        </div>
-    </ul>
-</nav>
-";
+                <nav-menu>
+                    <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+                    <div class="nav-scrollable">
+                        <nav class="nav flex-column">
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                                </NavLink>
+                            </div>
+
+                            <div class="nav-item px-3">
+                                <NavLink class="nav-link" href="weather">
+                                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                                </NavLink>
+                            </div>
+                        </nav>
+                    </div>
+                </nav-menu>
+                """.TrimEnd() + System.Environment.NewLine;
 
     /// <summary>
     /// Gets a minimal NavMenu.razor.css matching the standard Blazor template structure.
@@ -441,6 +467,10 @@ public class {modelName}
     public static string GetNavMenuCss() =>
         @".bi-list-nested-nav-menu {
     background-image: url(""data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-list-nested' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M4.5 11.5A.5.5 0 0 1 5 11h10a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 1 3h10a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5z'/%3E%3C/svg%3E"");
+}
+
+.nav-item {
+    font-size: 0.9rem;
 }
 ";
 
@@ -479,6 +509,7 @@ public class {modelName}
     {
         var projectDir = Path.Combine(testDirectory, projectName);
         Directory.CreateDirectory(projectDir);
+        File.WriteAllText(Path.Combine(projectDir, "NuGet.config"), GetTestNuGetConfig(targetFramework));
 
         var projectPath = Path.Combine(projectDir, $"{projectName}.csproj");
         File.WriteAllText(projectPath, GetWebProjectContent(targetFramework));
@@ -507,48 +538,41 @@ public class {modelName}
     /// The temporary test projects live under <see cref="Path.GetTempPath"/>, i.e. outside the
     /// repository tree, so they cannot discover the repository's root <c>NuGet.config</c> by the
     /// normal directory walk. To keep a single source of truth — and, critically, to restore from
-    /// the exact same curated, CI-mirrored dnceng feeds the rest of the build uses — this returns
-    /// the repository root <c>NuGet.config</c> content verbatim.
+    /// the exact same curated, CI-mirrored dnceng feeds the rest of the build uses — this copies
+    /// the repository root <c>NuGet.config</c> feeds.
     /// </para>
     /// <para>
     /// This deliberately avoids the live public <c>https://api.nuget.org</c> feed (which the repo's
     /// own config does not use). Restoring the scaffolded preview projects directly against the live
     /// nuget.org endpoint was the root cause of the CI flakiness: transient throttling/timeouts on
     /// that endpoint failed the pre-/post-build restores. The dnceng mirror feeds in the repo config
-    /// are the same ones the solution build already warmed, so these restores become cache hits.
+    /// are the same ones the solution build already warmed. Inherited source-disable and mapping
+    /// settings are cleared so machine-level configuration cannot change the fixture's feeds.
     /// </para>
     /// </summary>
     public static string PreviewNuGetConfig => GetRepoRootNuGetConfig();
 
+    internal static string GetTestNuGetConfig(string targetFramework)
+        => targetFramework == "net11.0" ? PreviewNuGetConfig : StableNuGetConfig;
+
     /// <summary>
     /// Reads the repository root <c>NuGet.config</c> so temporary test projects restore from the
-    /// identical feed set as the rest of the build. Falls back to an embedded copy of the repo's
-    /// dnceng feeds (still excluding the live nuget.org endpoint) if the file cannot be located.
+    /// identical feed set as the rest of the build, without inherited source-disable or mapping settings.
     /// </summary>
     private static string GetRepoRootNuGetConfig()
     {
         var repoConfig = Path.Combine(GetRepoRoot(), "NuGet.config");
-        if (File.Exists(repoConfig))
+        var config = XDocument.Load(repoConfig);
+        foreach (string sectionName in new[] { "disabledPackageSources", "packageSourceMapping" })
         {
-            return File.ReadAllText(repoConfig);
+            config.Root!.Element(sectionName)?.Remove();
+            config.Root.Add(new XElement(sectionName, new XElement("clear")));
         }
-
-        // Defensive fallback mirroring the repo's dnceng feeds. Intentionally excludes
-        // https://api.nuget.org — the dotnet-public feed is a reliable mirror of it.
-        return @"<?xml version=""1.0"" encoding=""utf-8""?>
-<configuration>
-  <packageSources>
-    <clear />
-    <add key=""dotnet-public"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json"" />
-    <add key=""dotnet11"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet11/nuget/v3/index.json"" />
-    <add key=""dotnet11-transport"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet11-transport/nuget/v3/index.json"" />
-  </packageSources>
-  <disabledPackageSources />
-</configuration>";
+        return config.ToString();
     }
 
     /// <summary>
-    /// NuGet.config content that restricts package sources to nuget.org only.
+    /// NuGet.config content that restricts package sources to the dotnet-public mirror.
     /// Prevents preview/dev feed packages from interfering with stable TFM tests
     /// (e.g., net8.0, net9.0) when the machine has preview SDK feeds configured.
     /// </summary>
@@ -556,7 +580,13 @@ public class {modelName}
 <configuration>
   <packageSources>
     <clear />
-    <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
+    <add key=""dotnet-public"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json"" />
   </packageSources>
+  <disabledPackageSources>
+    <clear />
+  </disabledPackageSources>
+  <packageSourceMapping>
+    <clear />
+  </packageSourceMapping>
 </configuration>";
 }

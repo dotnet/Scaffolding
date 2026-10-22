@@ -8,7 +8,6 @@ using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
-using ScaffoldIdentityModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Files;
 using Xunit;
 
@@ -21,7 +20,7 @@ public class BlazorIdentityHelperTests
     {
         // Arrange
         List<string> templatePaths = [];
-        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
+        IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
@@ -36,7 +35,7 @@ public class BlazorIdentityHelperTests
     {
         // Arrange
         List<string> templatePaths = [Path.Combine("BlazorIdentity", "Test.tt")];
-        ScaffoldIdentityModel identityModel = new ScaffoldIdentityModel
+        IdentityModel identityModel = new IdentityModel
         {
             ProjectInfo = new ProjectInfo(null),
             IdentityNamespace = "TestNamespace",
@@ -59,7 +58,7 @@ public class BlazorIdentityHelperTests
     {
         // Arrange
         string templatePath = Path.Combine("templates", "ApplicationUser.tt");
-        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
+        IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         TextTemplatingProperty? result = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(templatePath, identityModel);
@@ -79,7 +78,7 @@ public class BlazorIdentityHelperTests
     public void GetApplicationUserTextTemplatingProperty_WithNullTemplatePath_ReturnsNull()
     {
         // Arrange
-        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
+        IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         TextTemplatingProperty? result = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(null, identityModel);
@@ -92,7 +91,7 @@ public class BlazorIdentityHelperTests
     public void GetApplicationUserTextTemplatingProperty_WithEmptyTemplatePath_ReturnsNull()
     {
         // Arrange
-        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
+        IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         TextTemplatingProperty? result = BlazorIdentityHelper.GetApplicationUserTextTemplatingProperty(string.Empty, identityModel);
@@ -106,7 +105,7 @@ public class BlazorIdentityHelperTests
     {
         // Arrange
         string templatePath = Path.Combine("templates", "ApplicationUser.tt");
-        ScaffoldIdentityModel identityModel = new ScaffoldIdentityModel
+        IdentityModel identityModel = new IdentityModel
         {
             ProjectInfo = new ProjectInfo(null),
             IdentityNamespace = "TestNamespace",
@@ -128,7 +127,7 @@ public class BlazorIdentityHelperTests
     {
         // Arrange
         string templatePath = Path.Combine("templates", "ApplicationUser.tt");
-        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
+        IdentityModel identityModel = CreateTestIdentityModel();
         identityModel.UserClassName = "CustomUser";
 
         // Act
@@ -144,7 +143,7 @@ public class BlazorIdentityHelperTests
     {
         // Arrange
         List<string> templatePaths = [Path.Combine("BlazorIdentity", "Pages", "Login.tt")];
-        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
+        IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
@@ -159,7 +158,7 @@ public class BlazorIdentityHelperTests
     {
         // Arrange
         List<string> templatePaths = [Path.Combine("BlazorIdentity", "Shared", "ManageNavMenu.tt")];
-        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
+        IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
@@ -174,7 +173,7 @@ public class BlazorIdentityHelperTests
     {
         // Arrange
         List<string> templatePaths = [Path.Combine("BlazorIdentity", "IdentityRedirectManager.tt")];
-        ScaffoldIdentityModel identityModel = CreateTestIdentityModel();
+        IdentityModel identityModel = CreateTestIdentityModel();
 
         // Act
         IEnumerable<TextTemplatingProperty> result = BlazorIdentityHelper.GetTextTemplatingProperties(templatePaths, identityModel);
@@ -184,9 +183,9 @@ public class BlazorIdentityHelperTests
         Assert.Equal(Path.Combine(identityModel.BaseOutputPath, "Components", "Account", "IdentityRedirectManager.cs"), property.OutputPath);
     }
 
-    private ScaffoldIdentityModel CreateTestIdentityModel()
+    private IdentityModel CreateTestIdentityModel()
     {
-        return new ScaffoldIdentityModel
+        return new IdentityModel
         {
             ProjectInfo = new ProjectInfo(Path.Combine("test", "project", "TestProject.csproj")),
             IdentityNamespace = "TestNamespace",

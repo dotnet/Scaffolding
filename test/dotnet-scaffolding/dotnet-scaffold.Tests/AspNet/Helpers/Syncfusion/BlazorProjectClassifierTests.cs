@@ -70,6 +70,16 @@ public class BlazorProjectClassifierTests : IDisposable
     }
 
     [Fact]
+    public void BlazorWebApp_WithComponentsOnlyInAReferencedLibrary_IsWebApp()
+    {
+        var info = BlazorProjectClassifier.Classify(Project(
+            Sdk("Microsoft.NET.Sdk.Web"),
+            ("Program.cs", "var app = builder.Build();\napp.MapRazorComponents<Lib.App>();\n")));
+
+        Assert.Equal(BlazorAppKind.WebApp, info.Kind);
+    }
+
+    [Fact]
     public void StandaloneWasm_IsStandaloneWasm()
     {
         var info = BlazorProjectClassifier.Classify(Project(Sdk("Microsoft.NET.Sdk.BlazorWebAssembly")));
@@ -149,6 +159,18 @@ public class BlazorHostingInspectorTests
 
         Assert.Equal(BlazorHostingModes.Server, facts.Supported);
         Assert.Equal("None", facts.GlobalRenderMode);
+    }
+
+    [Fact]
+    public void HostingCallsInUncalledHelpersAndLambdas_AreNotCounted()
+    {
+        string text = ServerOnly +
+            "void Unused(WebApplicationBuilder b, WebApplication a)\n{\n" +
+            "    b.Services.AddRazorComponents().AddInteractiveWebAssemblyComponents();\n" +
+            "    a.MapRazorComponents<App>().AddInteractiveWebAssemblyRenderMode();\n}\n" +
+            "Action lambda = () => app.MapRazorComponents<App>().AddInteractiveWebAssemblyRenderMode();\n";
+
+        Assert.Equal(BlazorHostingModes.Server, BlazorHostingInspector.Inspect(text, null).Supported);
     }
 
     [Fact]

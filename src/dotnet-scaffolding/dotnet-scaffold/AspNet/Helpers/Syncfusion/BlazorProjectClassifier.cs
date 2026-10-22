@@ -1,6 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers.Syncfusion;
@@ -96,7 +99,7 @@ internal static class BlazorProjectClassifier
         if (IsTrue(values["UsingMicrosoftNETSdkWeb"]) &&
             IsTrue(values["UsingMicrosoftNETSdkRazor"]) &&
             string.Equals(values["OutputType"], "Exe", StringComparison.OrdinalIgnoreCase) &&
-            HasRazorComponents(service))
+            (HasRazorComponents(service) || MapsRazorComponents(service)))
         {
             return new BlazorProjectInfo(BlazorAppKind.WebApp, null);
         }
@@ -114,6 +117,54 @@ internal static class BlazorProjectClassifier
         {
             if (service.TryGetEvaluatedItems(itemType, out var items, out _) &&
                 items.Any(item => item.Include.EndsWith(".razor", StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // A host can keep its components in a referenced Razor class library and only call
+    // MapRazorComponents<Library.App>() from startup code, so it has no local .razor items.
+    private static bool MapsRazorComponents(MSBuildProjectService service)
+    {
+        if (!service.TryGetEvaluatedItems("Compile", out var items, out _))
+        {
+            return false;
+        }
+
+        foreach (string path in items.Select(i => i.FullPath).Where(p => p.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).Distinct())
+        {
+            string text;
+            try
+            {
+                if (!File.Exists(path))
+                {
+                    continue;
+                }
+
+                text = File.ReadAllText(path);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                continue;
+            }
+
+            if (!text.Contains("MapRazorComponents", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            SyntaxNode root = CSharpSyntaxTree.ParseText(text).GetRoot();
+            bool mapped = root.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(invocation =>
+                invocation.Expression switch
+                {
+                    MemberAccessExpressionSyntax access => access.Name.Identifier.ValueText == "MapRazorComponents",
+                    IdentifierNameSyntax identifier => identifier.Identifier.ValueText == "MapRazorComponents",
+                    _ => false,
+                });
+            if (mapped)
             {
                 return true;
             }

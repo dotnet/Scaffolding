@@ -38,6 +38,23 @@ public class SyncfusionBlazorToolkitHelperTests : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    [Theory]
+    [InlineData("", "3.0.0", "3.0.0")]
+    [InlineData(" VersionOverride=\"4.0.0\"", "3.0.0", "4.0.0")]
+    public void TryGetReferencedPackageVersion_ResolvesCentralPackageVersion(string overrideAttr, string central, string expected)
+    {
+        File.WriteAllText(Path.Combine(_tempDir, "Directory.Packages.props"),
+            "<Project><PropertyGroup><ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally></PropertyGroup>" +
+            $"<ItemGroup><PackageVersion Include=\"Syncfusion.Blazor.Toolkit\" Version=\"{central}\" /></ItemGroup></Project>");
+        var project = Path.Combine(_tempDir, "App.csproj");
+        File.WriteAllText(project,
+            "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>" +
+            $"<ItemGroup><PackageReference Include=\"Syncfusion.Blazor.Toolkit\"{overrideAttr} /></ItemGroup></Project>");
+
+        Assert.True(SyncfusionBlazorToolkitHelper.TryGetReferencedPackageVersion(project, out string? version, out _));
+        Assert.Equal(expected, version);
+    }
+
     [Fact]
     public void EnsureImportsUsing_AppendsDirective_AndIsIdempotent()
     {

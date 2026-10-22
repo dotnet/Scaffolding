@@ -48,6 +48,7 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
                 !string.IsNullOrEmpty(settings.Project))
             {
                 step.ProjectPath = settings.Project;
+                step.Prerelease = settings.Prerelease;
                 step.Packages = packages;
             }
             else
@@ -86,6 +87,7 @@ internal static class SyncfusionBlazorToolkitScaffolderBuilderExtensions
             }
 
             step.ProjectPath = settings.ClientProjectPath;
+            step.Prerelease = settings.Prerelease;
             step.Packages = new List<Package>
             {
                 PackageConstants.AspNetCorePackages.SyncfusionBlazorToolkitPackage

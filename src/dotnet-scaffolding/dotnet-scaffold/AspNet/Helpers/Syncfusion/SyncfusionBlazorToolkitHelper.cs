@@ -542,7 +542,7 @@ internal static class SyncfusionBlazorToolkitHelper
     /// <c>Main</c> method. Statements inside any other method, lambda or
     /// local function are deliberately not part of it.
     /// </summary>
-    private static List<List<StatementSyntax>> GetStartupStatementLists(SyntaxNode root)
+    internal static List<List<StatementSyntax>> GetStartupStatementLists(SyntaxNode root)
     {
         var lists = new List<List<StatementSyntax>>();
 
@@ -910,7 +910,7 @@ internal static class SyncfusionBlazorToolkitHelper
     /// <summary>
     /// The version of the evaluated <c>Syncfusion.Blazor.Toolkit</c> package
     /// reference: <c>null</c> when it is not referenced, an empty string when it is
-    /// referenced without a version (central package management). Returns
+    /// referenced but no version could be resolved (inline, <c>VersionOverride</c> or central <c>PackageVersion</c>). Returns
     /// <c>false</c> with a diagnostic when evaluation fails.
     /// </summary>
     public static bool TryGetReferencedPackageVersion(string? projectPath, out string? version, out string? error)
@@ -924,19 +924,32 @@ internal static class SyncfusionBlazorToolkitHelper
         }
 
         var projectService = new MSBuildProjectService(projectPath);
-        if (!projectService.TryGetEvaluatedItems("PackageReference", "Version", out var items, out string? evaluationError))
+        if (!projectService.TryGetEvaluatedItems("PackageReference", "Version", out var items, out string? evaluationError) ||
+            !projectService.TryGetEvaluatedItems("PackageReference", "VersionOverride", out var overrides, out evaluationError) ||
+            !projectService.TryGetEvaluatedItems("PackageVersion", "Version", out var centralVersions, out evaluationError))
         {
             error = $"Unable to evaluate the package references of '{projectPath}'. {evaluationError}";
             return false;
         }
 
+        const string PackageId = "Syncfusion.Blazor.Toolkit";
         foreach (var item in items)
         {
-            if (string.Equals(item.Include, "Syncfusion.Blazor.Toolkit", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(item.Include, PackageId, StringComparison.OrdinalIgnoreCase))
             {
-                version = item.Metadata;
-                return true;
+                continue;
             }
+
+            // Effective version: VersionOverride wins, then the inline Version, then the central PackageVersion.
+            string versionOverride = overrides
+                .FirstOrDefault(o => string.Equals(o.Include, PackageId, StringComparison.OrdinalIgnoreCase)).Metadata ?? string.Empty;
+            string central = centralVersions
+                .FirstOrDefault(c => string.Equals(c.Include, PackageId, StringComparison.OrdinalIgnoreCase)).Metadata ?? string.Empty;
+
+            version = !string.IsNullOrEmpty(versionOverride) ? versionOverride
+                : !string.IsNullOrEmpty(item.Metadata) ? item.Metadata
+                : central;
+            return true;
         }
 
         return true;

@@ -254,11 +254,12 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
     [Fact]
     public async Task Scaffold_BlazorIgniteUI_Net10_PackageInstallFails_StopsBeforeOtherChanges()
     {
-        // Arrange — the only package source is an empty local folder, so 'dotnet add package' fails
+        // Arrange — the only package source is an empty local folder, so 'dotnet add package' fails. It replaces the
+        // project's test NuGet.config, which would otherwise take precedence over a config in a parent folder.
         SetupBlazorWebAppProject();
         var emptyFeed = Path.Combine(_testDirectory, "empty-feed");
         Directory.CreateDirectory(emptyFeed);
-        File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), $"""
+        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), $"""
             <?xml version="1.0" encoding="utf-8"?>
             <configuration>
               <packageSources>

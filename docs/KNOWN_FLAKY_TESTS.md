@@ -53,6 +53,12 @@ or retry it as a network failure. Validate dependency updates across all tool TF
 Roslyn alignment alone is not a complete EF Design upgrade: newer EF builds can also require
 higher `Microsoft.Build.Framework` and `Microsoft.Extensions.*` versions. Update and restore
 the complete dependency graph together rather than advancing just one package.
+Roslyn 5.9's MSBuild workspace assets require .NET 10 or later, so the .NET 8/9
+targets retain Roslyn 5.3 across the shared and CLI projects.
+MSBuild 18.9.6 also requires NuGet.Frameworks 7.9.0 when evaluating projects in-process.
+Keep the NuGet protocol, packaging, and project-model packages aligned at 7.9.0;
+older NuGet assemblies can restore and compile successfully but fail at runtime with
+an assembly-version mismatch during Blazor client discovery.
 
 Package-selection unit tests use fixed metadata, not live feeds. Real feed restores remain
 covered by scaffolder integration tests. A deterministic unit test passing does not establish

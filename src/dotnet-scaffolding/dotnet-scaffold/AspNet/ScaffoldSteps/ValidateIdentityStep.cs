@@ -307,6 +307,10 @@ internal class ValidateIdentityStep : ScaffoldStep
         {
             ProjectInfo = projectInfo,
             DbContextInfo = dbContextInfo,
+            DbContextNamespace = settings.BlazorScenario &&
+                projectInfo.LowestSupportedTargetFramework is TargetFramework.Net8
+                ? dbContextInfo.DbContextNamespace
+                : string.Empty,
             IdentityNamespace = identityNamespace,
             UserClassName = AspNetConstants.Identity.UserClassName,
             UserClassNamespace = userClassNamespace,
@@ -342,6 +346,10 @@ internal class ValidateIdentityStep : ScaffoldStep
         if (identityModel.DbContextInfo.EfScenario)
         {
             codeChangeOptions.Add("EfScenario");
+        }
+        if (!string.IsNullOrEmpty(identityModel.DbContextNamespace))
+        {
+            codeChangeOptions.Add("DbContextNamespace");
         }
 
         // .NET 8 uses different authentication-state persistence and routing mechanisms.

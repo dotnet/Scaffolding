@@ -277,7 +277,11 @@ public class AspNetOptionCoverageTests
 
     [Fact]
     public void TenantId_HasCorrectCliOption()
-        => Assert.Equal(Constants.CliOptions.TenantIdOption, _options.TenantId.CliOption);
+        => Assert.Equal(Constants.CliOptions.TenantIdKebabCaseOption, _options.TenantId.CliOption);
+
+    [Fact]
+    public void TenantId_LegacyConstantRemainsCamelCase()
+        => Assert.Equal("--tenantId", Constants.CliOptions.TenantIdOption);
 
     [Fact]
     public void TenantId_IsRequired()
@@ -287,7 +291,7 @@ public class AspNetOptionCoverageTests
     public void TenantId_AcceptsLegacyCamelCaseAlias()
     {
         Assert.NotNull(_options.TenantId.Aliases);
-        Assert.Contains("--tenantId", _options.TenantId.Aliases);
+        Assert.Contains(Constants.CliOptions.TenantIdOption, _options.TenantId.Aliases);
     }
 
     #endregion
@@ -296,7 +300,11 @@ public class AspNetOptionCoverageTests
 
     [Fact]
     public void ApplicationId_HasCorrectCliOption()
-        => Assert.Equal(Constants.CliOptions.ApplicationIdOption, _options.ApplicationId.CliOption);
+        => Assert.Equal(Constants.CliOptions.ApplicationIdKebabCaseOption, _options.ApplicationId.CliOption);
+
+    [Fact]
+    public void ApplicationId_LegacyConstantRemainsCamelCase()
+        => Assert.Equal("--applicationId", Constants.CliOptions.ApplicationIdOption);
 
     [Fact]
     public void ApplicationId_IsNotRequired()
@@ -306,7 +314,7 @@ public class AspNetOptionCoverageTests
     public void ApplicationId_AcceptsLegacyCamelCaseAlias()
     {
         Assert.NotNull(_options.ApplicationId.Aliases);
-        Assert.Contains("--applicationId", _options.ApplicationId.Aliases);
+        Assert.Contains(Constants.CliOptions.ApplicationIdOption, _options.ApplicationId.Aliases);
     }
 
     #endregion
@@ -430,8 +438,8 @@ public class AspNetOptionCoverageTests
         public EntraIdOptions(IEnumerable<ScaffolderOption> options)
         {
             Username = GetOption(Constants.CliOptions.UsernameOption);
-            TenantId = GetOption(Constants.CliOptions.TenantIdOption);
-            ApplicationId = GetOption(Constants.CliOptions.ApplicationIdOption);
+            TenantId = GetOption(Constants.CliOptions.TenantIdKebabCaseOption);
+            ApplicationId = GetOption(Constants.CliOptions.ApplicationIdKebabCaseOption);
 
             ScaffolderOption<string> GetOption(string cliOption)
                 => Assert.IsType<ScaffolderOption<string>>(options.Single(option => option.CliOption == cliOption));

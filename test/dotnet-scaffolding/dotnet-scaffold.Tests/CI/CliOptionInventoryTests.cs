@@ -48,9 +48,9 @@ public class CliOptionInventoryTests
         Constants.CliOptions.ActionsOption,             // --actions
         Constants.CliOptions.ControllerNameOption,      // --controller
         Constants.CliOptions.UsernameOption,            // --username
-        Constants.CliOptions.TenantIdOption,            // --tenant-id
+        Constants.CliOptions.TenantIdKebabCaseOption,   // --tenant-id
         Constants.CliOptions.UseExistingApplicationOption, // --use-existing-application
-        Constants.CliOptions.ApplicationIdOption,       // --application-id
+        Constants.CliOptions.ApplicationIdKebabCaseOption, // --application-id
     });
 
     /// <summary>

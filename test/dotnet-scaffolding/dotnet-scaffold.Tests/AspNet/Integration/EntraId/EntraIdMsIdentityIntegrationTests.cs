@@ -105,9 +105,11 @@ public class EntraIdMsIdentityIntegrationTests
         
         // The actual scaffolding order in AspNetCommandService.cs is:
         // .WithStep<ValidateEntraIdStep>()
-        // .WithRegisterAppStep()           <- Uses msidentity CLI
-        // .WithAddClientSecretStep()       <- Ensures msidentity is installed, then uses it
+        // .WithValidateAzureCliIdentityStep()
         // .WithDetectBlazorWasmStep()
+        // .WithRegisterAppStep()           <- Uses msidentity CLI
+        // .WithUpdateAppAuthorizationStep()
+        // .WithAddClientSecretStep()       <- Ensures msidentity is installed, then uses it
         // ... other steps
         
         // This test verifies the key steps exist in the expected namespace

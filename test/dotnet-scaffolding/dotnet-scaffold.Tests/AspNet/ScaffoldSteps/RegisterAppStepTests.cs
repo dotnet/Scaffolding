@@ -20,6 +20,42 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.ScaffoldSteps;
 /// </summary>
 public class RegisterAppStepTests
 {
+    [Theory]
+    [InlineData(1, null, false)]
+    [InlineData(0, "Usage: dotnet-msidentity", false)]
+    [InlineData(0, "registration-cleanup", true)]
+    public async Task ExecuteAsync_RequiresCleanupCapabilityBeforeCreatingApplication(int exitCode, string? output, bool expected)
+    {
+        var fileSystem = new Mock<IFileSystem>();
+        fileSystem.Setup(fs => fs.FileExists("Test.csproj")).Returns(true);
+        var step = new CapabilityTestStep(fileSystem.Object, exitCode, output)
+        {
+            ProjectPath = "Test.csproj",
+            TenantId = "tenant-a",
+            Username = "user@example.com"
+        };
+        var context = new ScaffolderContext(Mock.Of<IScaffolder>());
+
+        Assert.Equal(expected, await step.ExecuteAsync(context));
+        Assert.Equal(expected ? 1 : 0, step.Registrations);
+        Assert.Empty(context.Properties);
+    }
+
+    private sealed class CapabilityTestStep(IFileSystem fileSystem, int exitCode, string? output)
+        : RegisterAppStep(Microsoft.Extensions.Logging.Abstractions.NullLogger<AddClientSecretStep>.Instance,
+            fileSystem, Mock.Of<ITelemetryService>())
+    {
+        public int Registrations { get; private set; }
+        protected override bool EnsureToolInstalled() => true;
+        protected override (int ExitCode, string? Output, string? Error) ReadCapabilities()
+            => (exitCode, output, "Unsupported command");
+        protected override bool RegisterApp(ScaffolderContext context)
+        {
+            Registrations++;
+            return true;
+        }
+    }
+
     private readonly Mock<IFileSystem> _mockFileSystem;
     private readonly Mock<ILogger<AddClientSecretStep>> _mockLogger;
     private readonly TestTelemetryService _testTelemetryService;

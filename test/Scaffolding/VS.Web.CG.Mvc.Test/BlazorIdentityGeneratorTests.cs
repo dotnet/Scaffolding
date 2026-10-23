@@ -36,7 +36,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 var projectDirectory = Path.Combine(fileProvider.Root, MsBuildProjectStrings.RootProjectFolder);
                 var projectPath = Path.Combine(projectDirectory, MsBuildProjectStrings.RootProjectName);
                 var projectContext = new MsBuildProjectContextBuilder(projectPath, "Dummy").Build();
-                var projectReference = Assert.Single(projectContext.ProjectReferenceInformation);
+                var directProjectReference = Assert.Single(projectContext.ProjectReferences);
+                var directProjectReferencePath = Path.GetFullPath(
+                    Path.IsPathRooted(directProjectReference)
+                        ? directProjectReference
+                        : Path.Combine(projectDirectory, directProjectReference));
+                var projectReference = Assert.Single(
+                    projectContext.ProjectReferenceInformation,
+                    reference => string.Equals(
+                        Path.GetFullPath(reference.FullPath),
+                        directProjectReferencePath,
+                        StringComparison.OrdinalIgnoreCase));
 
                 var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
                     projectContext.ProjectName,
@@ -490,6 +500,34 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 new[] { projectReference.FullPath });
 
             Assert.Equal("Active.ControlBlock.MainLayout", result);
+        }
+
+        [Theory]
+        [InlineData("@if (true) { <p>{</p> }")]
+        [InlineData("@if (true) { <a href=\"https://example.com\">Link</a> }")]
+        [InlineData("@code { @* unmatched markup brace: { *@ }")]
+        [InlineData("@if (true) { } else { var marker = \"@*\"; }")]
+        public void ResolveLayoutNamespacePreservesDirectiveAfterMixedRazorAndCSharp(string razorCode)
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            fileSystem
+                .Setup(fs => fs.ReadAllText(mainLayoutPath))
+                .Returns(razorCode + Environment.NewLine +
+                    "@namespace Active.MixedContent" + Environment.NewLine +
+                    "<main />");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("Active.MixedContent.MainLayout", result);
         }
 
         [Fact]

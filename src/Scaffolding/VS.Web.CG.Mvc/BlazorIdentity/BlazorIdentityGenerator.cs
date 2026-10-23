@@ -633,11 +633,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             {
                 var blockStart = SkipWhitespace(contents, identifierEnd);
                 return blockStart < contents.Length && contents[blockStart] == '{'
-                    ? FindMatchingCSharpDelimiter(
-                        contents,
-                        blockStart,
-                        SyntaxKind.OpenBraceToken,
-                        SyntaxKind.CloseBraceToken)
+                    ? FindMatchingRazorCodeBlockEnd(contents, blockStart)
                     : transitionIndex;
             }
 
@@ -654,11 +650,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     var blockStart = SkipWhitespace(contents, conditionEnd);
                     if (blockStart < contents.Length && contents[blockStart] == '{')
                     {
-                        return FindMatchingCSharpDelimiter(
-                            contents,
-                            blockStart,
-                            SyntaxKind.OpenBraceToken,
-                            SyntaxKind.CloseBraceToken);
+                        var blockEnd = FindMatchingRazorCodeBlockEnd(contents, blockStart);
+                        return string.Equals(identifier, "if", StringComparison.Ordinal)
+                            ? FindIfChainEnd(contents, blockEnd)
+                            : blockEnd;
                     }
                     return conditionEnd;
                 }
@@ -723,6 +718,247 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
 
             return contents.Length;
+        }
+
+        private static int FindMatchingRazorCodeBlockEnd(string contents, int openBraceIndex)
+        {
+            var depth = 0;
+            for (var index = openBraceIndex; index < contents.Length; index++)
+            {
+                var literalEnd = FindCSharpLiteralEnd(contents, index);
+                if (literalEnd > index)
+                {
+                    index = literalEnd - 1;
+                    continue;
+                }
+
+                if (index + 1 < contents.Length &&
+                    contents[index] == '/' &&
+                    contents[index + 1] == '/')
+                {
+                    var lineEnd = contents.IndexOfAny(new[] { '\r', '\n' }, index + 2);
+                    index = lineEnd < 0 ? contents.Length - 1 : lineEnd - 1;
+                    continue;
+                }
+
+                if (index + 1 < contents.Length &&
+                    contents[index] == '/' &&
+                    contents[index + 1] == '*')
+                {
+                    var commentEnd = contents.IndexOf("*/", index + 2, StringComparison.Ordinal);
+                    index = commentEnd < 0 ? contents.Length - 1 : commentEnd + 1;
+                    continue;
+                }
+
+                if (index + 1 < contents.Length &&
+                    contents[index] == '@' &&
+                    contents[index + 1] == '*')
+                {
+                    var commentEnd = contents.IndexOf("*@", index + 2, StringComparison.Ordinal);
+                    index = commentEnd < 0 ? contents.Length - 1 : commentEnd + 1;
+                    continue;
+                }
+
+                if (contents[index] == '<' && IsRazorMarkupStart(contents, index))
+                {
+                    var markupEnd = FindRazorMarkupEnd(contents, index);
+                    if (markupEnd > index)
+                    {
+                        index = markupEnd - 1;
+                        continue;
+                    }
+                }
+
+                if (contents[index] == '{')
+                {
+                    depth++;
+                }
+                else if (contents[index] == '}')
+                {
+                    depth--;
+                    if (depth == 0)
+                    {
+                        return index + 1;
+                    }
+                }
+            }
+
+            return contents.Length;
+        }
+
+        private static int FindIfChainEnd(string contents, int blockEnd)
+        {
+            var currentEnd = blockEnd;
+            while (currentEnd < contents.Length)
+            {
+                var elseStart = SkipWhitespace(contents, currentEnd);
+                if (!IsKeywordAt(contents, elseStart, "else"))
+                {
+                    return currentEnd;
+                }
+
+                var next = SkipWhitespace(contents, elseStart + "else".Length);
+                if (IsKeywordAt(contents, next, "if"))
+                {
+                    var conditionStart = SkipWhitespace(contents, next + "if".Length);
+                    if (conditionStart >= contents.Length || contents[conditionStart] != '(')
+                    {
+                        return currentEnd;
+                    }
+
+                    var conditionEnd = FindMatchingCSharpDelimiter(
+                        contents,
+                        conditionStart,
+                        SyntaxKind.OpenParenToken,
+                        SyntaxKind.CloseParenToken);
+                    var blockStart = SkipWhitespace(contents, conditionEnd);
+                    if (blockStart >= contents.Length || contents[blockStart] != '{')
+                    {
+                        return currentEnd;
+                    }
+
+                    currentEnd = FindMatchingRazorCodeBlockEnd(contents, blockStart);
+                    continue;
+                }
+
+                if (next >= contents.Length || contents[next] != '{')
+                {
+                    return currentEnd;
+                }
+
+                return FindMatchingRazorCodeBlockEnd(contents, next);
+            }
+
+            return currentEnd;
+        }
+
+        private static bool IsKeywordAt(string contents, int index, string keyword)
+        {
+            if (index < 0 ||
+                index + keyword.Length > contents.Length ||
+                !contents.AsSpan(index, keyword.Length).SequenceEqual(keyword.AsSpan()))
+            {
+                return false;
+            }
+
+            return index + keyword.Length == contents.Length ||
+                !SyntaxFacts.IsIdentifierPartCharacter(contents[index + keyword.Length]);
+        }
+
+        private static int FindCSharpLiteralEnd(string contents, int index)
+        {
+            var current = contents[index];
+            if (current != '"' &&
+                current != '\'' &&
+                current != '$' &&
+                (current != '@' ||
+                    index + 1 >= contents.Length ||
+                    (contents[index + 1] != '"' && contents[index + 1] != '$')))
+            {
+                return index;
+            }
+
+            var expression = SyntaxFactory.ParseExpression(contents.Substring(index));
+            return expression.SpanStart == 0 &&
+                (expression is LiteralExpressionSyntax || expression is InterpolatedStringExpressionSyntax)
+                ? index + expression.Span.End
+                : index;
+        }
+
+        private static bool IsRazorMarkupStart(string contents, int index)
+        {
+            if (index + 1 >= contents.Length)
+            {
+                return false;
+            }
+
+            var next = contents[index + 1];
+            return char.IsLetter(next) || next == '!' || next == '?';
+        }
+
+        private static int FindRazorMarkupEnd(string contents, int markupStart)
+        {
+            var depth = 0;
+            var index = markupStart;
+            while (index < contents.Length)
+            {
+                var tagStart = contents.IndexOf('<', index);
+                if (tagStart < 0 || tagStart + 1 >= contents.Length)
+                {
+                    return markupStart;
+                }
+
+                if (contents.AsSpan(tagStart).StartsWith("<!--".AsSpan(), StringComparison.Ordinal))
+                {
+                    var commentEnd = contents.IndexOf("-->", tagStart + 4, StringComparison.Ordinal);
+                    if (commentEnd < 0)
+                    {
+                        return contents.Length;
+                    }
+                    index = commentEnd + 3;
+                    continue;
+                }
+
+                var isClosingTag = contents[tagStart + 1] == '/';
+                var tagEnd = FindMarkupTagEnd(contents, tagStart + 1);
+                if (tagEnd < 0)
+                {
+                    return markupStart;
+                }
+
+                var isDeclaration = contents[tagStart + 1] == '!' || contents[tagStart + 1] == '?';
+                var isSelfClosing = tagEnd > tagStart && contents[tagEnd - 1] == '/';
+                if (!isDeclaration)
+                {
+                    if (isClosingTag)
+                    {
+                        depth--;
+                        if (depth == 0)
+                        {
+                            return tagEnd + 1;
+                        }
+                    }
+                    else if (!isSelfClosing)
+                    {
+                        depth++;
+                    }
+                    else if (depth == 0)
+                    {
+                        return tagEnd + 1;
+                    }
+                }
+
+                index = tagEnd + 1;
+            }
+
+            return markupStart;
+        }
+
+        private static int FindMarkupTagEnd(string contents, int index)
+        {
+            var quote = '\0';
+            for (; index < contents.Length; index++)
+            {
+                if (quote != '\0')
+                {
+                    if (contents[index] == quote)
+                    {
+                        quote = '\0';
+                    }
+                    continue;
+                }
+
+                if (contents[index] == '"' || contents[index] == '\'')
+                {
+                    quote = contents[index];
+                }
+                else if (contents[index] == '>')
+                {
+                    return index;
+                }
+            }
+
+            return -1;
         }
 
         private static void AppendWhitespacePreservingLines(

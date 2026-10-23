@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -53,10 +54,26 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             {
                 if (UsesBlazorWebAssemblySdk(fullProjectPath))
                 {
+                    LogUnsupportedStandaloneProject();
+                    return Task.FromResult(false);
+                }
+
+                var projectService = new MSBuildProjectService(fullProjectPath);
+                if (!projectService.TryGetEvaluatedProperties(
+                    ["UsingMicrosoftNETSdkBlazorWebAssembly"], out var properties, out var evaluationError))
+                {
                     _logger.LogError(
-                        "Entra ID scaffolding requires a server host and does not support directly selected Blazor WebAssembly projects. " +
-                        "For a hosted Blazor Web App, select the server project instead. " +
-                        "Standalone WebAssembly apps require separate MSAL authentication configuration.");
+                        "Unable to evaluate project '{ProjectPath}' while detecting Blazor WebAssembly. {Error} " +
+                        "Ensure the project's SDK and imports are available.",
+                        fullProjectPath,
+                        evaluationError);
+                    return Task.FromResult(false);
+                }
+
+                if (string.Equals(
+                    properties["UsingMicrosoftNETSdkBlazorWebAssembly"], "true", StringComparison.OrdinalIgnoreCase))
+                {
+                    LogUnsupportedStandaloneProject();
                     return Task.FromResult(false);
                 }
 
@@ -103,6 +120,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 .Where(element => element.Name.LocalName.Equals("Sdk", StringComparison.OrdinalIgnoreCase))
                 .Select(element => element.Attribute("Name")?.Value)
                 .Any(sdkName => sdkName?.Equals("Microsoft.NET.Sdk.BlazorWebAssembly", StringComparison.OrdinalIgnoreCase) == true);
+        }
+
+        private void LogUnsupportedStandaloneProject()
+        {
+            _logger.LogError(
+                "Entra ID scaffolding requires a server host and does not support directly selected Blazor WebAssembly projects. " +
+                "For a hosted Blazor Web App, select the server project instead. " +
+                "Standalone WebAssembly apps require separate MSAL authentication configuration.");
         }
 
         private void SetWebAssemblyProject(ScaffolderContext context, string projectPath)

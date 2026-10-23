@@ -78,6 +78,68 @@ public class DetectBlazorWasmStepTests : IDisposable
     }
 
     [Fact]
+    public async Task ExecuteAsync_RejectsProjectUsingExplicitWebAssemblySdkImports()
+    {
+        string projectPath = Path.Combine(_testDirectory, "StandaloneClient.csproj");
+        File.WriteAllText(
+            projectPath,
+            """
+            <Project>
+              <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.BlazorWebAssembly" />
+              <PropertyGroup>
+                <TargetFramework>net10.0</TargetFramework>
+              </PropertyGroup>
+              <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.BlazorWebAssembly" />
+            </Project>
+            """);
+        var logger = new Mock<ILogger<DetectBlazorWasmStep>>();
+        var step = new DetectBlazorWasmStep(
+            logger.Object,
+            FileSystem.Instance,
+            Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = projectPath
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        Assert.False(_context.Properties.ContainsKey("IsBlazorWasmProject"));
+        Assert.False(_context.Properties.ContainsKey("BlazorWasmClientProjectPath"));
+        Assert.Contains(logger.Invocations, invocation =>
+            invocation.Method.Name == nameof(ILogger.Log) &&
+            Equals(invocation.Arguments[0], LogLevel.Error) &&
+            invocation.Arguments[2].ToString()!.Contains("select the server project instead"));
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReportsSelectedProjectEvaluationFailure()
+    {
+        string projectPath = Path.Combine(_testDirectory, "InvalidServer.csproj");
+        File.WriteAllText(projectPath, """
+            <Project>
+              <Import Project="Missing.props" />
+            </Project>
+            """);
+        var logger = new Mock<ILogger<DetectBlazorWasmStep>>();
+        var step = new DetectBlazorWasmStep(
+            logger.Object,
+            FileSystem.Instance,
+            Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = projectPath
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        Assert.Contains(logger.Invocations, invocation =>
+            invocation.Method.Name == nameof(ILogger.Log) &&
+            Equals(invocation.Arguments[0], LogLevel.Error) &&
+            invocation.Arguments[2].ToString()!.Contains("while detecting Blazor WebAssembly"));
+    }
+
+    [Fact]
     public async Task ExecuteAsync_DetectsReferencedWebAssemblyClientProject()
     {
         string serverDirectory = Path.Combine(_testDirectory, "AutoApp");

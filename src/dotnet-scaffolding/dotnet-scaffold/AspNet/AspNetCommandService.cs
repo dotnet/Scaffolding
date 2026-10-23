@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(AddAspNetConnectionStringStep),
                 typeof(AddDbSetToExistingContextStep),
                 typeof(AddFileStep),
+                typeof(AddIdentityApiFilesStep),
                 typeof(AreaScaffolderStep),
                 typeof(DetectBlazorWasmStep),
                 typeof(DotnetNewScaffolderStep),
@@ -345,6 +346,30 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithAspNetConnectionStringStep()
                 .WithIdentityTextTemplatingStep()
                 .WithIdentityCodeChangeStep();
+
+            _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Identity.ApiName)
+                .WithDisplayName(AspnetStrings.Identity.ApiDisplayName)
+                .WithCategory(AspnetStrings.Catagories.Identity)
+                .WithDescription(AspnetStrings.Identity.ApiDescription)
+                .WithExample(AspnetStrings.Identity.ApiExample, AspnetStrings.Identity.ApiExampleDescription)
+                .WithOptions([options.Project, options.DataContextClassRequired, options.IdentityDbProviderRequired, options.Overwrite, options.Prerelease])
+                .WithStep<ValidateIdentityStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.DataContext = context.GetOptionResult(options.DataContextClassRequired);
+                    step.DatabaseProvider = context.GetOptionResult(options.IdentityDbProviderRequired);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
+                    step.Overwrite = context.GetOptionResult(options.Overwrite);
+                    step.IdentityApiScenario = true;
+                })
+                .WithIdentityApiAddPackagesStep()
+                .WithIdentityDbContextStep()
+                .WithAspNetConnectionStringStep()
+                .WithIdentityApiUserStep()
+                .WithIdentityApiFilesStep()
+                .WithIdentityApiCodeChangeStep();
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.EntraId.Name)
                     .WithDisplayName(AspnetStrings.EntraId.DisplayName)

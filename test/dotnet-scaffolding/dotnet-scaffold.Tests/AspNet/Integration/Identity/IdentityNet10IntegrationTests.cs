@@ -14,6 +14,17 @@ public class IdentityNet10IntegrationTests : IdentityIntegrationTestsBase
     protected override string TargetFramework => "net10.0";
     protected override string TestClassName => nameof(IdentityNet10IntegrationTests);
 
+    [Fact]
+    public void IdentityApi_HasSourceAndProgramConfig()
+    {
+        var basePath = GetActualTemplatesBasePath();
+        Assert.True(File.Exists(Path.Combine(basePath, TargetFramework, "IdentityApi", "IdentityApiEndpoints.cs.txt")));
+        var config = File.ReadAllText(Path.Combine(basePath, TargetFramework, "CodeModificationConfigs", "identityApiChanges.json"));
+        Assert.Contains("MapScaffoldedIdentityApi", config);
+        Assert.Contains("AddIdentityApiEndpoints", config);
+        Assert.Contains("AddAuthorization", config);
+    }
+
     // net10.0 Identity templates use Pages/ (T4) instead of Bootstrap4/Bootstrap5 (.cshtml)
     [Fact]
     public override void Identity_Bootstrap5_FolderExists()

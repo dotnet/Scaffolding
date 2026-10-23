@@ -120,6 +120,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 }
 
                 JsonNode? content;
+                string? originalContent = null;
                 bool writeContent = false;
 
                 // If appsettings.json doesn't exist, create a new one
@@ -134,6 +135,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 {
                     // Read existing appsettings.json
                     var jsonString = _fileSystem.ReadAllText(appSettingsFile);
+                    originalContent = jsonString;
                     try
                     {
                         content = JsonNode.Parse(jsonString);
@@ -221,19 +223,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 {
                     var options = new JsonSerializerOptions { WriteIndented = true };
 
-                    try
+                    var changes = new List<(string Path, string? Original, string Updated)>
                     {
-                        _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
-                        _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with AzureAd configuration");
-
-                        // Also check for appsettings.Development.json and update it if present
-                        return UpdateDevelopmentSettings(baseProjectPath, content);
-                    }
-                    catch (Exception ex)
+                        (appSettingsFile, originalContent, content.ToJsonString(options))
+                    };
+                    if (!PrepareDevelopmentSettings(baseProjectPath, content, changes))
                     {
-                        _logger.LogError($"Failed to write appsettings.json: {ex.Message}");
                         return false;
                     }
+                    return PersistSettings(changes);
                 }
                 else
                 {
@@ -252,11 +250,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         }
 
         /// <summary>
-        /// Updates the appsettings.Development.json file with AzureAd configuration.
+        /// Prepares the appsettings.Development.json update before any settings are written.
         /// </summary>
         /// <param name="baseProjectPath">Base project path.</param>
         /// <param name="content">Content of the appsettings.json file.</param>
-        private bool UpdateDevelopmentSettings(string baseProjectPath, JsonNode content)
+        /// <param name="changes">Pending settings writes and their original contents.</param>
+        private bool PrepareDevelopmentSettings(string baseProjectPath, JsonNode content,
+            List<(string Path, string? Original, string Updated)> changes)
         {
             var devSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
 
@@ -264,8 +264,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             {
                 try
                 {
-                    _logger.LogInformation("Updating appsettings.Development.json with AzureAd configuration");
-
                     JsonNode? devContent;
                     var devJsonString = _fileSystem.ReadAllText(devSettingsPath);
 
@@ -291,16 +289,60 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         devContent["AzureAd"] = content["AzureAd"]?.DeepClone();
 
                         var options = new JsonSerializerOptions { WriteIndented = true };
-                        _fileSystem.WriteAllText(devSettingsPath, devContent.ToJsonString(options));
+                        changes.Add((devSettingsPath, devJsonString, devContent.ToJsonString(options)));
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to update appsettings.Development.json.");
+                    _logger.LogError(ex, "Failed to prepare appsettings.Development.json.");
                     return false;
                 }
             }
             return true;
+        }
+
+        private bool PersistSettings(List<(string Path, string? Original, string Updated)> changes)
+        {
+            var attempted = new List<(string Path, string? Original)>();
+            try
+            {
+                foreach (var change in changes)
+                {
+                    // A failed write may have truncated the file, so include it in recovery.
+                    attempted.Add((change.Path, change.Original));
+                    _fileSystem.WriteAllText(change.Path, change.Updated);
+                    _logger.LogInformation("Updated '{FileName}' with AzureAd configuration", Path.GetFileName(change.Path));
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to persist Entra ID settings. Restoring attempted settings writes.");
+                foreach (var change in attempted.AsEnumerable().Reverse())
+                {
+                    try
+                    {
+                        if (change.Original is null)
+                        {
+                            if (_fileSystem.FileExists(change.Path))
+                            {
+                                _fileSystem.DeleteFile(change.Path);
+                            }
+                        }
+                        else if (!_fileSystem.FileExists(change.Path) ||
+                            _fileSystem.ReadAllText(change.Path) != change.Original)
+                        {
+                            _fileSystem.WriteAllText(change.Path, change.Original);
+                        }
+                    }
+                    catch (Exception restoreException)
+                    {
+                        _logger.LogError(restoreException,
+                            "Could not restore settings file {Path}. Restore this file manually before retrying.", change.Path);
+                    }
+                }
+                return false;
+            }
         }
     }
 }

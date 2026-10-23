@@ -7,6 +7,10 @@ Entra ID scaffolding currently uses both `dotnet msidentity` and the Azure CLI.
 Before creating or updating an application, scaffolding verifies that the Azure
 CLI's active tenant and user match the selected `--tenantId` and `--username`.
 Service principal logins cannot be used in place of the selected user.
+Tenant GUIDs and tenant domains are supported. For a domain selection, the CLI
+reads the issuer from Microsoft's HTTPS OpenID Connect discovery endpoint and
+compares its canonical tenant GUID with the active account. Discovery failure
+fails validation; it does not fall back to accepting an unverified tenant.
 
 If validation fails, run `az login --tenant <tenant-id> --allow-no-subscriptions`,
 sign in as the selected user, and verify the active identity with
@@ -43,7 +47,14 @@ a newly created application or credential.
 MSIdentity also attempts to delete a partially created registration using its
 returned object ID and the same Graph client if a subsequent registration
 operation fails. This requires the updated MSIdentity tool, not just an updated
-scaffolder. If deletion fails, its diagnostics identify the resource for manual
+scaffolder. Before creating an application, scaffolding checks the capabilities
+of the tool actually invoked by `dotnet msidentity`. It must report
+`registration-cleanup` through `--get-capabilities`; older tools (including ones
+that merely print help for an unknown command) are rejected before creation.
+Install an updated build containing this fix, updating the global tool or local
+tool manifest as applicable. A version number alone is not used because older
+development builds can share the same release version.
+If deletion fails, its diagnostics identify the resource for manual
 removal; no deletion targets are discovered by display name.
 
 Once the new application's identifier has been recorded, cleanup is best-effort
@@ -51,5 +62,9 @@ and covers authorization, credential setup, and app-settings persistence, not
 subsequent package installation or code generation failures. If registration
 fails before Graph returns an identifier (for example, an ambiguous network
 failure during creation), inspect the selected tenant manually.
-Cleanup does not restore local files or remove saved user secrets; after a
-failed run, check local configuration before retrying.
+Settings persistence prepares both settings files before writing. If a write
+fails, it attempts to restore the original contents of every attempted settings
+write, removing a newly created settings file when necessary. Restoration errors
+identify files requiring manual recovery. This is not full-run rollback:
+previous project-file edits and saved user secrets are not restored or removed.
+After a failed run, check local configuration before retrying.

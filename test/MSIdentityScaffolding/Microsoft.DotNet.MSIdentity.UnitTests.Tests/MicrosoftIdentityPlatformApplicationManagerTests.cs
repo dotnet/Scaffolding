@@ -21,6 +21,22 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 {
     public class MicrosoftIdentityPlatformApplicationManagerTests
     {
+        [Fact]
+        public async Task GetOrCreateSP_MissingResultPreservesExistingFailureReporting()
+        {
+            using var handler = new RegistrationHandler("servicePrincipal", false, new List<string>());
+            using var httpClient = new HttpClient(handler);
+            using var graphClient = new GraphServiceClient(httpClient);
+            var logger = new Mock<IConsoleLogger>();
+
+            var result = await MicrosoftIdentityPlatformApplicationManager.GetOrCreateSP(
+                graphClient, "existing-client", logger.Object);
+
+            Assert.True(handler.FailureReached);
+            Assert.Null(result);
+            logger.Verify(l => l.LogFailureAndExit(It.IsAny<string>()), Times.Once);
+        }
+
         [Theory]
         [InlineData("create", false)]
         [InlineData("owner", false)]

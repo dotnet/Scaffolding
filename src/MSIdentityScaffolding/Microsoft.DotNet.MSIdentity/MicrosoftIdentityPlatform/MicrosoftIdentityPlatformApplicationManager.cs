@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
                 // Create service principal, necessary for Web API applications
                 // and useful for Blazorwasm hosted applications. We create it always.
-                var createdSp = await GetOrCreateSP(graphServiceClient, createdApplication!.AppId, consoleLogger);
+                var createdSp = await GetOrCreateSP(graphServiceClient, createdApplication!.AppId, consoleLogger, throwOnFailure: true);
 
                 // B2C and CIAM don't allow user consent, and therefore we need to explicitly grant permissions
                 if (applicationParameters.IsB2C || applicationParameters.IsCiam)
@@ -344,7 +344,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             }
         }
 
-        internal static async Task<ServicePrincipal> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId, IConsoleLogger consoleLogger)
+        internal static async Task<ServicePrincipal> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId,
+            IConsoleLogger consoleLogger, bool throwOnFailure = false)
         {
             ServicePrincipal? servicePrincipal = (await graphServiceClient.ServicePrincipals
                 .GetAsync(options => options.QueryParameters.Filter = $"appId eq '{clientId}'"))?.Value?.FirstOrDefault();
@@ -364,7 +365,11 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
             if (servicePrincipal is null)
             {
-                throw new InvalidOperationException(Resources.FailedToGetServicePrincipal);
+                if (throwOnFailure)
+                {
+                    throw new InvalidOperationException(Resources.FailedToGetServicePrincipal);
+                }
+                consoleLogger.LogFailureAndExit(Resources.FailedToGetServicePrincipal);
             }
 
             return servicePrincipal!;

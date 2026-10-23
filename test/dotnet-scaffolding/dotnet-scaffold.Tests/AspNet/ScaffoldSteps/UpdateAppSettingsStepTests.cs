@@ -56,7 +56,57 @@ public class UpdateAppSettingsStepTests
         Assert.False(await step.ExecuteAsync(CreateContext(false)));
 
         Assert.Single(step.CleanupCommands);
-        fileSystem.Verify(fs => fs.WriteAllText(developmentPath, It.IsAny<string>()), Times.Never);
+        fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_PartialDevelopmentWriteFailure_RestoresOriginalSettings(bool missingPrimary)
+    {
+        var primary = Path.Combine("project", "appsettings.json");
+        var development = Path.Combine("project", "appsettings.Development.json");
+        var originalPrimary = """{"Keep":"primary","AzureAd":{"ClientId":"previous-app"}}""";
+        var originalDevelopment = """{"Keep":"development"}""";
+        var files = new Dictionary<string, string> { [development] = originalDevelopment };
+        if (!missingPrimary)
+        {
+            files[primary] = originalPrimary;
+        }
+        var fileSystem = CreateFileSystem();
+        fileSystem.Setup(fs => fs.FileExists(It.IsAny<string>()))
+            .Returns((string path) => files.ContainsKey(path));
+        fileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>()))
+            .Returns((string path) => files[path]);
+        fileSystem.Setup(fs => fs.DeleteFile(It.IsAny<string>()))
+            .Callback((string path) => files.Remove(path));
+        var failed = false;
+        fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+            .Callback((string path, string content) =>
+            {
+                if (path == development && !failed)
+                {
+                    failed = true;
+                    files[path] = "partially written";
+                    throw new IOException("Development write failed after truncation.");
+                }
+                files[path] = content;
+            });
+        var step = CreateStep(fileSystem);
+
+        Assert.False(await step.ExecuteAsync(CreateContext(false)));
+
+        Assert.True(failed);
+        Assert.Equal(originalDevelopment, files[development]);
+        if (missingPrimary)
+        {
+            Assert.False(files.ContainsKey(primary));
+        }
+        else
+        {
+            Assert.Equal(originalPrimary, files[primary]);
+        }
+        Assert.Single(step.CleanupCommands);
     }
 
     [Fact]

@@ -14,6 +14,28 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.ScaffoldSteps;
 public class ValidateAzureCliIdentityStepTests
 {
     [Theory]
+    [InlineData(0, "https://login.microsoftonline.com/11111111-2222-3333-4444-555555555555/v2.0", true)]
+    [InlineData(0, "https://login.microsoftonline.com/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/v2.0", false)]
+    [InlineData(1, null, false)]
+    [InlineData(0, "https://untrusted.example/11111111-2222-3333-4444-555555555555/v2.0", false)]
+    public void ValidateIdentity_ResolvesTenantDomainUsingTrustedIssuer(int exitCode, string? issuer, bool expected)
+    {
+        var resolved = false;
+        var result = ValidateAzureCliIdentityStep.ValidateIdentity("contoso.onmicrosoft.com", "user@example.com",
+            NullLogger.Instance,
+            () => (0, """{"tenantId":"11111111-2222-3333-4444-555555555555","user":{"name":"user@example.com","type":"user"}}""", null),
+            domain =>
+            {
+                Assert.Equal("contoso.onmicrosoft.com", domain);
+                resolved = true;
+                return (exitCode, issuer, null);
+            });
+
+        Assert.Equal(expected, result);
+        Assert.True(resolved);
+    }
+
+    [Theory]
     [InlineData("""{"tenantId":"TENANT-A","user":{"name":"USER@EXAMPLE.COM","type":"USER"}}""", true)]
     [InlineData("""{"tenantId":"tenant-b","user":{"name":"user@example.com","type":"user"}}""", false)]
     [InlineData("""{"tenantId":"tenant-a","user":{"name":"other@example.com","type":"user"}}""", false)]

@@ -65,7 +65,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 
             // Ensure the msidentity tool is available before attempting to invoke it,
             // so a missing tool surfaces a clear, actionable message instead of a cryptic dotnet error.
-            if (!MsIdentityToolHelper.EnsureMsIdentityIsInstalled(_logger))
+            if (!EnsureToolInstalled())
+            {
+                return Task.FromResult(false);
+            }
+
+            if (ClientId is null && !MsIdentityToolHelper.SupportsRegistrationCleanup(_logger, ReadCapabilities))
             {
                 return Task.FromResult(false);
             }
@@ -101,7 +106,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// <summary>
         /// Registers a new Azure AD application and captures the client ID.
         /// </summary>
-        private bool RegisterApp(ScaffolderContext context)
+        protected virtual bool RegisterApp(ScaffolderContext context)
         {
             try
             {
@@ -151,6 +156,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return false;
             }
         }
+
+        protected virtual bool EnsureToolInstalled()
+            => MsIdentityToolHelper.EnsureMsIdentityIsInstalled(_logger);
+
+        protected virtual (int ExitCode, string? Output, string? Error) ReadCapabilities()
+            => MsIdentityToolHelper.ReadCapabilities();
 
         /// <summary>
         /// Updates an existing Azure AD application registration.

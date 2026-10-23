@@ -3,6 +3,9 @@
 # Usage: Reference from azure-pipelines-pr.yml and azure-pipelines.yml
 
 parameters:
+- name: isOfficial
+  type: boolean
+  default: false
 - name: buildConfig
   type: string
   default: Release
@@ -33,6 +36,15 @@ jobs:
         demands: ${{ parameters.poolDemands }}
     ${{ if ne(parameters.poolVmImage, '') }}:
       vmImage: ${{ parameters.poolVmImage }}
+  ${{ if parameters.isOfficial }}:
+    templateContext:
+      outputs:
+      - output: pipelineArtifact
+        displayName: Publish CLI Option Coverage Test Result Files
+        condition: always()
+        targetPath: $(Build.ArtifactStagingDirectory)/TestResults
+        artifactName: TestResults-CLIOptionCoverage-Attempt$(System.JobAttempt)
+        isProduction: false
   steps:
   - checkout: self
     clean: true
@@ -74,13 +86,14 @@ jobs:
       testResultsFormat: VSTest
       testResultsFiles: '$(Build.ArtifactStagingDirectory)/TestResults/*.trx'
       testRunTitle: CLI Option Coverage
-  - task: PublishBuildArtifacts@1
-    displayName: Publish CLI Option Coverage Test Result Files
-    condition: always()
-    inputs:
-      pathToPublish: $(Build.ArtifactStagingDirectory)/TestResults
-      artifactName: TestResults-CLIOptionCoverage
-      artifactType: Container
+  - ${{ if not(parameters.isOfficial) }}:
+    - task: PublishBuildArtifacts@1
+      displayName: Publish CLI Option Coverage Test Result Files
+      condition: always()
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)/TestResults
+        artifactName: TestResults-CLIOptionCoverage
+        artifactType: Container
 
 # Integration test matrix — one job per scaffolder family
 - job: ScaffoldIntegration
@@ -119,6 +132,15 @@ jobs:
       Aspire:
         _Family: 'aspire-caching|aspire-database|aspire-storage'
         _FamilyLabel: Aspire
+  ${{ if parameters.isOfficial }}:
+    templateContext:
+      outputs:
+      - output: pipelineArtifact
+        displayName: 'Publish $(_FamilyLabel) Test Result Files'
+        condition: always()
+        targetPath: $(Build.ArtifactStagingDirectory)/TestResults
+        artifactName: 'TestResults-Integration-$(_FamilyLabel)-Attempt$(System.JobAttempt)'
+        isProduction: false
   steps:
   - checkout: self
     clean: true
@@ -160,10 +182,11 @@ jobs:
       testResultsFormat: VSTest
       testResultsFiles: '$(Build.ArtifactStagingDirectory)/TestResults/*.trx'
       testRunTitle: 'Integration - $(_FamilyLabel)'
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish $(_FamilyLabel) Test Result Files'
-    condition: always()
-    inputs:
-      pathToPublish: $(Build.ArtifactStagingDirectory)/TestResults
-      artifactName: 'TestResults-Integration-$(_FamilyLabel)'
-      artifactType: Container
+  - ${{ if not(parameters.isOfficial) }}:
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish $(_FamilyLabel) Test Result Files'
+      condition: always()
+      inputs:
+        pathToPublish: $(Build.ArtifactStagingDirectory)/TestResults
+        artifactName: 'TestResults-Integration-$(_FamilyLabel)'
+        artifactType: Container

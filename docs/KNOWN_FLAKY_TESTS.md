@@ -58,7 +58,8 @@ Package-selection unit tests use fixed metadata, not live feeds. Real feed resto
 covered by scaffolder integration tests. A deterministic unit test passing does not establish
 feed availability or prove that the latest package on a live feed is safe.
 
-The shared temporary-project helper and Blazor CRUD fixtures write explicit NuGet configuration.
+The shared temporary-project helper, ASP.NET integration fixtures, and standalone Blazor
+WebAssembly recipe test write explicit NuGet configuration before creating or restoring projects.
 Stable targets use the dotnet-public mirror; .NET 11 uses the repository feeds. Both clear
 inherited disabled-source and package-source-mapping settings, so an unrelated user configuration
 cannot silently disable or redirect the test feeds.

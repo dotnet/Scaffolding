@@ -36,6 +36,17 @@
                       }
                     },
                     {
+                      "InsertBefore": [
+                        "app.MapStaticAssets()",
+                        "app.MapRazorComponents<App>()"
+                      ],
+                      "CheckBlock": "app.UseAntiforgery()",
+                      "Block": "app.UseAntiforgery()",
+                      "LeadingTrivia": {
+                        "Newline": true
+                      }
+                    },
+                    {
                       "InsertBefore": [ "app.MapRazorComponents<App>()" ],
                       "Block": "app.MapGroup(\"/authentication\").MapLoginAndLogout()",
                       "LeadingTrivia": {
@@ -92,6 +103,21 @@
                         "                    @context.User.Identity?.Name",
                         "                </Authorized>",
                         "            </AuthorizeView>"
+                    ]
+                }
+            ]
+        },
+        {
+            "FileName": "Components\\Layout\\NavMenu.razor",
+            "Replacements": [
+                {
+                    "CheckBlock": "<LoginOrLogout />",
+                    "ReplaceSnippet": [
+                        "</nav>"
+                    ],
+                    "MultiLineBlock": [
+                        "    <LoginOrLogout />",
+                        "    </nav>"
                     ]
                 }
             ]

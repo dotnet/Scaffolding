@@ -53,7 +53,9 @@ namespace Microsoft.Extensions.ProjectModel
 
             if (result.ExitCode != 0)
             {
-                throw CreateProjectContextCreationFailedException(_projectPath, errors);
+                throw CreateProjectContextCreationFailedException(
+                    _projectPath,
+                    errors.Count > 0 ? errors : output);
             }
             try
             {

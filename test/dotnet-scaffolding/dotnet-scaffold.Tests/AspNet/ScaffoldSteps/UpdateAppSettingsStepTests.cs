@@ -288,7 +288,7 @@ public class UpdateAppSettingsStepTests
     [InlineData(true)]
     public async Task ExecuteAsync_SavesCompleteSettingsUsingRealFileSystem(bool fileExists)
     {
-        string projectDirectory = Path.Combine(Path.GetTempPath(), $"UpdateAppSettingsStepTests-{Guid.NewGuid():N}");
+        string projectDirectory = Path.Combine(Directory.GetCurrentDirectory(), $"UpdateAppSettingsStepTests-{Guid.NewGuid():N}");
         string settingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
         Directory.CreateDirectory(projectDirectory);
         try
@@ -302,6 +302,7 @@ public class UpdateAppSettingsStepTests
                 ProjectPath = Path.Combine(projectDirectory, "TestProject.csproj"),
                 Username = Username,
                 TenantId = TenantId,
+                Domain = Domain,
                 ClientId = ClientId
             };
 
@@ -478,13 +479,16 @@ public class UpdateAppSettingsStepTests
     }
 
     [Theory]
-    [InlineData("developer@contoso.com", null, "contoso.com")]
-    [InlineData("developer", null, "developer.onmicrosoft.com")]
+    [InlineData("developer@contoso.com", null, null)]
+    [InlineData("developer", null, null)]
+    [InlineData(null, null, null)]
+    [InlineData("", "", null)]
+    [InlineData("developer@contoso.com", " ", null)]
     [InlineData("developer@contoso.com", "tenant.onmicrosoft.com", "tenant.onmicrosoft.com")]
-    public void CreateAzureAdConfiguration_ResolvesDomain(
-        string username,
+    public void CreateAzureAdConfiguration_OnlyIncludesExplicitDomain(
+        string? username,
         string? domain,
-        string expectedDomain)
+        string? expectedDomain)
     {
         JsonObject configuration = UpdateAppSettingsStep.CreateAzureAdConfiguration(
             username,
@@ -493,11 +497,157 @@ public class UpdateAppSettingsStepTests
             domain);
 
         Assert.Equal(expectedDomain, configuration["Domain"]?.ToString());
+        Assert.Equal(expectedDomain is not null, configuration.ContainsKey("Domain"));
+    }
+
+    [Theory]
+    [InlineData("12345678-1234-1234-1234-123456789012", false)]
+    [InlineData("contoso.onmicrosoft.com", false)]
+    [InlineData("contoso.com", false)]
+    [InlineData("contoso.onmicrosoft.com", true)]
+    public async Task ExecuteAsync_DoesNotGenerateDomain(string tenantId, bool existingSection)
+    {
+        if (existingSection)
+        {
+            SetExistingSettings(new JsonObject { ["AzureAd"] = new JsonObject() });
+        }
+
+        (bool result, _) = await ExecuteAsync(
+            domain: null,
+            username: "user@contoso.onmicrosoft.com",
+            tenantId: tenantId);
+
+        Assert.True(result);
+        JsonObject azureAd = ParseWrittenSettings()["AzureAd"]!.AsObject();
+        Assert.False(azureAd.ContainsKey("Domain"));
+        Assert.Equal(tenantId, azureAd["TenantId"]?.ToString());
+    }
+
+    [Theory]
+    [InlineData("12345678-1234-1234-1234-123456789012", "contoso.onmicrosoft.com")]
+    [InlineData("contoso.onmicrosoft.com", "fabrikam.onmicrosoft.com")]
+    [InlineData("12345678-1234-1234-1234-123456789012", "login.contoso.com")]
+    [InlineData("contoso.onmicrosoft.com", "login.contoso.com")]
+    [InlineData("12345678-1234-1234-1234-123456789012", "another@contoso.onmicrosoft.com.onmicrosoft.com")]
+    public async Task ExecuteAsync_PreservesExistingDomain(string tenantId, string domain)
+    {
+        SetExistingSettings(new JsonObject
+        {
+            ["AzureAd"] = new JsonObject
+            {
+                ["Domain"] = domain,
+                ["SignUpSignInPolicyId"] = "B2C_1_signupsignin"
+            }
+        });
+
+        (bool result, _) = await ExecuteAsync(
+            domain: null,
+            username: "user@contoso.onmicrosoft.com",
+            tenantId: tenantId);
+
+        Assert.True(result);
+        JsonNode azureAd = ParseWrittenSettings()["AzureAd"]!;
+        Assert.Equal(domain, azureAd["Domain"]?.ToString());
+        Assert.Equal("B2C_1_signupsignin", azureAd["SignUpSignInPolicyId"]?.ToString());
+    }
+
+    [Theory]
+    [InlineData(null, false)]
+    [InlineData("", false)]
+    [InlineData("contoso", false)]
+    [InlineData("user@contoso.onmicrosoft.com", true)]
+    public async Task ExecuteAsync_PreservesExistingDomainWhenUnspecified(string? username, bool overwrite)
+    {
+        JsonObject azureAd = CreateExpectedAzureAd();
+        azureAd["Domain"] = "contoso.onmicrosoft.com";
+        SetExistingSettings(new JsonObject { ["AzureAd"] = azureAd });
+
+        (bool result, _) = await ExecuteAsync(overwrite: overwrite, domain: null, username: username);
+
+        Assert.True(result);
+        Assert.Null(_writtenContent);
+        Assert.Equal("contoso.onmicrosoft.com",
+            JsonNode.Parse(_files[_developmentSettingsPath])?["AzureAd"]?["Domain"]?.ToString());
+        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("12345678-1234-1234-1234-123456789012", null, "Domain", false)]
+    [InlineData("contoso.onmicrosoft.com", null, "Domain", true)]
+    [InlineData("contoso.onmicrosoft.com", "", "Domain", false)]
+    [InlineData("contoso.onmicrosoft.com", " ", "domain", false)]
+    public async Task ExecuteAsync_RemovesLegacyUsernameDerivedDomain(
+        string tenantId, string? explicitDomain, string domainKey, bool overwrite)
+    {
+        JsonObject azureAd = UpdateAppSettingsStep.CreateAzureAdConfiguration(
+            "user@contoso.onmicrosoft.com", tenantId, ClientId);
+        azureAd[domainKey] = "user@contoso.onmicrosoft.com.onmicrosoft.com";
+        azureAd["SignUpSignInPolicyId"] = "B2C_1_signupsignin";
+        SetExistingSettings(new JsonObject { ["azuread"] = azureAd });
+
+        (bool result, _) = await ExecuteAsync(
+            overwrite: overwrite,
+            domain: explicitDomain,
+            username: "user@contoso.onmicrosoft.com",
+            tenantId: tenantId);
+
+        Assert.True(result);
+        JsonObject writtenAzureAd = ParseWrittenSettings()["azuread"]!.AsObject();
+        Assert.False(writtenAzureAd.ContainsKey(domainKey));
+        Assert.Equal("B2C_1_signupsignin", writtenAzureAd["SignUpSignInPolicyId"]?.ToString());
+    }
+
+    [Theory]
+    [InlineData(null, "contoso.onmicrosoft.com")]
+    [InlineData("contoso.onmicrosoft.com", "contoso.onmicrosoft.com")]
+    [InlineData("fabrikam.onmicrosoft.com", "contoso.onmicrosoft.com")]
+    [InlineData("user@contoso.onmicrosoft.com.onmicrosoft.com", "contoso.onmicrosoft.com")]
+    [InlineData("user@contoso.onmicrosoft.com.onmicrosoft.com", "user@contoso.onmicrosoft.com.onmicrosoft.com")]
+    public async Task ExecuteAsync_HonorsExplicitDomainWithOverwrite(string? existingDomain, string explicitDomain)
+    {
+        SetExistingSettings(new JsonObject
+        {
+            ["AzureAd"] = new JsonObject { ["Domain"] = existingDomain }
+        });
+
+        (bool result, _) = await ExecuteAsync(
+            overwrite: true,
+            domain: explicitDomain,
+            username: "user@contoso.onmicrosoft.com");
+
+        Assert.True(result);
+        Assert.Equal(explicitDomain, ParseWrittenSettings()["AzureAd"]?["Domain"]?.ToString());
+    }
+
+    [Theory]
+    [InlineData(null, ClientId)]
+    [InlineData("", ClientId)]
+    [InlineData(TenantId, null)]
+    [InlineData(TenantId, " ")]
+    public async Task ExecuteAsync_RequiresTenantAndClientIdWithoutChangingExistingDomain(
+        string? tenantId, string? clientId)
+    {
+        const string originalContent = """{"AzureAd":{"Domain":"user@contoso.onmicrosoft.com.onmicrosoft.com"}}""";
+        SetExistingSettingsJson(originalContent);
+
+        (bool result, _) = await ExecuteAsync(
+            domain: null,
+            username: "user@contoso.onmicrosoft.com",
+            tenantId: tenantId,
+            clientId: clientId);
+
+        Assert.False(result);
+        Assert.Equal(originalContent, _files[_developmentSettingsPath]);
+        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     private async Task<(bool Result, TestLogger Logger)> ExecuteAsync(
         bool overwrite = false,
-        string? callbackPath = null)
+        string? callbackPath = null,
+        string? domain = Domain,
+        string? username = Username,
+        string? tenantId = TenantId,
+        string? clientId = ClientId)
     {
         var logger = new TestLogger();
         var step = new UpdateAppSettingsStep(
@@ -506,10 +656,10 @@ public class UpdateAppSettingsStepTests
             Mock.Of<ITelemetryService>())
         {
             ProjectPath = _projectPath,
-            Username = Username,
-            TenantId = TenantId,
-            Domain = Domain,
-            ClientId = ClientId,
+            Username = username,
+            TenantId = tenantId,
+            Domain = domain,
+            ClientId = clientId,
             CallbackPath = callbackPath,
             Overwrite = overwrite
         };

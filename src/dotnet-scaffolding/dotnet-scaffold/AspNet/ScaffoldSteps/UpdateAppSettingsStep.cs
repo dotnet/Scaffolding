@@ -1,6 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
+using System;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// </summary>
         public string? ClientId { get; set; }
         /// <summary>
-        /// Azure AD domain.
+        /// Optional Azure AD domain. When omitted, intentional existing values are preserved.
         /// </summary>
         public string? Domain { get; set; }
         /// <summary>
@@ -92,12 +92,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 return Task.FromResult(false);
             }
 
-            if (string.IsNullOrWhiteSpace(Domain) && string.IsNullOrWhiteSpace(Username))
-            {
-                _logger.LogError("Either Domain or Username is required to resolve AzureAd domain.");
-                return Task.FromResult(false);
-            }
-
             string developmentSettingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
 
             try
@@ -133,7 +127,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 
                 context.Properties["CallbackPath"] = generatedAzureAd["CallbackPath"]!.ToString();
 
+                string? legacyDomainProperty = null;
+                if (string.IsNullOrWhiteSpace(Domain) &&
+                    !string.IsNullOrEmpty(Username) && Username.Contains('@') &&
+                    existingAzureAd is JsonObject azureAdWithDomain)
+                {
+                    string? domainProperty = FindPropertyName(azureAdWithDomain, "Domain", "The AzureAd section");
+                    if (domainProperty is not null &&
+                        azureAdWithDomain[domainProperty]?.ToString() == $"{Username}.onmicrosoft.com")
+                    {
+                        legacyDomainProperty = domainProperty;
+                    }
+                }
+
                 if (existingAzureAd is JsonObject matchingAzureAd &&
+                    legacyDomainProperty is null &&
                     HasMatchingManagedAzureAdSettings(matchingAzureAd, generatedAzureAd))
                 {
                     _logger.LogInformation("No changes needed for AzureAd configuration in appsettings.Development.json.");
@@ -142,6 +150,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 }
 
                 JsonObject targetAzureAd = existingAzureAd as JsonObject ?? new JsonObject();
+                if (legacyDomainProperty is not null)
+                {
+                    targetAzureAd.Remove(legacyDomainProperty);
+                }
+
                 foreach ((string key, JsonNode? value) in generatedAzureAd)
                 {
                     // Update an existing key in place (keeping its casing) so the file never gets two keys that
@@ -328,14 +341,20 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             string? instance = null,
             string? callbackPath = null)
         {
-            return new JsonObject
+            var configuration = new JsonObject
             {
                 ["Instance"] = !string.IsNullOrWhiteSpace(instance) ? instance : DefaultInstance,
                 ["TenantId"] = tenantId,
-                ["Domain"] = ResolveAzureAdDomain(domain, username),
                 ["ClientId"] = clientId,
                 ["CallbackPath"] = !string.IsNullOrWhiteSpace(callbackPath) ? callbackPath : DefaultCallbackPath
             };
+
+            if (!string.IsNullOrWhiteSpace(domain))
+            {
+                configuration["Domain"] = domain;
+            }
+
+            return configuration;
         }
 
         internal static string? GetFirstConflictingAzureAdKey(
@@ -354,20 +373,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             }
 
             return null;
-        }
-
-        private static string ResolveAzureAdDomain(string? configuredDomain, string? username)
-        {
-            if (!string.IsNullOrWhiteSpace(configuredDomain))
-            {
-                return configuredDomain;
-            }
-
-            string resolvedUsername = username ?? string.Empty;
-            int atSignIndex = resolvedUsername.LastIndexOf('@');
-            return atSignIndex >= 0 && atSignIndex < resolvedUsername.Length - 1
-                ? resolvedUsername[(atSignIndex + 1)..]
-                : $"{resolvedUsername}.onmicrosoft.com";
         }
 
         private static bool HasMatchingManagedAzureAdSettings(

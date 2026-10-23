@@ -136,6 +136,7 @@ else
             if (!<#= modelName #>Exists(<#= modelName #>!.<#= primaryKeyName #>))
             {
                 NavigationManager.NotFound();
+                return;
             }
             else
             {

@@ -108,11 +108,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         {
             try
             {
-                // Fix for CS8620: Ensure the array passed to DotnetCliRunner.CreateDotNet is non-nullable
-                var runner = DotnetCliRunner.CreateDotNet(
-                    "msidentity",
-                    ["--create-client-secret", "--tenant-id", TenantId ?? string.Empty, "--username", Username ?? string.Empty, "--client-id", ClientId ?? string.Empty, "--json"]
-                );
+                var runner = MsIdentityToolHelper.CreateMsIdentityRunner(
+                    ["--create-client-secret", "--tenant-id", TenantId ?? string.Empty, "--username", Username ?? string.Empty, "--client-id", ClientId ?? string.Empty, "--json"],
+                    GetCliEnvVars());
                 int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
 
                 if (exitCode != 0)

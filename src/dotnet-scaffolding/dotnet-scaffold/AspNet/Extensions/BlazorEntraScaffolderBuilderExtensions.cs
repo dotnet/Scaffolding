@@ -4,6 +4,7 @@
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Helpers;
 using Microsoft.DotNet.Scaffolding.Core.Model;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
@@ -248,6 +249,12 @@ internal static class BlazorEntraScaffolderBuilderExtensions
                     throw new InvalidOperationException("Project path is not set in EntraIdSettings.");
                 }
 
+                if (IsStandaloneBlazorWebAssemblyProject(context, entraSettings.Project))
+                {
+                    step.SkipStep = true;
+                    return;
+                }
+
                 step.ProjectPath = entraSettings.Project;
                 step.Packages = [PackageConstants.AspNetCorePackages.MicrosoftIdentityWebPackage];
             }
@@ -319,6 +326,12 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             context.Properties.TryGetValue(nameof(EntraIdSettings), out var entraIdSettings);
             EntraIdSettings entraSettings = entraIdSettings as EntraIdSettings ??
                 throw new InvalidOperationException("missing 'EntraIdSettings' in 'ScaffolderContext.Properties'");
+            if (IsStandaloneBlazorWebAssemblyProject(context, entraSettings.Project))
+            {
+                step.SkipStep = true;
+                return;
+            }
+
             string? targetFrameworkFolder = TargetFrameworkHelpers.GetTargetFrameworkFolder(entraSettings?.Project);
             var codeModificationFilePath = GlobalToolFileFinder.FindCodeModificationConfigFile("blazorEntraChanges.json", System.Reflection.Assembly.GetExecutingAssembly(), targetFrameworkFolder);
             context.Properties.TryGetValue(nameof(EntraIdModel), out var entraIdModel);
@@ -433,7 +446,10 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             }
 
             var allBlazorIdentityFiles = templateFolderUtilities.GetAllT4TemplatesForTargetFramework(["BlazorEntraId"], entraIdModel.ProjectInfo.ProjectPath);
-            var blazorEntraIdProperties = EntraIdHelper.GetTextTemplatingProperties(allBlazorIdentityFiles, entraIdModel);
+            var blazorEntraIdProperties = EntraIdHelper.GetTextTemplatingProperties(
+                allBlazorIdentityFiles,
+                entraIdModel,
+                context.Properties.TryGetValue("BlazorWasmClientProjectPath", out var blazorWasmClientProjectPath) ? blazorWasmClientProjectPath as string : null);
 
             if (blazorEntraIdProperties is not null && blazorEntraIdProperties.Any())
             {
@@ -450,7 +466,14 @@ internal static class BlazorEntraScaffolderBuilderExtensions
 
         return builder;
     }
+
+    private static bool IsStandaloneBlazorWebAssemblyProject(ScaffolderContext context, string? projectPath)
+    {
+        return !string.IsNullOrEmpty(projectPath) &&
+            context.Properties.TryGetValue("BlazorWasmClientProjectPath", out var clientProjectPath) &&
+            clientProjectPath is string clientPath &&
+            !string.IsNullOrEmpty(clientPath) &&
+            Path.GetFullPath(clientPath).Equals(Path.GetFullPath(projectPath), StringComparison.OrdinalIgnoreCase);
+    }
+
 }
-
-
-

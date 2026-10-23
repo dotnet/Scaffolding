@@ -74,8 +74,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Msbuild
         private static IEnumerable<string> GetProjectReferences(Project project)
         {
             return project.GetItems("ProjectReference")
-                .Select(i => i.EvaluatedInclude)
-                .Select(path => EnsurePathRooted(path, project.DirectoryPath));
+                .Select(item => item.GetMetadataValue("FullPath"))
+                .Where(path => !string.IsNullOrEmpty(path))
+                .Select(Path.GetFullPath);
         }
 
         private static ProjectReferenceInformation GetProjectInformation(Project project)

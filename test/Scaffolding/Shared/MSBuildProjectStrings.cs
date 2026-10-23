@@ -1274,7 +1274,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
   <Target Name=""CollectCodeGenerationProjectReferences"">
     <ItemGroup>
       <_CodeGenerationProjectReference
-        Include=""@(ProjectReference)""
+        Include=""%(ProjectReference.FullPath)""
         Condition=""'%(ProjectReference.ReferenceOutputAssembly)' != 'false'"" />
     </ItemGroup>
   </Target>

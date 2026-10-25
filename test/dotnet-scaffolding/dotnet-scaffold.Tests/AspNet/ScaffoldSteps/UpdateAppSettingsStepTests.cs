@@ -48,9 +48,9 @@ public class UpdateAppSettingsStepTests
             .Returns<string>(path => _files.ContainsKey(path));
         _fileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>()))
             .Returns<string>(path => _files[path]);
-        _fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+        _fileSystem.Setup(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()))
             .Callback<string, string>((path, content) => _files[path] = content);
-        _fileSystem.Setup(fs => fs.MoveFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+        _fileSystem.Setup(fs => fs.ReplaceFilePreservingPermissions(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
             .Callback<string, string, bool>((source, destination, _) =>
             {
                 _writtenContent = _files[source];
@@ -87,7 +87,10 @@ public class UpdateAppSettingsStepTests
         _fileSystem.Verify(fs => fs.ReadAllText(_appSettingsPath), Times.Never);
         _fileSystem.Verify(fs => fs.WriteAllText(_appSettingsPath, It.IsAny<string>()), Times.Never);
         _fileSystem.Verify(fs => fs.WriteAllText(_developmentSettingsPath, It.IsAny<string>()), Times.Never);
-        _fileSystem.Verify(fs => fs.MoveFile(
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(
+            It.Is<string>(path => Path.GetDirectoryName(path) == _projectDirectory && path != _developmentSettingsPath),
+            It.IsAny<string>()), Times.Once);
+        _fileSystem.Verify(fs => fs.ReplaceFilePreservingPermissions(
             It.Is<string>(path => Path.GetDirectoryName(path) == _projectDirectory && path != _developmentSettingsPath),
             _developmentSettingsPath,
             true), Times.Once);
@@ -130,7 +133,7 @@ public class UpdateAppSettingsStepTests
 
         Assert.True(result);
         Assert.Null(_writtenContent);
-        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Theory]
@@ -151,7 +154,7 @@ public class UpdateAppSettingsStepTests
 
         Assert.False(result);
         Assert.Contains(logger.ErrorMessages, message => message.Contains($"'{conflictingKey}'", StringComparison.Ordinal));
-        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -193,7 +196,7 @@ public class UpdateAppSettingsStepTests
 
         Assert.False(result);
         Assert.Null(_writtenContent);
-        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Theory]
@@ -207,7 +210,7 @@ public class UpdateAppSettingsStepTests
             SetExistingSettingsJson(originalContent);
         }
         string? temporaryPath = null;
-        _fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+        _fileSystem.Setup(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()))
             .Callback<string, string>((path, content) =>
             {
                 temporaryPath = path;
@@ -227,7 +230,7 @@ public class UpdateAppSettingsStepTests
         }
         Assert.False(_files.ContainsKey(temporaryPath));
         _fileSystem.Verify(fs => fs.DeleteFile(temporaryPath), Times.Once);
-        _fileSystem.Verify(fs => fs.MoveFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+        _fileSystem.Verify(fs => fs.ReplaceFilePreservingPermissions(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
     }
 
     [Theory]
@@ -241,7 +244,7 @@ public class UpdateAppSettingsStepTests
             SetExistingSettingsJson(originalContent);
         }
         string? temporaryPath = null;
-        _fileSystem.Setup(fs => fs.MoveFile(It.IsAny<string>(), _developmentSettingsPath, true))
+        _fileSystem.Setup(fs => fs.ReplaceFilePreservingPermissions(It.IsAny<string>(), _developmentSettingsPath, true))
             .Callback<string, string, bool>((source, _, _) =>
             {
                 temporaryPath = source;
@@ -266,7 +269,7 @@ public class UpdateAppSettingsStepTests
     [Fact]
     public async Task ExecuteAsync_ReportsCleanupFailureWithoutHidingWriteFailure()
     {
-        _fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+        _fileSystem.Setup(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()))
             .Callback<string, string>((path, _) =>
             {
                 _files[path] = "{";
@@ -374,7 +377,7 @@ public class UpdateAppSettingsStepTests
 
         Assert.False(result);
         Assert.Contains(logger.ErrorMessages, message => message.Contains("root JSON value must be an object", StringComparison.Ordinal));
-        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]
@@ -429,7 +432,7 @@ public class UpdateAppSettingsStepTests
 
         Assert.False(result);
         Assert.Contains(logger.ErrorMessages, message => message.Contains(expectedNames, StringComparison.Ordinal));
-        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Theory]
@@ -456,8 +459,8 @@ public class UpdateAppSettingsStepTests
         Assert.Contains(logger.ErrorMessages, message => message.Contains($"flattened managed key '{key}'", StringComparison.Ordinal));
         Assert.Contains(logger.ErrorMessages, message => message.Contains("Move this value into a single 'AzureAd' object", StringComparison.Ordinal));
         Assert.Equal(originalContent, _files[_developmentSettingsPath]);
-        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-        _fileSystem.Verify(fs => fs.MoveFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.ReplaceFilePreservingPermissions(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
     }
 
     [Theory]
@@ -475,7 +478,7 @@ public class UpdateAppSettingsStepTests
 
         Assert.False(result);
         Assert.Contains(logger.ErrorMessages, message => message.Contains("flattened managed key 'AzureAd:ClientId'", StringComparison.Ordinal));
-        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Theory]
@@ -513,14 +516,13 @@ public class UpdateAppSettingsStepTests
         }
 
         (bool result, _) = await ExecuteAsync(
-            domain: null,
-            username: "user@contoso.onmicrosoft.com",
-            tenantId: tenantId);
+            domain: null, username: "user@contoso.onmicrosoft.com", tenantId: tenantId);
 
         Assert.True(result);
-        JsonObject azureAd = ParseWrittenSettings()["AzureAd"]!.AsObject();
+        JsonObject azureAd = Assert.IsType<JsonObject>(ParseWrittenSettings()["AzureAd"]);
         Assert.False(azureAd.ContainsKey("Domain"));
-        Assert.Equal(tenantId, azureAd["TenantId"]?.ToString());
+        Assert.Equal(tenantId, azureAd["TenantId"]?.GetValue<string>());
+        Assert.Equal(ClientId, azureAd["ClientId"]?.GetValue<string>());
     }
 
     [Theory]
@@ -541,14 +543,12 @@ public class UpdateAppSettingsStepTests
         });
 
         (bool result, _) = await ExecuteAsync(
-            domain: null,
-            username: "user@contoso.onmicrosoft.com",
-            tenantId: tenantId);
+            domain: null, username: "user@contoso.onmicrosoft.com", tenantId: tenantId);
 
         Assert.True(result);
         JsonNode azureAd = ParseWrittenSettings()["AzureAd"]!;
-        Assert.Equal(domain, azureAd["Domain"]?.ToString());
-        Assert.Equal("B2C_1_signupsignin", azureAd["SignUpSignInPolicyId"]?.ToString());
+        Assert.Equal(domain, azureAd["Domain"]?.GetValue<string>());
+        Assert.Equal("B2C_1_signupsignin", azureAd["SignUpSignInPolicyId"]?.GetValue<string>());
     }
 
     [Theory]
@@ -567,8 +567,8 @@ public class UpdateAppSettingsStepTests
         Assert.True(result);
         Assert.Null(_writtenContent);
         Assert.Equal("contoso.onmicrosoft.com",
-            JsonNode.Parse(_files[_developmentSettingsPath])?["AzureAd"]?["Domain"]?.ToString());
-        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            JsonNode.Parse(_files[_developmentSettingsPath])?["AzureAd"]?["Domain"]?.GetValue<string>());
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     [Theory]
@@ -586,15 +586,14 @@ public class UpdateAppSettingsStepTests
         SetExistingSettings(new JsonObject { ["azuread"] = azureAd });
 
         (bool result, _) = await ExecuteAsync(
-            overwrite: overwrite,
-            domain: explicitDomain,
-            username: "user@contoso.onmicrosoft.com",
-            tenantId: tenantId);
+            overwrite: overwrite, domain: explicitDomain, username: "user@contoso.onmicrosoft.com", tenantId: tenantId);
 
         Assert.True(result);
-        JsonObject writtenAzureAd = ParseWrittenSettings()["azuread"]!.AsObject();
+        JsonObject writtenAzureAd = Assert.IsType<JsonObject>(ParseWrittenSettings()["azuread"]);
         Assert.False(writtenAzureAd.ContainsKey(domainKey));
-        Assert.Equal("B2C_1_signupsignin", writtenAzureAd["SignUpSignInPolicyId"]?.ToString());
+        Assert.Equal(tenantId, writtenAzureAd["TenantId"]?.GetValue<string>());
+        Assert.Equal(ClientId, writtenAzureAd["ClientId"]?.GetValue<string>());
+        Assert.Equal("B2C_1_signupsignin", writtenAzureAd["SignUpSignInPolicyId"]?.GetValue<string>());
     }
 
     [Theory]
@@ -611,34 +610,36 @@ public class UpdateAppSettingsStepTests
         });
 
         (bool result, _) = await ExecuteAsync(
-            overwrite: true,
-            domain: explicitDomain,
-            username: "user@contoso.onmicrosoft.com");
+            overwrite: true, domain: explicitDomain, username: "user@contoso.onmicrosoft.com");
 
         Assert.True(result);
-        Assert.Equal(explicitDomain, ParseWrittenSettings()["AzureAd"]?["Domain"]?.ToString());
+        Assert.Equal(explicitDomain, ParseWrittenSettings()["AzureAd"]?["Domain"]?.GetValue<string>());
     }
 
     [Theory]
-    [InlineData(null, ClientId)]
-    [InlineData("", ClientId)]
-    [InlineData(TenantId, null)]
-    [InlineData(TenantId, " ")]
+    [InlineData(null, ClientId, "contoso.onmicrosoft.com")]
+    [InlineData(null, ClientId, "user@contoso.onmicrosoft.com.onmicrosoft.com")]
+    [InlineData("", ClientId, "contoso.onmicrosoft.com")]
+    [InlineData(TenantId, null, "contoso.onmicrosoft.com")]
+    [InlineData(TenantId, "", "contoso.onmicrosoft.com")]
+    [InlineData(TenantId, " ", "contoso.onmicrosoft.com")]
     public async Task ExecuteAsync_RequiresTenantAndClientIdWithoutChangingExistingDomain(
-        string? tenantId, string? clientId)
+        string? tenantId, string? clientId, string domain)
     {
-        const string originalContent = """{"AzureAd":{"Domain":"user@contoso.onmicrosoft.com.onmicrosoft.com"}}""";
-        SetExistingSettingsJson(originalContent);
+        SetExistingSettings(new JsonObject
+        {
+            ["AzureAd"] = new JsonObject { ["Domain"] = domain }
+        });
+        string originalContent = _files[_developmentSettingsPath];
 
-        (bool result, _) = await ExecuteAsync(
-            domain: null,
-            username: "user@contoso.onmicrosoft.com",
-            tenantId: tenantId,
-            clientId: clientId);
+        (bool result, TestLogger logger) = await ExecuteAsync(
+            domain: null, username: "user@contoso.onmicrosoft.com", tenantId: tenantId, clientId: clientId);
 
         Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("Both ClientId and TenantId are required", StringComparison.Ordinal));
         Assert.Equal(originalContent, _files[_developmentSettingsPath]);
-        _fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.ReplaceFilePreservingPermissions(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
     }
 
     private async Task<(bool Result, TestLogger Logger)> ExecuteAsync(

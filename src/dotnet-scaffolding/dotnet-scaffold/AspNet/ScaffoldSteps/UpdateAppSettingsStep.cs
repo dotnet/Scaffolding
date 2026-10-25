@@ -204,8 +204,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             string temporaryPath = $"{developmentSettingsPath}.{Guid.NewGuid():N}.tmp";
             try
             {
-                _fileSystem.WriteAllText(temporaryPath, content);
-                _fileSystem.MoveFile(temporaryPath, developmentSettingsPath, overwrite: true);
+                _fileSystem.WriteAllTextRestricted(temporaryPath, content);
+                _fileSystem.ReplaceFilePreservingPermissions(temporaryPath, developmentSettingsPath, overwrite: true);
             }
             finally
             {

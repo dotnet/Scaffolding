@@ -7,6 +7,7 @@
     using Microsoft.DotNet.Scaffolding.Internal.Services;
     using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
     using Microsoft.Extensions.Logging;
+    using System.Text.Json;
 
     namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
     {
@@ -18,6 +19,8 @@
             public string[]? SpaRedirectUris { get; set; }
             public bool AutoConfigureLocalUrls { get; set; } = true;
             public string CallbackPath { get; set; } = UpdateAppSettingsStep.DefaultCallbackPath;
+            public bool UseExistingApplication { get; set; }
+            internal Func<string, AzCliResult>? AzCliCommand { get; set; }
 
             private readonly ILogger _logger;
             private readonly IFileSystem _fileSystem;
@@ -42,7 +45,12 @@
                     ConfigureLocalRedirectUris(ProjectPath);
                 }
 
-                var runner = AzCliRunner.Create();
+                AzCliRunner? runner = AzCliCommand is null ? AzCliRunner.Create() : null;
+
+                if (UseExistingApplication && !TryMergeExistingWebRedirectUris(runner))
+                {
+                    return Task.FromResult(false);
+                }
 
                 // Build the Azure CLI command with all parameters
                 var command = $"ad app update --id {ClientId} --enable-id-token-issuance true";
@@ -61,16 +69,65 @@
                     command += $" --public-client-redirect-uris {spaUrisJson}";
                 }
 
-                var exitCode = runner.RunAzCli(command, out var stdOut, out var stdErr);
-                if (exitCode != 0 || !string.IsNullOrEmpty(stdErr))
+                AzCliResult updateResult = RunAzCli(runner, command);
+                if (updateResult.ExitCode != 0 || !string.IsNullOrEmpty(updateResult.StdErr))
                 {
-                    _logger.LogError($"Failed to update app registration: {stdErr}");
+                    _logger.LogError("Failed to update app registration: {Error}", updateResult.StdErr);
                     return Task.FromResult(false);
                 }
 
                 _logger.LogInformation($"Updated App registration with ID token configuration and redirect URIs");
 
                 return Task.FromResult(true);
+            }
+
+            private bool TryMergeExistingWebRedirectUris(AzCliRunner? runner)
+            {
+                var command = $"ad app show --id {ClientId} --query web.redirectUris --output json";
+                AzCliResult result = RunAzCli(runner, command);
+                if (result.ExitCode != 0 || !string.IsNullOrEmpty(result.StdErr))
+                {
+                    _logger.LogError("Failed to read existing app registration redirect URIs: {Error}", result.StdErr);
+                    return false;
+                }
+
+                if (string.IsNullOrWhiteSpace(result.StdOut))
+                {
+                    _logger.LogError("Azure CLI returned no Web redirect URI data for the existing app registration.");
+                    return false;
+                }
+
+                try
+                {
+                    string[]? existingUris = JsonSerializer.Deserialize<string[]>(result.StdOut);
+                    if (existingUris is null)
+                    {
+                        _logger.LogError("Azure CLI returned invalid Web redirect URI data for the existing app registration.");
+                        return false;
+                    }
+
+                    WebRedirectUris = existingUris
+                        .Concat(WebRedirectUris ?? Array.Empty<string>())
+                        .Distinct(StringComparer.Ordinal)
+                        .ToArray();
+                    return true;
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogError(ex, "Failed to parse existing app registration redirect URIs.");
+                    return false;
+                }
+            }
+
+            private AzCliResult RunAzCli(AzCliRunner? runner, string command)
+            {
+                if (AzCliCommand is not null)
+                {
+                    return AzCliCommand(command);
+                }
+
+                int exitCode = runner!.RunAzCli(command, out string? stdOut, out string? stdErr);
+                return new AzCliResult(exitCode, stdOut, stdErr);
             }
 
             internal void ConfigureLocalRedirectUris(string projectPath)
@@ -109,16 +166,8 @@
                                 {
                                     if (!string.IsNullOrWhiteSpace(url))
                                     {
-                                        try
-                                        {
-                                            var baseUrl = url.Trim();
-                                            localUrls.Add(baseUrl);
-                                            localUrls.Add($"{baseUrl}{CallbackPath}");
-                                        }
-                                        catch
-                                        {
-                                            _logger.LogError("An error occurred while processing the URL: {0}", url);
-                                        }
+                                        var baseUrl = url.Trim().TrimEnd('/');
+                                        localUrls.Add($"{baseUrl}{CallbackPath}");
                                     }
                                 }
                             }
@@ -130,7 +179,7 @@
                     {
                         WebRedirectUris = (WebRedirectUris ?? Array.Empty<string>())
                             .Concat(localUrls)
-                            .Distinct()
+                            .Distinct(StringComparer.Ordinal)
                             .ToArray();
                     
                         _logger.LogInformation($"Configured {localUrls.Count} local redirect URIs from launchSettings.json");
@@ -151,20 +200,19 @@
             {
                 var defaultUris = new[]
                 {
-                    "https://localhost:5001",
                     $"https://localhost:5001{CallbackPath}",
-                    "https://localhost:7001",
                     $"https://localhost:7001{CallbackPath}",
-                    "https://localhost:44300",
                     $"https://localhost:44300{CallbackPath}"
                 };
 
                 WebRedirectUris = (WebRedirectUris ?? Array.Empty<string>())
                     .Concat(defaultUris)
-                    .Distinct()
+                    .Distinct(StringComparer.Ordinal)
                     .ToArray();
             
                 _logger.LogInformation("Added default localhost redirect URIs");
             }
+
+            internal readonly record struct AzCliResult(int ExitCode, string? StdOut, string? StdErr);
         }
     }

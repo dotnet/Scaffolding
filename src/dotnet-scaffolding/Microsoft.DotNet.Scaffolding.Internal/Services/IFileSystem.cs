@@ -23,6 +23,10 @@ public interface IFileSystem
 
     void WriteAllText(string filePath, string content);
 
+    void WriteAllTextRestricted(string filePath, string content);
+
+    void ReplaceFilePreservingPermissions(string sourcePath, string destinationPath, bool overwrite);
+
     void WriteAllLines(string filePath, string[] content);
 
     Stream OpenFileStream(string path, FileMode mode, FileAccess access, FileShare share);

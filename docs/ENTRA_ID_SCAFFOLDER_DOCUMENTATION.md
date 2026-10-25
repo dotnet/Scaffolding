@@ -59,6 +59,19 @@ registration does not change its audience. This default requires a version of
 `dotnet msidentity` containing the single-tenant default fix; updating the
 scaffolder alone does not update an already installed identity tool.
 
+The scaffolder requires an identity tool that supports `--register-app
+--registration-only`. This opt-in mode receives the validated project path and
+explicit registration metadata; it does not infer a client ID from project
+configuration or read/write `appsettings.json`. Other identity tool invocations
+retain their existing project inference and update behavior. An explicitly
+selected existing registration is still reused rather than creating a new one.
+
+Generated local settings are saved only to `appsettings.Development.json`.
+Atomic saves create an owner-only staging file before writing any content and
+preserve the destination's Unix permissions or Windows DACL when replacing it.
+New development settings files are owner-only. Preserved settings may contain
+secrets; the staging file is cleaned up if writing or replacement fails.
+
 ### 2. **Code Generation**
 - Generates authentication-related code files from templates
 - Adds appropriate authentication middleware configuration

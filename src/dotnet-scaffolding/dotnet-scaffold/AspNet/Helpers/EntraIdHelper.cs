@@ -17,11 +17,18 @@ internal static class EntraIdHelper
     /// </summary>
     /// <param name="allT4TemplatePaths">The collection of all T4 template paths.</param>
     /// <param name="entraIdModel">The Entra ID model containing configuration and data.</param>
+    /// <param name="blazorWasmClientProjectPath">The optional Blazor WebAssembly client project path.</param>
     /// <returns>An enumerable collection of <see cref="TextTemplatingProperty"/> instances.</returns>
-    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, EntraIdModel entraIdModel)
+    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, EntraIdModel entraIdModel, string? blazorWasmClientProjectPath = null)
     {
         var textTemplatingProperties = new List<TextTemplatingProperty>();
         var templateTypes = GetBlazorEntraIdTemplateTypes(entraIdModel.ProjectInfo?.LowestSupportedTargetFramework);
+        var serverLayoutPath = Path.Combine(entraIdModel.BaseOutputPath ?? string.Empty, "Components", "Layout");
+        var serverNavMenuPath = Path.Combine(serverLayoutPath, "NavMenu.razor");
+        var clientProjectDirectory = string.IsNullOrEmpty(blazorWasmClientProjectPath) ? null : Path.GetDirectoryName(blazorWasmClientProjectPath);
+        var clientLayoutPath = string.IsNullOrEmpty(clientProjectDirectory) ? null : Path.Combine(clientProjectDirectory, "Layout");
+        var clientNavMenuPath = string.IsNullOrEmpty(clientLayoutPath) ? null : Path.Combine(clientLayoutPath, "NavMenu.razor");
+
         foreach (var templatePath in allT4TemplatePaths)
         {
             var templateFullName = GetFormattedRelativeIdentityFile(templatePath);
@@ -35,21 +42,50 @@ internal static class EntraIdHelper
             if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
             {
                 string extension = templateFullName.StartsWith("loginor", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
-                string templateNameWithNamespace = String.Equals(extension, ".razor") ? Path.Combine(entraIdModel.BaseOutputPath ?? "", "Components", "Layout") : (entraIdModel.BaseOutputPath ?? "");
-                string outputFileName = Path.Combine(templateNameWithNamespace, templateFullName + extension);
+                IEnumerable<string> outputDirectories = String.Equals(extension, ".razor", StringComparison.Ordinal)
+                    ? GetLayoutOutputPaths(serverLayoutPath, serverNavMenuPath, clientLayoutPath, clientNavMenuPath)
+                    : [entraIdModel.BaseOutputPath ?? string.Empty];
 
-                textTemplatingProperties.Add(new()
+                foreach (string outputDirectory in outputDirectories)
                 {
-                    TemplateModel = entraIdModel,
-                    TemplateModelName = "Model",
-                    TemplatePath = templatePath,
-                    TemplateType = templateType,
-                    OutputPath = outputFileName
-                });
+                    textTemplatingProperties.Add(new()
+                    {
+                        TemplateModel = entraIdModel,
+                        TemplateModelName = "Model",
+                        TemplatePath = templatePath,
+                        TemplateType = templateType,
+                        OutputPath = Path.Combine(outputDirectory, templateFullName + extension)
+                    });
+                }
             }
         }
 
         return textTemplatingProperties;
+    }
+
+    private static IReadOnlyList<string> GetLayoutOutputPaths(string serverLayoutPath, string serverNavMenuPath, string? clientLayoutPath, string? clientNavMenuPath)
+    {
+        var layoutOutputPaths = new List<string>();
+
+        if (File.Exists(serverNavMenuPath))
+        {
+            layoutOutputPaths.Add(serverLayoutPath);
+        }
+
+        if (!string.IsNullOrEmpty(clientLayoutPath) &&
+            !string.IsNullOrEmpty(clientNavMenuPath) &&
+            File.Exists(clientNavMenuPath))
+        {
+            layoutOutputPaths.Add(clientLayoutPath);
+        }
+
+        if (layoutOutputPaths.Count > 0)
+        {
+            return layoutOutputPaths;
+        }
+
+        string expectedPaths = string.IsNullOrEmpty(clientNavMenuPath) ? $"'{serverNavMenuPath}'" : $"'{serverNavMenuPath}' or '{clientNavMenuPath}'";
+        throw new InvalidOperationException($"Could not locate the Blazor navigation component. Expected {expectedPaths}.");
     }
 
     /// <summary>

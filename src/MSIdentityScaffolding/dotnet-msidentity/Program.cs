@@ -3,6 +3,7 @@
 
 using Microsoft.DotNet.MSIdentity.Shared;
 using System.Collections.Generic;
+using System;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Threading.Tasks;
@@ -11,7 +12,9 @@ namespace Microsoft.DotNet.MSIdentity.Tool
 {
     public static class Program
     {
-        public static async Task<int> Main(string[] args)
+        public static Task<int> Main(string[] args) => Run(args, MsAADToolFactory.CreateTool);
+
+        internal static async Task<int> Run(string[] args, Func<string, ProvisioningToolOptions, IMsAADTool> createTool)
         {
             var rootCommand = MsIdentityCommand();
             //new BinderBase for System.Commandline update, new way to bind handlers to commands.
@@ -39,7 +42,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 TenantOption,
                 UsernameOption,
                 InstanceOption,
-                CalledApiUrlOption);
+                CalledApiUrlOption,
+                RegistrationOnlyOption);
 
             //internal commands
             var listAadAppsCommand = ListAADAppsCommand();
@@ -81,7 +85,11 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             listAadAppsCommand.SetAction((parseResult, cancellationToken) => HandleListApps(provisioningToolBinder.GetBoundValue(parseResult)));
             listServicePrincipalsCommand.SetAction((parseResult, cancellationToken) => HandleListServicePrincipals(provisioningToolBinder.GetBoundValue(parseResult)));
             listTenantsCommand.SetAction((parseResult, cancellationToken) => HandleListTenants(provisioningToolBinder.GetBoundValue(parseResult)));
-            registerApplicationCommand.SetAction((parseResult, cancellationToken) => HandleRegisterApplication(provisioningToolBinder.GetBoundValue(parseResult)));
+            registerApplicationCommand.SetAction(async (parseResult, cancellationToken) =>
+            {
+                await createTool(Commands.REGISTER_APPLICATIION_COMMAND, provisioningToolBinder.GetBoundValue(parseResult)).Run();
+                return 0;
+            });
             unregisterApplicationCommand.SetAction((parseResult, cancellationToken) => HandleUnregisterApplication(provisioningToolBinder.GetBoundValue(parseResult)));
             updateAppRegistrationCommand.SetAction((parseResult, cancellationToken) => HandleUpdateApplication(provisioningToolBinder.GetBoundValue(parseResult)));
             updateProjectCommand.SetAction((parseResult, cancellationToken) => HandleUpdateProject(provisioningToolBinder.GetBoundValue(parseResult)));
@@ -235,7 +243,8 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 description: "Register an Azure AD or Azure AD B2C app registration in Azure and update the project." +
                              "\n\t- Updates the appsettings.json file.\n")
             {
-                TenantOption, UsernameOption, InstanceOption, JsonOption, ClientIdOption, ClientSecretOption, HostedAppIdUriOption, ApiClientIdOption, SusiPolicyIdOption, ProjectFilePathOption
+                TenantOption, UsernameOption, InstanceOption, JsonOption, ClientIdOption, ClientSecretOption, HostedAppIdUriOption, ApiClientIdOption, SusiPolicyIdOption, ProjectFilePathOption,
+                RegistrationOnlyOption, ProjectType, AppDisplayName, RedirectUriOption
             };
 
         internal static Command UpdateProjectCommand() =>
@@ -276,6 +285,12 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             };
 
         internal static Option<bool> JsonOption { get; } = CreateJsonOption();
+
+        internal static Option<bool> RegistrationOnlyOption { get; } =
+            new("--registration-only")
+            {
+                Description = "Use explicit registration options without reading or writing project configuration. Requires --project-file-path and --project-type."
+            };
 
         private static Option<bool> CreateJsonOption()
         {

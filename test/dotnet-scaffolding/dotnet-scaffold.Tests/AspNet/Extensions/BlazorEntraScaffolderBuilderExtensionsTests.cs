@@ -8,6 +8,7 @@ using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
@@ -113,6 +114,49 @@ public class BlazorEntraScaffolderBuilderExtensionsTests
         // Assert
         Assert.NotNull(result);
         mockBuilder.Verify(b => b.WithStep<UpdateAppAuthorizationStep>(It.IsAny<Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>>()), Times.Once);
+    }
+
+    [Fact]
+    public void WithUpdateAppAuthorizationStep_ConfiguresExistingApplication()
+    {
+        // Arrange
+        Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>? configure = null;
+        Mock<IScaffoldBuilder> mockBuilder = new Mock<IScaffoldBuilder>();
+        mockBuilder
+            .Setup(b => b.WithStep<UpdateAppAuthorizationStep>(It.IsAny<Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>>()))
+            .Callback<Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>?, Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>?>(
+                (preExecute, _) => configure = preExecute)
+            .Returns(mockBuilder.Object);
+
+        var scaffolder = new Mock<IScaffolder>();
+        scaffolder.SetupGet(value => value.Name).Returns("test");
+        scaffolder.SetupGet(value => value.DisplayName).Returns("Test");
+        var context = new ScaffolderContext(scaffolder.Object);
+        context.Properties[nameof(EntraIdModel)] = new EntraIdModel { UseExistingApplication = true };
+        context.Properties[nameof(EntraIdSettings)] = new EntraIdSettings { Project = "TestProject.csproj" };
+        context.Properties["ClientId"] = "client-id";
+
+        var step = new UpdateAppAuthorizationStep(
+            Mock.Of<ILogger<UpdateAppAuthorizationStep>>(),
+            Mock.Of<IFileSystem>(),
+            Mock.Of<ITelemetryService>())
+        {
+            ClientId = null,
+            ProjectPath = string.Empty
+        };
+
+        // Act
+        mockBuilder.Object.WithUpdateAppAuthorizationStep();
+        Assert.NotNull(configure);
+        configure(new ScaffoldStepConfigurator<UpdateAppAuthorizationStep>
+        {
+            Context = context,
+            Step = step
+        });
+
+        // Assert
+        Assert.True(step.UseExistingApplication);
+        Assert.Equal("client-id", step.ClientId);
     }
 
     [Fact]

@@ -64,13 +64,14 @@ public enum EmploymentType
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore",
             "--page", "CRUD");
-        Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.True(cliExitCode != 0, $"CLI scaffold should fail for known net8 template incompatibility.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.Contains("does not implement Microsoft.DotNet.Scaffolding.TextTemplating.ITextTransformation", cliOutput);
+        Assert.Contains("failed at step 'WrappedTextTemplatingStep'", cliOutput);
 
-        // Assert — expected files were created (only if scaffolding produced output;
-        // the scaffolder may silently skip file generation for older TFMs if model
-        // resolution or template execution encounters issues)
+        // Assert — expected files were created only when scaffolding succeeds.
         var blazorPagesDir = Path.Combine(_testProjectDir, "Components", "Pages", "TestModelPages");
         bool scaffoldingProducedFiles = Directory.Exists(blazorPagesDir);
+        Assert.False(scaffoldingProducedFiles, "Blazor CRUD pages should not be generated when templating fails.");
         if (scaffoldingProducedFiles)
         {
             foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })

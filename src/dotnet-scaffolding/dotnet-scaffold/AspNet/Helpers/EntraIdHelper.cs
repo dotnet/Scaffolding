@@ -61,9 +61,18 @@ internal static class EntraIdHelper
             }
         }
 
+        string serverLayoutPath = Path.Combine(componentsOutputPath, "Layout");
+        string? clientProjectDirectory = string.IsNullOrEmpty(blazorWasmClientProjectPath)
+            ? null
+            : Path.GetDirectoryName(blazorWasmClientProjectPath);
+        string? clientLayoutPath = isStandaloneWasmProject || string.IsNullOrEmpty(clientProjectDirectory)
+            ? null
+            : Path.Combine(clientProjectDirectory, "Layout");
+        string? clientNavMenuPath = clientLayoutPath is null ? null : Path.Combine(clientLayoutPath, "NavMenu.razor");
+
         var entries = new List<(string Name, string OutputPath)>
         {
-            ("LoginOrLogout", Path.Combine(componentsOutputPath, "Layout", "LoginOrLogout.razor")),
+            ("LoginOrLogout", Path.Combine(serverLayoutPath, "LoginOrLogout.razor")),
             ("RedirectToLogin", redirectToLoginOutputPath),
         };
 
@@ -85,17 +94,50 @@ internal static class EntraIdHelper
                 continue;
             }
 
-            textTemplatingProperties.Add(new()
+            IEnumerable<string> outputPaths = entry.Name == "LoginOrLogout"
+                ? GetLayoutOutputPaths(serverLayoutPath, Path.Combine(serverLayoutPath, "NavMenu.razor"), clientLayoutPath, clientNavMenuPath)
+                    .Select(layoutPath => Path.Combine(layoutPath, "LoginOrLogout.razor"))
+                : [entry.OutputPath];
+
+            foreach (string outputPath in outputPaths)
             {
-                TemplateModel = entraIdModel,
-                TemplateModelName = "Model",
-                TemplatePath = templatePath,
-                TemplateType = templateType,
-                OutputPath = entry.OutputPath
-            });
+                textTemplatingProperties.Add(new()
+                {
+                    TemplateModel = entraIdModel,
+                    TemplateModelName = "Model",
+                    TemplatePath = templatePath,
+                    TemplateType = templateType,
+                    OutputPath = outputPath
+                });
+            }
         }
 
         return textTemplatingProperties;
+    }
+
+    private static IReadOnlyList<string> GetLayoutOutputPaths(string serverLayoutPath, string serverNavMenuPath, string? clientLayoutPath, string? clientNavMenuPath)
+    {
+        var layoutOutputPaths = new List<string>();
+
+        if (File.Exists(serverNavMenuPath))
+        {
+            layoutOutputPaths.Add(serverLayoutPath);
+        }
+
+        if (!string.IsNullOrEmpty(clientLayoutPath) &&
+            !string.IsNullOrEmpty(clientNavMenuPath) &&
+            File.Exists(clientNavMenuPath))
+        {
+            layoutOutputPaths.Add(clientLayoutPath);
+        }
+
+        if (layoutOutputPaths.Count > 0)
+        {
+            return layoutOutputPaths;
+        }
+
+        string expectedPaths = string.IsNullOrEmpty(clientNavMenuPath) ? $"'{serverNavMenuPath}'" : $"'{serverNavMenuPath}' or '{clientNavMenuPath}'";
+        throw new InvalidOperationException($"Could not locate the Blazor navigation component. Expected {expectedPaths}.");
     }
 
     /// <summary>

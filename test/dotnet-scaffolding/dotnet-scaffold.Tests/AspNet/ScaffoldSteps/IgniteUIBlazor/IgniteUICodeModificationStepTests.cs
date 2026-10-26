@@ -3,6 +3,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -39,9 +40,15 @@ public class IgniteUICodeModificationStepTests
     /// Sets up the project's compiled documents, which are also files on disk.
     /// </summary>
     private void SetupDocuments(params (string RelativePath, string Content)[] documents)
+        => SetupDocuments(parseOptions: null, documents);
+
+    /// <summary>
+    /// Sets up the project's compiled documents, parsed with <paramref name="parseOptions"/>, which are also files on disk.
+    /// </summary>
+    private void SetupDocuments(CSharpParseOptions? parseOptions, params (string RelativePath, string Content)[] documents)
     {
         var workspace = new AdhocWorkspace();
-        var projectId = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Create(), "MyApp", "MyApp", LanguageNames.CSharp, filePath: s_projectPath)).Id;
+        var projectId = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Create(), "MyApp", "MyApp", LanguageNames.CSharp, filePath: s_projectPath, parseOptions: parseOptions)).Id;
         foreach (var (relativePath, content) in documents)
         {
             var path = Path.Combine(s_projectDirectory, relativePath);
@@ -120,6 +127,17 @@ public class IgniteUICodeModificationStepTests
     public async Task ContainsRequiredCalls_OnlyCountsInvocationsInActiveCSharpCode(string program, bool expected)
     {
         SetupDocuments(("Program.cs", program));
+
+        Assert.Equal(expected, await CreateStep().ContainsRequiredCallsAsync());
+    }
+
+    [Theory]
+    [InlineData(new string[] { "NET8_0_OR_GREATER" }, true)]
+    [InlineData(new string[0], false)]
+    public async Task ContainsRequiredCalls_UsesTheProjectsPreprocessorSymbols(string[] preprocessorSymbols, bool expected)
+    {
+        SetupDocuments(new CSharpParseOptions(preprocessorSymbols: preprocessorSymbols),
+            ("Program.cs", "var builder = WebApplication.CreateBuilder(args);\n#if NET8_0_OR_GREATER\nbuilder.Services.AddIgniteUIBlazor();\n#endif\nvar app = builder.Build();"));
 
         Assert.Equal(expected, await CreateStep().ContainsRequiredCallsAsync());
     }

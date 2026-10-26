@@ -3,7 +3,6 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
-using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Scaffolding.Roslyn.Extensions;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -104,29 +103,37 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
     /// </summary>
     internal async Task<bool> ContainsRequiredCallsAsync()
     {
-        var file = TargetFilePath ?? await GetTargetDocumentPathAsync();
-        return file is not null && _fileSystem.FileExists(file) && ContainsRequiredCalls(file);
+        var file = TargetFilePath;
+        CSharpParseOptions? parseOptions = null;
+        if (file is null)
+        {
+            (file, parseOptions) = await GetTargetDocumentAsync();
+        }
+
+        return file is not null && _fileSystem.FileExists(file) && ContainsRequiredCalls(file, parseOptions);
     }
 
     /// <summary>
-    /// Returns the path of the <see cref="TargetFileName"/> document that the code modifier changes: the project's first
-    /// document whose name or path ends with it (see ProjectModifier in Microsoft.DotNet.Scaffolding.CodeModification).
-    /// A same-named file that the project does not compile, such as one in an excluded folder or a nested project, is
-    /// not changed, so it must not count either.
+    /// Returns the path and parse options of the <see cref="TargetFileName"/> document that the code modifier changes:
+    /// the project's first document whose name or path ends with it (see ProjectModifier in
+    /// Microsoft.DotNet.Scaffolding.CodeModification). A same-named file that the project does not compile, such as one
+    /// in an excluded folder or a nested project, is not changed, so it must not count either. The parse options carry
+    /// the project's preprocessor symbols (e.g. 'NET8_0_OR_GREATER'), so that code in their '#if' blocks counts as active.
     /// </summary>
-    private async Task<string?> GetTargetDocumentPathAsync()
+    private async Task<(string? FilePath, CSharpParseOptions? ParseOptions)> GetTargetDocumentAsync()
     {
         CodeService ??= new CodeService(_logger, ProjectPath);
         var project = (await CodeService.GetWorkspaceAsync())?.CurrentSolution.GetProject(ProjectPath);
-        return project?.GetDocument(TargetFileName)?.FilePath;
+        var document = project?.GetDocument(TargetFileName);
+        return (document?.FilePath, document?.Project.ParseOptions as CSharpParseOptions);
     }
 
-    private bool ContainsRequiredCalls(string file)
+    private bool ContainsRequiredCalls(string file, CSharpParseOptions? parseOptions)
     {
         var content = _fileSystem.ReadAllText(file);
         if (Path.GetExtension(file).Equals(".cs", StringComparison.OrdinalIgnoreCase))
         {
-            var root = CSharpSyntaxTree.ParseText(content).GetRoot();
+            var root = CSharpSyntaxTree.ParseText(content, parseOptions).GetRoot();
             return RequiredCalls.All(call => BlazorInteractivityAnalyzer.IsInvoked(root, call));
         }
 

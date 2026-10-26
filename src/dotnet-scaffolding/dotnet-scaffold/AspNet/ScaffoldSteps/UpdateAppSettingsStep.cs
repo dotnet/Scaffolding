@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 // If appsettings.json doesn't exist, create a new one
                 if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
                 {
-                    appSettingsFile = Path.Combine(ProjectPath, "appsettings.json");
+                    appSettingsFile = Path.Combine(baseProjectPath, "appsettings.json");
                     content = new JsonObject();
                     writeContent = true;
                     _logger.LogInformation($"Creating new appsettings.json file at {appSettingsFile}");
@@ -206,7 +206,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with AzureAd configuration");
 
                         // Also check for appsettings.Development.json and update it if present
-                        UpdateDevelopmentSettings(ProjectPath, content);
+                        UpdateDevelopmentSettings(baseProjectPath, content);
 
                         return Task.FromResult(true);
                     }

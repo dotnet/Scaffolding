@@ -65,7 +65,7 @@ public class UpdateAppSettingsStepTests
     {
         string projectPath = Path.Combine("test", "project", "TestProject.csproj");
         string baseProjectPath = Path.GetDirectoryName(projectPath)!;
-        string generatedAppSettingsPath = Path.Combine(projectPath, "appsettings.json");
+        string generatedAppSettingsPath = Path.Combine(baseProjectPath, "appsettings.json");
 
         _mockFileSystem.Setup(fs => fs.DirectoryExists(baseProjectPath)).Returns(true);
         _mockFileSystem.Setup(fs => fs.EnumerateFiles(baseProjectPath, "appsettings.json", SearchOption.AllDirectories))
@@ -75,7 +75,7 @@ public class UpdateAppSettingsStepTests
         _mockFileSystem.Setup(fs => fs.WriteAllText(generatedAppSettingsPath, It.IsAny<string>()))
             .Callback<string, string>((_, content) => appSettingsContent = content);
 
-        _mockFileSystem.Setup(fs => fs.FileExists(Path.Combine(projectPath, "appsettings.Development.json"))).Returns(false);
+        _mockFileSystem.Setup(fs => fs.FileExists(Path.Combine(baseProjectPath, "appsettings.Development.json"))).Returns(false);
 
         UpdateAppSettingsStep step = new UpdateAppSettingsStep(
             NullLogger<UpdateAppSettingsStep>.Instance,
@@ -107,7 +107,7 @@ public class UpdateAppSettingsStepTests
         string projectPath = Path.Combine("test", "project", "TestProject.csproj");
         string baseProjectPath = Path.GetDirectoryName(projectPath)!;
         string appSettingsPath = Path.Combine(baseProjectPath, "appsettings.json");
-        string developmentSettingsPath = Path.Combine(projectPath, "appsettings.Development.json");
+        string developmentSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
 
         _mockFileSystem.Setup(fs => fs.DirectoryExists(baseProjectPath)).Returns(true);
         _mockFileSystem.Setup(fs => fs.EnumerateFiles(baseProjectPath, "appsettings.json", SearchOption.AllDirectories))

@@ -16,6 +16,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
     /// </summary>
     internal class UpdateAppSettingsStep : ScaffoldStep
     {
+        private static readonly JsonDocumentOptions ConfigurationJsonOptions = new()
+        {
+            CommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true
+        };
+
         // Required properties for the AzureAD configuration
         /// <summary>
         /// Path to the project file.
@@ -138,7 +144,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     originalContent = jsonString;
                     try
                     {
-                        content = JsonNode.Parse(jsonString);
+                        content = JsonNode.Parse(jsonString, documentOptions: ConfigurationJsonOptions);
                     }
                     catch (JsonException ex)
                     {
@@ -271,7 +277,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 
                     try
                     {
-                        devContent = JsonNode.Parse(devJsonString);
+                        devContent = JsonNode.Parse(devJsonString, documentOptions: ConfigurationJsonOptions);
                     }
                     catch (JsonException ex)
                     {
@@ -285,10 +291,32 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         return false;
                     }
 
-                    if (content["AzureAd"] != null)
+                    if (content["AzureAd"] is JsonObject sourceAzureAd)
                     {
-                        // Copy the AzureAd section to development settings
-                        devContent["AzureAd"] = content["AzureAd"]?.DeepClone();
+                        if (devContent["AzureAd"] is not null && devContent["AzureAd"] is not JsonObject)
+                        {
+                            _logger.LogError("The AzureAd section in {Path} must be a JSON object.", devSettingsPath);
+                            return false;
+                        }
+
+                        var developmentAzureAd = devContent["AzureAd"] as JsonObject ?? new JsonObject();
+                        foreach (var property in new[] { "ClientId", "TenantId", "Instance", "CallbackPath" })
+                        {
+                            if (sourceAzureAd.TryGetPropertyValue(property, out var value))
+                            {
+                                developmentAzureAd[property] = value?.DeepClone();
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(Domain))
+                        {
+                            developmentAzureAd["Domain"] = Domain;
+                        }
+                        else if (!string.IsNullOrEmpty(Username) && Username.Contains('@') &&
+                            developmentAzureAd["Domain"]?.ToString() == $"{Username}.onmicrosoft.com")
+                        {
+                            developmentAzureAd.Remove("Domain");
+                        }
+                        devContent["AzureAd"] = developmentAzureAd;
 
                         var options = new JsonSerializerOptions { WriteIndented = true };
                         changes.Add((devSettingsPath, devJsonString, devContent.ToJsonString(options)));

@@ -63,6 +63,12 @@ subsequent package installation or code generation failures. If registration
 fails before Graph returns an identifier (for example, an ambiguous network
 failure during creation), inspect the selected tenant manually.
 Settings persistence prepares both settings files before writing. If a write
+is needed, only scaffold-managed identity properties are merged into development
+settings; development-only credentials and unrelated properties are preserved.
+Both settings files accept comments and trailing commas, consistent with
+ASP.NET Core JSON configuration. Rewriting serializes JSON without preserving
+comments or original formatting.
+If a write
 fails, it attempts to restore the original contents of every attempted settings
 write, removing a newly created settings file when necessary. Restoration errors
 identify files requiring manual recovery. This is not full-run rollback:

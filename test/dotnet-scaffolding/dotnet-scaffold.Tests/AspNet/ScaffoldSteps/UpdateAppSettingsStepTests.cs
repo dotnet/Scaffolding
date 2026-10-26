@@ -22,6 +22,57 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings.Tests
     /// </summary>
     public class UpdateAppSettingsStepTests
     {
+        [Fact]
+        public async Task ExecuteAsync_PreservesDevelopmentOnlyCredentialsAndUnrelatedProperties()
+        {
+            var fileSystem = CreateFileSystem();
+            var developmentPath = Path.Combine("project", "appsettings.Development.json");
+            const string original = """
+                {"AzureAd":{"ClientId":"old-app","Domain":"development.contoso.com",
+                "ClientCredentials":[{"SourceType":"StoreWithDistinguishedName","CertificateDistinguishedName":"CN=Dev"}],
+                "SignUpSignInPolicyId":"B2C_1_dev"},"Keep":"development"}
+                """;
+            fileSystem.Setup(fs => fs.ReadAllText(developmentPath)).Returns(original);
+            fileSystem.Setup(fs => fs.ReadAllText(Path.Combine("project", "appsettings.json")))
+                .Returns("""{"AzureAd":{"ClientCredentials":[{"SourceType":"ClientSecret","ClientSecret":"primary-only"}],"SignUpSignInPolicyId":"B2C_1_primary"}}""");
+            string? written = null;
+            fileSystem.Setup(fs => fs.WriteAllText(developmentPath, It.IsAny<string>()))
+                .Callback((string _, string json) => written = json);
+            var step = CreateStep(fileSystem);
+            var context = CreateContext(existingApp: true);
+
+            Assert.True(await step.ExecuteAsync(context));
+
+            var result = JsonNode.Parse(Assert.IsType<string>(written))!;
+            var originalNode = JsonNode.Parse(original)!;
+            Assert.True(JsonNode.DeepEquals(originalNode["AzureAd"]!["ClientCredentials"], result["AzureAd"]!["ClientCredentials"]));
+            Assert.Equal("development.contoso.com", result["AzureAd"]!["Domain"]!.GetValue<string>());
+            Assert.Equal("B2C_1_dev", result["AzureAd"]!["SignUpSignInPolicyId"]!.GetValue<string>());
+            Assert.Equal("development", result["Keep"]!.GetValue<string>());
+            Assert.Equal("app-id", result["AzureAd"]!["ClientId"]!.GetValue<string>());
+            Assert.Equal("tenant-a", result["AzureAd"]!["TenantId"]!.GetValue<string>());
+            Assert.Empty(step.CleanupCommands);
+        }
+
+        [Theory]
+        [InlineData(false, "{/* supported comment */\"AzureAd\":{}}")]
+        [InlineData(false, "{\"AzureAd\":{\"ClientId\":\"old-app\",},}")]
+        [InlineData(true, "{/* supported comment */\"AzureAd\":{}}")]
+        [InlineData(true, "{\"AzureAd\":{\"ClientId\":\"old-app\",},}")]
+        public async Task ExecuteAsync_AcceptsConfigurationJsonFormats(bool primarySettings, string json)
+        {
+            var fileSystem = CreateFileSystem();
+            var path = Path.Combine("project", primarySettings ? "appsettings.json" : "appsettings.Development.json");
+            fileSystem.Setup(fs => fs.ReadAllText(path)).Returns(json);
+            var step = CreateStep(fileSystem);
+
+            Assert.True(await step.ExecuteAsync(CreateContext(existingApp: false)));
+
+            Assert.Empty(step.CleanupCommands);
+            fileSystem.Verify(fs => fs.WriteAllText(path,
+                It.Is<string>(content => content.Contains("app-id") && content.Contains("tenant-a"))), Times.Once);
+        }
+
         [Theory]
         [InlineData(false, false)]
         [InlineData(false, true)]

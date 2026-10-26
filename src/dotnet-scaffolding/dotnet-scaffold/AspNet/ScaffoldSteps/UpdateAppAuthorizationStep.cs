@@ -7,6 +7,7 @@
     using Microsoft.DotNet.Scaffolding.Internal.Services;
     using Microsoft.Extensions.Logging;
     using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+    using System.Text.Json;
 
     namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
     {
@@ -16,9 +17,11 @@
             public required string? ClientId { get; set; }
             public string? TenantId { get; set; }
             public string? Username { get; set; }
-            public string[]? WebRedirectUris { get; set; } 
+            public string[]? WebRedirectUris { get; set; }
             public string[]? SpaRedirectUris { get; set; }
             public bool AutoConfigureLocalUrls { get; set; } = true;
+            public bool UseExistingApplication { get; set; }
+            internal Func<string, AzCliResult>? AzCliCommand { get; set; }
 
             private readonly ILogger _logger;
             private readonly IFileSystem _fileSystem;
@@ -60,6 +63,15 @@
                 if (AutoConfigureLocalUrls)
                 {
                     ConfigureLocalRedirectUris(ProjectPath);
+                }
+
+                AzCliRunner? runner = AzCliCommand is null ? AzCliRunner.Create() : null;
+
+                if (UseExistingApplication &&
+                    (!ValidateAzureCliIdentityStep.ValidateIdentity(TenantId, Username, _logger, ReadAccount) ||
+                    !TryMergeExistingWebRedirectUris(runner)))
+                {
+                    return false;
                 }
 
                 // Build the Azure CLI command with all parameters
@@ -106,8 +118,57 @@
 
             protected virtual (int ExitCode, string? Error) RunUpdate(string command)
             {
-                var exitCode = AzCliRunner.Create().RunAzCli(command, out _, out var error);
-                return (exitCode, error);
+                var result = RunAzCli(AzCliCommand is null ? AzCliRunner.Create() : null, command);
+                return (result.ExitCode, result.StdErr);
+            }
+
+            private bool TryMergeExistingWebRedirectUris(AzCliRunner? runner)
+            {
+                var command = $"ad app show --id {ClientId} --query web.redirectUris --output json";
+                AzCliResult result = RunAzCli(runner, command);
+                if (result.ExitCode != 0 || !string.IsNullOrEmpty(result.StdErr))
+                {
+                    _logger.LogError("Failed to read existing app registration redirect URIs: {Error}", result.StdErr);
+                    return false;
+                }
+
+                if (string.IsNullOrWhiteSpace(result.StdOut))
+                {
+                    _logger.LogError("Azure CLI returned no Web redirect URI data for the existing app registration.");
+                    return false;
+                }
+
+                try
+                {
+                    string[]? existingUris = JsonSerializer.Deserialize<string[]>(result.StdOut);
+                    if (existingUris is null)
+                    {
+                        _logger.LogError("Azure CLI returned invalid Web redirect URI data for the existing app registration.");
+                        return false;
+                    }
+
+                    WebRedirectUris = existingUris
+                        .Concat(WebRedirectUris ?? Array.Empty<string>())
+                        .Distinct(StringComparer.Ordinal)
+                        .ToArray();
+                    return true;
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogError(ex, "Failed to parse existing app registration redirect URIs.");
+                    return false;
+                }
+            }
+
+            private AzCliResult RunAzCli(AzCliRunner? runner, string command)
+            {
+                if (AzCliCommand is not null)
+                {
+                    return AzCliCommand(command);
+                }
+
+                int exitCode = runner!.RunAzCli(command, out string? stdOut, out string? stdErr);
+                return new AzCliResult(exitCode, stdOut, stdErr);
             }
 
             private void ConfigureLocalRedirectUris(string projectPath)
@@ -146,16 +207,8 @@
                                 {
                                     if (!string.IsNullOrWhiteSpace(url))
                                     {
-                                        try
-                                        {
-                                            var baseUrl = url.Trim();
-                                            localUrls.Add(baseUrl);
-                                            localUrls.Add($"{baseUrl}/signin-oidc");
-                                        }
-                                        catch
-                                        {
-                                            _logger.LogError("An error occurred while processing the URL: {0}", url);
-                                        }
+                                        var baseUrl = url.Trim().TrimEnd('/');
+                                        localUrls.Add($"{baseUrl}/signin-oidc");
                                     }
                                 }
                             }
@@ -167,9 +220,9 @@
                     {
                         WebRedirectUris = (WebRedirectUris ?? Array.Empty<string>())
                             .Concat(localUrls)
-                            .Distinct()
+                            .Distinct(StringComparer.Ordinal)
                             .ToArray();
-                    
+
                         _logger.LogInformation($"Configured {localUrls.Count} local redirect URIs from launchSettings.json");
                     }
                     else
@@ -188,20 +241,19 @@
             {
                 var defaultUris = new[]
                 {
-                    "https://localhost:5001",
                     "https://localhost:5001/signin-oidc",
-                    "https://localhost:7001",
                     "https://localhost:7001/signin-oidc",
-                    "https://localhost:44300",
                     "https://localhost:44300/signin-oidc"
                 };
 
                 WebRedirectUris = (WebRedirectUris ?? Array.Empty<string>())
                     .Concat(defaultUris)
-                    .Distinct()
+                    .Distinct(StringComparer.Ordinal)
                     .ToArray();
-            
+
                 _logger.LogInformation("Added default localhost redirect URIs");
             }
+
+            internal readonly record struct AzCliResult(int ExitCode, string? StdOut, string? StdErr);
         }
     }

@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -17,6 +18,7 @@ public class RestrictedSettingsFileTests
     [InlineData(256)] // 0400
     [InlineData(384)] // 0600
     [InlineData(416)] // 0640
+    [UnsupportedOSPlatform("windows")]
     public void AtomicReplacement_PreservesUnixMode(int mode)
     {
         Skip.If(OperatingSystem.IsWindows(), "Unix file modes require Unix.");
@@ -45,6 +47,7 @@ public class RestrictedSettingsFileTests
     }
 
     [SkippableFact]
+    [UnsupportedOSPlatform("windows")]
     public void NewSettings_AreOwnerOnlyOnUnix()
     {
         Skip.If(OperatingSystem.IsWindows(), "Unix file modes require Unix.");
@@ -65,6 +68,7 @@ public class RestrictedSettingsFileTests
     }
 
     [SkippableFact]
+    [SupportedOSPlatform("windows")]
     public void AtomicReplacement_PreservesExplicitWindowsDacl()
     {
         Skip.IfNot(OperatingSystem.IsWindows(), "Windows DACLs require Windows.");

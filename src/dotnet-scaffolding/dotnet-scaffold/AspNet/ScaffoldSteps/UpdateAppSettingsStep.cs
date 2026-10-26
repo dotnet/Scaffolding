@@ -101,12 +101,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     return Task.FromResult(false);
                 }
 
-                if (string.IsNullOrWhiteSpace(Domain) && string.IsNullOrWhiteSpace(Username))
-                {
-                    _logger.LogError("Either Domain or Username is required to resolve AzureAd domain.");
-                    return Task.FromResult(false);
-                }
-
                 var devSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
                 JsonObject developmentSettings;
 
@@ -145,6 +139,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 }
 
                 var azureAdConfig = CreateAzureAdConfiguration(Username, TenantId, ClientId, Domain, Instance, CallbackPath);
+                bool removedLegacyDomain = RemoveLegacyUsernameDerivedDomain(developmentSettings, Username, Domain);
 
                 JsonNode? existingAzureAd = developmentSettings["AzureAd"];
 
@@ -165,6 +160,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 }
 
                 if (existingAzureAd is JsonObject existingAzureAdObjectForNoWrite &&
+                    !removedLegacyDomain &&
                     !HasFlatManagedAzureAdSettings(developmentSettings, azureAdConfig) &&
                     HasMatchingManagedAzureAdSettings(existingAzureAdObjectForNoWrite, azureAdConfig))
                 {
@@ -226,28 +222,49 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             string? username, string? tenantId, string? clientId,
             string? domain = null, string? instance = null, string? callbackPath = null)
         {
-            return new JsonObject
+            var configuration = new JsonObject
             {
                 ["Instance"] = !string.IsNullOrWhiteSpace(instance) ? instance : "https://login.microsoftonline.com/",
                 ["TenantId"] = tenantId,
-                ["Domain"] = ResolveAzureAdDomain(domain, username),
                 ["ClientId"] = clientId,
                 ["CallbackPath"] = !string.IsNullOrWhiteSpace(callbackPath) ? callbackPath : "/signin-oidc"
             };
-        }
 
-        private static string ResolveAzureAdDomain(string? configuredDomain, string? username)
-        {
-            if (!string.IsNullOrWhiteSpace(configuredDomain))
+            if (!string.IsNullOrWhiteSpace(domain))
             {
-                return configuredDomain;
+                configuration["Domain"] = domain;
             }
 
-            string resolvedUsername = username ?? string.Empty;
-            int atSignIndex = resolvedUsername.LastIndexOf('@');
-            return atSignIndex >= 0 && atSignIndex < resolvedUsername.Length - 1
-                ? resolvedUsername[(atSignIndex + 1)..]
-                : $"{resolvedUsername}.onmicrosoft.com";
+            return configuration;
+        }
+
+        private static bool RemoveLegacyUsernameDerivedDomain(
+            JsonObject developmentSettings,
+            string? username,
+            string? configuredDomain)
+        {
+            if (!string.IsNullOrWhiteSpace(configuredDomain) ||
+                string.IsNullOrWhiteSpace(username) ||
+                !username.Contains('@'))
+            {
+                return false;
+            }
+
+            string legacyDomain = $"{username}.onmicrosoft.com";
+            bool removed = false;
+
+            if (developmentSettings["AzureAd"] is JsonObject existingAzureAd &&
+                existingAzureAd["Domain"]?.ToString() == legacyDomain)
+            {
+                removed = existingAzureAd.Remove("Domain");
+            }
+
+            if (developmentSettings["AzureAd:Domain"]?.ToString() == legacyDomain)
+            {
+                removed = developmentSettings.Remove("AzureAd:Domain") || removed;
+            }
+
+            return removed;
         }
 
         internal static string? GetFirstConflictingAzureAdKey(JsonObject developmentSettings, JsonObject generatedAzureAd)

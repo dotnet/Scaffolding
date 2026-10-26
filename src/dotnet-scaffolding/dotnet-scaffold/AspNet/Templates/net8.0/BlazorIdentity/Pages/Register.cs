@@ -27,9 +27,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.P
         {
             this.Write("@page \"/Account/Register\"\r\n\r\n@using System.ComponentModel.DataAnnotations\r\n@using" +
                     " System.Text\r\n@using System.Text.Encodings.Web\r\n@using Microsoft.AspNetCore.Iden" +
-                    "tity\r\n@using Microsoft.AspNetCore.WebUtilities\r\n@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.DbContextNamespace));
-            this.Write("\r\n\r\n@inject UserManager<");
+                    "tity\r\n@using Microsoft.AspNetCore.WebUtilities\r\n");
+
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+
+            this.Write("@using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
+            this.Write("\r\n");
+}
+            this.Write("\r\n@inject UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject IUserStore<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));

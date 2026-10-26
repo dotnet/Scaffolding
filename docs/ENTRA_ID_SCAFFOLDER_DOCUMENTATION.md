@@ -467,6 +467,8 @@ The Microsoft Entra ID (Azure AD) tenant ID where the app will be registered.
 **Notes**:
 - You must have permissions to register apps in this tenant
 - The tenant must be accessible with your Azure CLI login
+- The tenant value, whether a GUID or domain name, is written to `AzureAd:TenantId`. The scaffolder does not generate `AzureAd:Domain`; Microsoft.Identity.Web does not require it for workforce Entra ID.
+- Existing intentional `AzureAd:Domain` values are preserved, including provider-specific settings such as B2C domains. Only a malformed value matching `<current-username>.onmicrosoft.com` from the old email-based default is removed.
 
 ---
 
@@ -980,8 +982,7 @@ dotnet user-secrets set "AzureAd:ClientCredentials:0:ClientSecret" "your-develop
    // appsettings.json - shared, committed
    {
      "AzureAd": {
-       "Instance": "https://login.microsoftonline.com/",
-       "Domain": "contoso.onmicrosoft.com"
+       "Instance": "https://login.microsoftonline.com/"
      }
    }
    

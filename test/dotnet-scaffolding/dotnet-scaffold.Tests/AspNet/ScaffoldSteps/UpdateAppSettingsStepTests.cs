@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.ScaffoldSteps;
+namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings.Tests;
 
 public class UpdateAppSettingsStepTests
 {
@@ -28,6 +28,20 @@ public class UpdateAppSettingsStepTests
     private readonly string _projectPath;
     private readonly string _devSettingsPath;
     private readonly string _appSettingsPath;
+    private readonly Mock<ILogger<UpdateAppSettingsStep>> _mockLogger;
+    private readonly Mock<ITelemetryService> _mockTelemetryService;
+    private readonly UpdateAppSettingsStep _step;
+
+    /// <summary>
+    /// Helper method to create a mock ScaffolderContext for testing.
+    /// </summary>
+    private ScaffolderContext CreateMockContext()
+    {
+        var mockScaffolder = new Mock<IScaffolder>();
+        mockScaffolder.Setup(s => s.DisplayName).Returns("Test");
+        mockScaffolder.Setup(s => s.Name).Returns("test");
+        return new ScaffolderContext(mockScaffolder.Object);
+    }
 
     public UpdateAppSettingsStepTests()
     {
@@ -41,6 +55,146 @@ public class UpdateAppSettingsStepTests
         _mockScaffolder.Setup(s => s.DisplayName).Returns("TestScaffolder");
         _mockScaffolder.Setup(s => s.Name).Returns("test-scaffolder");
         _context = new ScaffolderContext(_mockScaffolder.Object);
+
+        _mockLogger = new Mock<ILogger<UpdateAppSettingsStep>>();
+        _mockTelemetryService = new Mock<ITelemetryService>();
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(It.IsAny<string>())).Returns(true);
+        _mockFileSystem.Setup(fs => fs.EnumerateFiles(It.IsAny<string>(), It.IsAny<string>(), System.IO.SearchOption.AllDirectories))
+            .Returns(new List<string>());
+
+        _step = new UpdateAppSettingsStep(_mockLogger.Object, _mockFileSystem.Object, _mockTelemetryService.Object)
+        {
+            ProjectPath = Path.Combine(Path.GetTempPath(), "UpdateAppSettingsStepTests", "TestApp.csproj"),
+            ClientId = "test-client-id",
+            Instance = "https://login.microsoftonline.com/",
+            CallbackPath = "/signin-oidc"
+        };
+    }
+
+    [Theory]
+    [InlineData("12345678-1234-1234-1234-123456789012")]
+    [InlineData("contoso.onmicrosoft.com")]
+    [InlineData("contoso.com")]
+    public async Task ExecuteAsync_DoesNotGenerateDomain(string tenantId)
+    {
+        _step.TenantId = tenantId;
+        _step.Username = "user@contoso.onmicrosoft.com";
+
+        var azureAd = await ExecuteAndReadAzureAdAsync();
+        Assert.False(azureAd.ContainsKey("Domain"));
+        Assert.Equal(tenantId, azureAd["TenantId"]?.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_Issue3849_Reproduction_OmitsDomain()
+    {
+        _step.Username = "user@contoso.onmicrosoft.com";
+        _step.TenantId = "contoso.onmicrosoft.com";
+
+        var azureAd = await ExecuteAndReadAzureAdAsync(new JsonObject());
+        Assert.False(azureAd.ContainsKey("Domain"));
+        Assert.Equal("contoso.onmicrosoft.com", azureAd["TenantId"]?.GetValue<string>());
+    }
+
+    [Theory]
+    [InlineData("12345678-1234-1234-1234-123456789012", "contoso.onmicrosoft.com")]
+    [InlineData("contoso.onmicrosoft.com", "fabrikam.onmicrosoft.com")]
+    [InlineData("12345678-1234-1234-1234-123456789012", "login.contoso.com")]
+    [InlineData("contoso.onmicrosoft.com", "login.contoso.com")]
+    [InlineData("12345678-1234-1234-1234-123456789012", "another@contoso.onmicrosoft.com.onmicrosoft.com")]
+    public async Task ExecuteAsync_PreservesExistingDomain(string? tenantId, string domain)
+    {
+        _step.Username = "user@contoso.onmicrosoft.com";
+        _step.TenantId = tenantId;
+
+        var azureAd = await ExecuteAndReadAzureAdAsync(new JsonObject
+        {
+            ["Domain"] = domain,
+            ["SignUpSignInPolicyId"] = "B2C_1_signupsignin"
+        });
+
+        Assert.Equal(domain, azureAd["Domain"]?.GetValue<string>());
+        Assert.Equal("B2C_1_signupsignin", azureAd["SignUpSignInPolicyId"]?.GetValue<string>());
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("contoso")]
+    public async Task ExecuteAsync_PreservesExistingDomainWithoutEmailUsername(string? username)
+    {
+        _step.Username = username;
+        _step.TenantId = "12345678-1234-1234-1234-123456789012";
+
+        var azureAd = await ExecuteAndReadAzureAdAsync(new JsonObject
+        {
+            ["Domain"] = "contoso.onmicrosoft.com"
+        });
+
+        Assert.Equal("contoso.onmicrosoft.com", azureAd["Domain"]?.GetValue<string>());
+    }
+
+    [Theory]
+    [InlineData("12345678-1234-1234-1234-123456789012", null)]
+    [InlineData("contoso.onmicrosoft.com", null)]
+    [InlineData("contoso.onmicrosoft.com", "")]
+    public async Task ExecuteAsync_RemovesLegacyUsernameDerivedDomain(string? tenantId, string? explicitDomain)
+    {
+        _step.Username = "user@contoso.onmicrosoft.com";
+        _step.TenantId = tenantId;
+        _step.Domain = explicitDomain;
+
+        var azureAd = await ExecuteAndReadAzureAdAsync(new JsonObject
+        {
+            ["Domain"] = "user@contoso.onmicrosoft.com.onmicrosoft.com"
+        });
+
+        Assert.False(azureAd.ContainsKey("Domain"));
+    }
+
+    [Theory]
+    [InlineData(null, "contoso.onmicrosoft.com")]
+    [InlineData("contoso.onmicrosoft.com", "contoso.onmicrosoft.com")]
+    [InlineData("fabrikam.onmicrosoft.com", "contoso.onmicrosoft.com")]
+    [InlineData("user@contoso.onmicrosoft.com.onmicrosoft.com", "contoso.onmicrosoft.com")]
+    [InlineData("user@contoso.onmicrosoft.com.onmicrosoft.com", "user@contoso.onmicrosoft.com.onmicrosoft.com")]
+    public async Task ExecuteAsync_HonorsExplicitDomain(string? existingDomain, string explicitDomain)
+    {
+        _step.Username = "user@contoso.onmicrosoft.com";
+        _step.TenantId = "12345678-1234-1234-1234-123456789012";
+        _step.Domain = explicitDomain;
+        _step.Overwrite = true;
+
+        var azureAd = await ExecuteAndReadAzureAdAsync(new JsonObject
+        {
+            ["Domain"] = existingDomain
+        });
+
+        Assert.Equal(explicitDomain, azureAd["Domain"]?.GetValue<string>());
+    }
+
+    private async Task<JsonObject> ExecuteAndReadAzureAdAsync(JsonObject? existingAzureAd = null)
+    {
+        if (existingAzureAd is not null)
+        {
+            var devSettingsPath = Path.Combine(Path.GetTempPath(), "UpdateAppSettingsStepTests", "appsettings.Development.json");
+            var initialContent = new JsonObject { ["AzureAd"] = existingAzureAd };
+            _mockFileSystem.Setup(fs => fs.FileExists(devSettingsPath)).Returns(true);
+            _mockFileSystem.Setup(fs => fs.ReadAllText(devSettingsPath)).Returns(initialContent.ToJsonString());
+        }
+
+        string? capturedContent = null;
+        _mockFileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<string, string>((path, content) => capturedContent = content);
+
+        var result = await _step.ExecuteAsync(CreateMockContext());
+        Assert.True(result);
+        Assert.NotNull(capturedContent);
+        var azureAd = Assert.IsType<JsonObject>(JsonNode.Parse(capturedContent)?["AzureAd"]);
+        Assert.Equal(_step.ClientId, azureAd["ClientId"]?.GetValue<string>());
+        Assert.Equal(_step.Instance, azureAd["Instance"]?.GetValue<string>());
+        Assert.Equal(_step.CallbackPath, azureAd["CallbackPath"]?.GetValue<string>());
+        return azureAd;
     }
 
     [Fact]
@@ -83,6 +237,7 @@ public class UpdateAppSettingsStepTests
         {
             ProjectPath = _projectPath,
             Username = "devuser",
+            Domain = "tenant-domain",
             TenantId = "new-tenant-id",
             ClientId = "new-client-id",
             ClientSecret = "do-not-write-this",
@@ -100,7 +255,7 @@ public class UpdateAppSettingsStepTests
         Assert.Equal("Information", json["Logging"]?["LogLevel"]?["Default"]?.ToString());
         Assert.Equal("https://login.microsoftonline.com/", json["AzureAd"]?["Instance"]?.ToString());
         Assert.Equal("new-tenant-id", json["AzureAd"]?["TenantId"]?.ToString());
-        Assert.Equal("devuser.onmicrosoft.com", json["AzureAd"]?["Domain"]?.ToString());
+        Assert.Equal("tenant-domain", json["AzureAd"]?["Domain"]?.ToString());
         Assert.Equal("new-client-id", json["AzureAd"]?["ClientId"]?.ToString());
         Assert.Equal("/signin-oidc", json["AzureAd"]?["CallbackPath"]?.ToString());
         Assert.Equal("/signout-callback-oidc", json["AzureAd"]?["SignedOutCallbackPath"]?.ToString());
@@ -138,6 +293,7 @@ public class UpdateAppSettingsStepTests
         {
             ProjectPath = _projectPath,
             Username = "devuser",
+            Domain = "tenant-domain",
             TenantId = "new-tenant-id",
             ClientId = "new-client-id",
             Overwrite = false
@@ -178,6 +334,7 @@ public class UpdateAppSettingsStepTests
         {
             ProjectPath = _projectPath,
             Username = "devuser",
+            Domain = "tenant-domain",
             TenantId = "new-tenant-id",
             ClientId = "new-client-id",
             Overwrite = true
@@ -191,7 +348,7 @@ public class UpdateAppSettingsStepTests
         Assert.NotNull(json);
         Assert.Equal("new-tenant-id", json["AzureAd"]?["TenantId"]?.ToString());
         Assert.Equal("new-client-id", json["AzureAd"]?["ClientId"]?.ToString());
-        Assert.Equal("devuser.onmicrosoft.com", json["AzureAd"]?["Domain"]?.ToString());
+        Assert.Equal("tenant-domain", json["AzureAd"]?["Domain"]?.ToString());
     }
 
     [Theory]
@@ -487,6 +644,7 @@ public class UpdateAppSettingsStepTests
         {
             ProjectPath = "TestProject.csproj",
             Username = "devuser",
+            Domain = "tenant-domain",
             TenantId = "tenant-id",
             ClientId = "client-id",
             Overwrite = overwrite
@@ -498,7 +656,7 @@ public class UpdateAppSettingsStepTests
         Assert.NotNull(json);
         Assert.Equal("https://login.microsoftonline.com/", json["AzureAd"]?["Instance"]?.ToString());
         Assert.Equal("tenant-id", json["AzureAd"]?["TenantId"]?.ToString());
-        Assert.Equal("devuser.onmicrosoft.com", json["AzureAd"]?["Domain"]?.ToString());
+        Assert.Equal("tenant-domain", json["AzureAd"]?["Domain"]?.ToString());
         Assert.Equal("client-id", json["AzureAd"]?["ClientId"]?.ToString());
         Assert.Equal("/signin-oidc", json["AzureAd"]?["CallbackPath"]?.ToString());
         if (existingClientId is not null)
@@ -725,7 +883,7 @@ public class UpdateAppSettingsStepTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_ReturnsFalse_WhenDomainAndUsernameAreMissing()
+    public async Task ExecuteAsync_OmitsDomain_WhenDomainAndUsernameAreMissing()
     {
         _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
         _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(false);
@@ -742,18 +900,25 @@ public class UpdateAppSettingsStepTests
             ClientId = "client-id"
         };
 
+        string? writtenContent = null;
+        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
+            .Callback<string, string>((_, content) => writtenContent = content);
+
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
-        Assert.False(result);
-        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        Assert.True(result);
+        Assert.NotNull(writtenContent);
+        JsonNode? json = JsonNode.Parse(writtenContent);
+        Assert.NotNull(json);
+        Assert.Null(json["AzureAd"]?["Domain"]);
     }
 
     [Theory]
-    [InlineData("user@contoso.com", null, "contoso.com")]
-    [InlineData("devuser", null, "devuser.onmicrosoft.com")]
+    [InlineData("user@contoso.com", null, null)]
+    [InlineData("devuser", null, null)]
     [InlineData("user@contoso.com", "tenant.onmicrosoft.com", "tenant.onmicrosoft.com")]
-    public void CreateAzureAdConfiguration_ResolvesDomain(
-        string username, string? domain, string expectedDomain)
+    public void CreateAzureAdConfiguration_UsesOnlyExplicitDomain(
+        string username, string? domain, string? expectedDomain)
     {
         JsonObject configuration = UpdateAppSettingsStep.CreateAzureAdConfiguration(
             username, "tenant-id", "client-id", domain);

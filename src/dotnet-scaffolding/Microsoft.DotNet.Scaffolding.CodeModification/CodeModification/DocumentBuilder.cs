@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.CodeAnalysis.Operations;
 using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.Extensions.Logging;
@@ -35,6 +36,15 @@ internal class DocumentBuilder
     {
         var document = _document;
         var syntaxRoot = await document.GetSyntaxRootAsync() as CompilationUnitSyntax;
+        if (syntaxRoot is not null && _codeFile.Methods is not null &&
+            _codeFile.Methods.Values.Any(method => method.CodeChanges?.Any(change => change.InvocationArguments is not null) is true))
+        {
+            var semanticModel = await document.GetSemanticModelAsync();
+            foreach (var method in _codeFile.Methods.Values)
+            {
+                method.CodeChanges = ExpandInvocationArguments(method.CodeChanges ?? [], syntaxRoot, semanticModel);
+            }
+        }
         var output = new StringBuilder();
         var modifiedRoot = ModifyRoot(syntaxRoot, _options, output);
         if (output.Length > 0)
@@ -49,6 +59,72 @@ internal class DocumentBuilder
         //return the same document if syntax root came back null.
         return document;
     }
+
+    internal static CodeSnippet[] ExpandInvocationArguments(CodeSnippet[] snippets, SyntaxNode root, SemanticModel? semanticModel)
+    {
+        var result = new List<CodeSnippet>();
+        foreach (var snippet in snippets)
+        {
+            if (snippet.InvocationArguments is null)
+            {
+                result.Add(snippet);
+                continue;
+            }
+
+            var invocations = root.DescendantNodes().OfType<InvocationExpressionSyntax>()
+                .Where(invocation => IsInvocation(invocation, snippet.Parent)).ToArray();
+            var blocks = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var invocation in invocations)
+            {
+                var block = snippet.Block;
+                foreach (var (parameter, defaultValue) in snippet.InvocationArguments)
+                {
+                    var argument = invocation.ArgumentList.Arguments
+                        .FirstOrDefault(argument => argument.NameColon?.Name.Identifier.ValueText == parameter)?.Expression;
+                    if (argument is null && semanticModel?.GetOperation(invocation) is IInvocationOperation operation)
+                    {
+                        argument = operation.Arguments.FirstOrDefault(argument =>
+                            argument.Parameter?.Name == parameter && !argument.IsImplicit)?.Value.Syntax as ExpressionSyntax;
+                    }
+
+                    // A single required argument leaves the optional named options argument at its default.
+                    // Multiple positional arguments require binding to the actual overload.
+                    if (argument is null && invocation.ArgumentList.Arguments.Count(argument => argument.NameColon is null) > 1 &&
+                        semanticModel?.GetOperation(invocation) is not IInvocationOperation)
+                    {
+                        throw new InvalidOperationException($"Unable to resolve '{parameter}' in '{invocation}'. Restore the project's packages and ensure it compiles before scaffolding.");
+                    }
+
+                    block = block.Replace($"${parameter}$", argument?.WithoutTrivia().ToString() ?? defaultValue, StringComparison.Ordinal);
+                }
+
+                if (blocks.Add(block))
+                {
+                    result.Add(snippet.WithBlock(block));
+                }
+            }
+
+            if (invocations.Length == 0)
+            {
+                var block = snippet.Block;
+                foreach (var (parameter, defaultValue) in snippet.InvocationArguments)
+                {
+                    block = block.Replace($"${parameter}$", defaultValue, StringComparison.Ordinal);
+                }
+                result.Add(snippet.WithBlock(block));
+            }
+        }
+        return result.ToArray();
+    }
+
+    private static bool IsInvocation(InvocationExpressionSyntax invocation, string? name) =>
+        invocation.Expression switch
+        {
+            MemberAccessExpressionSyntax member => member.Name.Identifier.ValueText == name,
+            MemberBindingExpressionSyntax member => member.Name.Identifier.ValueText == name,
+            SimpleNameSyntax simpleName => simpleName.Identifier.ValueText == name,
+            _ => false
+        };
 
     internal static BaseMethodDeclarationSyntax GetModifiedMethod(string fileName, BaseMethodDeclarationSyntax method, Method methodChanges, IList<string> options, StringBuilder? output)
     {
@@ -412,8 +488,11 @@ internal class DocumentBuilder
             return originalMethod;
         }
 
-        //check for CodeChange.Block and CodeChange.CheckBlock for  block's are easy to check.
-        if (ProjectModifierHelper.StatementExists(children, codeChange.Block) || !string.IsNullOrEmpty(codeChange.CheckBlock) && ProjectModifierHelper.StatementExists(children, codeChange.CheckBlock))
+        var alreadyExists = !string.IsNullOrEmpty(codeChange.CheckInvocation)
+            ? originalMethod.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(invocation => IsInvocation(invocation, codeChange.CheckInvocation))
+            : ProjectModifierHelper.StatementExists(children, codeChange.Block) ||
+                !string.IsNullOrEmpty(codeChange.CheckBlock) && ProjectModifierHelper.StatementExists(children, codeChange.CheckBlock);
+        if (alreadyExists)
         {
             return originalMethod;
         }
@@ -1040,5 +1119,3 @@ internal class DocumentBuilder
     private static SyntaxTrivia SemiColonTrivia => SyntaxFactory.Trivia(SyntaxFactory.SkippedTokensTrivia()
                 .WithTokens(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.SemicolonToken))));
 }
-
-

@@ -81,9 +81,9 @@ scaffolder alone does not update an already installed identity tool.
 - Guides you through the authentication setup process
 
 ### 6. **Authorization Code Flow**
-- Configures the default OpenID Connect scheme to use authorization code flow and leaves PKCE enabled through the ASP.NET Core defaults
+- Configures the OpenID Connect schemes registered by `AddMicrosoftIdentityWebApp` (including custom `openIdConnectScheme` names) to use authorization code flow and leaves PKCE enabled through the ASP.NET Core defaults; unrelated OpenID Connect handlers are unchanged
 - Disables implicit ID-token and access-token issuance on the selected app registration
-- Uses named `PostConfigure<OpenIdConnectOptions>` configuration so existing authentication calls, formatting, and downstream-API registration chains are preserved on reruns
+- Uses named `PostConfigure<OpenIdConnectOptions>` configuration so existing authentication calls, formatting, and downstream-API registration chains are preserved on reruns. Registration detection uses C# invocation syntax, so comments, strings, and similarly named methods do not suppress registration.
 - Requires a confidential client credential for code redemption; see [Development credentials and production deployment](#development-credentials-and-production-deployment)
 - Applies to .NET 10 and .NET 11 Blazor Web Apps, including static SSR, Interactive Server, Interactive WebAssembly, and Interactive Auto
 

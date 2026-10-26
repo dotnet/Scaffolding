@@ -10,6 +10,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -48,6 +50,9 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         _testProjectDir = Path.Combine(_testDirectory, "TestProject");
         _testProjectPath = Path.Combine(_testProjectDir, "TestProject.csproj");
         Directory.CreateDirectory(_testProjectDir);
+        File.WriteAllText(Path.Combine(_testDirectory, "Directory.Build.props"), "<Project />");
+        File.WriteAllText(Path.Combine(_testDirectory, "Directory.Build.targets"), "<Project />");
+        File.WriteAllText(Path.Combine(_testDirectory, "Directory.Packages.props"), "<Project />");
         File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.GetTestNuGetConfig(TargetFramework));
 
         _mockFileSystem = new Mock<IFileSystem>();
@@ -260,6 +265,28 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
     }
 
     [Theory]
+    [InlineData("Console.WriteLine(\"AddMicrosoftIdentityWebApp\");")]
+    [InlineData("// AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"));")]
+    [InlineData("Console.WriteLine(nameof(AddMicrosoftIdentityWebApp));")]
+    [InlineData("builder.Services.AddMicrosoftIdentityWebApplication();")]
+    [InlineData("Console.WriteLine(\"builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme).AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\\\"AzureAd\\\"))\");")]
+    public async Task BlazorEntraChangesConfig_UnrelatedRegistrationReferenceDoesNotSuppressRegistration(string reference)
+    {
+        var programContent = BlazorServerProgramContent.Replace(
+            "var app = builder.Build();", reference + Environment.NewLine + "var app = builder.Build();", StringComparison.Ordinal);
+
+        var firstRunContent = await ApplyBlazorEntraChangesConfigAsync(programContent);
+        var secondRunContent = await ApplyBlazorEntraChangesConfigAsync(firstRunContent);
+        var invocations = CSharpSyntaxTree.ParseText(secondRunContent).GetRoot()
+            .DescendantNodes().OfType<InvocationExpressionSyntax>()
+            .Where(invocation => invocation.Expression is MemberAccessExpressionSyntax member &&
+                member.Name.Identifier.ValueText == "AddMicrosoftIdentityWebApp");
+
+        Assert.Single(invocations);
+        Assert.Contains(reference, secondRunContent, StringComparison.Ordinal);
+    }
+
+    [Theory]
     [InlineData("builder.Services.AddRazorComponents()\n    .AddInteractiveWebAssemblyComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveWebAssemblyComponents()\n    .AddAuthenticationStateSerialization();")]
     [InlineData("builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents()\n    .AddInteractiveWebAssemblyComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents()\n    .AddInteractiveWebAssemblyComponents()\n    .AddAuthenticationStateSerialization();")]
     [InlineData("builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents();", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents();")]
@@ -306,6 +333,35 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
             normalizedProgramContent,
             StringComparison.Ordinal);
         Assert.Contains(AuthorizationCodeFlowConfiguration, normalizedProgramContent, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(".AddInteractiveServerComponents()")]
+    [InlineData(".AddInteractiveWebAssemblyComponents()")]
+    [InlineData(".AddInteractiveServerComponents().AddInteractiveWebAssemblyComponents()")]
+    public async Task BlazorEntraChangesConfig_ConfiguresEachRegisteredSchemeAcrossRenderModes(string renderModeServices)
+    {
+        const string registrations = """
+            const string scheme = "CustomOidc";
+            builder.Services.AddAuthentication(scheme)
+                .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"), openIdConnectScheme: scheme);
+            builder.Services.AddAuthentication()
+                .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("OtherAzureAd"), openIdConnectScheme: "OtherOidc", cookieScheme: "OtherCookies");
+            """;
+        var programContent = BlazorServerProgramContent
+            .Replace(".AddInteractiveServerComponents()", renderModeServices, StringComparison.Ordinal)
+            .Replace("var app = builder.Build();", registrations + Environment.NewLine + "var app = builder.Build();", StringComparison.Ordinal);
+
+        var firstRunContent = await ApplyBlazorEntraChangesConfigAsync(programContent);
+        var secondRunContent = await ApplyBlazorEntraChangesConfigAsync(firstRunContent);
+        var normalized = RemoveWhitespace(secondRunContent);
+
+        Assert.Contains(RemoveWhitespace(registrations), normalized, StringComparison.Ordinal);
+        Assert.Equal(2, secondRunContent.Split("AddMicrosoftIdentityWebApp").Length - 1);
+        Assert.Equal(2, secondRunContent.Split("PostConfigure<OpenIdConnectOptions>").Length - 1);
+        Assert.Contains(AuthorizationCodeFlowConfiguration.Replace("OpenIdConnectDefaults.AuthenticationScheme", "scheme", StringComparison.Ordinal), normalized, StringComparison.Ordinal);
+        Assert.Contains(AuthorizationCodeFlowConfiguration.Replace("OpenIdConnectDefaults.AuthenticationScheme", "\"OtherOidc\"", StringComparison.Ordinal), normalized, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -367,10 +423,11 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
     [InlineData("builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(\n        builder.Configuration.GetSection(\"AzureAd\"));")]
     [InlineData("builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"))\n    .EnableTokenAcquisitionToCallDownstreamApi()\n    .AddInMemoryTokenCaches();")]
     [InlineData("builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(options =>\n    {\n        builder.Configuration.Bind(\"AzureAd\", options);\n        options.ResponseType = OpenIdConnectResponseType.IdToken;\n    });")]
-    public async Task BlazorEntraChangesConfig_GeneratedAppChallengesWithCodeAndPkce(string registration)
+    public async Task BlazorEntraChangesConfig_GeneratedAppChallengesWithCodeAndPkce(string registration, string scheme = "OpenIdConnect", string additionalScheme = "")
     {
         var programContent = $$"""
             using Microsoft.AspNetCore.Authentication;
+            using Microsoft.AspNetCore.DataProtection;
             using Microsoft.AspNetCore.Http;
             using Microsoft.AspNetCore.WebUtilities;
             using Microsoft.Extensions.Options;
@@ -378,6 +435,7 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
             using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
             builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["AzureAd:Instance"] = "https://login.microsoftonline.com/",
@@ -390,7 +448,7 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
             {{registration}}
             // An unrelated reference must not suppress the authorization code configuration.
             Console.WriteLine(OpenIdConnectResponseType.Code);
-            builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
+            builder.Services.PostConfigureAll<OpenIdConnectOptions>(options =>
             {
                 options.ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration
                 {
@@ -413,23 +471,27 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
             await using var disposableApp = app;
             using var scope = app.Services.CreateScope();
             var optionsMonitor = scope.ServiceProvider.GetRequiredService<IOptionsMonitor<OpenIdConnectOptions>>();
-            var options = optionsMonitor.Get(OpenIdConnectDefaults.AuthenticationScheme);
             var unrelated = optionsMonitor.Get("Unrelated");
-            var http = new DefaultHttpContext { RequestServices = scope.ServiceProvider };
-            http.Request.Scheme = "https";
-            http.Request.Host = new HostString("localhost", 5001);
-            await http.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme);
-            var query = QueryHelpers.ParseQuery(new Uri(http.Response.Headers.Location.ToString()).Query);
-            if (http.Response.StatusCode != 302 ||
-                query["response_type"] != "code" ||
-                !query.TryGetValue("code_challenge_method", out var method) || method != "S256" ||
-                !query.TryGetValue("code_challenge", out var challenge) || string.IsNullOrEmpty(challenge) ||
-                !options.UsePkce ||
-                unrelated.ResponseType != OpenIdConnectResponseType.IdToken)
+            foreach (var scheme in new[] { "{{scheme}}", "{{additionalScheme}}" }.Where(name => !string.IsNullOrEmpty(name)))
             {
-                Console.Error.WriteLine("Expected authorization code flow with PKCE/S256 without changing unrelated schemes.");
-                return 1;
+                var options = optionsMonitor.Get(scheme);
+                var http = new DefaultHttpContext { RequestServices = scope.ServiceProvider };
+                http.Request.Scheme = "https";
+                http.Request.Host = new HostString("localhost", 5001);
+                await http.ChallengeAsync(scheme);
+                var query = QueryHelpers.ParseQuery(new Uri(http.Response.Headers.Location.ToString()).Query);
+                if (http.Response.StatusCode != 302 ||
+                    query["response_type"] != "code" ||
+                    !query.TryGetValue("code_challenge_method", out var method) || method != "S256" ||
+                    !query.TryGetValue("code_challenge", out var challenge) || string.IsNullOrEmpty(challenge) ||
+                    !options.UsePkce ||
+                    unrelated.ResponseType != OpenIdConnectResponseType.IdToken)
+                {
+                    Console.Error.WriteLine($"Expected authorization code flow with PKCE/S256 for {scheme} without changing unrelated schemes.");
+                    return 1;
+                }
             }
+            Console.WriteLine(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
             Console.WriteLine("Authorization code flow with PKCE/S256 verified.");
             return 0;
             """;
@@ -454,7 +516,15 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
 
         Assert.True(exitCode == 0, $"Generated authentication must build and use code flow with PKCE.\nOutput: {output}\nError: {error}");
         Assert.Contains("Authorization code flow with PKCE/S256 verified.", output, StringComparison.Ordinal);
+        Assert.Contains(TargetFramework == "net11.0" ? ".NET 11.0." : ".NET 10.0.", output, StringComparison.Ordinal);
     }
+
+    [Theory]
+    [InlineData("builder.Services.AddAuthentication(\"CustomOidc\")\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"), openIdConnectScheme: \"CustomOidc\");")]
+    [InlineData("builder.Services.AddAuthentication(\"CustomOidc\")\n    .AddMicrosoftIdentityWebApp(options =>\n    {\n        builder.Configuration.Bind(\"AzureAd\", options);\n        options.ResponseType = OpenIdConnectResponseType.IdToken;\n    }, openIdConnectScheme: \"CustomOidc\");")]
+    [InlineData("const string customScheme = \"CustomOidc\";\nbuilder.Services.AddAuthentication(customScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"), openIdConnectScheme: customScheme);\nbuilder.Services.AddAuthentication()\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"), openIdConnectScheme: \"OtherOidc\", cookieScheme: \"OtherCookies\");", "OtherOidc")]
+    public Task BlazorEntraChangesConfig_CustomSchemeChallengesWithCodeAndPkce(string registration, string additionalScheme = "")
+        => BlazorEntraChangesConfig_GeneratedAppChallengesWithCodeAndPkce(registration, "CustomOidc", additionalScheme);
 
     #endregion
 

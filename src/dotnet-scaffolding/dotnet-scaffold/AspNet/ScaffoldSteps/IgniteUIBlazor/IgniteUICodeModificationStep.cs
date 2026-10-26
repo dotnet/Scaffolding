@@ -4,6 +4,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.DotNet.Scaffolding.Roslyn.Extensions;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -23,10 +25,16 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
     public required string TargetFileName { get; set; }
 
     /// <summary>
-    /// Gets or sets the exact file that is changed, when it is known (e.g. the resolved host page). When null, any
-    /// <see cref="TargetFileName"/> file in the project (outside bin/ and obj/) is checked.
+    /// Gets or sets the exact file that is changed, when it is known (e.g. the resolved host page). When null, the
+    /// <see cref="TargetFileName"/> document that the code modifier changes in the project is checked.
     /// </summary>
     public string? TargetFilePath { get; set; }
+
+    /// <summary>
+    /// Gets or sets the code service of the project at 'ProjectPath', which finds the
+    /// <see cref="TargetFileName"/> document when <see cref="TargetFilePath"/> is null. When null, one is created.
+    /// </summary>
+    public ICodeService? CodeService { get; set; }
 
     /// <summary>
     /// Gets or sets what the changed file must contain afterwards: in a C# file, the names of the methods (e.g.
@@ -79,7 +87,7 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
             return false;
         }
 
-        if (await base.ExecuteAsync(context, cancellationToken) && ContainsRequiredCalls())
+        if (await base.ExecuteAsync(context, cancellationToken) && await ContainsRequiredCallsAsync())
         {
             return true;
         }
@@ -90,28 +98,27 @@ internal class IgniteUICodeModificationStep : WrappedCodeModificationStep
     }
 
     /// <summary>
-    /// Returns true when a <see cref="TargetFileName"/> file in the project (outside bin/ and obj/) contains every one
-    /// of the <see cref="RequiredCalls"/>: as invocations in a C# file, otherwise as text (outside of markup comments
-    /// when <see cref="IgnoreMarkupComments"/> is set).
+    /// Returns true when the changed file (<see cref="TargetFilePath"/>, or the <see cref="TargetFileName"/> document that
+    /// the code modifier changes) contains every one of the <see cref="RequiredCalls"/>: as invocations in a C# file,
+    /// otherwise as text (outside of markup comments when <see cref="IgnoreMarkupComments"/> is set).
     /// </summary>
-    internal bool ContainsRequiredCalls()
+    internal async Task<bool> ContainsRequiredCallsAsync()
     {
-        if (TargetFilePath is not null)
-        {
-            return _fileSystem.FileExists(TargetFilePath) && ContainsRequiredCalls(TargetFilePath);
-        }
+        var file = TargetFilePath ?? await GetTargetDocumentPathAsync();
+        return file is not null && _fileSystem.FileExists(file) && ContainsRequiredCalls(file);
+    }
 
-        var projectDirectory = Path.GetDirectoryName(ProjectPath);
-        if (string.IsNullOrEmpty(projectDirectory) || !_fileSystem.DirectoryExists(projectDirectory))
-        {
-            return false;
-        }
-
-        return _fileSystem.EnumerateFiles(projectDirectory, TargetFileName, SearchOption.AllDirectories)
-            .Where(file => !Path.GetRelativePath(projectDirectory, file)
-                .Split(Path.DirectorySeparatorChar)
-                .Any(segment => segment.Equals("bin", StringComparison.OrdinalIgnoreCase) || segment.Equals("obj", StringComparison.OrdinalIgnoreCase)))
-            .Any(ContainsRequiredCalls);
+    /// <summary>
+    /// Returns the path of the <see cref="TargetFileName"/> document that the code modifier changes: the project's first
+    /// document whose name or path ends with it (see ProjectModifier in Microsoft.DotNet.Scaffolding.CodeModification).
+    /// A same-named file that the project does not compile, such as one in an excluded folder or a nested project, is
+    /// not changed, so it must not count either.
+    /// </summary>
+    private async Task<string?> GetTargetDocumentPathAsync()
+    {
+        CodeService ??= new CodeService(_logger, ProjectPath);
+        var project = (await CodeService.GetWorkspaceAsync())?.CurrentSolution.GetProject(ProjectPath);
+        return project?.GetDocument(TargetFileName)?.FilePath;
     }
 
     private bool ContainsRequiredCalls(string file)

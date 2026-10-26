@@ -1,11 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
-using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -18,6 +19,7 @@ public class IgniteUICodeModificationStepTests
     private static readonly string s_projectDirectory = Path.Combine(Path.GetTempPath(), "MyApp");
     private static readonly string s_projectPath = Path.Combine(s_projectDirectory, "MyApp.csproj");
     private readonly Mock<IFileSystem> _fileSystem = new();
+    private readonly Mock<ICodeService> _codeService = new();
     private readonly Mock<ILogger<WrappedCodeModificationStep>> _logger = new();
 
     private IgniteUICodeModificationStep CreateStep(string targetFileName = "Program.cs", string? configPath = "igniteUIBlazorChanges.json", params string[] requiredCalls)
@@ -27,48 +29,84 @@ public class IgniteUICodeModificationStepTests
             CodeModifierConfigPath = configPath,
             ProjectPath = s_projectPath,
             TargetFileName = targetFileName,
+            CodeService = _codeService.Object,
             RequiredCalls = requiredCalls.Length == 0 ? ["AddIgniteUIBlazor"] : requiredCalls,
             ChangeDescription = "'builder.Services.AddIgniteUIBlazor()'",
             ManualInstructions = "Add 'builder.Services.AddIgniteUIBlazor();'."
         };
 
-    private void SetupFiles(string fileName, params (string RelativePath, string Content)[] files)
+    /// <summary>
+    /// Sets up the project's compiled documents, which are also files on disk.
+    /// </summary>
+    private void SetupDocuments(params (string RelativePath, string Content)[] documents)
     {
-        _fileSystem.Setup(fs => fs.DirectoryExists(s_projectDirectory)).Returns(true);
-        _fileSystem.Setup(fs => fs.EnumerateFiles(s_projectDirectory, fileName, SearchOption.AllDirectories))
-            .Returns(files.Select(file => Path.Combine(s_projectDirectory, file.RelativePath)).ToList());
-        foreach (var (relativePath, content) in files)
+        var workspace = new AdhocWorkspace();
+        var projectId = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Create(), "MyApp", "MyApp", LanguageNames.CSharp, filePath: s_projectPath)).Id;
+        foreach (var (relativePath, content) in documents)
         {
-            _fileSystem.Setup(fs => fs.ReadAllText(Path.Combine(s_projectDirectory, relativePath))).Returns(content);
+            var path = Path.Combine(s_projectDirectory, relativePath);
+            workspace.AddDocument(DocumentInfo.Create(DocumentId.CreateNewId(projectId), Path.GetFileName(path), filePath: path,
+                loader: TextLoader.From(TextAndVersion.Create(SourceText.From(content), VersionStamp.Create()))));
+            SetupFileOnDisk(relativePath, content);
         }
+
+        _codeService.Setup(codeService => codeService.GetWorkspaceAsync()).ReturnsAsync(workspace);
+    }
+
+    private void SetupFileOnDisk(string relativePath, string content)
+    {
+        var path = Path.Combine(s_projectDirectory, relativePath);
+        _fileSystem.Setup(fs => fs.FileExists(path)).Returns(true);
+        _fileSystem.Setup(fs => fs.ReadAllText(path)).Returns(content);
     }
 
     [Fact]
-    public void ContainsRequiredCalls_TrueWhenTargetFileCallsAddIgniteUIBlazor()
+    public async Task ContainsRequiredCalls_TrueWhenTargetFileCallsAddIgniteUIBlazor()
     {
-        SetupFiles("MauiProgram.cs", ("MauiProgram.cs", "builder.Services.AddMauiBlazorWebView();\nbuilder.Services.AddIgniteUIBlazor();"));
+        SetupDocuments(("MauiProgram.cs", "builder.Services.AddMauiBlazorWebView();\nbuilder.Services.AddIgniteUIBlazor();"));
 
-        Assert.True(CreateStep("MauiProgram.cs").ContainsRequiredCalls());
+        Assert.True(await CreateStep("MauiProgram.cs").ContainsRequiredCallsAsync());
     }
 
     [Fact]
-    public void ContainsRequiredCalls_IgnoresBuildOutput()
+    public async Task ContainsRequiredCalls_ChecksTheDocumentThatTheModifierChanges_NotOtherSameNamedFiles()
     {
-        SetupFiles("Program.cs",
+        // Same-named files that the project does not compile (an excluded sample, a nested project, build output) are not
+        // changed by the code modifier, so their registrations do not count.
+        SetupDocuments(
             ("Program.cs", "var builder = WebApplication.CreateBuilder(args);\nvar app = builder.Build();"),
-            (Path.Combine("obj", "Debug", "Program.cs"), "builder.Services.AddIgniteUIBlazor();"),
-            (Path.Combine("bin", "Program.cs"), "builder.Services.AddIgniteUIBlazor();"));
+            ("Startup.cs", "builder.Services.AddIgniteUIBlazor();"));
+        SetupFileOnDisk(Path.Combine("Samples", "Program.cs"), "builder.Services.AddIgniteUIBlazor();");
+        SetupFileOnDisk(Path.Combine("Client", "Program.cs"), "builder.Services.AddIgniteUIBlazor();");
+        SetupFileOnDisk(Path.Combine("obj", "Debug", "Program.cs"), "builder.Services.AddIgniteUIBlazor();");
 
-        Assert.False(CreateStep().ContainsRequiredCalls());
+        Assert.False(await CreateStep().ContainsRequiredCallsAsync());
     }
 
     [Fact]
-    public void ContainsRequiredCalls_RequiresEveryCallInTheSameFile()
+    public async Task ContainsRequiredCalls_FindsTheDocumentInASubfolder()
     {
-        SetupFiles("Program.cs", ("Program.cs", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents();\napp.MapRazorComponents<App>();"));
+        SetupDocuments(("Startup" + Path.DirectorySeparatorChar + "Program.cs", "builder.Services.AddIgniteUIBlazor();"));
 
-        Assert.False(CreateStep(requiredCalls: ["AddInteractiveServerComponents", "AddInteractiveServerRenderMode"]).ContainsRequiredCalls());
-        Assert.True(CreateStep(requiredCalls: ["AddInteractiveServerComponents"]).ContainsRequiredCalls());
+        Assert.True(await CreateStep().ContainsRequiredCallsAsync());
+    }
+
+    [Fact]
+    public async Task ContainsRequiredCalls_FalseWhenTheProjectHasNoTargetDocument()
+    {
+        SetupDocuments(("Startup.cs", "builder.Services.AddIgniteUIBlazor();"));
+        SetupFileOnDisk("Program.cs", "builder.Services.AddIgniteUIBlazor();");
+
+        Assert.False(await CreateStep().ContainsRequiredCallsAsync());
+    }
+
+    [Fact]
+    public async Task ContainsRequiredCalls_RequiresEveryCallInTheSameFile()
+    {
+        SetupDocuments(("Program.cs", "builder.Services.AddRazorComponents()\n    .AddInteractiveServerComponents();\napp.MapRazorComponents<App>();"));
+
+        Assert.False(await CreateStep(requiredCalls: ["AddInteractiveServerComponents", "AddInteractiveServerRenderMode"]).ContainsRequiredCallsAsync());
+        Assert.True(await CreateStep(requiredCalls: ["AddInteractiveServerComponents"]).ContainsRequiredCallsAsync());
     }
 
     [Theory]
@@ -79,18 +117,18 @@ public class IgniteUICodeModificationStepTests
     [InlineData("var builder = WebApplication.CreateBuilder(args);\nvar addIgniteUIBlazor = builder.Services.AddIgniteUIBlazor;\nvar app = builder.Build();", false)]
     [InlineData("var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddIgniteUIBlazor ();\nvar app = builder.Build();", true)]
     [InlineData("var builder = WebApplication.CreateBuilder(args);\nbuilder.Services\n    .AddRazorComponents()\n    .Services.AddIgniteUIBlazor();\nvar app = builder.Build();", true)]
-    public void ContainsRequiredCalls_OnlyCountsInvocationsInActiveCSharpCode(string program, bool expected)
+    public async Task ContainsRequiredCalls_OnlyCountsInvocationsInActiveCSharpCode(string program, bool expected)
     {
-        SetupFiles("Program.cs", ("Program.cs", program));
+        SetupDocuments(("Program.cs", program));
 
-        Assert.Equal(expected, CreateStep().ContainsRequiredCalls());
+        Assert.Equal(expected, await CreateStep().ContainsRequiredCallsAsync());
     }
 
     [Fact]
     public async Task ExecuteAsync_ReportsIncompleteSetup_WhenRegistrationCannotBeAdded()
     {
         // The shared code modification step fails here (no config), and the registration is not present.
-        SetupFiles("Program.cs", ("Program.cs", "var app = WebApplication.Create(args);"));
+        SetupDocuments(("Program.cs", "var app = WebApplication.Create(args);"));
         var step = CreateStep(configPath: null);
 
         Assert.False(await step.ExecuteAsync(new ScaffolderContext(Mock.Of<IScaffolder>())));
@@ -120,7 +158,7 @@ public class IgniteUICodeModificationStepTests
     [Theory]
     [InlineData("<head><link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /></head>", true)]
     [InlineData("<head></head>", false)]
-    public void ContainsRequiredCalls_ChecksTheExactTargetFile(string hostPage, bool expected)
+    public async Task ContainsRequiredCalls_ChecksTheExactTargetFile(string hostPage, bool expected)
     {
         var hostPagePath = Path.Combine(s_projectDirectory, "Components", "App.razor");
         _fileSystem.Setup(fs => fs.FileExists(hostPagePath)).Returns(true);
@@ -128,8 +166,8 @@ public class IgniteUICodeModificationStepTests
         var step = CreateStep("App.razor", requiredCalls: ["_content/IgniteUI.Blazor/themes/dark/material.css"]);
         step.TargetFilePath = hostPagePath;
 
-        Assert.Equal(expected, step.ContainsRequiredCalls());
-        _fileSystem.Verify(fs => fs.EnumerateFiles(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<SearchOption>()), Times.Never);
+        Assert.Equal(expected, await step.ContainsRequiredCallsAsync());
+        _codeService.Verify(codeService => codeService.GetWorkspaceAsync(), Times.Never);
     }
 
     [Theory]
@@ -137,7 +175,7 @@ public class IgniteUICodeModificationStepTests
     [InlineData("App.razor", "<head>@*\n<link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" />\n*@</head>", true, false)]
     [InlineData("App.razor", "<head><!-- old --><link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /></head>", true, true)]
     [InlineData("App.razor", "<head><!-- <link href=\"_content/IgniteUI.Blazor/themes/dark/material.css\" rel=\"stylesheet\" /> --></head>", false, true)]
-    public void ContainsRequiredCalls_IgnoresCommentedOutMarkup_WhenRequested(string fileName, string hostPage, bool ignoreMarkupComments, bool expected)
+    public async Task ContainsRequiredCalls_IgnoresCommentedOutMarkup_WhenRequested(string fileName, string hostPage, bool ignoreMarkupComments, bool expected)
     {
         var hostPagePath = Path.Combine(s_projectDirectory, "Components", fileName);
         _fileSystem.Setup(fs => fs.FileExists(hostPagePath)).Returns(true);
@@ -146,6 +184,6 @@ public class IgniteUICodeModificationStepTests
         step.TargetFilePath = hostPagePath;
         step.IgnoreMarkupComments = ignoreMarkupComments;
 
-        Assert.Equal(expected, step.ContainsRequiredCalls());
+        Assert.Equal(expected, await step.ContainsRequiredCallsAsync());
     }
 }

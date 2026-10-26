@@ -85,6 +85,7 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
             step.ProjectPath = model.ProjectPath;
             step.CodeChangeOptions = [];
             step.TargetFileName = RegistrationFileName;
+            step.CodeService = model.ProjectInfo.CodeService;
             step.RequiredCalls = [BlazorCrudHelper.AddInteractiveServerComponentsMethod, BlazorCrudHelper.AddInteractiveServerRenderModeMethod];
             step.ChangeDescription = "Interactive Server support";
             step.ManualInstructions = "Chain '.AddInteractiveServerComponents()' after 'builder.Services.AddRazorComponents()' and '.AddInteractiveServerRenderMode()' after 'app.MapRazorComponents<App>()', then re-run the scaffolder to complete the remaining steps.";
@@ -102,6 +103,7 @@ internal static class IgniteUIBlazorScaffolderBuilderExtensions
             var model = GetModel(config.Context);
             ConfigureServicesStep(config.Step, config.Context, model.ProjectPath, model.CodeModificationConfigPath,
                 model.IsMauiBlazorHybridProject ? MauiRegistrationFileName : RegistrationFileName, model.ProjectInfo.CodeChangeOptions);
+            config.Step.CodeService = model.ProjectInfo.CodeService;
         });
     }
 

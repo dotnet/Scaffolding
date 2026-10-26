@@ -274,11 +274,24 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         Assert.Contains($"Failed to add package '{LitePackageName}'", cliOutput);
     }
 
-    [Fact]
-    public async Task Scaffold_BlazorIgniteUI_Net10_UnrecognizedProgram_ReportsIncompleteServiceRegistration()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Scaffold_BlazorIgniteUI_Net10_UnrecognizedProgram_ReportsIncompleteServiceRegistration(bool withExcludedSample)
     {
         // Arrange — a Startup-based app: there is no 'builder.Build()' for the code modifier to insert the registration before
         SetupBlazorWebAppProject();
+        if (withExcludedSample)
+        {
+            // A sample Program.cs that the project does not compile already registers the services: it is not the
+            // Program.cs that the code modifier changes, so it must not count as the registration
+            var samplesDir = Path.Combine(_testProjectDir, "Samples");
+            Directory.CreateDirectory(samplesDir);
+            File.WriteAllText(Path.Combine(samplesDir, "Program.cs"), "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddIgniteUIBlazor();\nvar app = builder.Build();\n");
+            File.WriteAllText(_testProjectPath, File.ReadAllText(_testProjectPath).Replace(
+                "</Project>", "  <ItemGroup>\n    <Compile Remove=\"Samples/**\" />\n  </ItemGroup>\n</Project>"));
+        }
+
         var programPath = Path.Combine(_testProjectDir, "Program.cs");
         File.WriteAllText(programPath, """
             public class Program

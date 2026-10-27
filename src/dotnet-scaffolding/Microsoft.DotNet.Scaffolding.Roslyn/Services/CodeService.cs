@@ -106,10 +106,19 @@ public class CodeService : ICodeService, IDisposable
                 foreach (var changedDocId in projectChange.GetChangedDocuments())
                 {
                     var newDoc = solution.GetDocument(changedDocId);
-                    if (newDoc?.FilePath is not null && newDoc.TryGetText(out var sourceText))
+                    if (newDoc?.FilePath is not null)
                     {
-                        try { File.WriteAllText(newDoc.FilePath, sourceText.ToString(), Encoding.UTF8); }
-                        catch { /* best-effort */ }
+                        // WithSyntaxRoot leaves text lazy, so TryGetText can miss real changes.
+                        var sourceText = newDoc.GetTextAsync().GetAwaiter().GetResult();
+                        try
+                        {
+                            File.WriteAllText(newDoc.FilePath, sourceText.ToString(), Encoding.UTF8);
+                        }
+                        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                        {
+                            _logger.LogError(ex, "Failed to save changes to '{FilePath}': {Message}", newDoc.FilePath, ex.Message);
+                            return false;
+                        }
                     }
                 }
             }

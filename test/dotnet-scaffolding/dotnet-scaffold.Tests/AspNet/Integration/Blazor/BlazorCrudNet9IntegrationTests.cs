@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
 
@@ -12,6 +13,69 @@ public class BlazorCrudNet9IntegrationTests : BlazorCrudIntegrationTestsBase
 {
     protected override string TargetFramework => "net9.0";
     protected override string TestClassName => nameof(BlazorCrudNet9IntegrationTests);
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Scaffold_BlazorCrud_Net9_ExistingIdentityContext_BuildsSuccessfully(bool useRelativeProjectPath)
+    {
+        File.WriteAllText(_testProjectPath, ProjectContent.Replace("</Project>", """
+            <ItemGroup>
+              <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.21" />
+              <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.21" />
+            </ItemGroup>
+            </Project>
+            """));
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"),
+            "using TestProject.Data;\n" + ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
+        ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Movie.cs"), """
+            public class Movie
+            {
+                public int ID { get; set; }
+                public string Title { get; set; } = string.Empty;
+                public DateTime ReleaseDate { get; set; }
+                public string Genre { get; set; } = string.Empty;
+                public decimal Price { get; set; }
+            }
+            """);
+        var dataDirectory = Path.Combine(_testProjectDir, "Data");
+        Directory.CreateDirectory(dataDirectory);
+        var contextPath = Path.Combine(dataDirectory, "ApplicationDbContext.cs");
+        File.WriteAllText(contextPath, """
+            using Microsoft.AspNetCore.Identity;
+            using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+            using Microsoft.EntityFrameworkCore;
+
+            namespace TestProject.Data;
+
+            public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<IdentityUser>(options)
+            {
+            }
+            """);
+
+        var (beforeExitCode, beforeOutput, beforeError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(beforeExitCode == 0, $"Project should build before scaffolding.\n{beforeOutput}\n{beforeError}");
+
+        var projectPath = useRelativeProjectPath
+            ? Path.GetRelativePath(Directory.GetCurrentDirectory(), _testProjectPath)
+            : _testProjectPath;
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework, "blazor-crud",
+            "--project", projectPath,
+            "--model", "Movie",
+            "--dataContext", "ApplicationDbContext",
+            "--dbProvider", "sqlserver-efcore",
+            "--page", "CRUD");
+        Assert.True(exitCode == 0, $"Scaffolding should succeed.\n{output}\n{error}");
+        Assert.Contains("DbSet<Movie> Movie", File.ReadAllText(contextPath));
+        var adapter = Assert.Single(XDocument.Load(_testProjectPath).Descendants("PackageReference"),
+            reference => (string?)reference.Attribute("Include") == "Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter");
+        Assert.StartsWith("9.", (string?)adapter.Attribute("Version"));
+
+        var (afterExitCode, afterOutput, afterError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(afterExitCode == 0, $"Project should build after scaffolding.\n{afterOutput}\n{afterError}");
+    }
 
     [Fact]
     public async Task Scaffold_BlazorCrud_Net9_CliInvocation()

@@ -16,6 +16,7 @@ public interface ICodeService
     /// <summary>
     /// Attempts to apply changes to current Roslyn workspace and returns true if it was successful.
     /// </summary>
+    /// <remarks>For source-file-backed fallback workspaces, success requires saving changed documents to disk.</remarks>
     /// <param name="solution"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>

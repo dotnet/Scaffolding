@@ -2,9 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
+using NuGet.Common;
+using NuGet.Protocol;
+using NuGet.Protocol.Core.Types;
+using NuGet.Versioning;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Blazor;
@@ -18,6 +23,67 @@ public class BlazorCrudNet9IntegrationTests : BlazorCrudIntegrationTestsBase
     [InlineData(false)]
     [InlineData(true)]
     public async Task Scaffold_BlazorCrud_Net9_ExistingIdentityContext_BuildsSuccessfully(bool useRelativeProjectPath)
+    {
+        await ScaffoldExistingIdentityContextAsync(useRelativeProjectPath);
+    }
+
+    [Fact]
+    public async Task Scaffold_BlazorCrud_Net9_ExistingIdentityContext_SelectsCompatiblePackages_WhenNet10PackagesAreAvailable()
+    {
+        string[] packageNames =
+        [
+            "Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter",
+            "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"
+        ];
+        var feedDirectory = Path.Combine(_testDirectory, "feed");
+        Directory.CreateDirectory(feedDirectory);
+        var configPath = Path.Combine(_testProjectDir, "NuGet.config");
+        var config = XDocument.Load(configPath);
+        var sources = config.Root!.Element("packageSources")!;
+        var repository = Repository.Factory.GetCoreV3(
+            (string)sources.Element("add")!.Attribute("value")!);
+        var downloadResource = await repository.GetResourceAsync<FindPackageByIdResource>();
+        Assert.NotNull(downloadResource);
+        using var cache = new SourceCacheContext();
+
+        foreach (string packageName in packageNames)
+        {
+            foreach (string version in new[] { "9.0.21", "10.0.0" })
+            {
+                var packagePath = Path.Combine(feedDirectory, $"{packageName}.{version}.nupkg");
+                using var stream = File.Create(packagePath);
+                Assert.True(await downloadResource.CopyNupkgToStreamAsync(
+                    packageName, NuGetVersion.Parse(version), stream, cache,
+                    NullLogger.Instance, CancellationToken.None),
+                    $"Could not download {packageName} {version} for the controlled feed.");
+            }
+        }
+
+        sources.Add(new XElement("add", new XAttribute("key", "controlled"),
+            new XAttribute("value", feedDirectory)));
+        config.Root.Element("packageSourceMapping")!.Add(
+            new XElement("packageSource", new XAttribute("key", "dotnet-public"),
+                new XElement("package", new XAttribute("pattern", "*"))),
+            new XElement("packageSource", new XAttribute("key", "controlled"),
+                new XElement("package", new XAttribute("pattern", packageNames[0])),
+                new XElement("package", new XAttribute("pattern", packageNames[1]))));
+        config.Root.Add(new XElement("config",
+            new XElement("add", new XAttribute("key", "globalPackagesFolder"),
+                new XAttribute("value", Path.Combine(_testDirectory, "packages")))));
+        config.Save(configPath);
+
+        await ScaffoldExistingIdentityContextAsync(useRelativeProjectPath: false);
+
+        var project = XDocument.Load(_testProjectPath);
+        foreach (string packageName in packageNames)
+        {
+            var reference = Assert.Single(project.Descendants("PackageReference"),
+                element => (string?)element.Attribute("Include") == packageName);
+            Assert.Equal("9.0.21", (string?)reference.Attribute("Version"));
+        }
+    }
+
+    private async Task ScaffoldExistingIdentityContextAsync(bool useRelativeProjectPath)
     {
         File.WriteAllText(_testProjectPath, ProjectContent.Replace("</Project>", """
             <ItemGroup>
@@ -68,6 +134,8 @@ public class BlazorCrudNet9IntegrationTests : BlazorCrudIntegrationTestsBase
             "--dbProvider", "sqlserver-efcore",
             "--page", "CRUD");
         Assert.True(exitCode == 0, $"Scaffolding should succeed.\n{output}\n{error}");
+        Assert.DoesNotContain("NU1202", output + error);
+        Assert.DoesNotContain("Failed to add package", output + error);
         Assert.Contains("DbSet<Movie> Movie", File.ReadAllText(contextPath));
         var adapter = Assert.Single(XDocument.Load(_testProjectPath).Descendants("PackageReference"),
             reference => (string?)reference.Attribute("Include") == "Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter");

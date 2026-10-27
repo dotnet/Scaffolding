@@ -108,7 +108,6 @@ public class CodeService : ICodeService, IDisposable
                     var newDoc = solution.GetDocument(changedDocId);
                     if (newDoc?.FilePath is not null)
                     {
-                        // WithSyntaxRoot leaves text lazy, so TryGetText can miss real changes.
                         var sourceText = newDoc.GetTextAsync().GetAwaiter().GetResult();
                         File.WriteAllText(newDoc.FilePath, sourceText.ToString(), Encoding.UTF8);
                     }

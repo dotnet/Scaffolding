@@ -21,10 +21,8 @@ public class CodeServiceTests : IDisposable
         Directory.CreateDirectory(_directory);
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task TryApplyChanges_FallbackWorkspace_PersistsLazySyntaxChanges(bool preventWrite)
+    [Fact]
+    public async Task TryApplyChanges_FallbackWorkspace_PersistsLazySyntaxChanges()
     {
         var filePath = Path.Combine(_directory, "ApplicationDbContext.cs");
         File.WriteAllText(filePath, "public class ApplicationDbContext { }");
@@ -37,23 +35,34 @@ public class CodeServiceTests : IDisposable
         var updatedDocument = document.WithSyntaxRoot(SyntaxFactory.ParseCompilationUnit(changedSource));
         Assert.False(updatedDocument.TryGetText(out _));
 
-        if (preventWrite)
-        {
-            File.Delete(filePath);
-            Directory.CreateDirectory(filePath);
-        }
-
         var result = service.TryApplyChanges(updatedDocument.Project.Solution);
 
-        Assert.Equal(!preventWrite, result);
-        if (!preventWrite)
-        {
-            Assert.Equal(changedSource, File.ReadAllText(filePath));
-        }
-        else
-        {
-            Assert.DoesNotContain("Movie", (await workspace.CurrentSolution.GetDocument(document.Id).GetTextAsync()).ToString());
-        }
+        Assert.True(result);
+        Assert.Equal(changedSource, File.ReadAllText(filePath));
+        Assert.Equal(changedSource, (await workspace.CurrentSolution.GetDocument(document.Id).GetTextAsync()).ToString());
+    }
+
+    [Fact]
+    public async Task TryApplyChanges_FallbackWorkspace_PropagatesException_WhenWriteFails()
+    {
+        var filePath = Path.Combine(_directory, "ApplicationDbContext.cs");
+        const string originalSource = "public class ApplicationDbContext { }";
+        File.WriteAllText(filePath, originalSource);
+        using var service = new CodeService(NullLogger.Instance, Path.Combine(_directory, "Missing.csproj"));
+        var workspace = await service.GetWorkspaceAsync();
+        Assert.IsType<AdhocWorkspace>(workspace);
+        var document = Assert.Single(Assert.Single(workspace.CurrentSolution.Projects).Documents);
+        var updatedDocument = document.WithSyntaxRoot(SyntaxFactory.ParseCompilationUnit(
+            "public class ApplicationDbContext { public object Movie { get; set; } }"));
+        Assert.False(updatedDocument.TryGetText(out _));
+
+        File.Delete(filePath);
+        Directory.CreateDirectory(filePath);
+
+        var exception = Assert.ThrowsAny<Exception>(() => service.TryApplyChanges(updatedDocument.Project.Solution));
+
+        Assert.True(exception is IOException or UnauthorizedAccessException, exception.ToString());
+        Assert.Equal(originalSource, (await workspace.CurrentSolution.GetDocument(document.Id).GetTextAsync()).ToString());
     }
 
     public void Dispose()

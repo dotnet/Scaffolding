@@ -12,6 +12,10 @@ namespace Microsoft.DotNet.Scaffolding.Core.Logging;
 /// </summary>
 internal class CleanConsoleFormatter : ConsoleFormatter
 {
+    private const string BrightRedColor = "\x1B[1;31m";
+    private const string BrightYellowColor = "\x1B[1;33m";
+    private const string ResetColor = "\x1B[0m";
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CleanConsoleFormatter"/> class.
     /// </summary>
@@ -29,12 +33,30 @@ internal class CleanConsoleFormatter : ConsoleFormatter
     /// <param name="textWriter">The text writer to write the log message to.</param>
     public override void Write<TState>(in LogEntry<TState> logEntry, IExternalScopeProvider? scopeProvider, TextWriter textWriter)
     {
-        // Format the log message using the provided formatter, ignoring log level and category.
         string? message = logEntry.Formatter?.Invoke(logEntry.State, logEntry.Exception);
-
-        if (message is not null)
+        if (message is null)
         {
-            textWriter.WriteLine(message);
+            return;
+        }
+
+        // Write ANSI codes through the logging writer, not the global console.
+        string? color = Console.IsOutputRedirected ? null : logEntry.LogLevel switch
+        {
+            LogLevel.Error or LogLevel.Critical => BrightRedColor,
+            LogLevel.Warning => BrightYellowColor,
+            _ => null
+        };
+
+        if (color is not null)
+        {
+            textWriter.Write(color);
+        }
+
+        textWriter.WriteLine(message);
+
+        if (color is not null)
+        {
+            textWriter.Write(ResetColor);
         }
     }
 }

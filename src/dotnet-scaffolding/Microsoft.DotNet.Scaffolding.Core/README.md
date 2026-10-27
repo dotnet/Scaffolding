@@ -1,6 +1,8 @@
 # Microsoft.DotNet.Scaffolding.Core
 Microsoft.DotNet.Scaffolding.Core is a library designed to assist .NET developers in creating dotnet-scaffold compatible scaffolders in their own dotnet tools.
 
+Console logging displays errors and critical messages in bright red and warnings in bright yellow. Other log levels retain the default terminal color. Redirected output contains no added ANSI color codes.
+
 For example: 
 - Install/reference Microsoft.DotNet.Scaffolding.Core
 - Refer to Microsoft.DotNet.Scaffolding.Core.Builder.IScaffolderBuilder for all available builder helpers.

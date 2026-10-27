@@ -240,6 +240,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return false;
             }
 
+            if (!useExistingApplication && !overwrite && azureAdNode is JsonObject azureAdObject)
+            {
+                if (azureAdObject.FirstOrDefault(p => p.Key.Equals("Domain", StringComparison.OrdinalIgnoreCase)).Key is not null)
+                {
+                    _logger.LogError("Conflicting AzureAd value for key 'Domain' already exists in appsettings.Development.json. Re-run with '--overwrite' to replace existing managed settings.");
+                    return false;
+                }
+            }
+
             return true;
         }
 

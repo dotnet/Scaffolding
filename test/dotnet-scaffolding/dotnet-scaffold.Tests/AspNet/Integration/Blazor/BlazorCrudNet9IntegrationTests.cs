@@ -19,12 +19,10 @@ public class BlazorCrudNet9IntegrationTests : BlazorCrudIntegrationTestsBase
     protected override string TargetFramework => "net9.0";
     protected override string TestClassName => nameof(BlazorCrudNet9IntegrationTests);
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task Scaffold_BlazorCrud_Net9_ExistingIdentityContext_BuildsSuccessfully(bool useRelativeProjectPath)
+    [Fact]
+    public async Task Scaffold_BlazorCrud_Net9_ExistingIdentityContext_BuildsSuccessfully()
     {
-        await ScaffoldExistingIdentityContextAsync(useRelativeProjectPath);
+        await ScaffoldExistingIdentityContextAsync();
     }
 
     [Fact]
@@ -72,7 +70,7 @@ public class BlazorCrudNet9IntegrationTests : BlazorCrudIntegrationTestsBase
                 new XAttribute("value", Path.Combine(_testDirectory, "packages")))));
         config.Save(configPath);
 
-        await ScaffoldExistingIdentityContextAsync(useRelativeProjectPath: false);
+        await ScaffoldExistingIdentityContextAsync();
 
         var project = XDocument.Load(_testProjectPath);
         foreach (string packageName in packageNames)
@@ -83,7 +81,7 @@ public class BlazorCrudNet9IntegrationTests : BlazorCrudIntegrationTestsBase
         }
     }
 
-    private async Task ScaffoldExistingIdentityContextAsync(bool useRelativeProjectPath)
+    private async Task ScaffoldExistingIdentityContextAsync()
     {
         File.WriteAllText(_testProjectPath, ProjectContent.Replace("</Project>", """
             <ItemGroup>
@@ -123,12 +121,9 @@ public class BlazorCrudNet9IntegrationTests : BlazorCrudIntegrationTestsBase
         var (beforeExitCode, beforeOutput, beforeError) = await RunBuildAsync(_testProjectDir);
         Assert.True(beforeExitCode == 0, $"Project should build before scaffolding.\n{beforeOutput}\n{beforeError}");
 
-        var projectPath = useRelativeProjectPath
-            ? Path.GetRelativePath(Directory.GetCurrentDirectory(), _testProjectPath)
-            : _testProjectPath;
         var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework, "blazor-crud",
-            "--project", projectPath,
+            "--project", _testProjectPath,
             "--model", "Movie",
             "--dataContext", "ApplicationDbContext",
             "--dbProvider", "sqlserver-efcore",

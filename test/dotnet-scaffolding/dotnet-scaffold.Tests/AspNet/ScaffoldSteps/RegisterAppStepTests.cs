@@ -176,6 +176,39 @@ public class RegisterAppStepTests
         Assert.NotNull(step.ProjectPath);
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("Created app Development - 22222222-2222-2222-2222-222222222222.")]
+    [InlineData("ClientId: not-a-guid")]
+    public async Task ExecuteAsync_RejectsMissingRegistrationOnlyClientId(string output)
+    {
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        var step = new OutputRegisterStep(_mockLogger.Object, _mockFileSystem.Object, _testTelemetryService, output)
+        {
+            ProjectPath = _testProjectPath
+        };
+
+        Assert.False(await step.ExecuteAsync(_context));
+        Assert.False(_context.Properties.ContainsKey("ClientId"));
+    }
+
+    private sealed class OutputRegisterStep : RegisterAppStep
+    {
+        private readonly string _output;
+
+        public OutputRegisterStep(ILogger<AddClientSecretStep> logger, IFileSystem fileSystem, ITelemetryService telemetryService, string output)
+            : base(logger, fileSystem, telemetryService) => _output = output;
+
+        protected override bool EnsureMsIdentityIsInstalled() => true;
+
+        protected override int ExecuteMsIdentity(string[] args, out string? stdOut, out string? stdErr)
+        {
+            stdOut = _output;
+            stdErr = string.Empty;
+            return 0;
+        }
+    }
+
     private class TestTelemetryService : ITelemetryService
     {
         public List<(string EventName, IReadOnlyDictionary<string, string> Properties, IReadOnlyDictionary<string, double> Measurements)> TrackedEvents { get; } = new();

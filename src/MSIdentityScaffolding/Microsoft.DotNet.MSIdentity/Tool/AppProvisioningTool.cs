@@ -52,6 +52,29 @@ namespace Microsoft.DotNet.MSIdentity
         {
             ValidateProjectPath();
 
+            if (ProvisioningToolOptions.RegistrationOnly)
+            {
+                if (CommandName != Commands.REGISTER_APPLICATIION_COMMAND ||
+                    string.IsNullOrEmpty(ProvisioningToolOptions.ProjectFilePath) ||
+                    string.IsNullOrEmpty(ProvisioningToolOptions.ProjectType))
+                {
+                    throw new ArgumentException("Registration-only provisioning requires --register-app, --project-file-path and --project-type.");
+                }
+
+                // Do not discover descriptors or read configuration: even inference can select a production ClientId.
+                ApplicationParameters parameters = InferApplicationParameters(
+                    ProvisioningToolOptions, Array.Empty<ProjectDescription>()).ApplicationParameters;
+                parameters.ProjectPath = ProvisioningToolOptions.ProjectPath;
+                ApplicationParameters? registration = await ProvisionRegistrationOnly(parameters);
+                if (!Guid.TryParse(registration?.ClientId, out Guid clientId))
+                {
+                    throw new InvalidOperationException("Registration did not return a valid client ID.");
+                }
+
+                ConsoleLogger.LogMessage($"ClientId: {clientId:D}");
+                return registration;
+            }
+
             var projectDescription = ProjectDescriptionReader.GetProjectDescription(ProvisioningToolOptions.ProjectTypeIdentifier);
             if (projectDescription == null)
             {
@@ -149,6 +172,22 @@ namespace Microsoft.DotNet.MSIdentity
             }
 
             return effectiveApplicationParameters;
+        }
+
+        /// <summary>
+        /// Provisions an explicitly configured registration without any project configuration changes.
+        /// </summary>
+        protected virtual async Task<ApplicationParameters?> ProvisionRegistrationOnly(ApplicationParameters parameters)
+        {
+            TokenCredential credential = GetTokenCredential(ProvisioningToolOptions, parameters.TenantId, ConsoleLogger);
+            if (!string.IsNullOrEmpty(parameters.ClientId))
+            {
+                ApplicationParameters application = await ReadMicrosoftIdentityApplication(credential, parameters);
+                await UpdateAppRegistration(credential, application);
+                return application;
+            }
+
+            return await CreateAppRegistration(credential, parameters);
         }
 
         /// <summary>

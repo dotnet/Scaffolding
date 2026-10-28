@@ -158,10 +158,13 @@ public class UpdateAppAuthorizationStepTests
                 command));
     }
 
-    [Fact]
-    public async Task ExecuteAsync_AddsOnlyCallbackUrisFromLaunchSettings()
+    [Theory]
+    [InlineData("/signin-oidc")]
+    [InlineData("/custom-signin")]
+    public async Task ExecuteAsync_AddsOnlyCallbackUrisFromLaunchSettings(string callbackPath)
     {
         // Arrange
+        _step.CallbackPath = callbackPath;
         string launchSettingsPath = Path.Combine("test", "Properties", "launchSettings.json");
         _fileSystem.Setup(fileSystem => fileSystem.FileExists(launchSettingsPath)).Returns(true);
         _fileSystem.Setup(fileSystem => fileSystem.ReadAllText(launchSettingsPath)).Returns(
@@ -188,10 +191,84 @@ public class UpdateAppAuthorizationStepTests
         // Assert
         Assert.True(result);
         Assert.NotNull(updateCommand);
-        Assert.Contains("\"http://localhost:5012/signin-oidc\"", updateCommand);
-        Assert.Contains("\"https://localhost:7188/signin-oidc\"", updateCommand);
+        Assert.Contains($"\"http://localhost:5012{callbackPath}\"", updateCommand);
+        Assert.Contains($"\"https://localhost:7188{callbackPath}\"", updateCommand);
         Assert.DoesNotContain("\"http://localhost:5012\"", updateCommand);
         Assert.DoesNotContain("\"https://localhost:7188/\"", updateCommand);
+        if (callbackPath != "/signin-oidc")
+        {
+            Assert.DoesNotContain("/signin-oidc", updateCommand);
+        }
+    }
+
+    [Theory]
+    [InlineData(null, "/signin-oidc")]
+    [InlineData(null, "/custom-signin")]
+    [InlineData("{", "/signin-oidc")]
+    [InlineData("{", "/custom-signin")]
+    [InlineData("""{"profiles":{}}""", "/signin-oidc")]
+    [InlineData("""{"profiles":{}}""", "/custom-signin")]
+    public async Task ExecuteAsync_AddsOnlyCallbackUrisWhenLaunchSettingsAreUnavailable(string? launchSettings, string callbackPath)
+    {
+        string launchSettingsPath = Path.Combine("test", "Properties", "launchSettings.json");
+        _fileSystem.Setup(fileSystem => fileSystem.FileExists(launchSettingsPath)).Returns(launchSettings is not null);
+        if (launchSettings is not null)
+        {
+            _fileSystem.Setup(fileSystem => fileSystem.ReadAllText(launchSettingsPath)).Returns(launchSettings);
+        }
+
+        _step.CallbackPath = callbackPath;
+        _step.WebRedirectUris = ["https://production.contoso.com/signin-oidc"];
+        _step.AzCliCommand = _ => new(0, null, null);
+
+        bool result = await _step.ExecuteAsync(CreateContext());
+
+        Assert.True(result);
+        Assert.Equal(
+            [
+                "https://production.contoso.com/signin-oidc",
+                $"https://localhost:5001{callbackPath}",
+                $"https://localhost:7001{callbackPath}",
+                $"https://localhost:44300{callbackPath}"
+            ],
+            _step.WebRedirectUris);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_MergesConfiguredCallbackUrisWithExistingApplication()
+    {
+        string launchSettingsPath = Path.Combine("test", "Properties", "launchSettings.json");
+        _fileSystem.Setup(fileSystem => fileSystem.FileExists(launchSettingsPath)).Returns(true);
+        _fileSystem.Setup(fileSystem => fileSystem.ReadAllText(launchSettingsPath)).Returns(
+            """
+            {
+              "profiles": {
+                "https": {
+                  "applicationUrl": "https://localhost:7188/; https://localhost:7188 "
+                }
+              }
+            }
+            """);
+        _step.CallbackPath = "/custom-signin";
+        _step.UseExistingApplication = true;
+        string? updateCommand = null;
+        _step.AzCliCommand = command =>
+        {
+            if (command.StartsWith("ad app show", StringComparison.Ordinal))
+            {
+                return new(0, """["https://production.contoso.com/signin-oidc","https://localhost:7188/custom-signin"]""", null);
+            }
+
+            updateCommand = command;
+            return new(0, null, null);
+        };
+
+        bool result = await _step.ExecuteAsync(CreateContext());
+
+        Assert.True(result);
+        Assert.Equal(
+            "ad app update --id client-id --enable-id-token-issuance true --web-redirect-uris \"https://production.contoso.com/signin-oidc\" \"https://localhost:7188/custom-signin\"",
+            updateCommand);
     }
 
     private static ScaffolderContext CreateContext()

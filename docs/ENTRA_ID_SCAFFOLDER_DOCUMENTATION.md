@@ -22,7 +22,7 @@ The **Microsoft Entra ID Scaffolder** is a command-line scaffolder (`dotnet scaf
 
 - Registering or updating app registrations in Microsoft Entra ID
 - Generating authentication-related code files
-- Configuring application settings (appsettings.json, user secrets)
+- Configuring local sign-in settings in `appsettings.Development.json`
 - Adding necessary NuGet packages
 - Modifying existing code to integrate authentication
 
@@ -48,8 +48,8 @@ The Entra ID Scaffolder is part of the modern .NET scaffolding system that helps
 ### 1. **Automatic App Registration**
 - Creates new app registrations in Microsoft Entra ID
 - Updates existing app registrations when provided with a client ID
-- For new development registrations, initializes user-secrets and stores the generated client credential there
-- Does not automatically create password credentials when using an existing registration
+- Sets up sign-in only; does not automatically create client secrets or initialize `UserSecretsId` for new or existing registrations
+- Preserves existing locally configured credentials
 - Uses the underlying `dotnet msidentity` tool for Azure AD operations
 
 When creating a new registration for a specific workforce tenant, the identity
@@ -59,11 +59,24 @@ registration does not change its audience. This default requires a version of
 `dotnet msidentity` containing the single-tenant default fix; updating the
 scaffolder alone does not update an already installed identity tool.
 
+The scaffolder requires an identity tool that supports `--register-app
+--registration-only`. This opt-in mode receives the validated project path and
+explicit registration metadata; it does not infer a client ID from project
+configuration or read/write `appsettings.json`. Other identity tool invocations
+retain their existing project inference and update behavior. An explicitly
+selected existing registration is still reused rather than creating a new one.
+
+Generated local settings are saved only to `appsettings.Development.json`.
+Atomic saves create an owner-only staging file before writing any content and
+preserve the destination's Unix permissions or Windows DACL when replacing it.
+New development settings files are owner-only. Preserved settings may contain
+secrets; the staging file is cleaned up if writing or replacement fails.
+
 ### 2. **Code Generation**
 - Generates authentication-related code files from templates
 - Adds appropriate authentication middleware configuration
-- Creates or updates configuration files (appsettings.json)
-- Stores secrets securely in user secrets
+- Creates or updates `appsettings.Development.json` with local sign-in settings
+- Leaves `appsettings.json` and user secrets unchanged
 
 ### 3. **Azure CLI Integration**
 - Uses Azure CLI credentials for authentication
@@ -133,25 +146,27 @@ scaffolder alone does not update an already installed identity tool.
 
 New app registrations created by the scaffolder are for local development and testing.
 Use a recognizable development-oriented display name for the registration. The
-generated client secret is saved only in the project's user-secrets store using:
-
-- `AzureAd:ClientCredentials:0:SourceType` = `ClientSecret`
-- `AzureAd:ClientCredentials:0:ClientSecret` = the generated development secret
-
-The scaffolder initializes `UserSecretsId` before creating the credential. It does
-not write the secret to appsettings files, source files, or command output.
-User-secrets are a development convenience, not an encrypted production secret store.
-
-With `--use-existing-application true`, no password credential is created or rotated.
-Existing locally configured credentials are left unchanged. Configure a supported
-`AzureAd:ClientCredentials` source before running a server application that requires
-a confidential client credential. Reusing a registration does not require permission
+generated flow configures sign-in only: it does not create a client secret, initialize
+`UserSecretsId`, or write credentials to user secrets. This applies to both new
+registrations and `--use-existing-application true`; existing locally configured
+credentials are left unchanged. Reusing a registration does not require permission
 to create new app registrations.
 
-Use a separate app registration for production and configure managed identity,
-federated identity credentials, or a certificate through deployment tooling. Do not
-use the generated development client secret in production or scaffold a production
-registration merely to add local redirect URIs.
+Local sign-in settings are written only to `appsettings.Development.json`; base
+`appsettings.json` is not read to select a registration or modified by this flow.
+Run locally with the `Development` environment so these settings are loaded.
+
+**Optional, outside the generated sign-in flow:** If you extend a server application
+to require a confidential client credential (for example, to call downstream APIs),
+configure a supported `AzureAd:ClientCredentials` source yourself. User secrets can
+hold manually configured local development credentials, but are not an encrypted
+production secret store.
+
+Use a separate app registration for production and supply its `AzureAd` settings
+through deployment tooling. If production functionality requires a credential,
+configure managed identity, federated identity credentials, or a certificate as
+appropriate. Do not scaffold a production registration merely to add local redirect
+URIs.
 
 ### Basic Workflow
 
@@ -180,10 +195,11 @@ This will:
 - Automatically install `dotnet msidentity` if not present
 - Register a new app in your Entra ID tenant
 - Generate authentication code files
-- Update appsettings.json with tenant and client information
+- Create or update appsettings.Development.json with tenant and client information
 - Add required NuGet packages
-- Store the client secret securely in user secrets
 - Apply necessary code changes for authentication
+
+No client secret is created and `UserSecretsId` is not initialized.
 
 #### Example 2: Interactive Mode
 
@@ -194,7 +210,7 @@ cd MyBlazorApp
 dotnet scaffold aspnet entra-id
 ```
 
-**Interactive Prompt Flow:**
+**Illustrative interactive prompt flow** (not a verbatim console transcript):
 
 ```
 ? User name for the identity user:
@@ -209,24 +225,25 @@ dotnet scaffold aspnet entra-id
 ? Use Existing Application? (No = Create New):
 > No
   Yes
+```
 
-✓ Installing dotnet msidentity tool...
-✓ Registering application in Azure AD...
-✓ Creating client secret...
-✓ Updating project files...
-✓ Adding NuGet packages...
-✓ Generating authentication code...
+For a new registration, representative log messages include the following
+(client ID is illustrative; logging prefixes and other messages are omitted):
 
-Successfully added Microsoft Entra ID authentication!
+```text
+Registering an application for local development and testing. Use a separate app registration for production.
+Captured client ID: 87654321-4321-4321-4321-210987654321
+Successfully Registered App.
+Updated 'appsettings.Development.json' with AzureAd development configuration.
+```
 
-Client ID: 87654321-4321-4321-4321-210987654321
-Secret stored in user secrets.
+If the development settings already match, the configuration step reports that no
+changes are needed instead. No client secret or user-secrets store is generated.
 
 Next steps:
-1. Run: dotnet run
-2. Navigate to a protected page
-3. Sign in with your Entra ID credentials
-```
+1. Run `dotnet run` with the `Development` environment.
+2. Navigate to a protected page.
+3. Sign in with your Entra ID credentials.
 
 #### Example 3: Interactive Mode - Selecting Existing App
 
@@ -234,6 +251,8 @@ Next steps:
 cd MyBlazorApp
 dotnet scaffold aspnet entra-id
 ```
+
+**Illustrative interactive prompts** (not a verbatim console transcript):
 
 ```
 ? User name for the identity user:
@@ -251,18 +270,11 @@ dotnet scaffold aspnet entra-id
 
 ? Select Existing Application (Application ID):
 > 11111111-2222-3333-4444-555555555555
-
-✓ Verifying application registration...
-✓ Reusing existing credential configuration (no new password credential)...
-✓ Updating project files...
-✓ Adding NuGet packages...
-✓ Generating authentication code...
-
-Successfully configured Microsoft Entra ID authentication!
-
-Using existing app: MyExistingApp
-Client ID: 11111111-2222-3333-4444-555555555555
 ```
+
+The explicitly selected registration is reused for the generated development
+settings and local redirect URI configuration. No new registration or password
+credential is created, and existing locally configured credentials are preserved.
 
 ---
 
@@ -402,8 +414,8 @@ dotnet scaffold aspnet entra-id \
   --tenantId "dev-tenant-id" \
   --use-existing-application false
 
-# Production - supply AzureAd settings and managed identity/FIC or certificate
-# credentials through deployment tooling, not the source-code scaffolder.
+# Production - supply AzureAd settings through deployment tooling.
+# Configure credentials separately only if required by the application's functionality.
 ```
 
 ---
@@ -637,8 +649,8 @@ dotnet scaffold aspnet entra-id \
   --tenantId "dev-tenant-id" \
   --use-existing-application false
 
-# Production - supply AzureAd settings and managed identity/FIC or certificate
-# credentials through deployment tooling, not the source-code scaffolder.
+# Production - supply AzureAd settings through deployment tooling.
+# Configure credentials separately only if required by the application's functionality.
 ```
 
 ---
@@ -652,19 +664,21 @@ When you run the Entra ID scaffolder, it performs a series of automated steps to
 1. **Tool Check & Auto-Install**: Checks if `dotnet msidentity` is installed; automatically installs it if not present
 2. **Validation**: Validates all required parameters and project file
 3. **Azure CLI Authentication**: Verifies Azure CLI login status
-4. **App Registration**: Calls `dotnet msidentity` to register/update the Azure AD app
-5. **Development Client Credential**: For a new registration, initializes user-secrets and stores the generated credential using `AzureAd:ClientCredentials`. Existing registrations do not receive new password credentials.
-6. **Project Analysis**: Detects project type (Blazor Server/WASM, target framework)
-7. **Configuration**: Updates appsettings.json and user secrets
+4. **App Registration**: Calls `dotnet msidentity --register-app --registration-only` for a new registration, or reuses the explicitly selected existing registration without inferring one from base configuration
+5. **Project Analysis**: Detects project type (Blazor Server/WASM, target framework)
+6. **Configuration**: Creates or updates only appsettings.Development.json with sign-in settings; does not create client secrets, initialize `UserSecretsId`, or update user secrets
+7. **Registration Configuration**: Configures ID token issuance and local redirect URIs
 8. **Packages**: Adds required NuGet packages (Microsoft.Identity.Web, etc.)
-9. **Code Generation**: Generates authentication components from templates
-10. **Code Modifications**: Updates Program.cs, App.razor, and other files
-11. **Build Validation**: Builds project to ensure no errors
+9. **Code Modifications**: Updates Program.cs, App.razor, and other files
+10. **Code Generation**: Generates authentication components from templates
 
 ### Files Created/Modified
 
-**Created:** Authentication components, state providers, login/logout pages  
-**Modified:** appsettings.json, secrets.json, Program.cs, App.razor, .csproj
+**Created:** LoginOrLogout.razor in the applicable layout folders
+
+**Created or modified:** appsettings.Development.json, Program.cs, App.razor, .csproj (depending on project type)
+
+**Unchanged by this flow:** appsettings.json, user secrets; no `UserSecretsId` initialization
 
 ---
 
@@ -839,9 +853,13 @@ Find your app ID:
 az ad app list --display-name "YourAppName" --query "[].{DisplayName:displayName, AppId:appId}" -o table
 ```
 
-#### Issue: "Failed to add client secret"
+#### Optional manual credential setup: "Failed to add client secret"
 
-**Solution:**
+The sign-in-only scaffolder does not create client secrets. This guidance applies
+only when you separately choose to create a credential for additional application
+functionality.
+
+**Solution for manual credential creation:**
 - Ensure the app registration exists
 - Verify you have permission to manage the app
 - Check that you're using the correct tenant ID and client ID
@@ -868,10 +886,11 @@ az ad app list --display-name "YourAppName" --query "[].{DisplayName:displayName
 
 4. Ensure target framework is .NET 6.0 or later
 
-#### Issue: "User secrets not working"
+#### Optional manual credential setup: "User secrets not working"
 
-**Solution:**
-Initialize user secrets if not already done:
+User secrets are not initialized or populated by the sign-in-only scaffolder.
+If you separately configure a local development client credential, initialize
+user secrets yourself if needed:
 ```bash
 dotnet user-secrets init --project ./MyApp.csproj
 
@@ -897,11 +916,11 @@ dotnet user-secrets set "AzureAd:ClientCredentials:0:ClientSecret" "your-develop
    ```
 
 3. **Check generated files**: After scaffolding, verify:
-   - appsettings.json has AzureAd section
-   - secrets.json (via `dotnet user-secrets list`)
+   - appsettings.Development.json has the AzureAd section
+   - appsettings.json and existing user secrets are unchanged
    - New authentication files were created
 
-4. **Test authentication**: Run the app and try to access a protected page
+4. **Test authentication**: Run the app in the `Development` environment and try to access a protected page
 
 ---
 
@@ -915,8 +934,9 @@ dotnet user-secrets set "AzureAd:ClientCredentials:0:ClientSecret" "your-develop
    - Never commit appsettings.json with actual secret values
    - Use Azure Key Vault or environment variables in production
 
-2. **Rotate Secrets Regularly**
-   - Generate new client secrets periodically
+2. **Rotate Manually Configured Credentials When Applicable**
+   - The sign-in-only scaffolder does not create credentials
+   - Rotate any client secrets you configure separately
    - Use Azure AD credential rotation features
    - Update secrets in all environments
 
@@ -943,13 +963,13 @@ dotnet user-secrets set "AzureAd:ClientCredentials:0:ClientSecret" "your-develop
    # Before scaffolding
    git add .
    git commit -m "Before adding Entra ID auth"
-   
+
    # Run scaffolder
    dotnet scaffold aspnet entra-id ...
-   
+
    # Review changes
    git diff
-   
+
    # Commit auth changes
    git add .
    git commit -m "Add Entra ID authentication"
@@ -978,6 +998,11 @@ dotnet user-secrets set "AzureAd:ClientCredentials:0:ClientSecret" "your-develop
    - Document tenant access requirements
 
 3. **Configuration Management**
+   The scaffolder writes local sign-in settings only to
+   `appsettings.Development.json`. It does not populate base settings or user
+   secrets. The following is an **optional manual configuration example**, not
+   generated output, for applications that require a confidential client credential:
+
    ```json
    // appsettings.json - shared, committed
    {
@@ -985,7 +1010,7 @@ dotnet user-secrets set "AzureAd:ClientCredentials:0:ClientSecret" "your-develop
        "Instance": "https://login.microsoftonline.com/"
      }
    }
-   
+
    // secrets.json - local, not committed
    {
      "AzureAd": {
@@ -1002,7 +1027,7 @@ dotnet user-secrets set "AzureAd:ClientCredentials:0:ClientSecret" "your-develop
 4. **CI/CD Considerations**
    - Don't run the scaffolder in CI/CD pipelines
    - Scaffold locally and commit the generated code
-   - Use pipeline secrets for production credentials
+   - Supply production settings and any required credentials through deployment tooling
    - Consider Azure Managed Identities for Azure-hosted apps
 
 ### Project Organization
@@ -1010,12 +1035,12 @@ dotnet user-secrets set "AzureAd:ClientCredentials:0:ClientSecret" "your-develop
 1. **Keep Authentication Code Separate**
    - The scaffolder generates auth files in appropriate folders
    - Don't mix authentication logic with business logic
-   - Use the generated authentication state providers
+   - Use the generated login/logout component
 
 2. **Environment-Specific Configuration**
-   - appsettings.Development.json: Dev overrides
-   - appsettings.Production.json: Production settings
-   - User secrets: Local development credentials only
+   - appsettings.Development.json: Generated local sign-in settings; loaded in `Development`
+   - appsettings.Production.json: Optional manually maintained production settings, not generated by this flow
+   - User secrets: Optional manually configured local development credentials, not generated by this flow
    - Environment variables: For non-local environments
 
 3. **Blazor-Specific**
@@ -1029,10 +1054,10 @@ dotnet user-secrets set "AzureAd:ClientCredentials:0:ClientSecret" "your-develop
    ```bash
    # Update .NET SDK
    # https://dotnet.microsoft.com/download
-   
+
    # Update dotnet msidentity tool
    dotnet tool update Microsoft.dotnet-msidentity -g
-   
+
    # Update NuGet packages
    dotnet list package --outdated
    dotnet add package Microsoft.Identity.Web
@@ -1041,7 +1066,7 @@ dotnet user-secrets set "AzureAd:ClientCredentials:0:ClientSecret" "your-develop
 2. **Monitor App Registrations**
    - Review app registrations in Azure Portal periodically
    - Remove unused or test app registrations
-   - Update secrets before they expire (default: 2 years)
+   - If you configure credentials separately, monitor their configured lifetimes and rotate them before expiry
 
 3. **Stay Current**
    - Follow Microsoft Identity platform updates
@@ -1079,14 +1104,15 @@ The **Microsoft Entra ID Scaffolder** (`dotnet scaffold aspnet entra-id`) is a p
 
 ### Key Takeaways
 
-✅ **For Existing Projects**: Adds auth to projects created without it  
-✅ **Automated Setup**: Handles app registration, secrets, code generation, and configuration  
-✅ **Azure CLI Based**: Uses your existing Azure login  
-✅ **Auto-Installs Dependencies**: Automatically installs `dotnet msidentity` tool if needed  
-✅ **.NET 10+ Only**: Requires .NET 10.0 or later  
-✅ **Interactive or Command-Line**: Run with prompts or specify all options  
-✅ **Blazor Optimized**: Best experience with Blazor Server and Blazor WebAssembly  
-✅ **Production Ready**: Generates secure, best-practice authentication code  
+✅ **For Existing Projects**: Adds auth to projects created without it
+✅ **Automated Sign-In Setup**: Handles app registration, code generation, and Development-only configuration without creating client secrets or initializing user secrets
+
+✅ **Azure CLI Based**: Uses your existing Azure login
+✅ **Auto-Installs Dependencies**: Automatically installs `dotnet msidentity` tool if needed
+✅ **.NET 10+ Only**: Requires .NET 10.0 or later
+✅ **Interactive or Command-Line**: Run with prompts or specify all options
+✅ **Blazor Optimized**: Best experience with Blazor Server and Blazor WebAssembly
+✅ **Separate Production Configuration**: Supply production settings and any required credentials through deployment tooling
 
 ### Quick Start Reminder
 
@@ -1105,7 +1131,7 @@ dotnet scaffold aspnet entra-id \
 # Or run interactively:
 dotnet scaffold aspnet entra-id
 
-# 3. Run and test
+# 3. Run and test with the Development environment
 dotnet run
 ```
 
@@ -1128,9 +1154,9 @@ For questions or issues, refer to the troubleshooting section or check the offic
 
 ---
 
-**Last Updated**: February 2026  
-**Scaffolder**: `dotnet scaffold aspnet entra-id`  
-**Minimum .NET Version**: .NET 10.0 (scaffolder only available in .NET 10+)  
-**Underlying Tool**: `dotnet msidentity` (auto-installed if needed)  
-**Supported Frameworks**: .NET 10.0+  
+**Last Updated**: February 2026
+**Scaffolder**: `dotnet scaffold aspnet entra-id`
+**Minimum .NET Version**: .NET 10.0 (scaffolder only available in .NET 10+)
+**Underlying Tool**: `dotnet msidentity` (auto-installed if needed)
+**Supported Frameworks**: .NET 10.0+
 **Primary Project Types**: Blazor Server, Blazor WebAssembly

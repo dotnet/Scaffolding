@@ -2,6 +2,8 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using System.Security.AccessControl;
+using System.Security.Principal;
 
 namespace Microsoft.DotNet.Scaffolding.Internal.Services;
 
@@ -45,6 +47,56 @@ public class FileSystem : IFileSystem
     }
 
     /// <inheritdoc />
+    public void WriteAllTextRestricted(string filePath, string content)
+    {
+        FileStream stream;
+        if (OperatingSystem.IsWindows())
+        {
+            var security = new FileSecurity();
+            security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
+            security.AddAccessRule(new FileSystemAccessRule(
+                WindowsIdentity.GetCurrent().User!, FileSystemRights.FullControl, AccessControlType.Allow));
+            stream = new FileInfo(filePath).Create(
+                FileMode.CreateNew, FileSystemRights.FullControl, FileShare.None, 4096, FileOptions.None, security);
+        }
+        else
+        {
+            stream = new FileStream(filePath, new FileStreamOptions
+            {
+                Mode = FileMode.CreateNew,
+                Access = FileAccess.Write,
+                Share = FileShare.None,
+                UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite
+            });
+        }
+
+        using (stream)
+        using (var writer = new StreamWriter(stream))
+        {
+            writer.Write(content);
+        }
+    }
+
+    /// <inheritdoc />
+    public void ReplaceFilePreservingPermissions(string sourcePath, string destinationPath, bool overwrite)
+    {
+        if (overwrite && File.Exists(destinationPath))
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                File.SetUnixFileMode(sourcePath, File.GetUnixFileMode(destinationPath));
+            }
+
+            // ReplaceFile retains the destination's DACL on Windows. A rename does not.
+            File.Replace(sourcePath, destinationPath, destinationBackupFileName: null);
+        }
+        else
+        {
+            File.Move(sourcePath, destinationPath);
+        }
+    }
+
+    /// <inheritdoc />
     public string[] ReadAllLines(string filePath)
     {
         return File.ReadAllLines(filePath);
@@ -84,6 +136,12 @@ public class FileSystem : IFileSystem
     public void CopyFile(string sourcePath, string destinationPath, bool overwrite)
     {
         File.Copy(sourcePath, destinationPath, overwrite);
+    }
+
+    /// <inheritdoc />
+    public void MoveFile(string sourcePath, string destinationPath, bool overwrite)
+    {
+        File.Move(sourcePath, destinationPath, overwrite);
     }
 
     /// <inheritdoc />

@@ -5,6 +5,7 @@
     using Microsoft.DotNet.Scaffolding.Core.Steps;
     using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
     using Microsoft.DotNet.Scaffolding.Internal.Services;
+    using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
     using Microsoft.Extensions.Logging;
     using System.Text.Json;
 
@@ -17,6 +18,7 @@
             public string[]? WebRedirectUris { get; set; } 
             public string[]? SpaRedirectUris { get; set; }
             public bool AutoConfigureLocalUrls { get; set; } = true;
+            public string CallbackPath { get; set; } = UpdateAppSettingsStep.DefaultCallbackPath;
             public bool UseExistingApplication { get; set; }
             internal Func<string, AzCliResult>? AzCliCommand { get; set; }
 
@@ -128,7 +130,7 @@
                 return new AzCliResult(exitCode, stdOut, stdErr);
             }
 
-            private void ConfigureLocalRedirectUris(string projectPath)
+            internal void ConfigureLocalRedirectUris(string projectPath)
             {
                 try
                 {
@@ -165,7 +167,7 @@
                                     if (!string.IsNullOrWhiteSpace(url))
                                     {
                                         var baseUrl = url.Trim().TrimEnd('/');
-                                        localUrls.Add($"{baseUrl}/signin-oidc");
+                                        localUrls.Add($"{baseUrl}{CallbackPath}");
                                     }
                                 }
                             }
@@ -198,9 +200,9 @@
             {
                 var defaultUris = new[]
                 {
-                    "https://localhost:5001/signin-oidc",
-                    "https://localhost:7001/signin-oidc",
-                    "https://localhost:44300/signin-oidc"
+                    $"https://localhost:5001{CallbackPath}",
+                    $"https://localhost:7001{CallbackPath}",
+                    $"https://localhost:44300{CallbackPath}"
                 };
 
                 WebRedirectUris = (WebRedirectUris ?? Array.Empty<string>())

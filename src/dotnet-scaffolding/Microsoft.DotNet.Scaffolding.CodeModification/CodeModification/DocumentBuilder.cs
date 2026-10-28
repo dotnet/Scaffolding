@@ -40,9 +40,29 @@ internal class DocumentBuilder
             _codeFile.Methods.Values.Any(method => method.CodeChanges?.Any(change => change.InvocationArguments is not null) is true))
         {
             var semanticModel = await document.GetSemanticModelAsync();
+            var scopedChanges = new Dictionary<SyntaxNode, List<CodeSnippet>>();
             foreach (var method in _codeFile.Methods.Values)
             {
-                method.CodeChanges = ExpandInvocationArguments(method.CodeChanges ?? [], syntaxRoot, semanticModel);
+                method.CodeChanges = ExpandInvocationArguments(method.CodeChanges ?? [], syntaxRoot, semanticModel, scopedChanges);
+            }
+
+            syntaxRoot = syntaxRoot.TrackNodes(scopedChanges.Keys);
+            foreach (var (originalAnchor, changes) in scopedChanges)
+            {
+                var anchor = syntaxRoot.GetCurrentNode(originalAnchor)!;
+                foreach (var change in (ProjectModifierHelper.FilterCodeSnippets(changes.ToArray(), _options) ?? []).Reverse())
+                {
+                    // Only siblings share the registration's lexical scope. A matching statement in
+                    // another helper must not suppress this configuration.
+                    var statement = SyntaxFactory.ParseStatement(change.Block.TrimEnd(' ', '\r', '\n', ';') + ";");
+                    if (!anchor.Parent!.ChildNodes().Any(node =>
+                        SyntaxFactory.AreEquivalent(node is GlobalStatementSyntax global ? global.Statement : node, statement)))
+                    {
+                        var nodes = GetNodeInsertionList(change, anchor.Parent.Kind())!;
+                        syntaxRoot = syntaxRoot.InsertNodesAfter(anchor, nodes);
+                        anchor = syntaxRoot.GetCurrentNode(originalAnchor)!;
+                    }
+                }
             }
         }
         var output = new StringBuilder();
@@ -60,7 +80,8 @@ internal class DocumentBuilder
         return document;
     }
 
-    internal static CodeSnippet[] ExpandInvocationArguments(CodeSnippet[] snippets, SyntaxNode root, SemanticModel? semanticModel)
+    internal static CodeSnippet[] ExpandInvocationArguments(CodeSnippet[] snippets, SyntaxNode root, SemanticModel? semanticModel,
+        Dictionary<SyntaxNode, List<CodeSnippet>>? scopedChanges = null)
     {
         var result = new List<CodeSnippet>();
         foreach (var snippet in snippets)
@@ -77,6 +98,7 @@ internal class DocumentBuilder
             foreach (var invocation in invocations)
             {
                 var block = snippet.Block;
+                bool requiresScope = false;
                 foreach (var (parameter, defaultValue) in snippet.InvocationArguments)
                 {
                     var argument = invocation.ArgumentList.Arguments
@@ -95,7 +117,50 @@ internal class DocumentBuilder
                         throw new InvalidOperationException($"Unable to resolve '{parameter}' in '{invocation}'. Restore the project's packages and ensure it compiles before scaffolding.");
                     }
 
-                    block = block.Replace($"${parameter}$", argument?.WithoutTrivia().ToString() ?? defaultValue, StringComparison.Ordinal);
+                    var value = defaultValue;
+                    if (argument is not null)
+                    {
+                        var constant = semanticModel?.GetConstantValue(argument) ?? default;
+                        if (constant.HasValue && constant.Value is string text)
+                        {
+                            value = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(text)).ToString();
+                        }
+                        else if (argument is LiteralExpressionSyntax { Token.Value: string literal })
+                        {
+                            value = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(literal)).ToString();
+                        }
+                        else
+                        {
+                            value = argument.WithoutTrivia().ToString();
+                            requiresScope = true;
+                        }
+                    }
+
+                    block = block.Replace($"${parameter}$", value, StringComparison.Ordinal);
+                }
+
+                if (requiresScope)
+                {
+                    var statement = invocation.Ancestors().OfType<StatementSyntax>().FirstOrDefault();
+                    SyntaxNode? anchor = statement?.Parent is GlobalStatementSyntax global ? global : statement;
+                    if (scopedChanges is null || anchor?.Parent is not (BlockSyntax or CompilationUnitSyntax) ||
+                        statement is not (ExpressionStatementSyntax or LocalDeclarationStatementSyntax) ||
+                        invocation.Ancestors().TakeWhile(node => node != statement)
+                            .Any(node => node is AnonymousFunctionExpressionSyntax or QueryExpressionSyntax))
+                    {
+                        throw new InvalidOperationException($"Unable to preserve the scope of '{invocation}'. Use a registration statement inside a block.");
+                    }
+
+                    var scopedSnippet = snippet.WithBlock(BindServiceReceiver(block, invocation, semanticModel));
+                    if (!scopedChanges.TryGetValue(anchor, out var changes))
+                    {
+                        scopedChanges.Add(anchor, changes = []);
+                    }
+                    if (!changes.Any(change => change.Block == scopedSnippet.Block))
+                    {
+                        changes.Add(scopedSnippet);
+                    }
+                    continue;
                 }
 
                 if (blocks.Add(block))
@@ -115,6 +180,45 @@ internal class DocumentBuilder
             }
         }
         return result.ToArray();
+    }
+
+    private static string BindServiceReceiver(string block, InvocationExpressionSyntax invocation, SemanticModel? semanticModel)
+    {
+        // Follow only the receiver chain, not invocations in options lambdas or arguments.
+        ExpressionSyntax? receiver = (invocation.Expression as MemberAccessExpressionSyntax)?.Expression;
+        bool hasAuthenticationCall = false;
+        while (receiver is InvocationExpressionSyntax call && call.Expression is MemberAccessExpressionSyntax member)
+        {
+            if (member.Name.Identifier.ValueText == "AddAuthentication")
+            {
+                receiver = member.Expression;
+                hasAuthenticationCall = true;
+                break;
+            }
+            // Without AddAuthentication, use an existing AuthenticationBuilder only when it
+            // is a stable receiver, rather than evaluating an arbitrary factory call twice.
+            if (member.Expression is not InvocationExpressionSyntax)
+            {
+                break;
+            }
+            receiver = member.Expression;
+        }
+
+        var configuration = SyntaxFactory.ParseStatement(block);
+        if (receiver is not (IdentifierNameSyntax or MemberAccessExpressionSyntax) ||
+            receiver.DescendantNodes().OfType<InvocationExpressionSyntax>().Any() ||
+            (!hasAuthenticationCall && semanticModel?.GetTypeInfo(receiver).Type?.GetMembers("Services").Any() is not true) ||
+            configuration is not ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax configurationCall } })
+        {
+            throw new InvalidOperationException($"Unable to resolve the service collection for '{invocation}'. Use an explicit service collection receiver.");
+        }
+
+        // An existing AuthenticationBuilder has Services; an AddAuthentication call already
+        // supplies the service collection. Neither case replays the registration chain.
+        var services = hasAuthenticationCall
+            ? receiver
+            : SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, receiver.WithoutTrivia(), SyntaxFactory.IdentifierName("Services"));
+        return configuration.ReplaceNode(configurationCall.Expression, services.WithoutTrivia()).ToString();
     }
 
     private static bool IsInvocation(InvocationExpressionSyntax invocation, string? name) =>

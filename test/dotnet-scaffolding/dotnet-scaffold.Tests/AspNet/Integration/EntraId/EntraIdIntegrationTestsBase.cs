@@ -573,7 +573,7 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         Assert.Contains(RemoveWhitespace(registrations), normalized, StringComparison.Ordinal);
         Assert.Equal(2, secondRunContent.Split("AddMicrosoftIdentityWebApp").Length - 1);
         Assert.Equal(2, secondRunContent.Split("PostConfigure<OpenIdConnectOptions>").Length - 1);
-        Assert.Contains(AuthorizationCodeFlowConfiguration.Replace("OpenIdConnectDefaults.AuthenticationScheme", "scheme", StringComparison.Ordinal), normalized, StringComparison.Ordinal);
+        Assert.Contains(AuthorizationCodeFlowConfiguration.Replace("OpenIdConnectDefaults.AuthenticationScheme", "\"CustomOidc\"", StringComparison.Ordinal), normalized, StringComparison.Ordinal);
         Assert.Contains(AuthorizationCodeFlowConfiguration.Replace("OpenIdConnectDefaults.AuthenticationScheme", "\"OtherOidc\"", StringComparison.Ordinal), normalized, StringComparison.Ordinal);
     }
 

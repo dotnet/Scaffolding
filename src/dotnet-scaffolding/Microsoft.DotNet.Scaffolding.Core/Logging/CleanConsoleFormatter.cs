@@ -12,6 +12,10 @@ namespace Microsoft.DotNet.Scaffolding.Core.Logging;
 /// </summary>
 internal class CleanConsoleFormatter : ConsoleFormatter
 {
+    private const string BrightRedColor = "\x1B[1;31m";
+    private const string BrightYellowColor = "\x1B[1;33m";
+    private const string ResetColor = "\x1B[0m";
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CleanConsoleFormatter"/> class.
     /// </summary>
@@ -31,10 +35,33 @@ internal class CleanConsoleFormatter : ConsoleFormatter
     {
         // Format the log message using the provided formatter, ignoring log level and category.
         string? message = logEntry.Formatter?.Invoke(logEntry.State, logEntry.Exception);
-
-        if (message is not null)
+        if (message is null)
         {
-            textWriter.WriteLine(message);
+            return;
+        }
+
+        // Apply console color using ANSI escape codes (only if output is not redirected).
+        // Uses a similar approach as .NET's built-in console formatters.
+        // See: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.Extensions.Logging.Console/src/TextWriterExtensions.cs
+        string? colorCode = !Console.IsOutputRedirected
+            ? logEntry.LogLevel switch
+            {
+                LogLevel.Error or LogLevel.Critical => BrightRedColor,
+                LogLevel.Warning => BrightYellowColor,
+                _ => null
+            }
+            : null;
+
+        if (colorCode is not null)
+        {
+            textWriter.Write(colorCode);
+        }
+
+        textWriter.WriteLine(message);
+
+        if (colorCode is not null)
+        {
+            textWriter.Write(ResetColor);
         }
     }
 }

@@ -12,8 +12,8 @@ namespace Microsoft.DotNet.Scaffolding.Core.Logging;
 /// </summary>
 internal class CleanConsoleFormatter : ConsoleFormatter
 {
-    private const string BrightRedColor = "\x1B[1;31m";
-    private const string BrightYellowColor = "\x1B[1;33m";
+    private const string BrightRedColor = "\x1B[1m\x1B[31m";
+    private const string BrightYellowColor = "\x1B[1m\x1B[33m";
     private const string ResetColor = "\x1B[0m";
 
     /// <summary>
@@ -32,6 +32,9 @@ internal class CleanConsoleFormatter : ConsoleFormatter
     /// <param name="scopeProvider">The external scope provider.</param>
     /// <param name="textWriter">The text writer to write the log message to.</param>
     public override void Write<TState>(in LogEntry<TState> logEntry, IExternalScopeProvider? scopeProvider, TextWriter textWriter)
+        => Write(logEntry, textWriter, Console.IsOutputRedirected);
+
+    internal void Write<TState>(in LogEntry<TState> logEntry, TextWriter textWriter, bool isOutputRedirected)
     {
         string? message = logEntry.Formatter?.Invoke(logEntry.State, logEntry.Exception);
         if (message is null)
@@ -40,7 +43,7 @@ internal class CleanConsoleFormatter : ConsoleFormatter
         }
 
         // Write ANSI codes through the logging writer, not the global console.
-        string? color = Console.IsOutputRedirected ? null : logEntry.LogLevel switch
+        string? color = isOutputRedirected ? null : logEntry.LogLevel switch
         {
             LogLevel.Error or LogLevel.Critical => BrightRedColor,
             LogLevel.Warning => BrightYellowColor,

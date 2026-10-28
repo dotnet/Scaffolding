@@ -113,13 +113,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 // Fix for CS8620: Ensure all elements in the array are non-null by using null-coalescing operator
                 var args = new[]
                 {
-                    "--register-app",
+                    "--create-app-registration",
                     "--tenant-id", TenantId ?? string.Empty,
                     "--username", Username ?? string.Empty
                 };
                 // Fix for IDE0300: Simplify collection initialization
-                var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
-                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+                var (exitCode, stdOut, stdErr) = RunRegistration(args);
                 if (exitCode != 0)
                 {
                     _logger.LogError($"Error registering application: {stdErr}");
@@ -159,6 +158,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 
         protected virtual bool EnsureToolInstalled()
             => MsIdentityToolHelper.EnsureMsIdentityIsInstalled(_logger);
+
+        protected virtual (int ExitCode, string? Output, string? Error) RunRegistration(string[] args)
+        {
+            var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
+            var exitCode = runner.ExecuteAndCaptureOutput(out var output, out var error);
+            return (exitCode, output, error);
+        }
 
         protected virtual (int ExitCode, string? Output, string? Error) ReadCapabilities()
             => MsIdentityToolHelper.ReadCapabilities();

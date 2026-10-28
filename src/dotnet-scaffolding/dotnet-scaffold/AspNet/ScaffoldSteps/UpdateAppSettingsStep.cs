@@ -16,6 +16,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
     /// </summary>
     internal class UpdateAppSettingsStep : ScaffoldStep
     {
+        private static readonly JsonNodeOptions ConfigurationNodeOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
         private static readonly JsonDocumentOptions ConfigurationJsonOptions = new()
         {
             CommentHandling = JsonCommentHandling.Skip,
@@ -144,7 +149,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     originalContent = jsonString;
                     try
                     {
-                        content = JsonNode.Parse(jsonString, documentOptions: ConfigurationJsonOptions);
+                        content = JsonNode.Parse(jsonString, ConfigurationNodeOptions, ConfigurationJsonOptions);
                     }
                     catch (JsonException ex)
                     {
@@ -277,7 +282,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 
                     try
                     {
-                        devContent = JsonNode.Parse(devJsonString, documentOptions: ConfigurationJsonOptions);
+                        devContent = JsonNode.Parse(devJsonString, ConfigurationNodeOptions, ConfigurationJsonOptions);
                     }
                     catch (JsonException ex)
                     {

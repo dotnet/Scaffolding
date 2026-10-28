@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json.Nodes;
+using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -22,6 +23,30 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings.Tests
     /// </summary>
     public class UpdateAppSettingsStepTests
     {
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task ExecuteAsync_UpdatesConfigurationKeysCaseInsensitively(bool primarySettings)
+        {
+            var fileSystem = CreateFileSystem();
+            var path = Path.Combine("project", primarySettings ? "appsettings.json" : "appsettings.Development.json");
+            fileSystem.Setup(fs => fs.ReadAllText(path))
+                .Returns("""{"azuread":{"clientid":"old-app","TENANTID":"old-tenant","clientcredentials":[{"SourceType":"StoreWithDistinguishedName","CertificateDistinguishedName":"CN=Dev"}]}}""");
+            string? written = null;
+            fileSystem.Setup(fs => fs.WriteAllText(path, It.IsAny<string>()))
+                .Callback((string _, string json) => written = json);
+            var step = CreateStep(fileSystem);
+
+            Assert.True(await step.ExecuteAsync(CreateContext(existingApp: true)));
+
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(Assert.IsType<string>(written)));
+            var configuration = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddJsonStream(stream).Build();
+            Assert.Equal("app-id", configuration["AzureAd:ClientId"]);
+            Assert.Equal("tenant-a", configuration["AzureAd:TenantId"]);
+            Assert.Equal("CN=Dev", configuration["AzureAd:ClientCredentials:0:CertificateDistinguishedName"]);
+        }
+
         [Fact]
         public async Task ExecuteAsync_PreservesDevelopmentOnlyCredentialsAndUnrelatedProperties()
         {

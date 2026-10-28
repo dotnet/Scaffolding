@@ -43,6 +43,10 @@ effective identity of every operation.
 
 Project detection runs before registration so a detection failure cannot leave
 a newly created application or credential.
+New applications are created with MSIdentity's `--create-app-registration`
+command, which does not write project configuration after creation.
+Cleanup with an explicit client ID, tenant, and username bypasses project
+configuration inference, so damaged local settings cannot block deletion.
 
 MSIdentity also attempts to delete a partially created registration using its
 returned object ID and the same Graph client if a subsequent registration
@@ -65,7 +69,8 @@ failure during creation), inspect the selected tenant manually.
 Settings persistence prepares both settings files before writing. If a write
 is needed, only scaffold-managed identity properties are merged into development
 settings; development-only credentials and unrelated properties are preserved.
-Both settings files accept comments and trailing commas, consistent with
+Both settings files match property names case-insensitively and accept comments
+and trailing commas, consistent with
 ASP.NET Core JSON configuration. Rewriting serializes JSON without preserving
 comments or original formatting.
 If a write

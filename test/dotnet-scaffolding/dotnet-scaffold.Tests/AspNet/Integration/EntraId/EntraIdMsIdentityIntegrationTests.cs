@@ -32,7 +32,7 @@ public class EntraIdMsIdentityIntegrationTests
         
         // Act & Assert
         // Verify that RegisterAppStep type exists and can be instantiated
-        // This step is responsible for calling "dotnet msidentity --register-app" or "--update-app-registration"
+        // This step calls "dotnet msidentity --create-app-registration" or "--update-app-registration".
         Type registerAppStepType = typeof(RegisterAppStep);
         Assert.NotNull(registerAppStepType);
         Assert.True(registerAppStepType.IsAssignableTo(typeof(ScaffoldStep)));

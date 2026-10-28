@@ -389,8 +389,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             foreach (var file in otherFiles)
             {
                 var fileDoc = project.GetDocumentFromName(file.FileName, FileSystem);
+                if (file.FileName.Equals("Components\\App.razor", StringComparison.OrdinalIgnoreCase) && fileDoc != null)
+                {
+                    BlazorIdentityHelper.ConfigureAppRenderMode(file, FileSystem.ReadAllText(fileDoc.Name));
+                }
                 await DocumentBuilder.ApplyTextReplacements(file, fileDoc, new CodeChangeOptions(), FileSystem);
                 if (file.FileName.Equals("Routes.razor", StringComparison.OrdinalIgnoreCase) &&
+                    fileDoc != null &&
                     FileSystem.FileExists(fileDoc.Name))
                 {
                     var usingStatement = $"@using {blazorIdentityModel.BlazorIdentityNamespace}.Shared";

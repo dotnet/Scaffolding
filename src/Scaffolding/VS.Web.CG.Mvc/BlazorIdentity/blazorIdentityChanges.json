@@ -13,8 +13,22 @@
               }
             },
             {
+              "Block": "app.UseAntiforgery()",
+              "InsertBefore": [ "app.MapAdditionalIdentityEndpoints();" ],
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
               "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
               "Block": "WebApplication.CreateBuilder.Services.AddCascadingAuthenticationState()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            },
+            {
+              "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+              "Block": "WebApplication.CreateBuilder.Services.AddAuthorization()",
               "LeadingTrivia": {
                 "Newline": true
               }
@@ -253,7 +267,7 @@
       "Replacements":  [
         {
           "ReplaceSnippet": [
-            "<HeadOutlet @rendermode=\"InteractiveServer\" />"
+            "<HeadOutlet @rendermode=\"$(BlazorRenderMode)\" />"
           ],
           "MultiLineBlock": [
             "<HeadOutlet @rendermode=\"PageRenderMode\" />"
@@ -261,41 +275,11 @@
         },
         {
           "ReplaceSnippet": [
-            "<Routes @rendermode=\"InteractiveServer\" />"
+            "<Routes @rendermode=\"$(BlazorRenderMode)\" />"
           ],
           "MultiLineBlock": [
             "<Routes @rendermode=\"PageRenderMode\" />"
           ]
-        },
-        {
-          "ReplaceSnippet": [
-            "<HeadOutlet />"
-          ],
-          "MultiLineBlock": [
-            "<HeadOutlet @rendermode=\"PageRenderMode\" />"
-          ],
-          "CheckBlock": "<HeadOutlet />"
-        },
-        {
-          "ReplaceSnippet": [
-            "<Router AppAssembly=\"typeof(Program).Assembly\"",
-            "        NotFoundPage=\"typeof(Pages.NotFound)\">",
-            "    <Found Context=\"routeData\">",
-            "        <RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" />",
-            "        <FocusOnNavigate RouteData=\"routeData\" Selector=\"h1\" />",
-            "    </Found>",
-            "</Router>"
-          ],
-          "MultiLineBlock": [
-            "<Router AppAssembly=\"typeof(Program).Assembly\"",
-            "        NotFoundPage=\"typeof(Pages.NotFound)\">",
-            "    <Found Context=\"routeData\">",
-            "        <RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" @rendermode=\"PageRenderMode\" />",
-            "        <FocusOnNavigate RouteData=\"routeData\" Selector=\"h1\" />",
-            "    </Found>",
-            "</Router>"
-          ],
-          "CheckBlock": "RouteView RouteData"
         },
         {
           "ReplaceSnippet": [
@@ -307,7 +291,7 @@
             "    private HttpContext HttpContext { get; set; } = default!;",
             "",
             "    private IComponentRenderMode? PageRenderMode =>",
-            "        HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;",
+            "        HttpContext.AcceptsInteractiveRouting() ? $(BlazorRenderMode) : null;",
             "}",
             "</body>"
           ],

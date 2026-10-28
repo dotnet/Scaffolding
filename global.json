@@ -1,14 +1,14 @@
 {
   "sdk": {
-    "version": "11.0.100-rc.1.26425.128",
+    "version": "11.0.100-rc.2.26504.105",
     "allowPrerelease": true,
     "rollForward": "latestMajor"
   },
   "tools": {
-    "dotnet": "11.0.100-rc.1.26425.128"
+    "dotnet": "11.0.100-rc.2.26504.105"
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "11.0.0-beta.26514.118",
+    "Microsoft.DotNet.Arcade.Sdk": "11.0.0-beta.26524.110",
     "Microsoft.DotNet.Helix.Sdk": "9.0.0-beta.23607.2"
   }
 }

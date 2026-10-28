@@ -80,6 +80,33 @@ public class ProjectModifierHelperTests
             },
             "FIRST(.*) [second]$\r\nnew $1 ${value} \\literal\n");
 
+    [Theory]
+    [InlineData("<RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(L)\"/>")]
+    [InlineData("<RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(L)\" />")]
+    [InlineData("<RouteView RouteData=\"routeData\"\r\n    DefaultLayout=\"typeof(L)\"\r\n/>")]
+    public Task Replacements_WhitespaceVariationsAllowOptionalGapBeforeSelfClosingTag(string input) =>
+        AssertBothReplacementPathsAsync(
+            input,
+            new CodeSnippet
+            {
+                ReplaceSnippet = ["<RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(L)\" />"],
+                Block = "replaced",
+                MatchWhitespaceVariations = true
+            },
+            "replaced");
+
+    [Fact]
+    public Task Replacements_WhitespaceVariationsStillRequireAttributeSeparators() =>
+        AssertBothReplacementPathsAsync(
+            "<RouteView RouteData=\"routeData\"DefaultLayout=\"typeof(L)\"/>",
+            new CodeSnippet
+            {
+                ReplaceSnippet = ["<RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(L)\" />"],
+                Block = "replaced",
+                MatchWhitespaceVariations = true
+            },
+            "<RouteView RouteData=\"routeData\"DefaultLayout=\"typeof(L)\"/>");
+
     [Fact]
     public Task Replacements_RespectExistingCheckBlock() =>
         AssertBothReplacementPathsAsync(

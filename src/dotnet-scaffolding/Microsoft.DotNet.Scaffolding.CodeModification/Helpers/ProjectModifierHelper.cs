@@ -553,6 +553,8 @@ internal static class ProjectModifierHelper
         if (matchWhitespaceVariations)
         {
             var whitespacePattern = string.Join(@"\s+", Regex.Split(snippet, @"\s+").Select(Regex.Escape));
+            // Whitespace before a self-closing "/>" is optional in Razor/XML.
+            whitespacePattern = whitespacePattern.Replace(@"\s+/>", @"\s*/>");
             return Regex.Replace(source, whitespacePattern, _ => replacement);
         }
 

@@ -533,7 +533,7 @@ internal static class ProjectModifierHelper
             var snippet = change.ReplaceSnippet is null ? string.Empty : string.Join("\n", change.ReplaceSnippet).Replace("\r\n", "\n");
             if (!string.IsNullOrEmpty(snippet))
             {
-                source = ReplaceSnippet(source, snippet, change.Block);
+                source = ReplaceSnippet(source, snippet, change.Block, change.MatchWhitespaceVariations);
             }
             else if (change.Prepend)
             {
@@ -548,8 +548,14 @@ internal static class ProjectModifierHelper
         return source;
     }
 
-    private static string ReplaceSnippet(string source, string snippet, string replacement)
+    private static string ReplaceSnippet(string source, string snippet, string replacement, bool matchWhitespaceVariations)
     {
+        if (matchWhitespaceVariations)
+        {
+            var whitespacePattern = string.Join(@"\s+", Regex.Split(snippet, @"\s+").Select(Regex.Escape));
+            return Regex.Replace(source, whitespacePattern, _ => replacement);
+        }
+
         if (!snippet.Contains('\n'))
         {
             return source.Replace(snippet, replacement, StringComparison.Ordinal);

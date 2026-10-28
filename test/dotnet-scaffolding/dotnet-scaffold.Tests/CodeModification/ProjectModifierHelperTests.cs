@@ -3,18 +3,44 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.CodeModification;
 
 public class ProjectModifierHelperTests
 {
+    [Theory]
+    [InlineData("net10.0", "blazorEntraChanges.json")]
+    [InlineData("net10.0", "blazorWasmEntraChanges.json")]
+    [InlineData("net11.0", "blazorEntraChanges.json")]
+    [InlineData("net11.0", "blazorWasmEntraChanges.json")]
+    public async Task EntraRouterReplacements_MatchWhitespaceVariantsAndAreIdempotent(string framework, string configName)
+    {
+        var configPath = Path.Combine(ScaffoldCliHelper.GetRepoRoot(), "src", "dotnet-scaffolding",
+            "dotnet-scaffold", "AspNet", "Templates", framework, "CodeModificationConfigs", configName);
+        using var config = JsonDocument.Parse(File.ReadAllText(configPath));
+        var routesConfig = config.RootElement.GetProperty("Files").EnumerateArray()
+            .Single(file => file.GetProperty("FileName").GetString()!.EndsWith("Routes.razor", StringComparison.Ordinal));
+        var snippet = routesConfig.GetProperty("Replacements")[0].Deserialize<CodeSnippet>()!;
+        const string prefix = "<Router>\r\n    <Found Context=\"routeData\">\n        ";
+        const string suffix = "\r\n        <FocusOnNavigate RouteData=\"routeData\" Selector=\"h1\" />\n    </Found>\r\n</Router>";
+
+        foreach (var whitespace in new[] { "\n            ", "\r\n            ", " ", "  ", "\t" })
+        {
+            var routeView = $"<RouteView{whitespace}RouteData=\"routeData\"{whitespace}DefaultLayout=\"typeof(Layout.MainLayout)\"{whitespace}/>";
+            await AssertBothReplacementPathsAsync(prefix + routeView + suffix, snippet, prefix + snippet.Block + suffix);
+        }
+    }
+
     [Theory]
     [InlineData("\n", "\n")]
     [InlineData("\r\n", "\r\n")]
@@ -41,6 +67,18 @@ public class ProjectModifierHelperTests
             "OLD(.*)$\r\nold(.*)$\n",
             new CodeSnippet { ReplaceSnippet = ["old(.*)$"], Block = "new $1" },
             "OLD(.*)$\r\nnew $1\n");
+
+    [Fact]
+    public Task Replacements_WhitespaceVariationsPreserveLiteralTextAndCaseSensitivity() =>
+        AssertBothReplacementPathsAsync(
+            "FIRST(.*) [second]$\r\nfirst(.*)\t[second]$\n",
+            new CodeSnippet
+            {
+                ReplaceSnippet = ["first(.*) [second]$"],
+                Block = "new $1 ${value} \\literal",
+                MatchWhitespaceVariations = true
+            },
+            "FIRST(.*) [second]$\r\nnew $1 ${value} \\literal\n");
 
     [Fact]
     public Task Replacements_RespectExistingCheckBlock() =>

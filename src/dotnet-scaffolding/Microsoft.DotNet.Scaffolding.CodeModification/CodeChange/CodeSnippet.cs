@@ -33,4 +33,5 @@ internal class CodeSnippet
     public string[]? MultiLineBlock { get; set; }
     public string? FileBlock { get; set; }
     public string[]? ReplaceSnippet { get; set; }
+    public bool MatchWhitespaceVariations { get; set; }
 }

@@ -84,6 +84,7 @@
                     "ReplaceSnippet": [
                         "<RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" />"
                     ],
+                    "MatchWhitespaceVariations": true,
                     "MultiLineBlock": [
                         "<AuthorizeRouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\">",
                         "            <NotAuthorized>",

@@ -680,6 +680,8 @@ The Entra ID Scaffolder is currently optimized for:
   - The server configures Entra authentication and serializes authentication state.
   - The client deserializes that state; it does not use standalone MSAL authentication.
   - The router uses `AuthorizeRouteView`, with `RedirectToLogin` generated in the project that owns the router.
+    The .NET 10/11 router recipes accept spaces, tabs, and line breaks between the existing `RouteView` attributes.
+    They opt into `MatchWhitespaceVariations`; other text replacements retain literal whitespace matching.
   - `LoginOrLogout.razor` is generated beside each existing server or client `NavMenu.razor`. If neither navigation component exists, scaffolding reports an error with the expected paths.
 
 **Not supported:** Standalone Blazor WebAssembly apps and directly selected WebAssembly client projects.

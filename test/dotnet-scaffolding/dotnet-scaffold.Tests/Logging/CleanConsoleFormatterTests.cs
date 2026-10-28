@@ -7,6 +7,8 @@ using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Options;
+using Moq;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.Logging;
@@ -24,7 +26,7 @@ public class CleanConsoleFormatterTests
     [InlineData(LogLevel.Critical, true, null)]
     public void Write_UsesLogLevelColorUnlessOutputIsRedirected(LogLevel level, bool isOutputRedirected, string? color)
     {
-        var formatter = new CleanConsoleFormatter();
+        var formatter = CreateFormatter();
         using var writer = new StringWriter();
         var entry = CreateEntry(level, "Invalid --model 'Program'");
 
@@ -37,13 +39,13 @@ public class CleanConsoleFormatterTests
     [Fact]
     public void Write_UsesConsoleRedirectionState()
     {
-        var formatter = new CleanConsoleFormatter();
+        var formatter = CreateFormatter();
         using var actual = new StringWriter();
         using var expected = new StringWriter();
         var entry = CreateEntry(LogLevel.Error, "Invalid model");
 
         formatter.Write(entry, scopeProvider: null, actual);
-        formatter.Write(entry, expected, Console.IsOutputRedirected);
+        formatter.Write(entry, expected, Console.IsOutputRedirected, Console.IsErrorRedirected, Environment.GetEnvironmentVariable("NO_COLOR"));
 
         Assert.Equal(expected.ToString(), actual.ToString());
     }
@@ -54,7 +56,7 @@ public class CleanConsoleFormatterTests
     [InlineData(LogLevel.Critical, ConsoleColor.Red)]
     public void Write_ProducesColorsRecognizedByWindowsFallbackParser(LogLevel level, ConsoleColor expectedColor)
     {
-        var formatter = new CleanConsoleFormatter();
+        var formatter = CreateFormatter();
         using var writer = new StringWriter();
         var entry = CreateEntry(level, "Invalid model");
         formatter.Write(entry, writer, isOutputRedirected: false);
@@ -73,6 +75,54 @@ public class CleanConsoleFormatterTests
         parse.Invoke(parser, new object[] { writer.ToString() });
 
         Assert.Equal($"Invalid model{Environment.NewLine}", parsed.ToString());
+    }
+
+    [Theory]
+    [InlineData(LogLevel.Error, false, true, false)]
+    [InlineData(LogLevel.Error, true, false, true)]
+    [InlineData(LogLevel.Error, false, false, true)]
+    [InlineData(LogLevel.Error, true, true, false)]
+    [InlineData(LogLevel.Warning, false, true, true)]
+    [InlineData(LogLevel.Warning, true, false, false)]
+    public void Write_UsesDestinationStreamRedirection(LogLevel level, bool stdoutRedirected, bool stderrRedirected, bool expectColor)
+    {
+        var formatter = CreateFormatter(LogLevel.Error);
+        using var writer = new StringWriter();
+        var entry = CreateEntry(level, "Invalid model");
+
+        formatter.Write(entry, writer, stdoutRedirected, stderrRedirected);
+
+        string color = level == LogLevel.Warning ? "\x1B[1m\x1B[33m" : "\x1B[1m\x1B[31m";
+        string expected = expectColor
+            ? $"{color}Invalid model{Environment.NewLine}\x1B[0m"
+            : $"Invalid model{Environment.NewLine}";
+        Assert.Equal(expected, writer.ToString());
+    }
+
+    [Theory]
+    [InlineData(null, true)]
+    [InlineData("", true)]
+    [InlineData("1", false)]
+    [InlineData("0", false)]
+    [InlineData(" ", false)]
+    public void Write_HonorsNoColor(string? noColor, bool expectColor)
+    {
+        var formatter = CreateFormatter();
+        using var writer = new StringWriter();
+        var entry = CreateEntry(LogLevel.Error, "Invalid model");
+
+        formatter.Write(entry, writer, isOutputRedirected: false, noColor: noColor);
+
+        Assert.Equal(expectColor
+            ? $"\x1B[1m\x1B[31mInvalid model{Environment.NewLine}\x1B[0m"
+            : $"Invalid model{Environment.NewLine}", writer.ToString());
+    }
+
+    private static CleanConsoleFormatter CreateFormatter(LogLevel stderrThreshold = LogLevel.None)
+    {
+        var options = new ConsoleLoggerOptions { LogToStandardErrorThreshold = stderrThreshold };
+        var monitor = Mock.Of<IOptionsMonitor<ConsoleLoggerOptions>>(m => m.CurrentValue == options);
+        return new CleanConsoleFormatter(monitor);
     }
 
     private static LogEntry<string> CreateEntry(LogLevel level, string message)

@@ -17,6 +17,68 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Extensions;
 
 public class BlazorEntraScaffolderBuilderExtensionsTests
 {
+    [Fact]
+    public void WithUpdateAppAuthorizationStep_ForwardsSelectedIdentityAndClientId()
+    {
+        var builder = new Mock<IScaffoldBuilder>();
+        Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>? configure = null;
+        builder.Setup(b => b.WithStep<UpdateAppAuthorizationStep>(It.IsAny<Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>>()))
+            .Callback<Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>, Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>>((action, _) => configure = action)
+            .Returns(builder.Object);
+        var context = new ScaffolderContext(Mock.Of<IScaffolder>());
+        context.Properties[nameof(EntraIdModel)] = new EntraIdModel
+        {
+            Username = "selected@example.com",
+            TenantId = "selected-tenant"
+        };
+        context.Properties[nameof(EntraIdSettings)] = new EntraIdSettings { Project = "Test.csproj" };
+        context.Properties["ClientId"] = "selected-app";
+        var step = new UpdateAppAuthorizationStep(NullLogger<UpdateAppAuthorizationStep>.Instance,
+            Mock.Of<IFileSystem>(), Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = string.Empty,
+            ClientId = null
+        };
+
+        builder.Object.WithUpdateAppAuthorizationStep();
+        Assert.NotNull(configure);
+        configure(new ScaffoldStepConfigurator<UpdateAppAuthorizationStep> { Step = step, Context = context });
+
+        Assert.Equal("selected-tenant", step.TenantId);
+        Assert.Equal("selected@example.com", step.Username);
+        Assert.Equal("selected-app", step.ClientId);
+        Assert.Equal("Test.csproj", step.ProjectPath);
+        Assert.False(step.SkipStep);
+    }
+
+    [Fact]
+    public void WithValidateAzureCliIdentityStep_UsesSelectedModelIdentity()
+    {
+        var builder = new Mock<IScaffoldBuilder>();
+        Action<ScaffoldStepConfigurator<ValidateAzureCliIdentityStep>>? configure = null;
+        builder.Setup(b => b.WithStep<ValidateAzureCliIdentityStep>(It.IsAny<Action<ScaffoldStepConfigurator<ValidateAzureCliIdentityStep>>>()))
+            .Callback<Action<ScaffoldStepConfigurator<ValidateAzureCliIdentityStep>>, Action<ScaffoldStepConfigurator<ValidateAzureCliIdentityStep>>>((action, _) => configure = action)
+            .Returns(builder.Object);
+        var context = new ScaffolderContext(Mock.Of<IScaffolder>());
+        context.Properties[nameof(EntraIdModel)] = new EntraIdModel
+        {
+            Username = "selected@example.com",
+            TenantId = "selected-tenant"
+        };
+        var step = new ValidateAzureCliIdentityStep(NullLogger<ValidateAzureCliIdentityStep>.Instance)
+        {
+            TenantId = string.Empty,
+            Username = string.Empty
+        };
+
+        builder.Object.WithValidateAzureCliIdentityStep();
+        Assert.NotNull(configure);
+        configure(new ScaffoldStepConfigurator<ValidateAzureCliIdentityStep> { Step = step, Context = context });
+
+        Assert.Equal("selected-tenant", step.TenantId);
+        Assert.Equal("selected@example.com", step.Username);
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

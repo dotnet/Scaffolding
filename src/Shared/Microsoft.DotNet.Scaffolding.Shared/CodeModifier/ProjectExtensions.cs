@@ -48,9 +48,19 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         /// <returns></returns>
         public static Document GetDocumentFromName(this CodeAnalysis.Project project, string fileName, IFileSystem fileSystem)
         {
-            if (project != null && !string.IsNullOrEmpty(fileName))
+            if (project == null || string.IsNullOrEmpty(fileName))
             {
-                var projectDirectory = Path.GetDirectoryName(project.FilePath);
+                return null;
+            }
+
+            foreach (var candidateProject in EnumerateCandidateProjects(project))
+            {
+                var projectDirectory = Path.GetDirectoryName(candidateProject.FilePath);
+                if (string.IsNullOrEmpty(projectDirectory))
+                {
+                    continue;
+                }
+
                 string extension = Path.GetExtension(fileName);
                 if (!string.IsNullOrEmpty(extension))
                 {
@@ -64,12 +74,45 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                     string fileText = fileSystem.ReadAllText(filePath);
                     if (!string.IsNullOrEmpty(fileText))
                     {
-                        return project.AddDocument(filePath, fileText);
+                        return candidateProject.AddDocument(filePath, fileText);
                     }
                 }
             }
 
             return null;
+        }
+
+        private static IEnumerable<CodeAnalysis.Project> EnumerateCandidateProjects(CodeAnalysis.Project project)
+        {
+            var queue = new Queue<CodeAnalysis.Project>();
+            var visited = new HashSet<string>();
+            queue.Enqueue(project);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                if (current == null)
+                {
+                    continue;
+                }
+
+                var key = current.FilePath ?? current.Name;
+                if (!visited.Add(key))
+                {
+                    continue;
+                }
+
+                yield return current;
+
+                foreach (var projectReference in current.ProjectReferences)
+                {
+                    var referencedProject = current.Solution.GetProject(projectReference.ProjectId);
+                    if (referencedProject != null)
+                    {
+                        queue.Enqueue(referencedProject);
+                    }
+                }
+            }
         }
     }
 }

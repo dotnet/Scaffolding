@@ -2,9 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
+using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor;
+using Microsoft.DotNet.Scaffolding.Shared;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity;
 using Xunit;
@@ -96,6 +100,63 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             var resource = assembly.GetManifestResourceNames().Single(name => name.EndsWith("blazorIdentityChanges.json", StringComparison.Ordinal));
             using var stream = assembly.GetManifestResourceStream(resource);
             return JsonDocument.Parse(stream);
+        }
+
+        [Fact]
+        public void GetDocumentFromName_ResolvesReferencedClientProjectFiles()
+        {
+            var tempRoot = Path.Combine(Path.GetTempPath(), $"blazor-identity-{Guid.NewGuid():N}");
+            Directory.CreateDirectory(Path.Combine(tempRoot, "Client"));
+            Directory.CreateDirectory(Path.Combine(tempRoot, "Server"));
+
+            try
+            {
+                var clientProjectPath = Path.Combine(tempRoot, "Client", "Client.csproj");
+                var clientRoutesPath = Path.Combine(tempRoot, "Client", "Routes.razor");
+                var serverProjectPath = Path.Combine(tempRoot, "Server", "Server.csproj");
+
+                File.WriteAllText(clientProjectPath, "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\" />");
+                File.WriteAllText(clientRoutesPath, "<Router />");
+                File.WriteAllText(serverProjectPath, "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><ItemGroup><ProjectReference Include=\"..\\Client\\Client.csproj\" /></ItemGroup></Project>");
+
+                var workspace = new AdhocWorkspace();
+                var solution = workspace.CurrentSolution;
+
+                var clientProjectId = ProjectId.CreateNewId();
+                solution = solution.AddProject(ProjectInfo.Create(
+                    clientProjectId,
+                    VersionStamp.Create(),
+                    "Client",
+                    "Client",
+                    LanguageNames.CSharp,
+                    filePath: clientProjectPath,
+                    outputFilePath: Path.Combine(tempRoot, "Client", "bin", "Debug", "Client.dll")));
+                var clientProject = solution.GetProject(clientProjectId);
+
+                var serverProjectId = ProjectId.CreateNewId();
+                solution = solution.AddProject(ProjectInfo.Create(
+                    serverProjectId,
+                    VersionStamp.Create(),
+                    "Server",
+                    "Server",
+                    LanguageNames.CSharp,
+                    filePath: serverProjectPath,
+                    outputFilePath: Path.Combine(tempRoot, "Server", "bin", "Debug", "Server.dll")));
+                var solutionWithReference = solution.AddProjectReference(serverProjectId, new ProjectReference(clientProject.Id));
+                var serverProjectWithReference = solutionWithReference.GetProject(serverProjectId);
+
+                var document = serverProjectWithReference.GetDocumentFromName("Routes.razor", DefaultFileSystem.Instance);
+
+                Assert.NotNull(document);
+                Assert.Equal(clientRoutesPath, document.Name);
+            }
+            finally
+            {
+                if (Directory.Exists(tempRoot))
+                {
+                    Directory.Delete(tempRoot, recursive: true);
+                }
+            }
         }
 
         [SkippableTheory]

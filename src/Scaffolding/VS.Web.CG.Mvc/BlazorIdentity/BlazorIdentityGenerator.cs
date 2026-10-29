@@ -378,17 +378,24 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 Logger.LogMessage($"Error deserializing {resourceName}. {ex.Message}");
             }
 
-            //Getting Program.cs document
+            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
+            var clientProject = GetBlazorWasmClientProject(project);
+
             var programCsFile = minimalApiChangesConfig.Files.FirstOrDefault(x => x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
-            await ModifyProgramCsAsync(programCsFile, blazorIdentityModel);
+            await ModifyProgramCsAsync(programCsFile, blazorIdentityModel, project);
+
+            if (clientProject != null)
+            {
+                var clientProgramCsFile = CreateClientProgramChanges();
+                await ModifyProgramCsAsync(clientProgramCsFile, blazorIdentityModel, clientProject);
+            }
 
             //Modify all other non .cs files
             var otherFiles = minimalApiChangesConfig.Files.Where(x => !x.FileName.EndsWith(".cs", StringComparison.OrdinalIgnoreCase));
-            var projectPath = Path.GetDirectoryName(ProjectContext.ProjectFullPath);
-            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
             foreach (var file in otherFiles)
             {
-                var fileDoc = project.GetDocumentFromName(file.FileName, FileSystem);
+                var targetProject = GetTargetProjectForFile(file.FileName, project, clientProject);
+                var fileDoc = targetProject?.GetDocumentFromName(file.FileName, FileSystem);
                 if (file.FileName.Equals("Components\\App.razor", StringComparison.OrdinalIgnoreCase) && fileDoc != null)
                 {
                     BlazorIdentityHelper.ConfigureAppRenderMode(file, FileSystem.ReadAllText(fileDoc.Name));
@@ -410,15 +417,80 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
-        internal async Task ModifyProgramCsAsync(CodeFile programCsFile, BlazorIdentityModel blazorIdentityModel)
+        private static Project GetTargetProjectForFile(string fileName, Project serverProject, Project clientProject)
         {
-            if (programCsFile is null)
+            if (clientProject == null || serverProject == null)
+            {
+                return serverProject;
+            }
+
+            var clientSpecificFiles = new[]
+            {
+                "Routes.razor",
+                "Layout\\NavMenu.razor",
+                "NavMenu.razor.css",
+                "_Imports.razor"
+            };
+
+            return clientSpecificFiles.Any(clientFile => fileName.Equals(clientFile, StringComparison.OrdinalIgnoreCase))
+                ? clientProject
+                : serverProject;
+        }
+
+        private Project GetBlazorWasmClientProject(Project currentProject)
+        {
+            if (currentProject == null)
+            {
+                return null;
+            }
+
+            foreach (var projectReference in currentProject.ProjectReferences)
+            {
+                var referencedProject = currentProject.Solution.GetProject(projectReference.ProjectId);
+                if (referencedProject == null || string.IsNullOrEmpty(referencedProject.FilePath))
+                {
+                    continue;
+                }
+
+                var fullPath = referencedProject.FilePath;
+                if (FileSystem.FileExists(fullPath) &&
+                    FileSystem.ReadAllText(fullPath).Contains("Microsoft.NET.Sdk.BlazorWebAssembly", StringComparison.OrdinalIgnoreCase))
+                {
+                    return referencedProject;
+                }
+            }
+
+            return null;
+        }
+
+        private static CodeFile CreateClientProgramChanges()
+        {
+            return new CodeFile
+            {
+                FileName = "Program.cs",
+                Methods = new Dictionary<string, Method>
+                {
+                    ["Global"] = new Method
+                    {
+                        CodeChanges = new[]
+                        {
+                            new CodeSnippet { Block = "builder.Services.AddAuthorizationCore()", InsertBefore = ["builder.Build()"], LeadingTrivia = new Formatting { Newline = true } },
+                            new CodeSnippet { Block = "builder.Services.AddCascadingAuthenticationState()", InsertBefore = ["builder.Build()"], LeadingTrivia = new Formatting { Newline = true } },
+                            new CodeSnippet { Block = "builder.Services.AddAuthenticationStateDeserialization()", InsertBefore = ["builder.Build()"], LeadingTrivia = new Formatting { Newline = true } }
+                        }
+                    }
+                }
+            };
+        }
+
+        internal async Task ModifyProgramCsAsync(CodeFile programCsFile, BlazorIdentityModel blazorIdentityModel, Project project)
+        {
+            if (programCsFile is null || project is null)
             {
                 return;
             }
 
             var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
-            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
             var programDocument = project.GetUpdatedDocument(FileSystem, programType);
             //Modifying Program.cs document
             var docEditor = await DocumentEditor.CreateAsync(programDocument);

@@ -136,5 +136,25 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             context.Properties["BlazorWasmClientProjectPath"] = projectPath;
             _logger.LogInformation("Detected Blazor WebAssembly project '{ProjectPath}'.", projectPath);
         }
+
+        /// <summary>
+        /// Resolves a project reference, as printed by 'dotnet reference list' (relative to the referencing project),
+        /// to a full path. The referencing project path may itself be relative to the current directory (e.g.
+        /// '--project .\App\App.csproj'), so it is fully qualified first: <see cref="Path.GetFullPath(string, string)"/>
+        /// throws when its base path is not fully qualified.
+        /// </summary>
+        /// <param name="projectPath">Path of the referencing project (absolute or relative to the current directory).</param>
+        /// <param name="reference">Referenced project path as listed by 'dotnet reference list'.</param>
+        /// <returns>The full path of the referenced project, or null when either input is empty.</returns>
+        internal static string? GetReferenceFullPath(string? projectPath, string? reference)
+        {
+            if (string.IsNullOrEmpty(projectPath) || string.IsNullOrEmpty(reference))
+            {
+                return null;
+            }
+
+            var baseDirectory = Path.GetDirectoryName(Path.GetFullPath(projectPath));
+            return string.IsNullOrEmpty(baseDirectory) ? null : Path.GetFullPath(reference, baseDirectory);
+        }
     }
 }

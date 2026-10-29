@@ -3,6 +3,8 @@
 
 using System;
 using System.IO;
+using System.Threading.Tasks;
+using Azure.Core;
 using Microsoft.DotNet.MSIdentity.AuthenticationParameters;
 using Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform;
 using Microsoft.DotNet.MSIdentity.Shared;
@@ -15,6 +17,61 @@ namespace Microsoft.DotNet.MSIdentity.UnitTests.Tests
 {
     public class AppProvisioningToolTests
     {
+        [Theory]
+        [InlineData("{\"AzureAd\":")]
+        [InlineData("")]
+        public async Task Run_ExplicitUnregister_DoesNotReadProjectConfiguration(string settings)
+        {
+            var directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            var settingsPath = Path.Combine(directory, "appsettings.json");
+            try
+            {
+                File.WriteAllText(settingsPath, settings);
+                var options = new ProvisioningToolOptions
+                {
+                    ProjectPath = directory,
+                    ProjectFilePath = Path.Combine(directory, "missing.csproj"),
+                    ClientId = "created-app",
+                    TenantId = "selected-tenant",
+                    Username = "selected@example.com"
+                };
+                var tool = new UnregisterTestTool(options);
+
+                Assert.Null(await tool.Run());
+
+                Assert.True(tool.Unregistered);
+                Assert.Equal(settings, File.ReadAllText(settingsPath));
+            }
+            finally
+            {
+                File.Delete(settingsPath);
+                Directory.Delete(directory);
+            }
+        }
+
+        private sealed class UnregisterTestTool(ProvisioningToolOptions options)
+            : AppProvisioningTool(Commands.UNREGISTER_APPLICATION_COMMAND, options)
+        {
+            private readonly TokenCredential _credential = Mock.Of<TokenCredential>();
+            public bool Unregistered { get; private set; }
+
+            protected override TokenCredential GetOperationCredential(string tenantId)
+            {
+                Assert.Equal("selected-tenant", tenantId);
+                return _credential;
+            }
+
+            protected override Task UnregisterApplication(TokenCredential credential, ApplicationParameters parameters)
+            {
+                Assert.Same(_credential, credential);
+                Assert.Equal("created-app", parameters.ClientId);
+                Assert.Equal("selected-tenant", parameters.TenantId);
+                Unregistered = true;
+                return Task.CompletedTask;
+            }
+        }
+
         const string existingDomain = "existing domain";
         const string existingTenantId = "existing tenant Id";
         const string existingClientId = "existing client Id";

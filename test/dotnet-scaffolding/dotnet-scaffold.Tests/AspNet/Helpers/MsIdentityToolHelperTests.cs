@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
+using System;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
@@ -16,6 +19,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
 /// </summary>
 public class MsIdentityToolHelperTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SupportsRegistrationCleanup_ReportsIncompatibleOrUnavailableTool(bool throws)
+    {
+        var logger = new Mock<ILogger>();
+
+        Assert.False(MsIdentityToolHelper.SupportsRegistrationCleanup(logger.Object,
+            () => throws ? throw new InvalidOperationException("Tool unavailable") : (1, null, "Unknown command")));
+
+        Assert.Contains(logger.Invocations, invocation => invocation.Method.Name == nameof(ILogger.Log) &&
+            invocation.Arguments[0] is LogLevel.Error &&
+            invocation.Arguments[2].ToString()!.Contains("partial-registration cleanup fix"));
+    }
+
     [Fact]
     public void MsIdentityToolName_HasExpectedValue()
     {

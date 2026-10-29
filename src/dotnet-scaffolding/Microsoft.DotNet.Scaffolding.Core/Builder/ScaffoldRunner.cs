@@ -30,7 +30,7 @@ internal class ScaffoldRunner(ILogger<ScaffoldRunner> logger) : IScaffoldRunner
     internal RootCommand? RootCommand { get; set; }
 
     /// <inheritdoc/>
-    public async Task RunAsync(string[] args)
+    public async Task<int> RunAsync(string[] args)
     {
         if (RootCommand is null)
         {
@@ -39,7 +39,8 @@ internal class ScaffoldRunner(ILogger<ScaffoldRunner> logger) : IScaffoldRunner
 
         // Parse and invoke the root command with the provided arguments
         ParseResult parseResult = RootCommand.Parse(args);
-        await parseResult.InvokeAsync();
+        int exitCode = await parseResult.InvokeAsync();
+        return exitCode < 0 ? 1 : exitCode;
     }
 
     /// <summary>
@@ -47,6 +48,17 @@ internal class ScaffoldRunner(ILogger<ScaffoldRunner> logger) : IScaffoldRunner
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
     public void AddHandler(Func<ParseResult, CancellationToken, Task> handle)
+    {
+        if (RootCommand is null)
+        {
+            throw new InvalidOperationException("RootCommand is not set.");
+        }
+
+        RootCommand.SetAction(handle);
+    }
+
+    /// <inheritdoc/>
+    public void AddHandler(Func<ParseResult, CancellationToken, Task<int>> handle)
     {
         if (RootCommand is null)
         {

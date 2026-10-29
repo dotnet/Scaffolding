@@ -13,7 +13,7 @@ public class ApiControllerNet11IntegrationTests : ApiControllerIntegrationTestsB
     protected override string TargetFramework => "net11.0";
     protected override string TestClassName => nameof(ApiControllerNet11IntegrationTests);
 
-    [Fact(Skip = "net11.0 preview SDK not yet supported")]
+    [Fact]
     public async Task Scaffold_ApiControllerCrud_Net11_CliInvocation()
     {
         // Arrange — set up project with Program.cs and a model class

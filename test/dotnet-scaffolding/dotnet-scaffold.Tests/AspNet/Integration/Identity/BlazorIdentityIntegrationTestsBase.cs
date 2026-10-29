@@ -48,6 +48,7 @@ public abstract class BlazorIdentityIntegrationTestsBase : IDisposable
         _toolsDirectory = Path.Combine(_testDirectory, "tools");
         _templatesDirectory = Path.Combine(_testDirectory, "Templates");
         Directory.CreateDirectory(_testProjectDir);
+        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.GetTestNuGetConfig(TargetFramework));
         Directory.CreateDirectory(_toolsDirectory);
         Directory.CreateDirectory(_templatesDirectory);
 
@@ -75,14 +76,6 @@ public abstract class BlazorIdentityIntegrationTestsBase : IDisposable
   </PropertyGroup>
 </Project>";
 
-    // App.razor content used by integration tests before scaffolding modifies it.
-    // Matches the structure expected by the Blazor Identity code-mods so replacements apply.
-    protected const string GloballyInteractiveAppContent = @"<body>
-<HeadOutlet @rendermode=""InteractiveServer"" />
-<Routes @rendermode=""InteractiveServer"" />
-<AuthorizeRouteView />
-<RedirectToLogin />
-</body>";
     #region Blazor Identity — Template Root Folders
 
     [Theory]

@@ -50,6 +50,9 @@ public class CliOptionInventoryTests
         Constants.CliOptions.UsernameOption,            // --username
         Constants.CliOptions.TenantIdKebabCaseOption,   // --tenant-id
         Constants.CliOptions.UseExistingApplicationOption, // --use-existing-application
+        Constants.CliOptions.ApplicationIdOption,       // --applicationId
+        Constants.CliOptions.IgniteUIThemeOption,        // --theme
+        Constants.CliOptions.IgniteUIThemeVariantOption, // --theme-variant
         Constants.CliOptions.ApplicationIdKebabCaseOption, // --application-id
     });
 
@@ -145,6 +148,7 @@ public class CliOptionInventoryTests
         ["identity"] = new() { "--project", "--dataContext", "--dbProvider", "--overwrite", "--prerelease" },
         // entra-id options — kebab-case is canonical; camelCase forms are legacy aliases.
         ["entra-id"] = new() { "--username", "--project", "--tenant-id", "--use-existing-application", "--tenantId", "--application-id", "--applicationId" },
+        ["blazor-igniteui"] = new() { "--project", "--theme", "--theme-variant", "--prerelease" },
     };
 
     /// <summary>

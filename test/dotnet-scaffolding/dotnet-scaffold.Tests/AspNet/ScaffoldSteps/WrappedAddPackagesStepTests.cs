@@ -1,5 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Model;
@@ -25,6 +28,29 @@ public class WrappedAddPackagesStepTests
         _mockScaffolder.Setup(s => s.DisplayName).Returns("TestScaffolder");
         _mockScaffolder.Setup(s => s.Name).Returns("test-scaffolder");
         _context = new ScaffolderContext(_mockScaffolder.Object);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsFailure_WhenDotNetAddPackageFails()
+    {
+        var telemetry = new Mock<ITelemetryService>();
+        var environment = new Mock<IEnvironmentService>();
+        environment.Setup(e => e.CurrentDirectory).Returns(Directory.GetCurrentDirectory());
+        var step = new WrappedAddPackagesStep(
+            NullLogger<WrappedAddPackagesStep>.Instance,
+            telemetry.Object,
+            new NuGetVersionService(environment.Object))
+        {
+            Packages = [new Package("Microsoft.Identity.Web")],
+            ProjectPath = Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}.csproj")
+        };
+
+        Assert.False(step.ContinueOnError);
+        Assert.False(await step.ExecuteAsync(_context, CancellationToken.None));
+        telemetry.Verify(t => t.TrackEvent(
+            It.IsAny<string>(),
+            It.IsAny<IReadOnlyDictionary<string, string>>(),
+            It.IsAny<IReadOnlyDictionary<string, double>>()), Times.Once);
     }
 
     [Fact]

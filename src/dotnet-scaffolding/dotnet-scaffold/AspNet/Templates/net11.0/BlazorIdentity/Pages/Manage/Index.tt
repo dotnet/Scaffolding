@@ -20,13 +20,15 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 <PageTitle>Profile</PageTitle>
 
 <h3>Profile</h3>
-<StatusMessage />
+<StatusMessage Message="@message" />
 
 <div class="row">
     <div class="col-xl-6">
         <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
+            <div role="alert" aria-atomic="true">
+                <ValidationSummary class="text-danger" />
+            </div>
             <div class="form-floating mb-3">
                 <input type="text" value="@username" id="username" class="form-control" placeholder="Choose your username." disabled />
                 <label for="username" class="form-label">Username</label>
@@ -42,6 +44,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 </div>
 
 @code {
+    private string? message;
     private <#= Model.UserClassName #>? user;
     private string? username;
     private string? phoneNumber;
@@ -49,17 +52,22 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
+    [SupplyParameterFromTempData(Name = IdentityRedirectManager.StatusMessageKey)]
+    private string? IdentityStatusMessage { get; set; }
+
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
+        message = IdentityStatusMessage;
+        IdentityStatusMessage = null;
         Input ??= new();
 
         user = await UserManager.GetUserAsync(HttpContext.User);
         if (user is null)
         {
-            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            RedirectManager.RedirectTo("Account/InvalidUser");
             return;
         }
 
@@ -73,7 +81,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
     {
         if (user is null)
         {
-            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            RedirectManager.RedirectTo("Account/InvalidUser");
             return;
         }
 
@@ -82,13 +90,15 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
             var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
             if (!setPhoneResult.Succeeded)
             {
-                RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
+                IdentityStatusMessage = "Error: Failed to set phone number.";
+                RedirectManager.RedirectToCurrentPage();
                 return;
             }
         }
 
         await SignInManager.RefreshSignInAsync(user);
-        RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
+        IdentityStatusMessage = "Your profile has been updated";
+        RedirectManager.RedirectToCurrentPage();
     }
 
     private sealed class InputModel

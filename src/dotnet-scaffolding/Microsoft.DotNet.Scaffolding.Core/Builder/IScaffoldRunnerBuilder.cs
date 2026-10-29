@@ -55,4 +55,10 @@ public interface IScaffoldRunnerBuilder
     /// Adds an action to the RootCommand doing the action passed in the handle parameter.
     /// </summary>
     void AddHandler(Func<ParseResult, CancellationToken, Task> handle);
+
+    /// <summary>
+    /// Adds an action to the RootCommand that returns a process exit code.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if <see cref="Build"/> has not been called.</exception>
+    void AddHandler(Func<ParseResult, CancellationToken, Task<int>> handle);
 }

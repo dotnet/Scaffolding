@@ -42,8 +42,9 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "\n        SameSite = SameSiteMode.Strict,\r\n        HttpOnly = true,\r\n        IsEs" +
                     "sential = true,\r\n        MaxAge = TimeSpan.FromSeconds(5),\r\n    };\r\n\r\n    public" +
                     " void RedirectTo(string? uri)\r\n    {\r\n        uri ??= \"\";\r\n\r\n        // Prevent " +
-                    "open redirects.\r\n        if (!Uri.IsWellFormedUriString(uri, UriKind.Relative))\r" +
-                    "\n        {\r\n            uri = navigationManager.ToBaseRelativePath(uri);\r\n      " +
+                    "open redirects.\r\n        if (!Uri.IsWellFormedUriString(uri, UriKind.Relative)\r" +
+                    "\n            || uri.StartsWith(\"//\", StringComparison.Ordinal))\r\n        {\r\n" +
+                    "            uri = navigationManager.ToBaseRelativePath(uri);\r\n      " +
                     "  }\r\n\r\n        navigationManager.NavigateTo(uri);\r\n    }\r\n\r\n    public void Redi" +
                     "rectTo(string uri, Dictionary<string, object?> queryParameters)\r\n    {\r\n        " +
                     "var uriWithoutQuery = navigationManager.ToAbsoluteUri(uri).GetLeftPart(UriPartia" +

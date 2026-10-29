@@ -22,7 +22,21 @@ public class BlazorCrudNet8IntegrationTests : BlazorCrudIntegrationTestsBase
         File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
         var modelsDir = Path.Combine(_testProjectDir, "Models");
         Directory.CreateDirectory(modelsDir);
-        File.WriteAllText(Path.Combine(modelsDir, "TestModel.cs"), ScaffoldCliHelper.GetModelClassContent("TestProject", "TestModel"));
+        File.WriteAllText(Path.Combine(modelsDir, "TestModel.cs"), @"namespace TestProject.Models;
+
+public class TestModel
+{
+    public int Id { get; set; }
+    public EmploymentType EmploymentType { get; set; }
+    public EmploymentType? OptionalEmploymentType { get; set; }
+}
+
+public enum EmploymentType
+{
+    Permanent,
+    Contract
+}
+");
 
         // Set up Blazor project structure required for scaffolded code to compile
         var componentsDir = Path.Combine(_testProjectDir, "Components");
@@ -32,8 +46,8 @@ public class BlazorCrudNet8IntegrationTests : BlazorCrudIntegrationTestsBase
         File.WriteAllText(Path.Combine(componentsDir, "Routes.razor"), ScaffoldCliHelper.GetBlazorRoutesRazor());
 
         // Verify project builds before scaffolding
-        var (beforeExitCode, _, beforeError) = await RunBuildAsync(_testProjectDir);
-        Assert.True(beforeExitCode == 0, $"Project should build before scaffolding. Error: {beforeError}");
+        var (beforeExitCode, beforeOutput, beforeError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(beforeExitCode == 0, $"Project should build before scaffolding.\nOutput: {beforeOutput}\nError: {beforeError}");
 
         // Act — invoke CLI: dotnet scaffold aspnet blazor-crud
         var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
@@ -44,31 +58,38 @@ public class BlazorCrudNet8IntegrationTests : BlazorCrudIntegrationTestsBase
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore",
             "--page", "CRUD");
-        Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.True(cliExitCode != 0, $"CLI scaffold should fail for known net8 template incompatibility.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.Contains("does not implement Microsoft.DotNet.Scaffolding.TextTemplating.ITextTransformation", cliOutput);
+        Assert.Contains("failed at step 'WrappedTextTemplatingStep'", cliOutput);
 
-        // Assert — expected files were created (only if scaffolding produced output;
-        // the scaffolder may silently skip file generation for older TFMs if model
-        // resolution or template execution encounters issues)
+        // Assert — expected files were created only when scaffolding succeeds.
         var blazorPagesDir = Path.Combine(_testProjectDir, "Components", "Pages", "TestModelPages");
         bool scaffoldingProducedFiles = Directory.Exists(blazorPagesDir);
+        Assert.False(scaffoldingProducedFiles, "Blazor CRUD pages should not be generated when templating fails.");
         if (scaffoldingProducedFiles)
         {
             foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
             {
                 Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
             }
+
             var editContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Edit.razor"));
             Assert.Contains("ApplicationState.TryTakeFromJson<TestModel>(nameof(TestModel), out var restoredTestModel)", editContent);
             Assert.Contains("TestModel = restoredTestModel", editContent);
             Assert.Contains("ApplicationState.PersistAsJson(nameof(TestModel), TestModel)", editContent);
+
+            var createContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Create.razor"));
+            Assert.Contains("<InputSelect id=\"employmenttype\"", createContent);
+            Assert.Contains("<InputSelect id=\"optionalemploymenttype\"", createContent);
+
             Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
                 "DbContext file 'Data/TestDbContext.cs' should be created.");
 
             // Assert — no NuGet errors and project builds after scaffolding
             Assert.False(cliOutput.Contains("error: NU"),
                 $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
-            var (afterExitCode, _, afterError) = await RunBuildAsync(_testProjectDir);
-            Assert.True(afterExitCode == 0, $"Project should still build after scaffolding. Error: {afterError}");
+            var (afterExitCode, afterOutput, afterError) = await RunBuildAsync(_testProjectDir);
+            Assert.True(afterExitCode == 0, $"Project should still build after scaffolding.\nOutput: {afterOutput}\nError: {afterError}");
         }
     }
 }

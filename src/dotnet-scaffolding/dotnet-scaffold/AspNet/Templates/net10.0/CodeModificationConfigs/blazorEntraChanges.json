@@ -48,6 +48,18 @@
             "Usings": [
                 "Microsoft.AspNetCore.Authentication.OpenIdConnect",
                 "Microsoft.Identity.Web"
+            ],
+            "Replacements": [
+                {
+                    "CheckBlock": "AddAuthenticationStateSerialization",
+                    "ReplaceSnippet": [
+                        ".AddInteractiveWebAssemblyComponents();"
+                    ],
+                    "MultiLineBlock": [
+                        ".AddInteractiveWebAssemblyComponents()",
+                        "    .AddAuthenticationStateSerialization();"
+                    ]
+                }
             ]
         },
         {
@@ -80,6 +92,21 @@
                         "                    @context.User.Identity?.Name",
                         "                </Authorized>",
                         "            </AuthorizeView>"
+                    ]
+                }
+            ]
+        },
+        {
+            "FileName": "Components\\Layout\\NavMenu.razor",
+            "Replacements": [
+                {
+                    "CheckBlock": "<LoginOrLogout />",
+                    "ReplaceSnippet": [
+                        "</nav>"
+                    ],
+                    "MultiLineBlock": [
+                        "    <LoginOrLogout />",
+                        "    </nav>"
                     ]
                 }
             ]

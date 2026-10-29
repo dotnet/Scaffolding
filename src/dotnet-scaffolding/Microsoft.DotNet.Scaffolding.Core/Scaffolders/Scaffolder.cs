@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 
@@ -18,6 +19,7 @@ public class Scaffolder : IScaffolder
     private readonly List<ScaffoldStep> _steps;
     private readonly List<ScaffoldStepPreparer> _preparers;
     private readonly List<(string Example, string? Description)> _examples;
+    private readonly ILogger<Scaffolder> _logger;
 
     /// <inheritdoc/>
     public string Name => _name;
@@ -42,8 +44,9 @@ public class Scaffolder : IScaffolder
     /// <param name="options">The options for the scaffolder.</param>
     /// <param name="steps">The steps for the scaffolder.</param>
     /// <param name="preparers">The preparers for the scaffolder steps.</param>
+    /// <param name="logger">The logger for scaffolder failures.</param>
     /// <param name="examples">The example usages for the scaffolder.</param>
-    internal Scaffolder(string name, string displayName, List<string> categories, string? description, List<ScaffolderOption> options, List<ScaffoldStep> steps, List<ScaffoldStepPreparer> preparers, List<(string Example, string? Description)>? examples = null)
+    internal Scaffolder(string name, string displayName, List<string> categories, string? description, List<ScaffolderOption> options, List<ScaffoldStep> steps, List<ScaffoldStepPreparer> preparers, ILogger<Scaffolder> logger, List<(string Example, string? Description)>? examples = null)
     {
         _name = name;
         _displayName = displayName;
@@ -53,10 +56,11 @@ public class Scaffolder : IScaffolder
         _steps = steps;
         _preparers = preparers;
         _examples = examples ?? [];
+        _logger = logger;
     }
 
     /// <inheritdoc/>
-    public async Task ExecuteAsync(ScaffolderContext context)
+    public async Task<bool> ExecuteAsync(ScaffolderContext context)
     {
         for (int stepIndex = 0; stepIndex < _steps.Count; stepIndex++)
         {
@@ -68,10 +72,13 @@ public class Scaffolder : IScaffolder
                 var stepResult = await step.ExecuteAsync(context);
                 if (!stepResult && !step.ContinueOnError)
                 {
-                    break;
+                    _logger.LogError("Scaffolding '{ScaffolderName}' failed at step '{StepName}'. The project or external resources may have been partially modified.", Name, step.GetType().Name);
+                    return false;
                 }
             }
             preparer.RunPostExecute(step, context);
         }
+
+        return true;
     }
 }

@@ -3,16 +3,18 @@
 <#@  import namespace="System.Collections.Generic" #>
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
+<#@  import namespace="Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions" #>
 <#
-    string modelName = Model.ModelType.Name;
-    string pluralModel = Model.ModelType.PluralName;
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName;
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : Model.DbContextNamespace;
-    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.ContextTypeName : $"{dbContextNamespace}.{Model.ContextTypeName}";
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
+    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.DbContextInfo.DbContextClassName : $"{dbContextNamespace}.{Model.DbContextInfo.DbContextClassName}";
     string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
-    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
-    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    var entityProperties = Model.ModelInfo.ModelProperties
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>/create"
 @using Microsoft.EntityFrameworkCore
@@ -39,18 +41,32 @@
             <#
                 foreach (var property in entityProperties)
                 {
-                    string modelPropertyName = property.PropertyName;
+                    string modelPropertyName = property.Name;
                     string modelPropertyNameLowercase = modelPropertyName.ToLowerInvariant();
-                    string propertyShortTypeName = property.ShortTypeName.Replace("?", string.Empty);
-                    var inputTypeName = Model.GetInputType(propertyShortTypeName);
+                    string propertyShortTypeName = property.Type.ToDisplayString().Replace("?", string.Empty);
+                    var isEnum = Model.IsEnumType(property.Type);
+                    var isNullableEnum = Model.IsNullableEnumType(property.Type);
+                    var inputTypeName = Model.GetInputType(propertyShortTypeName, isEnum);
                     var inputClass = Model.GetInputClassType(propertyShortTypeName);
-                    var ariaRequiredAttributeHtml = property.IsRequired ? "aria-required=\"true\"" : string.Empty;
+                    var ariaRequiredAttributeHtml = property.HasRequiredAttribute() ? "aria-required=\"true\"" : string.Empty;
                     var divWhitespace = new string(' ', 16);
-                    var requiredSpanAttributeHtml = property.IsRequired ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
+                    var requiredSpanAttributeHtml = property.HasRequiredAttribute() ? $"\r\n{divWhitespace}<span class=\"text-danger\">*</span>" : string.Empty;
             #>
 <div class="mb-3"><#= requiredSpanAttributeHtml #>
                 <label for="<#= modelPropertyNameLowercase #>" class="form-label"><#= modelPropertyName #>:</label> 
+<#              if (isEnum) { #>
+                <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" <#= ariaRequiredAttributeHtml #>>
+<#                  if (isNullableEnum) { #>
+                    <option value="">-- select --</option>
+<#                  } #>
+                    @foreach (var value in Enum.GetValues<<#= propertyShortTypeName #>>())
+                    {
+                        <option value="@value">@value</option>
+                    }
+                </<#= inputTypeName #>>
+<#              } else { #>
                 <<#= inputTypeName #> id="<#= modelPropertyNameLowercase #>" @bind-Value="<#= modelName #>.<#= modelPropertyName #>" class="<#= inputClass #>" <#= ariaRequiredAttributeHtml #>/> 
+<#              } #>
                 <ValidationMessage For="() => <#= modelName #>.<#= modelPropertyName #>" class="text-danger" /> 
             </div>        
             <#  } #>
@@ -71,7 +87,7 @@
     private async Task Add<#= modelName #>()
     {
         using var context = DbFactory.CreateDbContext();
-        context.<#= Model.ModelMetadata.EntitySetName #>.Add(<#= modelName #>);
+        context.<#= Model.DbContextInfo.EntitySetVariableName ?? modelName #>.Add(<#= modelName #>);
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
     }

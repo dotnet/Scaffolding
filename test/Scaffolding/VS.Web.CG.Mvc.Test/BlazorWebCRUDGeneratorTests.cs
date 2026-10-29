@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -25,6 +26,31 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         private IModelTypesLocator modelTypesLocator;
         private AdhocWorkspace workspace;
         private IFileSystem fileSystem;
+
+        [Fact]
+        public void EditTemplate_ReturnsAfterNotFoundWhenUpdatedEntityWasDeleted()
+        {
+            var primaryKey = new Mock<IPropertyMetadata>();
+            primaryKey.SetupGet(property => property.PropertyName).Returns("Id");
+            primaryKey.SetupGet(property => property.ShortTypeName).Returns("int");
+            var metadata = new Mock<IModelMetadata>();
+            metadata.SetupGet(model => model.PrimaryKeys).Returns(new[] { primaryKey.Object });
+            metadata.SetupGet(model => model.Properties).Returns(Array.Empty<IPropertyMetadata>());
+            metadata.SetupGet(model => model.EntitySetName).Returns("Employees");
+            var model = new BlazorModel(new ModelType { Name = "Employee", Namespace = "TestProject.Models" }, "AppDbContext")
+            {
+                ModelMetadata = metadata.Object
+            };
+            var template = new Templates.Blazor.Edit
+            {
+                Session = new Dictionary<string, object> { { "Model", model } }
+            };
+            template.Initialize();
+
+            string result = template.TransformText().Replace("\r\n", "\n");
+
+            Assert.Contains("if (!EmployeeExists(Employee!.Id))\n            {\n                NavigationManager.NotFound();\n                return;\n            }", result);
+        }
 
         [Fact]
         public void ValidateAndGetOutputPathTests()

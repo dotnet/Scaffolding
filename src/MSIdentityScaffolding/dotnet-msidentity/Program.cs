@@ -71,6 +71,9 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             rootCommand.Subcommands.Add(updateProjectCommand);
             rootCommand.Subcommands.Add(createClientSecretCommand);
             rootCommand.Subcommands.Add(createAppRegistration);
+            var capabilitiesCommand = new Command("--get-capabilities") { Hidden = true };
+            capabilitiesCommand.SetAction(_ => System.Console.WriteLine("registration-cleanup"));
+            rootCommand.Subcommands.Add(capabilitiesCommand);
 
             //if no args are present, show default help.
             if (args == null || args.Length == 0)

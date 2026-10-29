@@ -9,6 +9,7 @@ using Microsoft.DotNet.Tools.Scaffold.Helpers;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 {
@@ -64,18 +65,36 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// <inheritdoc />
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
+            var succeeded = false;
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                succeeded = ConfigureClientSecret(context);
+                return Task.FromResult(succeeded);
+            }
+            finally
+            {
+                if (!succeeded)
+                {
+                    EntraRegistrationCleanup.TryCleanup(context, TenantId, Username, _logger);
+                }
+            }
+        }
+
+        private bool ConfigureClientSecret(ScaffolderContext context)
+        {
             // Validate project path
             if (string.IsNullOrEmpty(ProjectPath) || !_fileSystem.FileExists(ProjectPath))
             {
                 _logger.LogError($"Invalid project path: {ProjectPath}");
-                return Task.FromResult(false);
+                return false;
             }
 
             if (UseExistingApplication)
             {
                 _logger.LogInformation("Using an existing application. No password credential will be created. Configure a supported AzureAd:ClientCredentials credential locally if one is not already configured.");
                 _logger.LogWarning("Use a separate production app registration with managed identity/federated identity credentials or a certificate. Client secrets are for local development only.");
-                return Task.FromResult(true);
+                return true;
             }
 
             _logger.LogInformation("Configuring a client credential for local development only...");
@@ -84,21 +103,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             {
                 if (!InitializeUserSecrets())
                 {
-                    return Task.FromResult(false);
+                    return false;
                 }
 
                 bool success = AddClientSecret(context);
                 if (!success)
                 {
                     _logger.LogError("Failed to add client secret.");
-                    return Task.FromResult(false);
+                    return false;
                 }
 
                 _logger.LogInformation("Successfully configured user secrets for the project.");
                 _logger.LogWarning("This development client secret is not suitable for production. Use a separate production app registration with managed identity/federated identity credentials or a certificate.");
-                return Task.FromResult(true);
+                return true;
             }
-            return Task.FromResult(false);
+            return false;
         }
 
         /// <summary>

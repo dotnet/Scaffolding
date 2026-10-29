@@ -70,6 +70,18 @@ public class BlazorProjectClassifierTests : IDisposable
     }
 
     [Fact]
+    public void RazorFilesKeptAsNone_AreNotCompiledComponents_AndDoNotMakeABlazorApp()
+    {
+        string xml =
+            "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>" +
+            "<ItemGroup><Content Remove=\"Samples\\**\\*.razor\" /><None Include=\"Samples\\**\\*.razor\" /></ItemGroup></Project>";
+
+        var info = BlazorProjectClassifier.Classify(Project(xml, ("Samples/Sample.razor", "<h1/>"), ("Program.cs", "var b = 1;")));
+
+        Assert.Equal(BlazorAppKind.NotBlazor, info.Kind);
+    }
+
+    [Fact]
     public void BlazorWebApp_WithComponentsOnlyInAReferencedLibrary_IsWebApp()
     {
         var info = BlazorProjectClassifier.Classify(Project(
@@ -212,7 +224,11 @@ public class BlazorHostingInspectorTests
     [InlineData("<Routes @rendermode=\"InteractiveServer\" />", "InteractiveServer")]
     [InlineData("<Routes @rendermode=\"InteractiveAuto\" />", "InteractiveAuto")]
     [InlineData("<Routes @rendermode=\"InteractiveWebAssembly\" />", "InteractiveWebAssembly")]
-    [InlineData("<HeadOutlet @rendermode=\"@RenderMode.InteractiveServer\" />", "InteractiveServer")]
+    [InlineData("<Routes @rendermode=\"@RenderMode.InteractiveServer\" />", "InteractiveServer")]
+    [InlineData("<HeadOutlet @rendermode=\"@RenderMode.InteractiveServer\" />", "None")]
+    [InlineData("<HeadOutlet @rendermode=\"InteractiveServer\" /><Routes />", "None")]
+    [InlineData("@* <Routes @rendermode=\"InteractiveServer\" /> *@<Routes />", "None")]
+    [InlineData("<!-- <Routes @rendermode=\"InteractiveServer\" /> --><Routes @rendermode=\"InteractiveAuto\" />", "InteractiveAuto")]
     [InlineData("<Routes />", "None")]
     public void GlobalRenderMode_IsReadFromAppRazor(string appRazor, string expected)
     {

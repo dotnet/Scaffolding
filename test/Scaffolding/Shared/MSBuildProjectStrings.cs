@@ -7,8 +7,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
     {
         public const string RootProjectFolder = "Test";
         public const string LibraryProjectFolder = "Library";
+        public const string ThemeProjectFolder = "Theme";
+        public const string BuildOnlyProjectFolder = "BuildOnly";
         public const string RootProjectName = "Test.csproj";
         public const string Library2ProjectName = "Library.csproj";
+        public const string ThemeProjectName = "Theme.csproj";
+        public const string BuildOnlyProjectName = "BuildOnly.csproj";
         public const string RootProjectName2 = "Test2.csproj";
         public const string RootProjectName3 = "Test3.csproj";
 
@@ -978,6 +982,7 @@ namespace Test
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include=""..\Library\Library.csproj"" />
+    <ProjectReference Include=""..\BuildOnly\BuildOnly.csproj"" ReferenceOutputAssembly=""false"" />
   </ItemGroup>
 </Project>
 ";
@@ -994,13 +999,38 @@ namespace Test
 </Project>
 ";
         public const string Net7Library = @"
-<Project Sdk=""Microsoft.NET.Sdk"">
+<Project Sdk=""Microsoft.NET.Sdk.Razor"">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <RootNamespace>Custom.Library.Root</RootNamespace>
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
   </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include=""Microsoft.AspNetCore.App"" />
+    <ProjectReference Include=""..\Theme\Theme.csproj"" />
+  </ItemGroup>
+
+</Project>
+";
+
+        public const string Net8LeafLibrary = @"
+<Project Sdk=""Microsoft.NET.Sdk.Razor"">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include=""Microsoft.AspNetCore.App"" />
+  </ItemGroup>
 
 </Project>
 ";
@@ -1232,6 +1262,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
   <PropertyGroup>
     <EvaluateProjectInfoForCodeGenerationDependsOn>
       $(EvaluateProjectInfoForCodeGenerationDependsOn);
+      CollectCodeGenerationProjectReferences;
       ResolveReferences;
       ResolveProjectReferences;
     </EvaluateProjectInfoForCodeGenerationDependsOn>
@@ -1243,6 +1274,14 @@ Outputs the Project Information needed for CodeGeneration to a file.
   <UsingTask TaskName=""ProjectContextWriter""
              AssemblyFile=""$(EvaluateProjectInfoForCodeGenerationAssemblyPath)"" />
 
+  <Target Name=""CollectCodeGenerationProjectReferences"">
+    <ItemGroup>
+      <_CodeGenerationProjectReference
+        Include=""%(ProjectReference.FullPath)""
+        Condition=""'%(ProjectReference.ReferenceOutputAssembly)' != 'false'"" />
+    </ItemGroup>
+  </Target>
+
   <Target Name = ""EvaluateProjectInfoForCodeGeneration"" DependsOnTargets=""$(EvaluateProjectInfoForCodeGenerationDependsOn)"">
 
     <ProjectContextWriter TargetFramework = ""$(TargetFramework)""
@@ -1250,7 +1289,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
                           OutputFile =""$(OutputFile)""
                           Name =""$(ProjectName)""
                           ResolvedReferences =""@(ReferencePath)""
-                          ProjectReferences =""@(ProjectReference)""
+                          ProjectReferences =""@(_CodeGenerationProjectReference)""
                           AssemblyFullPath =""$(TargetPath)""
                           OutputType=""$(OutputType)""
                           Platform=""$(Platform)""

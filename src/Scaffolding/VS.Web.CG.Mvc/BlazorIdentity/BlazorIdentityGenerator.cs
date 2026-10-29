@@ -6,9 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.DotNet.Scaffolding.Shared;
@@ -42,6 +45,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private ConsoleLogger ConsoleLogger { get; set; }
         private ICodeGenAssemblyLoadContext AssemblyLoadContextLoader { get; set; }
         private const string Main = nameof(Main);
+        private static readonly StringComparer PathComparer = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? StringComparer.OrdinalIgnoreCase
+            : StringComparer.Ordinal;
+        private static readonly StringComparison PathComparison = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
         private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
 
         private IEnumerable<string> _templateFolders;
@@ -171,12 +180,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
 
             var rootIdentityNamespace = $"{commandlineModel.RootNamespace}.Components.Account";
-            // For WASM/Auto Global Blazor projects, MainLayout lives in the client project (e.g. BlazorApp1.Client).
-            // For Blazor Server projects, it lives directly under Components/Layout/ in the server project.
-            var mainLayoutInServerProject = Path.Combine(AppInfo.ApplicationBasePath, "Components", "Layout", "MainLayout.razor");
-            var layoutNamespace = FileSystem.FileExists(mainLayoutInServerProject)
-                ? $"{commandlineModel.RootNamespace}.Components.Layout.MainLayout"
-                : $"{commandlineModel.RootNamespace}.Client.Layout.MainLayout";
+            // MainLayout can live in the server project, a WebAssembly client, or a referenced shared Razor project.
+            var layoutNamespace = ResolveLayoutNamespace(
+                ProjectContext.ProjectName,
+                commandlineModel.RootNamespace,
+                AppInfo.ApplicationBasePath,
+                FileSystem,
+                ProjectContext.ProjectReferenceInformation,
+                ProjectContext.ProjectReferences);
             var defaultDbContextNamespace = $"{commandlineModel.RootNamespace}.Data";
             var defaultUserNamespace = $"{commandlineModel.RootNamespace}.Data";
             var blazorIdentityModel = new BlazorIdentityModel
@@ -329,6 +340,650 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             blazorIdentityModel.BaseOutputPath = Path.Combine(AppInfo.ApplicationBasePath, commandlineModel.RelativeFolderPath);
             return blazorIdentityModel;
+        }
+
+        internal static string ResolveLayoutNamespace(
+            string projectName,
+            string rootNamespace,
+            string applicationBasePath,
+            IFileSystem fileSystem,
+            IEnumerable<ProjectReferenceInformation> projectReferences,
+            IEnumerable<string> directProjectReferences)
+        {
+            projectName = string.IsNullOrEmpty(projectName) ? rootNamespace : projectName;
+            var mainLayoutInServerProject = Path.Combine(applicationBasePath, "Components", "Layout", "MainLayout.razor");
+            if (fileSystem.FileExists(mainLayoutInServerProject))
+            {
+                var razorNamespace = ResolveRazorNamespace(
+                    mainLayoutInServerProject,
+                    applicationBasePath,
+                    fileSystem);
+                return $"{razorNamespace ?? $"{rootNamespace}.Components.Layout"}.MainLayout";
+            }
+
+            var directReferencePaths = new HashSet<string>(PathComparer);
+            foreach (var directProjectReference in directProjectReferences ?? Enumerable.Empty<string>())
+            {
+                directReferencePaths.Add(Path.GetFullPath(directProjectReference));
+                directReferencePaths.Add(Path.GetFullPath(Path.Combine(applicationBasePath, directProjectReference)));
+            }
+            var clientProjectNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                $"{projectName}.Client"
+            };
+            if (projectName.EndsWith(".Web", StringComparison.OrdinalIgnoreCase))
+            {
+                clientProjectNames.Add($"{projectName.Substring(0, projectName.Length - ".Web".Length)}.Client");
+            }
+
+            var layoutCandidates = new List<LayoutCandidate>();
+            foreach (var projectReference in projectReferences ?? Enumerable.Empty<ProjectReferenceInformation>())
+            {
+                if (!directReferencePaths.Contains(Path.GetFullPath(projectReference.FullPath)))
+                {
+                    continue;
+                }
+
+                var projectDirectory = Path.GetDirectoryName(projectReference.FullPath);
+                if (string.IsNullOrEmpty(projectDirectory) || !fileSystem.DirectoryExists(projectDirectory))
+                {
+                    continue;
+                }
+
+                if (!projectReference.IsRazorProject)
+                {
+                    continue;
+                }
+
+                var razorComponentPaths = new HashSet<string>(
+                    (projectReference.RazorComponentItems ?? new List<string>())
+                        .Select(path => Path.IsPathRooted(path)
+                            ? Path.GetFullPath(path)
+                            : Path.GetFullPath(Path.Combine(projectDirectory, path))),
+                    PathComparer);
+                var mainLayoutPaths = new[]
+                {
+                    Path.Combine(projectDirectory, "Components", "Layout", "MainLayout.razor"),
+                    Path.Combine(projectDirectory, "Layout", "MainLayout.razor")
+                }.Where(path => fileSystem.FileExists(path) &&
+                    razorComponentPaths.Contains(Path.GetFullPath(path)));
+                foreach (var mainLayoutPath in mainLayoutPaths)
+                {
+                    var relativeDirectory = Path.GetDirectoryName(Path.GetRelativePath(projectDirectory, mainLayoutPath));
+                    var namespaceSuffix = string.IsNullOrEmpty(relativeDirectory) || relativeDirectory == "."
+                        ? string.Empty
+                        : $".{relativeDirectory.Replace(Path.DirectorySeparatorChar, '.')}";
+                    var referencedRootNamespace = string.IsNullOrEmpty(projectReference.RootNamespace)
+                        ? projectReference.ProjectName
+                        : projectReference.RootNamespace;
+                    var razorNamespace = ResolveRazorNamespace(mainLayoutPath, projectDirectory, fileSystem);
+                    var isClientProject = clientProjectNames.Contains(projectReference.ProjectName);
+
+                    layoutCandidates.Add(new LayoutCandidate
+                    {
+                        ComponentPath = Path.GetFullPath(mainLayoutPath),
+                        Namespace = $"{razorNamespace ?? $"{referencedRootNamespace}{namespaceSuffix}"}.MainLayout",
+                        ProjectPath = Path.GetFullPath(projectReference.FullPath),
+                        IsClientProject = isClientProject
+                    });
+                }
+            }
+
+            var clientCandidates = layoutCandidates
+                .Where(candidate => candidate.IsClientProject)
+                .GroupBy(GetLayoutCandidateIdentity, PathComparer)
+                .Select(group => group.First())
+                .ToList();
+            if (clientCandidates.Count == 1)
+            {
+                return clientCandidates[0].Namespace;
+            }
+            if (clientCandidates.Count > 1)
+            {
+                throw new InvalidOperationException(
+                    $"Multiple MainLayout components were found in referenced client projects: {FormatLayoutCandidates(clientCandidates)}");
+            }
+
+            var sharedCandidates = layoutCandidates
+                .GroupBy(GetLayoutCandidateIdentity, PathComparer)
+                .Select(group => group.First())
+                .ToList();
+            if (sharedCandidates.Count == 1)
+            {
+                return sharedCandidates[0].Namespace;
+            }
+            if (sharedCandidates.Count > 1)
+            {
+                throw new InvalidOperationException(
+                    $"Multiple MainLayout components were found in referenced projects: {FormatLayoutCandidates(sharedCandidates)}");
+            }
+
+            return $"{rootNamespace}.Client.Layout.MainLayout";
+        }
+
+        private static string GetLayoutCandidateIdentity(LayoutCandidate candidate)
+        {
+            return $"{candidate.ProjectPath}\0{candidate.ComponentPath}";
+        }
+
+        private static string FormatLayoutCandidates(IEnumerable<LayoutCandidate> candidates)
+        {
+            return string.Join(
+                ", ",
+                candidates.Select(candidate =>
+                    $"{candidate.Namespace} ({candidate.ComponentPath}, project: {candidate.ProjectPath})"));
+        }
+
+        private static string ResolveRazorNamespace(
+            string componentPath,
+            string projectDirectory,
+            IFileSystem fileSystem)
+        {
+            var razorNamespace = ReadRazorNamespace(componentPath, fileSystem);
+            if (!string.IsNullOrEmpty(razorNamespace))
+            {
+                return razorNamespace;
+            }
+
+            var currentDirectory = Path.GetDirectoryName(componentPath);
+            while (!string.IsNullOrEmpty(currentDirectory) &&
+                   currentDirectory.StartsWith(projectDirectory, PathComparison))
+            {
+                var importsPath = Path.Combine(currentDirectory, "_Imports.razor");
+                if (fileSystem.FileExists(importsPath))
+                {
+                    razorNamespace = ReadRazorNamespace(importsPath, fileSystem);
+                    if (!string.IsNullOrEmpty(razorNamespace))
+                    {
+                        return razorNamespace + GetNamespaceSuffix(
+                            currentDirectory,
+                            Path.GetDirectoryName(componentPath));
+                    }
+                }
+
+                if (string.Equals(currentDirectory, projectDirectory, PathComparison))
+                {
+                    break;
+                }
+                currentDirectory = Path.GetDirectoryName(currentDirectory);
+            }
+
+            return null;
+        }
+
+        private static string GetNamespaceSuffix(string importsDirectory, string componentDirectory)
+        {
+            var relativeDirectory = Path.GetRelativePath(importsDirectory, componentDirectory);
+            if (string.IsNullOrEmpty(relativeDirectory) || relativeDirectory == ".")
+            {
+                return string.Empty;
+            }
+
+            var namespaceSegments = relativeDirectory.Split(
+                new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
+                StringSplitOptions.RemoveEmptyEntries);
+            return namespaceSegments.Length == 0
+                ? string.Empty
+                : $".{string.Join(".", namespaceSegments)}";
+        }
+
+        private static string ReadRazorNamespace(string path, IFileSystem fileSystem)
+        {
+            const string namespaceDirective = "@namespace";
+            var contents = fileSystem.ReadAllText(path);
+            if (string.IsNullOrEmpty(contents))
+            {
+                return null;
+            }
+
+            return RemoveRazorComments(contents)
+                .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
+                .Select(line => line.Trim())
+                .Where(line =>
+                    line.StartsWith(namespaceDirective, StringComparison.Ordinal) &&
+                    line.Length > namespaceDirective.Length &&
+                    char.IsWhiteSpace(line[namespaceDirective.Length]))
+                .Select(line => line.Substring(namespaceDirective.Length).Trim())
+                .FirstOrDefault(namespaceValue => !string.IsNullOrEmpty(namespaceValue));
+        }
+
+        private static string RemoveRazorComments(string contents)
+        {
+            var result = new StringBuilder(contents.Length);
+            for (var index = 0; index < contents.Length; index++)
+            {
+                if (index + 1 < contents.Length &&
+                    contents[index] == '@' &&
+                    contents[index + 1] == '@')
+                {
+                    result.Append("@@");
+                    index++;
+                    continue;
+                }
+
+                if (index + 1 < contents.Length &&
+                    contents[index] == '@' &&
+                    contents[index + 1] == '*')
+                {
+                    var commentEnd = contents.IndexOf("*@", index + 2, StringComparison.Ordinal);
+                    var endIndex = commentEnd < 0 ? contents.Length : commentEnd + 2;
+                    AppendWhitespacePreservingLines(result, contents, index, endIndex);
+                    index = endIndex - 1;
+                    continue;
+                }
+
+                if (contents[index] == '@')
+                {
+                    var codeEnd = FindEmbeddedCSharpEnd(contents, index);
+                    if (codeEnd > index)
+                    {
+                        AppendWhitespacePreservingLines(result, contents, index, codeEnd);
+                        index = codeEnd - 1;
+                        continue;
+                    }
+                }
+
+                result.Append(contents[index]);
+            }
+
+            return result.ToString();
+        }
+
+        private static int FindEmbeddedCSharpEnd(string contents, int transitionIndex)
+        {
+            var codeIndex = transitionIndex + 1;
+            if (codeIndex >= contents.Length)
+            {
+                return transitionIndex;
+            }
+
+            if (contents[codeIndex] == '{')
+            {
+                return FindMatchingCSharpDelimiter(
+                    contents,
+                    codeIndex,
+                    SyntaxKind.OpenBraceToken,
+                    SyntaxKind.CloseBraceToken);
+            }
+
+            if (contents[codeIndex] == '(')
+            {
+                return FindMatchingCSharpDelimiter(
+                    contents,
+                    codeIndex,
+                    SyntaxKind.OpenParenToken,
+                    SyntaxKind.CloseParenToken);
+            }
+
+            if (!SyntaxFacts.IsIdentifierStartCharacter(contents[codeIndex]))
+            {
+                return transitionIndex;
+            }
+
+            var identifierEnd = codeIndex + 1;
+            while (identifierEnd < contents.Length &&
+                   SyntaxFacts.IsIdentifierPartCharacter(contents[identifierEnd]))
+            {
+                identifierEnd++;
+            }
+
+            var identifier = contents.Substring(codeIndex, identifierEnd - codeIndex);
+            if (string.Equals(identifier, "code", StringComparison.Ordinal) ||
+                string.Equals(identifier, "functions", StringComparison.Ordinal))
+            {
+                var blockStart = SkipWhitespace(contents, identifierEnd);
+                return blockStart < contents.Length && contents[blockStart] == '{'
+                    ? FindMatchingRazorCodeBlockEnd(contents, blockStart)
+                    : transitionIndex;
+            }
+
+            if (IsRazorControlBlock(identifier))
+            {
+                var conditionStart = SkipWhitespace(contents, identifierEnd);
+                if (conditionStart < contents.Length && contents[conditionStart] == '(')
+                {
+                    var conditionEnd = FindMatchingCSharpDelimiter(
+                        contents,
+                        conditionStart,
+                        SyntaxKind.OpenParenToken,
+                        SyntaxKind.CloseParenToken);
+                    var blockStart = SkipWhitespace(contents, conditionEnd);
+                    if (blockStart < contents.Length && contents[blockStart] == '{')
+                    {
+                        var blockEnd = FindMatchingRazorCodeBlockEnd(contents, blockStart);
+                        return string.Equals(identifier, "if", StringComparison.Ordinal)
+                            ? FindIfChainEnd(contents, blockEnd)
+                            : blockEnd;
+                    }
+                    return conditionEnd;
+                }
+            }
+
+            if (string.Equals(identifier, "namespace", StringComparison.Ordinal))
+            {
+                return transitionIndex;
+            }
+
+            var expression = SyntaxFactory.ParseExpression(contents.Substring(codeIndex));
+            var firstToken = expression.GetFirstToken();
+            return !firstToken.IsMissing &&
+                   firstToken.SpanStart == 0 &&
+                   string.Equals(firstToken.ValueText, identifier, StringComparison.Ordinal)
+                ? codeIndex + expression.Span.End
+                : transitionIndex;
+        }
+
+        private static bool IsRazorControlBlock(string identifier)
+        {
+            return string.Equals(identifier, "if", StringComparison.Ordinal) ||
+                string.Equals(identifier, "for", StringComparison.Ordinal) ||
+                string.Equals(identifier, "foreach", StringComparison.Ordinal) ||
+                string.Equals(identifier, "while", StringComparison.Ordinal) ||
+                string.Equals(identifier, "switch", StringComparison.Ordinal) ||
+                string.Equals(identifier, "lock", StringComparison.Ordinal) ||
+                string.Equals(identifier, "using", StringComparison.Ordinal);
+        }
+
+        private static int SkipWhitespace(string contents, int startIndex)
+        {
+            while (startIndex < contents.Length && char.IsWhiteSpace(contents[startIndex]))
+            {
+                startIndex++;
+            }
+
+            return startIndex;
+        }
+
+        private static int FindMatchingCSharpDelimiter(
+            string contents,
+            int openDelimiterIndex,
+            SyntaxKind openDelimiter,
+            SyntaxKind closeDelimiter)
+        {
+            var depth = 0;
+            foreach (var token in SyntaxFactory.ParseTokens(contents.Substring(openDelimiterIndex)))
+            {
+                if (token.IsKind(openDelimiter))
+                {
+                    depth++;
+                }
+                else if (token.IsKind(closeDelimiter))
+                {
+                    depth--;
+                    if (depth == 0)
+                    {
+                        return openDelimiterIndex + token.Span.End;
+                    }
+                }
+            }
+
+            return contents.Length;
+        }
+
+        private static int FindMatchingRazorCodeBlockEnd(string contents, int openBraceIndex)
+        {
+            var depth = 0;
+            for (var index = openBraceIndex; index < contents.Length; index++)
+            {
+                var literalEnd = FindCSharpLiteralEnd(contents, index);
+                if (literalEnd > index)
+                {
+                    index = literalEnd - 1;
+                    continue;
+                }
+
+                if (index + 1 < contents.Length &&
+                    contents[index] == '/' &&
+                    contents[index + 1] == '/')
+                {
+                    var lineEnd = contents.IndexOfAny(new[] { '\r', '\n' }, index + 2);
+                    index = lineEnd < 0 ? contents.Length - 1 : lineEnd - 1;
+                    continue;
+                }
+
+                if (index + 1 < contents.Length &&
+                    contents[index] == '/' &&
+                    contents[index + 1] == '*')
+                {
+                    var commentEnd = contents.IndexOf("*/", index + 2, StringComparison.Ordinal);
+                    index = commentEnd < 0 ? contents.Length - 1 : commentEnd + 1;
+                    continue;
+                }
+
+                if (index + 1 < contents.Length &&
+                    contents[index] == '@' &&
+                    contents[index + 1] == '*')
+                {
+                    var commentEnd = contents.IndexOf("*@", index + 2, StringComparison.Ordinal);
+                    index = commentEnd < 0 ? contents.Length - 1 : commentEnd + 1;
+                    continue;
+                }
+
+                if (contents[index] == '<' && IsRazorMarkupStart(contents, index))
+                {
+                    var markupEnd = FindRazorMarkupEnd(contents, index);
+                    if (markupEnd > index)
+                    {
+                        index = markupEnd - 1;
+                        continue;
+                    }
+                }
+
+                if (contents[index] == '{')
+                {
+                    depth++;
+                }
+                else if (contents[index] == '}')
+                {
+                    depth--;
+                    if (depth == 0)
+                    {
+                        return index + 1;
+                    }
+                }
+            }
+
+            return contents.Length;
+        }
+
+        private static int FindIfChainEnd(string contents, int blockEnd)
+        {
+            var currentEnd = blockEnd;
+            while (currentEnd < contents.Length)
+            {
+                var elseStart = SkipWhitespace(contents, currentEnd);
+                if (!IsKeywordAt(contents, elseStart, "else"))
+                {
+                    return currentEnd;
+                }
+
+                var next = SkipWhitespace(contents, elseStart + "else".Length);
+                if (IsKeywordAt(contents, next, "if"))
+                {
+                    var conditionStart = SkipWhitespace(contents, next + "if".Length);
+                    if (conditionStart >= contents.Length || contents[conditionStart] != '(')
+                    {
+                        return currentEnd;
+                    }
+
+                    var conditionEnd = FindMatchingCSharpDelimiter(
+                        contents,
+                        conditionStart,
+                        SyntaxKind.OpenParenToken,
+                        SyntaxKind.CloseParenToken);
+                    var blockStart = SkipWhitespace(contents, conditionEnd);
+                    if (blockStart >= contents.Length || contents[blockStart] != '{')
+                    {
+                        return currentEnd;
+                    }
+
+                    currentEnd = FindMatchingRazorCodeBlockEnd(contents, blockStart);
+                    continue;
+                }
+
+                if (next >= contents.Length || contents[next] != '{')
+                {
+                    return currentEnd;
+                }
+
+                return FindMatchingRazorCodeBlockEnd(contents, next);
+            }
+
+            return currentEnd;
+        }
+
+        private static bool IsKeywordAt(string contents, int index, string keyword)
+        {
+            if (index < 0 ||
+                index + keyword.Length > contents.Length ||
+                !contents.AsSpan(index, keyword.Length).SequenceEqual(keyword.AsSpan()))
+            {
+                return false;
+            }
+
+            return index + keyword.Length == contents.Length ||
+                !SyntaxFacts.IsIdentifierPartCharacter(contents[index + keyword.Length]);
+        }
+
+        private static int FindCSharpLiteralEnd(string contents, int index)
+        {
+            var current = contents[index];
+            if (current != '"' &&
+                current != '\'' &&
+                current != '$' &&
+                (current != '@' ||
+                    index + 1 >= contents.Length ||
+                    (contents[index + 1] != '"' && contents[index + 1] != '$')))
+            {
+                return index;
+            }
+
+            var expression = SyntaxFactory.ParseExpression(contents.Substring(index));
+            return expression.SpanStart == 0 &&
+                (expression is LiteralExpressionSyntax || expression is InterpolatedStringExpressionSyntax)
+                ? index + expression.Span.End
+                : index;
+        }
+
+        private static bool IsRazorMarkupStart(string contents, int index)
+        {
+            if (index + 1 >= contents.Length)
+            {
+                return false;
+            }
+
+            var next = contents[index + 1];
+            return char.IsLetter(next) || next == '!' || next == '?';
+        }
+
+        private static int FindRazorMarkupEnd(string contents, int markupStart)
+        {
+            var depth = 0;
+            var index = markupStart;
+            while (index < contents.Length)
+            {
+                var tagStart = contents.IndexOf('<', index);
+                if (tagStart < 0 || tagStart + 1 >= contents.Length)
+                {
+                    return markupStart;
+                }
+
+                if (contents.AsSpan(tagStart).StartsWith("<!--".AsSpan(), StringComparison.Ordinal))
+                {
+                    var commentEnd = contents.IndexOf("-->", tagStart + 4, StringComparison.Ordinal);
+                    if (commentEnd < 0)
+                    {
+                        return contents.Length;
+                    }
+                    index = commentEnd + 3;
+                    continue;
+                }
+
+                var isClosingTag = contents[tagStart + 1] == '/';
+                var tagEnd = FindMarkupTagEnd(contents, tagStart + 1);
+                if (tagEnd < 0)
+                {
+                    return markupStart;
+                }
+
+                var isDeclaration = contents[tagStart + 1] == '!' || contents[tagStart + 1] == '?';
+                var isSelfClosing = tagEnd > tagStart && contents[tagEnd - 1] == '/';
+                if (!isDeclaration)
+                {
+                    if (isClosingTag)
+                    {
+                        depth--;
+                        if (depth == 0)
+                        {
+                            return tagEnd + 1;
+                        }
+                    }
+                    else if (!isSelfClosing)
+                    {
+                        depth++;
+                    }
+                    else if (depth == 0)
+                    {
+                        return tagEnd + 1;
+                    }
+                }
+
+                index = tagEnd + 1;
+            }
+
+            return markupStart;
+        }
+
+        private static int FindMarkupTagEnd(string contents, int index)
+        {
+            var quote = '\0';
+            for (; index < contents.Length; index++)
+            {
+                if (quote != '\0')
+                {
+                    if (contents[index] == quote)
+                    {
+                        quote = '\0';
+                    }
+                    continue;
+                }
+
+                if (contents[index] == '"' || contents[index] == '\'')
+                {
+                    quote = contents[index];
+                }
+                else if (contents[index] == '>')
+                {
+                    return index;
+                }
+            }
+
+            return -1;
+        }
+
+        private static void AppendWhitespacePreservingLines(
+            StringBuilder result,
+            string contents,
+            int startIndex,
+            int endIndex)
+        {
+            for (var index = startIndex; index < endIndex; index++)
+            {
+                result.Append(contents[index] == '\r' || contents[index] == '\n'
+                    ? contents[index]
+                    : ' ');
+            }
+        }
+
+        private sealed class LayoutCandidate
+        {
+            public string ComponentPath { get; set; }
+
+            public bool IsClientProject { get; set; }
+
+            public string Namespace { get; set; }
+
+            public string ProjectPath { get; set; }
         }
 
         private void ShowFileList()

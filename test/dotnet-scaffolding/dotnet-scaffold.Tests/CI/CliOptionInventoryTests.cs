@@ -109,6 +109,8 @@ public class CliOptionInventoryTests
         yield return options.Username;
         yield return options.TenantId;
         yield return options.ApplicationId;
+        yield return options.IgniteUITheme;
+        yield return options.IgniteUIThemeVariant;
     }
 
     /// <summary>

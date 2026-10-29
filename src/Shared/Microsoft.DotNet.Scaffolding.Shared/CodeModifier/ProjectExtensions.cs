@@ -53,66 +53,30 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return null;
             }
 
-            foreach (var candidateProject in EnumerateCandidateProjects(project))
+            var projectDirectory = Path.GetDirectoryName(project.FilePath);
+            if (string.IsNullOrEmpty(projectDirectory))
             {
-                var projectDirectory = Path.GetDirectoryName(candidateProject.FilePath);
-                if (string.IsNullOrEmpty(projectDirectory))
-                {
-                    continue;
-                }
+                return null;
+            }
 
-                string extension = Path.GetExtension(fileName);
-                if (!string.IsNullOrEmpty(extension))
-                {
-                    extension = $"*{extension}";
-                }
+            string extension = Path.GetExtension(fileName);
+            if (!string.IsNullOrEmpty(extension))
+            {
+                extension = $"*{extension}";
+            }
 
-                var allFiles = Directory.EnumerateFiles(projectDirectory, extension, SearchOption.AllDirectories);
-                string filePath = allFiles.FirstOrDefault(x => x.EndsWith(fileName, StringComparison.OrdinalIgnoreCase));
-                if (!string.IsNullOrEmpty(filePath))
+            var allFiles = Directory.EnumerateFiles(projectDirectory, extension, SearchOption.AllDirectories);
+            string filePath = allFiles.FirstOrDefault(x => x.EndsWith(Path.DirectorySeparatorChar + fileName, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                string fileText = fileSystem.ReadAllText(filePath);
+                if (!string.IsNullOrEmpty(fileText))
                 {
-                    string fileText = fileSystem.ReadAllText(filePath);
-                    if (!string.IsNullOrEmpty(fileText))
-                    {
-                        return candidateProject.AddDocument(filePath, fileText);
-                    }
+                    return project.AddDocument(filePath, fileText);
                 }
             }
 
             return null;
-        }
-
-        private static IEnumerable<CodeAnalysis.Project> EnumerateCandidateProjects(CodeAnalysis.Project project)
-        {
-            var queue = new Queue<CodeAnalysis.Project>();
-            var visited = new HashSet<string>();
-            queue.Enqueue(project);
-
-            while (queue.Count > 0)
-            {
-                var current = queue.Dequeue();
-                if (current == null)
-                {
-                    continue;
-                }
-
-                var key = current.FilePath ?? current.Name;
-                if (!visited.Add(key))
-                {
-                    continue;
-                }
-
-                yield return current;
-
-                foreach (var projectReference in current.ProjectReferences)
-                {
-                    var referencedProject = current.Solution.GetProject(projectReference.ProjectId);
-                    if (referencedProject != null)
-                    {
-                        queue.Enqueue(referencedProject);
-                    }
-                }
-            }
         }
     }
 }

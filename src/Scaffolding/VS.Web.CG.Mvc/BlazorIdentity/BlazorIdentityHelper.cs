@@ -168,6 +168,12 @@ If the project had identity support prior to scaffolding, ensure that the follow
 4. For global interactivity, HeadOutlet and Routes use a conditional render mode:
     - HttpContext.AcceptsInteractiveRouting() ? ORIGINAL_RENDER_MODE : null
     - Account pages must remain statically server-rendered.
+5. For WebAssembly/Auto, the server's AddRazorComponents() chain includes AddAuthenticationStateSerialization().
+   The referenced client registers AddAuthorizationCore(), AddCascadingAuthenticationState(), and
+   AddAuthenticationStateDeserialization(). Its imports include Microsoft.AspNetCore.Components.Authorization, and its
+   RedirectToLogin component performs a full-page load of the server Account/Login page.
+   The client also references Microsoft.AspNetCore.Components.WebAssembly.Authentication, matching
+   its WebAssembly package version. For centrally managed versions, add that package before scaffolding.
 ";
 
     }

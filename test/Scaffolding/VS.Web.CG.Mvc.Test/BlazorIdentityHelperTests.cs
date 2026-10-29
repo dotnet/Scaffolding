@@ -103,7 +103,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         }
 
         [Fact]
-        public void GetDocumentFromName_ResolvesReferencedClientProjectFiles()
+        public void GetDocumentFromName_StaysWithinExplicitTargetProject()
         {
             var tempRoot = Path.Combine(Path.GetTempPath(), $"blazor-identity-{Guid.NewGuid():N}");
             Directory.CreateDirectory(Path.Combine(tempRoot, "Client"));
@@ -118,6 +118,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 File.WriteAllText(clientProjectPath, "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\" />");
                 File.WriteAllText(clientRoutesPath, "<Router />");
                 File.WriteAllText(serverProjectPath, "<Project Sdk=\"Microsoft.NET.Sdk.Web\"><ItemGroup><ProjectReference Include=\"..\\Client\\Client.csproj\" /></ItemGroup></Project>");
+                File.WriteAllText(Path.Combine(tempRoot, "Server", "ManageNavMenu.razor"), "<nav>Account navigation</nav>");
 
                 var workspace = new AdhocWorkspace();
                 var solution = workspace.CurrentSolution;
@@ -145,7 +146,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 var solutionWithReference = solution.AddProjectReference(serverProjectId, new ProjectReference(clientProject.Id));
                 var serverProjectWithReference = solutionWithReference.GetProject(serverProjectId);
 
-                var document = serverProjectWithReference.GetDocumentFromName("Routes.razor", DefaultFileSystem.Instance);
+                Assert.Null(serverProjectWithReference.GetDocumentFromName("Routes.razor", DefaultFileSystem.Instance));
+                Assert.Null(serverProjectWithReference.GetDocumentFromName("NavMenu.razor", DefaultFileSystem.Instance));
+                var document = solutionWithReference.GetProject(clientProjectId).GetDocumentFromName("Routes.razor", DefaultFileSystem.Instance);
 
                 Assert.NotNull(document);
                 Assert.Equal(clientRoutesPath, document.Name);

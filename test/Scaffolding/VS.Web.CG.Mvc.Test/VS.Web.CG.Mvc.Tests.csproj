@@ -11,6 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="$(RepoRoot)src\Scaffolding\VS.Web.CG.Mvc\Templates\BlazorIdentity\**\*.tt;$(RepoRoot)src\Scaffolding\VS.Web.CG.Mvc\Templates\BlazorIdentity\**\*.js"
+             Link="Templates\BlazorIdentity\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="..\Shared\**\*.cs">
       <Link>Shared\%(RecursiveDir)%(FileName)</Link>
     </Compile>

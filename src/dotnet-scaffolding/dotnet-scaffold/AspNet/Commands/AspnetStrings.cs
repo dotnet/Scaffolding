@@ -147,6 +147,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string EntraIdExample2Description = "Add Microsoft Entra ID authentication by creating a new Azure application:";
         }
 
+        internal class SyncfusionBlazorToolkit
+        {
+            internal const string Name = "blazor-syncfusion-toolkit";
+            internal const string DisplayName = "Syncfusion Blazor Toolkit";
+            internal const string Description = "Sets up the Syncfusion Blazor Toolkit (package, service registration, and imports) in an existing Blazor app.";
+            internal const string SyncfusionBlazorToolkitExample = "dotnet scaffold aspnet blazor-syncfusion-toolkit --project ./MyBlazorApp.csproj";
+            internal const string SyncfusionBlazorToolkitExampleDescription = "Configure the Syncfusion Blazor Toolkit in an existing Blazor app:";
+        }
+
         internal class Catagories
         {
             internal const string Blazor = "Blazor";

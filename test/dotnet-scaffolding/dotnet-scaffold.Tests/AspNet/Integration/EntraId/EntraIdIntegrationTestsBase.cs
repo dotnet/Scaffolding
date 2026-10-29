@@ -739,6 +739,14 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
     public Task BlazorEntraChangesConfig_CustomSchemeChallengesWithCodeAndPkce(string registration, string additionalScheme = "")
         => BlazorEntraChangesConfig_GeneratedAppChallengesWithCodeAndPkce(registration, "CustomOidc", additionalScheme);
 
+    [Fact]
+    public Task BlazorEntraChangesConfig_RuntimeSchemeChallengesWithCodeAndPkce()
+        => BlazorEntraChangesConfig_GeneratedAppChallengesWithCodeAndPkce("""
+            string customScheme = "CustomOidc";
+            builder.Services.AddAuthentication(customScheme)
+                .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"), openIdConnectScheme: customScheme);
+            """, "CustomOidc");
+
     #endregion
 
     #region Validation Combination Tests
@@ -881,6 +889,13 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         File.WriteAllText(_testProjectPath, ProjectContent);
         var programPath = Path.Combine(_testProjectDir, "Program.cs");
         File.WriteAllText(programPath, programContent);
+        if (!File.Exists(Path.Combine(_testProjectDir, "obj", "project.assets.json")))
+        {
+            // MSBuildWorkspace needs restored framework references to resolve constant schemes.
+            var (exitCode, output, error) = await ScaffoldCliHelper.RunDotNetAsync(
+                _testProjectDir, "restore", _testProjectPath);
+            Assert.True(exitCode == 0, $"Project restore must succeed before code modification.\nOutput: {output}\nError: {error}");
+        }
         var configPath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs", "blazorEntraChanges.json");
         var step = new CodeModificationStep(NullLogger<CodeModificationStep>.Instance)
         {

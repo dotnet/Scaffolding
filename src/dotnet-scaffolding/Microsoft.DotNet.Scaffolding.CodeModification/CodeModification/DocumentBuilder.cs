@@ -243,6 +243,22 @@ internal class DocumentBuilder
         return true;
     }
 
+    private static bool CanReuseServiceCollection(ExpressionSyntax expression, InvocationExpressionSyntax invocation, SemanticModel? semanticModel)
+    {
+        if (CanReuseVariable(expression, invocation, semanticModel))
+        {
+            return true;
+        }
+
+        // WebApplicationBuilder owns a stable service collection. Arbitrary getters and
+        // factory receivers must not be evaluated again after the registration.
+        return expression is MemberAccessExpressionSyntax member &&
+            semanticModel?.GetSymbolInfo(member).Symbol is IPropertySymbol { Name: "Services", IsStatic: false, GetMethod: not null, SetMethod: null } property &&
+            property.ContainingType.ToDisplayString() == "Microsoft.AspNetCore.Builder.WebApplicationBuilder" &&
+            property.ContainingAssembly.Identity.Name == "Microsoft.AspNetCore" &&
+            CanReuseVariable(member.Expression, invocation, semanticModel);
+    }
+
     private static string BindServiceReceiver(string block, InvocationExpressionSyntax invocation, SemanticModel? semanticModel)
     {
         // Follow only the receiver chain, not invocations in options lambdas or arguments.
@@ -266,11 +282,13 @@ internal class DocumentBuilder
         }
 
         var configuration = SyntaxFactory.ParseStatement(block);
-        if (receiver is null || !CanReuseVariable(receiver, invocation, semanticModel) ||
+        if (receiver is null || !(hasAuthenticationCall
+                ? CanReuseServiceCollection(receiver, invocation, semanticModel)
+                : CanReuseVariable(receiver, invocation, semanticModel)) ||
             (!hasAuthenticationCall && semanticModel?.GetTypeInfo(receiver).Type?.GetMembers("Services").Any() is not true) ||
             configuration is not ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax configurationCall } })
         {
-            throw new InvalidOperationException($"Unable to safely reuse the service collection for '{invocation}'. Use an uncaptured, non-ref local variable holding the service collection or authentication builder, without assigning it within the registration statement.");
+            throw new InvalidOperationException($"Unable to safely reuse the service collection for '{invocation}'. Use an uncaptured, non-ref local variable holding the service collection, authentication builder, or WebApplicationBuilder (via its Services property), without assigning it within the registration statement.");
         }
 
         // An existing AuthenticationBuilder has Services; an AddAuthentication call already

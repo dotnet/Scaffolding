@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -168,8 +169,12 @@ public class DocumentBuilderTests
         Assert.Contains("local variable", error.Message);
     }
 
-    [Fact]
-    public async Task InvocationArguments_RejectServiceCollectionGetter()
+    [Theory]
+    [InlineData("Services")]
+    [InlineData("new Holder().Services")]
+    [InlineData("holder.Services")]
+    [InlineData("GetServices()")]
+    public async Task InvocationArguments_RejectServiceCollectionGetter(string receiver)
     {
         using var workspace = new AdhocWorkspace();
         var document = CreateRegistrationDocument(workspace, """
@@ -177,17 +182,100 @@ public class DocumentBuilderTests
             static class Registration
             {
                 static Services Services => new Services();
+                static Services GetServices() => new Services();
                 public static void Configure()
                 {
+                    var holder = new Holder();
                     string scheme = "First";
-                    Services.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: scheme);
+                    RECEIVER.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: scheme);
                 }
             }
-            """);
+            class Holder { public Services Services => new Services(); }
+            """.Replace("RECEIVER", receiver, StringComparison.Ordinal));
+        var compilation = await document.Project.GetCompilationAsync();
+        Assert.Empty(compilation!.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
 
         var error = await Assert.ThrowsAsync<InvalidOperationException>(() => ScaffoldAsync(document));
 
         Assert.Contains("service collection", error.Message);
+    }
+
+    [Theory]
+    [InlineData("Microsoft.AspNetCore", "builder.Services", true)]
+    [InlineData("Application", "builder.Services", false)]
+    [InlineData("Microsoft.AspNetCore", "CreateBuilder().Services", false)]
+    [InlineData("Microsoft.AspNetCore", "builder.Services", false, ".KeepChain(builder = CreateBuilder())")]
+    public async Task InvocationArguments_ReuseOnlyFrameworkServicesOnStableBuilder(
+        string assemblyName, string receiver, bool safe, string suffix = "")
+    {
+        using var workspace = new AdhocWorkspace();
+        var frameworkSource = """
+            namespace Microsoft.AspNetCore.Builder
+            {
+                public class WebApplicationBuilder
+                {
+                    public Services Services { get; } = new Services();
+                }
+            }
+            public class Services
+            {
+                public AuthenticationBuilder AddAuthentication() => new AuthenticationBuilder();
+                public void PostConfigure<T>(string scheme, System.Action<T> configure) { }
+            }
+            public class AuthenticationBuilder
+            {
+                public AuthenticationBuilder AddMicrosoftIdentityWebApp(object configuration, string openIdConnectScheme = "Default") => this;
+                public AuthenticationBuilder KeepChain(object value) => this;
+            }
+            public class OpenIdConnectOptions { public string ResponseType { get; set; } = ""; }
+            """;
+        using var assembly = new MemoryStream();
+        var reference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+        var emitted = CSharpCompilation.Create(assemblyName, [CSharpSyntaxTree.ParseText(frameworkSource)], [reference],
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)).Emit(assembly);
+        Assert.True(emitted.Success, string.Join(Environment.NewLine, emitted.Diagnostics));
+        var project = workspace.AddProject("Test", LanguageNames.CSharp)
+            .WithCompilationOptions(new CSharpCompilationOptions(OutputKind.ConsoleApplication))
+            .AddMetadataReferences([reference, MetadataReference.CreateFromImage(assembly.ToArray())]);
+        var document = project.AddDocument("Program.cs", SourceText.From($$"""
+            var builder = CreateBuilder();
+            string scheme = "First";
+            {{receiver}}.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: scheme){{suffix}};
+            scheme = "Second";
+            {{receiver}}.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: scheme){{suffix}};
+            static Microsoft.AspNetCore.Builder.WebApplicationBuilder CreateBuilder() => new Microsoft.AspNetCore.Builder.WebApplicationBuilder();
+            """));
+        var compilation = await document.Project.GetCompilationAsync();
+        Assert.Empty(compilation!.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+
+        if (!safe)
+        {
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => ScaffoldAsync(document));
+            Assert.Contains("service collection", error.Message);
+            return;
+        }
+
+        for (int run = 0; run < 2; run++)
+        {
+            document = await ScaffoldAsync(document);
+            document = document.WithText(SourceText.From((await document.GetTextAsync()).ToString()));
+            compilation = await document.Project.GetCompilationAsync();
+            Assert.Empty(compilation!.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+            var root = (await document.GetSyntaxRootAsync())!;
+            var registrations = root.DescendantNodes().OfType<InvocationExpressionSyntax>()
+                .Where(invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "AddMicrosoftIdentityWebApp").ToArray();
+            var configurations = root.DescendantNodes().OfType<InvocationExpressionSyntax>()
+                .Where(invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "PostConfigure").ToArray();
+            Assert.Equal(2, registrations.Length);
+            Assert.Equal(2, configurations.Length);
+            foreach (var registration in registrations)
+            {
+                var anchor = registration.Ancestors().OfType<GlobalStatementSyntax>().First();
+                var next = anchor.Parent!.ChildNodes().SkipWhile(node => node != anchor).Skip(1).First();
+                var configuration = Assert.Single(configurations, configuration => next.Span.Contains(configuration.Span));
+                Assert.Equal("builder.Services", ((MemberAccessExpressionSyntax)configuration.Expression).Expression.ToString());
+            }
+        }
     }
 
     [Theory]

@@ -89,8 +89,8 @@ public class DocumentBuilderTests
             var compilation = await document.Project.GetCompilationAsync();
             Assert.Empty(compilation!.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
             var root = await document.GetSyntaxRootAsync();
-            var configuration = Assert.Single(root!.DescendantNodes().OfType<InvocationExpressionSyntax>()
-                .Where(invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "PostConfigure"));
+            var configuration = Assert.Single(root!.DescendantNodes().OfType<InvocationExpressionSyntax>(),
+                invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "PostConfigure");
             if (constant)
             {
                 Assert.IsType<GlobalStatementSyntax>(configuration.Parent!.Parent);
@@ -106,8 +106,8 @@ public class DocumentBuilderTests
                 Assert.Equal(scope == "authenticationBuilder" ? "authentication.Services" : "services",
                     ((MemberAccessExpressionSyntax)configuration.Expression).Expression.ToString());
             }
-            Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>()
-                .Where(invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "KeepChain"));
+            Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(),
+                invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "KeepChain");
         }
     }
 

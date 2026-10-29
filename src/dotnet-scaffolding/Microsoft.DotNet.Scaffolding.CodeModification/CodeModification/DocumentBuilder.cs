@@ -58,7 +58,7 @@ internal class DocumentBuilder
                 var existingStatements = anchor.Parent!.ChildNodes().SkipWhile(node => node != anchor).Skip(1)
                     .Select(node => node is GlobalStatementSyntax global ? global.Statement : node)
                     .TakeWhile(node => statements.Any(statement => SyntaxFactory.AreEquivalent(node, statement))).ToArray();
-                foreach (var change in filteredChanges.Reverse())
+                foreach (var change in Enumerable.Reverse(filteredChanges))
                 {
                     var statement = SyntaxFactory.ParseStatement(change.Block.TrimEnd(' ', '\r', '\n', ';') + ";");
                     if (!existingStatements.Any(node => SyntaxFactory.AreEquivalent(node, statement)))

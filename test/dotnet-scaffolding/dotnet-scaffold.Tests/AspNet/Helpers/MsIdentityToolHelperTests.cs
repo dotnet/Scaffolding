@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
-using System;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;

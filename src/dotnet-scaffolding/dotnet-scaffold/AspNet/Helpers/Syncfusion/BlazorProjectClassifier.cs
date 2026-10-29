@@ -111,9 +111,10 @@ internal static class BlazorProjectClassifier
         string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
 
     // The evaluated Content/RazorComponent items include every .razor file the SDK compiles, wherever it lives.
+    // `None` is deliberately excluded: a .razor file kept as None (e.g. a removed sample) is not compiled.
     private static bool HasRazorComponents(MSBuildProjectService service)
     {
-        foreach (string itemType in new[] { "Content", "RazorComponent", "None" })
+        foreach (string itemType in new[] { "Content", "RazorComponent" })
         {
             if (service.TryGetEvaluatedItems(itemType, out var items, out _) &&
                 items.Any(item => item.Include.EndsWith(".razor", StringComparison.OrdinalIgnoreCase)))

@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -95,10 +96,19 @@ internal static class BlazorHostingInspector
         }
     }
 
+    // Razor comments (@* ... *@) and HTML comments (<!-- ... -->) are not rendered.
+    private static readonly Regex RazorComments = new(@"@\*.*?\*@|<!--.*?-->", RegexOptions.Singleline | RegexOptions.Compiled);
+
+    // An opening <Routes ...> tag; quoted attribute values may contain '>'.
+    private static readonly Regex RoutesTag = new(
+        @"<Routes(?=[\s/>])(?<attrs>(?:[^>""']|""[^""]*""|'[^']*')*)>",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
     /// <summary>
-    /// The render mode applied to the whole app from <c>App.razor</c>
-    /// (e.g. <c>&lt;Routes @rendermode="InteractiveServer" /&gt;</c>), or
-    /// <c>"None"</c> when pages choose their own. <c>"None"</c> never means
+    /// The render mode applied to the whole app from the active <c>&lt;Routes&gt;</c>
+    /// component in <c>App.razor</c> (e.g. <c>&lt;Routes @rendermode="InteractiveServer" /&gt;</c>),
+    /// or <c>"None"</c> when pages choose their own. Render modes in comments or on other
+    /// components (such as <c>HeadOutlet</c>) are ignored. <c>"None"</c> never means
     /// "not interactive".
     /// </summary>
     private static string ReadGlobalRenderMode(string? appRazorText)
@@ -108,14 +118,19 @@ internal static class BlazorHostingInspector
             return "None";
         }
 
-        foreach (string mode in new[] { "InteractiveAuto", "InteractiveServer", "InteractiveWebAssembly" })
+        string active = RazorComments.Replace(appRazorText, string.Empty);
+        foreach (Match routes in RoutesTag.Matches(active))
         {
-            if (appRazorText.Contains($"@rendermode=\"{mode}\"", StringComparison.OrdinalIgnoreCase) ||
-                appRazorText.Contains($"@rendermode=\"RenderMode.{mode}\"", StringComparison.OrdinalIgnoreCase) ||
-                appRazorText.Contains($"@rendermode=\"@RenderMode.{mode}\"", StringComparison.OrdinalIgnoreCase) ||
-                appRazorText.Contains($"@rendermode=\"@({mode})\"", StringComparison.OrdinalIgnoreCase))
+            string attributes = routes.Groups["attrs"].Value;
+            foreach (string mode in new[] { "InteractiveAuto", "InteractiveServer", "InteractiveWebAssembly" })
             {
-                return mode;
+                if (attributes.Contains($"@rendermode=\"{mode}\"", StringComparison.OrdinalIgnoreCase) ||
+                    attributes.Contains($"@rendermode=\"RenderMode.{mode}\"", StringComparison.OrdinalIgnoreCase) ||
+                    attributes.Contains($"@rendermode=\"@RenderMode.{mode}\"", StringComparison.OrdinalIgnoreCase) ||
+                    attributes.Contains($"@rendermode=\"@({mode})\"", StringComparison.OrdinalIgnoreCase))
+                {
+                    return mode;
+                }
             }
         }
 

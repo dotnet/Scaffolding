@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -20,7 +22,7 @@ internal static class ScaffolderBaselineRunner
         string template,
         Func<string, Task<(int ExitCode, string Output, string Error)>> scaffold,
         PrepareBaselineInput? prepareInput = null,
-        string? nugetConfig = null)
+        IReadOnlyList<string>? additionalPackageSources = null)
     {
         var repoRoot = ScaffoldCliHelper.GetRepoRoot();
         var baselines = Path.Combine(repoRoot, "test", "dotnet-scaffolding", "baselines");
@@ -34,18 +36,9 @@ internal static class ScaffolderBaselineRunner
         try
         {
             File.Copy(Path.Combine(repoRoot, "global.json"), Path.Combine(workingDirectory, "global.json"));
-            // Defaults to the repository feeds. A scaffolder whose package is not on those feeds
-            // (for example one published only to nuget.org) supplies its own scoped config.
-            var nugetConfigPath = Path.Combine(workingDirectory, "NuGet.config");
-            if (nugetConfig is null)
-            {
-                File.Copy(Path.Combine(repoRoot, "NuGet.config"), nugetConfigPath);
-            }
-            else
-            {
-                File.WriteAllText(nugetConfigPath, nugetConfig);
-            }
-
+            File.WriteAllText(
+                Path.Combine(workingDirectory, "NuGet.config"),
+                AddPackageSources(File.ReadAllText(Path.Combine(repoRoot, "NuGet.config")), additionalPackageSources ?? []));
             GeneratedProjectBaseline.CopyProject(baseline, expected);
             await RunDotNetAsync(output, expected, "restore");
             await RunDotNetAsync(output, expected, "build", "--no-restore");
@@ -69,6 +62,24 @@ internal static class ScaffolderBaselineRunner
         }
 
         Directory.Delete(workingDirectory, recursive: true);
+    }
+
+    /// <summary>
+    /// Adds package sources that the repository feeds do not mirror (such as nuget.org for third-party packages) to the
+    /// repository's NuGet.config, after its '&lt;clear /&gt;' so that they are not cleared.
+    /// </summary>
+    private static string AddPackageSources(string nugetConfig, IReadOnlyList<string> packageSources)
+    {
+        if (packageSources.Count == 0)
+        {
+            return nugetConfig;
+        }
+
+        const string clear = "<clear />";
+        var index = nugetConfig.IndexOf(clear, StringComparison.Ordinal);
+        Assert.True(index >= 0, "The repository NuGet.config has no '<clear />' in its package sources.");
+        var sources = string.Concat(packageSources.Select((source, i) => $"\n    <add key=\"baseline-source-{i}\" value=\"{source}\" />"));
+        return nugetConfig.Insert(index + clear.Length, sources);
     }
 
     private static async Task RunDotNetAsync(ITestOutputHelper output, string directory, params string[] arguments)

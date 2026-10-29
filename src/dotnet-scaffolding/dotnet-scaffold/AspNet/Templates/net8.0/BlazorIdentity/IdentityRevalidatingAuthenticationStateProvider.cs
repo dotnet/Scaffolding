@@ -22,8 +22,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity
         /// </summary>
         public virtual string TransformText()
         {
+
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+
             this.Write("using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.DbContextNamespace));
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
+            this.Write(";\r\n");
+}
+            this.Write("using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
             this.Write(";\r\nusing Microsoft.AspNetCore.Components.Authorization;\r\nusing Microsoft.AspNetCo" +
                     "re.Components.Server;\r\nusing Microsoft.AspNetCore.Identity;\r\nusing Microsoft.Ext" +
                     "ensions.Options;\r\nusing System.Security.Claims;\r\n\r\nnamespace ");

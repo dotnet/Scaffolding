@@ -112,6 +112,184 @@ public class DocumentBuilderTests
     }
 
     [Fact]
+    public async Task InvocationArguments_RejectSideEffectingSchemeWithoutRewritingDocument()
+    {
+        using var workspace = new AdhocWorkspace();
+        var document = CreateRegistrationDocument(workspace, """
+            var services = new Services();
+            services.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: NextScheme());
+            string NextScheme() => System.Guid.NewGuid().ToString();
+            """);
+        var originalText = await document.GetTextAsync();
+
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => ScaffoldAsync(document));
+
+        Assert.Contains("openIdConnectScheme", error.Message);
+        Assert.Contains("local variable", error.Message);
+        Assert.Contains("NextScheme()", error.Message);
+        Assert.Equal(originalText.ToString(), (await document.GetTextAsync()).ToString());
+    }
+
+    [Theory]
+    [InlineData("", "Scheme", "")]
+    [InlineData("", "NextScheme()", "")]
+    [InlineData("var scheme = new SchemeValue();", "scheme", "")]
+    [InlineData("var holder = new SchemeValue();", "holder.Scheme", "")]
+    [InlineData("string scheme = \"First\";", "(scheme = NextScheme())", "")]
+    [InlineData("string scheme = \"First\"; System.Action mutate = () => scheme = NextScheme();", "scheme", "")]
+    [InlineData("string scheme = \"First\"; Change(ref scheme);", "scheme", "")]
+    [InlineData("string scheme = \"First\"; Observe(scheme);", "scheme", "")]
+    [InlineData("string scheme = \"First\"; ref string alias = ref scheme;", "scheme", "")]
+    [InlineData("string scheme = \"First\";", "scheme", ".KeepChain(scheme = \"Changed\")")]
+    public async Task InvocationArguments_RejectSchemeValuesThatCannotBeSafelyReused(string declarations, string scheme, string suffix)
+    {
+        using var workspace = new AdhocWorkspace();
+        var document = CreateRegistrationDocument(workspace, $$"""
+            Registration.Configure(new Services());
+            static class Registration
+            {
+                static string NextScheme() => System.Guid.NewGuid().ToString();
+                static string Scheme => NextScheme();
+                static void Change(ref string value) => value = NextScheme();
+                static void Observe(in string value) { }
+                public static void Configure(Services services)
+                {
+                    {{declarations}}
+                    services.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: {{scheme}}){{suffix}};
+                }
+            }
+            """);
+        var compilation = await document.Project.GetCompilationAsync();
+        Assert.Empty(compilation!.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => ScaffoldAsync(document));
+
+        Assert.Contains("openIdConnectScheme", error.Message);
+        Assert.Contains("local variable", error.Message);
+    }
+
+    [Fact]
+    public async Task InvocationArguments_RejectServiceCollectionGetter()
+    {
+        using var workspace = new AdhocWorkspace();
+        var document = CreateRegistrationDocument(workspace, """
+            Registration.Configure();
+            static class Registration
+            {
+                static Services Services => new Services();
+                public static void Configure()
+                {
+                    string scheme = "First";
+                    Services.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: scheme);
+                }
+            }
+            """);
+
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => ScaffoldAsync(document));
+
+        Assert.Contains("service collection", error.Message);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task InvocationArguments_ReassignedSchemeGetsConfigurationAfterEachRegistration(bool topLevel)
+    {
+        using var workspace = new AdhocWorkspace();
+        const string registration = "services.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: scheme);";
+        var statements = $"string scheme = \"First\"; {registration}";
+        var source = topLevel
+            ? $"var services = new Services(); {statements}"
+            : $"Registration.Configure(new Services()); static class Registration {{ public static void Configure(Services services) {{ {statements} }} }}";
+        var document = await ScaffoldAsync(CreateRegistrationDocument(workspace, source));
+        var persisted = (await document.GetTextAsync()).ToString();
+        Assert.Single((await document.GetSyntaxRootAsync())!.DescendantNodes().OfType<InvocationExpressionSyntax>(),
+            invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "PostConfigure");
+
+        // Simulate editing the persisted file after scaffolding the first registration.
+        var root = CSharpSyntaxTree.ParseText(persisted).GetRoot();
+        var configuration = root.DescendantNodes().OfType<ExpressionStatementSyntax>()
+            .Single(statement => statement.Expression is InvocationExpressionSyntax invocation &&
+                invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "PostConfigure");
+        persisted = persisted.Insert(configuration.Span.End, $"\nscheme = \"Second\";\n{registration}\n");
+        document = document.WithText(SourceText.From(persisted));
+
+        for (int run = 0; run < 2; run++)
+        {
+            document = await ScaffoldAsync(document);
+            document = document.WithText(SourceText.From((await document.GetTextAsync()).ToString()));
+            var compilation = await document.Project.GetCompilationAsync();
+            Assert.Empty(compilation!.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+            root = (await document.GetSyntaxRootAsync())!;
+            var registrations = root.DescendantNodes().OfType<ExpressionStatementSyntax>()
+                .Where(statement => statement.Expression is InvocationExpressionSyntax invocation &&
+                    invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "AddMicrosoftIdentityWebApp").ToArray();
+            var configurations = root.DescendantNodes().OfType<ExpressionStatementSyntax>()
+                .Where(statement => statement.Expression is InvocationExpressionSyntax invocation &&
+                    invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "PostConfigure").ToArray();
+            Assert.Equal(2, registrations.Length);
+            Assert.Equal(2, configurations.Length);
+            for (int index = 0; index < registrations.Length; index++)
+            {
+                SyntaxNode anchor = registrations[index].Parent is GlobalStatementSyntax global ? global : registrations[index];
+                var next = anchor.Parent!.ChildNodes().SkipWhile(node => node != anchor).Skip(1).First();
+                Assert.Same(configurations[index], next is GlobalStatementSyntax nextGlobal ? nextGlobal.Statement : next);
+            }
+            Assert.True(configurations[0].Span.End < root.DescendantNodes().OfType<AssignmentExpressionSyntax>()
+                .Single(assignment => assignment.Left is IdentifierNameSyntax { Identifier.ValueText: "scheme" }).SpanStart);
+        }
+    }
+
+    private static Document CreateRegistrationDocument(AdhocWorkspace workspace, string statements)
+    {
+        var source = statements + """
+
+            class Services
+            {
+                public AuthenticationBuilder AddAuthentication() => new AuthenticationBuilder(this);
+                public void PostConfigure<T>(string scheme, System.Action<T> configure) { }
+            }
+            class AuthenticationBuilder
+            {
+                public AuthenticationBuilder(Services services) { Services = services; }
+                public Services Services { get; }
+                public AuthenticationBuilder AddMicrosoftIdentityWebApp(object configuration, string openIdConnectScheme = "Default") => this;
+                public AuthenticationBuilder KeepChain(string value) => this;
+            }
+            class OpenIdConnectOptions { public string ResponseType { get; set; } = ""; }
+            class SchemeValue
+            {
+                public string Scheme => System.Guid.NewGuid().ToString();
+                public static implicit operator string(SchemeValue value) => value.Scheme;
+            }
+            """;
+        var project = workspace.AddProject("Test", LanguageNames.CSharp)
+            .WithCompilationOptions(new CSharpCompilationOptions(OutputKind.ConsoleApplication))
+            .AddMetadataReference(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
+        return project.AddDocument("Program.cs", SourceText.From(source));
+    }
+
+    private static Task<Document> ScaffoldAsync(Document document) => new DocumentBuilder(document, new CodeFile
+    {
+        FileName = "Program.cs",
+        Methods = new()
+        {
+            ["Global"] = new Method
+            {
+                CodeChanges =
+                [
+                    new CodeSnippet
+                    {
+                        Parent = "AddMicrosoftIdentityWebApp",
+                        InvocationArguments = new() { ["openIdConnectScheme"] = "\"Default\"" },
+                        Block = "builder.Services.PostConfigure<OpenIdConnectOptions>($openIdConnectScheme$, options => { options.ResponseType = \"code\"; });"
+                    }
+                ]
+            }
+        }
+    }, [Constants.UseTopLevelStatements], NullLogger.Instance).RunAsync();
+
+    [Fact]
     public void InvocationArguments_BindNamedAndPositionalOverloadsAndDeduplicateSchemes()
     {
         var tree = CSharpSyntaxTree.ParseText("""

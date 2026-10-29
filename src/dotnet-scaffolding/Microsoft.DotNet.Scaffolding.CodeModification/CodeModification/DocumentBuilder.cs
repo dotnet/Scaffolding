@@ -50,15 +50,20 @@ internal class DocumentBuilder
             foreach (var (originalAnchor, changes) in scopedChanges)
             {
                 var anchor = syntaxRoot.GetCurrentNode(originalAnchor)!;
-                foreach (var change in (ProjectModifierHelper.FilterCodeSnippets(changes.ToArray(), _options) ?? []).Reverse())
+                var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(changes.ToArray(), _options) ?? [];
+                var statements = filteredChanges.Select(change =>
+                    SyntaxFactory.ParseStatement(change.Block.TrimEnd(' ', '\r', '\n', ';') + ";")).ToArray();
+                // Only the contiguous configuration immediately after this registration belongs
+                // to it. An earlier registration may have used a different value of the same local.
+                var existingStatements = anchor.Parent!.ChildNodes().SkipWhile(node => node != anchor).Skip(1)
+                    .Select(node => node is GlobalStatementSyntax global ? global.Statement : node)
+                    .TakeWhile(node => statements.Any(statement => SyntaxFactory.AreEquivalent(node, statement))).ToArray();
+                foreach (var change in filteredChanges.Reverse())
                 {
-                    // Only siblings share the registration's lexical scope. A matching statement in
-                    // another helper must not suppress this configuration.
                     var statement = SyntaxFactory.ParseStatement(change.Block.TrimEnd(' ', '\r', '\n', ';') + ";");
-                    if (!anchor.Parent!.ChildNodes().Any(node =>
-                        SyntaxFactory.AreEquivalent(node is GlobalStatementSyntax global ? global.Statement : node, statement)))
+                    if (!existingStatements.Any(node => SyntaxFactory.AreEquivalent(node, statement)))
                     {
-                        var nodes = GetNodeInsertionList(change, anchor.Parent.Kind())!;
+                        var nodes = GetNodeInsertionList(change, anchor.Parent!.Kind())!;
                         syntaxRoot = syntaxRoot.InsertNodesAfter(anchor, nodes);
                         anchor = syntaxRoot.GetCurrentNode(originalAnchor)!;
                     }
@@ -131,6 +136,10 @@ internal class DocumentBuilder
                         }
                         else
                         {
+                            if (!CanReuseVariable(argument, invocation, semanticModel, requireString: true))
+                            {
+                                throw new InvalidOperationException($"Unable to safely reuse '{parameter}' expression '{argument}' in '{invocation}'. Evaluate it into a constant or an uncaptured, non-ref string local variable before the registration, and do not assign that variable within the registration statement.");
+                            }
                             value = argument.WithoutTrivia().ToString();
                             requiresScope = true;
                         }
@@ -182,6 +191,58 @@ internal class DocumentBuilder
         return result.ToArray();
     }
 
+    private static bool CanReuseVariable(ExpressionSyntax expression, InvocationExpressionSyntax invocation, SemanticModel? semanticModel,
+        bool requireString = false)
+    {
+        if (expression is not IdentifierNameSyntax || semanticModel is null)
+        {
+            return false;
+        }
+
+        var symbol = semanticModel.GetSymbolInfo(expression).Symbol;
+        var type = symbol switch
+        {
+            ILocalSymbol { RefKind: RefKind.None } local => local.Type,
+            IParameterSymbol { RefKind: RefKind.None } parameter => parameter.Type,
+            _ => null
+        };
+        var declaration = symbol?.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+        var statement = invocation.Ancestors().OfType<StatementSyntax>().FirstOrDefault();
+        if (type is null || requireString && type.SpecialType != SpecialType.System_String || declaration is null || statement is null)
+        {
+            return false;
+        }
+
+        static SyntaxNode? GetFunction(SyntaxNode node) => node.Ancestors().FirstOrDefault(ancestor =>
+            ancestor is BaseMethodDeclarationSyntax or LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax);
+
+        var function = GetFunction(declaration);
+        var references = (function ?? declaration.SyntaxTree.GetRoot()).DescendantNodes().OfType<IdentifierNameSyntax>()
+            .Where(node => SymbolEqualityComparer.Default.Equals(semanticModel.GetSymbolInfo(node).Symbol, symbol)).ToArray();
+        var captured = references.Any(reference => GetFunction(reference)?.Span != function?.Span);
+        // Even a simple local read is unsafe if a later argument or chained call can change
+        // its storage through a mutable closure/ref alias, or if this statement assigns it.
+        foreach (var reference in references)
+        {
+            var operation = semanticModel.GetOperation(reference);
+            while (operation?.Parent is IConversionOperation or IParenthesizedOperation)
+            {
+                operation = operation.Parent;
+            }
+            if (operation?.Parent is IArgumentOperation { Parameter.RefKind: not RefKind.None } ||
+                reference.Ancestors().Any(node => node is RefExpressionSyntax or MakeRefExpressionSyntax ||
+                    node is ArgumentSyntax argument && !argument.RefKindKeyword.IsKind(SyntaxKind.None)) ||
+                (captured || statement.Span.Contains(reference.Span)) && reference.Ancestors().Any(node =>
+                    node is AssignmentExpressionSyntax assignment && assignment.Left.Span.Contains(reference.Span) ||
+                    node.IsKind(SyntaxKind.PreIncrementExpression) || node.IsKind(SyntaxKind.PreDecrementExpression) ||
+                    node.IsKind(SyntaxKind.PostIncrementExpression) || node.IsKind(SyntaxKind.PostDecrementExpression)))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static string BindServiceReceiver(string block, InvocationExpressionSyntax invocation, SemanticModel? semanticModel)
     {
         // Follow only the receiver chain, not invocations in options lambdas or arguments.
@@ -205,12 +266,11 @@ internal class DocumentBuilder
         }
 
         var configuration = SyntaxFactory.ParseStatement(block);
-        if (receiver is not (IdentifierNameSyntax or MemberAccessExpressionSyntax) ||
-            receiver.DescendantNodes().OfType<InvocationExpressionSyntax>().Any() ||
+        if (receiver is null || !CanReuseVariable(receiver, invocation, semanticModel) ||
             (!hasAuthenticationCall && semanticModel?.GetTypeInfo(receiver).Type?.GetMembers("Services").Any() is not true) ||
             configuration is not ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax configurationCall } })
         {
-            throw new InvalidOperationException($"Unable to resolve the service collection for '{invocation}'. Use an explicit service collection receiver.");
+            throw new InvalidOperationException($"Unable to safely reuse the service collection for '{invocation}'. Use an uncaptured, non-ref local variable holding the service collection or authentication builder, without assigning it within the registration statement.");
         }
 
         // An existing AuthenticationBuilder has Services; an AddAuthentication call already

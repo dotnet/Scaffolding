@@ -117,8 +117,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     "--tenant-id", TenantId ?? string.Empty,
                     "--username", Username ?? string.Empty
                 };
-                var runner = MsIdentityToolHelper.CreateMsIdentityRunner(args);
-                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+                var (exitCode, stdOut, stdErr) = RunRegistration(args);
                 if (exitCode != 0)
                 {
                     _logger.LogError($"Error registering application: {stdErr}");
@@ -161,7 +160,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 
         protected virtual (int ExitCode, string? Output, string? Error) RunRegistration(string[] args)
         {
-            var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
+            var runner = MsIdentityToolHelper.CreateMsIdentityRunner(args);
             var exitCode = runner.ExecuteAndCaptureOutput(out var output, out var error);
             return (exitCode, output, error);
         }

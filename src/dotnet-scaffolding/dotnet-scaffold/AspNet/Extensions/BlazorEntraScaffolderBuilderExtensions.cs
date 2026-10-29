@@ -19,6 +19,22 @@ namespace Microsoft.DotNet.Scaffolding.Core.Hosting;
 /// </summary>
 internal static class BlazorEntraScaffolderBuilderExtensions
 {
+    public static IScaffoldBuilder WithValidateAzureCliIdentityStep(this IScaffoldBuilder builder)
+    {
+        return builder.WithStep<ValidateAzureCliIdentityStep>(config =>
+        {
+            if (!config.Context.Properties.TryGetValue(nameof(EntraIdModel), out var value) ||
+                value is not EntraIdModel model ||
+                string.IsNullOrWhiteSpace(model.TenantId) || string.IsNullOrWhiteSpace(model.Username))
+            {
+                throw new InvalidOperationException("The selected Entra ID tenant and username are required.");
+            }
+
+            config.Step.TenantId = model.TenantId;
+            config.Step.Username = model.Username;
+        });
+    }
+
     /// <summary>
     /// Adds a step to register the application in Entra ID.
     /// </summary>
@@ -192,6 +208,8 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             }
 
             step.ProjectPath = entraSettings.Project;
+            step.TenantId = entra.TenantId;
+            step.Username = entra.Username;
             step.UseExistingApplication = entra.UseExistingApplication;
 
             if (context.Properties.TryGetValue("ClientId", out var clientIdObj) && clientIdObj is string clientId)

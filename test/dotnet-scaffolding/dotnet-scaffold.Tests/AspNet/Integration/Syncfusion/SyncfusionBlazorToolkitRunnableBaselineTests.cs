@@ -26,6 +26,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Syncfusion;
 [Trait("Family", "blazor-syncfusion-toolkit")]
 public class SyncfusionBlazorToolkitRunnableBaselineTests(ITestOutputHelper output)
 {
+    // Syncfusion.Blazor.Toolkit is published to nuget.org, which the repository feeds do not mirror.
+    private static readonly string[] s_packageSources = ["https://api.nuget.org/v3/index.json"];
+
     [Theory]
     [InlineData("net10.0")]
     [InlineData("net11.0")]
@@ -40,7 +43,6 @@ public class SyncfusionBlazorToolkitRunnableBaselineTests(ITestOutputHelper outp
                 ScaffoldCliHelper.GetTestTargetFramework(),
                 "blazor-syncfusion-toolkit",
                 "--project", Path.Combine(actual, "BlazorWebApp.csproj")),
-            // Syncfusion.Blazor.Toolkit is published to nuget.org, which the repository feeds do not include.
-            nugetConfig: ScaffoldCliHelper.SyncfusionTestNuGetConfig);
+            additionalPackageSources: s_packageSources);
     }
 }

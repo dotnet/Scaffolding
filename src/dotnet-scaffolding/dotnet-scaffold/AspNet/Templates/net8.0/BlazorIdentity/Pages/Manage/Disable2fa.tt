@@ -6,7 +6,11 @@
 @page "/Account/Manage/Disable2fa"
 
 @using Microsoft.AspNetCore.Identity
-@using <#= Model.DbContextNamespace #>
+<#
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+#>@using <#= Model.DbContextNamespace #>
+<#} #>
 
 @inject UserManager<<#= Model.UserClassName #>> UserManager
 @inject IdentityUserAccessor UserAccessor

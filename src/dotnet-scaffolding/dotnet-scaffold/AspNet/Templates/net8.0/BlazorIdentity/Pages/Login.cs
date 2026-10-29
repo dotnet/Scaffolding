@@ -26,10 +26,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.P
         public virtual string TransformText()
         {
             this.Write("@page \"/Account/Login\"\r\n\r\n@using System.ComponentModel.DataAnnotations\r\n@using Mi" +
-                    "crosoft.AspNetCore.Authentication\r\n@using Microsoft.AspNetCore.Identity\r\n@using " +
-                    "");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.DbContextNamespace));
-            this.Write("\r\n\r\n@inject SignInManager<");
+                    "crosoft.AspNetCore.Authentication\r\n@using Microsoft.AspNetCore.Identity\r\n");
+
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+
+            this.Write("@using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
+            this.Write("\r\n");
+}
+            this.Write("\r\n@inject SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> SignInManager\r\n@inject ILogger<Login> Logger\r\n@inject NavigationManager Navigat" +
                     "ionManager\r\n@inject IdentityRedirectManager RedirectManager\r\n\r\n<PageTitle>Log in" +

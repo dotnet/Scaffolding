@@ -117,6 +117,41 @@ public class MSBuildProjectService : IMSBuildProjectService
         }
     }
 
+    /// <summary>
+    /// Gets the evaluated items of the requested item types.
+    /// </summary>
+    /// <remarks>
+    /// Resolves imports, conditions, globs, and property substitutions using a fresh project collection that is disposed after evaluation.
+    /// Missing required SDKs or imports cause evaluation to fail.
+    /// </remarks>
+    /// <param name="itemTypes">The item types to return, e.g. 'PackageReference'.</param>
+    /// <param name="items">The evaluated items in evaluation order, or an empty list on evaluation failure.</param>
+    /// <param name="error">The project evaluation diagnostic on failure, or null on success.</param>
+    /// <returns>True if evaluation succeeds, including when there are no matching items; otherwise, false.</returns>
+    public bool TryGetEvaluatedItems(
+        IEnumerable<string> itemTypes,
+        out IReadOnlyList<EvaluatedProjectItem> items,
+        out string? error)
+    {
+        try
+        {
+            using var projects = new ProjectCollection();
+            var project = new Project(_projectPath, null, null, projects);
+            items = itemTypes
+                .SelectMany(project.GetItems)
+                .Select(item => new EvaluatedProjectItem(item.ItemType, item.EvaluatedInclude, item.Xml.ContainingProject.FullPath))
+                .ToList();
+            error = null;
+            return true;
+        }
+        catch (InvalidProjectFileException ex)
+        {
+            items = [];
+            error = ex.Message;
+            return false;
+        }
+    }
+
     private void Initialize(bool refresh = false)
     {
         lock (_initLock)

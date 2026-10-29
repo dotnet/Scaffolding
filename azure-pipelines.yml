@@ -119,6 +119,11 @@ extends:
                 $(_InternalBuildArgs)
                 $(_ValidateSdkArgs)
               displayName: Windows Build / Publish
+              env:
+                # These fixtures require nuget.org, which the internal build proxy blocks.
+                TestRunnerAdditionalArguments: >-
+                  -notrait Family=blazor-igniteui
+                  -notrait Family=blazor-syncfusion-toolkit
 
     - stage: integration
       displayName: Scaffold Integration Matrix

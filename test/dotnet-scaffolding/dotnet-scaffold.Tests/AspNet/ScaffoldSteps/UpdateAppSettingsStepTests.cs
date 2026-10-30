@@ -63,8 +63,8 @@ public class UpdateAppSettingsStepTests
     [Fact]
     public async Task ExecuteAsync_WritesAppSettingsWithTrailingNewLine()
     {
-        string projectPath = Path.Combine("test", "project", "TestProject.csproj");
-        string baseProjectPath = Path.GetDirectoryName(projectPath)!;
+        string baseProjectPath = Path.Combine("test", "project");
+        string projectPath = Path.Combine(baseProjectPath, "TestProject.csproj");
         string generatedAppSettingsPath = Path.Combine(baseProjectPath, "appsettings.json");
 
         _mockFileSystem.Setup(fs => fs.DirectoryExists(baseProjectPath)).Returns(true);
@@ -104,8 +104,8 @@ public class UpdateAppSettingsStepTests
     [Fact]
     public async Task ExecuteAsync_PreservesMissingTrailingNewLine()
     {
-        string projectPath = Path.Combine("test", "project", "TestProject.csproj");
-        string baseProjectPath = Path.GetDirectoryName(projectPath)!;
+        string baseProjectPath = Path.Combine("test", "project");
+        string projectPath = Path.Combine(baseProjectPath, "TestProject.csproj");
         string appSettingsPath = Path.Combine(baseProjectPath, "appsettings.json");
         string developmentSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
 
@@ -272,5 +272,96 @@ public class UpdateAppSettingsStepTests
         Assert.Equal(_step.Instance, azureAd["Instance"]?.GetValue<string>());
         Assert.Equal(_step.CallbackPath, azureAd["CallbackPath"]?.GetValue<string>());
         return azureAd;
+    }
+
+    [Theory]
+    [InlineData("{\n  // Preserve this comment\n  \"FeatureEnabled\": true\n}")]
+    [InlineData("{\n  \"FeatureEnabled\": true,\n}")]
+    public async Task ExecuteAsync_DoesNotOverwriteDevelopmentSettingsWhenItContainsUnsupportedJson(string developmentSettingsContent)
+    {
+        string projectPath = Path.Combine("test", "project", "TestProject.csproj");
+        string baseProjectPath = Path.GetDirectoryName(projectPath)!;
+        string appSettingsPath = Path.Combine(baseProjectPath, "appsettings.json");
+        string developmentSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
+
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(baseProjectPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.EnumerateFiles(baseProjectPath, "appsettings.json", SearchOption.AllDirectories))
+            .Returns(new List<string> { appSettingsPath });
+        _mockFileSystem.Setup(fs => fs.FileExists(appSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(appSettingsPath)).Returns("{}");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns(developmentSettingsContent);
+
+        string? writtenContent = null;
+
+        _mockFileSystem
+            .Setup(fs => fs.WriteAllText(
+                developmentSettingsPath,
+                It.IsAny<string>()))
+            .Callback<string, string>((_, content) =>
+            {
+                writtenContent = content;
+            });
+        UpdateAppSettingsStep step = new UpdateAppSettingsStep(
+            _mockLogger.Object,
+            _mockFileSystem.Object,
+            _mockTelemetryService.Object)
+        {
+            ProjectPath = projectPath,
+            ClientId = "client-id"
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.True(result);
+        if (writtenContent is not null)
+        {
+            Assert.Equal(developmentSettingsContent, writtenContent);
+        }
+        _mockFileSystem.Verify(fs => fs.WriteAllText(developmentSettingsPath, It.IsAny<string>()), Times.Never);
+
+        Assert.Contains(_mockLogger.Invocations, invocation =>
+            invocation.Method.Name == nameof(ILogger.Log) &&
+            invocation.Arguments[0] is LogLevel.Warning &&
+            invocation.Arguments[2]?.ToString()?.Contains(
+                "Failed to parse appsettings.Development.json") == true);
+    }
+    [Fact]
+    public async Task ExecuteAsync_LogsWarningWhenDevelopmentJsonInvalid()
+    {
+        string baseProjectPath = Path.Combine("test", "project");
+        string projectPath = Path.Combine(baseProjectPath, "TestProject.csproj");
+        string appSettingsPath = Path.Combine(baseProjectPath, "appsettings.json");
+        string developmentSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
+
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(baseProjectPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.EnumerateFiles(baseProjectPath, "appsettings.json", SearchOption.AllDirectories))
+            .Returns(new List<string> { appSettingsPath });
+        _mockFileSystem.Setup(fs => fs.FileExists(appSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(appSettingsPath)).Returns("{}");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath))
+            .Returns("{ invalid json }");
+
+        var mockLogger = new Mock<ILogger<UpdateAppSettingsStep>>();
+
+        UpdateAppSettingsStep step = new UpdateAppSettingsStep(
+            mockLogger.Object,
+            _mockFileSystem.Object,
+            _mockTelemetryService.Object)
+        {
+            ProjectPath = projectPath,
+            Username = "testuser",
+            ClientId = "client-id"
+        };
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+        Assert.True(result);
+
+        mockLogger.Verify(x => x.Log(
+            LogLevel.Warning,
+            It.IsAny<EventId>(),
+            It.Is<object>(o => o.ToString()!.Contains("Failed to parse")),
+            It.IsAny<Exception>(),
+            It.IsAny<Func<object, Exception?, string>>()), Times.Once);
     }
 }

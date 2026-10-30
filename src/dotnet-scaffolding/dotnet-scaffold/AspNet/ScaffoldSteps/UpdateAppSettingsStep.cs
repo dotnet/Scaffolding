@@ -254,10 +254,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     {
                         devContent = JsonNode.Parse(devJsonString);
                     }
-                    catch
+                    catch (JsonException ex)
                     {
-                        // If there's an error parsing, create a new object
                         devContent = new JsonObject();
+                        _logger.LogWarning($"Failed to parse {devSettingsPath}. The file contains invalid JSON (possibly comments or trailing commas). " +
+                            $"The file will not be modified to preserve existing settings. Error: {ex.Message}");
+                        return;
                     }
 
                     if (devContent != null && content["AzureAd"] != null)
@@ -269,6 +271,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         var serializedContent = devContent.ToJsonString(options);
                         var appendFinalNewLine = devJsonString.EndsWith('\n') || devJsonString.EndsWith('\r');
                         _fileSystem.WriteAllText(devSettingsPath, appendFinalNewLine ? serializedContent + Environment.NewLine : serializedContent);
+                        _logger.LogInformation("Successfully updated appsettings.Development.json with AzureAd configuration");
                     }
                 }
                 catch (Exception ex)

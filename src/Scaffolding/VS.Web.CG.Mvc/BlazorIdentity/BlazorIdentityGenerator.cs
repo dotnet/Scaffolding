@@ -146,6 +146,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 return;
             }
 
+            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
+            var clientProject = GetBlazorWasmClientProject(project);
+            if (clientProject != null)
+            {
+                GetClientProjectConfiguration(clientProject);
+            }
+
             var blazorTemplateModel = await ValidateAndBuild(model);
             ExecuteTemplates(blazorTemplateModel);
             AddStaticFiles(blazorTemplateModel);
@@ -381,6 +388,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
             var clientProject = GetBlazorWasmClientProject(project);
+            var clientConfiguration = clientProject != null ? GetClientProjectConfiguration(clientProject) : default;
 
             var programCsFile = minimalApiChangesConfig.Files.FirstOrDefault(x => x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
             programCsFile.Usings = (programCsFile.Usings ?? Array.Empty<string>())
@@ -403,7 +411,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             {
                 var clientProgramCsFile = CreateClientProgramChanges();
                 await ModifyProgramCsAsync(clientProgramCsFile, blazorIdentityModel, clientProject);
-                clientNamespace = ConfigureClientProject(clientProject);
+                clientNamespace = ConfigureClientProject(clientProject, clientConfiguration.ProjectXml, clientConfiguration.PackageAdded);
                 var clientImports = new CodeFile
                 {
                     FileName = "_Imports.razor",
@@ -456,11 +464,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
-        private string ConfigureClientProject(Project clientProject)
+        private (XDocument ProjectXml, bool PackageAdded) GetClientProjectConfiguration(Project clientProject)
         {
             var projectXml = XDocument.Parse(FileSystem.ReadAllText(clientProject.FilePath));
             const string authenticationPackage = "Microsoft.AspNetCore.Components.WebAssembly.Authentication";
             var packages = projectXml.Descendants().Where(e => e.Name.LocalName == "PackageReference");
+            var packageAdded = false;
             if (!packages.Any(package => string.Equals((string)package.Attribute("Include"), authenticationPackage, StringComparison.OrdinalIgnoreCase)))
             {
                 var wasmPackage = packages.FirstOrDefault(package => string.Equals((string)package.Attribute("Include"),
@@ -473,6 +482,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 var xmlNamespace = projectXml.Root.Name.Namespace;
                 wasmPackage.Parent.Add(new XElement(xmlNamespace + "PackageReference",
                     new XAttribute("Include", authenticationPackage), new XAttribute("Version", version)));
+                packageAdded = true;
+            }
+            return (projectXml, packageAdded);
+        }
+
+        private string ConfigureClientProject(Project clientProject, XDocument projectXml, bool packageAdded)
+        {
+            if (packageAdded)
+            {
                 FileSystem.WriteAllText(clientProject.FilePath, projectXml.ToString());
                 Logger.LogMessage($"Modified {clientProject.FilePath}.\n");
             }
@@ -496,9 +514,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 return null;
             }
 
-            foreach (var projectReference in currentProject.ProjectReferences)
+            foreach (var projectReference in ProjectContext.ProjectReferenceInformation ?? Enumerable.Empty<ProjectReferenceInformation>())
             {
-                var referencedProject = currentProject.Solution.GetProject(projectReference.ProjectId);
+                var referencedProject = currentProject.Solution.Projects.FirstOrDefault(project =>
+                    string.Equals(project.FilePath, projectReference.FullPath, StringComparison.OrdinalIgnoreCase));
                 if (referencedProject == null || string.IsNullOrEmpty(referencedProject.FilePath))
                 {
                     continue;

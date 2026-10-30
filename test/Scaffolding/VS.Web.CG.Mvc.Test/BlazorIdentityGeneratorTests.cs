@@ -19,6 +19,7 @@ using Microsoft.DotNet.Scaffolding.Shared.T4Templating;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity;
 using Moq;
@@ -30,6 +31,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
     {
         private readonly string _root = Path.Combine(Path.GetTempPath(), $"identity-generator-{Guid.NewGuid():N}");
         private readonly AdhocWorkspace _workspace = new AdhocWorkspace();
+        private RoslynWorkspace _productionWorkspace;
         private readonly BlazorIdentityModel _model = new BlazorIdentityModel
         {
             BlazorIdentityNamespace = "Server.Components.Account",
@@ -40,11 +42,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         };
 
         [Theory]
-        [InlineData("InteractiveAuto", true)]
-        [InlineData("InteractiveWebAssembly", true)]
-        [InlineData("InteractiveServer", true)]
-        [InlineData("InteractiveAuto", false)]
-        public async Task ModifyFiles_UpdatesBothProjectsWithoutServerDependenciesInClient(string renderMode, bool global)
+        [InlineData("InteractiveAuto", true, "Attribute")]
+        [InlineData("InteractiveWebAssembly", true, "Attribute")]
+        [InlineData("InteractiveServer", true, "Attribute")]
+        [InlineData("InteractiveAuto", false, "Attribute")]
+        [InlineData("InteractiveAuto", true, "Element")]
+        [InlineData("InteractiveAuto", true, "Central")]
+        public async Task ModifyFiles_UpdatesBothProjectsWithoutServerDependenciesInClient(string renderMode, bool global, string packageVersionStyle)
         {
             var isClientHosted = renderMode != "InteractiveServer";
             var client = isClientHosted
@@ -55,9 +59,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 isClientHosted
                     ? "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorComponents().AddInteractiveWebAssemblyComponents();\nvar app = builder.Build();\napp.Run();"
                     : "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorComponents().AddInteractiveServerComponents();\nvar app = builder.Build();\napp.Run();");
-            if (client != null)
+            if (packageVersionStyle == "Element")
             {
-                Assert.True(_workspace.TryApplyChanges(_workspace.CurrentSolution.AddProjectReference(server.Id, new ProjectReference(client.Id))));
+                Write("Client", "Client.csproj",
+                    "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\"><ItemGroup><PackageReference Include=\"Microsoft.AspNetCore.Components.WebAssembly\"><Version>10.0.14</Version></PackageReference></ItemGroup></Project>");
+            }
+            else if (packageVersionStyle == "Central")
+            {
+                Write("Client", "Directory.Packages.props",
+                    "<Project><PropertyGroup><ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally></PropertyGroup><ItemGroup><PackageVersion Include=\"Microsoft.AspNetCore.Components.WebAssembly\" Version=\"10.0.14\" /><PackageVersion Include=\"Microsoft.AspNetCore.Components.WebAssembly.Authentication\" Version=\"10.0.14\" /></ItemGroup></Project>");
+                Write("Client", "Client.csproj",
+                    "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\"><ItemGroup><PackageReference Include=\"Microsoft.AspNetCore.Components.WebAssembly\" /><PackageReference Include=\"Microsoft.AspNetCore.Components.WebAssembly.Authentication\" /></ItemGroup></Project>");
             }
             var uiProject = (global && isClientHosted) ? "Client" : "Server";
             var components = (global && isClientHosted) ? "" : "Components";
@@ -75,7 +87,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 ? $"<HeadOutlet @rendermode=\"{renderMode}\" /><Routes @rendermode=\"{renderMode}\" /></body>"
                 : "<HeadOutlet /><Routes /></body>");
 
-            var generator = CreateGenerator();
+            var generator = CreateGenerator(client);
+            Assert.All(_productionWorkspace.CurrentSolution.Projects, project => Assert.Empty(project.ProjectReferences));
             await generator.ModifyFilesAsync(_model);
 
             var serverProgram = Read("Server", "Program.cs");
@@ -95,6 +108,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 Assert.DoesNotContain("Microsoft.AspNetCore.Components.Endpoints", imports);
                 Assert.Contains("forceLoad: true", Read("Client", "RedirectToLogin.razor"));
                 Assert.False(Directory.Exists(Path.Combine(_root, "Client", "Components", "Account")));
+                var authenticationPackage = XDocument.Parse(Read("Client", "Client.csproj"))
+                    .Descendants("PackageReference").Single(package => (string)package.Attribute("Include") ==
+                        "Microsoft.AspNetCore.Components.WebAssembly.Authentication");
+                Assert.Equal(packageVersionStyle == "Central" ? null : "10.0.14", (string)authenticationPackage.Attribute("Version"));
             }
             else
             {
@@ -102,7 +119,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             }
 
             Assert.Contains("AuthorizeRouteView", Read(uiProject, Path.Combine(components, "Routes.razor")));
+            if (isClientHosted)
+            {
             Assert.DoesNotContain("Server.Components.Account", Read(uiProject, Path.Combine(components, "Routes.razor")));
+            }
             var nav = Read(uiProject, Path.Combine(components, "Layout", "NavMenu.razor"));
             Assert.Contains("Account/Register", nav);
             Assert.Contains("Account/Login", nav);
@@ -124,11 +144,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 Assert.DoesNotContain("PageRenderMode", serverApp);
             }
 
+            var clientProgramBeforeRepeat = isClientHosted ? Read("Client", "Program.cs") : null;
+            var clientProjectBeforeRepeat = isClientHosted ? Read("Client", "Client.csproj") : null;
             await generator.ModifyFilesAsync(_model);
             Assert.Equal(serverProgram, Read("Server", "Program.cs"));
             if (isClientHosted)
             {
-                Assert.Equal(Read("Client", "Program.cs"), Read("Client", "Program.cs"));
+                Assert.Equal(clientProgramBeforeRepeat, Read("Client", "Program.cs"));
+                Assert.Equal(clientProjectBeforeRepeat, Read("Client", "Client.csproj"));
             }
         }
 
@@ -146,6 +169,38 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             Assert.DoesNotContain("Server.Data", Read("Client", "Program.cs"));
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task MissingClientPackageVersion_FailsBeforeWritingFiles(bool generateCode)
+        {
+            AddProject("Server", "Microsoft.NET.Sdk.Web",
+                "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorComponents().AddInteractiveWebAssemblyComponents();\nvar app = builder.Build();\napp.Run();");
+            var client = AddProject("Client", "Microsoft.NET.Sdk.BlazorWebAssembly",
+                "var builder = WebAssemblyHostBuilder.CreateDefault(args);\nawait builder.Build().RunAsync();");
+            Write("Client", "Client.csproj",
+                "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\"><ItemGroup><PackageReference Include=\"Microsoft.AspNetCore.Components.WebAssembly\" /></ItemGroup></Project>");
+            Write("Client", "_Imports.razor", "@using Microsoft.AspNetCore.Components.Forms");
+            Write("Server", Path.Combine("Components", "App.razor"),
+                "<HeadOutlet @rendermode=\"InteractiveAuto\" /><Routes @rendermode=\"InteractiveAuto\" /></body>");
+            var originalFiles = Directory.GetFiles(_root, "*", SearchOption.AllDirectories)
+                .ToDictionary(path => path, File.ReadAllText);
+            var generator = CreateGenerator(client);
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => generateCode
+                ? generator.GenerateCode(new BlazorIdentityCommandLineModel())
+                : generator.ModifyFilesAsync(_model));
+
+            Assert.Contains("Microsoft.AspNetCore.Components.WebAssembly.Authentication", exception.Message);
+            Assert.Contains("before scaffolding", exception.Message);
+            Assert.Equal(originalFiles.Keys.OrderBy(path => path),
+                Directory.GetFiles(_root, "*", SearchOption.AllDirectories).OrderBy(path => path));
+            foreach (var file in originalFiles)
+            {
+                Assert.Equal(file.Value, File.ReadAllText(file.Key));
+            }
+        }
+
         [SkippableTheory]
         [InlineData("Auto")]
         [InlineData("WebAssembly")]
@@ -154,15 +209,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         {
             Skip.If(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests")));
             Directory.CreateDirectory(_root);
-            await RunDotnet("new", "blazor", "--name", "Server", "--output", _root,
-                "--framework", "net10.0", "--interactivity", interactivity, "--all-interactive", "--no-restore");
             var isClientHosted = interactivity != "Server";
+            await RunDotnet("new", "blazor", "--name", "Server", "--output", isClientHosted ? _root : Path.Combine(_root, "Server"),
+                "--framework", "net10.0", "--interactivity", interactivity, "--all-interactive", "--no-restore");
             var client = isClientHosted ? AddExistingProject("Server.Client") : null;
             var server = AddExistingProject("Server");
-            if (client != null)
-            {
-                Assert.True(_workspace.TryApplyChanges(_workspace.CurrentSolution.AddProjectReference(server.Id, new ProjectReference(client.Id))));
-            }
             var serverPath = Path.Combine(_root, "Server", "Server.csproj");
             var serverXml = XDocument.Load(serverPath);
             var version = isClientHosted
@@ -172,8 +223,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 new XElement("PackageReference", new XAttribute("Include", "Microsoft.AspNetCore.Identity.EntityFrameworkCore"), new XAttribute("Version", version)),
                 new XElement("PackageReference", new XAttribute("Include", "Microsoft.EntityFrameworkCore.Sqlite"), new XAttribute("Version", version))));
             serverXml.Save(serverPath);
-            var context = new Mock<IProjectContext>();
-            context.SetupGet(c => c.AssemblyName).Returns("Server");
+            var context = CreateProjectContext(client);
             context.SetupGet(c => c.RootNamespace).Returns("Server");
             context.SetupGet(c => c.PackageDependencies).Returns(new[]
             {
@@ -182,9 +232,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             });
             var app = new Mock<IApplicationInfo>();
             app.SetupGet(a => a.ApplicationBasePath).Returns(Path.Combine(_root, "Server"));
-            var generator = new BlazorIdentityGenerator(app.Object, new ModelTypesLocator(_workspace),
+            _productionWorkspace = new RoslynWorkspace(context.Object);
+            Assert.All(_productionWorkspace.CurrentSolution.Projects, project => Assert.Empty(project.ProjectReferences));
+            var generator = new BlazorIdentityGenerator(app.Object, new ModelTypesLocator(_productionWorkspace),
                 Mock.Of<ILogger>(), DefaultFileSystem.Instance, Mock.Of<IFilesLocator>(), context.Object,
-                Mock.Of<IEntityFrameworkService>(), Mock.Of<ICodeGenAssemblyLoadContext>(), _workspace);
+                Mock.Of<IEntityFrameworkService>(), Mock.Of<ICodeGenAssemblyLoadContext>(), _productionWorkspace);
             _model.BaseOutputPath = Path.Combine(_root, "Server");
             _model.BlazorLayoutNamespace = isClientHosted ? "Server.Client.Layout.MainLayout" : "Server.Components.Layout.MainLayout";
             _model.UserClassName = "IdentityUser";
@@ -217,7 +269,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
             var routesContent = Read(routesProject, routesPath);
             Assert.Contains("AuthorizeRouteView", routesContent);
-            Assert.DoesNotContain("Server.Components.Account", routesContent);
+            if (isClientHosted)
+            {
+                Assert.DoesNotContain("Server.Components.Account", routesContent);
+            }
             Assert.Contains("Account/Register", Read(routesProject, navMenuPath));
             Assert.Contains("Account/Login", Read(routesProject, navMenuPath));
             Assert.True(File.Exists(Path.Combine(_root, "Server", "Components", "Account", "Pages", "Login.razor")));
@@ -287,13 +342,38 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             return _workspace.CurrentSolution.GetProject(project.Id);
         }
 
-        private BlazorIdentityGenerator CreateGenerator()
+        private Mock<IProjectContext> CreateProjectContext(Project clientProject = null)
         {
+            var server = _workspace.CurrentSolution.Projects.Single(project => project.AssemblyName == "Server");
             var context = new Mock<IProjectContext>();
             context.SetupGet(c => c.AssemblyName).Returns("Server");
-            return new BlazorIdentityGenerator(Mock.Of<IApplicationInfo>(), new ModelTypesLocator(_workspace),
+            context.SetupGet(c => c.ProjectName).Returns("Server");
+            context.SetupGet(c => c.ProjectFullPath).Returns(server.FilePath);
+            context.SetupGet(c => c.CompilationItems).Returns(server.Documents.Select(document => document.FilePath));
+            context.SetupGet(c => c.CompilationAssemblies).Returns(Array.Empty<ResolvedReference>());
+            context.SetupGet(c => c.ProjectCapabilities).Returns(Array.Empty<string>());
+            context.SetupGet(c => c.ProjectReferenceInformation).Returns(clientProject == null
+                ? Array.Empty<ProjectReferenceInformation>()
+                : new[]
+                {
+                    new ProjectReferenceInformation
+                    {
+                        FullPath = clientProject.FilePath,
+                        ProjectName = clientProject.Name,
+                        AssemblyName = clientProject.AssemblyName,
+                        CompilationItems = clientProject.Documents.Select(document => document.FilePath).ToList()
+                    }
+                });
+            return context;
+        }
+
+        private BlazorIdentityGenerator CreateGenerator(Project clientProject = null)
+        {
+            var context = CreateProjectContext(clientProject);
+            _productionWorkspace = new RoslynWorkspace(context.Object);
+            return new BlazorIdentityGenerator(Mock.Of<IApplicationInfo>(), new ModelTypesLocator(_productionWorkspace),
                 Mock.Of<ILogger>(), DefaultFileSystem.Instance, Mock.Of<IFilesLocator>(), context.Object,
-                Mock.Of<IEntityFrameworkService>(), Mock.Of<ICodeGenAssemblyLoadContext>(), _workspace);
+                Mock.Of<IEntityFrameworkService>(), Mock.Of<ICodeGenAssemblyLoadContext>(), _productionWorkspace);
         }
 
         private string Write(string project, string relativePath, string content)
@@ -308,6 +388,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
         public void Dispose()
         {
+            _productionWorkspace?.Dispose();
             _workspace.Dispose();
             if (Directory.Exists(_root))
             {

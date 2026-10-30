@@ -174,6 +174,7 @@ If the project had identity support prior to scaffolding, ensure that the follow
    RedirectToLogin component performs a full-page load of the server Account/Login page.
    The client also references Microsoft.AspNetCore.Components.WebAssembly.Authentication, matching
    its WebAssembly package version. For centrally managed versions, add that package before scaffolding.
+   Client package prerequisites are checked before any application files are generated or modified.
 ";
 
     }

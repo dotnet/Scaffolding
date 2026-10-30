@@ -80,6 +80,13 @@ scaffolder alone does not update an already installed identity tool.
 - Validates inputs and provides helpful error messages
 - Guides you through the authentication setup process
 
+### 6. **Authorization Code Flow**
+- Configures each existing `AddMicrosoftIdentityWebApp` registration on its actual service collection, immediately after its full registration chain in the same execution scope, including branches and helper functions. This applies to default, literal, constant, and safely reusable local `openIdConnectScheme` values. Unsafe receivers, side-effecting scheme expressions, and execution positions that cannot preserve this scope produce an actionable error. Only newly generated registrations use the global default configuration fallback. Configuration deduplication compares executable syntax, preserving whitespace within scheme names and ignoring strings and comments. Authorization code flow leaves PKCE enabled through the ASP.NET Core defaults; unrelated OpenID Connect handlers are unchanged
+- Disables implicit ID-token and access-token issuance on the selected app registration
+- Uses named `PostConfigure<OpenIdConnectOptions>` configuration so existing authentication calls, formatting, and downstream-API registration chains are preserved on reruns. Registration detection uses C# invocation syntax, so comments, strings, and similarly named methods do not suppress registration.
+- Requires a confidential client credential for code redemption; see [Development credentials and production deployment](#development-credentials-and-production-deployment)
+- Applies to .NET 10 and .NET 11 Blazor Web Apps, including static SSR, Interactive Server, Interactive WebAssembly, and Interactive Auto
+
 ---
 
 ## Prerequisites
@@ -467,8 +474,6 @@ The Microsoft Entra ID (Azure AD) tenant ID where the app will be registered.
 **Notes**:
 - You must have permissions to register apps in this tenant
 - The tenant must be accessible with your Azure CLI login
-- The tenant value, whether a GUID or domain name, is written to `AzureAd:TenantId`. The scaffolder does not generate `AzureAd:Domain`; Microsoft.Identity.Web does not require it for workforce Entra ID.
-- Existing intentional `AzureAd:Domain` values are preserved, including provider-specific settings such as B2C domains. Only a malformed value matching `<current-username>.onmicrosoft.com` from the old email-based default is removed.
 
 ---
 
@@ -982,7 +987,8 @@ dotnet user-secrets set "AzureAd:ClientCredentials:0:ClientSecret" "your-develop
    // appsettings.json - shared, committed
    {
      "AzureAd": {
-       "Instance": "https://login.microsoftonline.com/"
+       "Instance": "https://login.microsoftonline.com/",
+       "Domain": "contoso.onmicrosoft.com"
      }
    }
    

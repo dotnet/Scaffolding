@@ -21,6 +21,8 @@ internal class CodeSnippet
     }
 
     public string? CheckBlock { get; set; }
+    public string? CheckInvocation { get; set; }
+    public Dictionary<string, string>? InvocationArguments { get; set; }
     public string? Parent { get; set; }
     public bool Prepend { get; set; } = false;
     public bool Replace { get; set; } = false;
@@ -33,4 +35,17 @@ internal class CodeSnippet
     public string[]? MultiLineBlock { get; set; }
     public string? FileBlock { get; set; }
     public string[]? ReplaceSnippet { get; set; }
+
+    internal CodeSnippet WithBlock(string block)
+    {
+        var snippet = (CodeSnippet)MemberwiseClone();
+        snippet.Block = block;
+        snippet.LeadingTrivia = new Formatting
+        {
+            Newline = LeadingTrivia.Newline,
+            NumberOfSpaces = LeadingTrivia.NumberOfSpaces,
+            Semicolon = LeadingTrivia.Semicolon
+        };
+        return snippet;
+    }
 }

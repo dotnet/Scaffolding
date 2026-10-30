@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.CodeAnalysis.Operations;
 using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.Extensions.Logging;
@@ -35,6 +36,40 @@ internal class DocumentBuilder
     {
         var document = _document;
         var syntaxRoot = await document.GetSyntaxRootAsync() as CompilationUnitSyntax;
+        if (syntaxRoot is not null && _codeFile.Methods is not null &&
+            _codeFile.Methods.Values.Any(method => method.CodeChanges?.Any(change => change.InvocationArguments is not null) is true))
+        {
+            var semanticModel = await document.GetSemanticModelAsync();
+            var scopedChanges = new Dictionary<SyntaxNode, List<CodeSnippet>>();
+            foreach (var method in _codeFile.Methods.Values)
+            {
+                method.CodeChanges = ExpandInvocationArguments(method.CodeChanges ?? [], syntaxRoot, semanticModel, scopedChanges);
+            }
+
+            syntaxRoot = syntaxRoot.TrackNodes(scopedChanges.Keys);
+            foreach (var (originalAnchor, changes) in scopedChanges)
+            {
+                var anchor = syntaxRoot.GetCurrentNode(originalAnchor)!;
+                var filteredChanges = ProjectModifierHelper.FilterCodeSnippets(changes.ToArray(), _options) ?? [];
+                var statements = filteredChanges.Select(change =>
+                    SyntaxFactory.ParseStatement(change.Block.TrimEnd(' ', '\r', '\n', ';') + ";")).ToArray();
+                // Only the contiguous configuration immediately after this registration belongs
+                // to it. An earlier registration may have used a different value of the same local.
+                var existingStatements = anchor.Parent!.ChildNodes().SkipWhile(node => node != anchor).Skip(1)
+                    .Select(node => node is GlobalStatementSyntax global ? global.Statement : node)
+                    .TakeWhile(node => statements.Any(statement => SyntaxFactory.AreEquivalent(node, statement))).ToArray();
+                foreach (var change in Enumerable.Reverse(filteredChanges))
+                {
+                    var statement = SyntaxFactory.ParseStatement(change.Block.TrimEnd(' ', '\r', '\n', ';') + ";");
+                    if (!existingStatements.Any(node => SyntaxFactory.AreEquivalent(node, statement)))
+                    {
+                        var nodes = GetNodeInsertionList(change, anchor.Parent!.Kind())!;
+                        syntaxRoot = syntaxRoot.InsertNodesAfter(anchor, nodes);
+                        anchor = syntaxRoot.GetCurrentNode(originalAnchor)!;
+                    }
+                }
+            }
+        }
         var output = new StringBuilder();
         var modifiedRoot = ModifyRoot(syntaxRoot, _options, output);
         if (output.Length > 0)
@@ -49,6 +84,227 @@ internal class DocumentBuilder
         //return the same document if syntax root came back null.
         return document;
     }
+
+    internal static CodeSnippet[] ExpandInvocationArguments(CodeSnippet[] snippets, SyntaxNode root, SemanticModel? semanticModel,
+        Dictionary<SyntaxNode, List<CodeSnippet>>? scopedChanges = null)
+    {
+        var result = new List<CodeSnippet>();
+        foreach (var snippet in snippets)
+        {
+            if (snippet.InvocationArguments is null)
+            {
+                result.Add(snippet);
+                continue;
+            }
+
+            var invocations = root.DescendantNodes().OfType<InvocationExpressionSyntax>()
+                .Where(invocation => IsInvocation(invocation, snippet.Parent)).ToArray();
+            foreach (var invocation in invocations)
+            {
+                var block = snippet.Block;
+                foreach (var (parameter, defaultValue) in snippet.InvocationArguments)
+                {
+                    var argument = invocation.ArgumentList.Arguments
+                        .FirstOrDefault(argument => argument.NameColon?.Name.Identifier.ValueText == parameter)?.Expression;
+                    if (argument is null && semanticModel?.GetOperation(invocation) is IInvocationOperation operation)
+                    {
+                        argument = operation.Arguments.FirstOrDefault(argument =>
+                            argument.Parameter?.Name == parameter && !argument.IsImplicit)?.Value.Syntax as ExpressionSyntax;
+                    }
+
+                    // A single required argument leaves the optional named options argument at its default.
+                    // Multiple positional arguments require binding to the actual overload.
+                    if (argument is null && invocation.ArgumentList.Arguments.Count(argument => argument.NameColon is null) > 1 &&
+                        semanticModel?.GetOperation(invocation) is not IInvocationOperation)
+                    {
+                        throw new InvalidOperationException($"Unable to resolve '{parameter}' in '{invocation}'. Restore the project's packages and ensure it compiles before scaffolding.");
+                    }
+
+                    var value = defaultValue;
+                    if (argument is not null)
+                    {
+                        var constant = semanticModel?.GetConstantValue(argument) ?? default;
+                        if (constant.HasValue && constant.Value is string text)
+                        {
+                            value = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(text)).ToString();
+                        }
+                        else if (argument is LiteralExpressionSyntax { Token.Value: string literal })
+                        {
+                            value = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(literal)).ToString();
+                        }
+                        else
+                        {
+                            if (!CanReuseVariable(argument, invocation, semanticModel, requireString: true))
+                            {
+                                throw new InvalidOperationException($"Unable to safely reuse '{parameter}' expression '{argument}' in '{invocation}'. Evaluate it into a constant or an uncaptured, non-ref string local variable before the registration, and do not assign that variable within the registration statement.");
+                            }
+                            value = argument.WithoutTrivia().ToString();
+                        }
+                    }
+
+                    block = block.Replace($"${parameter}$", value, StringComparison.Ordinal);
+                }
+
+                var statement = invocation.Ancestors().OfType<StatementSyntax>().FirstOrDefault();
+                SyntaxNode? anchor = statement?.Parent is GlobalStatementSyntax global ? global : statement;
+                SyntaxNode expression = invocation;
+                while (expression.Parent is MemberAccessExpressionSyntax member && member.Expression == expression ||
+                    expression.Parent is InvocationExpressionSyntax call && call.Expression == expression ||
+                    expression.Parent is ParenthesizedExpressionSyntax)
+                {
+                    expression = expression.Parent;
+                }
+                // Only a standalone receiver chain executes unconditionally with its statement.
+                // Arguments, expression-bodied lambdas and conditional expressions need a rewrite
+                // rather than an insertion after their enclosing statement.
+                var standalone = statement is ExpressionStatementSyntax expressionStatement && expressionStatement.Expression == expression ||
+                    statement is LocalDeclarationStatementSyntax local && local.Declaration.Variables.Count == 1 &&
+                        local.Declaration.Variables[0].Initializer?.Value == expression;
+                if (scopedChanges is null || anchor?.Parent is not (BlockSyntax or CompilationUnitSyntax) || !standalone)
+                {
+                    throw new InvalidOperationException($"Unable to preserve the scope of '{invocation}'. Use a standalone registration statement inside a block.");
+                }
+
+                var scopedSnippet = snippet.WithBlock(BindServiceReceiver(block, invocation, semanticModel));
+                if (!scopedChanges.TryGetValue(anchor, out var changes))
+                {
+                    scopedChanges.Add(anchor, changes = []);
+                }
+                if (!changes.Any(change => change.Block == scopedSnippet.Block))
+                {
+                    changes.Add(scopedSnippet);
+                }
+            }
+
+            if (invocations.Length == 0)
+            {
+                var block = snippet.Block;
+                foreach (var (parameter, defaultValue) in snippet.InvocationArguments)
+                {
+                    block = block.Replace($"${parameter}$", defaultValue, StringComparison.Ordinal);
+                }
+                result.Add(snippet.WithBlock(block));
+            }
+        }
+        return result.ToArray();
+    }
+
+    private static bool CanReuseVariable(ExpressionSyntax expression, InvocationExpressionSyntax invocation, SemanticModel? semanticModel,
+        bool requireString = false)
+    {
+        if (expression is not IdentifierNameSyntax || semanticModel is null)
+        {
+            return false;
+        }
+
+        var symbol = semanticModel.GetSymbolInfo(expression).Symbol;
+        var type = symbol switch
+        {
+            ILocalSymbol { RefKind: RefKind.None } local => local.Type,
+            IParameterSymbol { RefKind: RefKind.None } parameter => parameter.Type,
+            _ => null
+        };
+        var declaration = symbol?.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+        var statement = invocation.Ancestors().OfType<StatementSyntax>().FirstOrDefault();
+        if (type is null || requireString && type.SpecialType != SpecialType.System_String || declaration is null || statement is null)
+        {
+            return false;
+        }
+
+        static SyntaxNode? GetFunction(SyntaxNode node) => node.Ancestors().FirstOrDefault(ancestor =>
+            ancestor is BaseMethodDeclarationSyntax or LocalFunctionStatementSyntax or AnonymousFunctionExpressionSyntax);
+
+        var function = GetFunction(declaration);
+        var references = (function ?? declaration.SyntaxTree.GetRoot()).DescendantNodes().OfType<IdentifierNameSyntax>()
+            .Where(node => SymbolEqualityComparer.Default.Equals(semanticModel.GetSymbolInfo(node).Symbol, symbol)).ToArray();
+        var captured = references.Any(reference => GetFunction(reference)?.Span != function?.Span);
+        // Even a simple local read is unsafe if a later argument or chained call can change
+        // its storage through a mutable closure/ref alias, or if this statement assigns it.
+        foreach (var reference in references)
+        {
+            var operation = semanticModel.GetOperation(reference);
+            while (operation?.Parent is IConversionOperation or IParenthesizedOperation)
+            {
+                operation = operation.Parent;
+            }
+            if (operation?.Parent is IArgumentOperation { Parameter.RefKind: not RefKind.None } ||
+                reference.Ancestors().Any(node => node is RefExpressionSyntax or MakeRefExpressionSyntax ||
+                    node is ArgumentSyntax argument && !argument.RefKindKeyword.IsKind(SyntaxKind.None)) ||
+                (captured || statement.Span.Contains(reference.Span)) && reference.Ancestors().Any(node =>
+                    node is AssignmentExpressionSyntax assignment && assignment.Left.Span.Contains(reference.Span) ||
+                    node.IsKind(SyntaxKind.PreIncrementExpression) || node.IsKind(SyntaxKind.PreDecrementExpression) ||
+                    node.IsKind(SyntaxKind.PostIncrementExpression) || node.IsKind(SyntaxKind.PostDecrementExpression)))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static bool CanReuseServiceCollection(ExpressionSyntax expression, InvocationExpressionSyntax invocation, SemanticModel? semanticModel)
+    {
+        if (CanReuseVariable(expression, invocation, semanticModel))
+        {
+            return true;
+        }
+
+        // WebApplicationBuilder owns a stable service collection. Arbitrary getters and
+        // factory receivers must not be evaluated again after the registration.
+        return expression is MemberAccessExpressionSyntax member &&
+            semanticModel?.GetSymbolInfo(member).Symbol is IPropertySymbol { Name: "Services", IsStatic: false, GetMethod: not null, SetMethod: null } property &&
+            property.ContainingType.ToDisplayString() == "Microsoft.AspNetCore.Builder.WebApplicationBuilder" &&
+            property.ContainingAssembly.Identity.Name == "Microsoft.AspNetCore" &&
+            CanReuseVariable(member.Expression, invocation, semanticModel);
+    }
+
+    private static string BindServiceReceiver(string block, InvocationExpressionSyntax invocation, SemanticModel? semanticModel)
+    {
+        // Follow only the receiver chain, not invocations in options lambdas or arguments.
+        ExpressionSyntax? receiver = (invocation.Expression as MemberAccessExpressionSyntax)?.Expression;
+        bool hasAuthenticationCall = false;
+        while (receiver is InvocationExpressionSyntax call && call.Expression is MemberAccessExpressionSyntax member)
+        {
+            if (member.Name.Identifier.ValueText == "AddAuthentication")
+            {
+                receiver = member.Expression;
+                hasAuthenticationCall = true;
+                break;
+            }
+            // Without AddAuthentication, use an existing AuthenticationBuilder only when it
+            // is a stable receiver, rather than evaluating an arbitrary factory call twice.
+            if (member.Expression is not InvocationExpressionSyntax)
+            {
+                break;
+            }
+            receiver = member.Expression;
+        }
+
+        var configuration = SyntaxFactory.ParseStatement(block);
+        if (receiver is null || !(hasAuthenticationCall
+                ? CanReuseServiceCollection(receiver, invocation, semanticModel)
+                : CanReuseVariable(receiver, invocation, semanticModel)) ||
+            (!hasAuthenticationCall && semanticModel?.GetTypeInfo(receiver).Type?.GetMembers("Services").Any() is not true) ||
+            configuration is not ExpressionStatementSyntax { Expression: InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax configurationCall } })
+        {
+            throw new InvalidOperationException($"Unable to safely reuse the service collection for '{invocation}'. Use an uncaptured, non-ref local variable holding the service collection, authentication builder, or WebApplicationBuilder (via its Services property), without assigning it within the registration statement.");
+        }
+
+        // An existing AuthenticationBuilder has Services; an AddAuthentication call already
+        // supplies the service collection. Neither case replays the registration chain.
+        var services = hasAuthenticationCall
+            ? receiver
+            : SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, receiver.WithoutTrivia(), SyntaxFactory.IdentifierName("Services"));
+        return configuration.ReplaceNode(configurationCall.Expression, services.WithoutTrivia()).ToString();
+    }
+
+    private static bool IsInvocation(InvocationExpressionSyntax invocation, string? name) =>
+        invocation.Expression switch
+        {
+            MemberAccessExpressionSyntax member => member.Name.Identifier.ValueText == name,
+            MemberBindingExpressionSyntax member => member.Name.Identifier.ValueText == name,
+            SimpleNameSyntax simpleName => simpleName.Identifier.ValueText == name,
+            _ => false
+        };
 
     internal static BaseMethodDeclarationSyntax GetModifiedMethod(string fileName, BaseMethodDeclarationSyntax method, Method methodChanges, IList<string> options, StringBuilder? output)
     {
@@ -412,8 +668,14 @@ internal class DocumentBuilder
             return originalMethod;
         }
 
-        //check for CodeChange.Block and CodeChange.CheckBlock for  block's are easy to check.
-        if (ProjectModifierHelper.StatementExists(children, codeChange.Block) || !string.IsNullOrEmpty(codeChange.CheckBlock) && ProjectModifierHelper.StatementExists(children, codeChange.CheckBlock))
+        var alreadyExists = codeChange.InvocationArguments is not null
+            ? ExecutableStatementExists(children, codeChange.Block) ||
+                !string.IsNullOrEmpty(codeChange.CheckBlock) && ExecutableStatementExists(children, codeChange.CheckBlock)
+            : !string.IsNullOrEmpty(codeChange.CheckInvocation)
+            ? originalMethod.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(invocation => IsInvocation(invocation, codeChange.CheckInvocation))
+            : ProjectModifierHelper.StatementExists(children, codeChange.Block) ||
+                !string.IsNullOrEmpty(codeChange.CheckBlock) && ProjectModifierHelper.StatementExists(children, codeChange.CheckBlock);
+        if (alreadyExists)
         {
             return originalMethod;
         }
@@ -433,6 +695,13 @@ internal class DocumentBuilder
         }
 
         return updatedMethod ?? originalMethod;
+    }
+
+    private static bool ExecutableStatementExists(IEnumerable<SyntaxNode> nodes, string block)
+    {
+        var statement = SyntaxFactory.ParseStatement(block.TrimEnd(' ', '\r', '\n', ';') + ";");
+        return nodes.Any(node => SyntaxFactory.AreEquivalent(
+            node is GlobalStatementSyntax global ? global.Statement : node, statement));
     }
 
     private static SyntaxNode InsertBefore(CodeSnippet codeChange, IEnumerable<SyntaxNode> children, SyntaxNode originalMethod)
@@ -1040,5 +1309,3 @@ internal class DocumentBuilder
     private static SyntaxTrivia SemiColonTrivia => SyntaxFactory.Trivia(SyntaxFactory.SkippedTokensTrivia()
                 .WithTokens(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.SemicolonToken))));
 }
-
-

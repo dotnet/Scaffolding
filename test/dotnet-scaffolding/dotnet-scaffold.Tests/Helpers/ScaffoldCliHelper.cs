@@ -14,7 +14,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 
 /// <summary>
 /// Shared helper for invoking the dotnet-scaffold CLI tool from integration tests.
-/// Uses <c>dotnet run --project</c> to invoke the tool from source, avoiding global tool installation.
+/// Uses the already-built tool DLL from the Arcade artifacts layout, avoiding global tool installation
+/// and avoiding <c>dotnet run --no-build</c> assumptions about the output path.
 /// </summary>
 internal static class ScaffoldCliHelper
 {
@@ -44,6 +45,22 @@ internal static class ScaffoldCliHelper
     public static string GetScaffoldProjectPath()
     {
         return Path.Combine(GetRepoRoot(), "src", "dotnet-scaffolding", "dotnet-scaffold", "dotnet-scaffold.csproj");
+    }
+
+    /// <summary>
+    /// Gets the absolute path to the built dotnet-scaffold DLL for the specified target framework.
+    /// The Arcade build layout is: {repoRoot}/artifacts/bin/dotnet-scaffold/{Config}/{TFM}/dotnet-scaffold.dll
+    /// </summary>
+    public static string GetScaffoldDllPath(string targetFramework)
+    {
+        return Path.Combine(
+            GetRepoRoot(),
+            "artifacts",
+            "bin",
+            "dotnet-scaffold",
+            GetBuildConfiguration(),
+            targetFramework,
+            "dotnet-scaffold.dll");
     }
 
     /// <summary>
@@ -166,12 +183,11 @@ internal static class ScaffoldCliHelper
         => projectTargetFramework == "net11.0" ? ["--prerelease"] : [];
 
     /// <summary>
-    /// Runs a dotnet-scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspnet {command} {args}</c>.
-    /// Uses <c>--no-build</c> because the solution must already be built before running tests.
+    /// Runs a dotnet-scaffold CLI command by invoking the already-built tool DLL:
+    /// <c>dotnet {artifacts/bin/dotnet-scaffold/{config}/{framework}/dotnet-scaffold.dll} aspnet {command} {args}</c>.
     /// The build configuration is auto-detected from the test assembly output path so the correct
-    /// Debug or Release build of the tool is used.
-    /// The <paramref name="targetFramework"/> controls which TFM of the multi-targeted dotnet-scaffold tool is executed,
-    /// simulating a machine that only has that .NET version installed.
+    /// Debug or Release build of the tool is used. The <paramref name="targetFramework"/> controls
+    /// which TFM-specific output of the multi-targeted tool is executed.
     /// </summary>
     /// <param name="targetFramework">The target framework moniker to run the tool under (e.g., "net8.0", "net9.0", "net10.0", "net11.0").</param>
     /// <param name="command">The scaffold sub-command (e.g., "minimalapi", "mvccontroller", "blazor-empty").</param>
@@ -192,8 +208,7 @@ internal static class ScaffoldCliHelper
     /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
     public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldInDirectoryAsync(string? workingDirectory, string targetFramework, string command, params string[] args)
     {
-        var scaffoldCsproj = GetScaffoldProjectPath();
-        var configuration = GetBuildConfiguration();
+        var scaffoldDll = GetScaffoldDllPath(targetFramework);
 
         var process = new Process
         {
@@ -211,15 +226,7 @@ internal static class ScaffoldCliHelper
         }
 
         ConfigureDotNetEnvironment(process.StartInfo);
-        process.StartInfo.ArgumentList.Add("run");
-        process.StartInfo.ArgumentList.Add("--no-build");
-        process.StartInfo.ArgumentList.Add("-c");
-        process.StartInfo.ArgumentList.Add(configuration);
-        process.StartInfo.ArgumentList.Add("--project");
-        process.StartInfo.ArgumentList.Add(scaffoldCsproj);
-        process.StartInfo.ArgumentList.Add("--framework");
-        process.StartInfo.ArgumentList.Add(targetFramework);
-        process.StartInfo.ArgumentList.Add("--");
+        process.StartInfo.ArgumentList.Add(scaffoldDll);
         process.StartInfo.ArgumentList.Add("aspnet");
         process.StartInfo.ArgumentList.Add(command);
         foreach (var arg in args)
@@ -236,7 +243,8 @@ internal static class ScaffoldCliHelper
     }
 
     /// <summary>
-    /// Runs an Aspire scaffold CLI command by invoking <c>dotnet run --no-build -c {config} --project {scaffoldCsproj} --framework {framework} -- aspire {command} {args}</c>.
+    /// Runs an Aspire scaffold CLI command by invoking the already-built tool DLL:
+    /// <c>dotnet {artifacts/bin/dotnet-scaffold/{config}/{framework}/dotnet-scaffold.dll} aspire {command} {args}</c>.
     /// </summary>
     /// <param name="targetFramework">The target framework moniker to run the tool under (e.g., "net8.0", "net9.0", "net10.0", "net11.0").</param>
     /// <param name="command">The Aspire sub-command (e.g., "caching", "database", "storage").</param>
@@ -244,8 +252,7 @@ internal static class ScaffoldCliHelper
     /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
     public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAspireAsync(string targetFramework, string command, params string[] args)
     {
-        var scaffoldCsproj = GetScaffoldProjectPath();
-        var configuration = GetBuildConfiguration();
+        var scaffoldDll = GetScaffoldDllPath(targetFramework);
 
         var process = new Process
         {
@@ -258,15 +265,7 @@ internal static class ScaffoldCliHelper
             }
         };
         ConfigureDotNetEnvironment(process.StartInfo);
-        process.StartInfo.ArgumentList.Add("run");
-        process.StartInfo.ArgumentList.Add("--no-build");
-        process.StartInfo.ArgumentList.Add("-c");
-        process.StartInfo.ArgumentList.Add(configuration);
-        process.StartInfo.ArgumentList.Add("--project");
-        process.StartInfo.ArgumentList.Add(scaffoldCsproj);
-        process.StartInfo.ArgumentList.Add("--framework");
-        process.StartInfo.ArgumentList.Add(targetFramework);
-        process.StartInfo.ArgumentList.Add("--");
+        process.StartInfo.ArgumentList.Add(scaffoldDll);
         process.StartInfo.ArgumentList.Add("aspire");
         process.StartInfo.ArgumentList.Add(command);
         foreach (var arg in args)
@@ -424,7 +423,7 @@ public class {modelName}
 
 <Router AppAssembly=""typeof(Program).Assembly"">
     <Found Context=""routeData"">
-        <RouteView RouteData=""routeData"" />
+        <RouteView RouteData=""routeData"" DefaultLayout=""typeof(Layout.MainLayout)"" />
     </Found>
 </Router>
 ";
@@ -555,38 +554,51 @@ public class {modelName}
     /// <para>
     /// The temporary test projects live under <see cref="Path.GetTempPath"/>, i.e. outside the
     /// repository tree, so they cannot discover the repository's root <c>NuGet.config</c> by the
-    /// normal directory walk. To keep a single source of truth — and, critically, to restore from
-    /// the exact same curated, CI-mirrored dnceng feeds the rest of the build uses — this copies
-    /// the repository root <c>NuGet.config</c> feeds.
+    /// normal directory walk. Feed URLs come from the repository root <c>NuGet.config</c>, but
+    /// only the dotnet-public mirror and .NET 11 product/transport feeds are included.
     /// </para>
     /// <para>
-    /// This deliberately avoids the live public <c>https://api.nuget.org</c> feed (which the repo's
-    /// own config does not use). Restoring the scaffolded preview projects directly against the live
-    /// nuget.org endpoint was the root cause of the CI flakiness: transient throttling/timeouts on
-    /// that endpoint failed the pre-/post-build restores. The dnceng mirror feeds in the repo config
-    /// are the same ones the solution build already warmed. Inherited source-disable and mapping
+    /// This avoids querying unrelated engineering, tooling, Visual Studio, and older-framework
+    /// feeds during package discovery. Those extra metadata requests caused CI timeouts while
+    /// adding application packages such as QuickGrid. Inherited source-disable and mapping
     /// settings are cleared so machine-level configuration cannot change the fixture's feeds.
     /// </para>
     /// </summary>
-    public static string PreviewNuGetConfig => GetRepoRootNuGetConfig();
+    public static string PreviewNuGetConfig => GetPreviewNuGetConfig();
 
     internal static string GetTestNuGetConfig(string targetFramework)
         => targetFramework == "net11.0" ? PreviewNuGetConfig : StableNuGetConfig;
 
     /// <summary>
-    /// Reads the repository root <c>NuGet.config</c> so temporary test projects restore from the
-    /// identical feed set as the rest of the build, without inherited source-disable or mapping settings.
+    /// Builds an isolated application feed configuration using the repository's feed URLs.
     /// </summary>
-    private static string GetRepoRootNuGetConfig()
+    private static string GetPreviewNuGetConfig()
     {
         var repoConfig = Path.Combine(GetRepoRoot(), "NuGet.config");
         var config = XDocument.Load(repoConfig);
-        foreach (string sectionName in new[] { "disabledPackageSources", "packageSourceMapping" })
+        var sources = config.Root?.Element("packageSources")
+            ?? throw new System.InvalidOperationException($"No package sources found in '{repoConfig}'.");
+        string[] requiredSourceNames = ["dotnet-public", "dotnet11", "dotnet11-transport"];
+        var selectedSources = requiredSourceNames.Select(name =>
         {
-            config.Root!.Element(sectionName)?.Remove();
-            config.Root.Add(new XElement(sectionName, new XElement("clear")));
-        }
-        return config.ToString();
+            var matches = sources.Elements("add")
+                .Where(source => source.Attribute("key")?.Value == name)
+                .ToArray();
+            if (matches.Length != 1 || string.IsNullOrWhiteSpace(matches[0].Attribute("value")?.Value))
+            {
+                throw new System.InvalidOperationException(
+                    $"Expected exactly one package source with a URL for '{name}' in '{repoConfig}'.");
+            }
+
+            return new XElement(matches[0]);
+        });
+
+        return new XDocument(
+            new XElement("configuration",
+                new XElement("packageSources", new XElement("clear"), selectedSources),
+                new XElement("disabledPackageSources", new XElement("clear")),
+                new XElement("packageSourceMapping", new XElement("clear"))))
+            .ToString();
     }
 
     /// <summary>

@@ -17,46 +17,98 @@ internal static class EntraIdHelper
     /// </summary>
     /// <param name="allT4TemplatePaths">The collection of all T4 template paths.</param>
     /// <param name="entraIdModel">The Entra ID model containing configuration and data.</param>
-    /// <param name="blazorWasmClientProjectPath">The optional Blazor WebAssembly client project path.</param>
+    /// <param name="blazorWasmClientProjectPath">The optional client project path for WebAssembly and Auto apps.</param>
     /// <returns>An enumerable collection of <see cref="TextTemplatingProperty"/> instances.</returns>
-    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, EntraIdModel entraIdModel, string? blazorWasmClientProjectPath = null)
+    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(
+        IEnumerable<string> allT4TemplatePaths,
+        EntraIdModel entraIdModel,
+        string? blazorWasmClientProjectPath = null)
     {
-        var textTemplatingProperties = new List<TextTemplatingProperty>();
         var templateTypes = GetBlazorEntraIdTemplateTypes(entraIdModel.ProjectInfo?.LowestSupportedTargetFramework);
-        var serverLayoutPath = Path.Combine(entraIdModel.BaseOutputPath ?? string.Empty, "Components", "Layout");
-        var serverNavMenuPath = Path.Combine(serverLayoutPath, "NavMenu.razor");
-        var clientProjectDirectory = string.IsNullOrEmpty(blazorWasmClientProjectPath) ? null : Path.GetDirectoryName(blazorWasmClientProjectPath);
-        var clientLayoutPath = string.IsNullOrEmpty(clientProjectDirectory) ? null : Path.Combine(clientProjectDirectory, "Layout");
-        var clientNavMenuPath = string.IsNullOrEmpty(clientLayoutPath) ? null : Path.Combine(clientLayoutPath, "NavMenu.razor");
+        var templateByName = allT4TemplatePaths
+            .Select(templatePath => new
+            {
+                TemplatePath = templatePath,
+                TemplateName = GetFormattedRelativeIdentityFile(templatePath)
+            })
+            .Where(x => !string.IsNullOrEmpty(x.TemplateName))
+            .ToDictionary(x => x.TemplateName, x => x.TemplatePath, StringComparer.OrdinalIgnoreCase);
 
-        foreach (var templatePath in allT4TemplatePaths)
+        if (templateTypes.Count == 0 || templateByName.Count == 0)
         {
-            var templateFullName = GetFormattedRelativeIdentityFile(templatePath);
-            var typeName = StringUtil.GetTypeNameFromNamespace(templateFullName);
+            return [];
+        }
+
+        bool isStandaloneWasmProject =
+            !string.IsNullOrEmpty(blazorWasmClientProjectPath) &&
+            !string.IsNullOrEmpty(entraIdModel.ProjectInfo?.ProjectPath) &&
+            Path.GetFullPath(blazorWasmClientProjectPath).Equals(
+                Path.GetFullPath(entraIdModel.ProjectInfo.ProjectPath),
+                StringComparison.OrdinalIgnoreCase);
+        string projectOutputPath = isStandaloneWasmProject
+            ? Path.GetDirectoryName(blazorWasmClientProjectPath) ?? string.Empty
+            : entraIdModel.BaseOutputPath ?? string.Empty;
+        string componentsOutputPath = isStandaloneWasmProject
+            ? projectOutputPath
+            : Path.Combine(projectOutputPath, "Components");
+        string redirectToLoginOutputPath = Path.Combine(componentsOutputPath, "RedirectToLogin.razor");
+        if (!isStandaloneWasmProject && !string.IsNullOrEmpty(blazorWasmClientProjectPath))
+        {
+            string? clientDirectory = Path.GetDirectoryName(blazorWasmClientProjectPath);
+            if (clientDirectory is not null && File.Exists(Path.Combine(clientDirectory, "Routes.razor")))
+            {
+                redirectToLoginOutputPath = Path.Combine(clientDirectory, "RedirectToLogin.razor");
+            }
+        }
+
+        string serverLayoutPath = Path.Combine(componentsOutputPath, "Layout");
+        string? clientProjectDirectory = string.IsNullOrEmpty(blazorWasmClientProjectPath)
+            ? null
+            : Path.GetDirectoryName(blazorWasmClientProjectPath);
+        string? clientLayoutPath = isStandaloneWasmProject || string.IsNullOrEmpty(clientProjectDirectory)
+            ? null
+            : Path.Combine(clientProjectDirectory, "Layout");
+        string? clientNavMenuPath = clientLayoutPath is null ? null : Path.Combine(clientLayoutPath, "NavMenu.razor");
+
+        var entries = new List<(string Name, string OutputPath)>
+        {
+            ("LoginOrLogout", Path.Combine(serverLayoutPath, "LoginOrLogout.razor")),
+            ("RedirectToLogin", redirectToLoginOutputPath),
+        };
+
+        var textTemplatingProperties = new List<TextTemplatingProperty>();
+        foreach (var entry in entries)
+        {
+            if (!templateByName.TryGetValue(entry.Name, out var templatePath))
+            {
+                continue;
+            }
+
             var templateType = templateTypes.FirstOrDefault(x =>
                 !string.IsNullOrEmpty(x.FullName) &&
-                x.FullName.Contains(templateFullName) &&
-                x.Name.Equals(typeName, StringComparison.OrdinalIgnoreCase));
-            var projectName = Path.GetFileNameWithoutExtension(entraIdModel.ProjectInfo?.ProjectPath);
+                x.FullName.Contains(entry.Name, StringComparison.OrdinalIgnoreCase) &&
+                x.Name.Equals(entry.Name, StringComparison.OrdinalIgnoreCase));
 
-            if (!string.IsNullOrEmpty(templatePath) && templateType is not null && !string.IsNullOrEmpty(projectName))
+            if (templateType is null)
             {
-                string extension = templateFullName.StartsWith("loginor", StringComparison.OrdinalIgnoreCase) ? ".razor" : ".cs";
-                IEnumerable<string> outputDirectories = String.Equals(extension, ".razor", StringComparison.Ordinal)
-                    ? GetLayoutOutputPaths(serverLayoutPath, serverNavMenuPath, clientLayoutPath, clientNavMenuPath)
-                    : [entraIdModel.BaseOutputPath ?? string.Empty];
+                continue;
+            }
 
-                foreach (string outputDirectory in outputDirectories)
+            IEnumerable<string> outputPaths = entry.Name == "LoginOrLogout"
+                ? GetLayoutOutputPaths(serverLayoutPath, Path.Combine(serverLayoutPath, "NavMenu.razor"), clientLayoutPath, clientNavMenuPath)
+                    .Select(layoutPath => Path.Combine(layoutPath, "LoginOrLogout.razor"))
+                : [entry.OutputPath];
+
+            foreach (string outputPath in outputPaths)
+            {
+                textTemplatingProperties.Add(new()
                 {
-                    textTemplatingProperties.Add(new()
-                    {
-                        TemplateModel = entraIdModel,
-                        TemplateModelName = "Model",
-                        TemplatePath = templatePath,
-                        TemplateType = templateType,
-                        OutputPath = Path.Combine(outputDirectory, templateFullName + extension)
-                    });
-                }
+                    TemplateModel = entraIdModel,
+                    TemplateModelName = "Model",
+                    TemplatePath = templatePath,
+                    TemplateType = templateType,
+                    OutputPath = outputPath
+                });
             }
         }
 
@@ -119,10 +171,12 @@ internal static class EntraIdHelper
     private static readonly IList<Type> _blazorEntraIdTemplateTypesNet10 =
     [
         typeof(Templates.net10.BlazorEntraId.LoginOrLogout),
+        typeof(Templates.net10.BlazorEntraId.RedirectToLogin),
     ];
 
     private static readonly IList<Type> _blazorEntraIdTemplateTypesNet11 =
     [
         typeof(Templates.net11.BlazorEntraId.LoginOrLogout),
+        typeof(Templates.net11.BlazorEntraId.RedirectToLogin),
     ];
 }

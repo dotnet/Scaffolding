@@ -97,6 +97,31 @@ public class GlobalToolFileFinderTests : IDisposable
     }
 
     [Fact]
+    public void FindCodeModificationConfigFile_WithMatchingFilesInMultipleFrameworks_ReturnsRequestedFrameworkFile()
+    {
+        // Arrange
+        var (assembly, net8ConfigFile) = SetupTestEnvironment("net8.0", "testConfig.json");
+        SetupTestEnvironment("net11.0", "testConfig.json");
+
+        // Act
+        string? result = GlobalToolFileFinder.FindCodeModificationConfigFile(
+            "testConfig.json",
+            assembly,
+            "net8.0");
+
+        // Assert
+        Assert.Equal(net8ConfigFile, result);
+    }
+
+    [Fact]
+    public void FindCodeModificationConfigFile_WithOnlyAnotherFrameworkAvailable_ReturnsNull()
+    {
+        var (assembly, _) = SetupTestEnvironment("net8.0", "testConfig.json");
+
+        Assert.Null(GlobalToolFileFinder.FindCodeModificationConfigFile("testConfig.json", assembly, "net11.0"));
+    }
+
+    [Fact]
     public void FindCodeModificationConfigFile_WithFileInSubdirectory_ReturnsFilePath()
     {
         // Arrange

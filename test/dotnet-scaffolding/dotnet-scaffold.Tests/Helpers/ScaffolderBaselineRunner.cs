@@ -22,7 +22,8 @@ internal static class ScaffolderBaselineRunner
         string template,
         Func<string, Task<(int ExitCode, string Output, string Error)>> scaffold,
         PrepareBaselineInput? prepareInput = null,
-        IReadOnlyList<string>? additionalPackageSources = null)
+        IReadOnlyList<string>? additionalPackageSources = null,
+        string? nugetConfig = null)
     {
         var repoRoot = ScaffoldCliHelper.GetRepoRoot();
         var baselines = Path.Combine(repoRoot, "test", "dotnet-scaffolding", "baselines");
@@ -36,9 +37,11 @@ internal static class ScaffolderBaselineRunner
         try
         {
             File.Copy(Path.Combine(repoRoot, "global.json"), Path.Combine(workingDirectory, "global.json"));
+            // Defaults to the repository feeds. A scaffolder whose package is not on those feeds can either add
+            // sources to them (additionalPackageSources) or supply its own complete scoped config (nugetConfig).
             File.WriteAllText(
                 Path.Combine(workingDirectory, "NuGet.config"),
-                AddPackageSources(File.ReadAllText(Path.Combine(repoRoot, "NuGet.config")), additionalPackageSources ?? []));
+                AddPackageSources(nugetConfig ?? File.ReadAllText(Path.Combine(repoRoot, "NuGet.config")), additionalPackageSources ?? []));
             GeneratedProjectBaseline.CopyProject(baseline, expected);
             await RunDotNetAsync(output, expected, "restore");
             await RunDotNetAsync(output, expected, "build", "--no-restore");
@@ -77,7 +80,7 @@ internal static class ScaffolderBaselineRunner
 
         const string clear = "<clear />";
         var index = nugetConfig.IndexOf(clear, StringComparison.Ordinal);
-        Assert.True(index >= 0, "The repository NuGet.config has no '<clear />' in its package sources.");
+        Assert.True(index >= 0, "The NuGet.config has no '<clear />' in its package sources.");
         var sources = string.Concat(packageSources.Select((source, i) => $"\n    <add key=\"baseline-source-{i}\" value=\"{source}\" />"));
         return nugetConfig.Insert(index + clear.Length, sources);
     }

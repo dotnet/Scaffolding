@@ -59,14 +59,15 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return null;
             }
 
-            string extension = Path.GetExtension(fileName);
+            string normalizedFileName = fileName.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            string extension = Path.GetExtension(normalizedFileName);
             if (!string.IsNullOrEmpty(extension))
             {
                 extension = $"*{extension}";
             }
 
             var allFiles = Directory.EnumerateFiles(projectDirectory, extension, SearchOption.AllDirectories);
-            string filePath = allFiles.FirstOrDefault(x => x.EndsWith(Path.DirectorySeparatorChar + fileName, StringComparison.OrdinalIgnoreCase));
+            string filePath = allFiles.FirstOrDefault(x => x.EndsWith(Path.DirectorySeparatorChar + normalizedFileName, StringComparison.OrdinalIgnoreCase));
             if (!string.IsNullOrEmpty(filePath))
             {
                 string fileText = fileSystem.ReadAllText(filePath);

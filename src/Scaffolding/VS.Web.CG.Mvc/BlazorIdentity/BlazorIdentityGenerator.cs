@@ -434,7 +434,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 {
                     fileDoc = clientProject.GetDocumentFromName(file.FileName, FileSystem);
                 }
-                if (file.FileName.Equals("Components\\App.razor", StringComparison.OrdinalIgnoreCase) && fileDoc != null)
+                var normalizedFileName = file.FileName.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                if (normalizedFileName.Equals(Path.Combine("Components", "App.razor"), StringComparison.OrdinalIgnoreCase) && fileDoc != null)
                 {
                     BlazorIdentityHelper.ConfigureAppRenderMode(file, FileSystem.ReadAllText(fileDoc.Name));
                 }

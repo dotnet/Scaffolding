@@ -42,23 +42,35 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [Theory]
         [InlineData("InteractiveAuto", true)]
         [InlineData("InteractiveWebAssembly", true)]
+        [InlineData("InteractiveServer", true)]
         [InlineData("InteractiveAuto", false)]
         public async Task ModifyFiles_UpdatesBothProjectsWithoutServerDependenciesInClient(string renderMode, bool global)
         {
-            var client = AddProject("Client", "Microsoft.NET.Sdk.BlazorWebAssembly",
-                "using Microsoft.AspNetCore.Components.WebAssembly.Hosting;\nvar clientBuilder = WebAssemblyHostBuilder.CreateDefault(args);\nawait clientBuilder.Build().RunAsync();");
+            var isClientHosted = renderMode != "InteractiveServer";
+            var client = isClientHosted
+                ? AddProject("Client", "Microsoft.NET.Sdk.BlazorWebAssembly",
+                    "using Microsoft.AspNetCore.Components.WebAssembly.Hosting;\nvar clientBuilder = WebAssemblyHostBuilder.CreateDefault(args);\nawait clientBuilder.Build().RunAsync();")
+                : null;
             var server = AddProject("Server", "Microsoft.NET.Sdk.Web",
-                "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorComponents().AddInteractiveWebAssemblyComponents();\nvar app = builder.Build();\napp.Run();");
-            Assert.True(_workspace.TryApplyChanges(_workspace.CurrentSolution.AddProjectReference(server.Id, new ProjectReference(client.Id))));
-            var uiProject = global ? "Client" : "Server";
-            var components = global ? "" : "Components";
+                isClientHosted
+                    ? "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorComponents().AddInteractiveWebAssemblyComponents();\nvar app = builder.Build();\napp.Run();"
+                    : "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorComponents().AddInteractiveServerComponents();\nvar app = builder.Build();\napp.Run();");
+            if (client != null)
+            {
+                Assert.True(_workspace.TryApplyChanges(_workspace.CurrentSolution.AddProjectReference(server.Id, new ProjectReference(client.Id))));
+            }
+            var uiProject = (global && isClientHosted) ? "Client" : "Server";
+            var components = (global && isClientHosted) ? "" : "Components";
             Write(uiProject, Path.Combine(components, "Routes.razor"),
                 "<Router AppAssembly=\"typeof(Program).Assembly\"><Found Context=\"routeData\"><RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" /></Found></Router>");
             Write(uiProject, Path.Combine(components, "Layout", "NavMenu.razor"),
                 "<div class=\"top-row ps-3 navbar navbar-dark\">\n</div>\n<nav>\n        <div class=\"nav-item px-3\">\n            <NavLink class=\"nav-link\" href=\"weather\">\n                <span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather\n            </NavLink>\n        </div>\n</nav>");
             Write(uiProject, Path.Combine(components, "Layout", "NavMenu.razor.css"), ".nav-item {\n}");
             Write("Server", Path.Combine("Components", "_Imports.razor"), "@using Microsoft.AspNetCore.Components.Forms");
-            Write("Client", "_Imports.razor", "@using Microsoft.AspNetCore.Components.Forms");
+            if (client != null)
+            {
+                Write("Client", "_Imports.razor", "@using Microsoft.AspNetCore.Components.Forms");
+            }
             Write("Server", Path.Combine("Components", "App.razor"), global
                 ? $"<HeadOutlet @rendermode=\"{renderMode}\" /><Routes @rendermode=\"{renderMode}\" /></body>"
                 : "<HeadOutlet /><Routes /></body>");
@@ -67,15 +79,28 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             await generator.ModifyFilesAsync(_model);
 
             var serverProgram = Read("Server", "Program.cs");
-            var clientProgram = Read("Client", "Program.cs");
-            Assert.Contains("AddAuthenticationStateSerialization()", serverProgram);
-            Assert.DoesNotContain("AddAuthorizationCore()", serverProgram);
-            Assert.Contains("AddAuthorizationCore()", clientProgram);
-            Assert.Contains("AddCascadingAuthenticationState()", clientProgram);
-            Assert.Contains("AddAuthenticationStateDeserialization()", clientProgram);
-            Assert.DoesNotContain("Server.", clientProgram);
-            Assert.DoesNotContain("Identity", clientProgram);
-            Assert.Contains("clientBuilder.Services.AddAuthorizationCore()", clientProgram);
+            if (isClientHosted)
+            {
+                var clientProgram = Read("Client", "Program.cs");
+                Assert.Contains("AddAuthenticationStateSerialization()", serverProgram);
+                Assert.DoesNotContain("AddAuthorizationCore()", serverProgram);
+                Assert.Contains("AddAuthorizationCore()", clientProgram);
+                Assert.Contains("AddCascadingAuthenticationState()", clientProgram);
+                Assert.Contains("AddAuthenticationStateDeserialization()", clientProgram);
+                Assert.DoesNotContain("Server.", clientProgram);
+                Assert.DoesNotContain("Identity", clientProgram);
+                Assert.Contains("clientBuilder.Services.AddAuthorizationCore()", clientProgram);
+                var imports = Read("Client", "_Imports.razor");
+                Assert.Contains("Microsoft.AspNetCore.Components.Authorization", imports);
+                Assert.DoesNotContain("Microsoft.AspNetCore.Components.Endpoints", imports);
+                Assert.Contains("forceLoad: true", Read("Client", "RedirectToLogin.razor"));
+                Assert.False(Directory.Exists(Path.Combine(_root, "Client", "Components", "Account")));
+            }
+            else
+            {
+                Assert.DoesNotContain("AddAuthenticationStateSerialization()", serverProgram);
+            }
+
             Assert.Contains("AuthorizeRouteView", Read(uiProject, Path.Combine(components, "Routes.razor")));
             Assert.DoesNotContain("Server.Components.Account", Read(uiProject, Path.Combine(components, "Routes.razor")));
             var nav = Read(uiProject, Path.Combine(components, "Layout", "NavMenu.razor"));
@@ -83,16 +108,28 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             Assert.Contains("Account/Login", nav);
             Assert.Contains("AuthorizeView", nav);
             Assert.Contains("bi-lock-nav-menu", Read(uiProject, Path.Combine(components, "Layout", "NavMenu.razor.css")));
-            var imports = Read("Client", "_Imports.razor");
-            Assert.Contains("Microsoft.AspNetCore.Components.Authorization", imports);
-            Assert.DoesNotContain("Microsoft.AspNetCore.Components.Endpoints", imports);
-            Assert.Contains("Microsoft.AspNetCore.Components.Endpoints", Read("Server", Path.Combine("Components", "_Imports.razor")));
-            Assert.Contains("forceLoad: true", Read("Client", "RedirectToLogin.razor"));
-            Assert.False(Directory.Exists(Path.Combine(_root, "Client", "Components", "Account")));
+            var serverImports = Read("Server", Path.Combine("Components", "_Imports.razor"));
+            Assert.Contains("Microsoft.AspNetCore.Components.Endpoints", serverImports);
+            Assert.Contains("Microsoft.AspNetCore.Components.Authorization", serverImports);
+
+            var serverApp = Read("Server", Path.Combine("Components", "App.razor"));
+            if (global)
+            {
+                Assert.Contains("<HeadOutlet @rendermode=\"PageRenderMode\" />", serverApp);
+                Assert.Contains("<Routes @rendermode=\"PageRenderMode\" />", serverApp);
+                Assert.Contains($"HttpContext.AcceptsInteractiveRouting() ? {renderMode} : null;", serverApp);
+            }
+            else
+            {
+                Assert.DoesNotContain("PageRenderMode", serverApp);
+            }
 
             await generator.ModifyFilesAsync(_model);
             Assert.Equal(serverProgram, Read("Server", "Program.cs"));
-            Assert.Equal(clientProgram, Read("Client", "Program.cs"));
+            if (isClientHosted)
+            {
+                Assert.Equal(Read("Client", "Program.cs"), Read("Client", "Program.cs"));
+            }
         }
 
         [Fact]
@@ -112,19 +149,25 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [SkippableTheory]
         [InlineData("Auto")]
         [InlineData("WebAssembly")]
-        public async Task StockGlobalTemplate_ScaffoldsAndBuildsBothProjects(string interactivity)
+        [InlineData("Server")]
+        public async Task StockGlobalTemplate_ScaffoldsAndBuildsProjects(string interactivity)
         {
             Skip.If(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests")));
             Directory.CreateDirectory(_root);
             await RunDotnet("new", "blazor", "--name", "Server", "--output", _root,
                 "--framework", "net10.0", "--interactivity", interactivity, "--all-interactive", "--no-restore");
-            var client = AddExistingProject("Server.Client");
+            var isClientHosted = interactivity != "Server";
+            var client = isClientHosted ? AddExistingProject("Server.Client") : null;
             var server = AddExistingProject("Server");
-            Assert.True(_workspace.TryApplyChanges(_workspace.CurrentSolution.AddProjectReference(server.Id, new ProjectReference(client.Id))));
-            var clientXml = XDocument.Load(Path.Combine(_root, "Server.Client", "Server.Client.csproj"));
-            var version = (string)clientXml.Descendants("PackageReference").Single().Attribute("Version");
+            if (client != null)
+            {
+                Assert.True(_workspace.TryApplyChanges(_workspace.CurrentSolution.AddProjectReference(server.Id, new ProjectReference(client.Id))));
+            }
             var serverPath = Path.Combine(_root, "Server", "Server.csproj");
             var serverXml = XDocument.Load(serverPath);
+            var version = isClientHosted
+                ? (string)XDocument.Load(Path.Combine(_root, "Server.Client", "Server.Client.csproj")).Descendants("PackageReference").Single().Attribute("Version")
+                : "10.0.0";
             serverXml.Root.Add(new XElement("ItemGroup",
                 new XElement("PackageReference", new XAttribute("Include", "Microsoft.AspNetCore.Identity.EntityFrameworkCore"), new XAttribute("Version", version)),
                 new XElement("PackageReference", new XAttribute("Include", "Microsoft.EntityFrameworkCore.Sqlite"), new XAttribute("Version", version))));
@@ -143,7 +186,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 Mock.Of<ILogger>(), DefaultFileSystem.Instance, Mock.Of<IFilesLocator>(), context.Object,
                 Mock.Of<IEntityFrameworkService>(), Mock.Of<ICodeGenAssemblyLoadContext>(), _workspace);
             _model.BaseOutputPath = Path.Combine(_root, "Server");
-            _model.BlazorLayoutNamespace = "Server.Client.Layout.MainLayout";
+            _model.BlazorLayoutNamespace = isClientHosted ? "Server.Client.Layout.MainLayout" : "Server.Components.Layout.MainLayout";
             _model.UserClassName = "IdentityUser";
             _model.UserClassNamespace = "Microsoft.AspNetCore.Identity";
             _model.FilesToGenerate = Directory.GetFiles(Path.Combine(AppContext.BaseDirectory, "Templates", "BlazorIdentity"),
@@ -168,16 +211,23 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             generator.AddStaticFiles(_model);
             await generator.ModifyFilesAsync(_model);
 
-            var clientRoutes = Read("Server.Client", "Routes.razor");
-            Assert.Contains("AuthorizeRouteView", clientRoutes);
-            Assert.DoesNotContain("Server.Components.Account", clientRoutes);
-            Assert.Contains("Account/Register", Read("Server.Client", Path.Combine("Layout", "NavMenu.razor")));
-            Assert.Contains("Account/Login", Read("Server.Client", Path.Combine("Layout", "NavMenu.razor")));
+            var routesProject = isClientHosted ? "Server.Client" : "Server";
+            var routesPath = isClientHosted ? "Routes.razor" : Path.Combine("Components", "Routes.razor");
+            var navMenuPath = isClientHosted ? Path.Combine("Layout", "NavMenu.razor") : Path.Combine("Components", "Layout", "NavMenu.razor");
+
+            var routesContent = Read(routesProject, routesPath);
+            Assert.Contains("AuthorizeRouteView", routesContent);
+            Assert.DoesNotContain("Server.Components.Account", routesContent);
+            Assert.Contains("Account/Register", Read(routesProject, navMenuPath));
+            Assert.Contains("Account/Login", Read(routesProject, navMenuPath));
             Assert.True(File.Exists(Path.Combine(_root, "Server", "Components", "Account", "Pages", "Login.razor")));
             Assert.True(File.Exists(Path.Combine(_root, "Server", "Components", "Account", "Pages", "Register.razor")));
-            Assert.False(Directory.Exists(Path.Combine(_root, "Server.Client", "Components", "Account")));
-            Assert.Contains("AddAuthenticationStateSerialization()", Read("Server", "Program.cs"));
-            Assert.Contains("AddAuthenticationStateDeserialization()", Read("Server.Client", "Program.cs"));
+            if (isClientHosted)
+            {
+                Assert.False(Directory.Exists(Path.Combine(_root, "Server.Client", "Components", "Account")));
+                Assert.Contains("AddAuthenticationStateSerialization()", Read("Server", "Program.cs"));
+                Assert.Contains("AddAuthenticationStateDeserialization()", Read("Server.Client", "Program.cs"));
+            }
             Assert.Contains($"? Interactive{interactivity} : null", Read("Server", Path.Combine("Components", "App.razor")));
             Assert.Contains("[ExcludeFromInteractiveRouting]", Read("Server", Path.Combine("Components", "Account", "Pages", "_Imports.razor")));
             await RunDotnet("build", serverPath, "-p:UseSharedCompilation=false", "--nologo");

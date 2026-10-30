@@ -51,6 +51,7 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
         var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
         JsonNode? content;
         bool writeContent = false;
+        bool appendFinalNewLine = true;
         if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
         {
             content = new JsonObject();
@@ -61,6 +62,7 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
             try
             {
                 var jsonString = _fileSystem.ReadAllText(appSettingsFile);
+                appendFinalNewLine = jsonString.EndsWith('\n') || jsonString.EndsWith('\r');
                 content = JsonNode.Parse(jsonString);
             }
             catch (Exception ex)
@@ -100,7 +102,8 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
         if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
-            _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
+            var serializedContent = content.ToJsonString(options);
+            _fileSystem.WriteAllText(appSettingsFile, appendFinalNewLine ? serializedContent + Environment.NewLine : serializedContent);
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
             _telemetryService.TrackEvent(new AddAspNetConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));
         }

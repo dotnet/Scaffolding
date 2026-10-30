@@ -27,7 +27,7 @@
 <#  }
 #>
 @inject <#= dbContextFactory #>
-@inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 
 <PageTitle>Delete</PageTitle>
 
@@ -72,7 +72,7 @@
 
         if (<#= modelNameLowerInv #> is null)
         {
-            NavigationManager.NavigateTo("notfound");
+            Navigation.NavigateTo("notfound");
         }
     }
 
@@ -81,6 +81,6 @@
         using var context = DbFactory.CreateDbContext();
         context.<#= entitySetName #>.Remove(<#= modelNameLowerInv #>!);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/<#= pluralModelLowerInv #>");
+        Navigation.NavigateTo("/<#= pluralModelLowerInv #>");
     }
 }

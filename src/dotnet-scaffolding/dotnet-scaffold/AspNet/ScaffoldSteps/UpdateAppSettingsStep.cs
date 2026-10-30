@@ -133,6 +133,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 JsonNode? content;
                 string? originalContent = null;
                 bool writeContent = false;
+                bool appendFinalNewLine = true;
 
                 // If appsettings.json doesn't exist, create a new one
                 if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
@@ -146,6 +147,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 {
                     // Read existing appsettings.json
                     var jsonString = _fileSystem.ReadAllText(appSettingsFile);
+                    appendFinalNewLine = jsonString.EndsWith('\n') || jsonString.EndsWith('\r');
                     originalContent = jsonString;
                     try
                     {
@@ -236,10 +238,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 {
                     var options = new JsonSerializerOptions { WriteIndented = true };
 
+                    var serializedContent = content.ToJsonString(options);
+                    _fileSystem.WriteAllText(appSettingsFile, appendFinalNewLine ? serializedContent + Environment.NewLine : serializedContent);
                     var changes = new List<(string Path, string? Original, string Updated)>
                     {
-                        (appSettingsFile, originalContent, content.ToJsonString(options))
+                        (appSettingsFile, originalContent, serializedContent)
                     };
+
                     if (!PrepareDevelopmentSettings(baseProjectPath, content, changes))
                     {
                         return false;
@@ -286,6 +291,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     }
                     catch (JsonException ex)
                     {
+                        _logger.LogWarning($"Failed to parse {devSettingsPath}. The file contains invalid JSON (possibly comments or trailing commas). " +
+                            $"The file will not be modified to preserve existing settings. Error: {ex.Message}");
                         _logger.LogError(ex, "Failed to parse appsettings.Development.json at {Path}.", devSettingsPath);
                         return false;
                     }
@@ -324,6 +331,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         devContent["AzureAd"] = developmentAzureAd;
 
                         var options = new JsonSerializerOptions { WriteIndented = true };
+                        var serializedContent = devContent.ToJsonString(options);
+                        var appendFinalNewLine = devJsonString.EndsWith('\n') || devJsonString.EndsWith('\r');
+                        _fileSystem.WriteAllText(devSettingsPath, appendFinalNewLine ? serializedContent + Environment.NewLine : serializedContent);
+                        _logger.LogInformation("Successfully updated appsettings.Development.json with AzureAd configuration");
                         changes.Add((devSettingsPath, devJsonString, devContent.ToJsonString(options)));
                     }
                 }

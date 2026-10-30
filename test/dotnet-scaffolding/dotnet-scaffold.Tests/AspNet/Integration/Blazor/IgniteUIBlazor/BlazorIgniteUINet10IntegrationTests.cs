@@ -4,10 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
+using NuGet.Configuration;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Blazor;
@@ -59,6 +61,38 @@ public class BlazorIgniteUINet10IntegrationTests : BlazorIgniteUIIntegrationTest
         Assert.Equal(1, CountOccurrences(indexHtmlContent, "_content/IgniteUI"));
 
         await AssertBuildsAsync("after scaffolding");
+    }
+
+    [Fact]
+    public void SplitWebApp_ClientUsesServerFeedsDespiteInheritedSettings()
+    {
+        File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), """
+            <configuration>
+              <packageSources>
+                <clear />
+                <add key="unrelated" value="https://example.invalid/v3/index.json" />
+              </packageSources>
+              <disabledPackageSources>
+                <add key="dotnet-public" value="true" />
+              </disabledPackageSources>
+              <packageSourceMapping>
+                <packageSource key="unrelated">
+                  <package pattern="*" />
+                </packageSource>
+              </packageSourceMapping>
+            </configuration>
+            """);
+
+        var clientProjectDir = SetupSplitWebApp();
+        var serverSettings = Settings.LoadDefaultSettings(_testProjectDir);
+        var clientSettings = Settings.LoadDefaultSettings(clientProjectDir);
+        var serverSources = new PackageSourceProvider(serverSettings).LoadPackageSources()
+            .Select(source => (source.Name, source.Source, source.IsEnabled));
+        var clientSources = new PackageSourceProvider(clientSettings).LoadPackageSources()
+            .Select(source => (source.Name, source.Source, source.IsEnabled));
+
+        Assert.Equal(serverSources, clientSources);
+        Assert.False(PackageSourceMapping.GetPackageSourceMapping(clientSettings).IsEnabled);
     }
 
     [Fact]
@@ -732,6 +766,7 @@ app.Run();
 
         var clientProjectDir = Path.Combine(_testDirectory, "TestProject.Client");
         Directory.CreateDirectory(clientProjectDir);
+        File.WriteAllText(Path.Combine(clientProjectDir, "NuGet.config"), ScaffoldCliHelper.GetTestNuGetConfig(TargetFramework));
         File.WriteAllText(Path.Combine(clientProjectDir, "TestProject.Client.csproj"), GetSplitClientProjectContent());
         File.WriteAllText(Path.Combine(clientProjectDir, "Program.cs"), GetSplitClientProgramCs());
         File.WriteAllText(Path.Combine(clientProjectDir, "_Imports.razor"), GetSplitClientImportsRazor());

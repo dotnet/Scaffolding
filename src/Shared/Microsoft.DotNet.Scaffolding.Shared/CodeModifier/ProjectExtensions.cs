@@ -48,24 +48,32 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
         /// <returns></returns>
         public static Document GetDocumentFromName(this CodeAnalysis.Project project, string fileName, IFileSystem fileSystem)
         {
-            if (project != null && !string.IsNullOrEmpty(fileName))
+            if (project == null || string.IsNullOrEmpty(fileName))
             {
-                var projectDirectory = Path.GetDirectoryName(project.FilePath);
-                string extension = Path.GetExtension(fileName);
-                if (!string.IsNullOrEmpty(extension))
-                {
-                    extension = $"*{extension}";
-                }
+                return null;
+            }
 
-                var allFiles = Directory.EnumerateFiles(projectDirectory, extension, SearchOption.AllDirectories);
-                string filePath = allFiles.FirstOrDefault(x => x.EndsWith(fileName, StringComparison.OrdinalIgnoreCase));
-                if (!string.IsNullOrEmpty(filePath))
+            var projectDirectory = Path.GetDirectoryName(project.FilePath);
+            if (string.IsNullOrEmpty(projectDirectory))
+            {
+                return null;
+            }
+
+            string normalizedFileName = fileName.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            string extension = Path.GetExtension(normalizedFileName);
+            if (!string.IsNullOrEmpty(extension))
+            {
+                extension = $"*{extension}";
+            }
+
+            var allFiles = Directory.EnumerateFiles(projectDirectory, extension, SearchOption.AllDirectories);
+            string filePath = allFiles.FirstOrDefault(x => x.EndsWith(Path.DirectorySeparatorChar + normalizedFileName, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                string fileText = fileSystem.ReadAllText(filePath);
+                if (!string.IsNullOrEmpty(fileText))
                 {
-                    string fileText = fileSystem.ReadAllText(filePath);
-                    if (!string.IsNullOrEmpty(fileText))
-                    {
-                        return project.AddDocument(filePath, fileText);
-                    }
+                    return project.AddDocument(filePath, fileText);
                 }
             }
 

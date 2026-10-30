@@ -22,6 +22,34 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
 
         private static readonly HashSet<string> _staticFileExtensions = [".js"];
 
+        internal static void ConfigureAppRenderMode(CodeFile appChanges, string appContent)
+        {
+            const string placeholder = "$(BlazorRenderMode)";
+            var renderMode = new[] { "InteractiveAuto", "InteractiveServer", "InteractiveWebAssembly" }
+                .FirstOrDefault(mode => appContent.Contains($"@rendermode=\"{mode}\"", StringComparison.Ordinal));
+
+            appChanges.Replacements = appChanges.Replacements
+                .Where(change => renderMode != null ||
+                    (!change.Block.Contains(placeholder, StringComparison.Ordinal) &&
+                     !(change.ReplaceSnippet?.Any(snippet => snippet.Contains(placeholder, StringComparison.Ordinal)) ?? false)))
+                .ToArray();
+
+            if (renderMode is null)
+            {
+                return;
+            }
+
+            foreach (var change in appChanges.Replacements)
+            {
+                change.Block = change.Block.Replace(placeholder, renderMode, StringComparison.Ordinal);
+                if (change.ReplaceSnippet != null)
+                {
+                    change.ReplaceSnippet = change.ReplaceSnippet
+                        .Select(snippet => snippet.Replace(placeholder, renderMode, StringComparison.Ordinal)).ToArray();
+                }
+            }
+        }
+
         internal static string GetFormattedRelativeIdentityFile(string fullFileName)
         {
             string identifier = "BlazorIdentity" + Path.DirectorySeparatorChar;
@@ -134,6 +162,19 @@ If the project had identity support prior to scaffolding, ensure that the follow
 2. Correct Identity User class is being used, (if using the default 'IdentityUser' or a custom IdentityUser class).
     - builder.Services.AddIdentityCore<IDENTITY_USER_CLASS>...
     - builder.Services.AddSingleton<IEmailSender<IDENTITY_USER_CLASS>...
+3. Authorization services and cookie-based antiforgery middleware are enabled:
+    - builder.Services.AddAuthorization()
+    - app.UseAntiforgery() before the Identity endpoints execute
+4. For global interactivity, HeadOutlet and Routes use a conditional render mode:
+    - HttpContext.AcceptsInteractiveRouting() ? ORIGINAL_RENDER_MODE : null
+    - Account pages must remain statically server-rendered.
+5. For WebAssembly/Auto, the server's AddRazorComponents() chain includes AddAuthenticationStateSerialization().
+   The referenced client registers AddAuthorizationCore(), AddCascadingAuthenticationState(), and
+   AddAuthenticationStateDeserialization(). Its imports include Microsoft.AspNetCore.Components.Authorization, and its
+   RedirectToLogin component performs a full-page load of the server Account/Login page.
+   The client also references Microsoft.AspNetCore.Components.WebAssembly.Authentication, matching
+   its WebAssembly package version. For centrally managed versions, add that package before scaffolding.
+   Client package prerequisites are checked before any application files are generated or modified.
 ";
 
     }

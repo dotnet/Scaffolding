@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
@@ -143,6 +144,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             {
                 ShowFileList();
                 return;
+            }
+
+            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
+            var clientProject = GetBlazorWasmClientProject(project);
+            if (clientProject != null)
+            {
+                GetClientProjectConfiguration(clientProject);
             }
 
             var blazorTemplateModel = await ValidateAndBuild(model);
@@ -378,22 +386,73 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 Logger.LogMessage($"Error deserializing {resourceName}. {ex.Message}");
             }
 
-            //Getting Program.cs document
+            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
+            var clientProject = GetBlazorWasmClientProject(project);
+            var clientConfiguration = clientProject != null ? GetClientProjectConfiguration(clientProject) : default;
+
             var programCsFile = minimalApiChangesConfig.Files.FirstOrDefault(x => x.FileName.Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
-            await ModifyProgramCsAsync(programCsFile, blazorIdentityModel);
+            programCsFile.Usings = (programCsFile.Usings ?? Array.Empty<string>())
+                .Union(new[] { blazorIdentityModel.DbContextNamespace, blazorIdentityModel.BlazorIdentityNamespace }).ToArray();
+            if (clientProject != null)
+            {
+                var changes = programCsFile.Methods["Global"];
+                changes.CodeChanges = changes.CodeChanges.Append(new CodeSnippet
+                {
+                    Block = "AddAuthenticationStateSerialization()",
+                    Parent = "WebApplication.CreateBuilder.Services.AddRazorComponents()",
+                    CodeChangeType = CodeChangeType.MemberAccess,
+                    LeadingTrivia = new Formatting { Newline = true, NumberOfSpaces = 4 }
+                }).ToArray();
+            }
+            await ModifyProgramCsAsync(programCsFile, blazorIdentityModel, project);
+
+            string clientNamespace = null;
+            if (clientProject != null)
+            {
+                var clientProgramCsFile = CreateClientProgramChanges();
+                await ModifyProgramCsAsync(clientProgramCsFile, blazorIdentityModel, clientProject);
+                clientNamespace = ConfigureClientProject(clientProject, clientConfiguration.ProjectXml, clientConfiguration.PackageAdded);
+                var clientImports = new CodeFile
+                {
+                    FileName = "_Imports.razor",
+                    Replacements = new[]
+                    {
+                        new CodeSnippet
+                        {
+                            Block = Environment.NewLine + "@using Microsoft.AspNetCore.Components.Authorization" + Environment.NewLine,
+                            CheckBlock = "@using Microsoft.AspNetCore.Components.Authorization"
+                        }
+                    }
+                };
+                var importsDocument = clientProject.GetDocumentFromName(clientImports.FileName, FileSystem);
+                if (importsDocument == null)
+                {
+                    throw new InvalidOperationException($"Could not find _Imports.razor in {clientProject.FilePath}.");
+                }
+                await DocumentBuilder.ApplyTextReplacements(clientImports, importsDocument, new CodeChangeOptions(), FileSystem);
+            }
 
             //Modify all other non .cs files
             var otherFiles = minimalApiChangesConfig.Files.Where(x => !x.FileName.EndsWith(".cs", StringComparison.OrdinalIgnoreCase));
-            var projectPath = Path.GetDirectoryName(ProjectContext.ProjectFullPath);
-            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
             foreach (var file in otherFiles)
             {
-                var fileDoc = project.GetDocumentFromName(file.FileName, FileSystem);
+                var fileDoc = project?.GetDocumentFromName(file.FileName, FileSystem);
+                if (fileDoc == null && clientProject != null &&
+                    (file.FileName == "Routes.razor" || file.FileName == "NavMenu.razor" || file.FileName == "NavMenu.razor.css"))
+                {
+                    fileDoc = clientProject.GetDocumentFromName(file.FileName, FileSystem);
+                }
+                var normalizedFileName = file.FileName.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                if (normalizedFileName.Equals(Path.Combine("Components", "App.razor"), StringComparison.OrdinalIgnoreCase) && fileDoc != null)
+                {
+                    BlazorIdentityHelper.ConfigureAppRenderMode(file, FileSystem.ReadAllText(fileDoc.Name));
+                }
                 await DocumentBuilder.ApplyTextReplacements(file, fileDoc, new CodeChangeOptions(), FileSystem);
                 if (file.FileName.Equals("Routes.razor", StringComparison.OrdinalIgnoreCase) &&
+                    fileDoc != null &&
                     FileSystem.FileExists(fileDoc.Name))
                 {
-                    var usingStatement = $"@using {blazorIdentityModel.BlazorIdentityNamespace}.Shared";
+                    var usingStatement = $"@using {clientNamespace ?? blazorIdentityModel.BlazorIdentityNamespace + ".Shared"}";
                     var fileText = FileSystem.ReadAllText(fileDoc.Name);
                     if (!fileText.Contains(usingStatement, StringComparison.OrdinalIgnoreCase))
                     {
@@ -405,24 +464,134 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
-        internal async Task ModifyProgramCsAsync(CodeFile programCsFile, BlazorIdentityModel blazorIdentityModel)
+        private (XDocument ProjectXml, bool PackageAdded) GetClientProjectConfiguration(Project clientProject)
         {
-            if (programCsFile is null)
+            var projectXml = XDocument.Parse(FileSystem.ReadAllText(clientProject.FilePath));
+            const string authenticationPackage = "Microsoft.AspNetCore.Components.WebAssembly.Authentication";
+            var packages = projectXml.Descendants().Where(e => e.Name.LocalName == "PackageReference");
+            var packageAdded = false;
+            if (!packages.Any(package => string.Equals((string)package.Attribute("Include"), authenticationPackage, StringComparison.OrdinalIgnoreCase)))
+            {
+                var wasmPackage = packages.FirstOrDefault(package => string.Equals((string)package.Attribute("Include"),
+                    "Microsoft.AspNetCore.Components.WebAssembly", StringComparison.OrdinalIgnoreCase));
+                var version = (string)wasmPackage?.Attribute("Version") ?? wasmPackage?.Elements().FirstOrDefault(e => e.Name.LocalName == "Version")?.Value;
+                if (string.IsNullOrEmpty(version))
+                {
+                    throw new InvalidOperationException($"Add a {authenticationPackage} package reference matching the WebAssembly version to {clientProject.FilePath} before scaffolding.");
+                }
+                var xmlNamespace = projectXml.Root.Name.Namespace;
+                wasmPackage.Parent.Add(new XElement(xmlNamespace + "PackageReference",
+                    new XAttribute("Include", authenticationPackage), new XAttribute("Version", version)));
+                packageAdded = true;
+            }
+            return (projectXml, packageAdded);
+        }
+
+        private string ConfigureClientProject(Project clientProject, XDocument projectXml, bool packageAdded)
+        {
+            if (packageAdded)
+            {
+                FileSystem.WriteAllText(clientProject.FilePath, projectXml.ToString());
+                Logger.LogMessage($"Modified {clientProject.FilePath}.\n");
+            }
+            var clientNamespace = projectXml.Descendants().FirstOrDefault(e => e.Name.LocalName == "RootNamespace")?.Value
+                ?? clientProject.AssemblyName.Replace('-', '_');
+            var path = Path.Combine(Path.GetDirectoryName(clientProject.FilePath), "RedirectToLogin.razor");
+            if (!FileSystem.FileExists(path))
+            {
+                var template = new Templates.BlazorIdentity.Shared.RedirectToLogin();
+                var content = $"@namespace {clientNamespace}{Environment.NewLine}" + template.TransformText();
+                FileSystem.WriteAllText(path, StringUtil.NormalizeLineEndings(content));
+                Logger.LogMessage($"Added {path}.\n");
+            }
+            return clientNamespace;
+        }
+
+        private Project GetBlazorWasmClientProject(Project currentProject)
+        {
+            if (currentProject == null)
+            {
+                return null;
+            }
+
+            foreach (var projectReference in ProjectContext.ProjectReferenceInformation ?? Enumerable.Empty<ProjectReferenceInformation>())
+            {
+                var referencedProject = currentProject.Solution.Projects.FirstOrDefault(project =>
+                    string.Equals(project.FilePath, projectReference.FullPath, StringComparison.OrdinalIgnoreCase));
+                if (referencedProject == null || string.IsNullOrEmpty(referencedProject.FilePath))
+                {
+                    continue;
+                }
+
+                var fullPath = referencedProject.FilePath;
+                if (FileSystem.FileExists(fullPath) &&
+                    FileSystem.ReadAllText(fullPath).Contains("Microsoft.NET.Sdk.BlazorWebAssembly", StringComparison.OrdinalIgnoreCase))
+                {
+                    return referencedProject;
+                }
+            }
+
+            return null;
+        }
+
+        private static CodeFile CreateClientProgramChanges()
+        {
+            return new CodeFile
+            {
+                FileName = "Program.cs",
+                Usings = new[] { "Microsoft.AspNetCore.Components.Authorization", "Microsoft.Extensions.DependencyInjection" },
+                Methods = new Dictionary<string, Method>
+                {
+                    ["Global"] = new Method
+                    {
+                        CodeChanges = new[]
+                        {
+                            new CodeSnippet { Block = "builder.Services.AddAuthorizationCore()", InsertBefore = ["builder.Build()"], LeadingTrivia = new Formatting { Newline = true } },
+                            new CodeSnippet { Block = "builder.Services.AddCascadingAuthenticationState()", InsertBefore = ["builder.Build()"], LeadingTrivia = new Formatting { Newline = true } },
+                            new CodeSnippet { Block = "builder.Services.AddAuthenticationStateDeserialization()", InsertBefore = ["builder.Build()"], LeadingTrivia = new Formatting { Newline = true } }
+                        }
+                    }
+                }
+            };
+        }
+
+        internal async Task ModifyProgramCsAsync(CodeFile programCsFile, BlazorIdentityModel blazorIdentityModel, Project project)
+        {
+            if (programCsFile is null || project is null)
             {
                 return;
             }
 
-            var programType = ModelTypesLocator.GetType("<Program>$").FirstOrDefault() ?? ModelTypesLocator.GetType("Program").FirstOrDefault();
-            var project = Workspace.CurrentSolution.Projects.FirstOrDefault(p => p.AssemblyName.Equals(ProjectContext.AssemblyName, StringComparison.OrdinalIgnoreCase));
-            var programDocument = project.GetUpdatedDocument(FileSystem, programType);
+            var sourceDocument = project.Documents.FirstOrDefault(document =>
+                Path.GetFileName(document.FilePath ?? document.Name).Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
+            if (sourceDocument == null)
+            {
+                var compilation = await project.GetCompilationAsync();
+                var entryPoint = compilation?.GetEntryPoint(default);
+                var tree = entryPoint?.Locations.FirstOrDefault(location => location.IsInSource)?.SourceTree;
+                sourceDocument = tree == null ? null : project.GetDocument(tree);
+            }
+            var sourcePath = sourceDocument?.FilePath;
+            if (sourceDocument == null || string.IsNullOrEmpty(sourcePath))
+            {
+                throw new InvalidOperationException($"Could not resolve the startup document in {project.FilePath}.");
+            }
+            var programDocument = project.AddDocument(sourcePath, FileSystem.ReadAllText(sourcePath));
             //Modifying Program.cs document
             var docEditor = await DocumentEditor.CreateAsync(programDocument);
             var docRoot = docEditor.OriginalRoot as CompilationUnitSyntax;
-            programCsFile.Usings = programCsFile.Usings.Union(new string[] { blazorIdentityModel.DbContextNamespace, blazorIdentityModel.BlazorIdentityNamespace }).ToArray();
+            programCsFile.Usings ??= Array.Empty<string>();
             var docBuilder = new DocumentBuilder(docEditor, programCsFile, ConsoleLogger);
             var newRoot = docBuilder.AddUsings(new CodeChangeOptions());
-            var useTopLevelStatements = await ProjectModifierHelper.IsUsingTopLevelStatements(project.Documents.ToList());
+            var useTopLevelStatements = docRoot.Members.OfType<GlobalStatementSyntax>().Any();
             var builderIdentifier = ProjectModifierHelper.GetBuilderVariableIdentifierTransformation(newRoot.Members);
+            var clientBuilder = newRoot.DescendantNodes().OfType<VariableDeclaratorSyntax>().FirstOrDefault(variable =>
+                variable.Initializer?.Value is InvocationExpressionSyntax invocation &&
+                invocation.Expression.ToString().EndsWith("WebAssemblyHostBuilder.CreateDefault", StringComparison.Ordinal));
+            if (clientBuilder != null)
+            {
+                builderIdentifier = ("builder", clientBuilder.Identifier.ValueText);
+            }
             //add code snippets/changes.
             if (programCsFile.Methods != null && programCsFile.Methods.Count > 0)
             {
@@ -461,7 +630,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             Logger.LogMessage($"Modified {programDocument.Name}.\n");
         }
 
-        private void ExecuteTemplates(BlazorIdentityModel templateModel)
+        internal void ExecuteTemplates(BlazorIdentityModel templateModel)
         {
             TemplateInvoker templateInvoker = new TemplateInvoker();
             var dictParams = new Dictionary<string, object>()
@@ -559,7 +728,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
         }
 
-        private void AddStaticFiles(BlazorIdentityModel templateModel)
+        internal void AddStaticFiles(BlazorIdentityModel templateModel)
         {
             var identityComponentsAccountPath = Path.Combine(templateModel.BaseOutputPath, "Components", "Account");
             if (!FileSystem.DirectoryExists(identityComponentsAccountPath))

@@ -42,9 +42,17 @@ To add an input instead, run `.\New-InputBaseline.ps1 -Framework net11.0 -Name E
 
 Comparison includes every file except files under `bin` and `obj` directories. Common source and text formats use line-ending normalization, and `.csproj` comparisons ignore `PackageReference` version values. Other files are compared byte-for-byte; database files and `.vs` files are not excluded.
 
+| Baseline | Scaffolder | Input |
+| --- | --- | --- |
+| `BlazorCrud` | `blazor-crud` | `BlazorWebApp` |
+| `BlazorIdentity` | `blazor-identity` | `BlazorWebApp` |
+| `BlazorToolkit` | `blazor-syncfusion-toolkit` | `BlazorWebApp` |
+
+`BlazorToolkit` restores `Syncfusion.Blazor.Toolkit` from nuget.org, which the repository feeds do not include, so its test passes a scoped `NuGet.config` to the runner (the `nugetConfig` argument). Its expected projects differ from the input only by the package reference, the `using` and registration in `Program.cs`, and the `@using` in `Components/_Imports.razor`.
+
 To add coverage, reuse or add a shared input, check in a runnable expected project, and call `ScaffolderBaselineRunner.RunAsync` with named arguments for the scaffolder directory, framework, input template, and callback that runs the scaffolder on the copied input. The runner handles setup, builds, comparison, and cleanup.
 
-Baseline tests live under `test\dotnet-scaffolding\dotnet-scaffold.Tests\AspNet\Integration`; their shared runner is `dotnet-scaffold.Tests\Helpers\ScaffolderBaselineRunner.cs`. A scaffolder that needs additional input files can supply the runner's `prepareInput` callback without changing the checked-in template.
+Baseline tests live under `test\dotnet-scaffolding\dotnet-scaffold.Tests\AspNet\Integration`; their shared runner is `dotnet-scaffold.Tests\Helpers\ScaffolderBaselineRunner.cs`. A scaffolder that needs additional input files can supply the runner's `prepareInput` callback without changing the checked-in template. A scaffolder that installs packages the repository feeds do not mirror (for example, third-party packages published only to nuget.org) can pass `additionalPackageSources`; the runner adds them to the copied repository `NuGet.config` used for every restore and build.
 
 Update the expected project first and run it to verify the desired behavior, then update the scaffolder to match and run its baseline test. Tests never rewrite checked-in baselines. On failure, the runner reports the retained artifact directory; inspect or selectively copy generated files when useful, and review any baseline changes rather than replacing expected output just to make a failing comparison pass.
 

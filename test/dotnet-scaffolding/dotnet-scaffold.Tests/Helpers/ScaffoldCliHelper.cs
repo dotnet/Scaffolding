@@ -177,7 +177,20 @@ internal static class ScaffoldCliHelper
     /// <param name="command">The scaffold sub-command (e.g., "minimalapi", "mvccontroller", "blazor-empty").</param>
     /// <param name="args">CLI arguments for the command (e.g., "--project", path, "--name", "Foo").</param>
     /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
-    public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldAsync(string targetFramework, string command, params string[] args)
+    public static Task<(int ExitCode, string Output, string Error)> RunScaffoldAsync(string targetFramework, string command, params string[] args)
+        => RunScaffoldInDirectoryAsync(workingDirectory: null, targetFramework, command, args);
+
+    /// <summary>
+    /// Same as <see cref="RunScaffoldAsync"/>, but runs the tool with <paramref name="workingDirectory"/> as its current
+    /// directory so that relative CLI arguments such as <c>--project .\App\App.csproj</c> resolve against it. This mirrors
+    /// how users invoke <c>dotnet scaffold</c> from a solution folder; always passing absolute paths hides path-resolution bugs.
+    /// </summary>
+    /// <param name="workingDirectory">Working directory for the tool process, or null to inherit the test host's.</param>
+    /// <param name="targetFramework">The target framework moniker to run the tool under (e.g., "net8.0", "net9.0", "net10.0", "net11.0").</param>
+    /// <param name="command">The scaffold sub-command (e.g., "minimalapi", "mvccontroller", "blazor-empty").</param>
+    /// <param name="args">CLI arguments for the command (e.g., "--project", path, "--name", "Foo").</param>
+    /// <returns>A tuple of (ExitCode, StandardOutput, StandardError).</returns>
+    public static async Task<(int ExitCode, string Output, string Error)> RunScaffoldInDirectoryAsync(string? workingDirectory, string targetFramework, string command, params string[] args)
     {
         var scaffoldCsproj = GetScaffoldProjectPath();
         var configuration = GetBuildConfiguration();
@@ -192,6 +205,11 @@ internal static class ScaffoldCliHelper
                 CreateNoWindow = true
             }
         };
+        if (!string.IsNullOrEmpty(workingDirectory))
+        {
+            process.StartInfo.WorkingDirectory = workingDirectory;
+        }
+
         ConfigureDotNetEnvironment(process.StartInfo);
         process.StartInfo.ArgumentList.Add("run");
         process.StartInfo.ArgumentList.Add("--no-build");
@@ -580,6 +598,30 @@ public class {modelName}
 <configuration>
   <packageSources>
     <clear />
+    <add key=""dotnet-public"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json"" />
+  </packageSources>
+  <disabledPackageSources>
+    <clear />
+  </disabledPackageSources>
+  <packageSourceMapping>
+    <clear />
+  </packageSourceMapping>
+</configuration>";
+
+    /// <summary>
+    /// NuGet.config content used by Syncfusion Blazor Toolkit
+    /// integration tests. Adds nuget.org as a scoped source so the
+    /// <c>Syncfusion.Blazor.Toolkit</c> package — which is not
+    /// mirrored on the dnceng feeds used by the rest of the build —
+    /// can still be restored inside the temporary test fixture. The
+    /// extra source is scoped to the fixture only; the repository's
+    /// own <c>NuGet.config</c> deliberately does not include it.
+    /// </summary>
+    public static readonly string SyncfusionTestNuGetConfig = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key=""nuget.org"" value=""https://api.nuget.org/v3/index.json"" />
     <add key=""dotnet-public"" value=""https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json"" />
   </packageSources>
   <disabledPackageSources>

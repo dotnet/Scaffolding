@@ -8,8 +8,12 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions.Syncfusion;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion.Settings;
 using Microsoft.DotNet.Tools.Scaffold.Command;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet
@@ -26,6 +30,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(AddAspNetConnectionStringStep),
                 typeof(AddDbSetToExistingContextStep),
                 typeof(AddFileStep),
+                typeof(IgniteUIBlazorGuidanceStep),
+                typeof(IgniteUICodeModificationStep),
+                typeof(AddRazorImportsStep),
                 typeof(AreaScaffolderStep),
                 typeof(DetectBlazorWasmStep),
                 typeof(DotnetNewScaffolderStep),
@@ -37,7 +44,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(ValidateBlazorCrudStep),
                 typeof(ValidateEfControllerStep),
                 typeof(ValidateEntraIdStep),
+                typeof(ValidateSyncfusionBlazorToolkitStep),
+                typeof(ApplySyncfusionBlazorToolkitImportsStep),
+                typeof(ApplySyncfusionBlazorToolkitProgramCsStep),
+                typeof(VerifySyncfusionBlazorToolkitStep),
+                typeof(SummarizeSyncfusionBlazorToolkitStep),
+                typeof(ValidateAzureCliIdentityStep),
                 typeof(ValidateIdentityStep),
+                typeof(ValidateIgniteUIBlazorStep),
                 typeof(ValidateMinimalApiStep),
                 typeof(ValidateRazorPagesStep),
                 typeof(ValidateViewsStep),
@@ -212,6 +226,28 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithBlazorCrudTextTemplatingStep()
                 .WithBlazorCrudCodeChangeStep();
 
+            _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.SyncfusionBlazorToolkit.Name)
+                .WithDisplayName(AspnetStrings.SyncfusionBlazorToolkit.DisplayName)
+                .WithCategory(AspnetStrings.Catagories.Blazor)
+                .WithDescription(AspnetStrings.SyncfusionBlazorToolkit.Description)
+                .WithExample(AspnetStrings.SyncfusionBlazorToolkit.SyncfusionBlazorToolkitExample, AspnetStrings.SyncfusionBlazorToolkit.SyncfusionBlazorToolkitExampleDescription)
+                .WithOptions([options.Project, options.Prerelease])
+                .WithStep<ValidateSyncfusionBlazorToolkitStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
+                })
+                .WithSyncfusionBlazorToolkitAddPackagesStep()
+                .WithSyncfusionBlazorToolkitAddClientPackagesStep()
+                .WithSyncfusionBlazorToolkitProgramCsStep()
+                .WithSyncfusionBlazorToolkitClientProgramCsStep()
+                .WithSyncfusionBlazorToolkitImportsStep()
+                .WithSyncfusionBlazorToolkitImportsClientStep()
+                .WithStep<VerifySyncfusionBlazorToolkitStep>()
+                .WithStep<SummarizeSyncfusionBlazorToolkitStep>();
+
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorPage.Crud)
                 .WithDisplayName(AspnetStrings.RazorPage.CrudDisplayName)
                 .WithCategory(AspnetStrings.Catagories.RazorPages)
@@ -363,16 +399,42 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                         step.Application = context.GetOptionResult(options.ApplicationId);
                         step.UseExistingApplication = context.GetOptionResult(options.UseExistingApplication);
                     })
-                    .WithRegisterAppStep()
-                    .WithAddClientSecretStep()
+                    .WithValidateAzureCliIdentityStep()
                     .WithDetectBlazorWasmStep()
-                    .WithUpdateAppSettingsStep()
+                    .WithRegisterAppStep()
                     .WithUpdateAppAuthorizationStep()
+                    .WithAddClientSecretStep()
+                    .WithUpdateAppSettingsStep()
                     .WithEntraAddPackagesStep()
                     .WithEntraBlazorWasmAddPackagesStep()
                     .WithEntraIdCodeChangeStep()
                     .WithEntraIdBlazorWasmCodeChangeStep()
                     .WithEntraIdTextTemplatingStep();
+
+            _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.Blazor.IgniteUI)
+                .WithDisplayName(AspnetStrings.Blazor.IgniteUIDisplayName)
+                .WithCategory(AspnetStrings.Catagories.Blazor)
+                .WithDescription(AspnetStrings.Blazor.IgniteUIDescription)
+                .WithExample(AspnetStrings.Blazor.IgniteUIExample1, AspnetStrings.Blazor.IgniteUIExample1Description)
+                .WithExample(AspnetStrings.Blazor.IgniteUIExample2, AspnetStrings.Blazor.IgniteUIExample2Description)
+                .WithOptions([options.Project, options.IgniteUITheme, options.IgniteUIThemeVariant, options.Prerelease])
+                .WithStep<ValidateIgniteUIBlazorStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.Theme = context.GetOptionResult(options.IgniteUITheme);
+                    step.ThemeVariant = context.GetOptionResult(options.IgniteUIThemeVariant);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
+                })
+                .WithIgniteUIBlazorAddPackagesStep()
+                .WithIgniteUIBlazorInteractivityStep()
+                .WithIgniteUIBlazorCodeChangeStep()
+                .WithIgniteUIBlazorWasmCodeChangeStep()
+                .WithIgniteUIBlazorImportsStep()
+                .WithIgniteUIBlazorWasmImportsStep()
+                .WithIgniteUIBlazorThemeStylesheetStep()
+                .WithIgniteUIBlazorGuidanceStep();
         }
     }
 }

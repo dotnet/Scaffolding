@@ -6,6 +6,7 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -64,7 +65,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 
             // Ensure the msidentity tool is available before attempting to invoke it,
             // so a missing tool surfaces a clear, actionable message instead of a cryptic dotnet error.
-            if (!MsIdentityToolHelper.EnsureMsIdentityIsInstalled(_logger))
+            if (!EnsureToolInstalled())
+            {
+                return Task.FromResult(false);
+            }
+
+            if (ClientId is null && !MsIdentityToolHelper.SupportsRegistrationCleanup(_logger, ReadCapabilities))
             {
                 return Task.FromResult(false);
             }
@@ -100,20 +106,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// <summary>
         /// Registers a new Azure AD application and captures the client ID.
         /// </summary>
-        private bool RegisterApp(ScaffolderContext context)
+        protected virtual bool RegisterApp(ScaffolderContext context)
         {
             try
             {
                 // Fix for CS8620: Ensure all elements in the array are non-null by using null-coalescing operator
                 var args = new[]
                 {
-                    "--register-app",
+                    "--create-app-registration",
                     "--tenant-id", TenantId ?? string.Empty,
                     "--username", Username ?? string.Empty
                 };
                 // Fix for IDE0300: Simplify collection initialization
-                var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
-                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
+                var (exitCode, stdOut, stdErr) = RunRegistration(args);
                 if (exitCode != 0)
                 {
                     _logger.LogError($"Error registering application: {stdErr}");
@@ -128,12 +133,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     {
                         ClientId = match.Groups[1].Value;
                         context.Properties["ClientId"] = ClientId;
+                        context.Properties[EntraRegistrationCleanup.CreatedClientIdKey] = ClientId;
                         _logger.LogInformation($"Captured client ID: {ClientId}");
                     }
                     else
                     {
-                        _logger.LogWarning("Could not extract client ID from output");
+                        _logger.LogError("Could not extract the created client ID. Check the selected tenant for an application created during this run and remove it before retrying.");
+                        return false;
                     }
+                }
+                if (string.IsNullOrEmpty(ClientId))
+                {
+                    _logger.LogError("Registration returned no client ID. Check the selected tenant for an application created during this run before retrying.");
+                    return false;
                 }
                 return true;
             }
@@ -143,6 +155,19 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return false;
             }
         }
+
+        protected virtual bool EnsureToolInstalled()
+            => MsIdentityToolHelper.EnsureMsIdentityIsInstalled(_logger);
+
+        protected virtual (int ExitCode, string? Output, string? Error) RunRegistration(string[] args)
+        {
+            var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
+            var exitCode = runner.ExecuteAndCaptureOutput(out var output, out var error);
+            return (exitCode, output, error);
+        }
+
+        protected virtual (int ExitCode, string? Output, string? Error) ReadCapabilities()
+            => MsIdentityToolHelper.ReadCapabilities();
 
         /// <summary>
         /// Updates an existing Azure AD application registration.

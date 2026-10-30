@@ -350,6 +350,7 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
 
             app.Run();
             """);
+        await RestoreTestProjectAsync();
         var step = new WrappedCodeModificationStep(
             NullLogger<WrappedCodeModificationStep>.Instance,
             _testTelemetryService)
@@ -393,6 +394,7 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
 
             app.Run();
             """);
+        await RestoreTestProjectAsync();
         var step = new WrappedCodeModificationStep(
             NullLogger<WrappedCodeModificationStep>.Instance,
             _testTelemetryService)
@@ -570,7 +572,11 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         var secondRunContent = await ApplyBlazorEntraChangesConfigAsync(firstRunContent);
         var normalized = RemoveWhitespace(secondRunContent);
 
-        Assert.Contains(RemoveWhitespace(registrations), normalized, StringComparison.Ordinal);
+        foreach (var registration in CSharpSyntaxTree.ParseText(registrations).GetRoot()
+            .DescendantNodes().OfType<ExpressionStatementSyntax>())
+        {
+            Assert.Contains(RemoveWhitespace(registration.ToString()), normalized, StringComparison.Ordinal);
+        }
         Assert.Equal(2, secondRunContent.Split("AddMicrosoftIdentityWebApp").Length - 1);
         Assert.Equal(2, secondRunContent.Split("PostConfigure<OpenIdConnectOptions>").Length - 1);
         Assert.Contains(AuthorizationCodeFlowConfiguration.Replace("OpenIdConnectDefaults.AuthenticationScheme", "\"CustomOidc\"", StringComparison.Ordinal), normalized, StringComparison.Ordinal);
@@ -633,6 +639,14 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
 
     [Theory]
     [InlineData("")]
+    [InlineData("""""
+        const string reference = """
+            builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
+            {
+                options.ResponseType = OpenIdConnectResponseType.Code;
+            })
+            """;
+        """"")]
     [InlineData("builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(\n        builder.Configuration.GetSection(\"AzureAd\"));")]
     [InlineData("builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"))\n    .EnableTokenAcquisitionToCallDownstreamApi()\n    .AddInMemoryTokenCaches();")]
     [InlineData("builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)\n    .AddMicrosoftIdentityWebApp(options =>\n    {\n        builder.Configuration.Bind(\"AzureAd\", options);\n        options.ResponseType = OpenIdConnectResponseType.IdToken;\n    });")]
@@ -710,7 +724,10 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
             """;
 
         var firstRunContent = await ApplyBlazorEntraChangesConfigAsync(programContent);
-        await ApplyBlazorEntraChangesConfigAsync(firstRunContent);
+        var secondRunContent = await ApplyBlazorEntraChangesConfigAsync(firstRunContent);
+        Assert.Equal(string.IsNullOrEmpty(additionalScheme) ? 1 : 2,
+            CSharpSyntaxTree.ParseText(secondRunContent).GetRoot().DescendantNodes().OfType<InvocationExpressionSyntax>()
+                .Count(invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "PostConfigure"));
         File.WriteAllText(_testProjectPath, $$"""
             <Project Sdk="Microsoft.NET.Sdk.Web">
               <PropertyGroup>
@@ -736,6 +753,7 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
     [InlineData("builder.Services.AddAuthentication(\"CustomOidc\")\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"), openIdConnectScheme: \"CustomOidc\");")]
     [InlineData("builder.Services.AddAuthentication(\"CustomOidc\")\n    .AddMicrosoftIdentityWebApp(options =>\n    {\n        builder.Configuration.Bind(\"AzureAd\", options);\n        options.ResponseType = OpenIdConnectResponseType.IdToken;\n    }, openIdConnectScheme: \"CustomOidc\");")]
     [InlineData("const string customScheme = \"CustomOidc\";\nbuilder.Services.AddAuthentication(customScheme)\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"), openIdConnectScheme: customScheme);\nbuilder.Services.AddAuthentication()\n    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"), openIdConnectScheme: \"OtherOidc\", cookieScheme: \"OtherCookies\");", "OtherOidc")]
+    [InlineData("builder.Services.AddAuthentication(\"CustomOidc\").AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"), openIdConnectScheme: \"CustomOidc\");\nbuilder.Services.AddAuthentication().AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"), openIdConnectScheme: \"Custom Oidc\", cookieScheme: \"OtherCookies\");", "Custom Oidc")]
     public Task BlazorEntraChangesConfig_CustomSchemeChallengesWithCodeAndPkce(string registration, string additionalScheme = "")
         => BlazorEntraChangesConfig_GeneratedAppChallengesWithCodeAndPkce(registration, "CustomOidc", additionalScheme);
 
@@ -889,13 +907,7 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
         File.WriteAllText(_testProjectPath, ProjectContent);
         var programPath = Path.Combine(_testProjectDir, "Program.cs");
         File.WriteAllText(programPath, programContent);
-        if (!File.Exists(Path.Combine(_testProjectDir, "obj", "project.assets.json")))
-        {
-            // MSBuildWorkspace needs restored framework references to resolve constant schemes.
-            var (exitCode, output, error) = await ScaffoldCliHelper.RunDotNetAsync(
-                _testProjectDir, "restore", _testProjectPath);
-            Assert.True(exitCode == 0, $"Project restore must succeed before code modification.\nOutput: {output}\nError: {error}");
-        }
+        await RestoreTestProjectAsync();
         var configPath = Path.Combine(GetActualTemplatesBasePath(), TargetFramework, "CodeModificationConfigs", "blazorEntraChanges.json");
         var step = new CodeModificationStep(NullLogger<CodeModificationStep>.Instance)
         {
@@ -908,6 +920,17 @@ public abstract class EntraIdIntegrationTestsBase : IDisposable
 
         Assert.True(result);
         return File.ReadAllText(programPath);
+    }
+
+    private async Task RestoreTestProjectAsync()
+    {
+        if (!File.Exists(Path.Combine(_testProjectDir, "obj", "project.assets.json")))
+        {
+            // MSBuildWorkspace needs restored framework references to bind schemes and service receivers.
+            var (exitCode, output, error) = await ScaffoldCliHelper.RunDotNetAsync(
+                _testProjectDir, "restore", _testProjectPath);
+            Assert.True(exitCode == 0, $"Project restore must succeed before code modification.\nOutput: {output}\nError: {error}");
+        }
     }
 
     private static readonly string BlazorServerProgramContent = string.Join(Environment.NewLine,

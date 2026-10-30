@@ -99,11 +99,9 @@ internal class DocumentBuilder
 
             var invocations = root.DescendantNodes().OfType<InvocationExpressionSyntax>()
                 .Where(invocation => IsInvocation(invocation, snippet.Parent)).ToArray();
-            var blocks = new HashSet<string>(StringComparer.Ordinal);
             foreach (var invocation in invocations)
             {
                 var block = snippet.Block;
-                bool requiresScope = false;
                 foreach (var (parameter, defaultValue) in snippet.InvocationArguments)
                 {
                     var argument = invocation.ArgumentList.Arguments
@@ -141,40 +139,40 @@ internal class DocumentBuilder
                                 throw new InvalidOperationException($"Unable to safely reuse '{parameter}' expression '{argument}' in '{invocation}'. Evaluate it into a constant or an uncaptured, non-ref string local variable before the registration, and do not assign that variable within the registration statement.");
                             }
                             value = argument.WithoutTrivia().ToString();
-                            requiresScope = true;
                         }
                     }
 
                     block = block.Replace($"${parameter}$", value, StringComparison.Ordinal);
                 }
 
-                if (requiresScope)
+                var statement = invocation.Ancestors().OfType<StatementSyntax>().FirstOrDefault();
+                SyntaxNode? anchor = statement?.Parent is GlobalStatementSyntax global ? global : statement;
+                SyntaxNode expression = invocation;
+                while (expression.Parent is MemberAccessExpressionSyntax member && member.Expression == expression ||
+                    expression.Parent is InvocationExpressionSyntax call && call.Expression == expression ||
+                    expression.Parent is ParenthesizedExpressionSyntax)
                 {
-                    var statement = invocation.Ancestors().OfType<StatementSyntax>().FirstOrDefault();
-                    SyntaxNode? anchor = statement?.Parent is GlobalStatementSyntax global ? global : statement;
-                    if (scopedChanges is null || anchor?.Parent is not (BlockSyntax or CompilationUnitSyntax) ||
-                        statement is not (ExpressionStatementSyntax or LocalDeclarationStatementSyntax) ||
-                        invocation.Ancestors().TakeWhile(node => node != statement)
-                            .Any(node => node is AnonymousFunctionExpressionSyntax or QueryExpressionSyntax))
-                    {
-                        throw new InvalidOperationException($"Unable to preserve the scope of '{invocation}'. Use a registration statement inside a block.");
-                    }
-
-                    var scopedSnippet = snippet.WithBlock(BindServiceReceiver(block, invocation, semanticModel));
-                    if (!scopedChanges.TryGetValue(anchor, out var changes))
-                    {
-                        scopedChanges.Add(anchor, changes = []);
-                    }
-                    if (!changes.Any(change => change.Block == scopedSnippet.Block))
-                    {
-                        changes.Add(scopedSnippet);
-                    }
-                    continue;
+                    expression = expression.Parent;
+                }
+                // Only a standalone receiver chain executes unconditionally with its statement.
+                // Arguments, expression-bodied lambdas and conditional expressions need a rewrite
+                // rather than an insertion after their enclosing statement.
+                var standalone = statement is ExpressionStatementSyntax expressionStatement && expressionStatement.Expression == expression ||
+                    statement is LocalDeclarationStatementSyntax local && local.Declaration.Variables.Count == 1 &&
+                        local.Declaration.Variables[0].Initializer?.Value == expression;
+                if (scopedChanges is null || anchor?.Parent is not (BlockSyntax or CompilationUnitSyntax) || !standalone)
+                {
+                    throw new InvalidOperationException($"Unable to preserve the scope of '{invocation}'. Use a standalone registration statement inside a block.");
                 }
 
-                if (blocks.Add(block))
+                var scopedSnippet = snippet.WithBlock(BindServiceReceiver(block, invocation, semanticModel));
+                if (!scopedChanges.TryGetValue(anchor, out var changes))
                 {
-                    result.Add(snippet.WithBlock(block));
+                    scopedChanges.Add(anchor, changes = []);
+                }
+                if (!changes.Any(change => change.Block == scopedSnippet.Block))
+                {
+                    changes.Add(scopedSnippet);
                 }
             }
 
@@ -670,7 +668,10 @@ internal class DocumentBuilder
             return originalMethod;
         }
 
-        var alreadyExists = !string.IsNullOrEmpty(codeChange.CheckInvocation)
+        var alreadyExists = codeChange.InvocationArguments is not null
+            ? ExecutableStatementExists(children, codeChange.Block) ||
+                !string.IsNullOrEmpty(codeChange.CheckBlock) && ExecutableStatementExists(children, codeChange.CheckBlock)
+            : !string.IsNullOrEmpty(codeChange.CheckInvocation)
             ? originalMethod.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(invocation => IsInvocation(invocation, codeChange.CheckInvocation))
             : ProjectModifierHelper.StatementExists(children, codeChange.Block) ||
                 !string.IsNullOrEmpty(codeChange.CheckBlock) && ProjectModifierHelper.StatementExists(children, codeChange.CheckBlock);
@@ -694,6 +695,13 @@ internal class DocumentBuilder
         }
 
         return updatedMethod ?? originalMethod;
+    }
+
+    private static bool ExecutableStatementExists(IEnumerable<SyntaxNode> nodes, string block)
+    {
+        var statement = SyntaxFactory.ParseStatement(block.TrimEnd(' ', '\r', '\n', ';') + ";");
+        return nodes.Any(node => SyntaxFactory.AreEquivalent(
+            node is GlobalStatementSyntax global ? global.Statement : node, statement));
     }
 
     private static SyntaxNode InsertBefore(CodeSnippet codeChange, IEnumerable<SyntaxNode> children, SyntaxNode originalMethod)

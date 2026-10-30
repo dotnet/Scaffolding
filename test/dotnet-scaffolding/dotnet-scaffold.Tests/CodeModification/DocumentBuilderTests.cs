@@ -20,6 +20,9 @@ public class DocumentBuilderTests
 {
     [Theory]
     [InlineData(true, "method")]
+    [InlineData(true, "localFunction")]
+    [InlineData(true, "lambda")]
+    [InlineData(true, "authenticationBuilder")]
     [InlineData(false, "method")]
     [InlineData(false, "localFunction")]
     [InlineData(false, "lambda")]
@@ -94,22 +97,162 @@ public class DocumentBuilderTests
                 invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "PostConfigure");
             if (constant)
             {
-                Assert.IsType<GlobalStatementSyntax>(configuration.Parent!.Parent);
                 var literal = Assert.IsType<LiteralExpressionSyntax>(configuration.ArgumentList.Arguments[0].Expression);
                 Assert.Equal("Custom\"\\Oidc", literal.Token.ValueText);
             }
             else
             {
                 Assert.Equal("scheme", configuration.ArgumentList.Arguments[0].Expression.ToString());
-                var block = Assert.IsType<BlockSyntax>(configuration.Parent!.Parent);
-                Assert.Contains(block.Statements.OfType<LocalDeclarationStatementSyntax>(),
-                    statement => statement.Declaration.Variables.Any(variable => variable.Identifier.ValueText == "scheme"));
-                Assert.Equal(scope == "authenticationBuilder" ? "authentication.Services" : "services",
-                    ((MemberAccessExpressionSyntax)configuration.Expression).Expression.ToString());
             }
+            var block = Assert.IsType<BlockSyntax>(configuration.Parent!.Parent);
+            Assert.Contains(block.Statements.OfType<LocalDeclarationStatementSyntax>(),
+                statement => statement.Declaration.Variables.Any(variable => variable.Identifier.ValueText == "scheme"));
+            Assert.Equal(scope == "authenticationBuilder" ? "authentication.Services" : "services",
+                ((MemberAccessExpressionSyntax)configuration.Expression).Expression.ToString());
             Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(),
                 invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "KeepChain");
         }
+    }
+
+    [Theory]
+    [InlineData(true, "", true)]
+    [InlineData(false, "", true)]
+    [InlineData(true, ", openIdConnectScheme: \"CustomOidc\"", true)]
+    [InlineData(false, ", openIdConnectScheme: \"CustomOidc\"", true)]
+    [InlineData(true, "", false)]
+    [InlineData(false, "", false)]
+    [InlineData(true, ", openIdConnectScheme: \"CustomOidc\"", false)]
+    [InlineData(false, ", openIdConnectScheme: \"CustomOidc\"", false)]
+    public async Task InvocationArguments_ConstantAndDefaultSchemesKeepEachReceiverAndBranch(bool topLevel, string argument, bool branching)
+    {
+        using var workspace = new AdhocWorkspace();
+        var registration = $"AddAuthentication().AddMicrosoftIdentityWebApp(new object(){argument});";
+        var statements = branching ? $$"""
+            if (enabled)
+            {
+                first.{{registration}}
+            }
+            else
+            {
+                second.{{registration}}
+            }
+            """ : $"first.{registration} second.{registration}";
+        var calls = branching ? "Registration.Configure(first, second, true); Registration.Configure(first, second, false);" :
+            "Registration.Configure(first, second, true);";
+        var source = $$"""
+            var first = new Services();
+            var second = new Services();
+            var builder = new AuthenticationBuilder(new Services());
+            {{(topLevel ? (branching ? $"foreach (bool enabled in new[] {{ true, false }}) {{ {statements} }}" : statements) : calls)}}
+            if (first.Configurations != 1 || second.Configurations != 1 || builder.Services.Configurations != 0)
+                throw new System.Exception("Configuration used the wrong receiver or branch.");
+            {{(topLevel ? "" : $"static class Registration {{ public static void Configure(Services first, Services second, bool enabled) {{ {statements} }} }}")}}
+            """;
+        var document = CreateRegistrationDocument(workspace, source);
+        for (int run = 0; run < 2; run++)
+        {
+            document = await ScaffoldAsync(document);
+            document = document.WithText(SourceText.From((await document.GetTextAsync()).ToString()));
+            var root = (await document.GetSyntaxRootAsync())!;
+            var registrations = root.DescendantNodes().OfType<ExpressionStatementSyntax>()
+                .Where(statement => statement.Expression is InvocationExpressionSyntax invocation &&
+                    invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "AddMicrosoftIdentityWebApp").ToArray();
+            Assert.Equal(2, registrations.Length);
+            Assert.Equal(2, root.DescendantNodes().OfType<InvocationExpressionSyntax>()
+                .Count(invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "PostConfigure"));
+            foreach (var registrationStatement in registrations)
+            {
+                SyntaxNode anchor = registrationStatement.Parent is GlobalStatementSyntax global ? global : registrationStatement;
+                var next = anchor.Parent!.ChildNodes().SkipWhile(node => node != anchor).Skip(1).First();
+                Assert.Contains("PostConfigure", next.ToString(), StringComparison.Ordinal);
+            }
+            await CompileAndExecuteAsync(document);
+        }
+    }
+
+    [Theory]
+    [InlineData("if (true) services.AddAuthentication().AddMicrosoftIdentityWebApp(new object());")]
+    [InlineData("System.Func<AuthenticationBuilder> register = () => services.AddAuthentication().AddMicrosoftIdentityWebApp(new object());")]
+    [InlineData("var registration = true ? services.AddAuthentication().AddMicrosoftIdentityWebApp(new object()) : null;")]
+    [InlineData("Consume(services.AddAuthentication().AddMicrosoftIdentityWebApp(new object())); void Consume(object value) { }")]
+    [InlineData("services?.AddAuthentication().AddMicrosoftIdentityWebApp(new object());")]
+    public async Task InvocationArguments_RejectUnsupportedExecutionPositions(string registration)
+    {
+        using var workspace = new AdhocWorkspace();
+        var document = CreateRegistrationDocument(workspace, "var services = new Services(); " + registration);
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => ScaffoldAsync(document));
+        Assert.Contains("registration statement inside a block", error.Message);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    public async Task InvocationArguments_FallbackMatchesExecutableStatementsOnly(bool topLevel, bool existingConfiguration)
+    {
+        using var workspace = new AdhocWorkspace();
+        const string configuration = "builder.Services.PostConfigure<OpenIdConnectOptions>(\"Default\", options => { options.ResponseType = \"code\"; });";
+        var statements = $$""""
+            var builder = new AuthenticationBuilder(new Services());
+            // {{configuration}}
+            const string reference = """{{configuration}}""";
+            {{(existingConfiguration ? configuration.Replace("\"Default\"", "\"Def ault\"", StringComparison.Ordinal) : "")}}
+            if (builder.Services.Configurations != {{(existingConfiguration ? 2 : 1)}})
+                throw new System.Exception(reference);
+            """";
+        var source = topLevel ? statements : $"static class Program {{ public static void Main(string[] args) {{ {statements} }} }}";
+        var document = CreateRegistrationDocument(workspace, source);
+        for (int run = 0; run < 2; run++)
+        {
+            var snippet = new CodeSnippet
+            {
+                Parent = "AddMicrosoftIdentityWebApp",
+                InvocationArguments = new() { ["openIdConnectScheme"] = "\"Default\"" },
+                Block = configuration.Replace("\"Default\"", "$openIdConnectScheme$", StringComparison.Ordinal),
+                CheckBlock = configuration,
+                InsertBefore = ["if (builder.Services.Configurations"]
+            };
+            var file = new CodeFile
+            {
+                FileName = "Program.cs",
+                Methods = new() { ["Global"] = new Method { CodeChanges = [snippet] } }
+            };
+            document = await new DocumentBuilder(document, file, topLevel ? [Constants.UseTopLevelStatements] : [], NullLogger.Instance).RunAsync();
+            document = document.WithText(SourceText.From((await document.GetTextAsync()).ToString()));
+            await CompileAndExecuteAsync(document);
+        }
+    }
+
+    [Fact]
+    public async Task InvocationArguments_WhitespaceInSchemeLiteralsIsSignificantOnRerun()
+    {
+        using var workspace = new AdhocWorkspace();
+        var document = CreateRegistrationDocument(workspace, """
+            var services = new Services();
+            services.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: "CustomOidc");
+            services.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: "Custom Oidc");
+            if (services.Configurations != 2) throw new System.Exception("Missing distinct scheme configuration.");
+            """);
+        for (int run = 0; run < 2; run++)
+        {
+            document = await ScaffoldAsync(document);
+            document = document.WithText(SourceText.From((await document.GetTextAsync()).ToString()));
+            await CompileAndExecuteAsync(document);
+            var configurations = (await document.GetSyntaxRootAsync())!.DescendantNodes().OfType<InvocationExpressionSyntax>()
+                .Where(invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "PostConfigure").ToArray();
+            Assert.Equal(["CustomOidc", "Custom Oidc"], configurations.Select(invocation =>
+                ((LiteralExpressionSyntax)invocation.ArgumentList.Arguments[0].Expression).Token.ValueText).ToArray());
+        }
+    }
+
+    private static async Task CompileAndExecuteAsync(Document document)
+    {
+        var compilation = await document.Project.GetCompilationAsync();
+        using var assembly = new MemoryStream();
+        var emitted = compilation!.Emit(assembly);
+        Assert.True(emitted.Success, string.Join(Environment.NewLine, emitted.Diagnostics));
+        System.Reflection.Assembly.Load(assembly.ToArray()).EntryPoint!.Invoke(null, [Array.Empty<string>()]);
     }
 
     [Fact]
@@ -334,8 +477,9 @@ public class DocumentBuilderTests
 
             class Services
             {
+                public int Configurations;
                 public AuthenticationBuilder AddAuthentication() => new AuthenticationBuilder(this);
-                public void PostConfigure<T>(string scheme, System.Action<T> configure) { }
+                public void PostConfigure<T>(string scheme, System.Action<T> configure) { Configurations++; }
             }
             class AuthenticationBuilder
             {
@@ -378,20 +522,22 @@ public class DocumentBuilderTests
     }, [Constants.UseTopLevelStatements], NullLogger.Instance).RunAsync();
 
     [Fact]
-    public void InvocationArguments_BindNamedAndPositionalOverloadsAndDeduplicateSchemes()
+    public void InvocationArguments_BindNamedAndPositionalOverloadsPerRegistration()
     {
         var tree = CSharpSyntaxTree.ParseText("""
             class Registration
             {
-                static void AddIdentity(object configuration, string scheme = "Default") { }
-                static void AddIdentity(object configuration, object cookies, string scheme = "Default") { }
+                public Registration Services => this;
+                Registration AddIdentity(object configuration, string scheme = "Default") => this;
+                Registration AddIdentity(object configuration, object cookies, string scheme = "Default") => this;
                 static void Configure()
                 {
-                    AddIdentity(new object());
-                    AddIdentity(new object(), "Positional");
-                    AddIdentity(new object(), new object(), "OtherOverload");
-                    AddIdentity(new object(), scheme: "Named");
-                    AddIdentity(new object(), scheme: "Named");
+                    var authentication = new Registration();
+                    authentication.AddIdentity(new object());
+                    authentication.AddIdentity(new object(), "Positional");
+                    authentication.AddIdentity(new object(), new object(), "OtherOverload");
+                    authentication.AddIdentity(new object(), scheme: "Named");
+                    authentication.AddIdentity(new object(), scheme: "Named");
                 }
             }
             """);
@@ -400,14 +546,19 @@ public class DocumentBuilderTests
         var snippet = CreateSnippet();
         snippet.Parent = "AddIdentity";
         snippet.InvocationArguments = new() { ["scheme"] = "\"Default\"" };
-        snippet.Block = "Configure($scheme$);";
+        snippet.Block = "builder.Services.Configure($scheme$);";
 
-        var expanded = DocumentBuilder.ExpandInvocationArguments([snippet], tree.GetRoot(), compilation.GetSemanticModel(tree));
+        var scoped = new System.Collections.Generic.Dictionary<SyntaxNode, System.Collections.Generic.List<CodeSnippet>>();
+        var expanded = DocumentBuilder.ExpandInvocationArguments([snippet], tree.GetRoot(), compilation.GetSemanticModel(tree), scoped);
 
-        Assert.Equal(["Configure(\"Default\");", "Configure(\"Positional\");", "Configure(\"OtherOverload\");", "Configure(\"Named\");"],
-            expanded.Select(change => change.Block).ToArray());
-        expanded[0].LeadingTrivia.NumberOfSpaces = 8;
-        Assert.Equal(0, expanded[1].LeadingTrivia.NumberOfSpaces);
+        Assert.Empty(expanded);
+        var changes = scoped.Values.Select(changes => Assert.Single(changes)).ToArray();
+        Assert.Equal(["Default", "Positional", "OtherOverload", "Named", "Named"],
+            changes.Select(change => ((LiteralExpressionSyntax)((InvocationExpressionSyntax)((ExpressionStatementSyntax)
+                SyntaxFactory.ParseStatement(change.Block)).Expression).ArgumentList.Arguments[0].Expression).Token.ValueText).ToArray());
+        Assert.All(changes, change => Assert.StartsWith("authentication.Services.Configure(", change.Block, StringComparison.Ordinal));
+        changes[0].LeadingTrivia.NumberOfSpaces = 8;
+        Assert.Equal(0, changes[1].LeadingTrivia.NumberOfSpaces);
         Assert.Equal(0, snippet.LeadingTrivia.NumberOfSpaces);
     }
 

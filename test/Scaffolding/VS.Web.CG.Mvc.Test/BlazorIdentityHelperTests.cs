@@ -60,6 +60,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [InlineData("InteractiveServer")]
         [InlineData("InteractiveWebAssembly")]
         [InlineData("InteractiveAuto")]
+        [InlineData("new InteractiveServerRenderMode(prerender: false)")]
+        [InlineData("new InteractiveWebAssemblyRenderMode(prerender: false)")]
+        [InlineData("new InteractiveAutoRenderMode(prerender: false)")]
+        [InlineData("@(new InteractiveWebAssemblyRenderMode(prerender: false))")]
         public void ConfigureAppRenderMode_PreservesGlobalModeAndExcludesIdentity(string renderMode)
         {
             var changes = ReadAppChanges();
@@ -70,7 +74,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 change.ReplaceSnippet?.Contains($"<Routes @rendermode=\"{renderMode}\" />") == true &&
                 change.Block.Contains("<Routes @rendermode=\"PageRenderMode\" />"));
             Assert.Contains(changes.Replacements, change =>
-                change.Block.Contains($"HttpContext.AcceptsInteractiveRouting() ? {renderMode} : null"));
+                change.ReplaceSnippet?.Contains($"<HeadOutlet @rendermode=\"{renderMode}\" />") == true &&
+                change.Block.Contains("<HeadOutlet @rendermode=\"PageRenderMode\" />"));
+            Assert.Contains(changes.Replacements, change =>
+                change.Block.Contains($"HttpContext.AcceptsInteractiveRouting() ? {renderMode.TrimStart('@')} : null"));
             Assert.DoesNotContain(changes.Replacements, change => change.Block.Contains("$(BlazorRenderMode)"));
         }
 

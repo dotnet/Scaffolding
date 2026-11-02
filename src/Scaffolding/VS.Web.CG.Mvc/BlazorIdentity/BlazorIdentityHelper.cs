@@ -7,6 +7,9 @@ using Microsoft.DotNet.Scaffolding.Shared;
 using System.Linq;
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
@@ -25,8 +28,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
         internal static void ConfigureAppRenderMode(CodeFile appChanges, string appContent)
         {
             const string placeholder = "$(BlazorRenderMode)";
-            var renderMode = new[] { "InteractiveAuto", "InteractiveServer", "InteractiveWebAssembly" }
-                .FirstOrDefault(mode => appContent.Contains($"@rendermode=\"{mode}\"", StringComparison.Ordinal));
+            var renderMode = Regex.Matches(appContent,
+                @"<(?:HeadOutlet|Routes)\b[^>]*\s@rendermode\s*=\s*""([^""]+)""",
+                RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1))
+                .Select(match => match.Groups[1].Value)
+                .FirstOrDefault(IsInteractiveRenderMode);
 
             appChanges.Replacements = appChanges.Replacements
                 .Where(change => renderMode != null ||
@@ -41,13 +47,31 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
 
             foreach (var change in appChanges.Replacements)
             {
-                change.Block = change.Block.Replace(placeholder, renderMode, StringComparison.Ordinal);
+                change.Block = change.Block.Replace(placeholder, renderMode.TrimStart('@'), StringComparison.Ordinal);
                 if (change.ReplaceSnippet != null)
                 {
                     change.ReplaceSnippet = change.ReplaceSnippet
                         .Select(snippet => snippet.Replace(placeholder, renderMode, StringComparison.Ordinal)).ToArray();
                 }
             }
+        }
+
+        private static bool IsInteractiveRenderMode(string renderMode)
+        {
+            var expression = SyntaxFactory.ParseExpression(renderMode.TrimStart('@'));
+            if (expression.ContainsDiagnostics)
+            {
+                return false;
+            }
+            while (expression is ParenthesizedExpressionSyntax parenthesized)
+            {
+                expression = parenthesized.Expression;
+            }
+            return expression is IdentifierNameSyntax identifier &&
+                identifier.Identifier.ValueText is "InteractiveAuto" or "InteractiveServer" or "InteractiveWebAssembly" ||
+                expression is ObjectCreationExpressionSyntax creation &&
+                creation.Type.GetLastToken().ValueText is
+                    "InteractiveAutoRenderMode" or "InteractiveServerRenderMode" or "InteractiveWebAssemblyRenderMode";
         }
 
         internal static string GetFormattedRelativeIdentityFile(string fullFileName)
@@ -167,11 +191,14 @@ If the project had identity support prior to scaffolding, ensure that the follow
     - app.UseAntiforgery() before the Identity endpoints execute
 4. For global interactivity, HeadOutlet and Routes use a conditional render mode:
     - HttpContext.AcceptsInteractiveRouting() ? ORIGINAL_RENDER_MODE : null
+    - Explicit render-mode instances retain their original options, including prerender.
     - Account pages must remain statically server-rendered.
 5. For WebAssembly/Auto, the server's AddRazorComponents() chain includes AddAuthenticationStateSerialization().
    The referenced client registers AddAuthorizationCore(), AddCascadingAuthenticationState(), and
    AddAuthenticationStateDeserialization(). Its imports include Microsoft.AspNetCore.Components.Authorization, and its
    RedirectToLogin component performs a full-page load of the server Account/Login page.
+   Routes imports the redirect namespace from its owning project, not from the presence of a client.
+   The client redirect has an explicit, valid namespace; unevaluated MSBuild expressions are not emitted.
    The client also references Microsoft.AspNetCore.Components.WebAssembly.Authentication, matching
    its WebAssembly package version. For centrally managed versions, add that package before scaffolding.
    Client package prerequisites are checked before any application files are generated or modified.

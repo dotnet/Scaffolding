@@ -452,7 +452,10 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     fileDoc != null &&
                     FileSystem.FileExists(fileDoc.Name))
                 {
-                    var usingStatement = $"@using {clientNamespace ?? blazorIdentityModel.BlazorIdentityNamespace + ".Shared"}";
+                    var redirectNamespace = fileDoc.Project.Id == clientProject?.Id
+                        ? clientNamespace
+                        : blazorIdentityModel.BlazorIdentityNamespace + ".Shared";
+                    var usingStatement = $"@using {redirectNamespace}";
                     var fileText = FileSystem.ReadAllText(fileDoc.Name);
                     if (!fileText.Contains(usingStatement, StringComparison.OrdinalIgnoreCase))
                     {
@@ -494,8 +497,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 FileSystem.WriteAllText(clientProject.FilePath, projectXml.ToString());
                 Logger.LogMessage($"Modified {clientProject.FilePath}.\n");
             }
-            var clientNamespace = projectXml.Descendants().FirstOrDefault(e => e.Name.LocalName == "RootNamespace")?.Value
-                ?? clientProject.AssemblyName.Replace('-', '_');
+            // Keep the redirect out of root namespace imports and avoid unevaluated MSBuild properties.
+            const string clientNamespace = "BlazorIdentityClient";
             var path = Path.Combine(Path.GetDirectoryName(clientProject.FilePath), "RedirectToLogin.razor");
             if (!FileSystem.FileExists(path))
             {

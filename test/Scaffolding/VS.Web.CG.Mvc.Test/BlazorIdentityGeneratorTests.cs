@@ -48,9 +48,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [InlineData("InteractiveAuto", false, "Attribute")]
         [InlineData("InteractiveAuto", true, "Element")]
         [InlineData("InteractiveAuto", true, "Central")]
-        public async Task ModifyFiles_UpdatesBothProjectsWithoutServerDependenciesInClient(string renderMode, bool global, string packageVersionStyle)
+        [InlineData("InteractiveAuto", true, "Attribute", "$(MSBuildProjectName)")]
+        [InlineData("InteractiveAuto", true, "Attribute", "$(MSBuildProjectName.Replace('-', '_'))")]
+        [InlineData("InteractiveAuto", true, "Attribute", "Custom.Client")]
+        [InlineData("new InteractiveWebAssemblyRenderMode(prerender: false)", true, "Attribute")]
+        [InlineData("new InteractiveAutoRenderMode(prerender: false)", true, "Attribute")]
+        [InlineData("new InteractiveServerRenderMode(prerender: false)", true, "Attribute")]
+        public async Task ModifyFiles_UpdatesBothProjectsWithoutServerDependenciesInClient(
+            string renderMode, bool global, string packageVersionStyle, string rootNamespace = null)
         {
-            var isClientHosted = renderMode != "InteractiveServer";
+            var isClientHosted = !renderMode.Contains("InteractiveServer", StringComparison.Ordinal);
             var client = isClientHosted
                 ? AddProject("Client", "Microsoft.NET.Sdk.BlazorWebAssembly",
                     "using Microsoft.AspNetCore.Components.WebAssembly.Hosting;\nvar clientBuilder = WebAssemblyHostBuilder.CreateDefault(args);\nawait clientBuilder.Build().RunAsync();")
@@ -71,6 +78,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 Write("Client", "Client.csproj",
                     "<Project Sdk=\"Microsoft.NET.Sdk.BlazorWebAssembly\"><ItemGroup><PackageReference Include=\"Microsoft.AspNetCore.Components.WebAssembly\" /><PackageReference Include=\"Microsoft.AspNetCore.Components.WebAssembly.Authentication\" /></ItemGroup></Project>");
             }
+            if (rootNamespace != null)
+            {
+                var clientXml = XDocument.Parse(Read("Client", "Client.csproj"));
+                clientXml.Root.Add(new XElement("PropertyGroup", new XElement("RootNamespace", rootNamespace)));
+                Write("Client", "Client.csproj", clientXml.ToString());
+            }
             var uiProject = (global && isClientHosted) ? "Client" : "Server";
             var components = (global && isClientHosted) ? "" : "Components";
             Write(uiProject, Path.Combine(components, "Routes.razor"),
@@ -78,7 +91,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             Write(uiProject, Path.Combine(components, "Layout", "NavMenu.razor"),
                 "<div class=\"top-row ps-3 navbar navbar-dark\">\n</div>\n<nav>\n        <div class=\"nav-item px-3\">\n            <NavLink class=\"nav-link\" href=\"weather\">\n                <span class=\"bi bi-list-nested-nav-menu\" aria-hidden=\"true\"></span> Weather\n            </NavLink>\n        </div>\n</nav>");
             Write(uiProject, Path.Combine(components, "Layout", "NavMenu.razor.css"), ".nav-item {\n}");
-            Write("Server", Path.Combine("Components", "_Imports.razor"), "@using Microsoft.AspNetCore.Components.Forms");
+            Write("Server", Path.Combine("Components", "_Imports.razor"),
+                "@using Microsoft.AspNetCore.Components.Forms\n@using Server.Components.Account.Shared\n@using Client");
             if (client != null)
             {
                 Write("Client", "_Imports.razor", "@using Microsoft.AspNetCore.Components.Forms");
@@ -107,6 +121,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 Assert.Contains("Microsoft.AspNetCore.Components.Authorization", imports);
                 Assert.DoesNotContain("Microsoft.AspNetCore.Components.Endpoints", imports);
                 Assert.Contains("forceLoad: true", Read("Client", "RedirectToLogin.razor"));
+                var redirect = Read("Client", "RedirectToLogin.razor");
+                var namespaceDirective = redirect.Split('\n').First().Trim();
+                Assert.StartsWith("@namespace ", namespaceDirective);
+                var redirectNamespace = namespaceDirective.Substring("@namespace ".Length);
+                Assert.False(SyntaxFactory.ParseName(redirectNamespace).ContainsDiagnostics, namespaceDirective);
+                Assert.Equal("BlazorIdentityClient", redirectNamespace);
+                if (uiProject == "Client")
+                {
+                    Assert.Contains($"@using {redirectNamespace}", Read("Client", "Routes.razor"));
+                }
                 Assert.False(Directory.Exists(Path.Combine(_root, "Client", "Components", "Account")));
                 var authenticationPackage = XDocument.Parse(Read("Client", "Client.csproj"))
                     .Descendants("PackageReference").Single(package => (string)package.Attribute("Include") ==
@@ -119,9 +143,20 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             }
 
             Assert.Contains("AuthorizeRouteView", Read(uiProject, Path.Combine(components, "Routes.razor")));
-            if (isClientHosted)
+            if (uiProject == "Client")
             {
-            Assert.DoesNotContain("Server.Components.Account", Read(uiProject, Path.Combine(components, "Routes.razor")));
+                Assert.DoesNotContain("Server.Components.Account", Read(uiProject, Path.Combine(components, "Routes.razor")));
+            }
+            else
+            {
+                var routes = Read("Server", Path.Combine(components, "Routes.razor"));
+                Assert.Contains("@using Server.Components.Account.Shared", routes);
+                Assert.DoesNotContain("@using Client", routes);
+                var clientRedirect = isClientHosted ? Read("Client", "RedirectToLogin.razor").Split('\n').First().Trim() : null;
+                if (clientRedirect != null)
+                {
+                    Assert.DoesNotContain(clientRedirect.Replace("@namespace ", "@using "), routes);
+                }
             }
             var nav = Read(uiProject, Path.Combine(components, "Layout", "NavMenu.razor"));
             Assert.Contains("Account/Register", nav);
@@ -170,6 +205,32 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         }
 
         [Theory]
+        [InlineData("var marker = 1;")]
+        [InlineData("class Startup { public static void Main(string[] args) { } }")]
+        public async Task ModifyProgram_ResolvesRenamedStartupWithProductionCompilationOptions(string source)
+        {
+            AddProject("Server", "Microsoft.NET.Sdk.Web", source);
+            var startupPath = Path.Combine(_root, "Server", "Host.cs");
+            File.Move(Path.Combine(_root, "Server", "Program.cs"), startupPath);
+            var document = _workspace.CurrentSolution.Projects.Single().Documents.Single();
+            Assert.True(_workspace.TryApplyChanges(_workspace.CurrentSolution
+                .WithDocumentName(document.Id, "Host.cs").WithDocumentFilePath(document.Id, startupPath)));
+            var generator = CreateGenerator();
+            var project = _productionWorkspace.CurrentSolution.Projects.Single()
+                .AddMetadataReference(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
+            Assert.Equal(OutputKind.ConsoleApplication, (await project.GetCompilationAsync()).Options.OutputKind);
+
+            await generator.ModifyProgramCsAsync(new CodeFile
+            {
+                FileName = "Program.cs",
+                Usings = new[] { "System" }
+            }, _model, project);
+
+            Assert.Contains("using System;", File.ReadAllText(startupPath));
+            Assert.False(File.Exists(Path.Combine(_root, "Server", "Program.cs")));
+        }
+
+        [Theory]
         [InlineData(false)]
         [InlineData(true)]
         public async Task MissingClientPackageVersion_FailsBeforeWritingFiles(bool generateCode)
@@ -205,13 +266,45 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [InlineData("Auto")]
         [InlineData("WebAssembly")]
         [InlineData("Server")]
-        public async Task StockGlobalTemplate_ScaffoldsAndBuildsProjects(string interactivity)
+        [InlineData("Auto", false)]
+        [InlineData("WebAssembly", false)]
+        [InlineData("WebAssembly", true, true, "$(MSBuildProjectName)")]
+        [InlineData("Auto", true, true, "$(MSBuildProjectName.Replace('-', '_'))")]
+        [InlineData("Server", true, true)]
+        public async Task StockGlobalTemplate_ScaffoldsAndBuildsProjects(
+            string interactivity, bool global = true, bool explicitRenderMode = false, string rootNamespace = null)
         {
             Skip.If(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests")));
             Directory.CreateDirectory(_root);
             var isClientHosted = interactivity != "Server";
-            await RunDotnet("new", "blazor", "--name", "Server", "--output", isClientHosted ? _root : Path.Combine(_root, "Server"),
-                "--framework", "net10.0", "--interactivity", interactivity, "--all-interactive", "--no-restore");
+            var templateArguments = new List<string>
+            {
+                "new", "blazor", "--name", "Server", "--output", isClientHosted ? _root : Path.Combine(_root, "Server"),
+                "--framework", "net10.0", "--interactivity", interactivity, "--no-restore"
+            };
+            if (global)
+            {
+                templateArguments.Add("--all-interactive");
+            }
+            await RunDotnet(templateArguments.ToArray());
+            if (rootNamespace != null)
+            {
+                var clientPath = Path.Combine(_root, "Server.Client", "Server.Client.csproj");
+                var clientXml = XDocument.Load(clientPath);
+                clientXml.Root.Add(new XElement("PropertyGroup", new XElement("RootNamespace", rootNamespace)));
+                clientXml.Save(clientPath);
+            }
+            var renderMode = explicitRenderMode
+                ? $"new Interactive{interactivity}RenderMode(prerender: false)"
+                : $"Interactive{interactivity}";
+            var appPath = Path.Combine("Components", "App.razor");
+            if (explicitRenderMode)
+            {
+                Write("Server", appPath, Read("Server", appPath)
+                    .Replace($"@rendermode=\"Interactive{interactivity}\"", $"@rendermode=\"{renderMode}\""));
+            }
+            var importsPath = Path.Combine("Components", "_Imports.razor");
+            Write("Server", importsPath, Read("Server", importsPath) + "\n@using Server.Components.Account.Shared\n");
             var client = isClientHosted ? AddExistingProject("Server.Client") : null;
             var server = AddExistingProject("Server");
             var serverPath = Path.Combine(_root, "Server", "Server.csproj");
@@ -238,7 +331,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 Mock.Of<ILogger>(), DefaultFileSystem.Instance, Mock.Of<IFilesLocator>(), context.Object,
                 Mock.Of<IEntityFrameworkService>(), Mock.Of<ICodeGenAssemblyLoadContext>(), _productionWorkspace);
             _model.BaseOutputPath = Path.Combine(_root, "Server");
-            _model.BlazorLayoutNamespace = isClientHosted ? "Server.Client.Layout.MainLayout" : "Server.Components.Layout.MainLayout";
+            _model.BlazorLayoutNamespace = isClientHosted && global ? "Server.Client.Layout.MainLayout" : "Server.Components.Layout.MainLayout";
             _model.UserClassName = "IdentityUser";
             _model.UserClassNamespace = "Microsoft.AspNetCore.Identity";
             _model.FilesToGenerate = Directory.GetFiles(Path.Combine(AppContext.BaseDirectory, "Templates", "BlazorIdentity"),
@@ -263,13 +356,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             generator.AddStaticFiles(_model);
             await generator.ModifyFilesAsync(_model);
 
-            var routesProject = isClientHosted ? "Server.Client" : "Server";
-            var routesPath = isClientHosted ? "Routes.razor" : Path.Combine("Components", "Routes.razor");
-            var navMenuPath = isClientHosted ? Path.Combine("Layout", "NavMenu.razor") : Path.Combine("Components", "Layout", "NavMenu.razor");
+            var clientRoutes = isClientHosted && global;
+            var routesProject = clientRoutes ? "Server.Client" : "Server";
+            var routesPath = clientRoutes ? "Routes.razor" : Path.Combine("Components", "Routes.razor");
+            var navMenuPath = clientRoutes ? Path.Combine("Layout", "NavMenu.razor") : Path.Combine("Components", "Layout", "NavMenu.razor");
 
             var routesContent = Read(routesProject, routesPath);
             Assert.Contains("AuthorizeRouteView", routesContent);
-            if (isClientHosted)
+            if (clientRoutes)
             {
                 Assert.DoesNotContain("Server.Components.Account", routesContent);
             }
@@ -283,9 +377,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 Assert.Contains("AddAuthenticationStateSerialization()", Read("Server", "Program.cs"));
                 Assert.Contains("AddAuthenticationStateDeserialization()", Read("Server.Client", "Program.cs"));
             }
-            Assert.Contains($"? Interactive{interactivity} : null", Read("Server", Path.Combine("Components", "App.razor")));
+            if (global)
+            {
+                Assert.Contains($"? {renderMode} : null", Read("Server", appPath));
+            }
+            else
+            {
+                Assert.DoesNotContain("PageRenderMode", Read("Server", appPath));
+            }
             Assert.Contains("[ExcludeFromInteractiveRouting]", Read("Server", Path.Combine("Components", "Account", "Pages", "_Imports.razor")));
-            await RunDotnet("build", serverPath, "-p:UseSharedCompilation=false", "--nologo");
+            await RunDotnet("build", serverPath, "-p:UseSharedCompilation=false", "-m:1", "-nr:false", "--nologo");
         }
 
         private Project AddExistingProject(string name)
@@ -319,10 +420,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 await process.WaitForExitAsync().WaitAsync(TimeSpan.FromMinutes(5));
             }
-            catch (TimeoutException)
+            catch (TimeoutException exception)
             {
                 process.Kill(entireProcessTree: true);
-                throw;
+                await process.WaitForExitAsync();
+                throw new TimeoutException(
+                    $"dotnet {string.Join(" ", arguments)} timed out:\n{await output}\n{await error}", exception);
             }
             Assert.True(process.ExitCode == 0, $"dotnet {string.Join(" ", arguments)} failed:\n{await output}\n{await error}");
         }

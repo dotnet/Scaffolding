@@ -269,7 +269,10 @@ public class CodeService : ICodeService, IDisposable
         UnloadWorkspace();
     }
 
-    public async Task<List<ISymbol>> GetAllClassSymbolsAsync()
+    public Task<List<ISymbol>> GetAllClassSymbolsAsync()
+        => GetAllClassSymbolsAsync(includeReferencedProjects: false);
+
+    public async Task<List<ISymbol>> GetAllClassSymbolsAsync(bool includeReferencedProjects)
     {
         EnsureInitialized();
         List<ISymbol> classSymbols = [];
@@ -316,7 +319,45 @@ public class CodeService : ICodeService, IDisposable
             }
         });
 
+        if (includeReferencedProjects)
+        {
+            await AddReferencedProjectClassSymbolsAsync(classSymbols);
+        }
+
         return classSymbols;
+    }
+
+    private async Task AddReferencedProjectClassSymbolsAsync(List<ISymbol> classSymbols)
+    {
+        var projectPath = Path.GetFullPath(_projectPath);
+        var visitedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { projectPath };
+        var pendingProjects = new Queue<string>();
+        pendingProjects.Enqueue(projectPath);
+
+        while (pendingProjects.TryDequeue(out var currentProjectPath))
+        {
+            var projectService = new MSBuildProjectService(currentProjectPath);
+            if (!projectService.TryGetProjectReferences(out var references, out var error))
+            {
+                var message = $"Unable to discover referenced project classes for '{currentProjectPath}': {error}";
+                _logger.LogError("{Message}", message);
+                throw new InvalidOperationException(message);
+            }
+
+            foreach (var reference in references)
+            {
+                var referencePath = Path.GetFullPath(reference);
+                if (!visitedProjects.Add(referencePath))
+                {
+                    continue;
+                }
+
+                // Open the referenced project itself so built references are not limited to metadata.
+                using var codeService = new CodeService(_logger, referencePath);
+                classSymbols.AddRange(await codeService.GetAllClassSymbolsAsync());
+                pendingProjects.Enqueue(referencePath);
+            }
+        }
     }
 
     /// <summary>
@@ -415,5 +456,4 @@ public class CodeService : ICodeService, IDisposable
         return null;
     }
 }
-
 

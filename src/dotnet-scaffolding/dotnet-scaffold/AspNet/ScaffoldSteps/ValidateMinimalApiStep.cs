@@ -207,7 +207,7 @@ internal class ValidateMinimalApiStep : ScaffoldStep
 
         //find and set --model class properties
         ModelInfo? modelInfo = null;
-        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync();
+        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync(includeReferencedProjects: true);
         var modelClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(settings.Model, StringComparison.OrdinalIgnoreCase));
         if (string.IsNullOrEmpty(settings.Model) || modelClassSymbol is null)
         {

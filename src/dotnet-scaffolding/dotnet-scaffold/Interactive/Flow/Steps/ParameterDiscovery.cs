@@ -287,7 +287,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                         return [];
                     }
 
-                    return await codeService.GetAllClassSymbolsAsync();
+                    return await codeService.GetAllClassSymbolsAsync(includeReferencedProjects: true);
                 });
 
             List<StepOption> classNames = [];

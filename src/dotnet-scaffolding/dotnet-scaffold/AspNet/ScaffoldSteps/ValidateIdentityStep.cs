@@ -237,7 +237,7 @@ internal class ValidateIdentityStep : ScaffoldStep
             return null;
         }
 
-        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync();
+        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync(includeReferencedProjects: true);
         //find DbContext info or create properties for a new one.
         var dbContextClassName = settings.DataContext;
         DbContextInfo dbContextInfo = new();

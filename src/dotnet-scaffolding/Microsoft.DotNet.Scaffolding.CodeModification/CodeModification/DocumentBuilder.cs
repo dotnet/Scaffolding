@@ -223,17 +223,17 @@ internal class DocumentBuilder
         foreach (var reference in references)
         {
             var operation = semanticModel.GetOperation(reference);
-            while (operation?.Parent is IConversionOperation or IParenthesizedOperation)
+            // Follow tuple targets, but not member/indexer receivers that only mutate the object.
+            while (operation?.Parent is IConversionOperation or IParenthesizedOperation or ITupleOperation)
             {
                 operation = operation.Parent;
             }
             if (operation?.Parent is IArgumentOperation { Parameter.RefKind: not RefKind.None } ||
                 reference.Ancestors().Any(node => node is RefExpressionSyntax or MakeRefExpressionSyntax ||
                     node is ArgumentSyntax argument && !argument.RefKindKeyword.IsKind(SyntaxKind.None)) ||
-                (captured || statement.Span.Contains(reference.Span)) && reference.Ancestors().Any(node =>
-                    node is AssignmentExpressionSyntax assignment && assignment.Left.Span.Contains(reference.Span) ||
-                    node.IsKind(SyntaxKind.PreIncrementExpression) || node.IsKind(SyntaxKind.PreDecrementExpression) ||
-                    node.IsKind(SyntaxKind.PostIncrementExpression) || node.IsKind(SyntaxKind.PostDecrementExpression)))
+                (captured || statement.Span.Contains(reference.Span)) &&
+                    (operation?.Parent is IAssignmentOperation assignment && assignment.Target == operation ||
+                    operation?.Parent is IIncrementOrDecrementOperation increment && increment.Target == operation))
             {
                 return false;
             }
@@ -349,6 +349,11 @@ internal class DocumentBuilder
 
             if (!options.Contains(Constants.UseTopLevelStatements, StringComparer.OrdinalIgnoreCase))
             {
+                // Global registration guards also cover helpers outside Main's insertion scope.
+                filteredChanges = filteredChanges?.Where(change => change.InvocationArguments is not null ||
+                    string.IsNullOrEmpty(change.CheckInvocation) ||
+                    !root.DescendantNodes().OfType<InvocationExpressionSyntax>()
+                        .Any(invocation => IsInvocation(invocation, change.CheckInvocation))).ToArray();
                 var mainMethod = root?.DescendantNodes().OfType<MethodDeclarationSyntax>()
                     .FirstOrDefault(n => ProjectModifierHelper.Main.Equals(n.Identifier.ToString(), StringComparison.OrdinalIgnoreCase));
                 if (mainMethod != null

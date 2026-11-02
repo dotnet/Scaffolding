@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,6 +12,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
+using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
@@ -18,6 +21,197 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.CodeModification;
 
 public class DocumentBuilderTests
 {
+    [Theory]
+    [InlineData("", "Default")]
+    [InlineData(", openIdConnectScheme: \"CustomOidc\"", "CustomOidc")]
+    public async Task InvocationArguments_GlobalGuardReusesSiblingHelperRegistration(string argument, string scheme)
+    {
+        using var workspace = new AdhocWorkspace();
+        var document = CreateRegistrationDocument(workspace, $$"""
+            class Program
+            {
+                static void Main()
+                {
+                    var builder = new Builder();
+                    ConfigureAuthentication(builder.Services);
+                    var app = builder.Build();
+                }
+                static void ConfigureAuthentication(Services services)
+                {
+                    services.AddAuthentication().AddMicrosoftIdentityWebApp(new object(){{argument}});
+                }
+            }
+            class Builder
+            {
+                public Services Services { get; } = new Services();
+                public object Build() => new object();
+            }
+            """);
+        var compilation = (await document.Project.GetCompilationAsync())!;
+        Assert.Empty(compilation.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+
+        for (int run = 0; run < 2; run++)
+        {
+            var file = new CodeFile
+            {
+                FileName = "Program.cs",
+                Methods = new()
+                {
+                    ["Global"] = new Method
+                    {
+                        CodeChanges =
+                        [
+                            new CodeSnippet
+                            {
+                                CheckInvocation = "AddMicrosoftIdentityWebApp",
+                                InsertBefore = ["var app = builder.Build();"],
+                                Block = "builder.Services.AddAuthentication().AddMicrosoftIdentityWebApp(new object());"
+                            },
+                            new CodeSnippet
+                            {
+                                Parent = "AddMicrosoftIdentityWebApp",
+                                InvocationArguments = new() { ["openIdConnectScheme"] = "\"Default\"" },
+                                InsertBefore = ["var app = builder.Build();"],
+                                Block = "builder.Services.PostConfigure<OpenIdConnectOptions>($openIdConnectScheme$, options => { options.ResponseType = \"code\"; });"
+                            }
+                        ]
+                    }
+                }
+            };
+            document = await new DocumentBuilder(document, file, [], NullLogger.Instance).RunAsync();
+            document = document.WithText(SourceText.From((await document.GetTextAsync()).ToString()));
+            compilation = (await document.Project.GetCompilationAsync())!;
+            Assert.Empty(compilation.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+            var root = (await document.GetSyntaxRootAsync())!;
+            var registration = Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(),
+                invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "AddMicrosoftIdentityWebApp");
+            Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(),
+                invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "AddAuthentication");
+            Assert.Equal(argument.Length == 0 ? 1 : 2, registration.ArgumentList.Arguments.Count);
+            if (argument.Length > 0)
+            {
+                Assert.Equal(scheme, Assert.IsType<LiteralExpressionSyntax>(registration.ArgumentList.Arguments[1].Expression).Token.ValueText);
+                Assert.Equal("openIdConnectScheme", registration.ArgumentList.Arguments[1].NameColon!.Name.Identifier.ValueText);
+            }
+            var configuration = Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(),
+                invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "PostConfigure");
+            Assert.Equal(scheme, Assert.IsType<LiteralExpressionSyntax>(configuration.ArgumentList.Arguments[0].Expression).Token.ValueText);
+            Assert.Equal("services", ((MemberAccessExpressionSyntax)configuration.Expression).Expression.ToString());
+            var assignment = Assert.Single(configuration.DescendantNodes().OfType<AssignmentExpressionSyntax>());
+            Assert.Equal("options.ResponseType", assignment.Left.ToString());
+            Assert.Equal("code", Assert.IsType<LiteralExpressionSyntax>(assignment.Right).Token.ValueText);
+            var helper = configuration.Ancestors().OfType<MethodDeclarationSyntax>().First();
+            Assert.Equal("ConfigureAuthentication", helper.Identifier.ValueText);
+            Assert.Same(helper, registration.Ancestors().OfType<MethodDeclarationSyntax>().First());
+        }
+    }
+
+    [Fact]
+    public void CheckInvocation_MethodGuardDoesNotSearchSiblingMethods()
+    {
+        var root = CSharpSyntaxTree.ParseText("""
+            class Registration
+            {
+                void Configure() { }
+                void Other() { services.AddMicrosoftIdentityWebApp(configuration); }
+            }
+            """).GetCompilationUnitRoot();
+        var method = root.DescendantNodes().OfType<MethodDeclarationSyntax>().First();
+        var updated = DocumentBuilder.ApplyChangesToMethod(method.Body,
+            [new CodeSnippet { CheckInvocation = "AddMicrosoftIdentityWebApp", Block = "services.AddMicrosoftIdentityWebApp(configuration);" }]);
+
+        Assert.Single(updated!.DescendantNodes().OfType<InvocationExpressionSyntax>());
+    }
+
+    [Fact]
+    public async Task InvocationArguments_FallbackWorkspace_ReusesDefaultWebApplicationRegistration()
+    {
+        var directory = Path.Combine(AppContext.BaseDirectory, $"FallbackWorkspace-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        try
+        {
+            File.WriteAllText(Path.Combine(directory, "Directory.Build.props"), "<Project />");
+            File.WriteAllText(Path.Combine(directory, "Directory.Build.targets"), "<Project />");
+            File.WriteAllText(Path.Combine(directory, "global.json"),
+                "{\"sdk\":{\"version\":\"" + Environment.Version.Major + ".0.100-0\",\"rollForward\":\"latestMajor\",\"allowPrerelease\":true}}");
+            var projectPath = Path.Combine(directory, "WebApp.csproj");
+            File.WriteAllText(projectPath, $$"""
+                <Project Sdk="Microsoft.NET.Sdk.Web">
+                  <PropertyGroup>
+                    <TargetFramework>net{{Environment.Version.Major}}.0</TargetFramework>
+                    <ImplicitUsings>enable</ImplicitUsings>
+                    <Nullable>enable</Nullable>
+                    <LangVersion>12</LangVersion>
+                    <DefineConstants>$(DefineConstants);FALLBACK_REGISTRATION</DefineConstants>
+                  </PropertyGroup>
+                </Project>
+                """);
+            File.WriteAllText(Path.Combine(directory, "Program.cs"), """
+                var webHost = WebApplication.CreateBuilder(args);
+                webHost.Services.AddAuthentication("OpenIdConnect")
+                    .AddMicrosoftIdentityWebApp(webHost.Configuration);
+                var app = webHost.Build();
+                app.Run();
+
+                #if !FALLBACK_REGISTRATION
+                #error The project's compilation constants must be preserved.
+                #endif
+
+                class OpenIdConnectOptions { public string ResponseType { get; set; } = ""; }
+                static class IdentityExtensions
+                {
+                    public static Microsoft.AspNetCore.Authentication.AuthenticationBuilder AddMicrosoftIdentityWebApp(
+                        this Microsoft.AspNetCore.Authentication.AuthenticationBuilder builder,
+                        Microsoft.Extensions.Configuration.IConfiguration configuration,
+                        string openIdConnectScheme = "OpenIdConnect") => builder;
+                }
+                """);
+            // Restore only the synthetic fixture's SDK framework assets, never a customer project.
+            var restore = DotnetCliRunner.CreateDotNet("restore", [projectPath, "--ignore-failed-sources"]);
+            restore._psi.WorkingDirectory = directory;
+            Assert.True(restore.ExecuteAndCaptureOutput(out var output, out var error) == 0, output + error);
+            using var service = new CodeService(NullLogger.Instance, projectPath);
+            // Invoke the exact production fallback independently of whether MSBuildWorkspace can
+            // load this SDK on the machine running the test.
+            var buildFallback = typeof(CodeService).GetMethod("BuildFallbackWorkspaceAsync", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            using var workspace = (await (Task<AdhocWorkspace?>)buildFallback.Invoke(service, null)!)!;
+            var project = Assert.Single(workspace.CurrentSolution.Projects);
+            var document = Assert.Single(project.Documents, document => document.Name == "Program.cs");
+
+            for (var run = 0; run < 2; run++)
+            {
+                var snippet = new CodeSnippet
+                {
+                    Parent = "AddMicrosoftIdentityWebApp",
+                    InvocationArguments = new() { ["openIdConnectScheme"] = "\"OpenIdConnect\"" },
+                    InsertBefore = ["var app = webHost.Build();"],
+                    Block = "builder.Services.PostConfigure<OpenIdConnectOptions>($openIdConnectScheme$, options => { options.ResponseType = \"code\"; });"
+                };
+                var file = new CodeFile
+                {
+                    FileName = "Program.cs",
+                    Methods = new() { ["Global"] = new Method { CodeChanges = [snippet] } }
+                };
+                document = await new DocumentBuilder(document, file, [Constants.UseTopLevelStatements], NullLogger.Instance).RunAsync();
+                document = document.WithText(await document.GetTextAsync());
+                var root = (await document.GetSyntaxRootAsync())!;
+                var configuration = Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(),
+                    invocation => invocation.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == "PostConfigure");
+                Assert.Equal("webHost.Services", ((MemberAccessExpressionSyntax)configuration.Expression).Expression.ToString());
+                Assert.Equal("\"OpenIdConnect\"", configuration.ArgumentList.Arguments[0].Expression.ToString());
+                var compilation = (await document.Project.GetCompilationAsync())!;
+                Assert.Empty(compilation.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+            }
+
+            Assert.Equal(LanguageVersion.CSharp12, ((CSharpParseOptions)project.ParseOptions!).LanguageVersion);
+            Assert.Equal(NullableContextOptions.Enable, ((CSharpCompilationOptions)project.CompilationOptions!).NullableContextOptions);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
     [Theory]
     [InlineData(true, "method")]
     [InlineData(true, "localFunction")]
@@ -285,18 +479,22 @@ public class DocumentBuilderTests
     [InlineData("string scheme = \"First\"; Observe(scheme);", "scheme", "")]
     [InlineData("string scheme = \"First\"; ref string alias = ref scheme;", "scheme", "")]
     [InlineData("string scheme = \"First\";", "scheme", ".KeepChain(scheme = \"Changed\")")]
-    public async Task InvocationArguments_RejectSchemeValuesThatCannotBeSafelyReused(string declarations, string scheme, string suffix)
+    [InlineData("string scheme = \"First\";", "scheme", ".KeepChain(((scheme, _) = (NextScheme(), \"\")).Item1)")]
+    [InlineData("", "scheme", ".KeepChain(scheme = \"Changed\")", true)]
+    [InlineData("", "scheme", ".KeepChain(((scheme, _) = (NextScheme(), \"\")).Item1)", true)]
+    public async Task InvocationArguments_RejectSchemeValuesThatCannotBeSafelyReused(
+        string declarations, string scheme, string suffix, bool parameter = false)
     {
         using var workspace = new AdhocWorkspace();
         var document = CreateRegistrationDocument(workspace, $$"""
-            Registration.Configure(new Services());
+            Registration.Configure(new Services(){{(parameter ? ", \"First\"" : "")}});
             static class Registration
             {
                 static string NextScheme() => System.Guid.NewGuid().ToString();
                 static string Scheme => NextScheme();
                 static void Change(ref string value) => value = NextScheme();
                 static void Observe(in string value) { }
-                public static void Configure(Services services)
+                public static void Configure(Services services{{(parameter ? ", string scheme" : "")}})
                 {
                     {{declarations}}
                     services.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: {{scheme}}){{suffix}};
@@ -348,8 +546,11 @@ public class DocumentBuilderTests
     [InlineData("Application", "builder.Services", false)]
     [InlineData("Microsoft.AspNetCore", "CreateBuilder().Services", false)]
     [InlineData("Microsoft.AspNetCore", "builder.Services", false, ".KeepChain(builder = CreateBuilder())")]
+    [InlineData("Microsoft.AspNetCore", "builder.Services", false, ".KeepChain(((builder, _) = (CreateBuilder(), 0)).Item1)")]
+    [InlineData("Microsoft.AspNetCore", "builder.Services", true, "", "builder.Configuration.TenantId = \"tenant\";")]
+    [InlineData("Microsoft.AspNetCore", "builder.Services", true, "", "builder.Configuration[\"AzureAd:TenantId\"] = \"tenant\";")]
     public async Task InvocationArguments_ReuseOnlyFrameworkServicesOnStableBuilder(
-        string assemblyName, string receiver, bool safe, string suffix = "")
+        string assemblyName, string receiver, bool safe, string suffix = "", string mutation = "")
     {
         using var workspace = new AdhocWorkspace();
         var frameworkSource = """
@@ -358,7 +559,14 @@ public class DocumentBuilderTests
                 public class WebApplicationBuilder
                 {
                     public Services Services { get; } = new Services();
+                    public Configuration Configuration { get; } = new Configuration();
                 }
+            }
+            public class Configuration
+            {
+                public string TenantId { get; set; }
+                public string this[string key] { get => TenantId; set => TenantId = value; }
+                public void Bind(object options) { }
             }
             public class Services
             {
@@ -368,6 +576,7 @@ public class DocumentBuilderTests
             public class AuthenticationBuilder
             {
                 public AuthenticationBuilder AddMicrosoftIdentityWebApp(object configuration, string openIdConnectScheme = "Default") => this;
+                public AuthenticationBuilder AddMicrosoftIdentityWebApp(System.Action<object> configure, string openIdConnectScheme = "Default") => this;
                 public AuthenticationBuilder KeepChain(object value) => this;
             }
             public class OpenIdConnectOptions { public string ResponseType { get; set; } = ""; }
@@ -383,7 +592,8 @@ public class DocumentBuilderTests
         var document = project.AddDocument("Program.cs", SourceText.From($$"""
             var builder = CreateBuilder();
             string scheme = "First";
-            {{receiver}}.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: scheme){{suffix}};
+            {{mutation}}
+            {{receiver}}.AddAuthentication().AddMicrosoftIdentityWebApp({{(mutation.Length > 0 ? "options => builder.Configuration.Bind(options)" : "new object()")}}, openIdConnectScheme: scheme){{suffix}};
             scheme = "Second";
             {{receiver}}.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: scheme){{suffix}};
             static Microsoft.AspNetCore.Builder.WebApplicationBuilder CreateBuilder() => new Microsoft.AspNetCore.Builder.WebApplicationBuilder();

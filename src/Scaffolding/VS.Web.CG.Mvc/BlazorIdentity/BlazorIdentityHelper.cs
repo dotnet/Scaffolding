@@ -28,32 +28,45 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
         internal static void ConfigureAppRenderMode(CodeFile appChanges, string appContent)
         {
             const string placeholder = "$(BlazorRenderMode)";
-            var renderMode = Regex.Matches(appContent,
-                @"<(?:HeadOutlet|Routes)\b[^>]*\s@rendermode\s*=\s*""([^""]+)""",
+            var tags = Regex.Matches(appContent,
+                @"<(?:HeadOutlet|Routes)\b(?:[^""'>]|""[^""]*""|'[^']*')*>",
                 RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1))
-                .Select(match => match.Groups[1].Value)
-                .FirstOrDefault(IsInteractiveRenderMode);
-
-            appChanges.Replacements = appChanges.Replacements
-                .Where(change => renderMode != null ||
-                    (!change.Block.Contains(placeholder, StringComparison.Ordinal) &&
-                     !(change.ReplaceSnippet?.Any(snippet => snippet.Contains(placeholder, StringComparison.Ordinal)) ?? false)))
+                .Select(tag => new
+                {
+                    Content = tag.Value,
+                    Mode = Regex.Match(tag.Value, @"\s@rendermode\s*=\s*""([^""]+)""",
+                        RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1)).Groups[1]
+                })
+                .Where(tag => tag.Mode.Success && IsInteractiveRenderMode(tag.Mode.Value))
                 .ToArray();
+            var renderMode = tags.FirstOrDefault()?.Mode.Value;
+
+            var replacements = appChanges.Replacements.Where(change =>
+                !(change.ReplaceSnippet?.Any(snippet => snippet.Contains(placeholder, StringComparison.Ordinal)) ?? false) &&
+                (renderMode != null || !change.Block.Contains(placeholder, StringComparison.Ordinal))).ToList();
 
             if (renderMode is null)
             {
+                appChanges.Replacements = replacements.ToArray();
                 return;
             }
 
-            foreach (var change in appChanges.Replacements)
+            foreach (var change in replacements)
             {
                 change.Block = change.Block.Replace(placeholder, renderMode.TrimStart('@'), StringComparison.Ordinal);
-                if (change.ReplaceSnippet != null)
-                {
-                    change.ReplaceSnippet = change.ReplaceSnippet
-                        .Select(snippet => snippet.Replace(placeholder, renderMode, StringComparison.Ordinal)).ToArray();
-                }
             }
+            foreach (var tag in tags)
+            {
+                var conditionalMode = tag.Mode.Value == renderMode
+                    ? "PageRenderMode"
+                    : $"@(HttpContext.AcceptsInteractiveRouting() ? {tag.Mode.Value.TrimStart('@')} : null)";
+                replacements.Add(new CodeSnippet
+                {
+                    ReplaceSnippet = new[] { tag.Content },
+                    Block = tag.Content.Remove(tag.Mode.Index, tag.Mode.Length).Insert(tag.Mode.Index, conditionalMode)
+                });
+            }
+            appChanges.Replacements = replacements.ToArray();
         }
 
         private static bool IsInteractiveRenderMode(string renderMode)

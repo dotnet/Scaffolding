@@ -120,8 +120,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 var imports = Read("Client", "_Imports.razor");
                 Assert.Contains("Microsoft.AspNetCore.Components.Authorization", imports);
                 Assert.DoesNotContain("Microsoft.AspNetCore.Components.Endpoints", imports);
-                Assert.Contains("forceLoad: true", Read("Client", "RedirectToLogin.razor"));
-                var redirect = Read("Client", "RedirectToLogin.razor");
+                Assert.Contains("forceLoad: true", Read("Client", "IdentityRedirectToLogin.razor"));
+                var redirect = Read("Client", "IdentityRedirectToLogin.razor");
                 var namespaceDirective = redirect.Split('\n').First().Trim();
                 Assert.StartsWith("@namespace ", namespaceDirective);
                 var redirectNamespace = namespaceDirective.Substring("@namespace ".Length);
@@ -152,7 +152,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 var routes = Read("Server", Path.Combine(components, "Routes.razor"));
                 Assert.Contains("@using Server.Components.Account.Shared", routes);
                 Assert.DoesNotContain("@using Client", routes);
-                var clientRedirect = isClientHosted ? Read("Client", "RedirectToLogin.razor").Split('\n').First().Trim() : null;
+                var clientRedirect = isClientHosted ? Read("Client", "IdentityRedirectToLogin.razor").Split('\n').First().Trim() : null;
                 if (clientRedirect != null)
                 {
                     Assert.DoesNotContain(clientRedirect.Replace("@namespace ", "@using "), routes);
@@ -188,6 +188,76 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 Assert.Equal(clientProgramBeforeRepeat, Read("Client", "Program.cs"));
                 Assert.Equal(clientProjectBeforeRepeat, Read("Client", "Client.csproj"));
             }
+        }
+
+        [Fact]
+        public async Task ModifyFiles_AddsSerializationWhenRazorComponentsHasOptions()
+        {
+            var client = AddProject("Client", "Microsoft.NET.Sdk.BlazorWebAssembly",
+                "var builder = WebAssemblyHostBuilder.CreateDefault(args);\nawait builder.Build().RunAsync();");
+            AddProject("Server", "Microsoft.NET.Sdk.Web",
+                "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorComponents(options => options.DetailedErrors = true).AddInteractiveWebAssemblyComponents();\nvar app = builder.Build();\napp.Run();");
+            Write("Client", "_Imports.razor", "@using Microsoft.AspNetCore.Components.Forms");
+
+            await CreateGenerator(client).ModifyFilesAsync(_model);
+
+            var program = Read("Server", "Program.cs");
+            Assert.Contains("AddRazorComponents(options => options.DetailedErrors = true)", program);
+            Assert.Contains("AddAuthenticationStateSerialization()", program);
+        }
+
+        [Fact]
+        public async Task ModifyFiles_PreservesExistingClientRedirect()
+        {
+            var client = AddProject("Client", "Microsoft.NET.Sdk.BlazorWebAssembly",
+                "var builder = WebAssemblyHostBuilder.CreateDefault(args);\nawait builder.Build().RunAsync();");
+            AddProject("Server", "Microsoft.NET.Sdk.Web",
+                "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorComponents();\nvar app = builder.Build();\napp.Run();");
+            Write("Client", "_Imports.razor", "@using Client\n@using Microsoft.AspNetCore.Components.Forms");
+            const string existingRedirect = "@namespace Client\n<p>Existing redirect</p>";
+            Write("Client", "RedirectToLogin.razor", existingRedirect);
+            Write("Client", "Routes.razor",
+                "<RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" />");
+            var generator = CreateGenerator(client);
+
+            await generator.ModifyFilesAsync(_model);
+
+            Assert.Equal(existingRedirect, Read("Client", "RedirectToLogin.razor"));
+            Assert.Contains("@namespace BlazorIdentityClient", Read("Client", "IdentityRedirectToLogin.razor"));
+            Assert.Contains("forceLoad: true", Read("Client", "IdentityRedirectToLogin.razor"));
+            var routes = Read("Client", "Routes.razor");
+            Assert.Contains("<BlazorIdentityClient.IdentityRedirectToLogin />", routes);
+            Assert.DoesNotContain("<RedirectToLogin />", routes);
+            await generator.ModifyFilesAsync(_model);
+            Assert.Equal(routes, Read("Client", "Routes.razor"));
+            Assert.Equal(existingRedirect, Read("Client", "RedirectToLogin.razor"));
+        }
+
+        [Theory]
+        [InlineData("InteractiveWebAssembly", "new InteractiveWebAssemblyRenderMode(prerender: false)", " />")]
+        [InlineData("new InteractiveAutoRenderMode(prerender: false)", "InteractiveAuto", " />")]
+        [InlineData("InteractiveServer", "InteractiveServer", "/>")]
+        [InlineData("InteractiveWebAssembly", "new InteractiveWebAssemblyRenderMode(prerender: false)", "/>")]
+        public async Task ModifyFiles_ConditionsEachRenderModeAndPreservesTagAttributes(
+            string headMode, string routesMode, string closing)
+        {
+            AddProject("Server", "Microsoft.NET.Sdk.Web",
+                "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorComponents();\nvar app = builder.Build();\napp.Run();");
+            var appPath = Path.Combine("Components", "App.razor");
+            Write("Server", appPath,
+                $"<HeadOutlet @rendermode=\"{headMode}\"{closing}<Routes data-test=\"routes\" @rendermode=\"{routesMode}\" {closing}</body>");
+            var generator = CreateGenerator();
+
+            await generator.ModifyFilesAsync(_model);
+
+            var app = Read("Server", appPath);
+            Assert.DoesNotContain($"@rendermode=\"{headMode}\"", app);
+            Assert.DoesNotContain($"@rendermode=\"{routesMode}\"", app);
+            Assert.Contains($"HttpContext.AcceptsInteractiveRouting() ? {headMode} : null", app);
+            Assert.Contains($"HttpContext.AcceptsInteractiveRouting() ? {routesMode} : null", app);
+            Assert.Contains("data-test=\"routes\"", app);
+            await generator.ModifyFilesAsync(_model);
+            Assert.Equal(app, Read("Server", appPath));
         }
 
         [Fact]
@@ -271,8 +341,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [InlineData("WebAssembly", true, true, "$(MSBuildProjectName)")]
         [InlineData("Auto", true, true, "$(MSBuildProjectName.Replace('-', '_'))")]
         [InlineData("Server", true, true)]
+        [InlineData("Auto", true, false, null, true)]
+        [InlineData("WebAssembly", true, false, null, true)]
+        [InlineData("Server", true, false, null, true)]
         public async Task StockGlobalTemplate_ScaffoldsAndBuildsProjects(
-            string interactivity, bool global = true, bool explicitRenderMode = false, string rootNamespace = null)
+            string interactivity, bool global = true, bool explicitRenderMode = false, string rootNamespace = null,
+            bool reviewEdgeCases = false)
         {
             Skip.If(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests")));
             Directory.CreateDirectory(_root);
@@ -302,6 +376,18 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 Write("Server", appPath, Read("Server", appPath)
                     .Replace($"@rendermode=\"Interactive{interactivity}\"", $"@rendermode=\"{renderMode}\""));
+            }
+            if (reviewEdgeCases)
+            {
+                Write("Server", appPath, Read("Server", appPath).Replace(
+                    $"<Routes @rendermode=\"Interactive{interactivity}\" />",
+                    $"<Routes @rendermode=\"new Interactive{interactivity}RenderMode(prerender: false)\"/>"));
+                Write("Server", "Program.cs", Read("Server", "Program.cs").Replace(
+                    "AddRazorComponents()", "AddRazorComponents(options => options.DetailedErrors = true)"));
+                if (isClientHosted)
+                {
+                    Write("Server.Client", "RedirectToLogin.razor", "@namespace Server.Client\n<p>Existing redirect</p>");
+                }
             }
             var importsPath = Path.Combine("Components", "_Imports.razor");
             Write("Server", importsPath, Read("Server", importsPath) + "\n@using Server.Components.Account.Shared\n");
@@ -384,6 +470,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             else
             {
                 Assert.DoesNotContain("PageRenderMode", Read("Server", appPath));
+            }
+            if (reviewEdgeCases)
+            {
+                Assert.Contains($"HttpContext.AcceptsInteractiveRouting() ? new Interactive{interactivity}RenderMode(prerender: false) : null",
+                    Read("Server", appPath));
+                if (isClientHosted)
+                {
+                    Assert.Contains("<BlazorIdentityClient.IdentityRedirectToLogin />", routesContent);
+                    Assert.Contains("Existing redirect", Read("Server.Client", "RedirectToLogin.razor"));
+                }
             }
             Assert.Contains("[ExcludeFromInteractiveRouting]", Read("Server", Path.Combine("Components", "Account", "Pages", "_Imports.razor")));
             await RunDotnet("build", serverPath, "-p:UseSharedCompilation=false", "-m:1", "-nr:false", "--nologo");

@@ -399,7 +399,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 changes.CodeChanges = changes.CodeChanges.Append(new CodeSnippet
                 {
                     Block = "AddAuthenticationStateSerialization()",
-                    Parent = "WebApplication.CreateBuilder.Services.AddRazorComponents()",
+                    Parent = "WebApplication.CreateBuilder.Services.AddRazorComponents(",
                     CodeChangeType = CodeChangeType.MemberAccess,
                     LeadingTrivia = new Formatting { Newline = true, NumberOfSpaces = 4 }
                 }).ToArray();
@@ -446,6 +446,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 if (normalizedFileName.Equals(Path.Combine("Components", "App.razor"), StringComparison.OrdinalIgnoreCase) && fileDoc != null)
                 {
                     BlazorIdentityHelper.ConfigureAppRenderMode(file, FileSystem.ReadAllText(fileDoc.Name));
+                }
+                if (file.FileName == "Routes.razor" && fileDoc?.Project.Id == clientProject?.Id && clientProject != null)
+                {
+                    foreach (var change in file.Replacements)
+                    {
+                        change.Block = change.Block.Replace("<RedirectToLogin />",
+                            $"<{clientNamespace}.IdentityRedirectToLogin />", StringComparison.Ordinal);
+                    }
                 }
                 await DocumentBuilder.ApplyTextReplacements(file, fileDoc, new CodeChangeOptions(), FileSystem);
                 if (file.FileName.Equals("Routes.razor", StringComparison.OrdinalIgnoreCase) &&
@@ -499,7 +507,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
             // Keep the redirect out of root namespace imports and avoid unevaluated MSBuild properties.
             const string clientNamespace = "BlazorIdentityClient";
-            var path = Path.Combine(Path.GetDirectoryName(clientProject.FilePath), "RedirectToLogin.razor");
+            var path = Path.Combine(Path.GetDirectoryName(clientProject.FilePath), "IdentityRedirectToLogin.razor");
             if (!FileSystem.FileExists(path))
             {
                 var template = new Templates.BlazorIdentity.Shared.RedirectToLogin();

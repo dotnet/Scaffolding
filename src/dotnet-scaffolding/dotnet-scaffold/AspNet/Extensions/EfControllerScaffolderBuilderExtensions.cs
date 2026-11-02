@@ -173,6 +173,10 @@ internal static class EfControllerScaffolderBuilderExtensions
                 ViewModel viewModel = viewModelObj as ViewModel ??
                     throw new InvalidOperationException(missingViewModelExceptionMssg);
 
+                context.Properties.TryGetValue(nameof(EfControllerModel), out var efControllerModelObj);
+                EfControllerModel efControllerModel = efControllerModelObj as EfControllerModel ??
+                    throw new InvalidOperationException("missing 'EfControllerModel' in 'ScaffolderContext.Properties'");
+
                 if (viewModel.ProjectInfo is null || string.IsNullOrEmpty(viewModel.ProjectInfo.ProjectPath))
                 {
                     step.SkipStep = true;
@@ -181,7 +185,7 @@ internal static class EfControllerScaffolderBuilderExtensions
 
                 //TODO add extensions if 'TemplateFoldersUtilities' is not reworked.
                 var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4TemplatesForTargetFramework(["Views"], viewModel.ProjectInfo.ProjectPath);
-                var viewTemplateProperties = ViewHelper.GetTextTemplatingProperties(allT4TemplatePaths, viewModel);
+                var viewTemplateProperties = ViewHelper.GetTextTemplatingProperties(allT4TemplatePaths, viewModel, efControllerModel.ControllerName);
                 if (viewTemplateProperties.Any())
                 {
                     step.TextTemplatingProperties = viewTemplateProperties;

@@ -15,9 +15,11 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
     protected override string TestClassName => nameof(RazorPagesCrudNet10IntegrationTests);
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task Scaffold_RazorPagesCrud_ReferencedModelAndDbContext(bool directModelReference)
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    public async Task Scaffold_RazorPagesCrud_ReferencedModelAndDbContext(bool directModelReference, bool alreadyRegistered)
     {
         var modelDirectory = Path.Combine(_testDirectory, "ClassLibrary1");
         var contextDirectory = Path.Combine(_testDirectory, "ClassLibrary2");
@@ -58,6 +60,7 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
             }
             """;
         File.WriteAllText(contextPath, contextSource);
+        File.WriteAllText(Path.Combine(contextDirectory, "Startup.cs"), "namespace ClassLibrary2; public class Startup { }");
         var modelReference = directModelReference
             ? """<ProjectReference Include="..\ClassLibrary1\ClassLibrary1.csproj" />"""
             : string.Empty;
@@ -69,8 +72,70 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
               </ItemGroup>
             </Project>
             """));
-        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetMinimalProgramCs());
+        WriteProgram("ClassLibrary2.DBContext", alreadyRegistered);
 
+        await AssertExistingContextScaffoldingAsync(contextPath, contextSource, "ClassLibrary1.Models", "ClassLibrary2.DBContext", alreadyRegistered);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Scaffold_RazorPagesCrud_ExistingWebProjectModelAndDbContext(bool alreadyRegistered)
+    {
+        File.WriteAllText(_testProjectPath, ProjectContent.Replace("</Project>", """
+              <ItemGroup>
+                <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
+              </ItemGroup>
+            </Project>
+            """));
+        File.WriteAllText(Path.Combine(_testProjectDir, "Movie.cs"), """
+            namespace TestProject.Models;
+            public class Movie
+            {
+                public int Id { get; set; }
+                public string? Title { get; set; }
+            }
+            """);
+        var contextPath = Path.Combine(_testProjectDir, "MyDbContext.cs");
+        const string contextSource = """
+            using TestProject.Models;
+            using Microsoft.EntityFrameworkCore;
+            namespace TestProject.Data;
+            public class MyDbContext : DbContext
+            {
+                public MyDbContext(DbContextOptions<MyDbContext> options) : base(options) { }
+                public DbSet<Movie> Movies { get; set; }
+            }
+            """;
+        File.WriteAllText(contextPath, contextSource);
+        WriteProgram("TestProject.Data", alreadyRegistered);
+
+        await AssertExistingContextScaffoldingAsync(contextPath, contextSource, "TestProject.Models", "TestProject.Data", alreadyRegistered);
+    }
+
+    private const string ExistingRegistration =
+        """builder.Services.AddDbContext<MyDbContext>(options => options.UseSqlServer("Server=localhost;Database=ScaffoldingRegression;Trusted_Connection=True;"));""";
+
+    private void WriteProgram(string contextNamespace, bool alreadyRegistered)
+    {
+        var program = alreadyRegistered
+            ? $"""
+                using {contextNamespace};
+                using Microsoft.EntityFrameworkCore;
+                var builder = WebApplication.CreateBuilder(args);
+                {ExistingRegistration}
+                builder.Services.AddRazorPages();
+                var app = builder.Build();
+                app.MapRazorPages();
+                app.Run();
+                """
+            : ScaffoldCliHelper.GetMinimalProgramCs();
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), program);
+    }
+
+    private async Task AssertExistingContextScaffoldingAsync(
+        string contextPath, string contextSource, string modelNamespace, string contextNamespace, bool alreadyRegistered)
+    {
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
         Assert.True(preExitCode == 0, $"Build before scaffolding failed.\n{preOutput}\n{preError}");
 
@@ -91,14 +156,21 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
             Assert.True(File.Exists(pagePath), $"Missing {pagePath}.\n{output}\n{error}");
             Assert.True(File.Exists(pagePath + ".cs"), $"Missing {pagePath}.cs");
             var pageSource = File.ReadAllText(pagePath + ".cs");
-            Assert.Contains("using ClassLibrary1.Models;", pageSource);
-            Assert.Contains("using ClassLibrary2.DBContext;", pageSource);
+            Assert.Contains($"using {modelNamespace};", pageSource);
+            Assert.Contains($"using {contextNamespace};", pageSource);
             Assert.Contains("MyDbContext", pageSource);
             Assert.Contains("_context.Movies", pageSource);
         }
 
         Assert.Equal(contextSource, File.ReadAllText(contextPath));
         Assert.False(File.Exists(Path.Combine(_testProjectDir, "Data", "MyDbContext.cs")));
+        var program = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+        Assert.Equal(1, program.Split("AddDbContext<").Length - 1);
+        Assert.Equal(1, program.Split("AddRazorPages()").Length - 1);
+        if (alreadyRegistered)
+        {
+            Assert.Contains(ExistingRegistration, program);
+        }
         var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
         Assert.True(postExitCode == 0, $"Build after scaffolding failed.\n{postOutput}\n{postError}");
     }

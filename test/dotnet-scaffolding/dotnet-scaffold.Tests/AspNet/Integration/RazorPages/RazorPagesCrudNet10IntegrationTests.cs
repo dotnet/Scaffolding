@@ -15,11 +15,13 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
     protected override string TestClassName => nameof(RazorPagesCrudNet10IntegrationTests);
 
     [Theory]
-    [InlineData(true, false)]
-    [InlineData(false, false)]
-    [InlineData(true, true)]
-    [InlineData(false, true)]
-    public async Task Scaffold_RazorPagesCrud_ReferencedModelAndDbContext(bool directModelReference, bool alreadyRegistered)
+    [InlineData(true, false, true)]
+    [InlineData(false, false, true)]
+    [InlineData(true, true, true)]
+    [InlineData(false, true, true)]
+    [InlineData(true, false, false)]
+    [InlineData(false, false, false)]
+    public async Task Scaffold_RazorPagesCrud_ReferencedModelAndDbContext(bool directModelReference, bool alreadyRegistered, bool existingDbSet)
     {
         var modelDirectory = Path.Combine(_testDirectory, "ClassLibrary1");
         var contextDirectory = Path.Combine(_testDirectory, "ClassLibrary2");
@@ -49,7 +51,7 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
             </Project>
             """);
         var contextPath = Path.Combine(contextDirectory, "MyDbContext.cs");
-        const string contextSource = """
+        const string contextWithDbSet = """
             using ClassLibrary1.Models;
             using Microsoft.EntityFrameworkCore;
             namespace ClassLibrary2.DBContext;
@@ -59,7 +61,13 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
                 public DbSet<Movie> Movies { get; set; }
             }
             """;
+        var contextSource = existingDbSet
+            ? contextWithDbSet
+            : contextWithDbSet.Replace("    public DbSet<Movie> Movies { get; set; }", string.Empty);
         File.WriteAllText(contextPath, contextSource);
+        const string unrelatedSource = "namespace TestProject; public class UnrelatedClass { }";
+        var unrelatedPath = Path.Combine(_testProjectDir, "MyDbContext.cs");
+        File.WriteAllText(unrelatedPath, unrelatedSource);
         File.WriteAllText(Path.Combine(contextDirectory, "Startup.cs"), "namespace ClassLibrary2; public class Startup { }");
         var modelReference = directModelReference
             ? """<ProjectReference Include="..\ClassLibrary1\ClassLibrary1.csproj" />"""
@@ -74,7 +82,8 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
             """));
         WriteProgram("ClassLibrary2.DBContext", alreadyRegistered);
 
-        await AssertExistingContextScaffoldingAsync(contextPath, contextSource, "ClassLibrary1.Models", "ClassLibrary2.DBContext", alreadyRegistered);
+        await AssertExistingContextScaffoldingAsync(contextPath, contextSource, "ClassLibrary1.Models", "ClassLibrary2.DBContext", alreadyRegistered, existingDbSet);
+        Assert.Equal(unrelatedSource, File.ReadAllText(unrelatedPath));
     }
 
     [Theory]
@@ -134,7 +143,7 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
     }
 
     private async Task AssertExistingContextScaffoldingAsync(
-        string contextPath, string contextSource, string modelNamespace, string contextNamespace, bool alreadyRegistered)
+        string contextPath, string contextSource, string modelNamespace, string contextNamespace, bool alreadyRegistered, bool existingDbSet = true)
     {
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
         Assert.True(preExitCode == 0, $"Build before scaffolding failed.\n{preOutput}\n{preError}");
@@ -159,10 +168,19 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
             Assert.Contains($"using {modelNamespace};", pageSource);
             Assert.Contains($"using {contextNamespace};", pageSource);
             Assert.Contains("MyDbContext", pageSource);
-            Assert.Contains("_context.Movies", pageSource);
+            Assert.Contains(existingDbSet ? "_context.Movies" : "_context.Movie", pageSource);
         }
 
-        Assert.Equal(contextSource, File.ReadAllText(contextPath));
+        var updatedContext = File.ReadAllText(contextPath);
+        if (existingDbSet)
+        {
+            Assert.Equal(contextSource, updatedContext);
+        }
+        else
+        {
+            Assert.Contains($"public DbSet<{modelNamespace}.Movie> Movie", updatedContext);
+            Assert.Equal(1, updatedContext.Split("DbSet<").Length - 1);
+        }
         Assert.False(File.Exists(Path.Combine(_testProjectDir, "Data", "MyDbContext.cs")));
         var program = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Equal(1, program.Split("AddDbContext<").Length - 1);

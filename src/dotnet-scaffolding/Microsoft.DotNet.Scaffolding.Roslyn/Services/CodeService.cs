@@ -269,7 +269,9 @@ public class CodeService : ICodeService, IDisposable
         UnloadWorkspace();
     }
 
-    public async Task<List<ISymbol>> GetAllClassSymbolsAsync(bool includeReferencedProjects = true)
+    public Task<List<ISymbol>> GetAllClassSymbolsAsync() => GetAllClassSymbolsAsync(includeReferencedProjects: true);
+
+    public async Task<List<ISymbol>> GetAllClassSymbolsAsync(bool includeReferencedProjects)
     {
         EnsureInitialized();
         List<ISymbol> classSymbols = [];

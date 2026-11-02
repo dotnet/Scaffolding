@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -74,6 +75,16 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
             return true;
         }
 
+        using var codeService = new CodeService(_logger, ProjectPath);
+        var solution = (await codeService.GetWorkspaceAsync())?.CurrentSolution;
+        var documentId = solution?.GetDocumentIdsWithFilePath(dbContextPath).FirstOrDefault();
+        string? contextProjectPath = documentId is null ? null : solution?.GetDocument(documentId)?.Project.FilePath;
+        if (string.IsNullOrEmpty(contextProjectPath))
+        {
+            _logger.LogError("Unable to find the project owning DbContext '{DbContextPath}'.", dbContextPath);
+            return false;
+        }
+
         string dbContextFileName = Path.GetFileName(dbContextPath);
         string configJson = BuildCodeModifierConfig(dbContextFileName, dbSetStatement);
 
@@ -82,7 +93,7 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
         CodeModificationStep codeModificationStep = new CodeModificationStep(NullLogger<CodeModificationStep>.Instance)
         {
             CodeModifierConfigJsonText = configJson,
-            ProjectPath = ProjectPath,
+            ProjectPath = contextProjectPath,
             CodeChangeOptions = CodeChangeOptions
         };
 
@@ -90,9 +101,17 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
         if (!result)
         {
             _logger.LogError($"Failed to add '{dbSetStatement}' to '{dbContextFileName}'.");
+            return false;
         }
 
-        return result;
+        fileContent = await File.ReadAllTextAsync(dbContextPath, cancellationToken);
+        if (!DbSetAlreadyPresent(fileContent, dbSetStatement))
+        {
+            _logger.LogError("DbSet property was not saved to '{DbContextPath}'.", dbContextPath);
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>

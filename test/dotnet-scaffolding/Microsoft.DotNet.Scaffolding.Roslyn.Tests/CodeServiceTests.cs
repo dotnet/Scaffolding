@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -19,6 +20,42 @@ public class CodeServiceTests : IDisposable
     public CodeServiceTests()
     {
         Directory.CreateDirectory(_directory);
+    }
+
+    [Fact]
+    public void GetAllClassSymbolsAsync_PreservesParameterlessSignatures()
+    {
+        Assert.NotNull(typeof(ICodeService).GetMethod(nameof(ICodeService.GetAllClassSymbolsAsync), Type.EmptyTypes));
+        Assert.NotNull(typeof(CodeService).GetMethod(nameof(CodeService.GetAllClassSymbolsAsync), Type.EmptyTypes));
+    }
+
+    [Fact]
+    public async Task GetAllClassSymbolsAsync_SupportsExistingImplementation()
+    {
+        var implementation = new ExistingCodeService();
+        ICodeService service = implementation;
+
+        Assert.Empty(await service.GetAllClassSymbolsAsync());
+        Assert.Empty(await service.GetAllClassSymbolsAsync(includeReferencedProjects: true));
+        Assert.Empty(await service.GetAllClassSymbolsAsync(includeReferencedProjects: false));
+        Assert.Equal(3, implementation.DiscoveryCalls);
+    }
+
+    private sealed class ExistingCodeService : ICodeService
+    {
+        public int DiscoveryCalls { get; private set; }
+
+        public Task<List<ISymbol>> GetAllClassSymbolsAsync()
+        {
+            DiscoveryCalls++;
+            return Task.FromResult(new List<ISymbol>());
+        }
+
+        public Task<Workspace> GetWorkspaceAsync() => throw new NotSupportedException();
+        public bool TryApplyChanges(Solution solution) => throw new NotSupportedException();
+        public Task ReloadWorkspaceAsync() => throw new NotSupportedException();
+        public Task<List<Document>> GetAllDocumentsAsync() => throw new NotSupportedException();
+        public Task<Document> GetDocumentAsync(string documentName) => throw new NotSupportedException();
     }
 
     [Theory]

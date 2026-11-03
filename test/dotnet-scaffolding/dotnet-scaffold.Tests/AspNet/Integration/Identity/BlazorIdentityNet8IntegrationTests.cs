@@ -311,7 +311,8 @@ public class BlazorIdentityNet8IntegrationTests : BlazorIdentityIntegrationTests
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
         Assert.Contains("AddScoped<IdentityRedirectManager>()", programContent);
         Assert.Contains("AddScoped<IdentityUserAccessor>()", programContent);
-        Assert.Contains("TestDbContext", programContent);
+        Assert.Contains("AddDbContext<TestDbContext>", programContent);
+        Assert.Contains("AddEntityFrameworkStores<TestDbContext>", programContent);
         Assert.Contains("app.MapAdditionalIdentityEndpoints()", programContent);
         Assert.Contains("AddIdentityCore<", programContent);
         Assert.Contains("AddAuthentication(", programContent);

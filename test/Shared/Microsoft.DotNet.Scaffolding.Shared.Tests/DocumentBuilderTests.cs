@@ -18,6 +18,38 @@ namespace Microsoft.DotNet.Scaffolding.Shared.Tests
     public class DocumentBuilderTests : DocumentBuilderTestBase
     {
         [Theory]
+        [InlineData("", false, false)]
+        [InlineData("", true, false)]
+        [InlineData("var components = ", false, false)]
+        [InlineData("var components = ", true, false)]
+        [InlineData("", false, true)]
+        [InlineData("", true, true)]
+        [InlineData("var components = ", false, true)]
+        [InlineData("var components = ", true, true)]
+        public void AddExpressionToParent_UpdatesComponentsChain(string declaration, bool explicitMain, bool blockOptions)
+        {
+            var options = blockOptions ? "options => { options.DetailedErrors = true; }" : "";
+            var statement = $"{declaration}builder.Services.AddRazorComponents({options}).AddInteractiveWebAssemblyComponents();";
+            var source = explicitMain ? $"class Program {{ static void Main() {{ {statement} }} }}" : statement;
+            var root = SyntaxFactory.ParseCompilationUnit(source);
+            SyntaxNode target = explicitMain ? root.DescendantNodes().OfType<MethodDeclarationSyntax>().Single().Body : root;
+            var change = new CodeSnippet
+            {
+                Parent = "builder.Services.AddRazorComponents(",
+                Block = "AddAuthenticationStateSerialization()"
+            };
+
+            var updated = DocumentBuilder.AddExpressionToParent(target, change);
+
+            var text = updated.ToFullString();
+            Assert.Contains(declaration + "builder.Services.AddRazorComponents(" + options + ")", text);
+            Assert.Contains(".AddInteractiveWebAssemblyComponents().AddAuthenticationStateSerialization();", text);
+            Assert.False(SyntaxFactory.ParseCompilationUnit(explicitMain
+                ? $"class Program {{ static void Main() {text} }}" : text).ContainsDiagnostics);
+            Assert.Equal(text, DocumentBuilder.AddExpressionToParent(updated, change).ToFullString());
+        }
+
+        [Theory]
         [InlineData(new object[] { new string[] { "System", "System.Test", "System.Data", "", null } })]
         public async Task AddUsingsTest(string[] usings)
         {

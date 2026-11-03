@@ -34,8 +34,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
                 .Select(tag => new
                 {
                     Content = tag.Value,
-                    Mode = Regex.Match(tag.Value, @"\s@rendermode\s*=\s*""([^""]+)""",
-                        RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1)).Groups[1]
+                    Mode = Regex.Match(tag.Value, @"\s@rendermode\s*=\s*(?:""(?<mode>[^""]+)""|'(?<mode>[^']+)')",
+                        RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1)).Groups["mode"]
                 })
                 .Where(tag => tag.Mode.Success && IsInteractiveRenderMode(tag.Mode.Value))
                 .ToArray();
@@ -82,6 +82,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.BlazorIdentity
             }
             return expression is IdentifierNameSyntax identifier &&
                 identifier.Identifier.ValueText is "InteractiveAuto" or "InteractiveServer" or "InteractiveWebAssembly" ||
+                expression is MemberAccessExpressionSyntax member &&
+                member.Expression.GetLastToken().ValueText == "RenderMode" &&
+                member.Name.Identifier.ValueText is "InteractiveAuto" or "InteractiveServer" or "InteractiveWebAssembly" ||
                 expression is ObjectCreationExpressionSyntax creation &&
                 creation.Type.GetLastToken().ValueText is
                     "InteractiveAutoRenderMode" or "InteractiveServerRenderMode" or "InteractiveWebAssemblyRenderMode";
@@ -204,13 +207,15 @@ If the project had identity support prior to scaffolding, ensure that the follow
     - app.UseAntiforgery() before the Identity endpoints execute
 4. For global interactivity, HeadOutlet and Routes use a conditional render mode:
     - HttpContext.AcceptsInteractiveRouting() ? ORIGINAL_RENDER_MODE : null
+    - Single- or double-quoted attributes and qualified RenderMode members are supported.
     - Explicit render-mode instances retain their original options, including prerender.
     - Account pages must remain statically server-rendered.
-5. For WebAssembly/Auto, the server's AddRazorComponents() chain includes AddAuthenticationStateSerialization().
+5. For WebAssembly/Auto, the server's AddRazorComponents() chain includes AddAuthenticationStateSerialization(),
+   including when the components builder is retained in a local variable.
    The referenced client registers AddAuthorizationCore(), AddCascadingAuthenticationState(), and
    AddAuthenticationStateDeserialization(). Its imports include Microsoft.AspNetCore.Components.Authorization, and its
    RedirectToLogin component performs a full-page load of the server Account/Login page.
-   Routes imports the redirect namespace from its owning project, not from the presence of a client.
+   Routes imports the redirect namespace from its owning project, including clients nested under the server directory.
    The client redirect has an explicit, valid namespace; unevaluated MSBuild expressions are not emitted.
    The client also references Microsoft.AspNetCore.Components.WebAssembly.Authentication, matching
    its WebAssembly package version. For centrally managed versions, add that package before scaffolding.

@@ -751,8 +751,14 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
                 return originalMethod;
             }
 
-            // Find parent's expression statement
-            if (!(children.FirstOrDefault(n => n.IsKind(SyntaxKind.ExpressionStatement)) is ExpressionStatementSyntax exprNode))
+            var statement = parent is GlobalStatementSyntax globalStatement ? globalStatement.Statement : parent;
+            var expression = statement switch
+            {
+                LocalDeclarationStatementSyntax declaration => declaration.Declaration.Variables.FirstOrDefault()?.Initializer?.Value,
+                ExpressionStatementSyntax expressionStatement => expressionStatement.Expression,
+                _ => children.OfType<ExpressionStatementSyntax>().FirstOrDefault()?.Expression
+            };
+            if (expression is null)
             {
                 return originalMethod;
             }
@@ -763,18 +769,11 @@ namespace Microsoft.DotNet.Scaffolding.Shared.CodeModifier
 
             var newExpression = SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
-                exprNode.Expression.WithTrailingTrivia(leadingTrivia),
+                expression.WithTrailingTrivia(leadingTrivia),
                 identifier);
 
-            var modifiedExprNode = exprNode.WithExpression(newExpression);
-
-            if (modifiedExprNode is null)
-            {
-                return originalMethod;
-            }
-
             // Replace existing expression with updated expression
-            var updatedParent = parent.ReplaceNode(exprNode, modifiedExprNode);
+            var updatedParent = parent.ReplaceNode(expression, newExpression);
 
             return updatedParent != null ? originalMethod.ReplaceNode(parent, updatedParent) : originalMethod;
         }

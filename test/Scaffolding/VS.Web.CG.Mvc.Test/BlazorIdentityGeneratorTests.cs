@@ -190,20 +190,54 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             }
         }
 
-        [Fact]
-        public async Task ModifyFiles_AddsSerializationWhenRazorComponentsHasOptions()
+        [Theory]
+        [InlineData("")]
+        [InlineData("var components = ")]
+        public async Task ModifyFiles_AddsSerializationWhenRazorComponentsHasOptions(string declaration)
         {
             var client = AddProject("Client", "Microsoft.NET.Sdk.BlazorWebAssembly",
                 "var builder = WebAssemblyHostBuilder.CreateDefault(args);\nawait builder.Build().RunAsync();");
             AddProject("Server", "Microsoft.NET.Sdk.Web",
-                "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorComponents(options => options.DetailedErrors = true).AddInteractiveWebAssemblyComponents();\nvar app = builder.Build();\napp.Run();");
+                $"var builder = WebApplication.CreateBuilder(args);\n{declaration}builder.Services.AddRazorComponents(options => options.DetailedErrors = true).AddInteractiveWebAssemblyComponents();\nvar app = builder.Build();\napp.Run();");
             Write("Client", "_Imports.razor", "@using Microsoft.AspNetCore.Components.Forms");
 
-            await CreateGenerator(client).ModifyFilesAsync(_model);
+            var generator = CreateGenerator(client);
+            await generator.ModifyFilesAsync(_model);
 
             var program = Read("Server", "Program.cs");
             Assert.Contains("AddRazorComponents(options => options.DetailedErrors = true)", program);
             Assert.Contains("AddAuthenticationStateSerialization()", program);
+            Assert.Contains(declaration + "builder.Services.AddRazorComponents", program);
+            await generator.ModifyFilesAsync(_model);
+            Assert.Equal(program, Read("Server", "Program.cs"));
+        }
+
+        [Fact]
+        public async Task ModifyFiles_AssignsNestedClientFilesToClientProject()
+        {
+            const string clientDirectory = "Server\\Client";
+            var client = AddProject("Client", "Microsoft.NET.Sdk.BlazorWebAssembly",
+                "var builder = WebAssemblyHostBuilder.CreateDefault(args);\nawait builder.Build().RunAsync();", clientDirectory);
+            AddProject("Server", "Microsoft.NET.Sdk.Web",
+                "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorComponents().AddInteractiveWebAssemblyComponents();\nvar app = builder.Build();\napp.Run();");
+            Write(clientDirectory, "_Imports.razor", "@using Microsoft.AspNetCore.Components.Forms");
+            Write(clientDirectory, "Routes.razor",
+                "<RouteView RouteData=\"routeData\" DefaultLayout=\"typeof(Layout.MainLayout)\" />");
+            Write(clientDirectory, Path.Combine("Layout", "NavMenu.razor"), "<nav></nav>");
+            Write(clientDirectory, Path.Combine("Layout", "NavMenu.razor.css"), ".nav-item {\n}");
+            var generator = CreateGenerator(client);
+
+            await generator.ModifyFilesAsync(_model);
+
+            var routes = Read(clientDirectory, "Routes.razor");
+            Assert.Contains("AuthorizeRouteView", routes);
+            Assert.Contains("<BlazorIdentityClient.IdentityRedirectToLogin />", routes);
+            Assert.DoesNotContain("Server.Components.Account", routes);
+            Assert.DoesNotContain("<RedirectToLogin />", routes);
+            Assert.Contains("Account/Login", Read(clientDirectory, Path.Combine("Layout", "NavMenu.razor")));
+            Assert.Contains("bi-lock-nav-menu", Read(clientDirectory, Path.Combine("Layout", "NavMenu.razor.css")));
+            await generator.ModifyFilesAsync(_model);
+            Assert.Equal(routes, Read(clientDirectory, "Routes.razor"));
         }
 
         [Fact]
@@ -238,21 +272,25 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [InlineData("new InteractiveAutoRenderMode(prerender: false)", "InteractiveAuto", " />")]
         [InlineData("InteractiveServer", "InteractiveServer", "/>")]
         [InlineData("InteractiveWebAssembly", "new InteractiveWebAssemblyRenderMode(prerender: false)", "/>")]
+        [InlineData("InteractiveServer", "InteractiveServer", " />", "'")]
+        [InlineData("RenderMode.InteractiveServer", "Microsoft.AspNetCore.Components.Web.RenderMode.InteractiveServer", " />")]
+        [InlineData("global::Microsoft.AspNetCore.Components.Web.RenderMode.InteractiveAuto", "RenderMode.InteractiveWebAssembly", " />", "'")]
         public async Task ModifyFiles_ConditionsEachRenderModeAndPreservesTagAttributes(
-            string headMode, string routesMode, string closing)
+            string headMode, string routesMode, string closing, string quote = "\"")
         {
             AddProject("Server", "Microsoft.NET.Sdk.Web",
                 "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddRazorComponents();\nvar app = builder.Build();\napp.Run();");
             var appPath = Path.Combine("Components", "App.razor");
             Write("Server", appPath,
-                $"<HeadOutlet @rendermode=\"{headMode}\"{closing}<Routes data-test=\"routes\" @rendermode=\"{routesMode}\" {closing}</body>");
+                $"<HeadOutlet @rendermode={quote}{headMode}{quote}{closing}<Routes data-test=\"routes\" @rendermode={quote}{routesMode}{quote} {closing}</body>");
             var generator = CreateGenerator();
 
             await generator.ModifyFilesAsync(_model);
 
             var app = Read("Server", appPath);
-            Assert.DoesNotContain($"@rendermode=\"{headMode}\"", app);
-            Assert.DoesNotContain($"@rendermode=\"{routesMode}\"", app);
+            Assert.DoesNotContain($"@rendermode={quote}{headMode}{quote}", app);
+            Assert.DoesNotContain($"@rendermode={quote}{routesMode}{quote}", app);
+            Assert.Contains($"<HeadOutlet @rendermode={quote}PageRenderMode{quote}{closing}", app);
             Assert.Contains($"HttpContext.AcceptsInteractiveRouting() ? {headMode} : null", app);
             Assert.Contains($"HttpContext.AcceptsInteractiveRouting() ? {routesMode} : null", app);
             Assert.Contains("data-test=\"routes\"", app);
@@ -275,9 +313,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         }
 
         [Theory]
-        [InlineData("var marker = 1;")]
-        [InlineData("class Startup { public static void Main(string[] args) { } }")]
-        public async Task ModifyProgram_ResolvesRenamedStartupWithProductionCompilationOptions(string source)
+        [InlineData("var marker = 1;", false)]
+        [InlineData("class Startup { public static void Main(string[] args) { } }", false)]
+        [InlineData("var marker = 1;", true)]
+        [InlineData("class Startup { public static void Main(string[] args) { } }", true)]
+        public async Task ModifyProgram_ResolvesRenamedStartupWithProductionCompilationOptions(string source, bool partialProgram)
         {
             AddProject("Server", "Microsoft.NET.Sdk.Web", source);
             var startupPath = Path.Combine(_root, "Server", "Host.cs");
@@ -285,6 +325,13 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             var document = _workspace.CurrentSolution.Projects.Single().Documents.Single();
             Assert.True(_workspace.TryApplyChanges(_workspace.CurrentSolution
                 .WithDocumentName(document.Id, "Host.cs").WithDocumentFilePath(document.Id, startupPath)));
+            const string partialClass = "public partial class Program { }";
+            if (partialProgram)
+            {
+                var partialPath = Write("Server", "Program.cs", partialClass);
+                Assert.True(_workspace.TryApplyChanges(_workspace.CurrentSolution.AddDocument(
+                    DocumentId.CreateNewId(document.Project.Id), "Program.cs", SourceText.From(partialClass), filePath: partialPath)));
+            }
             var generator = CreateGenerator();
             var project = _productionWorkspace.CurrentSolution.Projects.Single()
                 .AddMetadataReference(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
@@ -293,11 +340,26 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             await generator.ModifyProgramCsAsync(new CodeFile
             {
                 FileName = "Program.cs",
-                Usings = new[] { "System" }
+                Usings = new[] { "System" },
+                Methods = new Dictionary<string, Method>
+                {
+                    ["Global"] = new Method
+                    {
+                        CodeChanges = new[] { new CodeSnippet { Block = "System.Console.WriteLine(\"startup\")" } }
+                    }
+                }
             }, _model, project);
 
             Assert.Contains("using System;", File.ReadAllText(startupPath));
-            Assert.False(File.Exists(Path.Combine(_root, "Server", "Program.cs")));
+            Assert.Contains("System.Console.WriteLine(\"startup\")", File.ReadAllText(startupPath));
+            if (partialProgram)
+            {
+                Assert.Equal(partialClass, Read("Server", "Program.cs"));
+            }
+            else
+            {
+                Assert.False(File.Exists(Path.Combine(_root, "Server", "Program.cs")));
+            }
         }
 
         [Theory]
@@ -344,9 +406,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [InlineData("Auto", true, false, null, true)]
         [InlineData("WebAssembly", true, false, null, true)]
         [InlineData("Server", true, false, null, true)]
+        [InlineData("Auto", true, false, null, false, true)]
+        [InlineData("WebAssembly", true, false, null, false, true)]
+        [InlineData("Server", true, false, null, false, true)]
         public async Task StockGlobalTemplate_ScaffoldsAndBuildsProjects(
             string interactivity, bool global = true, bool explicitRenderMode = false, string rootNamespace = null,
-            bool reviewEdgeCases = false)
+            bool reviewEdgeCases = false, bool qualifiedSingleQuotedMode = false)
         {
             Skip.If(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests")));
             Directory.CreateDirectory(_root);
@@ -376,6 +441,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             {
                 Write("Server", appPath, Read("Server", appPath)
                     .Replace($"@rendermode=\"Interactive{interactivity}\"", $"@rendermode=\"{renderMode}\""));
+            }
+            if (qualifiedSingleQuotedMode)
+            {
+                renderMode = $"Microsoft.AspNetCore.Components.Web.RenderMode.Interactive{interactivity}";
+                Write("Server", appPath, Read("Server", appPath).Replace(
+                    $"@rendermode=\"Interactive{interactivity}\"", $"@rendermode='{renderMode}'"));
+                Write("Server", "Program.cs", Read("Server", "Program.cs").Replace(
+                    "builder.Services.AddRazorComponents()", "var components = builder.Services.AddRazorComponents()"));
             }
             if (reviewEdgeCases)
             {
@@ -526,16 +599,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             Assert.True(process.ExitCode == 0, $"dotnet {string.Join(" ", arguments)} failed:\n{await output}\n{await error}");
         }
 
-        private Project AddProject(string name, string sdk, string program)
+        private Project AddProject(string name, string sdk, string program, string directory = null)
         {
+            directory ??= name;
             var packages = sdk == "Microsoft.NET.Sdk.BlazorWebAssembly"
                 ? "<ItemGroup><PackageReference Include=\"Microsoft.AspNetCore.Components.WebAssembly\" Version=\"10.0.14\" /></ItemGroup>"
                 : "";
-            var path = Write(name, $"{name}.csproj", $"<Project Sdk=\"{sdk}\">{packages}</Project>");
+            var path = Write(directory, $"{name}.csproj", $"<Project Sdk=\"{sdk}\">{packages}</Project>");
             var project = _workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Create(),
                 name, name, LanguageNames.CSharp, filePath: path,
                 compilationOptions: new CSharpCompilationOptions(OutputKind.ConsoleApplication)));
-            var programPath = Write(name, "Program.cs", program);
+            var programPath = Write(directory, "Program.cs", program);
             Assert.True(_workspace.TryApplyChanges(_workspace.CurrentSolution.AddDocument(DocumentId.CreateNewId(project.Id),
                 "Program.cs", SourceText.From(program), filePath: programPath)));
             return _workspace.CurrentSolution.GetProject(project.Id);

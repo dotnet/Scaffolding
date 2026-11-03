@@ -437,10 +437,19 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             foreach (var file in otherFiles)
             {
                 var fileDoc = project?.GetDocumentFromName(file.FileName, FileSystem);
-                if (fileDoc == null && clientProject != null &&
+                if (clientProject != null &&
                     (file.FileName == "Routes.razor" || file.FileName == "NavMenu.razor" || file.FileName == "NavMenu.razor.css"))
                 {
-                    fileDoc = clientProject.GetDocumentFromName(file.FileName, FileSystem);
+                    var clientDirectory = Path.GetFullPath(Path.GetDirectoryName(clientProject.FilePath))
+                        .TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                    if (fileDoc == null)
+                    {
+                        fileDoc = clientProject.GetDocumentFromName(file.FileName, FileSystem);
+                    }
+                    else if (Path.GetFullPath(fileDoc.Name).StartsWith(clientDirectory, StringComparison.OrdinalIgnoreCase))
+                    {
+                        fileDoc = clientProject.AddDocument(fileDoc.Name, FileSystem.ReadAllText(fileDoc.Name));
+                    }
                 }
                 var normalizedFileName = file.FileName.Replace('\\', Path.DirectorySeparatorChar).Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
                 if (normalizedFileName.Equals(Path.Combine("Components", "App.razor"), StringComparison.OrdinalIgnoreCase) && fileDoc != null)
@@ -573,14 +582,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 return;
             }
 
-            var sourceDocument = project.Documents.FirstOrDefault(document =>
-                Path.GetFileName(document.FilePath ?? document.Name).Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
+            var compilation = await project.GetCompilationAsync();
+            var entryPoint = compilation?.GetEntryPoint(default);
+            var tree = entryPoint?.Locations.FirstOrDefault(location => location.IsInSource)?.SourceTree;
+            var sourceDocument = tree == null ? null : project.GetDocument(tree);
             if (sourceDocument == null)
             {
-                var compilation = await project.GetCompilationAsync();
-                var entryPoint = compilation?.GetEntryPoint(default);
-                var tree = entryPoint?.Locations.FirstOrDefault(location => location.IsInSource)?.SourceTree;
-                sourceDocument = tree == null ? null : project.GetDocument(tree);
+                sourceDocument = project.Documents.FirstOrDefault(document =>
+                    Path.GetFileName(document.FilePath ?? document.Name).Equals("Program.cs", StringComparison.OrdinalIgnoreCase));
             }
             var sourcePath = sourceDocument?.FilePath;
             if (sourceDocument == null || string.IsNullOrEmpty(sourcePath))

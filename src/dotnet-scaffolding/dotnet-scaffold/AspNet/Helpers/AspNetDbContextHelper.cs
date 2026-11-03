@@ -81,6 +81,7 @@ internal class AspNetDbContextHelper
             !string.IsNullOrEmpty(projectBasePath))
         {
             dbContextProperties.DbContextName = dbContextInfo.DbContextClassName;
+            dbContextProperties.DbContextFullName = dbContextInfo.DbContextFullName;
             dbContextProperties.DbSetStatement = dbContextInfo.NewDbSetStatement;
             dbContextProperties.DbContextPath = dbContextInfo.DbContextClassPath;
             return dbContextProperties;

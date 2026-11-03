@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
@@ -143,7 +146,7 @@ public class AddDbSetToExistingContextStepTests : IDisposable
         const string fileName = "ApplicationDbContext.cs";
         const string dbSetStatement = "public DbSet<Movie> Movie { get; set; } = default!;";
 
-        string json = AddDbSetToExistingContextStep.BuildCodeModifierConfig(fileName, dbSetStatement);
+        string json = AddDbSetToExistingContextStep.BuildCodeModifierConfig(fileName, dbSetStatement, "Data.ApplicationDbContext");
 
         Assert.False(string.IsNullOrWhiteSpace(json));
         JsonDocument doc = JsonDocument.Parse(json);
@@ -160,7 +163,7 @@ public class AddDbSetToExistingContextStepTests : IDisposable
         const string fileName = "MyContext.cs";
         const string dbSetStatement = "public DbSet<Order> Orders { get; set; } = default!;";
 
-        string json = AddDbSetToExistingContextStep.BuildCodeModifierConfig(fileName, dbSetStatement);
+        string json = AddDbSetToExistingContextStep.BuildCodeModifierConfig(fileName, dbSetStatement, "Data.MyContext");
 
         JsonDocument doc = JsonDocument.Parse(json);
         JsonElement filesArray = doc.RootElement.GetProperty("Files");
@@ -168,6 +171,7 @@ public class AddDbSetToExistingContextStepTests : IDisposable
 
         JsonElement fileEntry = filesArray[0];
         Assert.Equal(fileName, fileEntry.GetProperty("FileName").GetString());
+        Assert.Equal("Data.MyContext", fileEntry.GetProperty("ClassFullName").GetString());
 
         JsonElement classProperties = fileEntry.GetProperty("ClassProperties");
         Assert.Equal(1, classProperties.GetArrayLength());
@@ -183,7 +187,7 @@ public class AddDbSetToExistingContextStepTests : IDisposable
         const string fileName = "AppDb.cs";
         const string dbSetStatement = "public DbSet<MyApp.Models.Movie> Movie { get; set; } = default!;";
 
-        string json = AddDbSetToExistingContextStep.BuildCodeModifierConfig(fileName, dbSetStatement);
+        string json = AddDbSetToExistingContextStep.BuildCodeModifierConfig(fileName, dbSetStatement, "Data.AppDb");
 
         JsonDocument doc = JsonDocument.Parse(json);
         JsonElement block = doc.RootElement
@@ -200,7 +204,7 @@ public class AddDbSetToExistingContextStepTests : IDisposable
         const string fileName = "AppDb.cs";
         const string dbSetStatementWithExtraSemicolons = "public DbSet<MyApp.Models.Movie> Movie { get; set; } = default!;;;";
 
-        string json = AddDbSetToExistingContextStep.BuildCodeModifierConfig(fileName, dbSetStatementWithExtraSemicolons);
+        string json = AddDbSetToExistingContextStep.BuildCodeModifierConfig(fileName, dbSetStatementWithExtraSemicolons, "Data.AppDb");
 
         JsonDocument doc = JsonDocument.Parse(json);
         JsonElement block = doc.RootElement
@@ -232,31 +236,17 @@ public class AddDbSetToExistingContextStepTests : IDisposable
     }
 
     // -----------------------------------------------------------------------
-    // Scenario 11: File exists and already contains the DbSet
-    //              (newly-created context from WithDbContextStep) — step skips
+    // Scenario 11: The selected context already contains the expected property.
     // -----------------------------------------------------------------------
     [Fact]
-    public async Task ExecuteAsync_ReturnsTrue_WhenDbSetAlreadyPresentInFile()
+    public void DbSetAlreadyPresent_ReturnsTrue_WhenPropertyExistsInSelectedContext()
     {
         const string dbSetStatement = "public DbSet<Movie> Movie { get; set; } = default!;";
-        string path = WriteContextFile($"public class ApplicationDbContext {{ {dbSetStatement} }}");
-        DbContextProperties props = new DbContextProperties
-        {
-            DbContextPath = path,
-            DbSetStatement = dbSetStatement
-        };
-        _context.Properties[nameof(DbContextProperties)] = props;
-
-        AddDbSetToExistingContextStep step = CreateStep();
-        step.ProjectPath = Path.Combine(_tempDir, "App.csproj");
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
+        Assert.True(ContainsDbSet($"public class Ctx {{ {dbSetStatement} }}", dbSetStatement));
     }
 
     // -----------------------------------------------------------------------
-    // Scenario 12: DbSetAlreadyPresent returns true when marker is in file
+    // Scenario 12: DbSetAlreadyPresent returns true for the expected property.
     // -----------------------------------------------------------------------
     [Fact]
     public void DbSetAlreadyPresent_ReturnsTrue_WhenDbSetIsInFile()
@@ -264,7 +254,7 @@ public class AddDbSetToExistingContextStepTests : IDisposable
         const string statement = "public DbSet<Movie> Movie { get; set; } = default!;";
         const string fileContent = "public class Ctx { public DbSet<Movie> Movie { get; set; } = default!; }";
 
-        Assert.True(AddDbSetToExistingContextStep.DbSetAlreadyPresent(fileContent, statement));
+        Assert.True(ContainsDbSet(fileContent, statement));
     }
 
     // -----------------------------------------------------------------------
@@ -276,7 +266,7 @@ public class AddDbSetToExistingContextStepTests : IDisposable
         const string statement = "public DbSet<Movie> Movie { get; set; } = default!;";
         const string fileContent = "public class Ctx { }";
 
-        Assert.False(AddDbSetToExistingContextStep.DbSetAlreadyPresent(fileContent, statement));
+        Assert.False(ContainsDbSet(fileContent, statement));
     }
 
     // -----------------------------------------------------------------------
@@ -288,7 +278,7 @@ public class AddDbSetToExistingContextStepTests : IDisposable
         const string statement = "public DbSet<MyApp.Models.Movie> Movie { get; set; } = default!;";
         const string fileContent = "public class Ctx { public DbSet<MyApp.Models.Movie> Movie { get; set; } = default!; }";
 
-        Assert.True(AddDbSetToExistingContextStep.DbSetAlreadyPresent(fileContent, statement));
+        Assert.True(ContainsDbSet(fileContent, statement));
     }
 
     // -----------------------------------------------------------------------
@@ -300,7 +290,26 @@ public class AddDbSetToExistingContextStepTests : IDisposable
         const string statement = "public string Foo { get; set; }";
         const string fileContent = "public class Ctx { public string Foo { get; set; } }";
 
-        Assert.False(AddDbSetToExistingContextStep.DbSetAlreadyPresent(fileContent, statement));
+        Assert.False(ContainsDbSet(fileContent, statement));
+    }
+
+    [Theory]
+    [InlineData("public class CtxFactory { public DbSet<Movie> Movie { get; set; } } public class Ctx { }")]
+    [InlineData("public class Ctx { class Nested { public DbSet<Movie> Movie { get; set; } } }")]
+    [InlineData("public class Ctx { /* public DbSet<Movie> Movie { get; set; } */ }")]
+    [InlineData("public class Ctx { public DbSet<Movie> Movie; }")]
+    [InlineData("public class Ctx { public DbSet<Movie> Other { get; set; } }")]
+    public void DbSetAlreadyPresent_IgnoresPropertiesNotOwnedBySelectedContext(string source)
+    {
+        Assert.False(ContainsDbSet(source, "public DbSet<Movie> Movie { get; set; } = default!;"));
+    }
+
+    private static bool ContainsDbSet(string source, string statement)
+    {
+        var declaration = SyntaxFactory.ParseCompilationUnit(source).DescendantNodes()
+            .OfType<ClassDeclarationSyntax>().Single(node => node.Identifier.ValueText == "Ctx");
+        var property = Assert.IsType<PropertyDeclarationSyntax>(SyntaxFactory.ParseMemberDeclaration(statement));
+        return AddDbSetToExistingContextStep.DbSetAlreadyPresent(declaration, property);
     }
 
     [Fact]

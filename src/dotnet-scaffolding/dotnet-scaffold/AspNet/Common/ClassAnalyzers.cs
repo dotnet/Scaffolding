@@ -35,6 +35,7 @@ internal static class ClassAnalyzers
         if (existingDbContextClass is not null)
         {
             dbContextInfo.DbContextClassName = existingDbContextClass.Name;
+            dbContextInfo.DbContextFullName = existingDbContextClass.ToDisplayString();
             dbContextInfo.DbContextClassPath = existingDbContextClass.Locations.FirstOrDefault()?.SourceTree?.FilePath;
             dbContextInfo.DbContextNamespace = existingDbContextClass.ContainingNamespace.ToDisplayString();
             var discoveredEntitySetName = modelInfo is null

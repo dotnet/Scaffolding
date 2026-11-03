@@ -18,6 +18,7 @@ internal class DocumentBuilder
     private readonly ILogger _consoleLogger;
     private readonly Document _document;
     private readonly IList<string> _options;
+    private readonly SyntaxAnnotation _targetClass = new();
 
     public DocumentBuilder(
         Document document,
@@ -35,6 +36,19 @@ internal class DocumentBuilder
     {
         var document = _document;
         var syntaxRoot = await document.GetSyntaxRootAsync() as CompilationUnitSyntax;
+        if (!string.IsNullOrEmpty(_codeFile.ClassFullName))
+        {
+            var semanticModel = await document.GetSemanticModelAsync();
+            var declaration = syntaxRoot?.DescendantNodes().OfType<ClassDeclarationSyntax>()
+                .FirstOrDefault(node => semanticModel?.GetDeclaredSymbol(node)?.ToDisplayString() == _codeFile.ClassFullName);
+            if (syntaxRoot is null || declaration is null)
+            {
+                throw new InvalidDataException($"Unable to find class '{_codeFile.ClassFullName}' in '{_codeFile.FileName}'.");
+            }
+
+            // Keep the selected declaration identifiable after adding usings changes the syntax tree.
+            syntaxRoot = syntaxRoot.ReplaceNode(declaration, declaration.WithAdditionalAnnotations(_targetClass));
+        }
         var output = new StringBuilder();
         var modifiedRoot = ModifyRoot(syntaxRoot, _options, output);
         if (output.Length > 0)
@@ -109,10 +123,12 @@ internal class DocumentBuilder
         }
         else if (!string.IsNullOrEmpty(_codeFile.FileName))
         {
-            var namespaceNode = root?.Members.OfType<BaseNamespaceDeclarationSyntax>()?.FirstOrDefault();
+            var namespaceNode = root.Members.OfType<BaseNamespaceDeclarationSyntax>().FirstOrDefault();
             string className = ProjectModifierHelper.GetClassName(Path.GetFileName(_codeFile.FileName));
             // get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
-            var classDeclarationSyntax = namespaceNode?.
+            var classDeclarationSyntax = !string.IsNullOrEmpty(_codeFile.ClassFullName)
+                ? root.GetAnnotatedNodes(_targetClass).OfType<ClassDeclarationSyntax>().Single()
+                : namespaceNode?.
                 DescendantNodes().
                 OfType<ClassDeclarationSyntax>().
                 FirstOrDefault(node =>

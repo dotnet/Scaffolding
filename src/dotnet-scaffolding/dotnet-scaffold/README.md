@@ -7,6 +7,8 @@ When a template file already exists, scaffolding compares its decoded text,
 allowing equivalent files with or without a Unicode byte order mark. Matching
 files are preserved without rewriting their encoding. Different text remains a
 conflict unless the step explicitly enables overwriting.
+When overwriting is disabled, files that cannot be decoded for comparison are
+also reported as conflicts and preserved.
 
 Interactive ASP.NET and Aspire failures include logged errors along with the
 command exit code. A failed operation may have already modified the project;

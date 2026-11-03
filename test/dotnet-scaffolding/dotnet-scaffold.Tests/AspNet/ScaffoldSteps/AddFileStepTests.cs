@@ -84,6 +84,52 @@ public class AddFileStepTests
         }
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_NonUtf8ExistingFile_LogsConflictAndPreservesBytes(bool invalidByteAtEnd)
+    {
+        string outputDirectory = Path.Combine(Path.GetTempPath(), nameof(AddFileStepTests), Guid.NewGuid().ToString("N"));
+        string toolsDirectory = Path.Combine(AppContext.BaseDirectory, "tools");
+        bool createdToolsDirectory = !Directory.Exists(toolsDirectory);
+        Directory.CreateDirectory(outputDirectory);
+        Directory.CreateDirectory(toolsDirectory);
+        try
+        {
+            using var errors = new ScaffoldingErrorCapture();
+            using var capture = errors.BeginCapture();
+            using var loggerFactory = LoggerFactory.Create(builder => builder.AddProvider(errors));
+            var step = new AddFileStep(loggerFactory.CreateLogger<AddFileStep>(), new FileSystem())
+            {
+                FileName = "_ValidationScriptsPartial.cshtml",
+                BaseOutputDirectory = outputDirectory,
+                ProjectPath = string.Empty
+            };
+            Assert.True(await step.ExecuteAsync(_context));
+
+            string destination = Path.Combine(outputDirectory, step.FileName);
+            byte[] templateContents = File.ReadAllBytes(destination);
+            // Windows-1252 encodes the accented character in "cafe" as a single 0xE9 byte.
+            byte[] comment = [.. Encoding.ASCII.GetBytes("@* caf"), 0xE9, .. Encoding.ASCII.GetBytes(" *@")];
+            byte[] contents = invalidByteAtEnd
+                ? [.. templateContents, 0xE9]
+                : [.. comment, .. templateContents];
+            File.WriteAllBytes(destination, contents);
+
+            Assert.False(await step.ExecuteAsync(_context));
+            Assert.Equal($"Existing file '{destination}' differs from the template. It was not overwritten.", capture.Message);
+            Assert.Equal(contents, File.ReadAllBytes(destination));
+        }
+        finally
+        {
+            Directory.Delete(outputDirectory, recursive: true);
+            if (createdToolsDirectory)
+            {
+                Directory.Delete(toolsDirectory);
+            }
+        }
+    }
+
     [Fact]
     public async Task ExecuteAsync_ReturnsFalse_WhenFileNameIsEmpty()
     {

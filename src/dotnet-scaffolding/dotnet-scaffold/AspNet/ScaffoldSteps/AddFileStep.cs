@@ -91,17 +91,25 @@ internal class AddFileStep : ScaffoldStep
 
     private static bool FilesMatch(Stream source, Stream destination)
     {
-        using var sourceReader = new StreamReader(source, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
-        using var destinationReader = new StreamReader(destination, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
-        int nextCharacter;
-        while ((nextCharacter = sourceReader.Read()) != -1)
+        try
         {
-            if (nextCharacter != destinationReader.Read())
+            using var sourceReader = new StreamReader(source, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
+            using var destinationReader = new StreamReader(destination, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
+            int nextCharacter;
+            while ((nextCharacter = sourceReader.Read()) != -1)
             {
-                return false;
+                if (nextCharacter != destinationReader.Read())
+                {
+                    return false;
+                }
             }
-        }
 
-        return destinationReader.Read() == -1;
+            return destinationReader.Read() == -1;
+        }
+        catch (DecoderFallbackException)
+        {
+            // Undecodable text is a conflict; the caller logs it and preserves the existing file.
+            return false;
+        }
     }
 }

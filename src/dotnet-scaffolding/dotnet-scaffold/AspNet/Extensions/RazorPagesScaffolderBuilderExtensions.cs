@@ -113,7 +113,11 @@ internal static class RazorPagesScaffolderBuilderExtensions
             if (context.Properties.TryGetValue(nameof(CrudSettings), out var commandSettingsObj) &&
                 commandSettingsObj is CrudSettings commandSettings)
             {
-                List<Package> packages = [PackageConstants.EfConstants.EfCoreToolsPackage];
+                List<Package> packages =
+                [
+                    PackageConstants.EfConstants.EfCoreToolsPackage,
+                    PackageConstants.EfConstants.EfCoreDesignPackage
+                ];
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&

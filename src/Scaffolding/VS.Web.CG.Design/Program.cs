@@ -17,16 +17,16 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
         private static ConsoleLogger _logger;
 
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
             _logger = new ConsoleLogger();
             _logger.LogMessage($"Command Line: {string.Join(" ", args)}", LogMessageLevel.Trace);
 
             //DotnetToolDispatcher.EnsureValidDispatchRecipient(ref args);
-            Execute(args, _logger);
+            return Execute(args, _logger);
         }
 
-        private static void Execute(string[] args, ConsoleLogger logger)
+        private static int Execute(string[] args, ConsoleLogger logger)
         {
             var app = new CommandLineApplication(false)
             {
@@ -104,7 +104,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
 
             });
 
-            app.Execute(args);
+            return app.Execute(args);
         }
     }
 }

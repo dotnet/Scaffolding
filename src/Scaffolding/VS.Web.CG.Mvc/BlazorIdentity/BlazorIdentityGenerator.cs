@@ -656,6 +656,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                     : transitionIndex;
             }
 
+            if (string.Equals(identifier, "try", StringComparison.Ordinal))
+            {
+                return FindTryChainEnd(contents, identifierEnd, transitionIndex);
+            }
+
+            if (string.Equals(identifier, "do", StringComparison.Ordinal))
+            {
+                return FindDoWhileEnd(contents, identifierEnd, transitionIndex);
+            }
+
             if (IsRazorControlBlock(identifier))
             {
                 var conditionStart = SkipWhitespace(contents, identifierEnd);
@@ -713,6 +723,134 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             return startIndex;
         }
 
+        private static int SkipWhitespaceAndComments(string contents, int startIndex)
+        {
+            while (startIndex < contents.Length)
+            {
+                startIndex = SkipWhitespace(contents, startIndex);
+                if (startIndex + 1 >= contents.Length)
+                {
+                    return startIndex;
+                }
+
+                if (contents[startIndex] == '@' && contents[startIndex + 1] == '*')
+                {
+                    var commentEnd = contents.IndexOf("*@", startIndex + 2, StringComparison.Ordinal);
+                    startIndex = commentEnd < 0 ? contents.Length : commentEnd + 2;
+                    continue;
+                }
+
+                if (contents[startIndex] == '/' && contents[startIndex + 1] == '/')
+                {
+                    var lineEnd = contents.IndexOfAny(new[] { '\r', '\n' }, startIndex + 2);
+                    startIndex = lineEnd < 0 ? contents.Length : lineEnd;
+                    continue;
+                }
+
+                if (contents[startIndex] == '/' && contents[startIndex + 1] == '*')
+                {
+                    var commentEnd = contents.IndexOf("*/", startIndex + 2, StringComparison.Ordinal);
+                    startIndex = commentEnd < 0 ? contents.Length : commentEnd + 2;
+                    continue;
+                }
+
+                return startIndex;
+            }
+
+            return startIndex;
+        }
+
+        private static int FindTryChainEnd(string contents, int identifierEnd, int transitionIndex)
+        {
+            var blockStart = SkipWhitespaceAndComments(contents, identifierEnd);
+            if (blockStart >= contents.Length || contents[blockStart] != '{')
+            {
+                return transitionIndex;
+            }
+
+            var currentEnd = FindMatchingRazorCodeBlockEnd(contents, blockStart);
+            while (currentEnd < contents.Length)
+            {
+                var clauseStart = SkipWhitespaceAndComments(contents, currentEnd);
+                if (IsKeywordAt(contents, clauseStart, "catch"))
+                {
+                    var next = SkipWhitespaceAndComments(contents, clauseStart + "catch".Length);
+                    if (next < contents.Length && contents[next] == '(')
+                    {
+                        next = SkipWhitespaceAndComments(contents, FindMatchingCSharpDelimiter(
+                            contents,
+                            next,
+                            SyntaxKind.OpenParenToken,
+                            SyntaxKind.CloseParenToken));
+                    }
+                    if (IsKeywordAt(contents, next, "when"))
+                    {
+                        var conditionStart = SkipWhitespaceAndComments(contents, next + "when".Length);
+                        if (conditionStart >= contents.Length || contents[conditionStart] != '(')
+                        {
+                            return currentEnd;
+                        }
+                        next = SkipWhitespaceAndComments(contents, FindMatchingCSharpDelimiter(
+                            contents,
+                            conditionStart,
+                            SyntaxKind.OpenParenToken,
+                            SyntaxKind.CloseParenToken));
+                    }
+                    if (next >= contents.Length || contents[next] != '{')
+                    {
+                        return currentEnd;
+                    }
+
+                    currentEnd = FindMatchingRazorCodeBlockEnd(contents, next);
+                    continue;
+                }
+
+                if (!IsKeywordAt(contents, clauseStart, "finally"))
+                {
+                    return currentEnd;
+                }
+
+                var finallyBlockStart = SkipWhitespaceAndComments(contents, clauseStart + "finally".Length);
+                return finallyBlockStart < contents.Length && contents[finallyBlockStart] == '{'
+                    ? FindMatchingRazorCodeBlockEnd(contents, finallyBlockStart)
+                    : currentEnd;
+            }
+
+            return currentEnd;
+        }
+
+        private static int FindDoWhileEnd(string contents, int identifierEnd, int transitionIndex)
+        {
+            var blockStart = SkipWhitespaceAndComments(contents, identifierEnd);
+            if (blockStart >= contents.Length || contents[blockStart] != '{')
+            {
+                return transitionIndex;
+            }
+
+            var blockEnd = FindMatchingRazorCodeBlockEnd(contents, blockStart);
+            var whileStart = SkipWhitespaceAndComments(contents, blockEnd);
+            if (!IsKeywordAt(contents, whileStart, "while"))
+            {
+                return blockEnd;
+            }
+
+            var conditionStart = SkipWhitespaceAndComments(contents, whileStart + "while".Length);
+            if (conditionStart >= contents.Length || contents[conditionStart] != '(')
+            {
+                return blockEnd;
+            }
+
+            var conditionEnd = FindMatchingCSharpDelimiter(
+                contents,
+                conditionStart,
+                SyntaxKind.OpenParenToken,
+                SyntaxKind.CloseParenToken);
+            var statementEnd = SkipWhitespaceAndComments(contents, conditionEnd);
+            return statementEnd < contents.Length && contents[statementEnd] == ';'
+                ? statementEnd + 1
+                : conditionEnd;
+        }
+
         private static int FindMatchingCSharpDelimiter(
             string contents,
             int openDelimiterIndex,
@@ -744,6 +882,15 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             var depth = 0;
             for (var index = openBraceIndex; index < contents.Length; index++)
             {
+                if (index + 1 < contents.Length &&
+                    contents[index] == '@' &&
+                    contents[index + 1] == ':')
+                {
+                    var lineEnd = contents.IndexOfAny(new[] { '\r', '\n' }, index + 2);
+                    index = lineEnd < 0 ? contents.Length - 1 : lineEnd - 1;
+                    continue;
+                }
+
                 var literalEnd = FindCSharpLiteralEnd(contents, index);
                 if (literalEnd > index)
                 {
@@ -810,16 +957,16 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             var currentEnd = blockEnd;
             while (currentEnd < contents.Length)
             {
-                var elseStart = SkipWhitespace(contents, currentEnd);
+                var elseStart = SkipWhitespaceAndComments(contents, currentEnd);
                 if (!IsKeywordAt(contents, elseStart, "else"))
                 {
                     return currentEnd;
                 }
 
-                var next = SkipWhitespace(contents, elseStart + "else".Length);
+                var next = SkipWhitespaceAndComments(contents, elseStart + "else".Length);
                 if (IsKeywordAt(contents, next, "if"))
                 {
-                    var conditionStart = SkipWhitespace(contents, next + "if".Length);
+                    var conditionStart = SkipWhitespaceAndComments(contents, next + "if".Length);
                     if (conditionStart >= contents.Length || contents[conditionStart] != '(')
                     {
                         return currentEnd;
@@ -830,7 +977,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                         conditionStart,
                         SyntaxKind.OpenParenToken,
                         SyntaxKind.CloseParenToken);
-                    var blockStart = SkipWhitespace(contents, conditionEnd);
+                    var blockStart = SkipWhitespaceAndComments(contents, conditionEnd);
                     if (blockStart >= contents.Length || contents[blockStart] != '{')
                     {
                         return currentEnd;

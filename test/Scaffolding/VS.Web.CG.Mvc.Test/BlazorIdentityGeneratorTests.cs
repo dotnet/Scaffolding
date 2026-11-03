@@ -508,8 +508,14 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [InlineData("@code { private bool IsLess(int a, int b) => a<b; }")]
         [InlineData("@code { private bool IsLess(int a, int b) => a < b; }")]
         [InlineData("@if (true) { <p>{<br></p> }")]
+        [InlineData("@if (true) {\n@: {\n}")]
+        [InlineData("@try { var marker = \"@*\"; } catch { }")]
+        [InlineData("@try { } catch { var marker = \"@*\"; } finally { }")]
+        [InlineData("@try { } @* branch *@ catch { var marker = \"@*\"; }")]
+        [InlineData("@do { var marker = \"@*\"; } while (false);")]
         [InlineData("@code { @* unmatched markup brace: { *@ }")]
         [InlineData("@if (true) { } else { var marker = \"@*\"; }")]
+        [InlineData("@if (true) { } @* branch *@ else { var marker = \"@*\"; }")]
         public void ResolveLayoutNamespacePreservesDirectiveAfterMixedRazorAndCSharp(string razorCode)
         {
             var fileSystem = new Mock<IFileSystem>();

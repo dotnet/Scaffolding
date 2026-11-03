@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.Text;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -52,6 +53,7 @@ internal class AddFileStep : ScaffoldStep
         if (string.IsNullOrEmpty(BaseOutputDirectory) ||
             string.IsNullOrEmpty(FileName))
         {
+            _logger.LogError("A file name and output directory are required to add a template file.");
             return Task.FromResult(false);
         }
 
@@ -83,25 +85,23 @@ internal class AddFileStep : ScaffoldStep
             return Task.FromResult(true);
         }
 
+        _logger.LogError("Unable to find template '{FileName}' or its destination directory for project '{ProjectPath}'.", FileName, ProjectPath);
         return Task.FromResult(false);
     }
 
     private static bool FilesMatch(Stream source, Stream destination)
     {
-        if (source.Length != destination.Length)
+        using var sourceReader = new StreamReader(source, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
+        using var destinationReader = new StreamReader(destination, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
+        int nextCharacter;
+        while ((nextCharacter = sourceReader.Read()) != -1)
         {
-            return false;
-        }
-
-        int nextByte;
-        while ((nextByte = source.ReadByte()) != -1)
-        {
-            if (nextByte != destination.ReadByte())
+            if (nextCharacter != destinationReader.Read())
             {
                 return false;
             }
         }
 
-        return true;
+        return destinationReader.Read() == -1;
     }
 }

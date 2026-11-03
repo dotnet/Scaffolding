@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
@@ -33,10 +35,19 @@ public class AddFileStepTests
     }
 
     [Theory]
-    [InlineData(false, false)]
-    [InlineData(true, false)]
-    [InlineData(true, true)]
-    public async Task ExecuteAsync_ExistingFile_RespectsContentsAndOverwrite(bool modifyFile, bool overwrite)
+    [InlineData("PasskeySubmit.razor.js", false, false, false)]
+    [InlineData("PasskeySubmit.razor.js", true, false, false)]
+    [InlineData("PasskeySubmit.razor.js", true, true, false)]
+    [InlineData("PasskeySubmit.razor.js", false, false, true)]
+    [InlineData("PasskeySubmit.razor.js", true, false, true)]
+    [InlineData("PasskeySubmit.razor.js", true, true, true)]
+    [InlineData("_ValidationScriptsPartial.cshtml", false, false, false)]
+    [InlineData("_ValidationScriptsPartial.cshtml", true, false, false)]
+    [InlineData("_ValidationScriptsPartial.cshtml", true, true, false)]
+    [InlineData("_ValidationScriptsPartial.cshtml", false, false, true)]
+    [InlineData("_ValidationScriptsPartial.cshtml", true, false, true)]
+    [InlineData("_ValidationScriptsPartial.cshtml", true, true, true)]
+    public async Task ExecuteAsync_ExistingFile_RespectsContentsAndOverwrite(string fileName, bool modifyFile, bool overwrite, bool emitBom)
     {
         string outputDirectory = Path.Combine(Path.GetTempPath(), nameof(AddFileStepTests), Guid.NewGuid().ToString("N"));
         string toolsDirectory = Path.Combine(AppContext.BaseDirectory, "tools");
@@ -47,7 +58,7 @@ public class AddFileStepTests
         {
             var step = new AddFileStep(NullLogger<AddFileStep>.Instance, new FileSystem())
             {
-                FileName = "PasskeySubmit.razor.js",
+                FileName = fileName,
                 BaseOutputDirectory = outputDirectory,
                 ProjectPath = string.Empty
             };
@@ -55,12 +66,9 @@ public class AddFileStepTests
 
             string destination = Path.Combine(outputDirectory, step.FileName);
             byte[] templateContents = File.ReadAllBytes(destination);
-            byte[] contents = [.. templateContents];
-            if (modifyFile)
-            {
-                contents[0] ^= 1;
-                File.WriteAllBytes(destination, contents);
-            }
+            string text = File.ReadAllText(destination);
+            File.WriteAllText(destination, modifyFile ? text + "// user change" : text, new UTF8Encoding(emitBom));
+            byte[] contents = File.ReadAllBytes(destination);
 
             step.Overwrite = overwrite;
             Assert.Equal(!modifyFile || overwrite, await step.ExecuteAsync(_context));
@@ -80,8 +88,11 @@ public class AddFileStepTests
     public async Task ExecuteAsync_ReturnsFalse_WhenFileNameIsEmpty()
     {
         // Arrange
+        using var errors = new ScaffoldingErrorCapture();
+        using var capture = errors.BeginCapture();
+        using var loggerFactory = LoggerFactory.Create(builder => builder.AddProvider(errors));
         AddFileStep step = new AddFileStep(
-            NullLogger<AddFileStep>.Instance,
+            loggerFactory.CreateLogger<AddFileStep>(),
             _mockFileSystem.Object)
         {
             FileName = string.Empty,
@@ -94,6 +105,7 @@ public class AddFileStepTests
 
         // Assert
         Assert.False(result);
+        Assert.Equal("A file name and output directory are required to add a template file.", capture.Message);
     }
 
     [Fact]

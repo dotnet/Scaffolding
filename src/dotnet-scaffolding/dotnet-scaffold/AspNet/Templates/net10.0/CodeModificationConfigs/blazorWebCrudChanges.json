@@ -5,11 +5,11 @@
       "Options": [ "GlobalInteractive" ],
       "Replacements": [
         {
-          "ReplaceSnippet": [ "@rendermode=\"$(BlazorRenderMode)\"" ],
+          "ReplaceSnippet": [ "$(RoutesRenderModeAttribute)" ],
           "Block": "@rendermode=\"PageRenderMode\""
         },
         {
-          "ReplaceSnippet": [ "@rendermode=\"@$(BlazorRenderMode)\"" ],
+          "ReplaceSnippet": [ "$(HeadOutletRenderModeAttribute)" ],
           "Block": "@rendermode=\"PageRenderMode\""
         },
         {

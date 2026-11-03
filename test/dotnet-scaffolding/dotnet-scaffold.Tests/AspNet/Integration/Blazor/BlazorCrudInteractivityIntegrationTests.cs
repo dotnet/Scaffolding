@@ -23,7 +23,8 @@ public class BlazorCrudInteractivityIntegrationTests
     [InlineData("net10.0", "InteractiveWebAssembly", false)]
     [InlineData("net10.0", "InteractiveServer", false)]
     [InlineData("net11.0", "InteractiveAuto", false)]
-    public async Task Scaffold_BlazorCrud_GlobalInteractivityKeepsCrudRoutesOnServer(string framework, string renderMode, bool individualAccounts)
+    [InlineData("net10.0", "InteractiveAuto", false, "@rendermode = \"@(InteractiveAuto)\"")]
+    public async Task Scaffold_BlazorCrud_GlobalInteractivityKeepsCrudRoutesOnServer(string framework, string renderMode, bool individualAccounts, string? routesRenderModeAttribute = null)
     {
         using var project = new BlazorTestProject(framework);
         project.AddWebAssemblyClient(framework == "net11.0" ? "11.0.*-*" : framework == "net9.0" ? "9.0.*" : "10.0.*",
@@ -46,7 +47,9 @@ public class BlazorCrudInteractivityIntegrationTests
         File.WriteAllText(Path.Combine(componentsDirectory, "App.razor"),
             ScaffoldCliHelper.GetBlazorAppRazor()
                 .Replace("<HeadOutlet />", $"<HeadOutlet @rendermode=\"{(renderMode == "InteractiveServer" ? "@" : "")}{renderMode}\" />")
-                .Replace("<Routes />", $"<Routes @rendermode=\"{(renderMode == "InteractiveServer" ? "@" : "")}{renderMode}\" />"));
+                .Replace("<Routes />", routesRenderModeAttribute is null
+                    ? $"<Routes @rendermode=\"{(renderMode == "InteractiveServer" ? "@" : "")}{renderMode}\" />"
+                    : $"<Routes {routesRenderModeAttribute} />"));
         Directory.CreateDirectory(Path.Combine(serverDirectory, "Models"));
         File.WriteAllText(Path.Combine(serverDirectory, "Models", "Movie.cs"), """
             namespace TestProject.Models;

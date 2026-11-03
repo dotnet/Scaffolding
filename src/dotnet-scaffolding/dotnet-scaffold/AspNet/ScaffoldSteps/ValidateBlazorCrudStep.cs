@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
@@ -128,13 +129,18 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
             if (_fileSystem.FileExists(appPath))
             {
                 var appContent = _fileSystem.ReadAllText(appPath);
-                var renderMode = new[] { "InteractiveAuto", "InteractiveServer", "InteractiveWebAssembly" }
-                    .FirstOrDefault(mode => appContent.Contains($"@rendermode=\"{mode}\"", StringComparison.Ordinal) ||
-                        appContent.Contains($"@rendermode=\"@{mode}\"", StringComparison.Ordinal));
-                if (renderMode is not null)
+                const string renderModePattern = @"@rendermode\s*=\s*""@?(?<parenthesized>\(\s*)?(?<mode>InteractiveAuto|InteractiveServer|InteractiveWebAssembly)\s*(?(parenthesized)\))""";
+                var renderMode = Regex.Match(appContent, $@"<Routes\b[^>]*?\s(?<attribute>{renderModePattern})",
+                    RegexOptions.None, TimeSpan.FromSeconds(1));
+                if (renderMode.Success)
                 {
                     blazorCrudModel.ProjectInfo.CodeChangeOptions!.Add("GlobalInteractive");
-                    codeModifierProperties.Add("$(BlazorRenderMode)", renderMode);
+                    codeModifierProperties.Add("$(BlazorRenderMode)", renderMode.Groups["mode"].Value);
+                    codeModifierProperties.Add("$(RoutesRenderModeAttribute)", renderMode.Groups["attribute"].Value);
+                    var headOutletRenderMode = Regex.Match(appContent, $@"<HeadOutlet\b[^>]*?\s(?<attribute>{renderModePattern})",
+                        RegexOptions.None, TimeSpan.FromSeconds(1));
+                    codeModifierProperties.Add("$(HeadOutletRenderModeAttribute)",
+                        headOutletRenderMode.Success ? headOutletRenderMode.Groups["attribute"].Value : renderMode.Groups["attribute"].Value);
                 }
             }
         }

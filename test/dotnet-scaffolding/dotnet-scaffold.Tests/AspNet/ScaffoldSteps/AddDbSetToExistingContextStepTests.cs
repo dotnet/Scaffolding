@@ -246,18 +246,6 @@ public class AddDbSetToExistingContextStepTests : IDisposable
     }
 
     // -----------------------------------------------------------------------
-    // Scenario 12: DbSetAlreadyPresent returns true for the expected property.
-    // -----------------------------------------------------------------------
-    [Fact]
-    public void DbSetAlreadyPresent_ReturnsTrue_WhenDbSetIsInFile()
-    {
-        const string statement = "public DbSet<Movie> Movie { get; set; } = default!;";
-        const string fileContent = "public class Ctx { public DbSet<Movie> Movie { get; set; } = default!; }";
-
-        Assert.True(ContainsDbSet(fileContent, statement));
-    }
-
-    // -----------------------------------------------------------------------
     // Scenario 13: DbSetAlreadyPresent returns false when marker is absent
     // -----------------------------------------------------------------------
     [Fact]

@@ -7,6 +7,7 @@
     using Microsoft.DotNet.Scaffolding.Internal.Services;
     using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
     using Microsoft.Extensions.Logging;
+    using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
     using System.Text.Json;
 
     namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
@@ -15,7 +16,9 @@
         {
             public required string ProjectPath { get; set; }
             public required string? ClientId { get; set; }
-            public string[]? WebRedirectUris { get; set; } 
+            public string? TenantId { get; set; }
+            public string? Username { get; set; }
+            public string[]? WebRedirectUris { get; set; }
             public string[]? SpaRedirectUris { get; set; }
             public bool AutoConfigureLocalUrls { get; set; } = true;
             public string CallbackPath { get; set; } = UpdateAppSettingsStep.DefaultCallbackPath;
@@ -35,9 +38,28 @@
 
             public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
             {
+                var succeeded = false;
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    succeeded = UpdateAuthorization();
+                    return Task.FromResult(succeeded);
+                }
+                finally
+                {
+                    if (!succeeded)
+                    {
+                        EntraRegistrationCleanup.TryCleanup(context, TenantId, Username, _logger);
+                    }
+                }
+            }
+
+            private bool UpdateAuthorization()
+            {
                 if (string.IsNullOrEmpty(ClientId))
                 {
-                    return Task.FromResult(false);
+                    _logger.LogError("A client ID is required to update app authorization.");
+                    return false;
                 }
 
                 if (AutoConfigureLocalUrls)
@@ -47,9 +69,11 @@
 
                 AzCliRunner? runner = AzCliCommand is null ? AzCliRunner.Create() : null;
 
-                if (UseExistingApplication && !TryMergeExistingWebRedirectUris(runner))
+                if (UseExistingApplication &&
+                    (!ValidateAzureCliIdentityStep.ValidateIdentity(TenantId, Username, _logger, ReadAccount) ||
+                    !TryMergeExistingWebRedirectUris(runner)))
                 {
-                    return Task.FromResult(false);
+                    return false;
                 }
 
                 // Build the Azure CLI command with all parameters
@@ -69,16 +93,35 @@
                     command += $" --public-client-redirect-uris {spaUrisJson}";
                 }
 
-                AzCliResult updateResult = RunAzCli(runner, command);
-                if (updateResult.ExitCode != 0 || !string.IsNullOrEmpty(updateResult.StdErr))
+                if (!ValidateAzureCliIdentityStep.ValidateIdentity(TenantId, Username, _logger, ReadAccount))
                 {
-                    _logger.LogError("Failed to update app registration: {Error}", updateResult.StdErr);
-                    return Task.FromResult(false);
+                    return false;
+                }
+
+                var (exitCode, stdErr) = RunUpdate(command);
+                if (exitCode != 0)
+                {
+                    _logger.LogError($"Failed to update app registration: {stdErr}");
+                    return false;
+                }
+
+                if (!string.IsNullOrWhiteSpace(stdErr))
+                {
+                    _logger.LogWarning("Azure CLI warning while updating app registration: {Warning}", stdErr);
                 }
 
                 _logger.LogInformation($"Updated App registration with ID token configuration and redirect URIs");
 
-                return Task.FromResult(true);
+                return true;
+            }
+
+            protected virtual (int ExitCode, string? Output, string? Error) ReadAccount()
+                => ValidateAzureCliIdentityStep.ReadAzureCliAccount();
+
+            protected virtual (int ExitCode, string? Error) RunUpdate(string command)
+            {
+                var result = RunAzCli(AzCliCommand is null ? AzCliRunner.Create() : null, command);
+                return (result.ExitCode, result.StdErr);
             }
 
             private bool TryMergeExistingWebRedirectUris(AzCliRunner? runner)
@@ -181,7 +224,7 @@
                             .Concat(localUrls)
                             .Distinct(StringComparer.Ordinal)
                             .ToArray();
-                    
+
                         _logger.LogInformation($"Configured {localUrls.Count} local redirect URIs from launchSettings.json");
                     }
                     else
@@ -209,7 +252,7 @@
                     .Concat(defaultUris)
                     .Distinct(StringComparer.Ordinal)
                     .ToArray();
-            
+
                 _logger.LogInformation("Added default localhost redirect URIs");
             }
 

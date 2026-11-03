@@ -2,10 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Internal.Services;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -17,6 +22,67 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.EntraId;
 /// </summary>
 public class EntraIdMsIdentityIntegrationTests
 {
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("12345678-1234-1234-1234-123456789abc")]
+    public async Task RegistrationOnly_PreservesProjectIsolationAndTracksOnlyNewApplications(string? existingClientId)
+    {
+        const string clientId = "12345678-1234-1234-1234-123456789abc";
+        var fileSystem = new Mock<IFileSystem>(MockBehavior.Strict);
+        fileSystem.Setup(fs => fs.FileExists("Test.csproj")).Returns(true);
+        var step = new RegistrationStep(fileSystem.Object)
+        {
+            ProjectPath = "Test.csproj",
+            TenantId = "tenant-a",
+            Username = "user@example.com",
+            ClientId = existingClientId
+        };
+        var context = new ScaffolderContext(Mock.Of<IScaffolder>());
+
+        Assert.True(await step.ExecuteAsync(context));
+
+        var expected = new System.Collections.Generic.List<string>
+        {
+            "--register-app", "--registration-only",
+            "--project-file-path", Path.GetFullPath("Test.csproj"),
+            "--project-type", "webapp", "--app-display-name", "Test",
+            "--tenant-id", "tenant-a", "--username", "user@example.com"
+        };
+        if (!string.IsNullOrEmpty(existingClientId))
+        {
+            expected.AddRange(["--client-id", existingClientId]);
+        }
+        Assert.Equal(expected, step.Arguments);
+        Assert.Equal(clientId, context.Properties["ClientId"]);
+        bool createsApplication = string.IsNullOrEmpty(existingClientId);
+        Assert.Equal(createsApplication ? 1 : 0, step.CapabilityChecks);
+        Assert.Equal(createsApplication, context.Properties.ContainsKey(EntraRegistrationCleanup.CreatedClientIdKey));
+        fileSystem.Verify(fs => fs.FileExists("Test.csproj"), Times.Once);
+        fileSystem.VerifyNoOtherCalls();
+    }
+
+    private sealed class RegistrationStep(IFileSystem fileSystem) : RegisterAppStep(
+        NullLogger<AddClientSecretStep>.Instance, fileSystem, Mock.Of<ITelemetryService>())
+    {
+        public string[]? Arguments { get; private set; }
+        public int CapabilityChecks { get; private set; }
+
+        protected override bool EnsureToolInstalled() => true;
+
+        protected override (int ExitCode, string? Output, string? Error) ReadCapabilities()
+        {
+            CapabilityChecks++;
+            return (0, "registration-cleanup", null);
+        }
+
+        protected override (int ExitCode, string? Output, string? Error) RunRegistration(string[] args)
+        {
+            Arguments = args;
+            return (0, "ClientId: 12345678-1234-1234-1234-123456789abc", null);
+        }
+    }
+
     [Fact]
     public void EntraIdScaffolder_IncludesRegisterAppStep_WhichUsesMsIdentity()
     {
@@ -32,7 +98,7 @@ public class EntraIdMsIdentityIntegrationTests
         
         // Act & Assert
         // Verify that RegisterAppStep type exists and can be instantiated
-        // This step is responsible for calling "dotnet msidentity --register-app" or "--update-app-registration"
+        // This step calls "dotnet msidentity --register-app --registration-only".
         Type registerAppStepType = typeof(RegisterAppStep);
         Assert.NotNull(registerAppStepType);
         Assert.True(registerAppStepType.IsAssignableTo(typeof(ScaffoldStep)));
@@ -63,8 +129,11 @@ public class EntraIdMsIdentityIntegrationTests
         
         // The actual scaffolding order in AspNetCommandService.cs is:
         // .WithStep<ValidateEntraIdStep>()
-        // .WithRegisterAppStep()           <- Uses msidentity CLI
+        // .WithValidateAzureCliIdentityStep()
         // .WithDetectBlazorWasmStep()
+        // .WithRegisterAppStep()           <- Uses msidentity CLI
+        // .WithUpdateAppAuthorizationStep()
+        // .WithAddClientSecretStep()       <- Ensures msidentity is installed, then uses it
         // ... other steps
         
         // This test verifies the key steps exist in the expected namespace

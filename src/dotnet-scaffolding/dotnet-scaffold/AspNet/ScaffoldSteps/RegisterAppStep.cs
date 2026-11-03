@@ -6,6 +6,7 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.Helpers;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -64,12 +65,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 
             // Ensure the msidentity tool is available before attempting to invoke it,
             // so a missing tool surfaces a clear, actionable message instead of a cryptic dotnet error.
-            if (!EnsureMsIdentityIsInstalled())
+            if (!EnsureToolInstalled())
             {
                 return Task.FromResult(false);
             }
 
-            if(ClientId is not null)
+            if (string.IsNullOrEmpty(ClientId) && !MsIdentityToolHelper.SupportsRegistrationCleanup(_logger, ReadCapabilities))
+            {
+                return Task.FromResult(false);
+            }
+
+            if (!string.IsNullOrEmpty(ClientId))
             {
                 _logger.LogInformation("Updating project...");
                 // Initialize user secrets
@@ -100,10 +106,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         /// <summary>
         /// Registers a new Azure AD application and captures the client ID.
         /// </summary>
-        private bool RegisterApp(ScaffolderContext context)
+        protected virtual bool RegisterApp(ScaffolderContext context)
         {
             try
             {
+                bool createsApplication = string.IsNullOrEmpty(ClientId);
                 // Fix for CS8620: Ensure all elements in the array are non-null by using null-coalescing operator
                 var args = new List<string>
                 {
@@ -120,7 +127,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     args.AddRange(["--client-id", ClientId]);
                 }
 
-                int exitCode = ExecuteMsIdentity(args.ToArray(), out var stdOut, out var stdErr);
+                var (exitCode, stdOut, stdErr) = RunRegistration(args.ToArray());
                 if (exitCode != 0)
                 {
                     _logger.LogError($"Error registering application: {stdErr}");
@@ -135,17 +142,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     {
                         ClientId = clientId.ToString("D");
                         context.Properties["ClientId"] = ClientId;
+                        if (createsApplication)
+                        {
+                            context.Properties[EntraRegistrationCleanup.CreatedClientIdKey] = ClientId;
+                        }
                         _logger.LogInformation($"Captured client ID: {ClientId}");
                     }
                     else
                     {
-                        _logger.LogWarning("Could not extract client ID from output");
+                        _logger.LogError("Could not extract the created client ID. Check the selected tenant for an application created during this run and remove it before retrying.");
                         return false;
                     }
                 }
                 else
                 {
-                    _logger.LogError("Registration returned no client ID.");
+                    _logger.LogError("Registration returned no client ID. Check the selected tenant for an application created during this run before retrying.");
                     return false;
                 }
                 return true;
@@ -161,5 +172,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
 
         protected virtual int ExecuteMsIdentity(string[] args, out string? stdOut, out string? stdErr) =>
             DotnetCliRunner.CreateDotNet("msidentity", args).ExecuteAndCaptureOutput(out stdOut, out stdErr);
+
+        protected virtual bool EnsureToolInstalled()
+            => EnsureMsIdentityIsInstalled();
+
+        protected virtual (int ExitCode, string? Output, string? Error) RunRegistration(string[] args)
+        {
+            var exitCode = ExecuteMsIdentity(args, out var output, out var error);
+            return (exitCode, output, error);
+        }
+
+        protected virtual (int ExitCode, string? Output, string? Error) ReadCapabilities()
+            => MsIdentityToolHelper.ReadCapabilities();
     }
 }

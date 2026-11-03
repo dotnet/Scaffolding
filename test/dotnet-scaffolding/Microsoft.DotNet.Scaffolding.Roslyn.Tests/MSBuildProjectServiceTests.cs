@@ -53,6 +53,38 @@ public class MSBuildProjectServiceTests : IDisposable
         Assert.Equal("true", properties["IncludeClient"]);
     }
 
+    [Fact]
+    public void TryGetEvaluatedItems_EvaluatesImportedConditionalItemsAndReportsDefiningFile()
+    {
+        var importPath = Path.Combine(_directory, "Packages.props");
+        File.WriteAllText(importPath, """
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="Imported.Package" Condition="'$(UseImported)' == 'true'" />
+                <PackageReference Include="Excluded.Package" Condition="'$(UseImported)' != 'true'" />
+              </ItemGroup>
+            </Project>
+            """);
+        File.WriteAllText(_projectPath, """
+            <Project>
+              <PropertyGroup><UseImported>true</UseImported></PropertyGroup>
+              <Import Project="Packages.props" />
+              <ItemGroup>
+                <PackageReference Include="Direct.Package" />
+                <Content Include="App.razor" />
+              </ItemGroup>
+            </Project>
+            """);
+
+        var service = new MSBuildProjectService(_projectPath);
+
+        Assert.True(service.TryGetEvaluatedItems(["PackageReference"], out var items, out var error), error);
+        Assert.Null(error);
+        Assert.Collection(items,
+            item => Assert.Equal(new EvaluatedProjectItem("PackageReference", "Imported.Package", importPath), item),
+            item => Assert.Equal(new EvaluatedProjectItem("PackageReference", "Direct.Package", _projectPath), item));
+    }
+
     [Theory]
     [InlineData("<Project><Import Project=\"Missing.props\" /></Project>", "Missing.props")]
     [InlineData("<Project Sdk=\"Scaffolding.Missing.Sdk\" />", "Scaffolding.Missing.Sdk")]
@@ -69,6 +101,9 @@ public class MSBuildProjectServiceTests : IDisposable
         Assert.Contains(expectedDiagnostic, error);
         Assert.False(service.TryGetEvaluatedProperties(["RootNamespace"], out var properties, out error));
         Assert.Empty(properties);
+        Assert.Contains(expectedDiagnostic, error);
+        Assert.False(service.TryGetEvaluatedItems(["PackageReference"], out var items, out error));
+        Assert.Empty(items);
         Assert.Contains(expectedDiagnostic, error);
 
         File.WriteAllText(_projectPath, "<Project />");

@@ -7,6 +7,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 {
@@ -74,6 +75,27 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// <inheritdoc />
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
+            var succeeded = false;
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                succeeded = UpdateSettings(context);
+                return Task.FromResult(succeeded);
+            }
+            finally
+            {
+                if (!succeeded)
+                {
+                    CleanupRegistration(context);
+                }
+            }
+        }
+
+        protected virtual void CleanupRegistration(ScaffolderContext context)
+            => EntraRegistrationCleanup.TryCleanup(context, TenantId, Username, _logger);
+
+        private bool UpdateSettings(ScaffolderContext context)
+        {
             string? projectDirectory = Path.GetDirectoryName(ProjectPath);
             if (string.IsNullOrEmpty(projectDirectory))
             {
@@ -83,13 +105,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             if (string.IsNullOrEmpty(ProjectPath) || !_fileSystem.DirectoryExists(projectDirectory))
             {
                 _logger.LogError($"Invalid project path: {ProjectPath}");
-                return Task.FromResult(false);
+                return false;
             }
 
             if (string.IsNullOrWhiteSpace(ClientId) || string.IsNullOrWhiteSpace(TenantId))
             {
                 _logger.LogError("Both ClientId and TenantId are required to write AzureAd development settings.");
-                return Task.FromResult(false);
+                return false;
             }
 
             string developmentSettingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
@@ -116,13 +138,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     if (conflictingKey is not null)
                     {
                         LogConflict(conflictingKey);
-                        return Task.FromResult(false);
+                        return false;
                     }
                 }
                 else if (!Overwrite && existingAzureAd is not null)
                 {
                     LogConflict("AzureAd");
-                    return Task.FromResult(false);
+                    return false;
                 }
 
                 context.Properties["CallbackPath"] = generatedAzureAd["CallbackPath"]!.ToString();
@@ -146,7 +168,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 {
                     _logger.LogInformation("No changes needed for AzureAd configuration in appsettings.Development.json.");
                     LogDevelopmentEnvironmentNotice();
-                    return Task.FromResult(true);
+                    return true;
                 }
 
                 JsonObject targetAzureAd = existingAzureAd as JsonObject ?? new JsonObject();
@@ -172,7 +194,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 WriteDevelopmentSettings(developmentSettingsPath, developmentSettings.ToJsonString(options));
                 _logger.LogInformation($"Updated '{Path.GetFileName(developmentSettingsPath)}' with AzureAd development configuration.");
                 LogDevelopmentEnvironmentNotice();
-                return Task.FromResult(true);
+                return true;
             }
             catch (JsonException ex)
             {
@@ -183,7 +205,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 _logger.LogError($"Failed to update appsettings.Development.json: {ex.Message}");
             }
 
-            return Task.FromResult(false);
+            return false;
         }
 
         private JsonObject ReadDevelopmentSettings(string developmentSettingsPath)

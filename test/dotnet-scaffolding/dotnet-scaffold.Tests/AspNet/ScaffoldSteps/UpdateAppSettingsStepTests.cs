@@ -10,7 +10,10 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.Extensions.Configuration;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -59,6 +62,172 @@ public class UpdateAppSettingsStepTests
             });
         _fileSystem.Setup(fs => fs.DeleteFile(It.IsAny<string>()))
             .Callback<string>(path => _files.Remove(path));
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_UpdatesConfigurationKeysCaseInsensitivelyAndPreservesCredentials()
+    {
+        SetExistingSettingsJson("""
+            {"azuread":{"clientid":"old-app","TENANTID":"old-tenant",
+            "clientcredentials":[{"SourceType":"StoreWithDistinguishedName","CertificateDistinguishedName":"CN=Dev"}]}}
+            """);
+
+        (bool result, _) = await ExecuteAsync(overwrite: true);
+
+        Assert.True(result);
+        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(_writtenContent!));
+        var configuration = new ConfigurationBuilder().AddJsonStream(stream).Build();
+        Assert.Equal(ClientId, configuration["AzureAd:ClientId"]);
+        Assert.Equal(TenantId, configuration["AzureAd:TenantId"]);
+        Assert.Equal("CN=Dev", configuration["AzureAd:ClientCredentials:0:CertificateDistinguishedName"]);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_PreservesDevelopmentOnlyCredentialsAndUnrelatedProperties()
+    {
+        const string original = """
+            {"AzureAd":{"ClientId":"old-app","Domain":"development.contoso.com",
+            "ClientCredentials":[{"SourceType":"StoreWithDistinguishedName","CertificateDistinguishedName":"CN=Dev"}],
+            "SignUpSignInPolicyId":"B2C_1_dev"},"Keep":"development"}
+            """;
+        SetExistingSettingsJson(original);
+        const string primary = """
+            {"AzureAd":{"ClientCredentials":[{"SourceType":"ClientSecret","ClientSecret":"primary-only"}],
+            "SignUpSignInPolicyId":"B2C_1_primary"}}
+            """;
+        _files[_appSettingsPath] = primary;
+
+        (bool result, _) = await ExecuteAsync(overwrite: true, domain: null);
+
+        Assert.True(result);
+        JsonNode settings = ParseWrittenSettings();
+        Assert.True(JsonNode.DeepEquals(
+            JsonNode.Parse(original)!["AzureAd"]!["ClientCredentials"],
+            settings["AzureAd"]!["ClientCredentials"]));
+        Assert.Equal("development.contoso.com", settings["AzureAd"]!["Domain"]!.GetValue<string>());
+        Assert.Equal("B2C_1_dev", settings["AzureAd"]!["SignUpSignInPolicyId"]!.GetValue<string>());
+        Assert.Equal("development", settings["Keep"]!.GetValue<string>());
+        Assert.Equal(primary, _files[_appSettingsPath]);
+        _fileSystem.Verify(fs => fs.ReadAllText(_appSettingsPath), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task ExecuteAsync_OnWriteFailure_CleansUpOnlyCurrentRunApplication(
+        bool existingApp, bool replacementFails)
+    {
+        const string originalDevelopment = """{"Keep":"development"}""";
+        const string originalPrimary = """{"AzureAd":{"ClientId":"production"}}""";
+        SetExistingSettingsJson(originalDevelopment);
+        _files[_appSettingsPath] = originalPrimary;
+        if (replacementFails)
+        {
+            _fileSystem.Setup(fs => fs.ReplaceFilePreservingPermissions(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Throws(new IOException("Replacement failed."));
+        }
+        else
+        {
+            _fileSystem.Setup(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()))
+                .Callback<string, string>((path, _) =>
+                {
+                    _files[path] = "partially written";
+                    throw new IOException("Write failed after truncation.");
+                });
+        }
+        TestStep step = CreateCleanupStep(existingApp);
+
+        Assert.False(await step.ExecuteAsync(_context));
+
+        Assert.Equal(originalDevelopment, _files[_developmentSettingsPath]);
+        Assert.Equal(originalPrimary, _files[_appSettingsPath]);
+        Assert.Equal(2, _files.Count);
+        if (existingApp)
+        {
+            Assert.Empty(step.CleanupCommands);
+            Assert.Equal(ClientId, _context.Properties["ClientId"]);
+        }
+        else
+        {
+            Assert.Equal(new[] { "--unregister-app", "--client-id", ClientId, "--tenant-id", TenantId,
+                "--username", Username }, Assert.Single(step.CleanupCommands));
+            Assert.False(_context.Properties.ContainsKey("ClientId"));
+            Assert.False(_context.Properties.ContainsKey("ClientSecret"));
+            Assert.False(_context.Properties.ContainsKey(EntraRegistrationCleanup.CreatedClientIdKey));
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_InvalidDevelopmentSettings_CleansUpWithoutOverwriting()
+    {
+        SetExistingSettingsJson("invalid JSON");
+        TestStep step = CreateCleanupStep(existingApp: false);
+
+        Assert.False(await step.ExecuteAsync(_context));
+
+        Assert.Single(step.CleanupCommands);
+        Assert.Equal("invalid JSON", _files[_developmentSettingsPath]);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_CancellationCleansUpCurrentRunApplication()
+    {
+        TestStep step = CreateCleanupStep(existingApp: false);
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            async () => await step.ExecuteAsync(_context, new CancellationToken(canceled: true)));
+
+        Assert.Single(step.CleanupCommands);
+        Assert.Empty(_files);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_SuccessPersistsOnlyDevelopmentSettingsWithoutCleanup()
+    {
+        TestStep step = CreateCleanupStep(existingApp: false);
+
+        Assert.True(await step.ExecuteAsync(_context));
+
+        Assert.Empty(step.CleanupCommands);
+        Assert.Equal(ClientId, _context.Properties[EntraRegistrationCleanup.CreatedClientIdKey]);
+        Assert.Single(_files);
+        AssertManagedValuesMatch(ParseWrittenSettings()["AzureAd"]!);
+        _fileSystem.Verify(fs => fs.ReadAllText(_appSettingsPath), Times.Never);
+    }
+
+    private TestStep CreateCleanupStep(bool existingApp)
+    {
+        _context.Properties["ClientId"] = ClientId;
+        if (!existingApp)
+        {
+            _context.Properties[EntraRegistrationCleanup.CreatedClientIdKey] = ClientId;
+            _context.Properties["ClientSecret"] = "development-secret";
+        }
+        return new TestStep(_fileSystem.Object)
+        {
+            ProjectPath = _projectPath,
+            ClientId = ClientId,
+            TenantId = TenantId,
+            Username = Username,
+            Domain = Domain
+        };
+    }
+
+    private sealed class TestStep(IFileSystem fileSystem) : UpdateAppSettingsStep(
+        NullLogger<UpdateAppSettingsStep>.Instance, fileSystem, Mock.Of<ITelemetryService>())
+    {
+        public List<string[]> CleanupCommands { get; } = [];
+
+        protected override void CleanupRegistration(ScaffolderContext context)
+            => EntraRegistrationCleanup.TryCleanup(context, TenantId, Username, NullLogger.Instance, args =>
+            {
+                CleanupCommands.Add(args);
+                return (0, null);
+            });
     }
 
     [Fact]

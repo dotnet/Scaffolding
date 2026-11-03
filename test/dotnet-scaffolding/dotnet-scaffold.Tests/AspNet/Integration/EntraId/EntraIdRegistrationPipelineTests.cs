@@ -156,6 +156,9 @@ public class EntraIdRegistrationPipelineTests
 
         protected override bool EnsureMsIdentityIsInstalled() => true;
 
+        protected override (int ExitCode, string? Output, string? Error) ReadCapabilities()
+            => (0, "registration-cleanup", null);
+
         protected override int ExecuteMsIdentity(string[] args, out string stdOut, out string stdErr)
         {
             TextWriter originalOutput = Console.Out;

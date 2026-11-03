@@ -50,6 +50,22 @@ namespace Microsoft.DotNet.MSIdentity
 
         public async Task<ApplicationParameters?> Run()
         {
+            if (CommandName == Commands.UNREGISTER_APPLICATION_COMMAND &&
+                !string.IsNullOrWhiteSpace(ProvisioningToolOptions.ClientId) &&
+                !string.IsNullOrWhiteSpace(ProvisioningToolOptions.TenantId) &&
+                !string.IsNullOrWhiteSpace(ProvisioningToolOptions.Username))
+            {
+                var parameters = new ApplicationParameters
+                {
+                    ClientId = ProvisioningToolOptions.ClientId,
+                    TenantId = ProvisioningToolOptions.TenantId,
+                    Instance = ProvisioningToolOptions.Instance,
+                    IsGovernmentCloud = ProvisioningToolOptions.IsGovernmentCloud
+                };
+                await UnregisterApplication(GetOperationCredential(parameters.TenantId), parameters);
+                return null;
+            }
+
             ValidateProjectPath();
 
             if (ProvisioningToolOptions.RegistrationOnly)
@@ -91,10 +107,8 @@ namespace Microsoft.DotNet.MSIdentity
                 projectDescription);
 
             // Get developer credentials
-            TokenCredential tokenCredential = GetTokenCredential(
-                ProvisioningToolOptions,
-                ProvisioningToolOptions.TenantId ?? projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain,
-                ConsoleLogger);
+            TokenCredential tokenCredential = GetOperationCredential(
+                ProvisioningToolOptions.TenantId ?? projectSettings.ApplicationParameters.EffectiveTenantId ?? projectSettings.ApplicationParameters.EffectiveDomain);
 
             ApplicationParameters applicationParameters;
             switch (CommandName)
@@ -277,6 +291,9 @@ namespace Microsoft.DotNet.MSIdentity
                 provisioningToolOptions.Instance,
                 consoleLogger);
         }
+
+        protected virtual TokenCredential GetOperationCredential(string? tenantId)
+            => GetTokenCredential(ProvisioningToolOptions, tenantId, ConsoleLogger);
 
         /// <summary>
         /// Creates a new Azure AD App registration
@@ -549,7 +566,7 @@ namespace Microsoft.DotNet.MSIdentity
         /// <param name="tokenCredential"></param>
         /// <param name="applicationParameters"></param>
         /// <returns></returns>
-        private async Task UnregisterApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
+        protected virtual async Task UnregisterApplication(TokenCredential tokenCredential, ApplicationParameters applicationParameters)
         {
             try
             {

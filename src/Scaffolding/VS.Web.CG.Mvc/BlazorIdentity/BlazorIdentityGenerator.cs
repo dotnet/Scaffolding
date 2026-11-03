@@ -51,6 +51,25 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
         private static readonly StringComparison PathComparison = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? StringComparison.OrdinalIgnoreCase
             : StringComparison.Ordinal;
+        private static readonly HashSet<string> HtmlVoidElements = new HashSet<string>(
+            new[]
+            {
+                "area",
+                "base",
+                "br",
+                "col",
+                "embed",
+                "hr",
+                "img",
+                "input",
+                "link",
+                "meta",
+                "param",
+                "source",
+                "track",
+                "wbr",
+            },
+            StringComparer.OrdinalIgnoreCase);
         private bool CalledFromCommandline => !(FileSystem is SimulationModeFileSystem);
 
         private IEnumerable<string> _templateFolders;
@@ -859,9 +878,11 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
 
             var expression = SyntaxFactory.ParseExpression(contents.Substring(index));
-            return expression.SpanStart == 0 &&
-                (expression is LiteralExpressionSyntax || expression is InterpolatedStringExpressionSyntax)
-                ? index + expression.Span.End
+            var literal = expression.DescendantNodesAndSelf()
+                .FirstOrDefault(node => node.SpanStart == 0 &&
+                    (node is LiteralExpressionSyntax || node is InterpolatedStringExpressionSyntax));
+            return literal != null
+                ? index + literal.Span.End
                 : index;
         }
 
@@ -873,7 +894,28 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
 
             var next = contents[index + 1];
-            return char.IsLetter(next) || next == '!' || next == '?';
+            if (!char.IsLetter(next) && next != '!' && next != '?')
+            {
+                return false;
+            }
+
+            var previous = index - 1;
+            while (previous >= 0 && char.IsWhiteSpace(contents[previous]))
+            {
+                previous--;
+            }
+
+            return previous < 0 || !IsCSharpExpressionEndingCharacter(contents[previous]);
+        }
+
+        private static bool IsCSharpExpressionEndingCharacter(char value)
+        {
+            return SyntaxFacts.IsIdentifierPartCharacter(value) ||
+                value == ')' ||
+                value == ']' ||
+                value == '"' ||
+                value == '\'' ||
+                value == '!';
         }
 
         private static int FindRazorMarkupEnd(string contents, int markupStart)
@@ -907,7 +949,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 }
 
                 var isDeclaration = contents[tagStart + 1] == '!' || contents[tagStart + 1] == '?';
-                var isSelfClosing = tagEnd > tagStart && contents[tagEnd - 1] == '/';
+                var isSelfClosing = tagEnd > tagStart &&
+                    (contents[tagEnd - 1] == '/' || IsHtmlVoidElement(contents, tagStart, tagEnd));
                 if (!isDeclaration)
                 {
                     if (isClosingTag)
@@ -932,6 +975,21 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
 
             return markupStart;
+        }
+
+        private static bool IsHtmlVoidElement(string contents, int tagStart, int tagEnd)
+        {
+            var nameStart = tagStart + 1;
+            var nameEnd = nameStart;
+            while (nameEnd < tagEnd &&
+                !char.IsWhiteSpace(contents[nameEnd]) &&
+                contents[nameEnd] != '/')
+            {
+                nameEnd++;
+            }
+
+            return nameEnd > nameStart &&
+                HtmlVoidElements.Contains(contents.Substring(nameStart, nameEnd - nameStart));
         }
 
         private static int FindMarkupTagEnd(string contents, int index)

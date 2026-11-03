@@ -505,6 +505,9 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [Theory]
         [InlineData("@if (true) { <p>{</p> }")]
         [InlineData("@if (true) { <a href=\"https://example.com\">Link</a> }")]
+        [InlineData("@code { private bool IsLess(int a, int b) => a<b; }")]
+        [InlineData("@code { private bool IsLess(int a, int b) => a < b; }")]
+        [InlineData("@if (true) { <p>{<br></p> }")]
         [InlineData("@code { @* unmatched markup brace: { *@ }")]
         [InlineData("@if (true) { } else { var marker = \"@*\"; }")]
         public void ResolveLayoutNamespacePreservesDirectiveAfterMixedRazorAndCSharp(string razorCode)
@@ -766,6 +769,32 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 Array.Empty<string>());
 
             Assert.Equal("Custom.Server.Layout.MainLayout", result);
+        }
+
+        [Theory]
+        [InlineData("@code { private const string Marker = \"@*\" + \"docs\"; }")]
+        [InlineData("@code { private const string Marker = \"@*\".Trim() + \"docs\"; }")]
+        public void ResolveLayoutNamespaceIgnoresCommentMarkerInConcatenatedStringLiteral(string razorCode)
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            fileSystem
+                .Setup(fs => fs.ReadAllText(mainLayoutPath))
+                .Returns(razorCode + Environment.NewLine +
+                    "@namespace Active.MixedContent" + Environment.NewLine +
+                    "<main />");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("Active.MixedContent.MainLayout", result);
         }
 
         private static ProjectReferenceInformation CreateProjectReference(string projectDirectory, string projectName)

@@ -86,7 +86,7 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
         }
 
         string dbContextFileName = Path.GetFileName(dbContextPath);
-        string configJson = BuildCodeModifierConfig(dbContextFileName, dbSetStatement);
+        string configJson = BuildCodeModifierConfig(dbContextPath, dbSetStatement);
 
         _logger.LogInformation($"Adding DbSet property to '{dbContextFileName}'...");
 
@@ -119,7 +119,9 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
     /// to insert <paramref name="dbSetStatement"/> as a class property via
     /// <c>ClassProperties</c>. Duplicate detection is built into DocumentBuilder.
     /// </summary>
-    internal static string BuildCodeModifierConfig(string dbContextFileName, string dbSetStatement)
+    /// <param name="dbContextFilePath">The context's full source path, used to select the exact document.</param>
+    /// <param name="dbSetStatement">The property declaration to insert.</param>
+    internal static string BuildCodeModifierConfig(string dbContextFilePath, string dbSetStatement)
     {
         dbSetStatement = NormalizeDbSetStatement(dbSetStatement);
 
@@ -129,7 +131,7 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
             {
                 new
                 {
-                    FileName = dbContextFileName,
+                    FileName = dbContextFilePath,
                     ClassProperties = new[]
                     {
                         new { Block = dbSetStatement }

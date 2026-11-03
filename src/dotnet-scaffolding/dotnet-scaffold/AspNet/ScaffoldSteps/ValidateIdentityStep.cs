@@ -246,6 +246,11 @@ internal class ValidateIdentityStep : ScaffoldStep
         {
             var dbContextClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(dbContextClassName, StringComparison.OrdinalIgnoreCase));
             dbContextInfo = ClassAnalyzers.GetIdentityDbContextInfo(settings.Project, dbContextClassSymbol, dbContextClassName, settings.DatabaseProvider);
+            // The .NET 9+ shared context template creates new contexts in the global namespace.
+            if (dbContextClassSymbol is null && projectInfo.LowestSupportedTargetFramework is not TargetFramework.Net8)
+            {
+                dbContextInfo.DbContextNamespace = string.Empty;
+            }
             dbContextInfo.EfScenario = true;
         }
 

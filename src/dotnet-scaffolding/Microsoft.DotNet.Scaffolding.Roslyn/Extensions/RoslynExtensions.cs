@@ -96,6 +96,15 @@ public static class RoslynExtensions
             return null;
         }
 
+        if (Path.IsPathRooted(documentName))
+        {
+            var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+            var fullPath = Path.GetFullPath(documentName);
+            return project.Documents.FirstOrDefault(document =>
+                document.FilePath is not null &&
+                Path.GetFullPath(document.FilePath).Equals(fullPath, comparison));
+        }
+
         //often Document.Name is the file path of the document and not the name.
         //check for all possible cases. 
         return project.Documents.FirstOrDefault(x =>

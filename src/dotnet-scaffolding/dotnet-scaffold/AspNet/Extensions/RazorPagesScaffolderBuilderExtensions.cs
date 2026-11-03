@@ -50,12 +50,6 @@ internal static class RazorPagesScaffolderBuilderExtensions
                     step.CodeModifierProperties.TryAdd(kvp.Key, kvp.Value);
                 }
 
-                if (!string.IsNullOrEmpty(razorPageModel.DbContextInfo.DbContextNamespace))
-                {
-                    step.CodeModifierProperties[Internal.Constants.CodeModifierPropertyConstants.DbContextName] =
-                        $"{razorPageModel.DbContextInfo.DbContextNamespace}.{razorPageModel.DbContextInfo.DbContextClassName}";
-                }
-
                 step.ProjectPath = crudSettings.Project;
                 step.CodeChangeOptions = razorPageModel.ProjectInfo.CodeChangeOptions ?? [];
             }

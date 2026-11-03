@@ -110,7 +110,7 @@ internal class DocumentBuilder
         else if (!string.IsNullOrEmpty(_codeFile.FileName))
         {
             var namespaceNode = root?.Members.OfType<BaseNamespaceDeclarationSyntax>()?.FirstOrDefault();
-            string className = ProjectModifierHelper.GetClassName(_codeFile.FileName);
+            string className = ProjectModifierHelper.GetClassName(Path.GetFileName(_codeFile.FileName));
             // get classNode. All class changes are done on the ClassDeclarationSyntax and then that node is replaced using documentEditor.
             var classDeclarationSyntax = namespaceNode?.
                 DescendantNodes().

@@ -21,7 +21,13 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
     [InlineData(false, true, true)]
     [InlineData(true, false, false)]
     [InlineData(false, false, false)]
-    public async Task Scaffold_RazorPagesCrud_ReferencedModelAndDbContext(bool directModelReference, bool alreadyRegistered, bool existingDbSet)
+    [InlineData(true, false, true, "mvccontroller-crud")]
+    [InlineData(true, false, true, "minimalapi")]
+    [InlineData(true, false, true, "blazor-crud")]
+    [InlineData(true, false, false, "razorpages-crud", true)]
+    public async Task Scaffold_RazorPagesCrud_ReferencedModelAndDbContext(
+        bool directModelReference, bool alreadyRegistered, bool existingDbSet,
+        string scaffolder = "razorpages-crud", bool duplicateContextFileNames = false)
     {
         var modelDirectory = Path.Combine(_testDirectory, "ClassLibrary1");
         var contextDirectory = Path.Combine(_testDirectory, "ClassLibrary2");
@@ -50,7 +56,9 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
               </ItemGroup>
             </Project>
             """);
-        var contextPath = Path.Combine(contextDirectory, "MyDbContext.cs");
+        var targetContextDirectory = duplicateContextFileNames ? Path.Combine(contextDirectory, "ZSelected") : contextDirectory;
+        Directory.CreateDirectory(targetContextDirectory);
+        var contextPath = Path.Combine(targetContextDirectory, "MyDbContext.cs");
         const string contextWithDbSet = """
             using ClassLibrary1.Models;
             using Microsoft.EntityFrameworkCore;
@@ -65,6 +73,22 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
             ? contextWithDbSet
             : contextWithDbSet.Replace("    public DbSet<Movie> Movies { get; set; }", string.Empty);
         File.WriteAllText(contextPath, contextSource);
+        string? duplicatePath = null;
+        const string duplicateSource = """
+            using Microsoft.EntityFrameworkCore;
+            namespace ClassLibrary2.Other;
+            public class OtherMyDbContext : DbContext
+            {
+                public OtherMyDbContext(DbContextOptions<OtherMyDbContext> options) : base(options) { }
+            }
+            """;
+        if (duplicateContextFileNames)
+        {
+            var duplicateDirectory = Path.Combine(contextDirectory, "AUnselected");
+            Directory.CreateDirectory(duplicateDirectory);
+            duplicatePath = Path.Combine(duplicateDirectory, "MyDbContext.cs");
+            File.WriteAllText(duplicatePath, duplicateSource);
+        }
         const string unrelatedSource = "namespace TestProject; public class UnrelatedClass { }";
         var unrelatedPath = Path.Combine(_testProjectDir, "MyDbContext.cs");
         File.WriteAllText(unrelatedPath, unrelatedSource);
@@ -81,9 +105,23 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
             </Project>
             """));
         WriteProgram("ClassLibrary2.DBContext", alreadyRegistered);
+        if (scaffolder == "blazor-crud")
+        {
+            File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
+            var componentsDirectory = Path.Combine(_testProjectDir, "Components");
+            Directory.CreateDirectory(componentsDirectory);
+            File.WriteAllText(Path.Combine(componentsDirectory, "_Imports.razor"), ScaffoldCliHelper.GetBlazorImportsRazor());
+            File.WriteAllText(Path.Combine(componentsDirectory, "App.razor"), ScaffoldCliHelper.GetBlazorAppRazor());
+            File.WriteAllText(Path.Combine(componentsDirectory, "Routes.razor"), ScaffoldCliHelper.GetBlazorRoutesRazor());
+        }
 
-        await AssertExistingContextScaffoldingAsync(contextPath, contextSource, "ClassLibrary1.Models", "ClassLibrary2.DBContext", alreadyRegistered, existingDbSet);
+        await AssertExistingContextScaffoldingAsync(contextPath, contextSource, "ClassLibrary1.Models", "ClassLibrary2.DBContext",
+            alreadyRegistered, existingDbSet, scaffolder);
         Assert.Equal(unrelatedSource, File.ReadAllText(unrelatedPath));
+        if (duplicatePath is not null)
+        {
+            Assert.Equal(duplicateSource, File.ReadAllText(duplicatePath));
+        }
     }
 
     [Theory]
@@ -143,32 +181,53 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
     }
 
     private async Task AssertExistingContextScaffoldingAsync(
-        string contextPath, string contextSource, string modelNamespace, string contextNamespace, bool alreadyRegistered, bool existingDbSet = true)
+        string contextPath, string contextSource, string modelNamespace, string contextNamespace, bool alreadyRegistered,
+        bool existingDbSet = true, string scaffolder = "razorpages-crud")
     {
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
         Assert.True(preExitCode == 0, $"Build before scaffolding failed.\n{preOutput}\n{preError}");
 
-        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework, "razorpages-crud",
+        var options = new System.Collections.Generic.List<string>
+        {
             "--project", _testProjectPath,
             "--model", "Movie",
             "--dataContext", "MyDbContext",
-            "--dbProvider", "sqlserver-efcore",
-            "--page", "CRUD");
+            "--dbProvider", "sqlserver-efcore"
+        };
+        options.AddRange(scaffolder switch
+        {
+            "mvccontroller-crud" => new[] { "--controller", "MoviesController", "--views" },
+            "minimalapi" => new[] { "--endpoints", "MovieEndpoints" },
+            _ => new[] { "--page", "CRUD" }
+        });
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(TargetFramework, scaffolder, options.ToArray());
 
         Assert.True(exitCode == 0, $"Scaffolding failed.\n{output}\n{error}");
         Assert.DoesNotContain("Invalid --model", output);
         Assert.DoesNotContain("An error occurred", output);
-        foreach (var page in new[] { "Create", "Delete", "Details", "Edit", "Index" })
+        if (scaffolder == "razorpages-crud")
         {
-            var pagePath = Path.Combine(_testProjectDir, "Pages", "MoviePages", $"{page}.cshtml");
-            Assert.True(File.Exists(pagePath), $"Missing {pagePath}.\n{output}\n{error}");
-            Assert.True(File.Exists(pagePath + ".cs"), $"Missing {pagePath}.cs");
-            var pageSource = File.ReadAllText(pagePath + ".cs");
-            Assert.Contains($"using {modelNamespace};", pageSource);
-            Assert.Contains($"using {contextNamespace};", pageSource);
-            Assert.Contains("MyDbContext", pageSource);
-            Assert.Contains(existingDbSet ? "_context.Movies" : "_context.Movie", pageSource);
+            foreach (var page in new[] { "Create", "Delete", "Details", "Edit", "Index" })
+            {
+                var pagePath = Path.Combine(_testProjectDir, "Pages", "MoviePages", $"{page}.cshtml");
+                Assert.True(File.Exists(pagePath), $"Missing {pagePath}.\n{output}\n{error}");
+                Assert.True(File.Exists(pagePath + ".cs"), $"Missing {pagePath}.cs");
+                var pageSource = File.ReadAllText(pagePath + ".cs");
+                Assert.Contains($"using {modelNamespace};", pageSource);
+                Assert.Contains($"using {contextNamespace};", pageSource);
+                Assert.Contains("MyDbContext", pageSource);
+                Assert.Contains(existingDbSet ? "_context.Movies" : "_context.Movie", pageSource);
+            }
+        }
+        else
+        {
+            var generatedPath = scaffolder switch
+            {
+                "mvccontroller-crud" => Path.Combine(_testProjectDir, "Controllers", "MoviesController.cs"),
+                "minimalapi" => Path.Combine(_testProjectDir, "MovieEndpoints.cs"),
+                _ => Path.Combine(_testProjectDir, "Components", "Pages", "MoviePages", "Index.razor")
+            };
+            Assert.True(File.Exists(generatedPath), $"Missing {generatedPath}.\n{output}\n{error}");
         }
 
         var updatedContext = File.ReadAllText(contextPath);
@@ -183,8 +242,16 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
         }
         Assert.False(File.Exists(Path.Combine(_testProjectDir, "Data", "MyDbContext.cs")));
         var program = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-        Assert.Equal(1, program.Split("AddDbContext<").Length - 1);
-        Assert.Equal(1, program.Split("AddRazorPages()").Length - 1);
+        var registrationMethod = scaffolder == "blazor-crud" ? "AddDbContextFactory<" : "AddDbContext<";
+        Assert.Equal(1, program.Split(registrationMethod).Length - 1);
+        if (!alreadyRegistered)
+        {
+            Assert.Contains($"{registrationMethod}{contextNamespace}.MyDbContext>", program);
+        }
+        if (scaffolder == "razorpages-crud")
+        {
+            Assert.Equal(1, program.Split("AddRazorPages()").Length - 1);
+        }
         if (alreadyRegistered)
         {
             Assert.Contains(ExistingRegistration, program);

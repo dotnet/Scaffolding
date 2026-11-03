@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.Scaffolding.Roslyn.Extensions;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
@@ -20,6 +21,23 @@ public class CodeServiceTests : IDisposable
     public CodeServiceTests()
     {
         Directory.CreateDirectory(_directory);
+    }
+
+    [Fact]
+    public void GetDocument_FullPath_SelectsExactDocumentWithDuplicateFileNames()
+    {
+        using var workspace = new AdhocWorkspace();
+        var project = workspace.AddProject("Contexts", LanguageNames.CSharp);
+        var firstPath = Path.Combine(_directory, "First", "MyDbContext.cs");
+        var selectedPath = Path.Combine(_directory, "Selected", "MyDbContext.cs");
+        var solution = project.Solution
+            .AddDocument(DocumentId.CreateNewId(project.Id), "MyDbContext.cs", string.Empty, filePath: firstPath)
+            .AddDocument(DocumentId.CreateNewId(project.Id), "MyDbContext.cs", string.Empty, filePath: selectedPath);
+        project = solution.GetProject(project.Id);
+
+        Assert.Equal(selectedPath, project.GetDocument(selectedPath).FilePath);
+        Assert.Null(project.GetDocument(Path.Combine(_directory, "Missing", "MyDbContext.cs")));
+        Assert.Equal(firstPath, project.GetDocument("MyDbContext.cs").FilePath);
     }
 
     [Fact]

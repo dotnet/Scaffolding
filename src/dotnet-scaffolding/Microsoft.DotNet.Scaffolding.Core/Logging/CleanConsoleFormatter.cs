@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.DotNet.Scaffolding.Core.Logging;
 
@@ -12,12 +13,18 @@ namespace Microsoft.DotNet.Scaffolding.Core.Logging;
 /// </summary>
 internal class CleanConsoleFormatter : ConsoleFormatter
 {
+    private const string BrightRedColor = "\x1B[1m\x1B[31m";
+    private const string BrightYellowColor = "\x1B[1m\x1B[33m";
+    private const string ResetColor = "\x1B[0m";
+    private readonly IOptionsMonitor<ConsoleLoggerOptions> _consoleOptions;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CleanConsoleFormatter"/> class.
     /// </summary>
-    public CleanConsoleFormatter()
+    public CleanConsoleFormatter(IOptionsMonitor<ConsoleLoggerOptions> consoleOptions)
         : base(nameof(CleanConsoleFormatter))
     {
+        _consoleOptions = consoleOptions;
     }
 
     /// <summary>
@@ -28,13 +35,38 @@ internal class CleanConsoleFormatter : ConsoleFormatter
     /// <param name="scopeProvider">The external scope provider.</param>
     /// <param name="textWriter">The text writer to write the log message to.</param>
     public override void Write<TState>(in LogEntry<TState> logEntry, IExternalScopeProvider? scopeProvider, TextWriter textWriter)
-    {
-        // Format the log message using the provided formatter, ignoring log level and category.
-        string? message = logEntry.Formatter?.Invoke(logEntry.State, logEntry.Exception);
+        => Write(logEntry, textWriter, Console.IsOutputRedirected, Console.IsErrorRedirected, Environment.GetEnvironmentVariable("NO_COLOR"));
 
-        if (message is not null)
+    internal void Write<TState>(in LogEntry<TState> logEntry, TextWriter textWriter, bool isOutputRedirected, bool isErrorRedirected = false, string? noColor = null)
+    {
+        string? message = logEntry.Formatter?.Invoke(logEntry.State, logEntry.Exception);
+        if (message is null)
         {
-            textWriter.WriteLine(message);
+            return;
+        }
+
+        bool isDestinationRedirected = logEntry.LogLevel >= _consoleOptions.CurrentValue.LogToStandardErrorThreshold
+            ? isErrorRedirected
+            : isOutputRedirected;
+
+        // Write ANSI codes through the logging writer, not the global console.
+        string? color = isDestinationRedirected || !string.IsNullOrEmpty(noColor) ? null : logEntry.LogLevel switch
+        {
+            LogLevel.Error or LogLevel.Critical => BrightRedColor,
+            LogLevel.Warning => BrightYellowColor,
+            _ => null
+        };
+
+        if (color is not null)
+        {
+            textWriter.Write(color);
+        }
+
+        textWriter.WriteLine(message);
+
+        if (color is not null)
+        {
+            textWriter.Write(ResetColor);
         }
     }
 }

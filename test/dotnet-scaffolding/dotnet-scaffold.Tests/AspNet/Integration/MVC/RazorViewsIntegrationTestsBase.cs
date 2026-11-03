@@ -89,24 +89,7 @@ public abstract class RazorViewsIntegrationTestsBase : IDisposable
     [InlineData(true)]
     public async Task Scaffold_Views_WithModelInReferencedProject(bool buildBeforeScaffolding)
     {
-        var modelsDirectory = Path.Combine(_testDirectory, "BookStore Models");
-        Directory.CreateDirectory(modelsDirectory);
-        var modelsProjectPath = Path.Combine(modelsDirectory, "BookStore.Models.csproj");
-        File.WriteAllText(modelsProjectPath, $"""
-            <Project Sdk="Microsoft.NET.Sdk">
-              <PropertyGroup>
-                <TargetFramework>{TargetFramework}</TargetFramework>
-              </PropertyGroup>
-            </Project>
-            """);
-        File.WriteAllText(Path.Combine(modelsDirectory, "Book.cs"), """
-            namespace BookStore.Models;
-            public class Book
-            {
-                public int Id { get; set; }
-                public string Title { get; set; } = string.Empty;
-            }
-            """);
+        var modelsProjectPath = CreateBookModelProject();
         File.WriteAllText(_testProjectPath, $"""
             <Project Sdk="Microsoft.NET.Sdk.Web">
               <PropertyGroup>
@@ -126,8 +109,36 @@ public abstract class RazorViewsIntegrationTestsBase : IDisposable
         Assert.True(preparation.ExitCode == 0,
             $"Project preparation failed.\nOutput: {preparation.Output}\nError: {preparation.Error}");
         Assert.Equal(buildBeforeScaffolding,
-            File.Exists(Path.Combine(modelsDirectory, "bin", "Debug", TargetFramework, "BookStore.Models.dll")));
+            File.Exists(Path.Combine(Path.GetDirectoryName(modelsProjectPath)!, "bin", "Debug", TargetFramework, "BookStore.Models.dll")));
 
+        await ScaffoldBookIndexAndVerifyBuildAsync();
+    }
+
+    protected string CreateBookModelProject()
+    {
+        var modelsDirectory = Path.Combine(_testDirectory, "BookStore Models");
+        Directory.CreateDirectory(modelsDirectory);
+        var modelsProjectPath = Path.Combine(modelsDirectory, "BookStore.Models.csproj");
+        File.WriteAllText(modelsProjectPath, $"""
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFramework>{TargetFramework}</TargetFramework>
+              </PropertyGroup>
+            </Project>
+            """);
+        File.WriteAllText(Path.Combine(modelsDirectory, "Book.cs"), """
+            namespace BookStore.Models;
+            public class Book
+            {
+                public int Id { get; set; }
+                public string Title { get; set; } = string.Empty;
+            }
+            """);
+        return modelsProjectPath;
+    }
+
+    protected async Task ScaffoldBookIndexAndVerifyBuildAsync()
+    {
         var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
             "views",

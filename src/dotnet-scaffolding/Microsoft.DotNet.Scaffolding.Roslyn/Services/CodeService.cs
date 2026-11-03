@@ -1,4 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
+using System.Collections.Concurrent;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -269,13 +270,19 @@ public class CodeService : ICodeService, IDisposable
         UnloadWorkspace();
     }
 
+    /// <inheritdoc />
     public Task<List<ISymbol>> GetAllClassSymbolsAsync()
         => GetAllClassSymbolsAsync(includeReferencedProjects: false);
 
+    /// <inheritdoc />
     public async Task<List<ISymbol>> GetAllClassSymbolsAsync(bool includeReferencedProjects)
     {
         EnsureInitialized();
-        List<ISymbol> classSymbols = [];
+        if (includeReferencedProjects)
+        {
+            return await GetClassSymbolsIncludingReferencedProjectsAsync();
+        }
+
         if (_compilation is null)
         {
             // Explicitly use only the MSBuildWorkspace for compilation — the fallback
@@ -299,19 +306,25 @@ public class CodeService : ICodeService, IDisposable
             }
         }
 
-        List<ISymbol?>? compilationClassSymbols = _compilation?.SyntaxTrees.SelectMany(tree =>
+        return _compilation is null ? [] : GetClassSymbols(_compilation);
+    }
+
+    private static List<ISymbol> GetClassSymbols(Compilation compilation)
+    {
+        List<ISymbol> classSymbols = [];
+        var compilationClassSymbols = compilation.SyntaxTrees.SelectMany(tree =>
         {
-            var model = _compilation.GetSemanticModel(tree);
+            var model = compilation.GetSemanticModel(tree);
             return tree.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
                 .Select(classSyntax => model.GetDeclaredSymbol(classSyntax))
                 .Where(classSymbol => classSymbol is not null &&
                                      !classSymbol.MetadataName.StartsWith("<"));    //if the metadata name starts with < it is a compiler generated class
         })
-        .Append(_compilation.GetEntryPoint(CancellationToken.None)?.ContainingType)
+        .Append(compilation.GetEntryPoint(CancellationToken.None)?.ContainingType)
         .Distinct(SymbolEqualityComparer.Default)
         .ToList();
 
-        compilationClassSymbols?.ForEach(x =>
+        compilationClassSymbols.ForEach(x =>
         {
             if (x is not null)
             {
@@ -319,45 +332,54 @@ public class CodeService : ICodeService, IDisposable
             }
         });
 
-        if (includeReferencedProjects)
-        {
-            await AddReferencedProjectClassSymbolsAsync(classSymbols);
-        }
-
         return classSymbols;
     }
 
-    private async Task AddReferencedProjectClassSymbolsAsync(List<ISymbol> classSymbols)
+    private async Task<List<ISymbol>> GetClassSymbolsIncludingReferencedProjectsAsync()
     {
-        var projectPath = Path.GetFullPath(_projectPath);
-        var visitedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { projectPath };
-        var pendingProjects = new Queue<string>();
-        pendingProjects.Enqueue(projectPath);
-
-        while (pendingProjects.TryDequeue(out var currentProjectPath))
+        using var workspace = MSBuildWorkspace.Create();
+        // Source projects preserve model locations, even when their output assemblies already exist.
+        workspace.LoadMetadataForReferencedProjects = false;
+        var failures = new ConcurrentQueue<string>();
+        using var registration = workspace.RegisterWorkspaceFailedHandler(args =>
         {
-            var projectService = new MSBuildProjectService(currentProjectPath);
-            if (!projectService.TryGetProjectReferences(out var references, out var error))
+            if (args.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
             {
-                var message = $"Unable to discover referenced project classes for '{currentProjectPath}': {error}";
-                _logger.LogError("{Message}", message);
-                throw new InvalidOperationException(message);
+                failures.Enqueue(args.Diagnostic.Message);
             }
+        });
+        var project = await workspace.OpenProjectAsync(_projectPath);
+        if (!failures.IsEmpty)
+        {
+            throw new InvalidOperationException(
+                $"Unable to discover referenced project classes for '{_projectPath}': {string.Join(Environment.NewLine, failures)}");
+        }
 
-            foreach (var reference in references)
+        List<ISymbol> classSymbols = [];
+        var visitedProjects = new HashSet<ProjectId> { project.Id };
+        var pendingProjects = new Queue<Project>();
+        pendingProjects.Enqueue(project);
+        while (pendingProjects.TryDequeue(out var currentProject))
+        {
+            var compilation = await currentProject.GetCompilationAsync()
+                ?? throw new InvalidOperationException($"Unable to compile project '{currentProject.FilePath}' for class discovery.");
+            classSymbols.AddRange(GetClassSymbols(compilation));
+
+            // Roslyn's resolved graph honors target-framework selection and ReferenceOutputAssembly.
+            foreach (var reference in currentProject.ProjectReferences)
             {
-                var referencePath = Path.GetFullPath(reference);
-                if (!visitedProjects.Add(referencePath))
+                if (!visitedProjects.Add(reference.ProjectId))
                 {
                     continue;
                 }
 
-                // Open the referenced project itself so built references are not limited to metadata.
-                using var codeService = new CodeService(_logger, referencePath);
-                classSymbols.AddRange(await codeService.GetAllClassSymbolsAsync());
-                pendingProjects.Enqueue(referencePath);
+                var referencedProject = workspace.CurrentSolution.GetProject(reference.ProjectId)
+                    ?? throw new InvalidOperationException($"Unable to load a referenced project of '{currentProject.FilePath}'.");
+                pendingProjects.Enqueue(referencedProject);
             }
         }
+
+        return classSymbols;
     }
 
     /// <summary>
@@ -456,4 +478,3 @@ public class CodeService : ICodeService, IDisposable
         return null;
     }
 }
-

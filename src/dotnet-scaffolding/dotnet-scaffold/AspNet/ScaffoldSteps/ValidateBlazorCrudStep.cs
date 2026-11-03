@@ -221,7 +221,7 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
 
         //find and set --model class properties
         ModelInfo? modelInfo = null;
-        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync(includeReferencedProjects: true);
+        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync();
         var modelClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(settings.Model, StringComparison.OrdinalIgnoreCase));
         if (string.IsNullOrEmpty(settings.Model) || modelClassSymbol is null)
         {

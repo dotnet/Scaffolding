@@ -55,17 +55,50 @@ public class ClassAnalyzersTests
     [Fact]
     public async Task ValidateTypeAccessibilityAsync_PreservesLocalFallbackSymbols()
     {
+        var directory = Path.Combine(Path.GetTempPath(), nameof(ClassAnalyzersTests), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(directory);
+        try
+        {
+            var path = Path.Combine(directory, "Missing.csproj");
+            File.WriteAllText(Path.Combine(directory, "Movie.cs"), "public class Movie { }");
+            using var service = new CodeService(_mockLogger.Object, path);
+            var selectedType = Assert.Single(await service.GetAllClassSymbolsAsync());
+            Assert.IsType<AdhocWorkspace>(await service.GetWorkspaceAsync());
+
+            Assert.True(await ClassAnalyzers.ValidateTypeAccessibilityAsync(service, path, selectedType, _mockLogger.Object));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public async Task ValidateTypeAccessibilityAsync_HandlesEscapedNamespaceMetadata(bool referenced, bool nested)
+    {
         using var workspace = new AdhocWorkspace();
         var path = Path.Combine(Path.GetTempPath(), "Web.csproj");
-        var sourcePath = Path.Combine(Path.GetTempPath(), "Movie.cs");
-        const string source = "public class Movie { }";
         var project = workspace.AddProject(Microsoft.CodeAnalysis.ProjectInfo.Create(
-            ProjectId.CreateNewId(), VersionStamp.Create(), "Web", "Web", LanguageNames.CSharp, filePath: path));
-        project = project.AddDocument("Movie.cs", SourceText.From(source), filePath: sourcePath).Project;
+            ProjectId.CreateNewId(), VersionStamp.Create(), referenced ? "Library" : "Web",
+            referenced ? "Library" : "Web", LanguageNames.CSharp, filePath: referenced ? null : path));
+        var declaration = nested ? "public class Container { public class Movie { } }" : "public class Movie { }";
+        project = project.AddDocument("Types.cs",
+            SourceText.From($"namespace MyApp.@event {{ {declaration} }}")).Project;
+        var compilation = await project.GetCompilationAsync();
+        var selectedType = compilation!.GetTypeByMetadataName(nested
+            ? "MyApp.event.Container+Movie" : "MyApp.event.Movie");
+        if (referenced)
+        {
+            var solution = project.Solution.AddProject(Microsoft.CodeAnalysis.ProjectInfo.Create(
+                ProjectId.CreateNewId(), VersionStamp.Create(), "Web", "Web", LanguageNames.CSharp, filePath: path));
+            project = solution.Projects.Single(candidate => candidate.Name == "Web")
+                .AddProjectReference(new ProjectReference(project.Id));
+        }
         Assert.True(workspace.TryApplyChanges(project.Solution));
-        var fallback = CSharpCompilation.Create("FallbackCompilation",
-            [CSharpSyntaxTree.ParseText(source, path: sourcePath)]);
-        var selectedType = fallback.GetTypeByMetadataName("Movie");
         var service = new Mock<ICodeService>();
         service.Setup(code => code.GetWorkspaceAsync()).ReturnsAsync(workspace);
 

@@ -37,20 +37,19 @@ internal static class ClassAnalyzers
         string metadataName = string.Join("+", names);
         if (!selectedType.ContainingNamespace.IsGlobalNamespace)
         {
-            metadataName = $"{selectedType.ContainingNamespace.ToDisplayString()}.{metadataName}";
+            var namespaceNames = new Stack<string>();
+            for (var containingNamespace = selectedType.ContainingNamespace;
+                !containingNamespace.IsGlobalNamespace; containingNamespace = containingNamespace.ContainingNamespace)
+            {
+                namespaceNames.Push(containingNamespace.MetadataName);
+            }
+            metadataName = $"{string.Join(".", namespaceNames)}.{metadataName}";
         }
 
         var assembly = compilation.Assembly.Identity.Equals(selectedType.ContainingAssembly.Identity)
             ? compilation.Assembly
             : compilation.SourceModule.ReferencedAssemblySymbols.FirstOrDefault(candidate =>
                 candidate.Identity.Equals(selectedType.ContainingAssembly.Identity));
-        if (assembly is null && project is not null &&
-            selectedType.Locations.Any(location => location.SourceTree is not null &&
-                project.Documents.Any(document => document.FilePath == location.SourceTree.FilePath)))
-        {
-            // Source-only fallback discovery uses a different assembly name for local symbols.
-            assembly = compilation.Assembly;
-        }
         var resolvedType = assembly?.GetTypeByMetadataName(metadataName);
         if (resolvedType is null || !compilation.IsSymbolAccessibleWithin(resolvedType, compilation.Assembly))
         {

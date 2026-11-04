@@ -39,6 +39,7 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
     {
         var modelDirectory = Path.Combine(_testDirectory, "ClassLibrary1");
         var contextDirectory = Path.Combine(_testDirectory, "ClassLibrary2");
+        var modelNamespace = typeScenario == "escaped-namespace" ? "ClassLibrary1.@event" : "ClassLibrary1.Models";
         Directory.CreateDirectory(modelDirectory);
         Directory.CreateDirectory(contextDirectory);
         File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), ScaffoldCliHelper.GetTestNuGetConfig(TargetFramework));
@@ -60,7 +61,8 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
             modelSource = modelSource.Replace("public class Movie", "internal class Movie");
             modelSource = "[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"ClassLibrary2\")]\n" + modelSource;
         }
-        File.WriteAllText(Path.Combine(modelDirectory, "Movie.cs"), modelSource);
+        File.WriteAllText(Path.Combine(modelDirectory, "Movie.cs"),
+            modelSource.Replace("ClassLibrary1.Models", modelNamespace));
         File.WriteAllText(Path.Combine(contextDirectory, "ClassLibrary2.csproj"), """
             <Project Sdk="Microsoft.NET.Sdk">
               <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
@@ -101,6 +103,7 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
         {
             contextSource = contextSource.Replace("public class MyDbContext", "internal class MyDbContext");
         }
+        contextSource = contextSource.Replace("using ClassLibrary1.Models;", $"using {modelNamespace};");
         if (typeScenario == "same-name-model")
         {
             File.WriteAllText(Path.Combine(_testProjectDir, "Movie.cs"), """
@@ -151,7 +154,7 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
             File.WriteAllText(Path.Combine(componentsDirectory, "Routes.razor"), ScaffoldCliHelper.GetBlazorRoutesRazor());
         }
 
-        await AssertExistingContextScaffoldingAsync(contextPath, contextSource, "ClassLibrary1.Models", contextNamespace,
+        await AssertExistingContextScaffoldingAsync(contextPath, contextSource, modelNamespace, contextNamespace,
             alreadyRegistered, existingDbSet, scaffolder,
             typeScenario is "internal-model" or "internal-context" ? "not accessible" :
                 typeScenario == "same-name-model" ? "selected model" : null);
@@ -169,6 +172,8 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
     [InlineData("internal-context", false)]
     [InlineData("same-name-model", true)]
     [InlineData("same-name-model", false)]
+    [InlineData("escaped-namespace", true, "apicontroller-crud")]
+    [InlineData("escaped-namespace", false, "apicontroller-crud")]
     [InlineData("internal-context", true, "mvccontroller-crud")]
     [InlineData("internal-context", true, "apicontroller-crud")]
     [InlineData("internal-context", true, "minimalapi")]

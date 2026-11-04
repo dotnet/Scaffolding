@@ -124,6 +124,20 @@ public class CodeServiceTests : IDisposable
         Assert.Equal("Movie", symbol.Name);
     }
 
+    [Fact]
+    public async Task GetAllClassSymbolsAsync_FallbackAssemblyIdentity_MatchesOwningWorkspace()
+    {
+        File.WriteAllText(Path.Combine(_directory, "Movie.cs"), "public class Movie { public int Id { get; set; } }");
+        using var service = new CodeService(NullLogger.Instance, Path.Combine(_directory, "Missing.csproj"));
+        var symbol = Assert.Single(await service.GetAllClassSymbolsAsync());
+        var workspace = await service.GetWorkspaceAsync();
+        Assert.IsType<AdhocWorkspace>(workspace);
+        var project = Assert.Single(workspace.CurrentSolution.Projects);
+        var compilation = await project.GetCompilationAsync();
+
+        Assert.Equal(compilation.Assembly.Identity, symbol.ContainingAssembly.Identity);
+    }
+
     private string WriteProject(string name, string source, string references = "")
     {
         var directory = Path.Combine(_directory, name);

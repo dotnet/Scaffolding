@@ -349,6 +349,7 @@ public class CodeService : ICodeService, IDisposable
     /// SDK versions). Metadata references are gathered from the currently-loaded assemblies
     /// in <see cref="AppDomain.CurrentDomain"/> so that primitive types such as
     /// <c>int</c> and <c>string</c> resolve correctly for model-class discovery.
+    /// The assembly name matches the source-backed fallback workspace.
     /// </summary>
     private async Task<Compilation?> GetFallbackCompilationAsync()
     {
@@ -402,7 +403,7 @@ public class CodeService : ICodeService, IDisposable
             .OfType<MetadataReference>();
 
         return CSharpCompilation.Create(
-            assemblyName: "FallbackCompilation",
+            assemblyName: Path.GetFileNameWithoutExtension(_projectPath),
             syntaxTrees: syntaxTrees,
             references: references,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));

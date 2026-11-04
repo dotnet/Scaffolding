@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -49,6 +50,37 @@ public class AddDbSetToExistingContextStepTests : IDisposable
         string path = Path.Combine(_tempDir, "ApplicationDbContext.cs");
         File.WriteAllText(path, content);
         return path;
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_FallbackDiscovery_AcceptsSelectedLocalModel(bool existingDbSet)
+    {
+        const string statement = "public DbSet<Movie> Movie { get; set; } = default!;";
+        var source = $"public class DbSet<T> {{ }} public class Movie {{ public int Id {{ get; set; }} }} public class ApplicationDbContext {{ {(existingDbSet ? statement : "")} }}";
+        var path = WriteContextFile(source);
+        var projectPath = Path.Combine(_tempDir, "Missing.csproj");
+        using var service = new CodeService(NullLogger.Instance, projectPath);
+        var symbols = await service.GetAllClassSymbolsAsync();
+        var model = Assert.Single(symbols, symbol => symbol.Name == "Movie");
+        _context.Properties[nameof(DbContextProperties)] = new DbContextProperties
+        {
+            DbContextPath = path,
+            DbContextFullName = "ApplicationDbContext",
+            ModelFullName = "Movie",
+            ModelAssemblyIdentity = model.ContainingAssembly.Identity.ToString(),
+            DbSetStatement = existingDbSet ? null : statement
+        };
+        var step = CreateStep();
+        step.ProjectPath = projectPath;
+
+        Assert.True(await step.ExecuteAsync(_context));
+        Assert.True(ContainsDbSet(File.ReadAllText(path).Replace("ApplicationDbContext", "Ctx"), statement));
+        if (existingDbSet)
+        {
+            Assert.Equal(source, File.ReadAllText(path));
+        }
     }
 
     // -----------------------------------------------------------------------

@@ -71,7 +71,7 @@ internal class NuGetVersionService
         return versions.Where(v => !v.IsPrerelease).OrderByDescending(v => v).FirstOrDefault();
     }
 
-    private async Task<IEnumerable<NuGetVersion>> GetVersionsForPackageAsync(string packageId, string? projectDirectory = null)
+    protected virtual async Task<IEnumerable<NuGetVersion>> GetVersionsForPackageAsync(string packageId, string? projectDirectory = null)
     {
         // When a project directory is provided, load settings from there so that the package
         // sources match the context used by 'dotnet add package' (e.g. a temp project directory

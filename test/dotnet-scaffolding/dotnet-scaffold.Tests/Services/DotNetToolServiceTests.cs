@@ -11,6 +11,7 @@ using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.Services;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -115,6 +116,59 @@ public class DotNetToolServiceTests
         var metadataInvocation = invocations[^1];
         Assert.Equal(isGlobalTool ? tool.Command : "dotnet", Path.GetFileNameWithoutExtension(metadataInvocation.FileName));
         Assert.Equal(isGlobalTool ? "get-commands" : $"{tool.Command} get-commands", metadataInvocation.Arguments);
+    }
+
+    [Theory]
+    [InlineData(1, "build failed on stdout", "missing dependency", "exit code 1")]
+    [InlineData(0, "", "missing command output", "no output")]
+    [InlineData(0, "not json", "unexpected banner", "invalid JSON")]
+    [InlineData(0, "null", "", "null instead of a command list")]
+    public void GetCommands_FailureLogsDiagnostics(int exitCode, string output, string error, string expectedMessage)
+    {
+        var logger = new RecordingLogger();
+        var service = new ResultDotNetToolService(logger, exitCode, output, error);
+
+        Assert.Empty(service.GetCommands(CreateUnavailableTool("Microsoft.dotnet-scaffold", false)));
+
+        string message = Assert.Single(logger.Messages);
+        Assert.Contains("Microsoft.dotnet-scaffold", message);
+        Assert.Contains(expectedMessage, message);
+        if (exitCode != 0 || output == "not json")
+        {
+            Assert.Contains(output, message);
+            Assert.Contains(error, message);
+        }
+    }
+
+    [Fact]
+    public void GetCommands_EmptyCommandListIsNotAnError()
+    {
+        var logger = new RecordingLogger();
+        var service = new ResultDotNetToolService(logger, 0, "[]", "");
+
+        Assert.Empty(service.GetCommands(CreateUnavailableTool("Contoso.Scaffolder", true)));
+        Assert.Empty(logger.Messages);
+    }
+
+    private sealed class ResultDotNetToolService(ILogger<DotNetToolService> logger, int exitCode, string output, string error)
+        : DotNetToolService(logger, Mock.Of<IEnvironmentService>(), Mock.Of<IFileSystem>())
+    {
+        protected override int ExecuteAndCaptureOutput(DotnetCliRunner runner, out string? stdOut, out string? stdErr)
+        {
+            stdOut = output;
+            stdErr = error;
+            return exitCode;
+        }
+    }
+
+    private sealed class RecordingLogger : ILogger<DotNetToolService>
+    {
+        public List<string> Messages { get; } = [];
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+            => Messages.Add(formatter(state, exception));
     }
 
     private static DotNetToolInfo CreateUnavailableTool(string packageName, bool isGlobalTool) => new()

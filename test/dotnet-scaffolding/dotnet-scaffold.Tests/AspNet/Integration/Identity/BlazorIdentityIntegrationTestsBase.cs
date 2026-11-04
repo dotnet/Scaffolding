@@ -48,6 +48,7 @@ public abstract class BlazorIdentityIntegrationTestsBase : IDisposable
         _toolsDirectory = Path.Combine(_testDirectory, "tools");
         _templatesDirectory = Path.Combine(_testDirectory, "Templates");
         Directory.CreateDirectory(_testProjectDir);
+        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.GetTestNuGetConfig(TargetFramework));
         Directory.CreateDirectory(_toolsDirectory);
         Directory.CreateDirectory(_templatesDirectory);
 

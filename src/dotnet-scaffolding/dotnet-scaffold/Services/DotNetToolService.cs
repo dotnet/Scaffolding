@@ -62,18 +62,35 @@ internal class DotNetToolService : IDotNetToolService
                 DotnetCliRunner.CreateDotNet(dotnetTool.Command, ["get-commands"], envVars);
         }
 
-        var exitCode = ExecuteAndCaptureOutput(runner, out var stdOut, out _);
-        if (exitCode == 0 && !string.IsNullOrEmpty(stdOut))
+        var exitCode = ExecuteAndCaptureOutput(runner, out var stdOut, out var stdErr);
+        if (exitCode != 0)
         {
-            try
-            {
-                string escapedJsonString = stdOut.Replace("\r", "").Replace("\n", "");
-                commands = JsonSerializer.Deserialize<List<CommandInfo>>(escapedJsonString);
-            }
-            catch (Exception)
-            {
-                // Ignore deserialization errors
-            }
+            _logger.LogError(
+                "Command discovery failed for tool '{PackageName}' with exit code {ExitCode}.\nOutput: {Output}\nError: {Error}",
+                dotnetTool.PackageName, exitCode, stdOut, stdErr);
+            return [];
+        }
+
+        if (string.IsNullOrWhiteSpace(stdOut))
+        {
+            _logger.LogError("Command discovery returned no output for tool '{PackageName}'.\nError: {Error}", dotnetTool.PackageName, stdErr);
+            return [];
+        }
+
+        try
+        {
+            commands = JsonSerializer.Deserialize<List<CommandInfo>>(stdOut);
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Command discovery returned invalid JSON for tool '{PackageName}'.\nOutput: {Output}\nError: {Error}",
+                dotnetTool.PackageName, stdOut, stdErr);
+            return [];
+        }
+
+        if (commands is null)
+        {
+            _logger.LogError("Command discovery returned null instead of a command list for tool '{PackageName}'.", dotnetTool.PackageName);
         }
 
         return commands ?? [];

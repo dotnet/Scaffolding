@@ -106,10 +106,10 @@ public class CodeService : ICodeService, IDisposable
                 foreach (var changedDocId in projectChange.GetChangedDocuments())
                 {
                     var newDoc = solution.GetDocument(changedDocId);
-                    if (newDoc?.FilePath is not null && newDoc.TryGetText(out var sourceText))
+                    if (newDoc?.FilePath is not null)
                     {
-                        try { File.WriteAllText(newDoc.FilePath, sourceText.ToString(), Encoding.UTF8); }
-                        catch { /* best-effort */ }
+                        var sourceText = newDoc.GetTextAsync().GetAwaiter().GetResult();
+                        File.WriteAllText(newDoc.FilePath, sourceText.ToString(), Encoding.UTF8);
                     }
                 }
             }

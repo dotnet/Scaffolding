@@ -1,0 +1,116 @@
+{
+  "Files": [
+    {
+      "FileName": "Components\\App.razor",
+      "Options": [
+        "IgniteUIAppRazorHost"
+      ],
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "$(IgniteUIHeadClosingTag)"
+          ],
+          "Block": "$(IgniteUIThemeLinkBeforeHead)",
+          "Options": [
+            "IgniteUILinkTheme"
+          ]
+        },
+        {
+          "ReplaceSnippet": [
+            "$(IgniteUIExistingThemeLink)"
+          ],
+          "Block": "$(IgniteUISwappedThemeLink)",
+          "Options": [
+            "IgniteUISwapTheme"
+          ]
+        }
+      ]
+    },
+    {
+      "FileName": "Pages\\_Layout.cshtml",
+      "Options": [
+        "IgniteUILayoutCshtmlHost"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "ReplaceSnippet": [
+                "$(IgniteUIHeadClosingTag)"
+              ],
+              "Block": "$(IgniteUIThemeLinkBeforeHead)",
+              "Options": [
+                "IgniteUILinkTheme"
+              ]
+            },
+            {
+              "ReplaceSnippet": [
+                "$(IgniteUIExistingThemeLink)"
+              ],
+              "Block": "$(IgniteUISwappedThemeLink)",
+              "Options": [
+                "IgniteUISwapTheme"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "FileName": "Pages\\_Host.cshtml",
+      "Options": [
+        "IgniteUIHostCshtmlHost"
+      ],
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "ReplaceSnippet": [
+                "$(IgniteUIHeadClosingTag)"
+              ],
+              "Block": "$(IgniteUIThemeLinkBeforeHead)",
+              "Options": [
+                "IgniteUILinkTheme"
+              ]
+            },
+            {
+              "ReplaceSnippet": [
+                "$(IgniteUIExistingThemeLink)"
+              ],
+              "Block": "$(IgniteUISwappedThemeLink)",
+              "Options": [
+                "IgniteUISwapTheme"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "FileName": "wwwroot\\index.html",
+      "Options": [
+        "IgniteUIIndexHtmlHost"
+      ],
+      "Replacements": [
+        {
+          "ReplaceSnippet": [
+            "$(IgniteUIHeadClosingTag)"
+          ],
+          "Block": "$(IgniteUIThemeLinkBeforeHead)",
+          "Options": [
+            "IgniteUILinkTheme"
+          ]
+        },
+        {
+          "ReplaceSnippet": [
+            "$(IgniteUIExistingThemeLink)"
+          ],
+          "Block": "$(IgniteUISwappedThemeLink)",
+          "Options": [
+            "IgniteUISwapTheme"
+          ]
+        }
+      ]
+    }
+  ]
+}

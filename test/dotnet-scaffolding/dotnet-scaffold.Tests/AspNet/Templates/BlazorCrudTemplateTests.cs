@@ -39,6 +39,18 @@ public class BlazorCrudTemplateTests
     }
 
     [Theory]
+    [InlineData(10)]
+    [InlineData(11)]
+    public void EditTemplate_ReturnsAfterNotFoundWhenUpdatedEntityWasDeleted(int frameworkVersion)
+    {
+        BlazorCrudModel model = CreateModel("Edit");
+
+        string result = TransformTemplate(frameworkVersion, "Edit", model).Replace("\r\n", "\n");
+
+        Assert.Contains("if (!EmployeeExists(Employee!.Id))\n            {\n                NavigationManager.NotFound();\n                return;\n            }", result);
+    }
+
+    [Theory]
     [InlineData(9, "Create")]
     [InlineData(9, "Edit")]
     [InlineData(10, "Create")]

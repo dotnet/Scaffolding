@@ -105,7 +105,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                     }
                     else
                     {
-                        stepOptions = await GetClassDisplayNamesAsync(codeService);
+                        stepOptions = await AnsiConsole
+                            .Status()
+                            .WithSpinner()
+                            .StartAsync("Finding model classes", _ => GetClassDisplayNamesAsync(codeService, context.GetCommandObj()));
                     }
                     break;
                 case InteractivePickerType.FilePicker:
@@ -275,20 +278,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// <summary>
         /// Gets all class display names from the code service.
         /// </summary>
-        private static async Task<List<StepOption>> GetClassDisplayNamesAsync(ICodeService codeService)
+        internal static async Task<List<StepOption>> GetClassDisplayNamesAsync(ICodeService codeService, CommandInfo? command)
         {
-            var allClassSymbols = await AnsiConsole
-                .Status()
-                .WithSpinner()
-                .StartAsync("Finding model classes", async statusContext =>
-                {
-                    if (codeService is null)
-                    {
-                        return [];
-                    }
-
-                    return await codeService.GetAllClassSymbolsAsync();
-                });
+            var allClassSymbols = command?.Name.Equals(AspnetStrings.RazorView.Views, StringComparison.OrdinalIgnoreCase) == true
+                ? await codeService.GetAllClassSymbolsAsync(includeReferencedProjects: true)
+                : await codeService.GetAllClassSymbolsAsync();
 
             List<StepOption> classNames = [];
             if (allClassSymbols != null && allClassSymbols.Count != 0)

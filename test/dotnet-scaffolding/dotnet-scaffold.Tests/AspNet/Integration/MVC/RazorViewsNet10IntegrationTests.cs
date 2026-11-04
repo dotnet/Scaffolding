@@ -14,6 +14,71 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
     protected override string TestClassName => nameof(RazorViewsNet10IntegrationTests);
 
     [Fact]
+    public async Task Scaffold_Views_WithFrameworkConditionalTransitiveModelReference()
+    {
+        var modelsProject = CreateBookModelProject();
+        var dataDirectory = Path.Combine(_testDirectory, "BookStore Data");
+        Directory.CreateDirectory(dataDirectory);
+        var dataProject = Path.Combine(dataDirectory, "BookStore.Data.csproj");
+        File.WriteAllText(dataProject, $"""
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFrameworks>net8.0;{TargetFramework}</TargetFrameworks>
+              </PropertyGroup>
+              <ItemGroup Condition="'$(TargetFramework)' == '{TargetFramework}'">
+                <ProjectReference Include="{Path.GetRelativePath(dataDirectory, modelsProject)}" />
+              </ItemGroup>
+            </Project>
+            """);
+        File.WriteAllText(Path.Combine(dataDirectory, "Store.cs"), "public class Store { }");
+        File.WriteAllText(_testProjectPath, $"""
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <PropertyGroup>
+                <TargetFramework>{TargetFramework}</TargetFramework>
+                <ImplicitUsings>enable</ImplicitUsings>
+              </PropertyGroup>
+              <ItemGroup>
+                <ProjectReference Include="{Path.GetRelativePath(_testProjectDir, dataProject)}" />
+              </ItemGroup>
+            </Project>
+            """);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetMinimalProgramCs());
+        var build = await RunBuildAsync(_testProjectDir);
+        Assert.True(build.ExitCode == 0, $"Sample should build before scaffolding.\n{build.Output}\n{build.Error}");
+
+        await ScaffoldBookIndexAndVerifyBuildAsync();
+    }
+
+    [Fact]
+    public async Task Scaffold_Views_RejectsModelInBuildOnlyReferenceWithoutModifyingProject()
+    {
+        var modelsProject = CreateBookModelProject();
+        File.WriteAllText(_testProjectPath, $"""
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <PropertyGroup>
+                <TargetFramework>{TargetFramework}</TargetFramework>
+                <ImplicitUsings>enable</ImplicitUsings>
+              </PropertyGroup>
+              <ItemGroup>
+                <ProjectReference Include="{Path.GetRelativePath(_testProjectDir, modelsProject)}" ReferenceOutputAssembly="false" />
+              </ItemGroup>
+            </Project>
+            """);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetMinimalProgramCs());
+        var build = await RunBuildAsync(_testProjectDir);
+        Assert.True(build.ExitCode == 0, $"Sample should build before scaffolding.\n{build.Output}\n{build.Error}");
+
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework, "views", "--project", _testProjectPath, "--model", "Book", "--page", "Index");
+
+        Assert.Equal(1, exitCode);
+        Assert.Contains("Invalid --model 'Book'", output + error);
+        Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Views")));
+        build = await RunBuildAsync(_testProjectDir);
+        Assert.True(build.ExitCode == 0, $"Rejected scaffolding must leave a buildable project.\n{build.Output}\n{build.Error}");
+    }
+
+    [Fact]
     public async Task Scaffold_Views_Net10_CliInvocation()
     {
         File.WriteAllText(_testProjectPath, ProjectContent);

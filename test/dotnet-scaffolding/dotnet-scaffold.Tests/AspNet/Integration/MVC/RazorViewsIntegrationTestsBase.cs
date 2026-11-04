@@ -85,6 +85,77 @@ public abstract class RazorViewsIntegrationTestsBase : IDisposable
   </PropertyGroup>
 </Project>";
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Scaffold_Views_WithModelInReferencedProject(bool buildBeforeScaffolding)
+    {
+        var modelsProjectPath = CreateBookModelProject();
+        File.WriteAllText(_testProjectPath, $"""
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <PropertyGroup>
+                <TargetFramework>{TargetFramework}</TargetFramework>
+                <ImplicitUsings>enable</ImplicitUsings>
+              </PropertyGroup>
+              <ItemGroup>
+                <ProjectReference Include="{Path.GetRelativePath(_testProjectDir, modelsProjectPath)}" />
+              </ItemGroup>
+            </Project>
+            """);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetMinimalProgramCs());
+
+        var preparation = buildBeforeScaffolding
+            ? await RunBuildAsync(_testProjectDir)
+            : await ScaffoldCliHelper.RunDotNetAsync(_testProjectDir, "restore");
+        Assert.True(preparation.ExitCode == 0,
+            $"Project preparation failed.\nOutput: {preparation.Output}\nError: {preparation.Error}");
+        Assert.Equal(buildBeforeScaffolding,
+            File.Exists(Path.Combine(Path.GetDirectoryName(modelsProjectPath)!, "bin", "Debug", TargetFramework, "BookStore.Models.dll")));
+
+        await ScaffoldBookIndexAndVerifyBuildAsync();
+    }
+
+    protected string CreateBookModelProject()
+    {
+        var modelsDirectory = Path.Combine(_testDirectory, "BookStore Models");
+        Directory.CreateDirectory(modelsDirectory);
+        var modelsProjectPath = Path.Combine(modelsDirectory, "BookStore.Models.csproj");
+        File.WriteAllText(modelsProjectPath, $"""
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFramework>{TargetFramework}</TargetFramework>
+              </PropertyGroup>
+            </Project>
+            """);
+        File.WriteAllText(Path.Combine(modelsDirectory, "Book.cs"), """
+            namespace BookStore.Models;
+            public class Book
+            {
+                public int Id { get; set; }
+                public string Title { get; set; } = string.Empty;
+            }
+            """);
+        return modelsProjectPath;
+    }
+
+    protected async Task ScaffoldBookIndexAndVerifyBuildAsync()
+    {
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "views",
+            "--project", _testProjectPath,
+            "--model", "Book",
+            "--page", "Index");
+        Assert.True(exitCode == 0, $"Scaffolding failed.\nOutput: {output}\nError: {error}");
+
+        var viewPath = Path.Combine(_testProjectDir, "Views", "Book", "Index.cshtml");
+        Assert.True(File.Exists(viewPath));
+        Assert.Contains("@model IEnumerable<BookStore.Models.Book>", File.ReadAllText(viewPath));
+        var build = await RunBuildAsync(_testProjectDir);
+        Assert.True(build.ExitCode == 0,
+            $"Generated view should build.\nOutput: {build.Output}\nError: {build.Error}");
+    }
+
     #region ValidateViewsStep — Validation Logic
 
     [Fact]

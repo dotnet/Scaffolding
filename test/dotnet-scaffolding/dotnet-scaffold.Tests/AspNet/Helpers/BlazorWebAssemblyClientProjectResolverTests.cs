@@ -61,6 +61,33 @@ public class BlazorWebAssemblyClientProjectResolverTests : IDisposable
     }
 
     [Fact]
+    public void TryGetClient_ResolvesClientReferencedFromImportedProps()
+    {
+        // The reference is not in the .csproj text at all: it comes from an
+        // imported .props file, which a textual "<ProjectReference" gate misses.
+        File.WriteAllText(Path.Combine(_directory, "Shared.props"), """
+            <Project>
+              <ItemGroup><ProjectReference Include="Client/Client.csproj" /></ItemGroup>
+            </Project>
+            """);
+        var server = WriteProject("Server.csproj", """
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+              <Import Project="Shared.props" />
+            </Project>
+            """);
+        var client = WriteProject(Path.Combine("Client", "Client.csproj"), """
+            <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+              <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+            </Project>
+            """);
+
+        Assert.True(BlazorWebAssemblyClientProjectResolver.TryGetClient(server, _fileSystem, out var resolved, out var error), error);
+        Assert.NotNull(resolved);
+        Assert.Equal(client, resolved.Value.ProjectPath);
+    }
+
+    [Fact]
     public void TryGetClient_ReturnsNullForServerWithoutClient()
     {
         var server = WriteProject("Server.csproj", """

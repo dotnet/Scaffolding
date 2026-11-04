@@ -256,7 +256,6 @@ public class ValidateEntraIdStepTests
     [InlineData("""{"AzureAd":{"ClientId":"different-client-id"}}""", true, false, "ClientId", false)]
     [InlineData("""{"AzureAd":{"Instance":"https://other-instance/"}}""", false, false, "Instance", false)]
     [InlineData("""{"AzureAd":{"TenantId":"different-tenant"}}""", false, false, "TenantId", false)]
-    [InlineData("""{"AzureAd":{"Domain":"different-domain"}}""", false, false, "Domain", false)]
     [InlineData("""{"AzureAd":{"CallbackPath":"/different-callback"}}""", false, false, "CallbackPath", false)]
     [InlineData("""{"AzureAd":{"TenantId":"different-tenant"}}""", true, false, "TenantId", false)]
     [InlineData("""{"AzureAd":"invalid-shape"}""", true, false, "AzureAd", false)]
@@ -272,7 +271,6 @@ public class ValidateEntraIdStepTests
     [InlineData("""{"AZUREAD":{"CLIENTID":"different-client-id"}}""", true, false, "ClientId", false)]
     [InlineData("""{"azuread":{"instance":"https://other-instance/"}}""", false, false, "Instance", false)]
     [InlineData("""{"azuread":{"tenantid":"different-tenant"}}""", false, false, "TenantId", false)]
-    [InlineData("""{"azuread":{"domain":"different-domain"}}""", false, false, "Domain", false)]
     [InlineData("""{"azuread":{"callbackpath":"/different-callback"}}""", false, false, "CallbackPath", false)]
     [InlineData("""{"azuread":"invalid-shape"}""", false, false, "AzureAd", false)]
     [InlineData("""{"AzureAd:ClientId":"existing-client-id"}""", false, false, "ClientId", false)]
@@ -366,6 +364,16 @@ public class ValidateEntraIdStepTests
     [InlineData("""{ /* development settings */ "Logging": {} }""", false, false, false)]
     [InlineData("""{ "Logging": {}, }""", false, false, false)]
     [InlineData("""{ /* development settings */ "azuread": { "clientid": "client-id", }, }""", true, false, false)]
+    [InlineData("""{"AzureAd":{"Domain":"contoso.onmicrosoft.com"}}""", false, false, false)]
+    [InlineData("""{"AzureAd":{"Domain":"contoso.com"}}""", false, false, false)]
+    [InlineData("""{"AzureAd":{"Domain":null}}""", false, false, false)]
+    [InlineData("""{"AzureAd":{"Domain":""}}""", false, false, false)]
+    [InlineData("""{"azuread":{"domain":"contoso.com"}}""", false, false, false)]
+    [InlineData("""{"AZUREAD":{"DOMAIN":null}}""", false, false, false)]
+    [InlineData("""{"AzureAd":{},"azuread":{"Domain":"contoso.com","tenantid":"tenant-id"}}""", false, false, false)]
+    [InlineData("""{"AzureAd":{"ClientId":"client-id"},"azuread":{"tenantid":"tenant-id"}}""", true, false, false)]
+    [InlineData("""{"Logging":{"LogLevel":{"Default":"Information"}},"logging":{"LogLevel":{"Microsoft":"Warning"}}}""", false, false, false)]
+    [InlineData("""{"AzureAd:OtherClientId":"other","AzureAd:Options:ClientId":"nested"}""", false, false, false)]
     public void DevelopmentSettingsPreflight_AllowsCompatibleSettingsOrExplicitOverwrite(
         string? settings, bool useExistingApplication, bool overwrite, bool bareProjectFilename)
     {
@@ -447,6 +455,160 @@ public class ValidateEntraIdStepTests
 
         // Assert
         Assert.False(step.UseExistingApplication);
+    }
+
+    [Theory]
+    [InlineData("""{"AzureAd":{"Domain":"contoso.onmicrosoft.com"}}""")]
+    [InlineData("""{"AzureAd":{"Domain":"contoso.com"}}""")]
+    [InlineData("""{"azuread":{"domain":"contoso.onmicrosoft.com"}}""")]
+    [InlineData("""{"AZUREAD":{"DOMAIN":"b2c.onmicrosoft.com"}}""")]
+    public void DevelopmentSettingsPreflight_AllowsDomainWhenCreatingNewRegistration(string settings)
+    {
+        // Arrange: Settings with Domain property but no conflicting managed values
+        string projectDirectory = Path.Combine("test", "project");
+        string projectPath = Path.Combine(projectDirectory, "TestProject.csproj");
+        string devSettingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
+
+        _mockFileSystem.Setup(fs => fs.FileExists(devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(devSettingsPath)).Returns(settings);
+
+        var logger = new TestLogger();
+        var step = new ValidateEntraIdStep(_mockFileSystem.Object, logger, _testTelemetryService)
+        {
+            Username = "devuser",
+            TenantId = "tenant-id",
+            Application = null  // Creating new registration, not using existing app
+        };
+
+        // Act
+        bool result = step.ValidateDevelopmentSettingsPreflight(projectPath, useExistingApplication: false, overwrite: false);
+
+        // Assert: Should succeed even though Domain property exists
+        Assert.True(result);
+        Assert.Empty(logger.Errors);
+    }
+
+    [Theory]
+    [InlineData("""{"AzureAd":{"ClientId":"different-client"}}""", "ClientId", false)]
+    [InlineData("""{"AzureAd":{"TenantId":"different-tenant"}}""", "TenantId", false)]
+    [InlineData("""{"AzureAd":{"Instance":"https://other-instance/"}}""", "Instance", false)]
+    [InlineData("""{"AzureAd":{"CallbackPath":"/different-path"}}""", "CallbackPath", false)]
+    [InlineData("""{"AzureAd":{"Domain":"contoso.onmicrosoft.com","ClientId":"client-id"}}""", "ClientId", false)]
+    [InlineData("""{"AzureAd":{"Domain":"contoso.onmicrosoft.com","Instance":"https://other/"}}""", "Instance", false)]
+    public void DevelopmentSettingsPreflight_StillDetectsConflictingManagedValues(
+        string settings, string expectedConflict, bool overwrite)
+    {
+        // Arrange: Settings with conflicting managed values
+        string projectDirectory = Path.Combine("test", "project");
+        string projectPath = Path.Combine(projectDirectory, "TestProject.csproj");
+        string devSettingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
+
+        _mockFileSystem.Setup(fs => fs.FileExists(devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(devSettingsPath)).Returns(settings);
+
+        var logger = new TestLogger();
+        var step = new ValidateEntraIdStep(_mockFileSystem.Object, logger, _testTelemetryService)
+        {
+            Username = "devuser",
+            TenantId = "tenant-id",
+            Application = null  // Creating new registration
+        };
+
+        // Act
+        bool result = step.ValidateDevelopmentSettingsPreflight(projectPath, useExistingApplication: false, overwrite: overwrite);
+
+        // Assert: Should fail because managed values conflict
+        Assert.False(result);
+        Assert.Single(logger.Errors);
+        Assert.Contains(expectedConflict, logger.Errors[0]);
+    }
+
+    [Theory]
+    [InlineData("""{"azuread":{"domain":"b2c-domain.onmicrosoft.com"}}""")]
+    [InlineData("""{"AZUREAD":{"DOMAIN":"b2c-domain.onmicrosoft.com"}}""")]
+    [InlineData("""{"AzureAd":{"domain":"b2c-domain.onmicrosoft.com"}}""")]
+    public void DevelopmentSettingsPreflight_HandlesCaseInsensitiveDomain(string settings)
+    {
+        // Arrange: Settings with case-insensitive Domain property
+        string projectDirectory = Path.Combine("test", "project");
+        string projectPath = Path.Combine(projectDirectory, "TestProject.csproj");
+        string devSettingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
+
+        _mockFileSystem.Setup(fs => fs.FileExists(devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(devSettingsPath)).Returns(settings);
+
+        var logger = new TestLogger();
+        var step = new ValidateEntraIdStep(_mockFileSystem.Object, logger, _testTelemetryService)
+        {
+            Username = "devuser",
+            TenantId = "tenant-id",
+            Application = null
+        };
+
+        // Act
+        bool result = step.ValidateDevelopmentSettingsPreflight(projectPath, useExistingApplication: false, overwrite: false);
+
+        // Assert: Should succeed; Domain alone doesn't cause rejection
+        Assert.True(result);
+        Assert.Empty(logger.Errors);
+    }
+
+    [Theory]
+    [InlineData("""{"AzureAd":{"Domain":null}}""")]
+    [InlineData("""{"AzureAd":{"Domain":""}}""")]
+    [InlineData("""{"AzureAd":{"Domain":null,"ClientId":""}}""")]
+    [InlineData("""{"azuread":{"domain":""}}""")]
+    public void DevelopmentSettingsPreflight_AllowsEmptyOrNullDomain(string settings)
+    {
+        // Arrange: Settings with empty/null Domain (placeholder)
+        string projectDirectory = Path.Combine("test", "project");
+        string projectPath = Path.Combine(projectDirectory, "TestProject.csproj");
+        string devSettingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
+
+        _mockFileSystem.Setup(fs => fs.FileExists(devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(devSettingsPath)).Returns(settings);
+
+        var logger = new TestLogger();
+        var step = new ValidateEntraIdStep(_mockFileSystem.Object, logger, _testTelemetryService)
+        {
+            Username = "devuser",
+            TenantId = "tenant-id",
+            Application = null
+        };
+
+        // Act
+        bool result = step.ValidateDevelopmentSettingsPreflight(projectPath, useExistingApplication: false, overwrite: false);
+
+        // Assert: Should succeed; empty/null Domain is not a real conflict
+        Assert.True(result);
+        Assert.Empty(logger.Errors);
+    }
+
+    [Theory]
+    [InlineData("""{"AzureAd":{},"azuread":{"clientid":"old-client"}}""", "ClientId")]
+    [InlineData("""{"AzureAd":{},"azuread":{"tenantid":"other-tenant"}}""", "TenantId")]
+    [InlineData("""{"AzureAd":{},"azuread":{"instance":"https://other/"}}""", "Instance")]
+    [InlineData("""{"AzureAd":{},"azuread":{"callbackpath":"/other"}}""", "CallbackPath")]
+    [InlineData("""{"AzureAd":{},"azuread":"invalid-shape"}""", "AzureAd")]
+    [InlineData("""{"AzureAd":{"Domain":"contoso.com","ClientId":"old-client"}}""", "ClientId")]
+    [InlineData("""{"AzureAd":{"Domain":null,"ClientId":"old-client"}}""", "ClientId")]
+    [InlineData("""{"AzureAd":{},"AZUREAD:CLIENTID":"old-client"}""", "ClientId")]
+    public void DevelopmentSettingsPreflight_ChecksEveryAlias(string settings, string expectedKey)
+    {
+        string devSettingsPath = Path.Combine("test", "project", "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(devSettingsPath)).Returns(settings);
+        var logger = new TestLogger();
+        var step = new ValidateEntraIdStep(_mockFileSystem.Object, logger, _testTelemetryService)
+        {
+            Username = "devuser",
+            TenantId = "tenant-id"
+        };
+
+        Assert.False(step.ValidateDevelopmentSettingsPreflight(_testProjectPath, useExistingApplication: false, overwrite: false));
+        Assert.Single(logger.Errors);
+        Assert.Contains($"key '{expectedKey}'", logger.Errors[0]);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
     private sealed class TestLogger : ILogger<ValidateEntraIdStep>

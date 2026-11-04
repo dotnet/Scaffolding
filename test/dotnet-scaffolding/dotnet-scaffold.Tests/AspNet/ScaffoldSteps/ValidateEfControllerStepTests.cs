@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
@@ -61,6 +62,7 @@ public class ValidateEfControllerStepTests
     {
         var step = CreateStep(controllerName);
         var context = new ScaffolderContext(Mock.Of<IScaffolder>());
+        context.OptionResults[new ScaffolderOption<bool> { DisplayName = "Views", CliOption = Constants.CliOptions.ViewsOption }] = true;
 
         Assert.False(await step.ExecuteAsync(context));
 
@@ -90,18 +92,60 @@ public class ValidateEfControllerStepTests
     [InlineData("COM10Controller", "COM10Controller", "MVC")]
     [InlineData("MoviesController", "MoviesController", "API")]
     [InlineData("MoviesController.cs", "MoviesController", "API")]
+    [InlineData("ConController", "ConController", "API")]
+    [InlineData("NULController", "NULController", "API")]
     public void ValidateSettings_ValidControllerName_PreservesExplicitName(string controllerName, string expectedName, string controllerType)
     {
         var step = CreateStep(controllerName);
         step.ControllerType = controllerType;
 
-        var settings = step.ValidateEfControllerSettings();
+        var settings = step.ValidateEfControllerSettings(addViews: controllerType == "MVC");
 
         Assert.NotNull(settings);
         Assert.Equal(expectedName, settings.ControllerName);
         Assert.Equal(expectedName, step.ControllerName);
         Assert.Equal(controllerType, settings.ControllerType);
         Assert.Equal("Movie", settings.Model);
+    }
+
+    [Theory]
+    [InlineData("ConController")]
+    [InlineData("ConController.cs")]
+    [InlineData("NULController")]
+    [InlineData("PRNController")]
+    [InlineData("AUXController")]
+    [InlineData("COM1Controller")]
+    [InlineData("Lpt9Controller")]
+    public void ValidateSettings_ViewFolderRestrictions_ApplyOnlyWhenGeneratingViews(string controllerName)
+    {
+        var apiStep = CreateStep(controllerName);
+        apiStep.ControllerType = "API";
+        Assert.NotNull(apiStep.ValidateEfControllerSettings(addViews: false));
+
+        var mvcStep = CreateStep(controllerName);
+        Assert.NotNull(mvcStep.ValidateEfControllerSettings(addViews: false));
+        Assert.Null(mvcStep.ValidateEfControllerSettings(addViews: true));
+    }
+
+    [Theory]
+    [InlineData("CON")]
+    [InlineData("NUL.cs")]
+    [InlineData("COM1")]
+    [InlineData("../MoviesController")]
+    [InlineData(@"..\MoviesController")]
+    [InlineData("MoviesController:stream")]
+    [InlineData("Movies-Controller")]
+    [InlineData("class")]
+    [InlineData("COM\u00b9Controller")]
+    public void ValidateSettings_InvalidControllerFileName_IsRejectedWithOrWithoutViews(string controllerName)
+    {
+        var apiStep = CreateStep(controllerName);
+        apiStep.ControllerType = "API";
+        Assert.Null(apiStep.ValidateEfControllerSettings(addViews: false));
+
+        var mvcStep = CreateStep(controllerName);
+        Assert.Null(mvcStep.ValidateEfControllerSettings(addViews: false));
+        Assert.Null(mvcStep.ValidateEfControllerSettings(addViews: true));
     }
 
     private ValidateEfControllerStep CreateStep(string? controllerName)

@@ -79,7 +79,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
     /// <returns>Task indicating the completion of the operation.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        var efControllerSettings = ValidateEfControllerSettings();
+        var efControllerSettings = ValidateEfControllerSettings(context.GetOptionResult<bool>(AspNetConstants.CliOptions.ViewsOption));
         var codeModifierProperties = new Dictionary<string, string>();
         if (efControllerSettings is null)
         {
@@ -131,8 +131,9 @@ internal class ValidateEfControllerStep : ScaffoldStep
     /// <summary>
     /// Validates the EF Controller settings provided by the user.
     /// </summary>
+    /// <param name="addViews">Whether controller-specific view folders will be generated.</param>
     /// <returns>Validated EF Controller settings.</returns>
-    internal EfControllerSettings? ValidateEfControllerSettings()
+    internal EfControllerSettings? ValidateEfControllerSettings(bool addViews)
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
@@ -154,18 +155,27 @@ internal class ValidateEfControllerStep : ScaffoldStep
         string controllerName = ControllerName.EndsWith(AspNetConstants.CSharpExtension, StringComparison.OrdinalIgnoreCase)
             ? ControllerName[..^AspNetConstants.CSharpExtension.Length]
             : ControllerName;
-        const string controllerSuffix = "Controller";
-        string viewFolderName = controllerName.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase)
-            ? controllerName[..^controllerSuffix.Length]
-            : controllerName;
         if (!SyntaxFacts.IsValidIdentifier(controllerName) ||
             SyntaxFacts.GetKeywordKind(controllerName) != SyntaxKind.None ||
-            string.IsNullOrEmpty(viewFolderName) ||
-            IsReservedFileName(viewFolderName))
+            IsReservedFileName(controllerName))
         {
             _logger.LogError($"Invalid {AspNetConstants.CliOptions.ControllerNameOption} option. " +
-                "Specify an unqualified C# identifier, optionally followed by '.cs', with a nonempty, non-reserved view folder name.");
+                "Specify a non-reserved, unqualified C# identifier, optionally followed by '.cs'.");
             return null;
+        }
+
+        if (addViews)
+        {
+            const string controllerSuffix = "Controller";
+            string viewFolderName = controllerName.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase)
+                ? controllerName[..^controllerSuffix.Length]
+                : controllerName;
+            if (string.IsNullOrEmpty(viewFolderName) || IsReservedFileName(viewFolderName))
+            {
+                _logger.LogError($"Invalid {AspNetConstants.CliOptions.ControllerNameOption} option. " +
+                    "Specify a controller name with a nonempty, non-reserved view folder name when generating views.");
+                return null;
+            }
         }
 
         ControllerName = controllerName;

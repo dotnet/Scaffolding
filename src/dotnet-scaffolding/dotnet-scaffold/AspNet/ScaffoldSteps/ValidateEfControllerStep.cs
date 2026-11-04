@@ -47,7 +47,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
     /// </summary>
     public string? Model { get; set; }
     /// <summary>
-    /// Name of the controller to be scaffolded.
+    /// Unqualified C# controller name, optionally followed by .cs. Directory paths are not supported.
     /// </summary>
     public string? ControllerName { get; set; }
     /// <summary>
@@ -132,7 +132,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
     /// Validates the EF Controller settings provided by the user.
     /// </summary>
     /// <returns>Validated EF Controller settings.</returns>
-    private EfControllerSettings? ValidateEfControllerSettings()
+    internal EfControllerSettings? ValidateEfControllerSettings()
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
@@ -151,10 +151,24 @@ internal class ValidateEfControllerStep : ScaffoldStep
             _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.ControllerNameOption} option.");
             return null;
         }
-        else
+        string controllerName = ControllerName.EndsWith(AspNetConstants.CSharpExtension, StringComparison.OrdinalIgnoreCase)
+            ? ControllerName[..^AspNetConstants.CSharpExtension.Length]
+            : ControllerName;
+        const string controllerSuffix = "Controller";
+        string viewFolderName = controllerName.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase)
+            ? controllerName[..^controllerSuffix.Length]
+            : controllerName;
+        if (!SyntaxFacts.IsValidIdentifier(controllerName) ||
+            SyntaxFacts.GetKeywordKind(controllerName) != SyntaxKind.None ||
+            string.IsNullOrEmpty(viewFolderName) ||
+            IsReservedFileName(viewFolderName))
         {
-            ControllerName = Path.GetFileNameWithoutExtension(ControllerName);
+            _logger.LogError($"Invalid {AspNetConstants.CliOptions.ControllerNameOption} option. " +
+                "Specify an unqualified C# identifier, optionally followed by '.cs', with a nonempty, non-reserved view folder name.");
+            return null;
         }
+
+        ControllerName = controllerName;
 
         if (string.IsNullOrEmpty(ControllerType))
         {
@@ -200,6 +214,15 @@ internal class ValidateEfControllerStep : ScaffoldStep
             DatabaseProvider = DatabaseProvider,
             Prerelease = Prerelease
         };
+    }
+
+    private static bool IsReservedFileName(string name)
+    {
+        string upperName = name.ToUpperInvariant();
+        return upperName is "CON" or "PRN" or "AUX" or "NUL" ||
+            (upperName.Length == 4 &&
+             (upperName.StartsWith("COM", StringComparison.Ordinal) || upperName.StartsWith("LPT", StringComparison.Ordinal)) &&
+             (upperName[3] is >= '1' and <= '9' or '\u00b9' or '\u00b2' or '\u00b3'));
     }
 
     /// <summary>

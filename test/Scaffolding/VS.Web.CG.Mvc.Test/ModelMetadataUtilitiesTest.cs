@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Shared;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.MinimalApi;
 using Moq;
 using Xunit;
@@ -29,6 +30,35 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Test
             modelTypesLocatorWithoutContext = new Mock<IModelTypesLocator>();
             codeModelService = new Mock<ICodeModelService>();
             logger = new Mock<ILogger>();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task GetModelEFMetadataBlazorAsync_RequestsFactoryRegistrationForSelectedContext(bool existingContext)
+        {
+            var movie = new ModelType { Name = "Movie", FullName = "TestProject.Movie" };
+            var contextType = new ModelType { Name = "MovieContext", FullName = "TestProject.Data.MovieContext" };
+            var command = new BlazorWebCRUDGeneratorCommandLineModel
+            {
+                ModelClass = "Movie",
+                DataContextClass = "MovieContext"
+            };
+            modelTypesLocator.Setup(locator => locator.GetType("Movie")).Returns(new[] { movie });
+            modelTypesLocator.Setup(locator => locator.GetType("MovieContext"))
+                .Returns(existingContext ? new[] { contextType } : Array.Empty<ModelType>());
+            var contextName = existingContext ? contextType.FullName : "MovieContext";
+            var provider = existingContext ? DbProvider.Existing : DbProvider.SqlServer;
+            var metadata = new ContextProcessingResult { ContextProcessingStatus = ContextProcessingStatus.ContextAdded };
+            efService.Setup(service => service.GetModelMetadata(contextName, movie, string.Empty, provider, true))
+                .ReturnsAsync(metadata);
+
+            var result = await ModelMetadataUtilities.GetModelEFMetadataBlazorAsync(
+                command, efService.Object, modelTypesLocator.Object, logger.Object, string.Empty);
+
+            Assert.Same(metadata, result.ContextProcessingResult);
+            Assert.Equal(contextName, result.DbContextFullName);
+            efService.Verify(service => service.GetModelMetadata(contextName, movie, string.Empty, provider, true), Times.Once);
         }
 
         [Fact]

@@ -63,11 +63,6 @@
             "    app.UseMigrationsEndPoint();"
           ],
           "CheckBlock": "app.UseMigrationsEndPoint()"
-        },
-        {
-          "ReplaceSnippet": [".AddDbContext<"],
-          "Block": ".AddDbContextFactory<",
-          "CheckBlock": ".AddDbContextFactory<"
         }
       ],
       "Usings": [

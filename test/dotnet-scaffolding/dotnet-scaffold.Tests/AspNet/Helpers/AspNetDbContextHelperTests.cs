@@ -10,6 +10,25 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
 
 public class AspNetDbContextHelperTests
 {
+    [Theory]
+    [InlineData("sqlserver-efcore", "UseSqlServer(movieConnectionString)")]
+    [InlineData("sqlite-efcore", "UseSqlite(movieConnectionString)")]
+    [InlineData("npgsql-efcore", "UseNpgsql(movieConnectionString)")]
+    [InlineData("cosmos-efcore", "UseCosmos(movieConnectionString, \"MovieContext\")")]
+    public void GetDbContextCodeModifierProperties_UsesSelectedConnectionString(string provider, string expected)
+    {
+        var context = new DbContextInfo
+        {
+            EfScenario = true,
+            DatabaseProvider = provider,
+            DbContextClassName = "MovieContext"
+        };
+
+        var properties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(context, "movieConnectionString");
+
+        Assert.Equal(expected, properties[Microsoft.DotNet.Scaffolding.Internal.Constants.CodeModifierPropertyConstants.UseDbMethod]);
+    }
+
     [Fact]
     public void GetDbContextCodeModifierProperties_WithEfScenarioAndSqlServer_ReturnsExpectedProperties()
     {

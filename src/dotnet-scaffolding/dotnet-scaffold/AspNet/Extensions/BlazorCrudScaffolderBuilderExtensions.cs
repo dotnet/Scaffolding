@@ -100,6 +100,7 @@ internal static class BlazorCrudScaffolderBuilderExtensions
     /// </summary>
     public static IScaffoldBuilder WithBlazorCrudCodeChangeStep(this IScaffoldBuilder builder)
     {
+        builder = builder.WithStep<BlazorDbContextFactoryStep>(_ => { });
         builder = builder.WithStep<WrappedCodeModificationStep>(config =>
         {
             var step = config.Step;

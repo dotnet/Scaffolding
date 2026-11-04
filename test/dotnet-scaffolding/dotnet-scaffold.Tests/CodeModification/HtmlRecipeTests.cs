@@ -332,6 +332,7 @@ public class HtmlRecipeTests : IDisposable
     [Trait("Suite", "ScaffoldIntegration")]
     public async Task ExecuteAsync_StandaloneBlazorWebAssemblyRecipeSupportsSubstitutionsAndReruns()
     {
+        File.WriteAllText(Path.Combine(_directory, "NuGet.config"), ScaffoldCliHelper.GetTestNuGetConfig("net10.0"));
         var create = await ScaffoldCliHelper.RunDotNetAsync(_directory,
             "new", "blazorwasm", "--name", "TestProject", "--framework", "net10.0", "--output", _directory);
         Assert.True(create.ExitCode == 0, $"dotnet new failed: {create.Output}{create.Error}");

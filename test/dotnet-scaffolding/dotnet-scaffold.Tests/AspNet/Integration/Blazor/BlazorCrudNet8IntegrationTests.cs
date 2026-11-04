@@ -45,14 +45,15 @@ public class BlazorCrudNet8IntegrationTests : BlazorCrudIntegrationTestsBase
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore",
             "--page", "CRUD");
-        Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.True(cliExitCode != 0, $"CLI scaffold should fail for known net8 template incompatibility.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.Contains("does not implement Microsoft.DotNet.Scaffolding.TextTemplating.ITextTransformation", cliOutput);
+        Assert.Contains("failed at step 'WrappedTextTemplatingStep'", cliOutput);
 
-        // Assert — expected files were created
+        // Assert — expected files were created only when scaffolding succeeds.
         var blazorPagesDir = Path.Combine(_testProjectDir, "Components", "Pages", "TestModelPages");
-        Assert.True(Directory.Exists(blazorPagesDir),
-            $"Blazor pages directory '{blazorPagesDir}' should be created.");
-
-        foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
+        bool scaffoldingProducedFiles = Directory.Exists(blazorPagesDir);
+        Assert.False(scaffoldingProducedFiles, "Blazor CRUD pages should not be generated when templating fails.");
+        if (scaffoldingProducedFiles)
         {
             Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
         }

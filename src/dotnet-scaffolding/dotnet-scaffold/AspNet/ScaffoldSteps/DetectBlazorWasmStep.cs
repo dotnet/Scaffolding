@@ -51,13 +51,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                     {
                         foreach (var reference in references)
                         {
-                            var projectInfo = ClassAnalyzers.GetProjectInfo(reference, _logger);
-
-                            var baseDirectory = Path.GetDirectoryName(ProjectPath);
-                            if (baseDirectory is not null)
+                            // This step was throwing in a non-wasm (e.g. Blazor Server) project when trying to list 
+                            // packages for the reference with a relative project path.
+                            // Changed it to use GetReferenceFullPath to ensure the full path is correctly resolved.
+                            var fullPath = GetReferenceFullPath(ProjectPath, reference);
+                            if (fullPath is not null)
                             {
-                                var fullPath = Path.GetFullPath(reference, baseDirectory);
-
                                 var projectRunner = DotnetCliRunner.CreateDotNet("package", new[] { "list", "--project", fullPath, "--format", "json" });
                                 int packageExitCode = projectRunner.ExecuteAndCaptureOutput(out var packageStdOut, out var packageStdErr);
 
@@ -114,6 +113,26 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             }
 
             return Task.FromResult(false);
+        }
+
+        /// <summary>
+        /// Resolves a project reference, as printed by 'dotnet reference list' (relative to the referencing project),
+        /// to a full path. The referencing project path may itself be relative to the current directory (e.g.
+        /// '--project .\App\App.csproj'), so it is fully qualified first: <see cref="Path.GetFullPath(string, string)"/>
+        /// throws when its base path is not fully qualified.
+        /// </summary>
+        /// <param name="projectPath">Path of the referencing project (absolute or relative to the current directory).</param>
+        /// <param name="reference">Referenced project path as listed by 'dotnet reference list'.</param>
+        /// <returns>The full path of the referenced project, or null when either input is empty.</returns>
+        internal static string? GetReferenceFullPath(string? projectPath, string? reference)
+        {
+            if (string.IsNullOrEmpty(projectPath) || string.IsNullOrEmpty(reference))
+            {
+                return null;
+            }
+
+            var baseDirectory = Path.GetDirectoryName(Path.GetFullPath(projectPath));
+            return string.IsNullOrEmpty(baseDirectory) ? null : Path.GetFullPath(reference, baseDirectory);
         }
     }
 }

@@ -239,10 +239,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     var options = new JsonSerializerOptions { WriteIndented = true };
 
                     var serializedContent = content.ToJsonString(options);
-                    _fileSystem.WriteAllText(appSettingsFile, appendFinalNewLine ? serializedContent + Environment.NewLine : serializedContent);
                     var changes = new List<(string Path, string? Original, string Updated)>
                     {
-                        (appSettingsFile, originalContent, serializedContent)
+                        (appSettingsFile, originalContent, appendFinalNewLine ? serializedContent + Environment.NewLine : serializedContent)
                     };
 
                     if (!PrepareDevelopmentSettings(baseProjectPath, content, changes))
@@ -333,9 +332,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         var options = new JsonSerializerOptions { WriteIndented = true };
                         var serializedContent = devContent.ToJsonString(options);
                         var appendFinalNewLine = devJsonString.EndsWith('\n') || devJsonString.EndsWith('\r');
-                        _fileSystem.WriteAllText(devSettingsPath, appendFinalNewLine ? serializedContent + Environment.NewLine : serializedContent);
-                        _logger.LogInformation("Successfully updated appsettings.Development.json with AzureAd configuration");
-                        changes.Add((devSettingsPath, devJsonString, devContent.ToJsonString(options)));
+                        changes.Add((devSettingsPath, devJsonString,
+                            appendFinalNewLine ? serializedContent + Environment.NewLine : serializedContent));
                     }
                 }
                 catch (Exception ex)

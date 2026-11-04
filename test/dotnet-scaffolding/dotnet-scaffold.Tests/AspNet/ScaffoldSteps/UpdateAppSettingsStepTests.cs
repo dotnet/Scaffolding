@@ -520,7 +520,7 @@ public class UpdateAppSettingsStepTests
     [Theory]
     [InlineData("{\n  // Preserve this comment\n  \"FeatureEnabled\": true\n}")]
     [InlineData("{\n  \"FeatureEnabled\": true,\n}")]
-    public async Task ExecuteAsync_DoesNotOverwriteDevelopmentSettingsWhenItContainsUnsupportedJson(string developmentSettingsContent)
+    public async Task ExecuteAsync_AcceptsCommentsAndTrailingCommasInDevelopmentSettings(string developmentSettingsContent)
     {
         string projectPath = Path.Combine("test", "project", "TestProject.csproj");
         string baseProjectPath = Path.GetDirectoryName(projectPath)!;
@@ -557,17 +557,10 @@ public class UpdateAppSettingsStepTests
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
         Assert.True(result);
-        if (writtenContent is not null)
-        {
-            Assert.Equal(developmentSettingsContent, writtenContent);
-        }
-        _mockFileSystem.Verify(fs => fs.WriteAllText(developmentSettingsPath, It.IsAny<string>()), Times.Never);
-
-        Assert.Contains(_mockLogger.Invocations, invocation =>
-            invocation.Method.Name == nameof(ILogger.Log) &&
-            invocation.Arguments[0] is LogLevel.Warning &&
-            invocation.Arguments[2]?.ToString()?.Contains(
-                "Failed to parse appsettings.Development.json") == true);
+        using JsonDocument document = JsonDocument.Parse(Assert.IsType<string>(writtenContent));
+        Assert.True(document.RootElement.GetProperty("FeatureEnabled").GetBoolean());
+        Assert.Equal("client-id", document.RootElement.GetProperty("AzureAd").GetProperty("ClientId").GetString());
+        _mockFileSystem.Verify(fs => fs.WriteAllText(developmentSettingsPath, It.IsAny<string>()), Times.Once);
     }
     [Fact]
     public async Task ExecuteAsync_LogsWarningWhenDevelopmentJsonInvalid()
@@ -598,13 +591,12 @@ public class UpdateAppSettingsStepTests
             ClientId = "client-id"
         };
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-        Assert.True(result);
+        Assert.False(result);
 
-        mockLogger.Verify(x => x.Log(
-            LogLevel.Warning,
-            It.IsAny<EventId>(),
-            It.Is<object>(o => o.ToString()!.Contains("Failed to parse")),
-            It.IsAny<Exception>(),
-            It.IsAny<Func<object, Exception?, string>>()), Times.Once);
+        Assert.Contains(mockLogger.Invocations, invocation =>
+            invocation.Method.Name == nameof(ILogger.Log) &&
+            invocation.Arguments[0] is LogLevel.Warning &&
+            invocation.Arguments[2]?.ToString()?.Contains("Failed to parse") == true);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 }

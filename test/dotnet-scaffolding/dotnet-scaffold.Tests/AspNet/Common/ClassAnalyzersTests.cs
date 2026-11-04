@@ -4,8 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Text;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -20,6 +23,53 @@ public class ClassAnalyzersTests
     public ClassAnalyzersTests()
     {
         _mockLogger = new Mock<ILogger>();
+    }
+
+    [Theory]
+    [InlineData("public", false, true)]
+    [InlineData("internal", false, false)]
+    [InlineData("internal", true, true)]
+    public async Task ValidateTypeAccessibilityAsync_HonorsTargetAssemblyAccess(
+        string accessibility, bool friendAssembly, bool expected)
+    {
+        using var workspace = new AdhocWorkspace();
+        var path = Path.Combine(Path.GetTempPath(), "Web.csproj");
+        var library = workspace.AddProject("Library", LanguageNames.CSharp)
+            .WithMetadataReferences([MetadataReference.CreateFromFile(typeof(object).Assembly.Location)]);
+        var friend = friendAssembly ? "[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"Web\")]" : "";
+        library = library.AddDocument("Types.cs", SourceText.From($"{friend} namespace Models {{ {accessibility} class Movie {{ }} }}")).Project;
+        var web = library.Solution.AddProject(Microsoft.CodeAnalysis.ProjectInfo.Create(
+            ProjectId.CreateNewId(), VersionStamp.Create(), "Web", "Web", LanguageNames.CSharp, filePath: path));
+        var webProject = web.Projects.Single(project => project.Name == "Web")
+            .AddProjectReference(new ProjectReference(library.Id))
+            .AddMetadataReference(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
+        Assert.True(workspace.TryApplyChanges(webProject.Solution));
+        var compilation = await workspace.CurrentSolution.GetProject(library.Id)!.GetCompilationAsync();
+        var selectedType = compilation!.GetTypeByMetadataName("Models.Movie");
+        var service = new Mock<ICodeService>();
+        service.Setup(code => code.GetWorkspaceAsync()).ReturnsAsync(workspace);
+
+        Assert.Equal(expected, await ClassAnalyzers.ValidateTypeAccessibilityAsync(service.Object, path, selectedType!, _mockLogger.Object));
+    }
+
+    [Fact]
+    public async Task ValidateTypeAccessibilityAsync_PreservesLocalFallbackSymbols()
+    {
+        using var workspace = new AdhocWorkspace();
+        var path = Path.Combine(Path.GetTempPath(), "Web.csproj");
+        var sourcePath = Path.Combine(Path.GetTempPath(), "Movie.cs");
+        const string source = "public class Movie { }";
+        var project = workspace.AddProject(Microsoft.CodeAnalysis.ProjectInfo.Create(
+            ProjectId.CreateNewId(), VersionStamp.Create(), "Web", "Web", LanguageNames.CSharp, filePath: path));
+        project = project.AddDocument("Movie.cs", SourceText.From(source), filePath: sourcePath).Project;
+        Assert.True(workspace.TryApplyChanges(project.Solution));
+        var fallback = CSharpCompilation.Create("FallbackCompilation",
+            [CSharpSyntaxTree.ParseText(source, path: sourcePath)]);
+        var selectedType = fallback.GetTypeByMetadataName("Movie");
+        var service = new Mock<ICodeService>();
+        service.Setup(code => code.GetWorkspaceAsync()).ReturnsAsync(workspace);
+
+        Assert.True(await ClassAnalyzers.ValidateTypeAccessibilityAsync(service.Object, path, selectedType!, _mockLogger.Object));
     }
 
     [Fact]

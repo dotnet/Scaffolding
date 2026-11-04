@@ -34,7 +34,8 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
     [InlineData(true, false, false, "razorpages-crud", true)]
     public async Task Scaffold_RazorPagesCrud_ReferencedModelAndDbContext(
         bool directModelReference, bool alreadyRegistered, bool existingDbSet,
-        string scaffolder = "razorpages-crud", bool duplicateContextFileNames = false, string? contextShape = null)
+        string scaffolder = "razorpages-crud", bool duplicateContextFileNames = false, string? contextShape = null,
+        string? typeScenario = null)
     {
         var modelDirectory = Path.Combine(_testDirectory, "ClassLibrary1");
         var contextDirectory = Path.Combine(_testDirectory, "ClassLibrary2");
@@ -46,14 +47,20 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
               <PropertyGroup><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable></PropertyGroup>
             </Project>
             """);
-        File.WriteAllText(Path.Combine(modelDirectory, "Movie.cs"), """
+        var modelSource = """
             namespace ClassLibrary1.Models;
             public class Movie
             {
                 public int Id { get; set; }
                 public string? Title { get; set; }
             }
-            """);
+            """;
+        if (typeScenario == "internal-model")
+        {
+            modelSource = modelSource.Replace("public class Movie", "internal class Movie");
+            modelSource = "[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"ClassLibrary2\")]\n" + modelSource;
+        }
+        File.WriteAllText(Path.Combine(modelDirectory, "Movie.cs"), modelSource);
         File.WriteAllText(Path.Combine(contextDirectory, "ClassLibrary2.csproj"), """
             <Project Sdk="Microsoft.NET.Sdk">
               <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
@@ -89,6 +96,17 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
         else if (contextShape == "global-namespace")
         {
             contextSource = contextSource.Replace("namespace ClassLibrary2.DBContext;", string.Empty);
+        }
+        if (typeScenario is "internal-model" or "internal-context")
+        {
+            contextSource = contextSource.Replace("public class MyDbContext", "internal class MyDbContext");
+        }
+        if (typeScenario == "same-name-model")
+        {
+            File.WriteAllText(Path.Combine(_testProjectDir, "Movie.cs"), """
+                namespace ClassLibrary1.Models;
+                public class Movie { public int Id { get; set; } public string? Title { get; set; } }
+                """);
         }
         File.WriteAllText(contextPath, contextSource);
         string? duplicatePath = null;
@@ -134,13 +152,30 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
         }
 
         await AssertExistingContextScaffoldingAsync(contextPath, contextSource, "ClassLibrary1.Models", contextNamespace,
-            alreadyRegistered, existingDbSet, scaffolder);
+            alreadyRegistered, existingDbSet, scaffolder,
+            typeScenario is "internal-model" or "internal-context" ? "not accessible" :
+                typeScenario == "same-name-model" ? "selected model" : null);
         Assert.Equal(unrelatedSource, File.ReadAllText(unrelatedPath));
         if (duplicatePath is not null)
         {
             Assert.Equal(duplicateSource, File.ReadAllText(duplicatePath));
         }
     }
+
+    [Theory]
+    [InlineData("internal-model", true)]
+    [InlineData("internal-model", false)]
+    [InlineData("internal-context", true)]
+    [InlineData("internal-context", false)]
+    [InlineData("same-name-model", true)]
+    [InlineData("same-name-model", false)]
+    [InlineData("internal-context", true, "mvccontroller-crud")]
+    [InlineData("internal-context", true, "apicontroller-crud")]
+    [InlineData("internal-context", true, "minimalapi")]
+    [InlineData("internal-context", true, "blazor-crud")]
+    public Task Scaffold_Crud_ValidatesReferencedTypeIdentityAndAccessibility(
+        string scenario, bool existingDbSet, string scaffolder = "razorpages-crud") =>
+        Scaffold_RazorPagesCrud_ReferencedModelAndDbContext(true, false, existingDbSet, scaffolder, typeScenario: scenario);
 
     [Theory]
     [InlineData("factory-first")]
@@ -304,10 +339,15 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
 
     private async Task AssertExistingContextScaffoldingAsync(
         string contextPath, string contextSource, string modelNamespace, string contextNamespace, bool alreadyRegistered,
-        bool existingDbSet = true, string scaffolder = "razorpages-crud")
+        bool existingDbSet = true, string scaffolder = "razorpages-crud", string? expectedError = null)
     {
         var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
         Assert.True(preExitCode == 0, $"Build before scaffolding failed.\n{preOutput}\n{preError}");
+        var originalFiles = Directory.GetFiles(_testDirectory, "*", SearchOption.AllDirectories)
+            .Where(path => path.EndsWith(".cs") || path.EndsWith(".csproj"))
+            .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}") &&
+                !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}"))
+            .ToDictionary(path => path, File.ReadAllText);
 
         var options = new System.Collections.Generic.List<string>
         {
@@ -324,6 +364,20 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
             _ => new[] { "--page", "CRUD" }
         });
         var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(TargetFramework, scaffolder, options.ToArray());
+
+        if (expectedError is not null)
+        {
+            Assert.NotEqual(0, exitCode);
+            Assert.Contains(expectedError, output + error);
+            foreach (var file in originalFiles)
+            {
+                Assert.Equal(file.Value, File.ReadAllText(file.Key));
+            }
+            Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Pages", "MoviePages")));
+            var (rejectedBuild, rejectedOutput, rejectedError) = await RunBuildAsync(_testProjectDir);
+            Assert.True(rejectedBuild == 0, $"Rejected configuration changed the build.\n{rejectedOutput}\n{rejectedError}");
+            return;
+        }
 
         Assert.True(exitCode == 0, $"Scaffolding failed.\n{output}\n{error}");
         Assert.DoesNotContain("Invalid --model", output);

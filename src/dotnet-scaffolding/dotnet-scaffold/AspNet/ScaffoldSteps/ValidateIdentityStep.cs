@@ -237,7 +237,8 @@ internal class ValidateIdentityStep : ScaffoldStep
             return null;
         }
 
-        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync();
+        // Referenced Identity contexts may use a different user type than the generated ApplicationUser.
+        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync(includeReferencedProjects: false);
         //find DbContext info or create properties for a new one.
         var dbContextClassName = settings.DataContext;
         DbContextInfo dbContextInfo = new();

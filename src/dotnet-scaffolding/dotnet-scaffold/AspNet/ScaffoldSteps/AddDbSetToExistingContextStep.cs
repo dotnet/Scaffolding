@@ -19,6 +19,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 /// Scaffold step that adds a missing DbSet property to an existing DbContext class.
 /// This is needed when a pre-existing DbContext is selected for CRUD scaffolding but does
 /// not yet contain a DbSet property for the model being scaffolded.
+/// Existing contexts are checked against the selected model's type and assembly identity even
+/// when a DbSet already exists.
 /// Delegates the actual code modification to <see cref="CodeModificationStep"/> using its
 /// in-memory JSON config path, consistent with how all other code changes are applied in
 /// this project.
@@ -54,18 +56,10 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
         string? dbContextPath = dbContextProperties.DbContextPath;
         string? dbSetStatement = dbContextProperties.DbSetStatement;
 
-        // Only act when:
-        //   The target file already exists on disk (existing context — new contexts are
-        //     handled by WithDbContextStep via its T4 template which already includes the DbSet).
-        //   A DbSet statement was produced (only set when GetDbContextInfo found no existing DbSet).
-        //   The project path is available to initialise the Roslyn workspace.
-        if (string.IsNullOrEmpty(dbContextPath) || !File.Exists(dbContextPath) || string.IsNullOrWhiteSpace(dbSetStatement) || string.IsNullOrEmpty(ProjectPath))
-        {
-            return true;
-        }
-
-        dbSetStatement = NormalizeDbSetStatement(dbSetStatement);
-        if (string.IsNullOrWhiteSpace(dbSetStatement))
+        // Validate existing contexts even when they already have a DbSet for a same-named model.
+        // New contexts are handled by WithDbContextStep.
+        if (string.IsNullOrEmpty(dbContextPath) || !File.Exists(dbContextPath) || string.IsNullOrEmpty(ProjectPath) ||
+            (string.IsNullOrWhiteSpace(dbContextProperties.ModelFullName) && string.IsNullOrWhiteSpace(dbSetStatement)))
         {
             return true;
         }
@@ -89,16 +83,7 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
             return false;
         }
 
-        if (SyntaxFactory.ParseMemberDeclaration(dbSetStatement) is not PropertyDeclarationSyntax dbSetProperty ||
-            dbSetProperty.ContainsDiagnostics ||
-            dbSetProperty.Type is not GenericNameSyntax { Identifier.ValueText: "DbSet" } dbSetType ||
-            dbSetType.TypeArgumentList.Arguments.Count != 1)
-        {
-            _logger.LogError("Invalid DbSet property declaration '{DbSetStatement}'.", dbSetStatement);
-            return false;
-        }
-
-        var modelTypeSyntax = dbSetType.TypeArgumentList.Arguments[0];
+        var modelTypeSyntax = SyntaxFactory.ParseTypeName(dbContextProperties.ModelFullName ?? string.Empty);
         var modelType = semanticModel.GetSpeculativeTypeInfo(contextDeclaration.OpenBraceToken.Span.End,
             modelTypeSyntax, SpeculativeBindingOption.BindAsTypeOrNamespace).Type;
         if (modelType is not INamedTypeSymbol { TypeKind: not TypeKind.Error } ||
@@ -106,6 +91,29 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
         {
             _logger.LogError("Model '{ModelType}' is not accessible to DbContext '{DbContextFullName}'. Place the model in the context project or a shared project referenced by it.",
                 modelTypeSyntax.ToString(), dbContextProperties.DbContextFullName);
+            return false;
+        }
+
+        if (modelType.ToDisplayString() != dbContextProperties.ModelFullName ||
+            modelType.ContainingAssembly.Identity.ToString() != dbContextProperties.ModelAssemblyIdentity)
+        {
+            _logger.LogError("DbContext '{DbContextFullName}' does not reference the selected model '{ModelType}' from assembly '{ModelAssembly}'.",
+                dbContextProperties.DbContextFullName, dbContextProperties.ModelFullName, dbContextProperties.ModelAssemblyIdentity);
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(dbSetStatement))
+        {
+            return true;
+        }
+
+        dbSetStatement = NormalizeDbSetStatement(dbSetStatement);
+        if (SyntaxFactory.ParseMemberDeclaration(dbSetStatement) is not PropertyDeclarationSyntax dbSetProperty ||
+            dbSetProperty.ContainsDiagnostics ||
+            dbSetProperty.Type is not GenericNameSyntax { Identifier.ValueText: "DbSet" } dbSetType ||
+            dbSetType.TypeArgumentList.Arguments.Count != 1)
+        {
+            _logger.LogError("Invalid DbSet property declaration '{DbSetStatement}'.", dbSetStatement);
             return false;
         }
 

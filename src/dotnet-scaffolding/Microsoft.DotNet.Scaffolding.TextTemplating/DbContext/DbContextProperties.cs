@@ -12,6 +12,8 @@ internal class DbContextProperties
     /// </summary>
     public string DbContextName { get; set; } = Constants.NewDbContext;
     public string? DbContextFullName { get; set; }
+    public string? ModelFullName { get; set; }
+    public string? ModelAssemblyIdentity { get; set; }
     /// <summary>
     /// The output path for the generated DbContext file.
     /// </summary>

@@ -82,6 +82,8 @@ internal class AspNetDbContextHelper
         {
             dbContextProperties.DbContextName = dbContextInfo.DbContextClassName;
             dbContextProperties.DbContextFullName = dbContextInfo.DbContextFullName;
+            dbContextProperties.ModelFullName = dbContextInfo.ModelFullName;
+            dbContextProperties.ModelAssemblyIdentity = dbContextInfo.ModelAssemblyIdentity;
             dbContextProperties.DbSetStatement = dbContextInfo.NewDbSetStatement;
             dbContextProperties.DbContextPath = dbContextInfo.DbContextClassPath;
             return dbContextProperties;

@@ -5,17 +5,16 @@
       "Options": [ "GlobalInteractive" ],
       "Replacements": [
         {
-          "ReplaceSnippet": [ "$(RoutesRenderModeAttribute)" ],
-          "Block": "@rendermode=\"PageRenderMode\""
+          "ReplaceSnippet": [ "$(RoutesRenderModeTag)" ],
+          "Block": "$(UpdatedRoutesRenderModeTag)"
         },
         {
-          "ReplaceSnippet": [ "$(HeadOutletRenderModeAttribute)" ],
-          "Block": "@rendermode=\"PageRenderMode\""
+          "ReplaceSnippet": [ "$(HeadOutletRenderModeTag)" ],
+          "Block": "$(UpdatedHeadOutletRenderModeTag)"
         },
         {
           "ReplaceSnippet": [ "</html>" ],
-          "FileBlock": "..\\..\\Shared\\CodeBlocks\\IdentityPageRenderMode.razor",
-          "CheckBlock": "AcceptsInteractiveRouting()"
+          "Block": "</html>\n\n@code {\n$(BlazorCrudRenderModeMembers)\n}"
         }
       ]
     },

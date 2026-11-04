@@ -129,18 +129,53 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
             if (_fileSystem.FileExists(appPath))
             {
                 var appContent = _fileSystem.ReadAllText(appPath);
-                const string renderModePattern = @"@rendermode\s*=\s*""@?(?<parenthesized>\(\s*)?(?<mode>InteractiveAuto|InteractiveServer|InteractiveWebAssembly)\s*(?(parenthesized)\))""";
-                var renderMode = Regex.Match(appContent, $@"<Routes\b[^>]*?\s(?<attribute>{renderModePattern})",
-                    RegexOptions.None, TimeSpan.FromSeconds(1));
-                if (renderMode.Success)
+                const string componentAttributesPattern = """(?:[^"'<>]|"[^"]*"|'[^']*')*""";
+                const string renderModePattern = """@rendermode\s*=\s*(?:"(?<expression>[^"]+)"|'(?<expression>[^']+)')""";
+                var routes = Regex.Match(appContent, $@"<Routes\b{componentAttributesPattern}>", RegexOptions.None, TimeSpan.FromSeconds(1));
+                var renderMode = Regex.Match(routes.Value, renderModePattern, RegexOptions.None, TimeSpan.FromSeconds(1));
+                var expression = GetRenderModeExpression(renderMode);
+                var existingProperty = expression.Trim('(', ')', ' ', '\r', '\n', '\t');
+                if (renderMode.Success && !Regex.IsMatch(appContent,
+                    $@"\b{Regex.Escape(existingProperty)}\s*=>\s*\w+\.AcceptsInteractiveRouting\(\)", RegexOptions.None, TimeSpan.FromSeconds(1)))
                 {
                     blazorCrudModel.ProjectInfo.CodeChangeOptions!.Add("GlobalInteractive");
-                    codeModifierProperties.Add("$(BlazorRenderMode)", renderMode.Groups["mode"].Value);
-                    codeModifierProperties.Add("$(RoutesRenderModeAttribute)", renderMode.Groups["attribute"].Value);
-                    var headOutletRenderMode = Regex.Match(appContent, $@"<HeadOutlet\b[^>]*?\s(?<attribute>{renderModePattern})",
-                        RegexOptions.None, TimeSpan.FromSeconds(1));
-                    codeModifierProperties.Add("$(HeadOutletRenderModeAttribute)",
-                        headOutletRenderMode.Success ? headOutletRenderMode.Groups["attribute"].Value : renderMode.Groups["attribute"].Value);
+                    var httpContextName = GetUniqueMemberName("HttpContext", appContent);
+                    var pageRenderModeName = GetUniqueMemberName("PageRenderMode", appContent);
+                    var members = $$"""
+                            [CascadingParameter]
+                            private HttpContext {{httpContextName}} { get; set; } = default!;
+
+                            private IComponentRenderMode? {{pageRenderModeName}} =>
+                                {{httpContextName}}.AcceptsInteractiveRouting() ? {{expression}} : null;
+                        """;
+                    codeModifierProperties.Add("$(RoutesRenderModeTag)", routes.Value);
+                    codeModifierProperties.Add("$(UpdatedRoutesRenderModeTag)",
+                        routes.Value.Replace(renderMode.Value, $"@rendermode=\"{pageRenderModeName}\""));
+
+                    var headOutlet = Regex.Match(appContent, $@"<HeadOutlet\b{componentAttributesPattern}>", RegexOptions.None, TimeSpan.FromSeconds(1));
+                    var headOutletRenderMode = Regex.Match(headOutlet.Value, renderModePattern, RegexOptions.None, TimeSpan.FromSeconds(1));
+                    var updatedHeadOutlet = headOutlet.Value;
+                    if (headOutletRenderMode.Success)
+                    {
+                        var headOutletExpression = GetRenderModeExpression(headOutletRenderMode);
+                        var headOutletRenderModeName = pageRenderModeName;
+                        if (headOutletExpression != expression)
+                        {
+                            headOutletRenderModeName = GetUniqueMemberName("HeadOutletRenderMode", appContent);
+                            members += $"""
+
+
+                                    private IComponentRenderMode? {headOutletRenderModeName} =>
+                                        {httpContextName}.AcceptsInteractiveRouting() ? {headOutletExpression} : null;
+                                """;
+                        }
+
+                        updatedHeadOutlet = headOutlet.Value.Replace(headOutletRenderMode.Value, $"@rendermode=\"{headOutletRenderModeName}\"");
+                    }
+
+                    codeModifierProperties.Add("$(HeadOutletRenderModeTag)", headOutlet.Value);
+                    codeModifierProperties.Add("$(UpdatedHeadOutletRenderModeTag)", updatedHeadOutlet);
+                    codeModifierProperties.Add("$(BlazorCrudRenderModeMembers)", members);
                 }
             }
         }
@@ -156,6 +191,25 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
 
         _telemetryService.TrackEvent(new ValidateScaffolderTelemetryEvent(nameof(ValidateBlazorCrudStep), context.Scaffolder.DisplayName, result: true));
         return true;
+    }
+
+    private static string GetRenderModeExpression(Match renderMode)
+    {
+        var expression = renderMode.Groups["expression"].Value.Trim();
+        return expression.StartsWith("@(", StringComparison.Ordinal) && expression.EndsWith(')')
+            ? expression[2..^1].Trim()
+            : expression.TrimStart('@');
+    }
+
+    private static string GetUniqueMemberName(string name, string content)
+    {
+        var candidate = name;
+        for (var suffix = 1; Regex.IsMatch(content, $@"\b{candidate}\b", RegexOptions.None, TimeSpan.FromSeconds(1)); suffix++)
+        {
+            candidate = name + suffix;
+        }
+
+        return candidate;
     }
 
     /// <summary>

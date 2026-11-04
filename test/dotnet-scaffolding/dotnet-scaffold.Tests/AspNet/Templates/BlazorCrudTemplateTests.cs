@@ -13,68 +13,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;
 public class BlazorCrudTemplateTests
 {
     [Theory]
-    [InlineData(8)]
-    [InlineData(9)]
-    [InlineData(10)]
-    [InlineData(11)]
-    public void EditTemplate_RetainsLoadedModelWhenInteractiveRenderingStarts(int frameworkVersion)
+    [InlineData(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Create))]
+    [InlineData(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Delete))]
+    [InlineData(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Details))]
+    [InlineData(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Edit))]
+    [InlineData(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Index))]
+    public void Net8CrudTemplate_ImplementsRequiredTextTransformationInterface(System.Type templateType)
     {
-        BlazorCrudModel model = CreateModel("Edit");
-
-        string result = TransformTemplate(frameworkVersion, "Edit", model).Replace("\r\n", "\n");
-
-        Assert.Contains("[SupplyParameterFromForm]\n    private Employee? Employee { get; set; }", result);
-
-        if (frameworkVersion >= 10)
-        {
-            Assert.Contains("[PersistentState]\n    public Employee? EmployeeState { get; set; }", result);
-            Assert.Contains("Employee ??= EmployeeState ??= await context.Employees.FirstOrDefaultAsync", result);
-            Assert.DoesNotContain("[SupplyParameterFromForm]\n    [PersistentState]", result);
-        }
-        else
-        {
-            Assert.Contains("@inject PersistentComponentState ApplicationState", result);
-            Assert.Contains("persistingSubscription ??= ApplicationState.RegisterOnPersisting(PersistData)", result);
-            Assert.Contains("ApplicationState.TryTakeFromJson<Employee>(nameof(Employee), out var restoredEmployee)", result);
-            Assert.Contains("Employee = restoredEmployee", result);
-            Assert.Contains("ApplicationState.PersistAsJson(nameof(Employee), Employee)", result);
-            Assert.Contains("if (Employee is not null)", result);
-            Assert.Contains("public void Dispose() => persistingSubscription?.Dispose();", result);
-
-            int registerIndex = result.IndexOf("persistingSubscription ??= ApplicationState.RegisterOnPersisting(PersistData)", System.StringComparison.Ordinal);
-            int queryIndex = result.IndexOf("await context.Employees.FirstOrDefaultAsync", System.StringComparison.Ordinal);
-            Assert.True(registerIndex >= 0 && queryIndex >= 0 && registerIndex < queryIndex,
-                "Persistent state callback registration should occur before awaiting the database query.");
-        }
-    }
-
-    [Theory]
-    [InlineData(8)]
-    [InlineData(9)]
-    [InlineData(10)]
-    [InlineData(11)]
-    public void EditTemplate_GeneratesSingleDatabaseLookupStatement(int frameworkVersion)
-    {
-        BlazorCrudModel model = CreateModel("Edit");
-        string result = TransformTemplate(frameworkVersion, "Edit", model);
-
-        int first = result.IndexOf("FirstOrDefaultAsync", System.StringComparison.Ordinal);
-        Assert.True(first >= 0, "Expected the generated edit template to query by primary key.");
-        int second = result.IndexOf("FirstOrDefaultAsync", first + 1, System.StringComparison.Ordinal);
-        Assert.True(second < 0, "Generated edit template should contain only one database lookup expression.");
-    }
-
-    [Theory]
-    [InlineData(8)]
-    [InlineData(9)]
-    public void EditTemplate_Net8AndNet9_ContainsRestoreFallbackAndEarlyNotFoundReturn(int frameworkVersion)
-    {
-        BlazorCrudModel model = CreateModel("Edit");
-        string result = TransformTemplate(frameworkVersion, "Edit", model).Replace("\r\n", "\n");
-
-        Assert.Contains("ApplicationState.TryTakeFromJson<Employee>(nameof(Employee), out var restoredEmployee)", result);
-        Assert.Contains("Employee = restoredEmployee", result);
-        Assert.Contains("NavigationManager.NavigateTo(\"notfound\");\n            return;", result);
+        Assert.IsAssignableFrom<Microsoft.DotNet.Scaffolding.TextTemplating.ITextTransformation>(
+            System.Activator.CreateInstance(templateType));
     }
 
     [Theory]
@@ -162,6 +109,71 @@ public class BlazorCrudTemplateTests
         Assert.Contains("<InputDate id=\"startdate\" @bind-Value=\"Employee.StartDate\"", result);
     }
 
+    [Theory]
+    [InlineData(8)]
+    [InlineData(9)]
+    [InlineData(10)]
+    [InlineData(11)]
+    public void EditTemplate_RetainsLoadedModelWhenInteractiveRenderingStarts(int frameworkVersion)
+    {
+        BlazorCrudModel model = CreateModel("Edit");
+
+        string result = TransformTemplate(frameworkVersion, "Edit", model).Replace("\r\n", "\n");
+
+        Assert.Contains("[SupplyParameterFromForm]\n    private Employee? Employee { get; set; }", result);
+
+        if (frameworkVersion >= 10)
+        {
+            Assert.Contains("[PersistentState]\n    public Employee? EmployeeState { get; set; }", result);
+            Assert.Contains("Employee ??= EmployeeState ??= await context.Employees.FirstOrDefaultAsync", result);
+            Assert.DoesNotContain("[SupplyParameterFromForm]\n    [PersistentState]", result);
+        }
+        else
+        {
+            Assert.Contains("@inject PersistentComponentState ApplicationState", result);
+            Assert.Contains("persistingSubscription ??= ApplicationState.RegisterOnPersisting(PersistData)", result);
+            Assert.Contains("ApplicationState.TryTakeFromJson<Employee>(nameof(Employee), out var restoredEmployee)", result);
+            Assert.Contains("Employee = restoredEmployee", result);
+            Assert.Contains("ApplicationState.PersistAsJson(nameof(Employee), Employee)", result);
+            Assert.Contains("if (Employee is not null)", result);
+            Assert.Contains("public void Dispose() => persistingSubscription?.Dispose();", result);
+
+            int registerIndex = result.IndexOf("persistingSubscription ??= ApplicationState.RegisterOnPersisting(PersistData)", System.StringComparison.Ordinal);
+            int queryIndex = result.IndexOf("await context.Employees.FirstOrDefaultAsync", System.StringComparison.Ordinal);
+            Assert.True(registerIndex >= 0 && queryIndex >= 0 && registerIndex < queryIndex,
+                "Persistent state callback registration should occur before awaiting the database query.");
+        }
+    }
+
+    [Theory]
+    [InlineData(8)]
+    [InlineData(9)]
+    [InlineData(10)]
+    [InlineData(11)]
+    public void EditTemplate_GeneratesSingleDatabaseLookupStatement(int frameworkVersion)
+    {
+        BlazorCrudModel model = CreateModel("Edit");
+        string result = TransformTemplate(frameworkVersion, "Edit", model);
+
+        int first = result.IndexOf("FirstOrDefaultAsync", System.StringComparison.Ordinal);
+        Assert.True(first >= 0, "Expected the generated edit template to query by primary key.");
+        int second = result.IndexOf("FirstOrDefaultAsync", first + 1, System.StringComparison.Ordinal);
+        Assert.True(second < 0, "Generated edit template should contain only one database lookup expression.");
+    }
+
+    [Theory]
+    [InlineData(8)]
+    [InlineData(9)]
+    public void EditTemplate_Net8AndNet9_ContainsRestoreFallbackAndEarlyNotFoundReturn(int frameworkVersion)
+    {
+        BlazorCrudModel model = CreateModel("Edit");
+        string result = TransformTemplate(frameworkVersion, "Edit", model).Replace("\r\n", "\n");
+
+        Assert.Contains("ApplicationState.TryTakeFromJson<Employee>(nameof(Employee), out var restoredEmployee)", result);
+        Assert.Contains("Employee = restoredEmployee", result);
+        Assert.Contains("NavigationManager.NavigateTo(\"notfound\");\n            return;", result);
+    }
+
     private static BlazorCrudModel CreateModel(string pageType)
     {
         const string source = """
@@ -237,6 +249,17 @@ public class BlazorCrudTemplateTests
         return template.TransformText();
     }
 
+    private static string GetInputSelect(string result, string id)
+    {
+        int start = result.IndexOf($"<InputSelect id=\"{id}\"", System.StringComparison.Ordinal);
+        Assert.True(start >= 0, $"InputSelect with id '{id}' was not generated.");
+
+        const string closingTag = "</InputSelect>";
+        int end = result.IndexOf(closingTag, start, System.StringComparison.Ordinal);
+        Assert.True(end >= 0, $"InputSelect with id '{id}' was not closed.");
+
+        return result.Substring(start, end - start + closingTag.Length);
+    }
     private static List<IPropertySymbol> GetProperties(string source)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);

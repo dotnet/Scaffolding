@@ -45,27 +45,17 @@ public class BlazorCrudNet8IntegrationTests : BlazorCrudIntegrationTestsBase
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore",
             "--page", "CRUD");
-        Assert.True(cliExitCode != 0, $"CLI scaffold should fail for known net8 template incompatibility.\nOutput: {cliOutput}\nError: {cliError}");
-        Assert.Contains("does not implement Microsoft.DotNet.Scaffolding.TextTemplating.ITextTransformation", cliOutput);
-        Assert.Contains("failed at step 'WrappedTextTemplatingStep'", cliOutput);
+        Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
-        // Assert — expected files were created only when scaffolding succeeds.
+        // Assert — expected files were created.
         var blazorPagesDir = Path.Combine(_testProjectDir, "Components", "Pages", "TestModelPages");
-        bool scaffoldingProducedFiles = Directory.Exists(blazorPagesDir);
-        Assert.False(scaffoldingProducedFiles, "Blazor CRUD pages should not be generated when templating fails.");
-        if (scaffoldingProducedFiles)
+        Assert.True(Directory.Exists(blazorPagesDir), $"Blazor pages directory '{blazorPagesDir}' should be created.");
+        foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
         {
-            Assert.True(File.Exists(Path.Combine(blazorPagesDir, page)), $"Blazor page '{page}' should be created.");
+            var pagePath = Path.Combine(blazorPagesDir, page);
+            Assert.True(File.Exists(pagePath), $"Blazor page '{page}' should be created.");
+            Assert.False(string.IsNullOrWhiteSpace(File.ReadAllText(pagePath)), $"Blazor page '{page}' should not be empty.");
         }
-
-        var editContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Edit.razor"));
-        Assert.Contains("ApplicationState.TryTakeFromJson<TestModel>(nameof(TestModel), out var restoredTestModel)", editContent);
-        Assert.Contains("TestModel = restoredTestModel", editContent);
-        Assert.Contains("ApplicationState.PersistAsJson(nameof(TestModel), TestModel)", editContent);
-
-        var createContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Create.razor"));
-        Assert.Contains("<InputSelect id=\"employmenttype\"", createContent);
-        Assert.Contains("<InputSelect id=\"optionalemploymenttype\"", createContent);
 
         Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
             "DbContext file 'Data/TestDbContext.cs' should be created.");

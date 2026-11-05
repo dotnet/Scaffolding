@@ -21,10 +21,7 @@ public class BlazorIgniteUINet11IntegrationTests : BlazorIgniteUIIntegrationTest
         // The dnceng mirror feeds only carry Microsoft packages, so nuget.org is added as an extra source:
         // the third-party Ignite UI packages are otherwise reported as "no versions available".
         SetupBlazorWebAppProject("    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>");
-        var nugetConfig = ScaffoldCliHelper.PreviewNuGetConfig.Replace(
-            "<clear />",
-            "<clear />\n    <add key=\"nuget.org\" value=\"https://api.nuget.org/v3/index.json\" />");
-        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), nugetConfig);
+        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
 
         // Act + Assert — dotnet scaffold aspnet blazor-igniteui --project TestProject.csproj
         // The Ignite UI packages ship net10.0 assets which net11.0 projects consume; no prerelease needed.

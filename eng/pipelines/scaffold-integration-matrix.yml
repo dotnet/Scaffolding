@@ -100,6 +100,12 @@ jobs:
   displayName: 'Integration: '
   dependsOn: CLIOptionCoverage
   timeoutInMinutes: 60
+  variables:
+  - name: _IntegrationTestExclusions
+    ${{ if parameters.isOfficial }}:
+      value: '&Family!=blazor-igniteui&Family!=blazor-syncfusion-toolkit'
+    ${{ else }}:
+      value: ''
   pool:
     ${{ if ne(parameters.poolName, '') }}:
       name: ${{ parameters.poolName }}
@@ -171,7 +177,7 @@ jobs:
       dotnet test test/dotnet-scaffolding/dotnet-scaffold.Tests/dotnet-scaffold.Tests.csproj
       --no-build
       -c ${{ parameters.buildConfig }}
-      --filter "Suite=ScaffoldIntegration&(Family=$(_Family))"
+      --filter "Suite=ScaffoldIntegration&(Family=$(_Family))$(_IntegrationTestExclusions)"
       --logger "trx;LogFileName=Integration-$(_FamilyLabel).trx"
       --results-directory $(Build.ArtifactStagingDirectory)/TestResults
     displayName: 'Run $(_FamilyLabel) Integration Tests'

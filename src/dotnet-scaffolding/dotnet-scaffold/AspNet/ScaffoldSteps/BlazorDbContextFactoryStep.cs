@@ -10,6 +10,8 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -37,7 +39,16 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
                 : $"{contextInfo.DbContextNamespace}.{contextInfo.DbContextClassName}";
             var connection = $"builder.Configuration.GetConnectionString(\"{contextInfo.DbContextClassName}\") ?? throw new InvalidOperationException(\"Connection string '{contextInfo.DbContextClassName}' not found.\")";
             var properties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(contextInfo, connection);
-            var updated = await RegisterFactoryAsync(document, contextName, properties["$(UseDbMethod)"], cancellationToken);
+            properties.TryGetValue(Constants.CodeModifierPropertyConstants.UseDbMethod, out var useDbMethod);
+            var updated = await TryRegisterFactoryAsync(document, contextName, useDbMethod, logger, cancellationToken);
+            if (updated is null)
+            {
+                // Later Blazor recipes must also leave unsupported startup code untouched.
+                model.ProjectInfo.CodeChangeOptions?.Remove("EfScenario");
+                context.Properties.Remove(Constants.StepConstants.AdditionalCodeModifier);
+                return true;
+            }
+
             if (!codeService.TryApplyChanges(updated.Project.Solution))
             {
                 logger.LogError("Failed to save the DbContext factory registration in Program.cs.");
@@ -55,10 +66,40 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
     }
 
     internal static async Task<Document> RegisterFactoryAsync(
-        Document document, string contextName, string useDbMethod, CancellationToken cancellationToken = default)
+        Document document, string contextName, string? useDbMethod, CancellationToken cancellationToken = default, ILogger? logger = null)
+        => await TryRegisterFactoryAsync(document, contextName, useDbMethod, logger ?? NullLogger.Instance, cancellationToken) ?? document;
+
+    private static async Task<Document?> TryRegisterFactoryAsync(
+        Document document, string contextName, string? useDbMethod, ILogger logger, CancellationToken cancellationToken)
     {
-        var root = await document.GetSyntaxRootAsync(cancellationToken) as CompilationUnitSyntax
-            ?? throw new InvalidOperationException("Program.cs is not a C# compilation unit.");
+        var builderName = "builder";
+        Document? Warn(string reason)
+        {
+            var provider = string.IsNullOrWhiteSpace(useDbMethod) ? null : SyntaxFactory.ParseExpression(useDbMethod);
+            var arguments = "";
+            if (provider is InvocationExpressionSyntax invocation && !invocation.ContainsDiagnostics)
+            {
+                provider = provider.ReplaceNodes(provider.DescendantNodes().OfType<IdentifierNameSyntax>()
+                    .Where(identifier => identifier.Identifier.ValueText == "builder"),
+                    (identifier, _) => SyntaxFactory.IdentifierName(builderName).WithTriviaFrom(identifier));
+                arguments = $"options => options.{provider}";
+            }
+            else
+            {
+                reason += " Configure the database provider options for this registration.";
+            }
+
+            var registration = $"{builderName}.Services.AddDbContextFactory<{contextName}>({arguments});";
+            logger.LogWarning("Could not safely update Program.cs. Add before {BuilderName}.Build(): {Registration} {Reason}",
+                builderName, registration, reason);
+            return null;
+        }
+
+        if (await document.GetSyntaxRootAsync(cancellationToken) is not CompilationUnitSyntax root)
+        {
+            return Warn("Program.cs is not a C# compilation unit.");
+        }
+
         if (!root.Usings.Any(usingDirective => usingDirective.Name?.ToString() == "Microsoft.EntityFrameworkCore"))
         {
             root = root.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("Microsoft.EntityFrameworkCore"))
@@ -68,26 +109,60 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
         }
 
         root = (CompilationUnitSyntax)(await document.GetSyntaxRootAsync(cancellationToken))!;
-        var semanticModel = await document.GetSemanticModelAsync(cancellationToken)
-            ?? throw new InvalidOperationException("Cannot analyze Program.cs.");
-        var contextType = semanticModel.Compilation.GetTypeByMetadataName(contextName)
-            ?? throw new InvalidOperationException($"Cannot resolve the selected DbContext '{contextName}'.");
-        var builder = root.DescendantNodes().OfType<VariableDeclaratorSyntax>().SingleOrDefault(variable =>
+        var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
+        if (semanticModel is null)
+        {
+            return Warn("Cannot analyze Program.cs.");
+        }
+
+        var builders = root.DescendantNodes().OfType<VariableDeclaratorSyntax>().Where(variable =>
             variable.Initializer?.Value is InvocationExpressionSyntax invocation &&
             semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is IMethodSymbol method &&
-            method.Name == "CreateBuilder" &&
+            method.Name is "CreateBuilder" or "CreateSlimBuilder" or "CreateEmptyBuilder" &&
             method.ContainingType.ToDisplayString() == "Microsoft.AspNetCore.Builder.WebApplication")
-            ?? throw new InvalidOperationException("Expected one WebApplication.CreateBuilder declaration in Program.cs.");
-        var builderName = builder.Identifier.ValueText;
-        var build = root.DescendantNodes().OfType<InvocationExpressionSyntax>().SingleOrDefault(invocation =>
+            .ToArray();
+        if (builders.Length != 1)
+        {
+            return Warn("Expected exactly one WebApplication builder declaration.");
+        }
+
+        var builder = builders[0];
+        builderName = builder.Identifier.ValueText;
+        var contextType = semanticModel.Compilation.GetTypeByMetadataName(contextName);
+        if (contextType is null)
+        {
+            return Warn($"Cannot resolve the selected DbContext '{contextName}'.");
+        }
+
+        var builds = root.DescendantNodes().OfType<InvocationExpressionSyntax>().Where(invocation =>
             invocation.Expression is MemberAccessExpressionSyntax
             {
                 Expression: IdentifierNameSyntax receiver,
                 Name.Identifier.ValueText: "Build"
-            } && receiver.Identifier.ValueText == builderName)
-            ?? throw new InvalidOperationException("Cannot locate the selected WebApplication builder's Build call.");
-        var buildStatement = build.Ancestors().OfType<StatementSyntax>().First();
+            } && SymbolEqualityComparer.Default.Equals(
+                semanticModel.GetSymbolInfo(receiver, cancellationToken).Symbol,
+                semanticModel.GetDeclaredSymbol(builder, cancellationToken)))
+            .ToArray();
+        if (builds.Length != 1)
+        {
+            return Warn("Cannot locate exactly one Build call for the selected WebApplication builder.");
+        }
+
+        var build = builds[0];
+        var buildStatement = build.Ancestors().OfType<StatementSyntax>().FirstOrDefault();
+        if (buildStatement is null)
+        {
+            return Warn("The Build call is not a startup statement.");
+        }
+
         var container = buildStatement.Parent is GlobalStatementSyntax global ? global.Parent : buildStatement.Parent;
+        if (buildStatement.Ancestors().Any(node => node is not
+            (BlockSyntax or GlobalStatementSyntax or CompilationUnitSyntax or BaseNamespaceDeclarationSyntax or TypeDeclarationSyntax or
+                MethodDeclarationSyntax { Identifier.ValueText: "Main" })))
+        {
+            return Warn("The Build call is not in unconditional application startup code.");
+        }
+
         List<InvocationExpressionSyntax> registrations = [];
         foreach (var invocation in root.DescendantNodes().OfType<InvocationExpressionSyntax>())
         {
@@ -113,7 +188,7 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
 
             if (semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is not IMethodSymbol method)
             {
-                throw new InvalidOperationException($"Cannot resolve registration '{invocation}' for '{contextName}'.");
+                return Warn($"Cannot resolve registration '{invocation}' for '{contextName}'.");
             }
 
             if (method.ContainingType.ToDisplayString() == "Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions")
@@ -126,8 +201,8 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
             { Name: "AddDbContextFactory" or "AddPooledDbContextFactory" }).ToArray();
         foreach (var registration in registrations)
         {
-            var statement = registration.Ancestors().OfType<StatementSyntax>().First();
-            var parent = statement.Parent is GlobalStatementSyntax wrapper ? wrapper.Parent : statement.Parent;
+            var statement = registration.Ancestors().OfType<StatementSyntax>().FirstOrDefault();
+            var parent = statement?.Parent is GlobalStatementSyntax wrapper ? wrapper.Parent : statement?.Parent;
             if (parent != container || statement is not ExpressionStatementSyntax ||
                 registration.Ancestors().TakeWhile(node => node != statement).Any(node =>
                     node is AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax or ConditionalExpressionSyntax or
@@ -136,7 +211,7 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
                     node.IsKind(SyntaxKind.CoalesceExpression) || node.IsKind(SyntaxKind.CoalesceAssignmentExpression)) ||
                 registration.SpanStart >= build.SpanStart)
             {
-                throw new InvalidOperationException($"Registration for '{contextName}' must be an unconditional startup statement before {builderName}.Build().");
+                return Warn($"Registration for '{contextName}' is not an unconditional startup statement before {builderName}.Build().");
             }
 
             var services = GetServicesExpression(registration, semanticModel, cancellationToken);
@@ -148,7 +223,7 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
                     semanticModel.GetSymbolInfo(receiver, cancellationToken).Symbol,
                     semanticModel.GetDeclaredSymbol(builder, cancellationToken)))
             {
-                throw new InvalidOperationException($"Cannot verify that registration '{registration}' uses {builderName}.Services.");
+                return Warn($"Cannot verify that registration '{registration}' uses {builderName}.Services.");
             }
         }
 
@@ -159,14 +234,20 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
 
         // Existing AddDbContext options can depend on scoped services. Reuse those options
         // with a scoped factory instead of changing the application's context registration.
-        var providerCall = SyntaxFactory.ParseExpression(useDbMethod) as InvocationExpressionSyntax
-            ?? throw new InvalidOperationException("The selected database provider did not produce an options invocation.");
-        providerCall = providerCall.ReplaceNodes(providerCall.DescendantNodes().OfType<IdentifierNameSyntax>()
-            .Where(identifier => identifier.Identifier.ValueText == "builder"),
-            (identifier, _) => SyntaxFactory.IdentifierName(builderName).WithTriviaFrom(identifier));
         List<StatementSyntax> additions = [];
+        var arguments = "lifetime: global::Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped";
         if (registrations.Count == 0)
         {
+            if (string.IsNullOrWhiteSpace(useDbMethod) ||
+                SyntaxFactory.ParseExpression(useDbMethod) is not InvocationExpressionSyntax providerCall ||
+                providerCall.ContainsDiagnostics || providerCall.ArgumentList.Arguments.Count == 0)
+            {
+                return Warn("The selected database provider did not produce an options invocation.");
+            }
+
+            providerCall = providerCall.ReplaceNodes(providerCall.DescendantNodes().OfType<IdentifierNameSyntax>()
+                .Where(identifier => identifier.Identifier.ValueText == "builder"),
+                (identifier, _) => SyntaxFactory.IdentifierName(builderName).WithTriviaFrom(identifier));
             var baseName = $"{char.ToLowerInvariant(contextType.Name[0])}{contextType.Name[1..]}ConnectionString";
             var connectionName = baseName;
             var suffix = 1;
@@ -180,10 +261,8 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
             var connectionArgument = providerCall.ArgumentList.Arguments.First();
             additions.Add(SyntaxFactory.ParseStatement($"var {connectionName} = {connectionArgument.Expression};"));
             providerCall = providerCall.ReplaceNode(connectionArgument.Expression, SyntaxFactory.IdentifierName(connectionName));
+            arguments = $"options => options.{providerCall}";
         }
-        var arguments = registrations.Count != 0
-            ? "lifetime: global::Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped"
-            : $"options => options.{providerCall}";
         var factory = SyntaxFactory.ParseStatement(
             $"{builderName}.Services.AddDbContextFactory<global::{contextName}>({arguments});");
         additions.Add(factory);
@@ -203,7 +282,7 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
                 method.ContainingType.ToDisplayString() == "Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions" &&
                 method.TypeArguments[0].ToDisplayString() == contextType.ToDisplayString()))
         {
-            throw new InvalidOperationException($"The generated IDbContextFactory<{contextName}> registration could not be resolved.");
+            return Warn($"The generated IDbContextFactory<{contextName}> registration could not be resolved.");
         }
 
         return updated;

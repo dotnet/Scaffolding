@@ -27,7 +27,7 @@ public class BlazorCrudIdentityRegressionTests
         => await ScaffoldAndVerifyAsync(framework, registration);
 
     [Fact]
-    public async Task Scaffold_ConditionalContextRegistration_FailsWithActionableDiagnostic()
+    public async Task Scaffold_ConditionalContextRegistration_WarnsAndPreservesProgram()
         => await ScaffoldAndVerifyAsync("net10.0", "conditional");
 
     [SkippableTheory]
@@ -113,6 +113,7 @@ public class BlazorCrudIdentityRegressionTests
         }
         var before = await ScaffoldCliHelper.RunBuildAsync(project.ProjectDirectory);
         Assert.True(before.ExitCode == 0, $"Input project build failed.\n{before.Output}\n{before.Error}");
+        var programBeforeScaffolding = File.ReadAllText(programPath);
 
         var scaffold = await ScaffoldCliHelper.RunScaffoldAsync(
             ScaffoldCliHelper.GetTestTargetFramework(), "blazor-crud",
@@ -120,8 +121,11 @@ public class BlazorCrudIdentityRegressionTests
             "--dbProvider", "sqlserver-efcore", "--page", "CRUD");
         if (registration == "conditional")
         {
-            Assert.NotEqual(0, scaffold.ExitCode);
-            Assert.Contains("unconditional startup statement", scaffold.Output + scaffold.Error);
+            Assert.True(scaffold.ExitCode == 0, $"Scaffolding failed.\n{scaffold.Output}\n{scaffold.Error}");
+            Assert.Equal(programBeforeScaffolding, File.ReadAllText(programPath));
+            Assert.Contains("Could not safely update Program.cs. Add before builder.Build():", scaffold.Output + scaffold.Error);
+            Assert.Contains("""builder.Services.AddDbContextFactory<MovieContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("MovieContext") ?? throw new InvalidOperationException("Connection string 'MovieContext' not found.")));""",
+                scaffold.Output + scaffold.Error);
             return;
         }
         Assert.True(scaffold.ExitCode == 0, $"Scaffolding failed.\n{scaffold.Output}\n{scaffold.Error}");

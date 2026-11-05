@@ -516,6 +516,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
         [InlineData("@code { @* unmatched markup brace: { *@ }")]
         [InlineData("@if (true) { } else { var marker = \"@*\"; }")]
         [InlineData("@if (true) { } @* branch *@ else { var marker = \"@*\"; }")]
+        [InlineData("@{ <p>{</p> }")]
+        [InlineData("@if (true) @* comment *@ { var marker = \"@*\"; }")]
+        [InlineData("@code @* comment *@ { private string marker = \"@*\"; }")]
+        [InlineData("@if (true) @* comment *@ {\n    var marker = \"\"\"\n@namespace Bogus.Layout\n\"\"\";\n}")]
+        [InlineData("<main>@Body</main>")]
+        [InlineData("<article>\n    @Body\n</article>")]
         public void ResolveLayoutNamespacePreservesDirectiveAfterMixedRazorAndCSharp(string razorCode)
         {
             var fileSystem = new Mock<IFileSystem>();
@@ -537,6 +543,57 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
                 new[] { projectReference.FullPath });
 
             Assert.Equal("Active.MixedContent.MainLayout", result);
+        }
+
+        [Fact]
+        public void ResolveLayoutNamespaceIgnoresNamespaceTextInServerLayoutRawString()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var applicationBasePath = Path.Combine("src", "MyApp.Web");
+            var mainLayoutPath = Path.Combine(applicationBasePath, "Components", "Layout", "MainLayout.razor");
+            fileSystem.Setup(fs => fs.FileExists(mainLayoutPath)).Returns(true);
+            fileSystem
+                .Setup(fs => fs.ReadAllText(mainLayoutPath))
+                .Returns("@if (true) @* comment *@ {" + Environment.NewLine +
+                    "    var marker = \"\"\"" + Environment.NewLine +
+                    "@namespace Bogus.Layout" + Environment.NewLine +
+                    "\"\"\";" + Environment.NewLine +
+                    "}" + Environment.NewLine +
+                    "<main>@Body</main>");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                applicationBasePath,
+                fileSystem.Object,
+                Array.Empty<ProjectReferenceInformation>(),
+                Array.Empty<string>());
+
+            Assert.Equal("MyApp.Web.Components.Layout.MainLayout", result);
+        }
+
+        [Fact]
+        public void ResolveLayoutNamespaceUsesNamespaceAfterExplicitBlockWithMarkupBrace()
+        {
+            var fileSystem = new Mock<IFileSystem>();
+            var sharedProjectDirectory = Path.Combine("src", "MyApp.Shared");
+            var mainLayoutPath = SetupLayout(fileSystem, sharedProjectDirectory);
+            fileSystem
+                .Setup(fs => fs.ReadAllText(mainLayoutPath))
+                .Returns("@{ <p>{</p> }" + Environment.NewLine +
+                    "@namespace Actual.ExplicitBlock" + Environment.NewLine +
+                    "<main />");
+            var projectReference = CreateProjectReference(sharedProjectDirectory, "MyApp.Shared");
+
+            var result = BlazorIdentityGenerator.ResolveLayoutNamespace(
+                "MyApp.Web",
+                "MyApp.Web",
+                Path.Combine("src", "MyApp.Web"),
+                fileSystem.Object,
+                new[] { projectReference },
+                new[] { projectReference.FullPath });
+
+            Assert.Equal("Actual.ExplicitBlock.MainLayout", result);
         }
 
         [Fact]

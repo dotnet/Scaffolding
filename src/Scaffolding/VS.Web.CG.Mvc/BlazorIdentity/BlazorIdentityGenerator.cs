@@ -618,11 +618,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             if (contents[codeIndex] == '{')
             {
-                return FindMatchingCSharpDelimiter(
-                    contents,
-                    codeIndex,
-                    SyntaxKind.OpenBraceToken,
-                    SyntaxKind.CloseBraceToken);
+                return FindMatchingRazorCodeBlockEnd(contents, codeIndex);
             }
 
             if (contents[codeIndex] == '(')
@@ -650,7 +646,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             if (string.Equals(identifier, "code", StringComparison.Ordinal) ||
                 string.Equals(identifier, "functions", StringComparison.Ordinal))
             {
-                var blockStart = SkipWhitespace(contents, identifierEnd);
+                var blockStart = SkipWhitespaceAndComments(contents, identifierEnd);
                 return blockStart < contents.Length && contents[blockStart] == '{'
                     ? FindMatchingRazorCodeBlockEnd(contents, blockStart)
                     : transitionIndex;
@@ -668,7 +664,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
 
             if (IsRazorControlBlock(identifier))
             {
-                var conditionStart = SkipWhitespace(contents, identifierEnd);
+                var conditionStart = SkipWhitespaceAndComments(contents, identifierEnd);
                 if (conditionStart < contents.Length && contents[conditionStart] == '(')
                 {
                     var conditionEnd = FindMatchingCSharpDelimiter(
@@ -676,7 +672,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                         conditionStart,
                         SyntaxKind.OpenParenToken,
                         SyntaxKind.CloseParenToken);
-                    var blockStart = SkipWhitespace(contents, conditionEnd);
+                    var blockStart = SkipWhitespaceAndComments(contents, conditionEnd);
                     if (blockStart < contents.Length && contents[blockStart] == '{')
                     {
                         var blockEnd = FindMatchingRazorCodeBlockEnd(contents, blockStart);
@@ -693,13 +689,34 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
                 return transitionIndex;
             }
 
-            var expression = SyntaxFactory.ParseExpression(contents.Substring(codeIndex));
-            var firstToken = expression.GetFirstToken();
-            return !firstToken.IsMissing &&
-                   firstToken.SpanStart == 0 &&
-                   string.Equals(firstToken.ValueText, identifier, StringComparison.Ordinal)
-                ? codeIndex + expression.Span.End
-                : transitionIndex;
+            var end = identifierEnd;
+            while (end < contents.Length)
+            {
+                var current = contents[end];
+                if (current == '(')
+                {
+                    end = FindMatchingCSharpDelimiter(contents, end, SyntaxKind.OpenParenToken, SyntaxKind.CloseParenToken);
+                }
+                else if (current == '[')
+                {
+                    end = FindMatchingCSharpDelimiter(contents, end, SyntaxKind.OpenBracketToken, SyntaxKind.CloseBracketToken);
+                }
+                else if ((current == '.' || (current == '?' && end + 1 < contents.Length && contents[end + 1] == '.')) &&
+                         end + (current == '?' ? 2 : 1) < contents.Length &&
+                         SyntaxFacts.IsIdentifierStartCharacter(contents[end + (current == '?' ? 2 : 1)]))
+                {
+                    end += current == '?' ? 2 : 1;
+                    while (end < contents.Length && SyntaxFacts.IsIdentifierPartCharacter(contents[end]))
+                    {
+                        end++;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return end;
         }
 
         private static bool IsRazorControlBlock(string identifier)

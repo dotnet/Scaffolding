@@ -210,6 +210,51 @@ public class BlazorCrudIdentityRegressionTests
                                 }
                             }
                             await client.GetStringAsync("/movies/create");
+                            async Task SubmitForm(string route, Dictionary<string, string> values)
+                            {
+                                var form = await client.GetStringAsync(route);
+                                foreach (System.Text.RegularExpressions.Match input in
+                                    System.Text.RegularExpressions.Regex.Matches(form, "<input\\b[^>]*>"))
+                                {
+                                    if (!input.Value.Contains("type=\"hidden\""))
+                                    {
+                                        continue;
+                                    }
+                                    var name = System.Text.RegularExpressions.Regex.Match(input.Value, "name=\"([^\"]*)\"").Groups[1].Value;
+                                    var value = System.Text.RegularExpressions.Regex.Match(input.Value, "value=\"([^\"]*)\"").Groups[1].Value;
+                                    if (!string.IsNullOrEmpty(name))
+                                    {
+                                        values.TryAdd(System.Net.WebUtility.HtmlDecode(name), System.Net.WebUtility.HtmlDecode(value));
+                                    }
+                                }
+                                using var response = await client.PostAsync(route, new System.Net.Http.FormUrlEncodedContent(values));
+                                response.EnsureSuccessStatusCode();
+                            }
+                            var fields = new Dictionary<string, string>
+                            {
+                                ["Movie.Title"] = "Created through generated form",
+                                ["Movie.ReleaseDate"] = "2026-01-02",
+                                ["Movie.Genre"] = "Regression",
+                                ["Movie.Price"] = "15.25"
+                            };
+                            await SubmitForm("/movies/create", fields);
+                            var created = await movies.Movie.AsNoTracking().SingleAsync(item => item.Title == fields["Movie.Title"]);
+                            fields["Movie.ID"] = created.ID.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                            fields["Movie.Title"] = "Edited through generated form";
+                            fields.Remove("_handler");
+                            fields.Remove("__RequestVerificationToken");
+                            await SubmitForm($"/movies/edit?id={created.ID}", fields);
+                            var edited = await movies.Movie.AsNoTracking().SingleAsync(item => item.ID == created.ID);
+                            if (edited.Title != fields["Movie.Title"])
+                            {
+                                throw new InvalidOperationException("The generated edit submission did not update the database.");
+                            }
+                            await SubmitForm($"/movies/delete?id={created.ID}", new Dictionary<string, string>());
+                            if (await movies.Movie.AsNoTracking().AnyAsync(item => item.ID == created.ID))
+                            {
+                                throw new InvalidOperationException("The generated delete submission did not delete the movie.");
+                            }
+                            Console.WriteLine("Generated create, edit and delete submissions verified against SQL Server.");
                             Console.WriteLine("Generated CRUD pages rendered successfully against SQL Server.");
                         }
                         finally
@@ -245,6 +290,7 @@ public class BlazorCrudIdentityRegressionTests
         if (verifyPage)
         {
             Assert.Contains("Generated CRUD pages rendered successfully against SQL Server.", verify.Output);
+            Assert.Contains("Generated create, edit and delete submissions verified against SQL Server.", verify.Output);
         }
     }
 }

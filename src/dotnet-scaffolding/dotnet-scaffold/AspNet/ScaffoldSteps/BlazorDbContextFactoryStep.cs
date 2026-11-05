@@ -129,7 +129,11 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
             var statement = registration.Ancestors().OfType<StatementSyntax>().First();
             var parent = statement.Parent is GlobalStatementSyntax wrapper ? wrapper.Parent : statement.Parent;
             if (parent != container || statement is not ExpressionStatementSyntax ||
-                registration.Ancestors().Any(node => node is AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax) ||
+                registration.Ancestors().TakeWhile(node => node != statement).Any(node =>
+                    node is AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax or ConditionalExpressionSyntax or
+                        ConditionalAccessExpressionSyntax or SwitchExpressionSyntax ||
+                    node.IsKind(SyntaxKind.LogicalAndExpression) || node.IsKind(SyntaxKind.LogicalOrExpression) ||
+                    node.IsKind(SyntaxKind.CoalesceExpression) || node.IsKind(SyntaxKind.CoalesceAssignmentExpression)) ||
                 registration.SpanStart >= build.SpanStart)
             {
                 throw new InvalidOperationException($"Registration for '{contextName}' must be an unconditional startup statement before {builderName}.Build().");
@@ -155,21 +159,40 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
 
         // Existing AddDbContext options can depend on scoped services. Reuse those options
         // with a scoped factory instead of changing the application's context registration.
-        var providerCall = SyntaxFactory.ParseExpression(useDbMethod);
+        var providerCall = SyntaxFactory.ParseExpression(useDbMethod) as InvocationExpressionSyntax
+            ?? throw new InvalidOperationException("The selected database provider did not produce an options invocation.");
         providerCall = providerCall.ReplaceNodes(providerCall.DescendantNodes().OfType<IdentifierNameSyntax>()
             .Where(identifier => identifier.Identifier.ValueText == "builder"),
             (identifier, _) => SyntaxFactory.IdentifierName(builderName).WithTriviaFrom(identifier));
+        List<StatementSyntax> additions = [];
+        if (registrations.Count == 0)
+        {
+            var baseName = $"{char.ToLowerInvariant(contextType.Name[0])}{contextType.Name[1..]}ConnectionString";
+            var connectionName = baseName;
+            var suffix = 1;
+            var identifiers = root.DescendantTokens().Where(token => token.IsKind(SyntaxKind.IdentifierToken))
+                .Select(token => token.ValueText).ToHashSet(StringComparer.Ordinal);
+            while (identifiers.Contains(connectionName))
+            {
+                connectionName = baseName + suffix++;
+            }
+
+            var connectionArgument = providerCall.ArgumentList.Arguments.First();
+            additions.Add(SyntaxFactory.ParseStatement($"var {connectionName} = {connectionArgument.Expression};"));
+            providerCall = providerCall.ReplaceNode(connectionArgument.Expression, SyntaxFactory.IdentifierName(connectionName));
+        }
         var arguments = registrations.Count != 0
             ? "lifetime: global::Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped"
             : $"options => options.{providerCall}";
         var factory = SyntaxFactory.ParseStatement(
             $"{builderName}.Services.AddDbContextFactory<global::{contextName}>({arguments});");
-        factory = factory.NormalizeWhitespace()
+        additions.Add(factory);
+        additions = additions.Select(statement => statement.NormalizeWhitespace()
             .WithLeadingTrivia(buildStatement.GetLeadingTrivia())
-            .WithTrailingTrivia(SyntaxFactory.EndOfLine(Environment.NewLine));
+            .WithTrailingTrivia(SyntaxFactory.EndOfLine(Environment.NewLine))).ToList();
         root = buildStatement.Parent is GlobalStatementSyntax globalStatement
-            ? root.InsertNodesBefore(globalStatement, [SyntaxFactory.GlobalStatement(factory)])
-            : root.InsertNodesBefore(buildStatement, [factory]);
+            ? root.InsertNodesBefore(globalStatement, additions.Select(SyntaxFactory.GlobalStatement))
+            : root.InsertNodesBefore(buildStatement, additions);
         var updated = document.WithSyntaxRoot(root);
         var updatedRoot = await updated.GetSyntaxRootAsync(cancellationToken);
         var updatedModel = await updated.GetSemanticModelAsync(cancellationToken);

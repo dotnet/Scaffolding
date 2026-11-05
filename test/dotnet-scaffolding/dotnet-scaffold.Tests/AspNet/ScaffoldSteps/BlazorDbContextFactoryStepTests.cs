@@ -24,6 +24,7 @@ public class BlazorDbContextFactoryStepTests
             public class ServiceCollection { }
             public static class EntityFrameworkServiceCollectionExtensions
             {
+                public static void Consume(object value) { }
                 public static ServiceCollection AddDbContext<T>(this ServiceCollection services,
                     System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder> configure = null,
                     ServiceLifetime optionsLifetime = ServiceLifetime.Scoped) => services;
@@ -132,6 +133,14 @@ public class BlazorDbContextFactoryStepTests
     [InlineData("if (true) { builder.Services.AddDbContext<MovieContext>(); }")]
     [InlineData("Action configure = () => builder.Services.AddDbContext<MovieContext>();")]
     [InlineData("builder.Services.AddDbContextFactory<MovieContext>(unknownOption: true);")]
+    [InlineData("EntityFrameworkServiceCollectionExtensions.Consume(false ? builder.Services.AddDbContextFactory<MovieContext>() : builder.Services);")]
+    [InlineData("EntityFrameworkServiceCollectionExtensions.Consume(false && builder.Services.AddDbContextFactory<MovieContext>() != null);")]
+    [InlineData("EntityFrameworkServiceCollectionExtensions.Consume(true || builder.Services.AddDbContextFactory<MovieContext>() != null);")]
+    [InlineData("EntityFrameworkServiceCollectionExtensions.Consume(builder.Services ?? builder.Services.AddDbContextFactory<MovieContext>());")]
+    [InlineData("EntityFrameworkServiceCollectionExtensions.Consume(false switch { true => builder.Services.AddDbContextFactory<MovieContext>(), _ => builder.Services });")]
+    [InlineData("var services = builder.Services; services.AddDbContextFactory<MovieContext>();")]
+    [InlineData("void Register() { builder.Services.AddDbContextFactory<MovieContext>(); } Register();")]
+    [InlineData("var anotherBuilder = WebApplication.CreateBuilder(args);")]
     public async Task RegisterFactoryAsync_RejectsUnverifiableRegistrations(string registration)
     {
         using var workspace = new AdhocWorkspace();
@@ -151,6 +160,23 @@ public class BlazorDbContextFactoryStepTests
         Assert.Contains(logger.Invocations, invocation =>
             invocation.Method.Name == nameof(ILogger.Log) && Equals(invocation.Arguments[0], LogLevel.Error) &&
             invocation.Arguments[2].ToString()!.Contains("settings or model are missing"));
+    }
+
+    [Fact]
+    public async Task RegisterFactoryAsync_EvaluatesConnectionStringBeforeBuild()
+    {
+        using var workspace = new AdhocWorkspace();
+        var document = CreateDocument(workspace, "");
+        var updated = await BlazorDbContextFactoryStep.RegisterFactoryAsync(
+            document, "App.MovieContext", """UseSqlServer(builder.Configuration.GetConnectionString("Movies") ?? throw new InvalidOperationException("Missing Movies"))""");
+        var root = (await updated.GetSyntaxRootAsync())!;
+        var declaration = Assert.Single(root.DescendantNodes().OfType<VariableDeclaratorSyntax>(),
+            variable => variable.Initializer?.Value is BinaryExpressionSyntax binary && binary.IsKind(SyntaxKind.CoalesceExpression));
+        Assert.Empty(declaration.Ancestors().OfType<AnonymousFunctionExpressionSyntax>());
+        var build = Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(),
+            invocation => invocation.Expression.ToString() == "builder.Build");
+        Assert.True(declaration.SpanStart < build.SpanStart);
+        Assert.Contains($"options.UseSqlServer({declaration.Identifier.ValueText})", root.ToFullString());
     }
 
     private static Document CreateDocument(AdhocWorkspace workspace, string registration, string builderName = "builder")

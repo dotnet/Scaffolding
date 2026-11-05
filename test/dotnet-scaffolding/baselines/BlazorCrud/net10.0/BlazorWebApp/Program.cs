@@ -7,7 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddDbContextFactory<global::ApplicationDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("ApplicationDbContext") ?? throw new InvalidOperationException("Connection string 'ApplicationDbContext' not found.")));
+var applicationDbContextConnectionString = builder.Configuration.GetConnectionString("ApplicationDbContext") ?? throw new InvalidOperationException("Connection string 'ApplicationDbContext' not found.");
+builder.Services.AddDbContextFactory<global::ApplicationDbContext>(options => options.UseSqlite(applicationDbContextConnectionString));
 
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 

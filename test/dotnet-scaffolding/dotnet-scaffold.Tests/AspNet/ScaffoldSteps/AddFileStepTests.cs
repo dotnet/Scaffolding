@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
@@ -38,7 +39,7 @@ public class AddFileStepTests
     [InlineData(true, true)]
     public async Task ExecuteAsync_ExistingFile_RespectsContentsAndOverwrite(bool modifyFile, bool overwrite)
     {
-        string outputDirectory = Path.Combine(Path.GetTempPath(), nameof(AddFileStepTests), Guid.NewGuid().ToString("N"));
+        string outputDirectory = Path.Combine(AppContext.BaseDirectory, nameof(AddFileStepTests), Guid.NewGuid().ToString("N"));
         string toolsDirectory = Path.Combine(AppContext.BaseDirectory, "tools");
         bool createdToolsDirectory = !Directory.Exists(toolsDirectory);
         Directory.CreateDirectory(outputDirectory);
@@ -74,6 +75,73 @@ public class AddFileStepTests
                 Directory.Delete(toolsDirectory);
             }
         }
+    }
+
+    [Theory]
+    [InlineData(false, "\n")]
+    [InlineData(true, "\n")]
+    [InlineData(true, "\r\n")]
+    public async Task ExecuteAsync_ExistingValidationPartial_AcceptsEquivalentTextWithoutOverwriting(bool bom, string lineEnding)
+    {
+        string outputDirectory = Path.Combine(AppContext.BaseDirectory, nameof(AddFileStepTests), Guid.NewGuid().ToString("N"));
+        string toolsDirectory = Path.Combine(AppContext.BaseDirectory, "tools");
+        bool createdToolsDirectory = !Directory.Exists(toolsDirectory);
+        Directory.CreateDirectory(outputDirectory);
+        Directory.CreateDirectory(toolsDirectory);
+        try
+        {
+            var logger = new Mock<ILogger<AddFileStep>>();
+            var step = new AddFileStep(logger.Object, new FileSystem())
+            {
+                FileName = "_ValidationScriptsPartial.cshtml",
+                BaseOutputDirectory = outputDirectory,
+                ProjectPath = string.Empty
+            };
+            Assert.True(await step.ExecuteAsync(_context));
+
+            string destination = Path.Combine(outputDirectory, step.FileName);
+            string text = File.ReadAllText(destination).ReplaceLineEndings(lineEnding);
+            File.WriteAllText(destination, text, new UTF8Encoding(bom));
+            byte[] originalContents = File.ReadAllBytes(destination);
+
+            Assert.True(await step.ExecuteAsync(_context));
+            Assert.Equal(originalContents, File.ReadAllBytes(destination));
+
+            File.WriteAllText(destination, text.Replace("jquery.validate.min.js", "custom-validation.js"), new UTF8Encoding(bom));
+            byte[] customizedContents = File.ReadAllBytes(destination);
+
+            Assert.False(await step.ExecuteAsync(_context));
+            Assert.Equal(customizedContents, File.ReadAllBytes(destination));
+            Assert.Contains(logger.Invocations, invocation =>
+                Equals(invocation.Arguments[0], LogLevel.Error) &&
+                invocation.Arguments[2].ToString()!.Contains("differs from the template"));
+        }
+        finally
+        {
+            Directory.Delete(outputDirectory, recursive: true);
+            if (createdToolsDirectory)
+            {
+                Directory.Delete(toolsDirectory);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_MissingTemplate_ReportsFailure()
+    {
+        var logger = new Mock<ILogger<AddFileStep>>();
+        var step = new AddFileStep(logger.Object, _mockFileSystem.Object)
+        {
+            FileName = "missing-template.cshtml",
+            BaseOutputDirectory = _testOutputDirectory,
+            ProjectPath = string.Empty
+        };
+
+        Assert.False(await step.ExecuteAsync(_context));
+        Assert.Contains(logger.Invocations, invocation =>
+            Equals(invocation.Arguments[0], LogLevel.Error) &&
+            invocation.Arguments[2].ToString()!.Contains("missing-template.cshtml"));
+        _mockFileSystem.Verify(f => f.CopyFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
     }
 
     [Fact]

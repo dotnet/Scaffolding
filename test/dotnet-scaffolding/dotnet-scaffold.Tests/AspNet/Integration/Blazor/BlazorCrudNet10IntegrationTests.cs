@@ -62,7 +62,7 @@ public enum EmploymentType
         Assert.DoesNotContain("Failed", combinedOutput);
         Assert.DoesNotContain("No modifications made for file: Program.cs", combinedOutput);
 
-        // Assert — enum inputs and persistent-state wiring were generated and the resulting project compiles.
+        // Assert — enum inputs and static SSR form handling were generated and the resulting project compiles.
         var blazorPagesDir = Path.Combine(_testProjectDir, "Components", "Pages", "TestModelPages");
         Assert.True(Directory.Exists(blazorPagesDir), "Components/Pages/TestModelPages directory should be created.");
         foreach (var page in new[] { "Create.razor", "Delete.razor", "Details.razor", "Edit.razor", "Index.razor" })
@@ -74,8 +74,8 @@ public enum EmploymentType
         Assert.Contains("<InputSelect id=\"optionalemploymenttype\"", createContent);
         var editContent = File.ReadAllText(Path.Combine(blazorPagesDir, "Edit.razor")).Replace("\r\n", "\n");
         Assert.Contains("[SupplyParameterFromForm]\n    private TestModel? TestModel", editContent);
-        Assert.Contains("[PersistentState]\n    public TestModel? TestModelState", editContent);
-        Assert.Contains("TestModel ??= TestModelState ??= await context.", editContent);
+        Assert.Contains("@attribute [Microsoft.AspNetCore.Components.ExcludeFromInteractiveRouting]", editContent);
+        Assert.Contains("TestModel ??= await context.", editContent);
         Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
             "DbContext file 'Data/TestDbContext.cs' should be created.");
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));

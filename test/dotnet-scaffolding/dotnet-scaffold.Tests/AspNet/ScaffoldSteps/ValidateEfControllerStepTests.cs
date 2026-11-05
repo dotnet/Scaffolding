@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -22,6 +23,18 @@ public class ValidateEfControllerStepTests
     private readonly Mock<ILogger<ValidateEfControllerStep>> _logger = new();
     private readonly Mock<ITelemetryService> _telemetry = new();
     private readonly string _projectPath = Path.Combine("test", "TestProject.csproj");
+
+    [Fact]
+    public void ValidateSettings_FormattingCharacter_IsRejectedBeforeDerivingViewFolder()
+    {
+        const string controllerName = "Movie\u200CController";
+        Assert.True(SyntaxFacts.IsValidIdentifier(controllerName));
+        Assert.Equal("MovieController", SyntaxFactory.ParseToken(controllerName).ValueText);
+
+        var step = CreateStep(controllerName);
+
+        Assert.Null(step.ValidateEfControllerSettings(addViews: true));
+    }
 
     [Theory]
     [InlineData(null)]
@@ -44,6 +57,12 @@ public class ValidateEfControllerStepTests
     [InlineData("MoviesController.dll")]
     [InlineData("MoviesController.cs.cs")]
     [InlineData("MoviesController\0")]
+    [InlineData("Movie\u200CController")]
+    [InlineData("Movie\u200CController.cs")]
+    [InlineData("Movie\u200CController.CS")]
+    [InlineData("MovieCon\u200Ctroller")]
+    [InlineData("Movie\u200DController")]
+    [InlineData("Movie\uFEFFController")]
     [InlineData("class")]
     [InlineData("namespace")]
     [InlineData("@MoviesController")]
@@ -90,6 +109,8 @@ public class ValidateEfControllerStepTests
     [InlineData("MovieControllerController", "MovieControllerController", "MVC")]
     [InlineData("ControllerMoviesController", "ControllerMoviesController", "MVC")]
     [InlineData("COM10Controller", "COM10Controller", "MVC")]
+    [InlineData("M\u00F6vieController", "M\u00F6vieController", "MVC")]
+    [InlineData("\u7535\u5F71Controller", "\u7535\u5F71Controller", "MVC")]
     [InlineData("MoviesController", "MoviesController", "API")]
     [InlineData("MoviesController.cs", "MoviesController", "API")]
     [InlineData("ConController", "ConController", "API")]
@@ -137,6 +158,10 @@ public class ValidateEfControllerStepTests
     [InlineData("Movies-Controller")]
     [InlineData("class")]
     [InlineData("COM\u00b9Controller")]
+    [InlineData("Movie\u200CController")]
+    [InlineData("Movie\u200CController.cs")]
+    [InlineData("Co\u200CnController")]
+    [InlineData("NU\u200CL.cs")]
     public void ValidateSettings_InvalidControllerFileName_IsRejectedWithOrWithoutViews(string controllerName)
     {
         var apiStep = CreateStep(controllerName);

@@ -47,7 +47,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
     /// </summary>
     public string? Model { get; set; }
     /// <summary>
-    /// Unqualified C# controller name, optionally followed by .cs. Directory paths are not supported.
+    /// Unqualified C# controller name without formatting characters, optionally followed by .cs. Directory paths are not supported.
     /// </summary>
     public string? ControllerName { get; set; }
     /// <summary>
@@ -157,10 +157,11 @@ internal class ValidateEfControllerStep : ScaffoldStep
             : ControllerName;
         if (!SyntaxFacts.IsValidIdentifier(controllerName) ||
             SyntaxFacts.GetKeywordKind(controllerName) != SyntaxKind.None ||
+            !string.Equals(SyntaxFactory.ParseToken(controllerName).ValueText, controllerName, StringComparison.Ordinal) ||
             IsReservedFileName(controllerName))
         {
             _logger.LogError($"Invalid {AspNetConstants.CliOptions.ControllerNameOption} option. " +
-                "Specify a non-reserved, unqualified C# identifier, optionally followed by '.cs'.");
+                "Specify a non-reserved, unqualified C# identifier without formatting characters, optionally followed by '.cs'.");
             return null;
         }
 

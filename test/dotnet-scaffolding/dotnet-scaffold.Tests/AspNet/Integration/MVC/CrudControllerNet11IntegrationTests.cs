@@ -43,32 +43,26 @@ public class CrudControllerNet11IntegrationTests : CrudControllerIntegrationTest
             "--prerelease");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
-        // Assert — expected files were created (skip if scaffolding encountered errors)
-        bool scaffoldingSucceeded = !cliOutput.Contains("An error occurred") && !cliOutput.Contains("Failed");
-        if (scaffoldingSucceeded)
+        Assert.DoesNotContain("An error occurred", cliOutput);
+        Assert.DoesNotContain("Failed", cliOutput);
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Controllers", "TestController.cs")),
+            "Controller file 'Controllers/TestController.cs' should be created.");
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
+            "DbContext file 'Data/TestDbContext.cs' should be created.");
+        var viewsDir = Path.Combine(_testProjectDir, "Views", "Test");
+        Assert.True(Directory.Exists(viewsDir), "Views/Test directory should be created.");
+        Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Views", "TestModel")));
+        foreach (var view in new[] { "Create.cshtml", "Delete.cshtml", "Details.cshtml", "Edit.cshtml", "Index.cshtml" })
         {
-            Assert.True(File.Exists(Path.Combine(_testProjectDir, "Controllers", "TestController.cs")),
-                "Controller file 'Controllers/TestController.cs' should be created.");
-            Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
-                "DbContext file 'Data/TestDbContext.cs' should be created.");
-            var viewsDir = Path.Combine(_testProjectDir, "Views", "TestModel");
-            Assert.True(Directory.Exists(viewsDir), "Views/TestModel directory should be created.");
-            foreach (var view in new[] { "Create.cshtml", "Delete.cshtml", "Details.cshtml", "Edit.cshtml", "Index.cshtml" })
-            {
-                Assert.True(File.Exists(Path.Combine(viewsDir, view)), $"View '{view}' should be created.");
-            }
-            Assert.True(File.Exists(Path.Combine(_testProjectDir, "Views", "Shared", "_ValidationScriptsPartial.cshtml")),
-                "_ValidationScriptsPartial.cshtml should be created.");
-            var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-            Assert.Contains("TestDbContext", programContent);
-
-            // Assert no NuGet errors during scaffolding
-            Assert.False(cliOutput.Contains("error: NU"),
-                $"Scaffolding should not produce NuGet errors for {TargetFramework}.\nOutput: {cliOutput}");
-
-            // Verify project builds after scaffolding
-            var (afterExitCode, _, afterError) = await RunBuildAsync(_testProjectDir);
-            Assert.True(afterExitCode == 0, $"Project should still build after scaffolding. Error: {afterError}");
+            Assert.True(File.Exists(Path.Combine(viewsDir, view)), $"View '{view}' should be created.");
         }
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Views", "Shared", "_ValidationScriptsPartial.cshtml")),
+            "_ValidationScriptsPartial.cshtml should be created.");
+        var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+        Assert.Contains("TestDbContext", programContent);
+
+        Assert.DoesNotContain("error: NU", cliOutput);
+        var (afterExitCode, afterOutput, afterError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(afterExitCode == 0, $"Project should still build after scaffolding.\nOutput: {afterOutput}\nError: {afterError}");
     }
 }

@@ -40,12 +40,21 @@ internal class ViewHelper
     /// </summary>
     /// <param name="allT4TemplatePaths">The collection of all T4 template paths.</param>
     /// <param name="viewModel">The view model containing project and model information.</param>
+    /// <param name="controllerName">The controller name when generating views with an MVC controller.</param>
     /// <returns>An enumerable collection of <see cref="TextTemplatingProperty"/> instances.</returns>
-    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, ViewModel viewModel)
+    internal static IEnumerable<TextTemplatingProperty> GetTextTemplatingProperties(IEnumerable<string> allT4TemplatePaths, ViewModel viewModel, string? controllerName = null)
     {
         var textTemplatingProperties = new List<TextTemplatingProperty>();
         if (allT4TemplatePaths is not null && allT4TemplatePaths.Any()) 
         {
+            const string controllerSuffix = "Controller";
+            string viewFolderName = controllerName ?? viewModel.ModelInfo.ModelTypeName;
+            if (controllerName is not null && controllerName.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase))
+            {
+                viewFolderName = controllerName[..^controllerSuffix.Length];
+            }
+
+            string baseOutputPath = GetBaseOutputPath(viewFolderName, viewModel.ProjectInfo.ProjectPath);
             foreach (var templatePath in allT4TemplatePaths)
             {
                 var templateName = Path.GetFileNameWithoutExtension(templatePath);
@@ -57,7 +66,6 @@ internal class ViewHelper
                         continue;
                     }
 
-                    string baseOutputPath = GetBaseOutputPath(viewModel.ModelInfo.ModelTypeName, viewModel.ProjectInfo.ProjectPath);
                     string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.ViewExtension}");
                     textTemplatingProperties.Add(new()
                     {
@@ -143,14 +151,14 @@ internal class ViewHelper
     }
 
     /// <summary>
-    /// Gets the base output path for the specified model name and project path.
+    /// Gets the base output path for the specified view folder name and project path.
     /// </summary>
-    /// <param name="modelName">The model name.</param>
+    /// <param name="viewFolderName">The view folder name.</param>
     /// <param name="projectPath">The project path.</param>
     /// <returns>The base output path as a string.</returns>
-    private static string GetBaseOutputPath(string modelName, string? projectPath)
+    private static string GetBaseOutputPath(string viewFolderName, string? projectPath)
     {
         string projectBasePath = Path.GetDirectoryName(projectPath) ?? Directory.GetCurrentDirectory();
-        return Path.Combine(projectBasePath, "Views", modelName);
+        return Path.Combine(projectBasePath, "Views", viewFolderName);
     }
 }

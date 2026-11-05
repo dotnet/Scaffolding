@@ -47,7 +47,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
     /// </summary>
     public string? Model { get; set; }
     /// <summary>
-    /// Name of the controller to be scaffolded.
+    /// Unqualified C# controller name without formatting characters, optionally followed by .cs. Directory paths are not supported.
     /// </summary>
     public string? ControllerName { get; set; }
     /// <summary>
@@ -79,7 +79,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
     /// <returns>Task indicating the completion of the operation.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        var efControllerSettings = ValidateEfControllerSettings();
+        var efControllerSettings = ValidateEfControllerSettings(context.GetOptionResult<bool>(AspNetConstants.CliOptions.ViewsOption));
         var codeModifierProperties = new Dictionary<string, string>();
         if (efControllerSettings is null)
         {
@@ -131,8 +131,9 @@ internal class ValidateEfControllerStep : ScaffoldStep
     /// <summary>
     /// Validates the EF Controller settings provided by the user.
     /// </summary>
+    /// <param name="addViews">Whether controller-specific view folders will be generated.</param>
     /// <returns>Validated EF Controller settings.</returns>
-    private EfControllerSettings? ValidateEfControllerSettings()
+    internal EfControllerSettings? ValidateEfControllerSettings(bool addViews)
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
@@ -151,10 +152,34 @@ internal class ValidateEfControllerStep : ScaffoldStep
             _logger.LogError($"Missing/Invalid {AspNetConstants.CliOptions.ControllerNameOption} option.");
             return null;
         }
-        else
+        string controllerName = ControllerName.EndsWith(AspNetConstants.CSharpExtension, StringComparison.OrdinalIgnoreCase)
+            ? ControllerName[..^AspNetConstants.CSharpExtension.Length]
+            : ControllerName;
+        if (!SyntaxFacts.IsValidIdentifier(controllerName) ||
+            SyntaxFacts.GetKeywordKind(controllerName) != SyntaxKind.None ||
+            !string.Equals(SyntaxFactory.ParseToken(controllerName).ValueText, controllerName, StringComparison.Ordinal) ||
+            IsReservedFileName(controllerName))
         {
-            ControllerName = Path.GetFileNameWithoutExtension(ControllerName);
+            _logger.LogError($"Invalid {AspNetConstants.CliOptions.ControllerNameOption} option. " +
+                "Specify a non-reserved, unqualified C# identifier without formatting characters, optionally followed by '.cs'.");
+            return null;
         }
+
+        if (addViews)
+        {
+            const string controllerSuffix = "Controller";
+            string viewFolderName = controllerName.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase)
+                ? controllerName[..^controllerSuffix.Length]
+                : controllerName;
+            if (string.IsNullOrEmpty(viewFolderName) || IsReservedFileName(viewFolderName))
+            {
+                _logger.LogError($"Invalid {AspNetConstants.CliOptions.ControllerNameOption} option. " +
+                    "Specify a controller name with a nonempty, non-reserved view folder name when generating views.");
+                return null;
+            }
+        }
+
+        ControllerName = controllerName;
 
         if (string.IsNullOrEmpty(ControllerType))
         {
@@ -200,6 +225,15 @@ internal class ValidateEfControllerStep : ScaffoldStep
             DatabaseProvider = DatabaseProvider,
             Prerelease = Prerelease
         };
+    }
+
+    private static bool IsReservedFileName(string name)
+    {
+        string upperName = name.ToUpperInvariant();
+        return upperName is "CON" or "PRN" or "AUX" or "NUL" ||
+            (upperName.Length == 4 &&
+             (upperName.StartsWith("COM", StringComparison.Ordinal) || upperName.StartsWith("LPT", StringComparison.Ordinal)) &&
+             (upperName[3] is >= '1' and <= '9' or '\u00b9' or '\u00b2' or '\u00b3'));
     }
 
     /// <summary>

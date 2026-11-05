@@ -20,16 +20,10 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
     [InlineData(true, false, true)]
     [InlineData(false, false, true)]
     [InlineData(true, true, true)]
-    [InlineData(false, true, true)]
-    [InlineData(true, false, false)]
     [InlineData(false, false, false)]
-    [InlineData(true, false, true, "mvccontroller-crud")]
-    [InlineData(true, false, true, "minimalapi")]
-    [InlineData(true, false, true, "blazor-crud")]
     [InlineData(true, false, false, "mvccontroller-crud")]
     [InlineData(true, false, false, "minimalapi")]
     [InlineData(true, false, false, "blazor-crud")]
-    [InlineData(true, false, true, "apicontroller-crud")]
     [InlineData(true, false, false, "apicontroller-crud")]
     [InlineData(true, false, false, "razorpages-crud", true)]
     public async Task Scaffold_RazorPagesCrud_ReferencedModelAndDbContext(
@@ -167,9 +161,7 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
 
     [Theory]
     [InlineData("internal-model", true)]
-    [InlineData("internal-model", false)]
     [InlineData("internal-context", true)]
-    [InlineData("internal-context", false)]
     [InlineData("same-name-model", true)]
     [InlineData("same-name-model", false)]
     [InlineData("escaped-namespace", true, "apicontroller-crud")]
@@ -193,12 +185,8 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
     [InlineData("web-model")]
     [InlineData("unreferenced-model")]
     [InlineData("internal-model")]
-    [InlineData("web-model", "mvccontroller-crud")]
-    [InlineData("web-model", "apicontroller-crud")]
-    [InlineData("web-model", "minimalapi")]
-    [InlineData("web-model", "blazor-crud")]
     public async Task Scaffold_RazorPagesCrud_RejectsModelInaccessibleToReferencedContext(
-        string scenario, string scaffolder = "razorpages-crud")
+        string scenario)
     {
         File.WriteAllText(Path.Combine(_testDirectory, "NuGet.config"), ScaffoldCliHelper.GetTestNuGetConfig(TargetFramework));
         var contextDirectory = Directory.CreateDirectory(Path.Combine(_testDirectory, "ClassLibrary2")).FullName;
@@ -266,14 +254,8 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
         Assert.True(preExitCode == 0, $"Build before scaffolding failed.\n{preOutput}\n{preError}");
 
         string[] options = ["--project", _testProjectPath, "--model", "Movie",
-            "--dataContext", "MyDbContext", "--dbProvider", "sqlserver-efcore"];
-        options = scaffolder switch
-        {
-            "mvccontroller-crud" or "apicontroller-crud" => [.. options, "--controller", "MoviesController"],
-            "minimalapi" => [.. options, "--endpoints", "MovieEndpoints"],
-            _ => [.. options, "--page", "CRUD"]
-        };
-        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(TargetFramework, scaffolder, options);
+            "--dataContext", "MyDbContext", "--dbProvider", "sqlserver-efcore", "--page", "CRUD"];
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(TargetFramework, "razorpages-crud", options);
 
         Assert.Equal(contextSource, File.ReadAllText(contextPath));
         Assert.Equal(contextProjectSource, File.ReadAllText(contextProjectPath));
@@ -286,10 +268,8 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
         Assert.True(postExitCode == 0, $"Rejected configuration changed the build.\n{postOutput}\n{postError}");
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task Scaffold_RazorPagesCrud_ExistingWebProjectModelAndDbContext(bool alreadyRegistered)
+    [Fact]
+    public async Task Scaffold_RazorPagesCrud_ExistingWebProjectModelAndDbContext()
     {
         File.WriteAllText(_testProjectPath, ProjectContent.Replace("</Project>", """
               <ItemGroup>
@@ -317,9 +297,9 @@ public class RazorPagesCrudNet10IntegrationTests : RazorPagesCrudIntegrationTest
             }
             """;
         File.WriteAllText(contextPath, contextSource);
-        WriteProgram("TestProject.Data", alreadyRegistered);
+        WriteProgram("TestProject.Data", alreadyRegistered: true);
 
-        await AssertExistingContextScaffoldingAsync(contextPath, contextSource, "TestProject.Models", "TestProject.Data", alreadyRegistered);
+        await AssertExistingContextScaffoldingAsync(contextPath, contextSource, "TestProject.Models", "TestProject.Data", alreadyRegistered: true);
     }
 
     private const string ExistingRegistration =

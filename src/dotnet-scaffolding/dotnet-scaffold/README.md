@@ -3,6 +3,11 @@ More details coming soon!
 
 ### Entra ID account selection
 
+The interactive **Select Existing Application** picker displays each application's
+name and client ID once. It starts at the first application and sizes pages to
+the terminal's available rows, including wrapped labels, to keep the selection
+visible while navigating with the Up and Down arrow keys.
+
 Entra ID scaffolding currently uses both `dotnet msidentity` and the Azure CLI.
 Before creating or updating an application, scaffolding verifies that the Azure
 CLI's active tenant and user match the selected `--tenantId` and `--username`.

@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
@@ -23,6 +25,69 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.EntraId;
 
 public class EntraIdTenantIdentityPipelineTests
 {
+    [Fact]
+    public async Task EntraPipeline_AuthorizationFailurePersistsSettingsOnlyForExistingApplication()
+    {
+        foreach (bool existingApplication in new[] { true, false })
+        {
+            var path = Path.Combine("project", "appsettings.json");
+            var files = new Mock<IFileSystem>();
+            files.Setup(f => f.DirectoryExists("project")).Returns(true);
+            files.Setup(f => f.EnumerateFiles("project", "appsettings.json", SearchOption.AllDirectories)).Returns(new[] { path });
+            files.Setup(f => f.FileExists(path)).Returns(true);
+            files.Setup(f => f.ReadAllText(path)).Returns("""{"AllowedHosts":"*"}""");
+            string? written = null;
+            files.Setup(f => f.WriteAllText(path, It.IsAny<string>())).Callback<string, string>((_, json) => written = json);
+            var context = new ScaffolderContext(Mock.Of<IScaffolder>());
+            context.Properties[nameof(EntraIdModel)] = new EntraIdModel { TenantId = "tenant-a" };
+            context.Properties[nameof(EntraIdSettings)] = new EntraIdSettings
+            {
+                Project = Path.Combine("project", "Test.csproj"), Username = "user@example.com",
+                TenantId = "tenant-a", UseExistingApplication = existingApplication
+            };
+            context.Properties["ClientId"] = "app-id";
+            var steps = new List<Func<Task<bool>>>();
+            var builder = new Mock<IScaffoldBuilder>();
+            builder.SetReturnsDefault(builder.Object);
+            builder.Setup(b => b.WithStep<UpdateAppSettingsStep>(It.IsAny<Action<ScaffoldStepConfigurator<UpdateAppSettingsStep>>>()))
+                .Callback<Action<ScaffoldStepConfigurator<UpdateAppSettingsStep>>, Action<ScaffoldStepConfigurator<UpdateAppSettingsStep>>>((configure, _) =>
+                    steps.Add(async () =>
+                    {
+                        var step = new UpdateAppSettingsStep(NullLogger<UpdateAppSettingsStep>.Instance, files.Object, Mock.Of<ITelemetryService>()) { ProjectPath = string.Empty };
+                        configure(new ScaffoldStepConfigurator<UpdateAppSettingsStep> { Step = step, Context = context });
+                        return step.SkipStep || await step.ExecuteAsync(context);
+                    })).Returns(builder.Object);
+            builder.Setup(b => b.WithStep<UpdateAppAuthorizationStep>(It.IsAny<Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>>()))
+                .Callback(() => steps.Add(() => Task.FromResult(false))).Returns(builder.Object);
+            var runner = new Mock<IScaffoldRunnerBuilder>();
+            runner.Setup(r => r.AddScaffolder(It.IsAny<ScaffolderCatagory>(), It.IsAny<string>())).Returns(builder.Object);
+            new AspNetCommandService(runner.Object).AddScaffolderCommands();
+
+            var succeeded = true;
+            foreach (var execute in steps)
+            {
+                succeeded = await execute();
+                if (!succeeded)
+                {
+                    break;
+                }
+            }
+
+            Assert.False(succeeded);
+            if (existingApplication)
+            {
+                var settings = JsonNode.Parse(Assert.IsType<string>(written))!;
+                Assert.Equal("app-id", settings["AzureAd"]!["ClientId"]!.GetValue<string>());
+                Assert.Equal("tenant-a", settings["AzureAd"]!["TenantId"]!.GetValue<string>());
+                Assert.Equal("*", settings["AllowedHosts"]!.GetValue<string>());
+            }
+            else
+            {
+                Assert.Null(written);
+            }
+        }
+    }
+
     [Fact]
     public async Task EntraPipeline_TenantMismatchStopsBeforeRegistrationSecretsAuthorizationAndSettings()
     {
@@ -83,7 +148,7 @@ public class EntraIdTenantIdentityPipelineTests
     }
 
     [Fact]
-    public void EntraPipeline_ValidatesIdentityBeforeMutationsAndAuthorizesBeforeSecretAndSettings()
+    public void EntraPipeline_ValidatesIdentityBeforeMutationsAndAuthorizesBeforeSecretAndNewApplicationSettings()
     {
         var builder = new Mock<IScaffoldBuilder>();
         builder.SetReturnsDefault(builder.Object);
@@ -105,7 +170,7 @@ public class EntraIdTenantIdentityPipelineTests
         Assert.Equal(new[]
         {
             typeof(ValidateEntraIdStep), typeof(ValidateAzureCliIdentityStep), typeof(DetectBlazorWasmStep), typeof(RegisterAppStep),
-            typeof(UpdateAppAuthorizationStep), typeof(AddClientSecretStep), typeof(UpdateAppSettingsStep)
+            typeof(UpdateAppSettingsStep), typeof(UpdateAppAuthorizationStep), typeof(AddClientSecretStep), typeof(UpdateAppSettingsStep)
         }, steps);
         Assert.Contains(typeof(ValidateAzureCliIdentityStep), service.GetScaffoldSteps());
     }

@@ -30,6 +30,7 @@ public class ParameterDiscoveryTests
     [InlineData(120, 30, 0)]
     [InlineData(40, 25, 0)]
     [InlineData(80, 15, 0)]
+    [InlineData(40, 15, 220)]
     public void ApplicationPicker_StartsAtFirstOption_AndHighlightsArrowNavigation(int width, int height, int namePadding)
     {
         var options = CreateApplicationOptions(namePadding);
@@ -64,6 +65,24 @@ public class ParameterDiscoveryTests
         Assert.Contains("\u001b[94m> Application-24", frames[26]);
         Assert.DoesNotContain("Application-00", frames[25]);
         Assert.Contains(options[24].Value, frames[26]);
+    }
+
+    [Fact]
+    public void ApplicationPicker_HeightBoundedLabels_PreserveSelectedValue()
+    {
+        var options = CreateApplicationOptions(220);
+        var keys = Enumerable.Repeat(ConsoleKey.DownArrow, 24)
+            .Concat([ConsoleKey.Enter])
+            .ToArray();
+
+        var (result, frames) = ShowPicker(options, 40, 15, keys);
+
+        Assert.Same(options[24], result);
+        Assert.Matches("\u001b\\[94m(?:> )?Application-24", frames[24]);
+        var renderedText = Regex.Replace(frames[24], "\u001b\\[[0-9;?]*[A-Za-z]", "");
+        renderedText = Regex.Replace(renderedText, @"\s+", "");
+        Assert.Contains("...", renderedText);
+        Assert.Contains(options[24].Value[^36..], renderedText);
     }
 
     [Theory]

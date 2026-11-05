@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
@@ -193,6 +194,45 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 .Max();
             int reservedRows = CountRows(title, console.Profile.Width) +
                 CountRows(prompt.Raw.MoreChoicesText!, console.Profile.Width) + 2;
+            int maxChoiceRows = Math.Max(1, (console.Profile.Height - reservedRows) / 3);
+            if (choiceHeight > maxChoiceRows)
+            {
+                // Spectre requires at least three choices; shorten display labels, not their values.
+                var originalConverter = converter;
+                converter = option =>
+                {
+                    var markup = originalConverter(option);
+                    if (CountRows("> " + markup, console.Profile.Width - 1) <= maxChoiceRows)
+                    {
+                        return markup;
+                    }
+
+                    var label = markup.RemoveMarkup();
+                    var textElements = StringInfo.ParseCombiningCharacters(label);
+                    string Shorten(int count) =>
+                        Markup.Escape(label[..textElements[(count + 1) / 2]] + "..." +
+                            (count / 2 == 0 ? string.Empty : label[textElements[^(count / 2)]..]));
+
+                    int low = 0;
+                    int high = textElements.Length - 1;
+                    while (low < high)
+                    {
+                        int retained = (low + high + 1) / 2;
+                        if (CountRows("> " + Shorten(retained), console.Profile.Width - 1) <= maxChoiceRows)
+                        {
+                            low = retained;
+                        }
+                        else
+                        {
+                            high = retained - 1;
+                        }
+                    }
+
+                    return Shorten(low);
+                };
+                prompt.Converter(converter);
+                choiceHeight = choices.Select(option => CountRows("> " + converter(option), console.Profile.Width - 1)).Max();
+            }
             int pageSize = Math.Clamp((console.Profile.Height - reservedRows) / Math.Max(1, choiceHeight), 3, prompt.Raw.PageSize);
 
             return prompt.PageSize(pageSize);

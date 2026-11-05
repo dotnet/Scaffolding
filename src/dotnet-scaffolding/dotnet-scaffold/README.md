@@ -7,6 +7,8 @@ The interactive **Select Existing Application** picker displays each application
 name and client ID once. It starts at the first application and sizes pages to
 the terminal's available rows, including wrapped labels, to keep the selection
 visible while navigating with the Up and Down arrow keys.
+If three full labels cannot fit, the picker shortens the middle of long display
+labels with `...`. Selecting an application still uses its complete original value.
 
 Entra ID scaffolding currently uses both `dotnet msidentity` and the Azure CLI.
 Before creating or updating an application, scaffolding verifies that the Azure

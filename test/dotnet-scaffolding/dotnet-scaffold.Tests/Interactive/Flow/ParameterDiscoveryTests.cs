@@ -114,6 +114,9 @@ public class ParameterDiscoveryTests
         });
         realConsole.Profile.Width = width;
         realConsole.Profile.Height = height;
+        // CI detection overrides the settings above; this fake terminal must remain interactive.
+        realConsole.Profile.Capabilities.Interactive = true;
+        realConsole.Profile.Capabilities.Ansi = true;
         realConsole.Profile.Capabilities.Unicode = false;
         var frames = new List<string>();
         var keys = new Queue<ConsoleKey>(inputKeys);

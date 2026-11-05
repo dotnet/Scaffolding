@@ -216,6 +216,10 @@ internal class ValidateMinimalApiStep : ScaffoldStep
         }
         else
         {
+            if (!await ClassAnalyzers.ValidateTypeAccessibilityAsync(projectInfo.CodeService, settings.Project, modelClassSymbol, _logger))
+            {
+                return null;
+            }
             modelInfo = ClassAnalyzers.GetModelClassInfo(modelClassSymbol);
         }
 
@@ -233,6 +237,11 @@ internal class ValidateMinimalApiStep : ScaffoldStep
         if (!string.IsNullOrEmpty(dbContextClassName) && !string.IsNullOrEmpty(settings.DatabaseProvider))
         {
             var dbContextClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(dbContextClassName, StringComparison.OrdinalIgnoreCase));
+            if (dbContextClassSymbol is not null &&
+                !await ClassAnalyzers.ValidateTypeAccessibilityAsync(projectInfo.CodeService, settings.Project, dbContextClassSymbol, _logger))
+            {
+                return null;
+            }
             dbContextInfo = ClassAnalyzers.GetDbContextInfo(settings.Project, dbContextClassSymbol, dbContextClassName, settings.DatabaseProvider, modelInfo);
         }
 

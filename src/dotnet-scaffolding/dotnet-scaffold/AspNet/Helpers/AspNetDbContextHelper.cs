@@ -33,7 +33,7 @@ internal class AspNetDbContextHelper
     };
 
     /// <summary>
-    /// Gets code modifier properties for a given DbContextInfo.
+    /// Gets code modifier properties, qualifying the context type while keeping configuration names unchanged.
     /// </summary>
     internal static Dictionary<string, string> GetDbContextCodeModifierProperties(DbContextInfo dbContextInfo)
     {
@@ -51,7 +51,10 @@ internal class AspNetDbContextHelper
 
             if (!string.IsNullOrEmpty(dbContextInfo.DbContextClassName))
             {
-                dbContextProperties.Add(Constants.CodeModifierPropertyConstants.DbContextName, dbContextInfo.DbContextClassName);
+                var contextTypeName = string.IsNullOrEmpty(dbContextInfo.DbContextNamespace)
+                    ? dbContextInfo.DbContextClassName
+                    : $"{dbContextInfo.DbContextNamespace}.{dbContextInfo.DbContextClassName}";
+                dbContextProperties.Add(Constants.CodeModifierPropertyConstants.DbContextName, contextTypeName);
                 dbContextProperties.Add(Constants.CodeModifierPropertyConstants.ConnectionStringName, dbContextInfo.DbContextClassName);
             }
 
@@ -78,6 +81,9 @@ internal class AspNetDbContextHelper
             !string.IsNullOrEmpty(projectBasePath))
         {
             dbContextProperties.DbContextName = dbContextInfo.DbContextClassName;
+            dbContextProperties.DbContextFullName = dbContextInfo.DbContextFullName;
+            dbContextProperties.ModelFullName = dbContextInfo.ModelFullName;
+            dbContextProperties.ModelAssemblyIdentity = dbContextInfo.ModelAssemblyIdentity;
             dbContextProperties.DbSetStatement = dbContextInfo.NewDbSetStatement;
             dbContextProperties.DbContextPath = dbContextInfo.DbContextClassPath;
             return dbContextProperties;

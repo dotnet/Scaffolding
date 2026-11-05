@@ -21,6 +21,7 @@ internal class ModelInfo
     /// Gets or sets the full name of the model class (namespace + type name).
     /// </summary>
     public string? ModelFullName { get; set; }
+    public string? ModelAssemblyIdentity { get; set; }
     /// <summary>
     /// Gets or sets the type name of the model class.
     /// </summary>

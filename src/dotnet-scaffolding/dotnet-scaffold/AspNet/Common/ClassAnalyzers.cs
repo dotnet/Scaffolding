@@ -3,6 +3,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
+using Microsoft.DotNet.Scaffolding.Roslyn.Extensions;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -13,6 +14,52 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 /// </summary>
 internal static class ClassAnalyzers
 {
+    /// <summary>
+    /// Checks the selected type in the consuming compilation, including friend-assembly access.
+    /// </summary>
+    internal static async Task<bool> ValidateTypeAccessibilityAsync(
+        ICodeService codeService, string projectPath, ISymbol selectedType, ILogger logger)
+    {
+        var workspace = await codeService.GetWorkspaceAsync();
+        var project = workspace?.CurrentSolution.GetProject(projectPath);
+        var compilation = project is null ? null : await project.GetCompilationAsync();
+        if (compilation is null)
+        {
+            logger.LogError("Unable to validate accessibility of '{Type}' from project '{ProjectPath}'.", selectedType.ToDisplayString(), projectPath);
+            return false;
+        }
+
+        var names = new Stack<string>();
+        for (var type = selectedType as INamedTypeSymbol; type is not null; type = type.ContainingType)
+        {
+            names.Push(type.MetadataName);
+        }
+        string metadataName = string.Join("+", names);
+        if (!selectedType.ContainingNamespace.IsGlobalNamespace)
+        {
+            var namespaceNames = new Stack<string>();
+            for (var containingNamespace = selectedType.ContainingNamespace;
+                !containingNamespace.IsGlobalNamespace; containingNamespace = containingNamespace.ContainingNamespace)
+            {
+                namespaceNames.Push(containingNamespace.MetadataName);
+            }
+            metadataName = $"{string.Join(".", namespaceNames)}.{metadataName}";
+        }
+
+        var assembly = compilation.Assembly.Identity.Equals(selectedType.ContainingAssembly.Identity)
+            ? compilation.Assembly
+            : compilation.SourceModule.ReferencedAssemblySymbols.FirstOrDefault(candidate =>
+                candidate.Identity.Equals(selectedType.ContainingAssembly.Identity));
+        var resolvedType = assembly?.GetTypeByMetadataName(metadataName);
+        if (resolvedType is null || !compilation.IsSymbolAccessibleWithin(resolvedType, compilation.Assembly))
+        {
+            logger.LogError("Type '{Type}' is not accessible from target project '{ProjectPath}'.", selectedType.ToDisplayString(), projectPath);
+            return false;
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// Gets information about a DbContext, either existing or to be created, including its name, path, namespace, and entity set variable.
     /// </summary>
@@ -32,9 +79,12 @@ internal static class ClassAnalyzers
         var dbContextInfo = new DbContextInfo();
         dbContextInfo.EfScenario = true;
         dbContextInfo.DatabaseProvider = dbProvider;
+        dbContextInfo.ModelFullName = modelInfo?.ModelFullName;
+        dbContextInfo.ModelAssemblyIdentity = modelInfo?.ModelAssemblyIdentity;
         if (existingDbContextClass is not null)
         {
             dbContextInfo.DbContextClassName = existingDbContextClass.Name;
+            dbContextInfo.DbContextFullName = existingDbContextClass.ToDisplayString();
             dbContextInfo.DbContextClassPath = existingDbContextClass.Locations.FirstOrDefault()?.SourceTree?.FilePath;
             dbContextInfo.DbContextNamespace = existingDbContextClass.ContainingNamespace.ToDisplayString();
             var discoveredEntitySetName = modelInfo is null
@@ -130,6 +180,7 @@ internal static class ClassAnalyzers
     {
         var modelInfo = new ModelInfo();
         modelInfo.ModelTypeName = modelClassSymbol.Name;
+        modelInfo.ModelAssemblyIdentity = modelClassSymbol.ContainingAssembly.Identity.ToString();
         modelInfo.ModelNamespace = modelClassSymbol.ContainingNamespace.ToDisplayString();
         if (!string.IsNullOrEmpty(modelInfo.ModelNamespace))
         {

@@ -10,6 +10,7 @@ internal class CodeFile
     public string[]? Usings { get; set; }
     public CodeBlock[]? UsingsWithOptions { get; set; }
     public string? FileName { get; set; }
+    public string? ClassFullName { get; set; }
     public string? Extension => FileName?.Substring(FileName.LastIndexOf('.') + 1);
     public CodeBlock[]? ClassProperties { get; set; }
     public CodeBlock[]? ClassAttributes { get; set; }

@@ -237,7 +237,8 @@ internal class ValidateIdentityStep : ScaffoldStep
             return null;
         }
 
-        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync();
+        // Referenced Identity contexts may use a different user type than the generated ApplicationUser.
+        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync(includeReferencedProjects: false);
         //find DbContext info or create properties for a new one.
         var dbContextClassName = settings.DataContext;
         DbContextInfo dbContextInfo = new();
@@ -246,6 +247,11 @@ internal class ValidateIdentityStep : ScaffoldStep
         {
             var dbContextClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(dbContextClassName, StringComparison.OrdinalIgnoreCase));
             dbContextInfo = ClassAnalyzers.GetIdentityDbContextInfo(settings.Project, dbContextClassSymbol, dbContextClassName, settings.DatabaseProvider);
+            // The shared context template creates new contexts in the global namespace, including .NET 8.
+            if (dbContextClassSymbol is null)
+            {
+                dbContextInfo.DbContextNamespace = string.Empty;
+            }
             dbContextInfo.EfScenario = true;
         }
 

@@ -9,12 +9,51 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.CodeModification.CodeChange;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.CodeModification;
 
 public class ProjectModifierHelperTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task IsMinimalApp_IgnoresStartupInReferencedProject(bool localStartup)
+    {
+        var directory = Path.Combine(Path.GetTempPath(), nameof(ProjectModifierHelperTests), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(Path.Combine(directory, "Library"));
+        Directory.CreateDirectory(Path.Combine(directory, "Web"));
+        try
+        {
+            File.WriteAllText(Path.Combine(directory, "Library", "Library.csproj"), """
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+                </Project>
+                """);
+            File.WriteAllText(Path.Combine(directory, "Library", "Startup.cs"), "namespace Library; public class Startup { }");
+            var projectPath = Path.Combine(directory, "Web", "Web.csproj");
+            File.WriteAllText(projectPath, """
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+                  <ItemGroup><ProjectReference Include="..\Library\Library.csproj" /></ItemGroup>
+                </Project>
+                """);
+            File.WriteAllText(Path.Combine(directory, "Web", "Program.cs"),
+                localStartup ? "namespace Web; public class Startup { }" : "namespace Web; public class Program { }");
+            using var service = new CodeService(NullLogger.Instance, projectPath);
+            Assert.Contains(await service.GetAllClassSymbolsAsync(),
+                symbol => symbol.ToDisplayString() == "Library.Startup");
+
+            Assert.Equal(!localStartup, await ProjectModifierHelper.IsMinimalApp(service));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
     [Theory]
     [InlineData("\n", "\n")]
     [InlineData("\r\n", "\r\n")]

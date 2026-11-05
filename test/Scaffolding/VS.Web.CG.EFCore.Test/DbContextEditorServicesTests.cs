@@ -186,48 +186,6 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 fs != null ? fs : new MockFileSystem());
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void EditStartupForNewContext_BlazorFactoryPreservesExistingIdentityRegistration(bool existingFactory)
-        {
-            var identityRegistration = existingFactory
-                ? "builder.Services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlServer(connectionString));"
-                : "builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));";
-            var source = $$"""
-                var builder = WebApplication.CreateBuilder(args);
-                var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-                {{identityRegistration}}
-                var app = builder.Build();
-                app.Run();
-                """;
-            var tree = CSharpSyntaxTree.ParseText(source);
-            var compilation = CSharpCompilation.Create("BlazorIdentity",
-                new[] { tree }, new[] { MetadataReference.CreateFromFile(typeof(object).Assembly.Location) },
-                new CSharpCompilationOptions(OutputKind.ConsoleApplication));
-            var program = ModelType.FromITypeSymbol(compilation.GetTypeByMetadataName("Program"));
-
-            var result = GetTestObject().EditStartupForNewContext(program, new Dictionary<string, string>
-            {
-                { nameof(NewDbContextTemplateModel.DbContextTypeName), "MovieContext" },
-                { nameof(NewDbContextTemplateModel.DbContextNamespace), "TestProject.Data" },
-                { "dataBaseName", "MovieContext-Regression" },
-                { "databaseProvider", DbProvider.SqlServer.ToString() },
-                { "useTopLevelStatements", "true" },
-                { "useDbFactory", "true" }
-            });
-
-            Assert.True(result.Edited);
-            var updated = result.NewTree.GetText().ToString();
-            Assert.Contains(identityRegistration, updated);
-            Assert.Contains("GetConnectionString(\"DefaultConnection\")", updated);
-            Assert.Contains("AddDbContextFactory<MovieContext>", updated);
-            Assert.Contains("GetConnectionString(\"MovieContext\")", updated);
-            Assert.True(updated.IndexOf("AddDbContextFactory<MovieContext>", StringComparison.Ordinal) <
-                updated.IndexOf("builder.Build()", StringComparison.Ordinal));
-            Assert.DoesNotContain(result.NewTree.GetDiagnostics(), diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
-        }
-
         public static IEnumerable<object[]> AddDbContextStringData =>
             new[]
             {

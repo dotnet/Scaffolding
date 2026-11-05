@@ -109,6 +109,39 @@ public class IdentityNet10IntegrationTests : IdentityIntegrationTestsBase
             $"Project should build after scaffolding.\nExit code: {postExitCode}\nOutput: {postOutput}\nError: {postError}");
     }
 
+    [Theory]
+    [InlineData("webapp", "Pages")]
+    [InlineData("mvc", "Views")]
+    public async Task Scaffold_Identity_NoneAuth_GeneratesSharedLoginPartial(string projectTemplate, string sharedRoot)
+    {
+        var (createExitCode, createOutput, createError) = await ScaffoldCliHelper.RunDotNetAsync(
+            _testProjectDir, "new", projectTemplate, "--name", "TestProject",
+            "--output", _testProjectDir, "--framework", TargetFramework, "--auth", "None", "--no-restore");
+        Assert.True(createExitCode == 0, $"Project creation should succeed.\nOutput: {createOutput}\nError: {createError}");
+        Assert.True(File.Exists(_testProjectPath), $"Project file should be created at {_testProjectPath}.\nOutput: {createOutput}");
+
+        string partialPath = Path.Combine(_testProjectDir, sharedRoot, "Shared", "_LoginPartial.cshtml");
+        Assert.False(File.Exists(partialPath));
+
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            ScaffoldCliHelper.GetTestTargetFramework(),
+            "identity",
+            "--project", _testProjectPath,
+            "--dataContext", "TestDbContext",
+            "--dbProvider", "sqlserver-efcore");
+        Assert.True(exitCode == 0, $"Identity scaffolding should succeed without --overwrite.\nOutput: {output}\nError: {error}");
+
+        Assert.True(File.Exists(partialPath), $"Identity scaffolding should generate {partialPath}.");
+        string content = File.ReadAllText(partialPath);
+        Assert.Contains("@inject SignInManager<ApplicationUser> SignInManager", content);
+        Assert.Contains("@inject UserManager<ApplicationUser> UserManager", content);
+        Assert.Contains("asp-page=\"/Account/Register\"", content);
+        Assert.Contains("asp-page=\"/Account/Login\"", content);
+
+        var (buildExitCode, buildOutput, buildError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(buildExitCode == 0, $"Scaffolded project should build.\nOutput: {buildOutput}\nError: {buildError}");
+    }
+
     // identityMinimalHostingChanges.json does not exist for net10.0+; only net8.0 uses it.
     [Fact]
     public override void IdentityMinimalHostingChangesConfig_ExistsForTargetFramework() { }

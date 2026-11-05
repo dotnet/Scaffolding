@@ -67,6 +67,7 @@
     -->
     <None Pack="true" Include="AspNet\Templates\net9.0\EfController\*.tt" PackagePath="AspNet\Templates\net8.0\EfController\" />
     <None Pack="true" Include="AspNet\Templates\net9.0\Identity\Pages\**\*.tt" PackagePath="AspNet\Templates\net8.0\Identity\Pages\" />
+    <None Pack="true" Include="AspNet\Templates\net9.0\Identity\_LoginPartial.tt" PackagePath="AspNet\Templates\net8.0\Identity\" />
     <None Pack="true" Include="AspNet\Templates\net9.0\MinimalApi\*.tt" PackagePath="AspNet\Templates\net8.0\MinimalApi\" />
     <None Pack="true" Include="AspNet\Templates\net9.0\RazorPages\*.tt" PackagePath="AspNet\Templates\net8.0\RazorPages\" />
     <None Pack="true" Include="AspNet\Templates\net9.0\Views\*.tt" PackagePath="AspNet\Templates\net8.0\Views\" />
@@ -139,6 +140,10 @@
     <None Include="AspNet\Templates\net9.0\Identity\Pages\**\*.tt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>AspNet\Templates\net8.0\Identity\Pages\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="AspNet\Templates\net9.0\Identity\_LoginPartial.tt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>AspNet\Templates\net8.0\Identity\_LoginPartial.tt</Link>
     </None>
     <None Include="AspNet\Templates\net9.0\Files\ApplicationUser.tt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -310,6 +315,10 @@
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
     <None Update="AspNet\Templates\net11.0\Blazor\NotFound.tt">
+      <LastGenOutput>%(Filename).cs</LastGenOutput>
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+    </None>
+    <None Update="AspNet\Templates\*\Identity\_LoginPartial.tt">
       <LastGenOutput>%(Filename).cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
     </None>
@@ -854,6 +863,11 @@
     </Compile>
     <Compile Update="AspNet\Templates\net11.0\Blazor\NotFound.cs">
       <DependentUpon>NotFound.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="AspNet\Templates\*\Identity\_LoginPartial.cs">
+      <DependentUpon>_LoginPartial.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>

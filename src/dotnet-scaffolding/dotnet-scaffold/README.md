@@ -1,6 +1,14 @@
 New and improved scaffolding experience. 
 More details coming soon!
 
+### Identity shared login partial
+
+Identity scaffolding generates `_LoginPartial.cshtml` in `Pages/Shared` for
+Razor Pages projects and `Views/Shared` for MVC projects, including when
+`--overwrite` is not specified. Existing login partials are preserved even
+when overwriting Identity pages. Blazor Identity scaffolding uses Razor
+components instead of this partial.
+
 ### Entra ID account selection
 
 Entra ID scaffolding currently uses both `dotnet msidentity` and the Azure CLI.

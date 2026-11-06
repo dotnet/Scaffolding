@@ -32,6 +32,7 @@ public class CliOptionInventoryTests
         Constants.CliOptions.ProjectCliOption,         // --project
         Constants.CliOptions.PrereleaseCliOption,      // --prerelease
         Constants.CliOptions.NameOption,               // --name
+        Constants.CliOptions.RelativeFolderPathOption, // --relativeFolderPath
         Constants.CliOptions.OverwriteOption,          // --overwrite
         Constants.CliOptions.ModelCliOption,            // --model
         Constants.CliOptions.DataContextOption,         // --dataContext
@@ -73,7 +74,7 @@ public class CliOptionInventoryTests
     private static readonly Dictionary<string, HashSet<string>> AspNetCommandOptions = new()
     {
         ["blazor-empty"] = new() { "--project", "--name" },
-        ["razorview-empty"] = new() { "--project", "--name" },
+        ["razorview-empty"] = new() { "--project", "--name", "--relativeFolderPath" },
         ["razorpage-empty"] = new() { "--project", "--name" },
         ["apicontroller"] = new() { "--project", "--name", "--actions" },
         ["mvccontroller"] = new() { "--project", "--name", "--actions" },
@@ -120,6 +121,7 @@ public class CliOptionInventoryTests
             options.Project.CliOption!,
             options.Prerelease.CliOption!,
             options.FileName.CliOption!,
+            options.RelativeFolderPath.CliOption!,
             options.Actions.CliOption!,
             options.AreaName.CliOption!,
             options.ModelName.CliOption!,
@@ -177,6 +179,7 @@ public class CliOptionInventoryTests
             options.Project.CliOption!,
             options.Prerelease.CliOption!,
             options.FileName.CliOption!,
+            options.RelativeFolderPath.CliOption!,
             options.Actions.CliOption!,
             options.AreaName.CliOption!,
             options.ModelName.CliOption!,

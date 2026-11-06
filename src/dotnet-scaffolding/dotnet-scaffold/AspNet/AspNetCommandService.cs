@@ -88,12 +88,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithExample(AspnetStrings.RazorView.EmptyExample, AspnetStrings.RazorView.EmptyExampleDescription)
                 .WithOption(options.Project)
                 .WithOption(options.FileName)
+                .WithOption(options.RelativeFolderPath)
                 .WithStep<DotnetNewScaffolderStep>(config =>
                 {
                     var step = config.Step;
                     var context = config.Context;
                     step.ProjectPath = context.GetOptionResult(options.Project);
                     step.FileName = context.GetOptionResult(options.FileName);
+                    step.RelativeOutputPath = context.GetOptionResult(options.RelativeFolderPath);
                     step.CommandName = Constants.DotnetCommands.ViewCommandName;
                 });
 

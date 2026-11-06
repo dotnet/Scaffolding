@@ -16,6 +16,10 @@ internal class DotnetNewStepSettings : BaseSettings
     /// </summary>
     public required string Name { get; set; }
     /// <summary>
+    /// An optional relative output path beneath the command's default folder.
+    /// </summary>
+    public string? RelativeOutputPath { get; set; }
+    /// <summary>
     /// The namespace for the new item, if specified.
     /// </summary>
     public string? NamespaceName { get; set; }

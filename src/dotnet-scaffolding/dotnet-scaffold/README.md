@@ -1,6 +1,26 @@
 New and improved scaffolding experience. 
 More details coming soon!
 
+### Empty MVC Razor views
+
+For .NET 8, 9, 10 and 11 projects, `razorview-empty` can place a view under a
+folder relative to the project's default `Views` root:
+
+```powershell
+dotnet scaffold aspnet razorview-empty --project ".\MyMvcApp\MyMvcApp.csproj" --name Index --relativeFolderPath "Home"
+```
+
+This creates `Views\Home\Index.cshtml` inside `MyMvcApp`. If the caller already
+includes the root folder, `--relativeFolderPath "Views\Home"` is normalized to
+the same destination instead of creating `Views\Views\Home`.
+
+The command also accepts a nested path in `--name`, such as `--name "Home/Index"`.
+Absolute paths and traversal segments such as `..` are rejected.
+
+This command creates an empty view using `dotnet new view`. It does not infer a
+controller-specific destination from the view name alone; integrations that know
+the controller context must pass the destination explicitly.
+
 ### Entra ID account selection
 
 The interactive **Select Existing Application** picker displays each application's

@@ -404,7 +404,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     .WithDetectBlazorWasmStep()
                     .WithRegisterAppStep()
                     .WithUpdateAppAuthorizationStep()
-                    .WithAddClientSecretStep()
                     .WithUpdateAppSettingsStep()
                     .WithEntraAddPackagesStep()
                     .WithEntraBlazorWasmAddPackagesStep()

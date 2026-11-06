@@ -3,13 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
-using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
@@ -24,7 +25,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.EntraId;
 public class EntraIdTenantIdentityPipelineTests
 {
     [Fact]
-    public async Task EntraPipeline_TenantMismatchStopsBeforeRegistrationSecretsAuthorizationAndSettings()
+    public async Task EntraPipeline_TenantMismatchStopsBeforeRegistrationAuthorizationAndSettings()
     {
         var logger = new Mock<ILogger<ValidateAzureCliIdentityStep>>();
         var identity = new MismatchedIdentityStep(logger.Object)
@@ -36,14 +37,12 @@ public class EntraIdTenantIdentityPipelineTests
         var telemetry = Mock.Of<ITelemetryService>();
         var registration = new Mock<RegisterAppStep>(NullLogger<AddClientSecretStep>.Instance, files.Object, telemetry);
         var authorization = new Mock<UpdateAppAuthorizationStep>(NullLogger<UpdateAppAuthorizationStep>.Instance, files.Object, telemetry);
-        var secrets = new Mock<AddClientSecretStep>(NullLogger<AddClientSecretStep>.Instance, files.Object, Mock.Of<IEnvironmentService>());
         var settings = new Mock<UpdateAppSettingsStep>(NullLogger<UpdateAppSettingsStep>.Instance, files.Object, telemetry);
         var services = new Dictionary<Type, object>
         {
             [typeof(ValidateAzureCliIdentityStep)] = identity,
             [typeof(RegisterAppStep)] = registration.Object,
             [typeof(UpdateAppAuthorizationStep)] = authorization.Object,
-            [typeof(AddClientSecretStep)] = secrets.Object,
             [typeof(UpdateAppSettingsStep)] = settings.Object
         };
         var provider = new Mock<IServiceProvider>();
@@ -53,7 +52,6 @@ public class EntraIdTenantIdentityPipelineTests
             .WithValidateAzureCliIdentityStep()
             .WithRegisterAppStep()
             .WithUpdateAppAuthorizationStep()
-            .WithAddClientSecretStep()
             .WithUpdateAppSettingsStep()
             .Build(provider.Object);
         var context = new ScaffolderContext(scaffolder);
@@ -67,7 +65,6 @@ public class EntraIdTenantIdentityPipelineTests
 
         registration.Verify(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>()), Times.Never);
         authorization.Verify(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>()), Times.Never);
-        secrets.Verify(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>()), Times.Never);
         settings.Verify(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>()), Times.Never);
         files.VerifyNoOtherCalls();
         Assert.DoesNotContain("ClientId", context.Properties.Keys);
@@ -83,37 +80,25 @@ public class EntraIdTenantIdentityPipelineTests
     }
 
     [Fact]
-    public void EntraPipeline_ValidatesIdentityBeforeMutationsAndAuthorizesBeforeSecretAndSettings()
+    public void EntraPipeline_RegistersSignInOnlyStepSequence()
     {
-        var builder = new Mock<IScaffoldBuilder>();
-        builder.SetReturnsDefault(builder.Object);
-        var steps = new List<Type>();
-        Capture<ValidateEntraIdStep>(builder, steps);
-        Capture<ValidateAzureCliIdentityStep>(builder, steps);
-        Capture<DetectBlazorWasmStep>(builder, steps);
-        Capture<RegisterAppStep>(builder, steps);
-        Capture<UpdateAppAuthorizationStep>(builder, steps);
-        Capture<AddClientSecretStep>(builder, steps);
-        Capture<UpdateAppSettingsStep>(builder, steps);
-        var runner = new Mock<IScaffoldRunnerBuilder>();
-        runner.Setup(r => r.AddScaffolder(It.IsAny<ScaffolderCatagory>(), It.IsAny<string>()))
-            .Returns(builder.Object);
-        var service = new AspNetCommandService(runner.Object);
+        var builder = new ScaffoldRunnerBuilder();
+        var service = new AspNetCommandService(builder);
 
         service.AddScaffolderCommands();
 
+        var scaffolder = Assert.Single(builder.Scaffolders[ScaffolderCatagory.AspNet],
+            scaffolder => scaffolder.Name == AspnetStrings.EntraId.Name);
+        var steps = scaffolder.StepPreparers.Select(step => step.GetStepType()).ToArray();
+
+        Assert.DoesNotContain(typeof(AddClientSecretStep), steps);
         Assert.Equal(new[]
         {
             typeof(ValidateEntraIdStep), typeof(ValidateAzureCliIdentityStep), typeof(DetectBlazorWasmStep), typeof(RegisterAppStep),
-            typeof(UpdateAppAuthorizationStep), typeof(AddClientSecretStep), typeof(UpdateAppSettingsStep)
+            typeof(UpdateAppAuthorizationStep), typeof(UpdateAppSettingsStep),
+            typeof(WrappedAddPackagesStep), typeof(WrappedAddPackagesStep),
+            typeof(WrappedCodeModificationStep), typeof(WrappedCodeModificationStep), typeof(WrappedTextTemplatingStep)
         }, steps);
         Assert.Contains(typeof(ValidateAzureCliIdentityStep), service.GetScaffoldSteps());
-    }
-
-    private static void Capture<TStep>(Mock<IScaffoldBuilder> builder, List<Type> steps) where TStep : ScaffoldStep
-    {
-        builder.Setup(b => b.WithStep<TStep>(It.IsAny<Action<ScaffoldStepConfigurator<TStep>>>()))
-            .Callback(() => steps.Add(typeof(TStep)))
-            .Returns(builder.Object);
     }
 }

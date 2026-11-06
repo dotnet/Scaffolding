@@ -24,6 +24,8 @@ public class BlazorCrudInteractivityIntegrationTests
     [InlineData("net10.0", "InteractiveServer", false)]
     [InlineData("net11.0", "InteractiveAuto", false)]
     [InlineData("net10.0", "InteractiveAuto", false, "@rendermode = \"@(InteractiveAuto)\"")]
+    [InlineData("net10.0", "new InteractiveServerRenderMode(prerender: \"server\" == \"server\")", false,
+        "@rendermode=\"@(new InteractiveServerRenderMode(prerender: \"server\" == \"server\"))\"")]
     public async Task Scaffold_BlazorCrud_GlobalInteractivityKeepsCrudRoutesOnServer(string framework, string renderMode, bool individualAccounts, string? routesRenderModeAttribute = null)
     {
         using var project = new BlazorTestProject(framework);
@@ -46,7 +48,9 @@ public class BlazorCrudInteractivityIntegrationTests
             """);
         File.WriteAllText(Path.Combine(componentsDirectory, "App.razor"),
             ScaffoldCliHelper.GetBlazorAppRazor()
-                .Replace("<HeadOutlet />", $"<HeadOutlet @rendermode=\"{(renderMode == "InteractiveServer" ? "@" : "")}{renderMode}\" />")
+                .Replace("<HeadOutlet />", routesRenderModeAttribute is null
+                    ? $"<HeadOutlet @rendermode=\"{(renderMode == "InteractiveServer" ? "@" : "")}{renderMode}\" />"
+                    : $"<HeadOutlet {routesRenderModeAttribute} />")
                 .Replace("<Routes />", routesRenderModeAttribute is null
                     ? $"<Routes @rendermode=\"{(renderMode == "InteractiveServer" ? "@" : "")}{renderMode}\" />"
                     : $"<Routes {routesRenderModeAttribute} />"));

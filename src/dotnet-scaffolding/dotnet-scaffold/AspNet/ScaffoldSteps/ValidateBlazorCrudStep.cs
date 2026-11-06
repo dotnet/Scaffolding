@@ -129,13 +129,10 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
             if (_fileSystem.FileExists(appPath))
             {
                 var appContent = _fileSystem.ReadAllText(appPath);
-                const string componentAttributesPattern = """(?:[^"'<>]|"[^"]*"|'[^']*')*""";
-                const string renderModePattern = """@rendermode\s*=\s*(?:"(?<expression>[^"]+)"|'(?<expression>[^']+)')""";
-                var routes = Regex.Match(appContent, $@"<Routes\b{componentAttributesPattern}>", RegexOptions.None, TimeSpan.FromSeconds(1));
-                var renderMode = Regex.Match(routes.Value, renderModePattern, RegexOptions.None, TimeSpan.FromSeconds(1));
-                var expression = GetRenderModeExpression(renderMode);
+                var routes = GetComponentRenderMode(appContent, "Routes");
+                var expression = GetRenderModeExpression(routes.Expression);
                 var existingProperty = expression.Trim('(', ')', ' ', '\r', '\n', '\t');
-                if (renderMode.Success && !Regex.IsMatch(appContent,
+                if (!string.IsNullOrEmpty(routes.Attribute) && !Regex.IsMatch(appContent,
                     $@"\b{Regex.Escape(existingProperty)}\s*=>\s*\w+\.AcceptsInteractiveRouting\(\)", RegexOptions.None, TimeSpan.FromSeconds(1)))
                 {
                     blazorCrudModel.ProjectInfo.CodeChangeOptions!.Add("GlobalInteractive");
@@ -148,16 +145,15 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
                             private IComponentRenderMode? {{pageRenderModeName}} =>
                                 {{httpContextName}}.AcceptsInteractiveRouting() ? {{expression}} : null;
                         """;
-                    codeModifierProperties.Add("$(RoutesRenderModeTag)", routes.Value);
+                    codeModifierProperties.Add("$(RoutesRenderModeTag)", routes.Tag);
                     codeModifierProperties.Add("$(UpdatedRoutesRenderModeTag)",
-                        routes.Value.Replace(renderMode.Value, $"@rendermode=\"{pageRenderModeName}\""));
+                        routes.Tag.Replace(routes.Attribute, $"@rendermode=\"{pageRenderModeName}\""));
 
-                    var headOutlet = Regex.Match(appContent, $@"<HeadOutlet\b{componentAttributesPattern}>", RegexOptions.None, TimeSpan.FromSeconds(1));
-                    var headOutletRenderMode = Regex.Match(headOutlet.Value, renderModePattern, RegexOptions.None, TimeSpan.FromSeconds(1));
-                    var updatedHeadOutlet = headOutlet.Value;
-                    if (headOutletRenderMode.Success)
+                    var headOutlet = GetComponentRenderMode(appContent, "HeadOutlet");
+                    var updatedHeadOutlet = headOutlet.Tag;
+                    if (!string.IsNullOrEmpty(headOutlet.Attribute))
                     {
-                        var headOutletExpression = GetRenderModeExpression(headOutletRenderMode);
+                        var headOutletExpression = GetRenderModeExpression(headOutlet.Expression);
                         var headOutletRenderModeName = pageRenderModeName;
                         if (headOutletExpression != expression)
                         {
@@ -170,10 +166,10 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
                                 """;
                         }
 
-                        updatedHeadOutlet = headOutlet.Value.Replace(headOutletRenderMode.Value, $"@rendermode=\"{headOutletRenderModeName}\"");
+                        updatedHeadOutlet = headOutlet.Tag.Replace(headOutlet.Attribute, $"@rendermode=\"{headOutletRenderModeName}\"");
                     }
 
-                    codeModifierProperties.Add("$(HeadOutletRenderModeTag)", headOutlet.Value);
+                    codeModifierProperties.Add("$(HeadOutletRenderModeTag)", headOutlet.Tag);
                     codeModifierProperties.Add("$(UpdatedHeadOutletRenderModeTag)", updatedHeadOutlet);
                     codeModifierProperties.Add("$(BlazorCrudRenderModeMembers)", members);
                 }
@@ -193,9 +189,74 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
         return true;
     }
 
-    private static string GetRenderModeExpression(Match renderMode)
+    // Mask explicit Razor expressions at the same offsets so their C# string literals cannot terminate attributes.
+    private static (string Tag, string Attribute, string Expression) GetComponentRenderMode(string content, string componentName)
     {
-        var expression = renderMode.Groups["expression"].Value.Trim();
+        var opening = Regex.Match(content, $@"<{Regex.Escape(componentName)}\b", RegexOptions.None, TimeSpan.FromSeconds(1));
+        if (!opening.Success)
+        {
+            return (string.Empty, string.Empty, string.Empty);
+        }
+
+        var tag = content[opening.Index..];
+        var masked = tag.ToCharArray();
+        var quote = '\0';
+        for (var index = opening.Length; index < tag.Length; index++)
+        {
+            var character = tag[index];
+            if (quote == '\0' && character == '>')
+            {
+                const string pattern = """@rendermode\s*=\s*(?:"(?<expression>[^"]+)"|'(?<expression>[^']+)')""";
+                var attribute = Regex.Match(new string(masked, 0, index + 1), pattern, RegexOptions.None, TimeSpan.FromSeconds(1));
+                var value = attribute.Groups["expression"];
+                return (tag[..(index + 1)], tag.Substring(attribute.Index, attribute.Length), tag.Substring(value.Index, value.Length));
+            }
+
+            if (character == quote || (quote == '\0' && character is '"' or '\''))
+            {
+                quote = quote == '\0' ? character : '\0';
+            }
+            else if (quote != '\0' && character == '@' && index + 1 < tag.Length)
+            {
+                if (tag[index + 1] == '@')
+                {
+                    index++;
+                    continue;
+                }
+
+                if (tag[index + 1] != '(')
+                {
+                    continue;
+                }
+
+                var depth = 0;
+                var end = index;
+                foreach (var token in SyntaxFactory.ParseTokens(tag[(index + 1)..]))
+                {
+                    depth += token.Kind() switch { SyntaxKind.OpenParenToken => 1, SyntaxKind.CloseParenToken => -1, _ => 0 };
+                    if (depth == 0)
+                    {
+                        end = index + 1 + token.Span.End;
+                        break;
+                    }
+                }
+
+                if (end == index)
+                {
+                    throw new InvalidOperationException("Unable to parse an explicit Razor expression in the component markup.");
+                }
+
+                Array.Fill(masked, ' ', index, end - index);
+                index = end - 1;
+            }
+        }
+
+        return (string.Empty, string.Empty, string.Empty);
+    }
+
+    private static string GetRenderModeExpression(string value)
+    {
+        var expression = value.Trim();
         return expression.StartsWith("@(", StringComparison.Ordinal) && expression.EndsWith(')')
             ? expression[2..^1].Trim()
             : expression.TrimStart('@');

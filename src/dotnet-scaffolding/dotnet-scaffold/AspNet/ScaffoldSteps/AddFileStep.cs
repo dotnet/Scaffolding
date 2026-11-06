@@ -11,6 +11,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 /// <summary>
 /// Scaffold step for adding a file from the template folder to the output directory if it does not already exist.
+/// Existing text with equivalent encoding and line endings is preserved; content conflicts fail unless overwrite is requested.
 /// </summary>
 internal class AddFileStep : ScaffoldStep
 {
@@ -85,7 +86,7 @@ internal class AddFileStep : ScaffoldStep
             return Task.FromResult(true);
         }
 
-        _logger.LogError("Unable to find template '{FileName}' or its destination directory for project '{ProjectPath}'.", FileName, ProjectPath);
+        _logger.LogError("Unable to find template '{FileName}' for project '{ProjectPath}' or its destination directory.", FileName, ProjectPath);
         return Task.FromResult(false);
     }
 
@@ -93,18 +94,13 @@ internal class AddFileStep : ScaffoldStep
     {
         try
         {
-            using var sourceReader = new StreamReader(source, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
-            using var destinationReader = new StreamReader(destination, new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
-            int nextCharacter;
-            while ((nextCharacter = sourceReader.Read()) != -1)
-            {
-                if (nextCharacter != destinationReader.Read())
-                {
-                    return false;
-                }
-            }
-
-            return destinationReader.Read() == -1;
+            // Project templates may use a BOM or different line endings for the same text.
+            using var sourceReader = new StreamReader(source, new UTF8Encoding(false, true));
+            using var destinationReader = new StreamReader(destination, new UTF8Encoding(false, true));
+            return string.Equals(
+                sourceReader.ReadToEnd().Replace("\r\n", "\n", StringComparison.Ordinal),
+                destinationReader.ReadToEnd().Replace("\r\n", "\n", StringComparison.Ordinal),
+                StringComparison.Ordinal);
         }
         catch (DecoderFallbackException)
         {

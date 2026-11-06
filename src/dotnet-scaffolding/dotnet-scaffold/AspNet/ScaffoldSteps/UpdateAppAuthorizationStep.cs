@@ -128,10 +128,15 @@
             {
                 var command = $"ad app show --id {ClientId} --query web.redirectUris --output json";
                 AzCliResult result = RunAzCli(runner, command);
-                if (result.ExitCode != 0 || !string.IsNullOrEmpty(result.StdErr))
+                if (result.ExitCode != 0)
                 {
                     _logger.LogError("Failed to read existing app registration redirect URIs: {Error}", result.StdErr);
                     return false;
+                }
+
+                if (!string.IsNullOrWhiteSpace(result.StdErr))
+                {
+                    _logger.LogWarning("Azure CLI warning while reading existing app registration redirect URIs: {Warning}", result.StdErr);
                 }
 
                 if (string.IsNullOrWhiteSpace(result.StdOut))

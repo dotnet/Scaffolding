@@ -86,6 +86,7 @@ internal static class MinimalApiScaffolderBuilderExtensions
                     PackageConstants.EfConstants.EfPackagesDict.TryGetValue(commandSettings.DatabaseProvider, out Package? projectPackage))
                 {
                     packages.Add(PackageConstants.EfConstants.EfCoreToolsPackage);
+                    packages.Add(PackageConstants.EfConstants.EfCoreDesignPackage);
                     packages.Add(projectPackage);
                     if (commandSettings.DatabaseProvider == PackageConstants.EfConstants.SQLite)
                     {

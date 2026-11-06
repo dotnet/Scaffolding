@@ -156,6 +156,11 @@ Local sign-in settings are written only to `appsettings.Development.json`; base
 `appsettings.json` is not read to select a registration or modified by this flow.
 Run locally with the `Development` environment so these settings are loaded.
 
+When reusing a registration, the scaffolder preserves its existing Web redirect
+URIs before updating authorization and development settings. Azure CLI warnings on a
+successful read are logged without stopping scaffolding; failed commands or invalid
+redirect URI data still stop the operation before settings are written.
+
 **Optional, outside the generated sign-in flow:** If you extend a server application
 to require a confidential client credential (for example, to call downstream APIs),
 configure a supported `AzureAd:ClientCredentials` source yourself. User secrets can

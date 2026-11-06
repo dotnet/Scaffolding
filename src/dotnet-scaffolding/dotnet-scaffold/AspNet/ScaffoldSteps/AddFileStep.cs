@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.Text;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -10,6 +11,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
 /// <summary>
 /// Scaffold step for adding a file from the template folder to the output directory if it does not already exist.
+/// Existing text with equivalent encoding and line endings is preserved; content conflicts fail unless overwrite is requested.
 /// </summary>
 internal class AddFileStep : ScaffoldStep
 {
@@ -52,6 +54,7 @@ internal class AddFileStep : ScaffoldStep
         if (string.IsNullOrEmpty(BaseOutputDirectory) ||
             string.IsNullOrEmpty(FileName))
         {
+            _logger.LogError("A file name and output directory are required to add a file.");
             return Task.FromResult(false);
         }
 
@@ -83,25 +86,25 @@ internal class AddFileStep : ScaffoldStep
             return Task.FromResult(true);
         }
 
+        _logger.LogError("Unable to find template '{FileName}' for project '{ProjectPath}' or its destination directory.", FileName, ProjectPath);
         return Task.FromResult(false);
     }
 
     private static bool FilesMatch(Stream source, Stream destination)
     {
-        if (source.Length != destination.Length)
+        try
+        {
+            // Project templates may use a BOM or different line endings for the same text.
+            using var sourceReader = new StreamReader(source, new UTF8Encoding(false, true));
+            using var destinationReader = new StreamReader(destination, new UTF8Encoding(false, true));
+            return string.Equals(
+                sourceReader.ReadToEnd().Replace("\r\n", "\n", StringComparison.Ordinal),
+                destinationReader.ReadToEnd().Replace("\r\n", "\n", StringComparison.Ordinal),
+                StringComparison.Ordinal);
+        }
+        catch (DecoderFallbackException)
         {
             return false;
         }
-
-        int nextByte;
-        while ((nextByte = source.ReadByte()) != -1)
-        {
-            if (nextByte != destination.ReadByte())
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

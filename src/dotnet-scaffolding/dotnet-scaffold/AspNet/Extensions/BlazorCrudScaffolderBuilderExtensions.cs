@@ -70,7 +70,8 @@ internal static class BlazorCrudScaffolderBuilderExtensions
                 {
                     PackageConstants.AspNetCorePackages.QuickGridEfAdapterPackage,
                     PackageConstants.AspNetCorePackages.AspNetCoreDiagnosticsEfCorePackage,
-                    PackageConstants.EfConstants.EfCoreToolsPackage
+                    PackageConstants.EfConstants.EfCoreToolsPackage,
+                    PackageConstants.EfConstants.EfCoreDesignPackage
                 };
 
                 step.ProjectPath = commandSettings.Project;

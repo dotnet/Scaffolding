@@ -18,13 +18,10 @@ public class BlazorIgniteUINet11IntegrationTests : BlazorIgniteUIIntegrationTest
     {
         // Arrange — Blazor Web App; allow warnings so preview-SDK warnings do not fail the build, and use
         // the preview feeds so the preview-only framework packages resolve during restore/build.
-        // The dnceng mirror feeds only carry Microsoft packages, so nuget.org is added as an extra source:
-        // the third-party Ignite UI packages are otherwise reported as "no versions available".
+        // Use the shared preview feed configuration for framework and Ignite UI packages;
+        // no explicit nuget.org source is needed.
         SetupBlazorWebAppProject("    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>");
-        var nugetConfig = ScaffoldCliHelper.PreviewNuGetConfig.Replace(
-            "<clear />",
-            "<clear />\n    <add key=\"nuget.org\" value=\"https://api.nuget.org/v3/index.json\" />");
-        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), nugetConfig);
+        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
 
         // Act + Assert — dotnet scaffold aspnet blazor-igniteui --project TestProject.csproj
         // The Ignite UI packages ship net10.0 assets which net11.0 projects consume; no prerelease needed.

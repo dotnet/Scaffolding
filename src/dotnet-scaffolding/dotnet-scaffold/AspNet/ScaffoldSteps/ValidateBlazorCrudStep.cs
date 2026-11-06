@@ -189,10 +189,11 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
         return true;
     }
 
-    // Mask explicit Razor expressions at the same offsets so their C# string literals cannot terminate attributes.
+    // Ignore comments and mask explicit Razor expressions without changing their original offsets.
     private static (string Tag, string Attribute, string Expression) GetComponentRenderMode(string content, string componentName)
     {
-        var opening = Regex.Match(content, $@"<{Regex.Escape(componentName)}\b", RegexOptions.None, TimeSpan.FromSeconds(1));
+        var searchableContent = MarkupHelper.MaskComments(content, htmlComments: true, razorComments: true);
+        var opening = Regex.Match(searchableContent, $@"<{Regex.Escape(componentName)}\b", RegexOptions.None, TimeSpan.FromSeconds(1));
         if (!opening.Success)
         {
             return (string.Empty, string.Empty, string.Empty);

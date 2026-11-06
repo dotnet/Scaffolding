@@ -26,7 +26,9 @@ public class BlazorCrudInteractivityIntegrationTests
     [InlineData("net10.0", "InteractiveAuto", false, "@rendermode = \"@(InteractiveAuto)\"")]
     [InlineData("net10.0", "new InteractiveServerRenderMode(prerender: \"server\" == \"server\")", false,
         "@rendermode=\"@(new InteractiveServerRenderMode(prerender: \"server\" == \"server\"))\"")]
-    public async Task Scaffold_BlazorCrud_GlobalInteractivityKeepsCrudRoutesOnServer(string framework, string renderMode, bool individualAccounts, string? routesRenderModeAttribute = null)
+    [InlineData("net10.0", "InteractiveAuto", false, null, "@* <Routes /> <HeadOutlet /> *@")]
+    [InlineData("net10.0", "InteractiveAuto", false, null, "<!-- <Routes /> <HeadOutlet /> -->")]
+    public async Task Scaffold_BlazorCrud_GlobalInteractivityKeepsCrudRoutesOnServer(string framework, string renderMode, bool individualAccounts, string? routesRenderModeAttribute = null, string? commentedMarkup = null)
     {
         using var project = new BlazorTestProject(framework);
         project.AddWebAssemblyClient(framework == "net11.0" ? "11.0.*-*" : framework == "net9.0" ? "9.0.*" : "10.0.*",
@@ -47,7 +49,7 @@ public class BlazorCrudInteractivityIntegrationTests
             </Router>
             """);
         File.WriteAllText(Path.Combine(componentsDirectory, "App.razor"),
-            ScaffoldCliHelper.GetBlazorAppRazor()
+            (commentedMarkup ?? string.Empty) + ScaffoldCliHelper.GetBlazorAppRazor()
                 .Replace("<HeadOutlet />", routesRenderModeAttribute is null
                     ? $"<HeadOutlet @rendermode=\"{(renderMode == "InteractiveServer" ? "@" : "")}{renderMode}\" />"
                     : $"<HeadOutlet {routesRenderModeAttribute} />")
@@ -101,6 +103,11 @@ public class BlazorCrudInteractivityIntegrationTests
         Assert.Contains($"HttpContext.AcceptsInteractiveRouting() ? {renderMode} : null", app);
         Assert.Contains("<Routes @rendermode=\"PageRenderMode\"", app);
         Assert.Contains("<HeadOutlet @rendermode=\"PageRenderMode\"", app);
+        if (commentedMarkup is not null)
+        {
+            Assert.Contains(commentedMarkup, app);
+        }
+
         Assert.Equal(1, app.Split("private IComponentRenderMode? PageRenderMode").Length - 1);
         Assert.Equal(1, app.Split("private HttpContext HttpContext").Length - 1);
         if (individualAccounts)

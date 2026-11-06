@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using Microsoft.DotNet.Scaffolding.Shared;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
@@ -47,6 +48,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
                 _logger.LogMessage("Running the generator '" + codeGeneratorName + "'...");
                 actionInvoker.Execute(args);
+                return 0;
             }
             catch (Exception ex)
             {
@@ -54,10 +56,9 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 {
                     ex = ex.InnerException;
                 }
-                _logger.LogMessage(ex.Message, LogMessageLevel.Error);
-                _logger.LogMessage(ex.StackTrace);
+                ExceptionDispatchInfo.Capture(ex).Throw();
+                throw;
             }
-            return 0;
         }
 
         private static bool IsHelpArgument(string argument)

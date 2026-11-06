@@ -16,6 +16,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
   <PropertyGroup>
     <EvaluateProjectInfoForCodeGenerationDependsOn>
       $(EvaluateProjectInfoForCodeGenerationDependsOn);
+      CollectCodeGenerationProjectReferences;
       ResolveReferences;
       ResolveProjectReferences;
     </EvaluateProjectInfoForCodeGenerationDependsOn>
@@ -28,6 +29,14 @@ Outputs the Project Information needed for CodeGeneration to a file.
   <UsingTask TaskName="ProjectContextWriter"
              AssemblyFile="$(EvaluateProjectInfoForCodeGenerationAssemblyPath)" />
 
+  <Target Name="CollectCodeGenerationProjectReferences">
+    <ItemGroup>
+      <_CodeGenerationProjectReference
+        Include="%(ProjectReference.FullPath)"
+        Condition="'%(ProjectReference.ReferenceOutputAssembly)' != 'false'" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="EvaluateProjectInfoForCodeGeneration" DependsOnTargets="$(EvaluateProjectInfoForCodeGenerationDependsOn)">
 
     <ProjectContextWriter TargetFramework ="$(TargetFramework)"
@@ -35,7 +44,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
                           OutputFile ="$(OutputFile)"
                           Name ="$(ProjectName)"
                           ResolvedReferences ="@(ReferencePath)"
-                          ProjectReferences ="@(ProjectReference)"
+                          ProjectReferences ="@(_CodeGenerationProjectReference)"
                           AssemblyFullPath ="$(TargetPath)"
                           OutputType="$(OutputType)"
                           Platform="$(Platform)"

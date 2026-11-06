@@ -38,11 +38,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
 
         internal class RazorView
         {
+            internal const string Single = "razorview";
+            internal const string SingleDisplayName = "Razor View";
+            internal const string SingleDescription = "Add a single Razor view with template, model, layout and validation script options";
+            internal const string SingleExample = "dotnet scaffold aspnet razorview --project C:/MyMvcApp/MyMvcApp.csproj --name Create --template Create --model Product --relativeFolderPath Views/Products --useDefaultLayout --referenceScriptLibraries";
+            internal const string SingleExampleDescription = "Create a model-based view using the default layout and validation scripts:";
             internal const string Empty = "razorview-empty";
             internal const string EmptyDisplayName = "Razor View - Empty";
             internal const string EmptyDescription = "Add an empty razor view to a given project";
-            internal const string EmptyExample = "dotnet scaffold aspnet razorview-empty --project C:/MyMvcApp/MyMvcApp.csproj --file-name Dashboard";
-            internal const string EmptyExampleDescription = "Create an empty view named Dashboard:";
+            internal const string EmptyExample = "dotnet scaffold aspnet razorview-empty --project C:/MyMvcApp/MyMvcApp.csproj --name Index --relativeFolderPath Views/Orders";
+            internal const string EmptyExampleDescription = "Create an empty Index view for OrdersController:";
 
             internal const string Views = "views";
             internal const string ViewsDisplayName = "Razor Views";
@@ -184,6 +189,36 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             {
                 internal const string DisplayName = "File name";
                 internal const string Description = "File name for new file being created with 'dotnet new'";
+            }
+
+            internal static class RelativeFolderPath
+            {
+                internal const string DisplayName = "Output folder";
+                internal const string Description = "Output folder relative to the project directory (for example, Views/Orders). Defaults to Views.";
+            }
+
+            internal static class ViewTemplate
+            {
+                internal const string DisplayName = "View template";
+                internal const string Description = "View template: Empty (default), Create, Edit, Delete, Details or List. Non-empty templates require --model.";
+            }
+
+            internal static class Layout
+            {
+                internal const string DisplayName = "Layout";
+                internal const string Description = "Custom Razor layout name or application-relative path. Cannot be combined with --useDefaultLayout.";
+            }
+
+            internal static class UseDefaultLayout
+            {
+                internal const string DisplayName = "Use default layout?";
+                internal const string Description = "Inherit the layout from _ViewStart.cshtml. Otherwise, --layout is used or layout is disabled.";
+            }
+
+            internal static class ReferenceScriptLibraries
+            {
+                internal const string DisplayName = "Reference script libraries?";
+                internal const string Description = "Reference _ValidationScriptsPartial and add it to Views/Shared if missing.";
             }
 
             internal static class Actions

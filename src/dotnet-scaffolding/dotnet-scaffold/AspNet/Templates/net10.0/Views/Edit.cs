@@ -75,10 +75,14 @@ foreach (var property in entityProperties)
     <a asp-action=""Index"">Back to List</a>
 </div>
 
-@section Scripts {
+");
+if (Model.ReferenceScriptLibraries)
+{
+            this.Write(@"@section Scripts {
     @{await Html.RenderPartialAsync(""_ValidationScriptsPartial"");}
 }
 ");
+}
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

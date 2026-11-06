@@ -26,6 +26,7 @@ public static class ScaffoldingMatrix
         "blazor-empty",
         "blazor-crud",
         "razorview-empty",
+        "razorview",
         "razorviews",
         "razorpage-empty",
         "razorpages-crud",

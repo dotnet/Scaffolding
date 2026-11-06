@@ -14,6 +14,12 @@ internal class AspNetOptions
     public ScaffolderOption<string> Project { get; }
     public ScaffolderOption<bool> Prerelease { get; }
     public ScaffolderOption<string> FileName { get; }
+    public ScaffolderOption<string> RelativeFolderPath { get; }
+    public ScaffolderOption<string> ViewTemplate { get; }
+    public ScaffolderOption<string> ViewModelName { get; }
+    public ScaffolderOption<string> Layout { get; }
+    public ScaffolderOption<bool> UseDefaultLayout { get; }
+    public ScaffolderOption<bool> ReferenceScriptLibraries { get; }
     public ScaffolderOption<bool> Actions { get; }
     public ScaffolderOption<string> AreaName { get; }
     public ScaffolderOption<string> ModelName { get; }
@@ -63,6 +69,55 @@ internal class AspNetOptions
             CliOption = Constants.CliOptions.NameOption,
             Description = AspnetStrings.Options.FileName.Description,
             Required = true,
+        };
+
+        RelativeFolderPath = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.RelativeFolderPath.DisplayName,
+            CliOption = Constants.CliOptions.RelativeFolderPathOption,
+            Description = AspnetStrings.Options.RelativeFolderPath.Description,
+            Required = false
+        };
+
+        ViewTemplate = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.ViewTemplate.DisplayName,
+            CliOption = Constants.CliOptions.ViewTemplateOption,
+            Description = AspnetStrings.Options.ViewTemplate.Description,
+            Required = false,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = [.. ScaffoldSteps.RazorViewScaffolderStep.TemplateNames]
+        };
+        ViewModelName = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.ModelName.DisplayName,
+            CliOption = Constants.CliOptions.ModelCliOption,
+            Description = AspnetStrings.Options.ModelName.Description,
+            Required = false,
+            PickerType = InteractivePickerType.ClassPicker
+        };
+        Layout = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.Layout.DisplayName,
+            CliOption = Constants.CliOptions.LayoutOption,
+            Description = AspnetStrings.Options.Layout.Description,
+            Required = false
+        };
+        UseDefaultLayout = new ScaffolderOption<bool>
+        {
+            DisplayName = AspnetStrings.Options.UseDefaultLayout.DisplayName,
+            CliOption = Constants.CliOptions.UseDefaultLayoutOption,
+            Description = AspnetStrings.Options.UseDefaultLayout.Description,
+            Required = false,
+            PickerType = InteractivePickerType.YesNo
+        };
+        ReferenceScriptLibraries = new ScaffolderOption<bool>
+        {
+            DisplayName = AspnetStrings.Options.ReferenceScriptLibraries.DisplayName,
+            CliOption = Constants.CliOptions.ReferenceScriptLibrariesOption,
+            Description = AspnetStrings.Options.ReferenceScriptLibraries.Description,
+            Required = false,
+            PickerType = InteractivePickerType.YesNo
         };
 
         Actions = new ScaffolderOption<bool>

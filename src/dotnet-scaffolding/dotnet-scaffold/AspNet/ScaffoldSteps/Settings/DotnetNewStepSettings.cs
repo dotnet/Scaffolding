@@ -19,4 +19,8 @@ internal class DotnetNewStepSettings : BaseSettings
     /// The namespace for the new item, if specified.
     /// </summary>
     public string? NamespaceName { get; set; }
+    /// <summary>
+    /// The absolute output directory for the new item.
+    /// </summary>
+    public string? OutputDirectory { get; set; }
 }

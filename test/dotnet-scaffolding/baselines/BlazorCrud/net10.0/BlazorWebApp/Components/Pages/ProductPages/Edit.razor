@@ -1,4 +1,5 @@
 @page "/products/edit"
+@attribute [Microsoft.AspNetCore.Components.ExcludeFromInteractiveRouting]
 @using Microsoft.EntityFrameworkCore
 @using BlazorWebApp.Models
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
@@ -44,13 +45,10 @@ else
     [SupplyParameterFromForm]
     private Product? Product { get; set; }
 
-    [PersistentState]
-    public Product? ProductState { get; set; }
-
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        Product ??= ProductState ??= await context.Product.FirstOrDefaultAsync(m => m.Id == Id);
+        Product ??= await context.Product.FirstOrDefaultAsync(m => m.Id == Id);
 
         if (Product is null)
         {

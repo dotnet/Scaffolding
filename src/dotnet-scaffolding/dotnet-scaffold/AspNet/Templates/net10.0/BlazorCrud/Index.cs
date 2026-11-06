@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("\"\r\n@using Microsoft.AspNetCore.Components.QuickGrid\r\n@using Microsoft.EntityFrame" +
+            this.Write("\"\r\n@attribute [Microsoft.AspNetCore.Components.ExcludeFromInteractiveRouting]\r\n@using Microsoft.AspNetCore.Components.QuickGrid\r\n@using Microsoft.EntityFrame" +
                     "workCore\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))

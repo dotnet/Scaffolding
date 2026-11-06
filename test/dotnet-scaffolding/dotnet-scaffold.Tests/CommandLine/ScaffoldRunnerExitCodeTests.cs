@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Model;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
@@ -46,7 +47,7 @@ public class ScaffoldRunnerExitCodeTests
     [InlineData(int.MinValue, 1)]
     public async Task RunAsync_ReturnsPortableExitCode(int actionResult, int expectedExitCode)
     {
-        var runner = new ScaffoldRunner(NullLogger<ScaffoldRunner>.Instance)
+        var runner = new ScaffoldRunner(NullLogger<ScaffoldRunner>.Instance, new ScaffoldingErrorCapture())
         {
             RootCommand = new System.CommandLine.RootCommand()
         };

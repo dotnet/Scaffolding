@@ -154,6 +154,8 @@ internal class ScaffoldRunnerBuilder : IScaffoldRunnerBuilder
     private void AddCoreServices()
     {
         Services.AddLogging();
+        Services.AddSingleton<ScaffoldingErrorCapture>();
+        Services.AddSingleton<ILoggerProvider>(services => services.GetRequiredService<ScaffoldingErrorCapture>());
         Logging.AddCleanConsoleFormatter();
         Logging.AddDebug();
     }

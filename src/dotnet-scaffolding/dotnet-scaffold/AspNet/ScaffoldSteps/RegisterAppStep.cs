@@ -70,16 +70,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 return Task.FromResult(false);
             }
 
-            if (ClientId is null && !MsIdentityToolHelper.SupportsRegistrationCleanup(_logger, ReadCapabilities))
+            if (string.IsNullOrEmpty(ClientId) && !MsIdentityToolHelper.SupportsRegistrationCleanup(_logger, ReadCapabilities))
             {
                 return Task.FromResult(false);
             }
 
-            if(ClientId is not null)
+            if (!string.IsNullOrEmpty(ClientId))
             {
                 _logger.LogInformation("Updating project...");
                 // Initialize user secrets
-                bool success = UpdateApp(context);
+                bool success = RegisterApp(context);
                 if (!success)
                 {
                     _logger.LogError("Failed to Update App.");
@@ -110,15 +110,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
         {
             try
             {
+                bool createsApplication = string.IsNullOrEmpty(ClientId);
                 // Fix for CS8620: Ensure all elements in the array are non-null by using null-coalescing operator
-                var args = new[]
+                var args = new List<string>
                 {
-                    "--create-app-registration",
+                    "--register-app",
+                    "--registration-only",
+                    "--project-file-path", Path.GetFullPath(ProjectPath),
+                    "--project-type", "webapp",
+                    "--app-display-name", Path.GetFileNameWithoutExtension(ProjectPath),
                     "--tenant-id", TenantId ?? string.Empty,
                     "--username", Username ?? string.Empty
                 };
-                // Fix for IDE0300: Simplify collection initialization
-                var (exitCode, stdOut, stdErr) = RunRegistration(args);
+                if (!string.IsNullOrEmpty(ClientId))
+                {
+                    args.AddRange(["--client-id", ClientId]);
+                }
+
+                var (exitCode, stdOut, stdErr) = RunRegistration(args.ToArray());
                 if (exitCode != 0)
                 {
                     _logger.LogError($"Error registering application: {stdErr}");
@@ -128,12 +137,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                 if (!string.IsNullOrEmpty(stdOut))
                 {
                     // Extract client ID using regex
-                    var match = Regex.Match(stdOut, @"Created app .+ - ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})");
-                    if (match.Success && match.Groups.Count > 1)
+                    var match = Regex.Match(stdOut, @"(?m)^ClientId: ([0-9a-fA-F-]+)\s*$");
+                    if (match.Success && Guid.TryParse(match.Groups[1].Value, out Guid clientId))
                     {
-                        ClientId = match.Groups[1].Value;
+                        ClientId = clientId.ToString("D");
                         context.Properties["ClientId"] = ClientId;
-                        context.Properties[EntraRegistrationCleanup.CreatedClientIdKey] = ClientId;
+                        if (createsApplication)
+                        {
+                            context.Properties[EntraRegistrationCleanup.CreatedClientIdKey] = ClientId;
+                        }
                         _logger.LogInformation($"Captured client ID: {ClientId}");
                     }
                     else
@@ -142,7 +154,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
                         return false;
                     }
                 }
-                if (string.IsNullOrEmpty(ClientId))
+                else
                 {
                     _logger.LogError("Registration returned no client ID. Check the selected tenant for an application created during this run before retrying.");
                     return false;
@@ -156,65 +168,21 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             }
         }
 
+        protected virtual bool EnsureMsIdentityIsInstalled() => MsIdentityToolHelper.EnsureMsIdentityIsInstalled(_logger);
+
+        protected virtual int ExecuteMsIdentity(string[] args, out string? stdOut, out string? stdErr) =>
+            DotnetCliRunner.CreateDotNet("msidentity", args).ExecuteAndCaptureOutput(out stdOut, out stdErr);
+
         protected virtual bool EnsureToolInstalled()
-            => MsIdentityToolHelper.EnsureMsIdentityIsInstalled(_logger);
+            => EnsureMsIdentityIsInstalled();
 
         protected virtual (int ExitCode, string? Output, string? Error) RunRegistration(string[] args)
         {
-            var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
-            var exitCode = runner.ExecuteAndCaptureOutput(out var output, out var error);
+            var exitCode = ExecuteMsIdentity(args, out var output, out var error);
             return (exitCode, output, error);
         }
 
         protected virtual (int ExitCode, string? Output, string? Error) ReadCapabilities()
             => MsIdentityToolHelper.ReadCapabilities();
-
-        /// <summary>
-        /// Updates an existing Azure AD application registration.
-        /// </summary>
-        private bool UpdateApp(ScaffolderContext context)
-        {
-            try
-            {
-                // Fix for CS8620: Ensure all elements in the array are non-null by using null-coalescing operator
-                var args = new[]
-                {
-                    "--update-app-registration",
-                    "--client-id", ClientId ?? string.Empty,
-                    "--tenant-id", TenantId ?? string.Empty,
-                    "--username", Username ?? string.Empty,
-                };
-                // Fix for IDE0300: Simplify collection initialization
-                var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
-                int exitCode = runner.ExecuteAndCaptureOutput(out var stdOut, out var stdErr);
-                if (exitCode != 0)
-                {
-                    _logger.LogError($"Error updating registration: {stdErr}");
-                    _logger.LogError(MsIdentityToolHelper.NotInstalledMessage);
-                    return false;
-                }
-                if (!string.IsNullOrEmpty(stdOut))
-                {
-                    // Extract client ID using regex
-                    var match = Regex.Match(stdOut, @"Created app .+ - ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})");
-                    if (match.Success && match.Groups.Count > 1)
-                    {
-                        ClientId = match.Groups[1].Value;
-                        context.Properties["ClientId"] = ClientId;
-                        _logger.LogInformation($"Captured client ID: {ClientId}");
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Could not extract client ID from output");
-                    }
-                }
-                return true;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError($"Error Registering App: {e.Message}");
-                return false;
-            }
-        }
     }
 }

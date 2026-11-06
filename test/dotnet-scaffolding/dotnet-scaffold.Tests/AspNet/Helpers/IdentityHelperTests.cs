@@ -13,6 +13,8 @@ using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
 
+using IdentityModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel;
+
 public class IdentityHelperTests
 {
     [Fact]

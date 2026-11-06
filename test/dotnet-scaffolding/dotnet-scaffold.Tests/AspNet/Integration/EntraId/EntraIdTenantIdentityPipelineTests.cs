@@ -26,6 +26,89 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.EntraId;
 public class EntraIdTenantIdentityPipelineTests
 {
     [Theory]
+    [InlineData(true, false, false)]
+    [InlineData(false, false, false)]
+    [InlineData(true, true, false)]
+    [InlineData(false, true, false)]
+    [InlineData(true, true, true)]
+    [InlineData(false, true, true)]
+    public async Task EntraPipeline_PersistsSettingsAndStopsOnFailure(bool existingApplication, bool authorizationSucceeds, bool writeFails)
+    {
+        var path = Path.Combine("project", "appsettings.json");
+        var files = new Mock<IFileSystem>();
+        files.Setup(f => f.DirectoryExists("project")).Returns(true);
+        files.Setup(f => f.EnumerateFiles("project", "appsettings.json", SearchOption.AllDirectories)).Returns(new[] { path });
+        files.Setup(f => f.FileExists(path)).Returns(true);
+        const string original = """{"AllowedHosts":"*"}""";
+        var written = original;
+        files.Setup(f => f.ReadAllText(path)).Returns(() => written);
+        files.Setup(f => f.WriteAllText(path, It.IsAny<string>())).Callback<string, string>((_, json) =>
+        {
+            if (writeFails)
+            {
+                throw new IOException("Write failed.");
+            }
+            written = json;
+        });
+        var telemetry = Mock.Of<ITelemetryService>();
+        var settingsStep = new Mock<UpdateAppSettingsStep>(NullLogger<UpdateAppSettingsStep>.Instance, files.Object, telemetry) { CallBase = true };
+        var authorization = new Mock<UpdateAppAuthorizationStep>(NullLogger<UpdateAppAuthorizationStep>.Instance, files.Object, telemetry);
+        authorization.Setup(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>())).ReturnsAsync(authorizationSucceeds);
+        var downstream = new Mock<ScaffoldStep>();
+        downstream.Setup(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var realBuilder = new ScaffoldBuilder("entra-test");
+        var builder = new Mock<IScaffoldBuilder>();
+        builder.SetReturnsDefault(builder.Object);
+        builder.Setup(b => b.WithStep<UpdateAppSettingsStep>(It.IsAny<Action<ScaffoldStepConfigurator<UpdateAppSettingsStep>>>()))
+            .Callback<Action<ScaffoldStepConfigurator<UpdateAppSettingsStep>>, Action<ScaffoldStepConfigurator<UpdateAppSettingsStep>>>((pre, post) => realBuilder.WithStep(pre, post))
+            .Returns(builder.Object);
+        builder.Setup(b => b.WithStep<UpdateAppAuthorizationStep>(It.IsAny<Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>>()))
+            .Callback<Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>, Action<ScaffoldStepConfigurator<UpdateAppAuthorizationStep>>>((pre, post) => realBuilder.WithStep(pre, post))
+            .Returns(builder.Object);
+        var runner = new Mock<IScaffoldRunnerBuilder>();
+        runner.Setup(r => r.AddScaffolder(It.IsAny<ScaffolderCatagory>(), It.IsAny<string>())).Returns(builder.Object);
+        new AspNetCommandService(runner.Object).AddScaffolderCommands();
+        realBuilder.WithStep<ScaffoldStep>();
+        var provider = new Mock<IServiceProvider>();
+        provider.Setup(p => p.GetService(It.IsAny<Type>()))
+            .Returns((Type type) => type == typeof(UpdateAppSettingsStep) ? settingsStep.Object :
+                type == typeof(UpdateAppAuthorizationStep) ? authorization.Object :
+                type == typeof(ScaffoldStep) ? downstream.Object : null);
+        var scaffolder = realBuilder.Build(provider.Object);
+        var context = new ScaffolderContext(scaffolder);
+        context.Properties[nameof(EntraIdModel)] = new EntraIdModel
+        {
+            TenantId = "tenant-a", Username = "user@example.com", UseExistingApplication = existingApplication
+        };
+        context.Properties[nameof(EntraIdSettings)] = new EntraIdSettings
+        {
+            Project = Path.Combine("project", "Test.csproj"),
+            Username = "user@example.com",
+            TenantId = "tenant-a",
+            UseExistingApplication = existingApplication
+        };
+        context.Properties["ClientId"] = "app-id";
+        Assert.Equal(authorizationSucceeds && !writeFails, await scaffolder.ExecuteAsync(context));
+        settingsStep.Verify(s => s.ExecuteAsync(context, It.IsAny<CancellationToken>()),
+            existingApplication || authorizationSucceeds ? Times.Once : Times.Never);
+        authorization.Verify(s => s.ExecuteAsync(context, It.IsAny<CancellationToken>()),
+            existingApplication && writeFails ? Times.Never : Times.Once);
+        downstream.Verify(s => s.ExecuteAsync(context, It.IsAny<CancellationToken>()),
+            authorizationSucceeds && !writeFails ? Times.Once : Times.Never);
+        if ((existingApplication || authorizationSucceeds) && !writeFails)
+        {
+            var settings = JsonNode.Parse(Assert.IsType<string>(written))!;
+            Assert.Equal("app-id", settings["AzureAd"]!["ClientId"]!.GetValue<string>());
+            Assert.Equal("tenant-a", settings["AzureAd"]!["TenantId"]!.GetValue<string>());
+            Assert.Equal("*", settings["AllowedHosts"]!.GetValue<string>());
+        }
+        else
+        {
+            Assert.Equal(original, written);
+        }
+    }
+
+    [Theory]
     [InlineData(0, 0, true)]
     [InlineData(1, 0, false)]
     [InlineData(0, 1, false)]
@@ -158,9 +241,10 @@ public class EntraIdTenantIdentityPipelineTests
         var scaffolder = new ScaffoldBuilder("entra-test")
             .WithValidateAzureCliIdentityStep()
             .WithRegisterAppStep()
+            .WithUpdateAppSettingsStep(useExistingApplication: true)
             .WithUpdateAppAuthorizationStep()
             .WithAddClientSecretStep()
-            .WithUpdateAppSettingsStep()
+            .WithUpdateAppSettingsStep(useExistingApplication: false)
             .Build(provider.Object);
         var context = new ScaffolderContext(scaffolder);
         context.Properties[nameof(EntraIdModel)] = new EntraIdModel
@@ -189,7 +273,7 @@ public class EntraIdTenantIdentityPipelineTests
     }
 
     [Fact]
-    public void EntraPipeline_ValidatesIdentityBeforeMutationsAndAuthorizesBeforeSecretAndSettings()
+    public void EntraPipeline_ValidatesIdentityBeforeMutationsAndAuthorizesBeforeSecretAndNewApplicationSettings()
     {
         var builder = new Mock<IScaffoldBuilder>();
         builder.SetReturnsDefault(builder.Object);
@@ -211,7 +295,7 @@ public class EntraIdTenantIdentityPipelineTests
         Assert.Equal(new[]
         {
             typeof(ValidateEntraIdStep), typeof(ValidateAzureCliIdentityStep), typeof(DetectBlazorWasmStep), typeof(RegisterAppStep),
-            typeof(UpdateAppAuthorizationStep), typeof(AddClientSecretStep), typeof(UpdateAppSettingsStep)
+            typeof(UpdateAppSettingsStep), typeof(UpdateAppAuthorizationStep), typeof(AddClientSecretStep), typeof(UpdateAppSettingsStep)
         }, steps);
         Assert.Contains(typeof(ValidateAzureCliIdentityStep), service.GetScaffoldSteps());
     }

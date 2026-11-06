@@ -108,6 +108,110 @@ public class EntraIdTenantIdentityPipelineTests
         }
     }
 
+    [Theory]
+    [InlineData(0, 0, true)]
+    [InlineData(1, 0, false)]
+    [InlineData(0, 1, false)]
+    public async Task EntraPipeline_ExistingApplicationPersistsSettingsAfterSuccessfulAuthorizationWithWarnings(
+        int readExitCode, int updateExitCode, bool expectedSuccess)
+    {
+        var files = new Mock<IFileSystem>();
+        var projectPath = Path.Combine("project", "Test.csproj");
+        var settingsPath = Path.Combine("project", "appsettings.json");
+        files.Setup(f => f.FileExists(projectPath)).Returns(true);
+        files.Setup(f => f.DirectoryExists("project")).Returns(true);
+        files.Setup(f => f.EnumerateFiles("project", "appsettings.json", SearchOption.AllDirectories))
+            .Returns(new[] { settingsPath });
+        files.Setup(f => f.FileExists(settingsPath)).Returns(true);
+        files.Setup(f => f.ReadAllText(settingsPath)).Returns("""{"Keep":"original"}""");
+        string? writtenSettings = null;
+        files.Setup(f => f.WriteAllText(settingsPath, It.IsAny<string>()))
+            .Callback((string _, string content) => writtenSettings = content);
+        var telemetry = Mock.Of<ITelemetryService>();
+        var authorization = new MatchingIdentityAuthorizationStep(files.Object, telemetry)
+        {
+            ProjectPath = string.Empty,
+            ClientId = null,
+            AutoConfigureLocalUrls = false,
+            WebRedirectUris = ["https://localhost:5001/signin-oidc"]
+        };
+        var commands = new List<string>();
+        authorization.AzCliCommand = command =>
+        {
+            commands.Add(command);
+            return command.StartsWith("ad app show", StringComparison.Ordinal)
+                ? new(readExitCode, """["https://example.com/signin-oidc"]""", "Azure CLI read diagnostic")
+                : new(updateExitCode, null, "Azure CLI update diagnostic");
+        };
+        var registration = new Mock<RegisterAppStep>(MockBehavior.Strict,
+            NullLogger<AddClientSecretStep>.Instance, files.Object, telemetry);
+        var services = new Dictionary<Type, object>
+        {
+            [typeof(RegisterAppStep)] = registration.Object,
+            [typeof(UpdateAppAuthorizationStep)] = authorization,
+            [typeof(AddClientSecretStep)] = new AddClientSecretStep(
+                NullLogger<AddClientSecretStep>.Instance, files.Object, Mock.Of<IEnvironmentService>())
+                { ProjectPath = string.Empty },
+            [typeof(UpdateAppSettingsStep)] = new UpdateAppSettingsStep(
+                NullLogger<UpdateAppSettingsStep>.Instance, files.Object, telemetry)
+                { ProjectPath = string.Empty }
+        };
+        var provider = new Mock<IServiceProvider>();
+        provider.Setup(p => p.GetService(It.IsAny<Type>()))
+            .Returns((Type type) => services.TryGetValue(type, out var service) ? service : null);
+        var scaffolder = new ScaffoldBuilder("entra-test")
+            .WithRegisterAppStep()
+            .WithUpdateAppAuthorizationStep()
+            .WithAddClientSecretStep()
+            .WithUpdateAppSettingsStep()
+            .Build(provider.Object);
+        var context = new ScaffolderContext(scaffolder);
+        context.Properties[nameof(EntraIdSettings)] = new EntraIdSettings
+        {
+            Project = projectPath,
+            Username = "user@example.com",
+            TenantId = "tenant-a",
+            UseExistingApplication = true,
+            Application = "Existing Application app-id"
+        };
+        context.Properties[nameof(EntraIdModel)] = new EntraIdModel
+        {
+            Username = "user@example.com",
+            TenantId = "tenant-a",
+            UseExistingApplication = true
+        };
+
+        Assert.Equal(expectedSuccess, await scaffolder.ExecuteAsync(context));
+
+        registration.Verify(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>()), Times.Never);
+        Assert.False(context.Properties.ContainsKey("ClientSecret"));
+        Assert.Equal(readExitCode == 0 ? 2 : 1, commands.Count);
+        if (readExitCode == 0)
+        {
+            Assert.Contains("\"https://example.com/signin-oidc\"", commands[1]);
+            Assert.Contains("\"https://localhost:5001/signin-oidc\"", commands[1]);
+        }
+        if (expectedSuccess)
+        {
+            var settings = JsonNode.Parse(Assert.IsType<string>(writtenSettings))!;
+            Assert.Equal("app-id", settings["AzureAd"]!["ClientId"]!.GetValue<string>());
+            Assert.Equal("tenant-a", settings["AzureAd"]!["TenantId"]!.GetValue<string>());
+            Assert.Equal("original", settings["Keep"]!.GetValue<string>());
+        }
+        else
+        {
+            Assert.Null(writtenSettings);
+            files.Verify(f => f.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+    }
+
+    private sealed class MatchingIdentityAuthorizationStep(IFileSystem files, ITelemetryService telemetry)
+        : UpdateAppAuthorizationStep(NullLogger<UpdateAppAuthorizationStep>.Instance, files, telemetry)
+    {
+        protected override (int ExitCode, string? Output, string? Error) ReadAccount()
+            => (0, """{"tenantId":"tenant-a","user":{"name":"user@example.com","type":"user"}}""", null);
+    }
+
     [Fact]
     public async Task EntraPipeline_TenantMismatchStopsBeforeRegistrationSecretsAuthorizationAndSettings()
     {

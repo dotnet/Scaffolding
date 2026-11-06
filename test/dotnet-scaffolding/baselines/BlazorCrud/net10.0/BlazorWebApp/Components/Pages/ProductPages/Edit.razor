@@ -2,7 +2,7 @@
 @using Microsoft.EntityFrameworkCore
 @using BlazorWebApp.Models
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
-@inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 
 <PageTitle>Edit</PageTitle>
 
@@ -20,11 +20,11 @@ else
         <div class="col-md-4">
             <EditForm method="post" Model="Product" OnValidSubmit="UpdateProduct" FormName="edit" Enhance>
                 <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
+                <ValidationSummary role="alert" />
                 <input type="hidden" name="Product.Id" value="@Product.Id" />
                 <div class="mb-3">
                     <label for="name" class="form-label">Name:</label>
-                    <InputText id="name" @bind-Value="Product.Name" class="form-control" />
+                    <InputText id="name" @bind-Value="Product.Name" class="form-control"/>
                     <ValidationMessage For="() => Product.Name" class="text-danger" />
                 </div>
                 <button type="submit" class="btn btn-primary">Save</button>
@@ -54,7 +54,7 @@ else
 
         if (Product is null)
         {
-            NavigationManager.NotFound();
+            Navigation.NotFound();
         }
     }
 
@@ -73,7 +73,7 @@ else
         {
             if (!ProductExists(Product!.Id))
             {
-                NavigationManager.NotFound();
+                Navigation.NotFound();
                 return;
             }
             else
@@ -82,7 +82,7 @@ else
             }
         }
 
-        NavigationManager.NavigateTo("/products");
+        Navigation.NavigateTo("/products");
     }
 
     private bool ProductExists(int id)

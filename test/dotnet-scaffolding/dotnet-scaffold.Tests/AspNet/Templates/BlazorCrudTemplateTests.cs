@@ -21,7 +21,7 @@ public class BlazorCrudTemplateTests
 
         string result = TransformTemplate(frameworkVersion, "Edit", model).Replace("\r\n", "\n");
 
-        Assert.Contains("if (!EmployeeExists(Employee!.Id))\n            {\n                NavigationManager.NotFound();\n                return;\n            }", result);
+        Assert.Contains("if (!EmployeeExists(Employee!.Id))\n            {\n                Navigation.NotFound();\n                return;\n            }", result);
     }
 
     [Theory]
@@ -159,7 +159,7 @@ public class BlazorCrudTemplateTests
 
         Assert.Contains("ApplicationState.TryTakeFromJson<Employee>(nameof(Employee), out var restoredEmployee)", result);
         Assert.Contains("Employee = restoredEmployee", result);
-        Assert.Contains("NavigationManager.NavigateTo(\"notfound\");\n            return;", result);
+        Assert.Contains("Navigation.NavigateTo(\"notfound\");\n            return;", result);
     }
 
     private static BlazorCrudModel CreateModel(string pageType)

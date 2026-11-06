@@ -9,27 +9,6 @@
         "Global": {
           "CodeChanges": [
             {
-              "InsertAfter": "WebApplication.CreateBuilder",
-              "CheckBlock": "builder.Configuration.GetConnectionString",
-              "Block": "\nvar connectionString = builder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '$(ConnectionStringName)' not found.\")"
-            },
-            {
-              "InsertAfter": "builder.Configuration.GetConnectionString",
-              "CheckBlock": "builder.Services.AddDbContext",
-              "Block": "builder.Services.AddDbContextFactory<$(DbContextName)>(options => options.$(UseDbMethod))",
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
-              "InsertAfter": "var builder = WebApplication.CreateBuilder(args);",
-              "CheckBlock": "builder.Services.AddDbContext",
-              "Block": "builder.Services.AddDbContextFactory<$(DbContextName)>(options => options.$(UseDbMethod))",
-              "LeadingTrivia": {
-                "Newline": true
-              }
-            },
-            {
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContextFactory",
               "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
               "LeadingTrivia": {
@@ -92,11 +71,6 @@
           "ReplaceSnippet": [ "app.UseHttpsRedirection();" ],
           "Block": "app.UseStatusCodePagesWithReExecute(\"/not-found\", createScopeForStatusCodePages: true);\n\napp.UseHttpsRedirection();",
           "CheckBlock": "UseStatusCodePagesWithReExecute"
-        },
-        {
-          "ReplaceSnippet": [".AddDbContext<"],
-          "Block": ".AddDbContextFactory<",
-          "CheckBlock": ".AddDbContextFactory<"
         }
       ],
       "Usings": [

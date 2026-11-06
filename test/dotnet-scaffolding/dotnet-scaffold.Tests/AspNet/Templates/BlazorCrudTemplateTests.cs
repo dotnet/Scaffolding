@@ -13,6 +13,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;
 public class BlazorCrudTemplateTests
 {
     [Theory]
+    [InlineData(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Create))]
+    [InlineData(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Delete))]
+    [InlineData(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Details))]
+    [InlineData(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Edit))]
+    [InlineData(typeof(Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Index))]
+    public void Net8CrudTemplate_ImplementsRequiredTextTransformationInterface(System.Type templateType)
+    {
+        Assert.IsAssignableFrom<Microsoft.DotNet.Scaffolding.TextTemplating.ITextTransformation>(
+            System.Activator.CreateInstance(templateType));
+    }
+
+    [Theory]
     [InlineData(10)]
     [InlineData(11)]
     public void EditTemplate_ReturnsAfterNotFoundWhenUpdatedEntityWasDeleted(int frameworkVersion)

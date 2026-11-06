@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,7 +15,7 @@ namespace Microsoft.DotNet.Scaffolding.Roslyn.Tests;
 
 public class CodeServiceTests : IDisposable
 {
-    private readonly string _directory = Path.Combine(Path.GetTempPath(), nameof(CodeServiceTests), Guid.NewGuid().ToString());
+    private readonly string _directory = Path.Combine(AppContext.BaseDirectory, nameof(CodeServiceTests), Guid.NewGuid().ToString());
 
     public CodeServiceTests()
     {
@@ -26,8 +27,7 @@ public class CodeServiceTests : IDisposable
     {
         var filePath = Path.Combine(_directory, "ApplicationDbContext.cs");
         File.WriteAllText(filePath, "public class ApplicationDbContext { }");
-        // A missing project forces the source-file-backed fallback workspace.
-        using var service = new CodeService(NullLogger.Instance, Path.Combine(_directory, "Missing.csproj"));
+        using var service = await CreateFallbackServiceAsync();
         var workspace = await service.GetWorkspaceAsync();
         Assert.IsType<AdhocWorkspace>(workspace);
         var document = Assert.Single(Assert.Single(workspace.CurrentSolution.Projects).Documents);
@@ -48,7 +48,7 @@ public class CodeServiceTests : IDisposable
         var filePath = Path.Combine(_directory, "ApplicationDbContext.cs");
         const string originalSource = "public class ApplicationDbContext { }";
         File.WriteAllText(filePath, originalSource);
-        using var service = new CodeService(NullLogger.Instance, Path.Combine(_directory, "Missing.csproj"));
+        using var service = await CreateFallbackServiceAsync();
         var workspace = await service.GetWorkspaceAsync();
         Assert.IsType<AdhocWorkspace>(workspace);
         var document = Assert.Single(Assert.Single(workspace.CurrentSolution.Projects).Documents);
@@ -63,6 +63,41 @@ public class CodeServiceTests : IDisposable
 
         Assert.True(exception is IOException or UnauthorizedAccessException, exception.ToString());
         Assert.Equal(originalSource, (await workspace.CurrentSolution.GetDocument(document.Id).GetTextAsync()).ToString());
+    }
+
+    [Fact]
+    public async Task GetWorkspaceAsync_FallbackWorkspace_ReportsProjectResolutionFailure()
+    {
+        using var service = new CodeService(NullLogger.Instance, Path.Combine(_directory, "Missing.csproj"));
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => service.GetWorkspaceAsync());
+
+        Assert.Contains("Missing.csproj", exception.Message);
+        Assert.Contains("MSB1009", exception.Message);
+    }
+
+    private async Task<CodeService> CreateFallbackServiceAsync()
+    {
+        // Persistence needs compiler inputs, not an SDK restore or a second framework-resolution
+        // test. Supply a minimal MSBuild compiler-input project and invoke the production factory.
+        var projectPath = Path.Combine(_directory, "Test.csproj");
+        File.WriteAllText(projectPath, """
+            <Project>
+              <ItemGroup>
+                <Compile Include="*.cs" />
+              </ItemGroup>
+              <Target Name="Compile">
+                <ItemGroup>
+                  <CscCommandLineArgs Include="/target:library;@(Compile)" />
+                </ItemGroup>
+              </Target>
+            </Project>
+            """);
+        var service = new CodeService(NullLogger.Instance, projectPath);
+        var factory = typeof(CodeService).GetMethod("BuildFallbackWorkspaceAsync", BindingFlags.Instance | BindingFlags.NonPublic);
+        var workspace = await (Task<AdhocWorkspace>)factory.Invoke(service, null);
+        typeof(CodeService).GetField("_fallbackWorkspace", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(service, workspace);
+        return service;
     }
 
     public void Dispose()

@@ -57,7 +57,16 @@ internal class ViewHelper
                         continue;
                     }
 
-                    string baseOutputPath = GetBaseOutputPath(viewModel.ModelInfo.ModelTypeName, viewModel.ProjectInfo.ProjectPath);
+                    string folderName = viewModel.ModelInfo.ModelTypeName;
+                    if (!string.IsNullOrEmpty(viewModel.ControllerName))
+                    {
+                        const string controllerSuffix = "Controller";
+                        folderName = viewModel.ControllerName.EndsWith(controllerSuffix, StringComparison.Ordinal)
+                            ? viewModel.ControllerName[..^controllerSuffix.Length]
+                            : viewModel.ControllerName;
+                    }
+
+                    string baseOutputPath = GetBaseOutputPath(folderName, viewModel.ProjectInfo.ProjectPath);
                     string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.ViewExtension}");
                     textTemplatingProperties.Add(new()
                     {
@@ -143,14 +152,14 @@ internal class ViewHelper
     }
 
     /// <summary>
-    /// Gets the base output path for the specified model name and project path.
+    /// Gets the base output path for the specified view folder name and project path.
     /// </summary>
-    /// <param name="modelName">The model name.</param>
+    /// <param name="folderName">The controller-based folder name, or model name for standalone views.</param>
     /// <param name="projectPath">The project path.</param>
     /// <returns>The base output path as a string.</returns>
-    private static string GetBaseOutputPath(string modelName, string? projectPath)
+    private static string GetBaseOutputPath(string folderName, string? projectPath)
     {
         string projectBasePath = Path.GetDirectoryName(projectPath) ?? Directory.GetCurrentDirectory();
-        return Path.Combine(projectBasePath, "Views", modelName);
+        return Path.Combine(projectBasePath, "Views", folderName);
     }
 }

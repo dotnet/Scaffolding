@@ -177,6 +177,11 @@ internal static class EfControllerScaffolderBuilderExtensions
                 ViewModel viewModel = viewModelObj as ViewModel ??
                     throw new InvalidOperationException(missingViewModelExceptionMssg);
 
+                context.Properties.TryGetValue(nameof(EfControllerModel), out var efControllerModelObj);
+                EfControllerModel efControllerModel = efControllerModelObj as EfControllerModel ??
+                    throw new InvalidOperationException("missing 'EfControllerModel' in 'ScaffolderContext.Properties'");
+                viewModel.ControllerName = efControllerModel.ControllerName;
+
                 if (viewModel.ProjectInfo is null || string.IsNullOrEmpty(viewModel.ProjectInfo.ProjectPath))
                 {
                     step.SkipStep = true;

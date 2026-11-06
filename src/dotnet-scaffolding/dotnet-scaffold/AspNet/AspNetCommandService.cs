@@ -36,7 +36,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(AreaScaffolderStep),
                 typeof(DetectBlazorWasmStep),
                 typeof(DotnetNewScaffolderStep),
-                typeof(RazorViewScaffolderStep),
                 typeof(EmptyControllerScaffolderStep),
                 typeof(NuGetVersionService),
                 typeof(RegisterAppStep),
@@ -96,29 +95,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     var context = config.Context;
                     step.ProjectPath = context.GetOptionResult(options.Project);
                     step.FileName = context.GetOptionResult(options.FileName);
-                    step.RelativeFolderPath = context.GetOptionResult(options.RelativeFolderPath);
+                    step.RelativeOutputPath = context.GetOptionResult(options.RelativeFolderPath);
                     step.CommandName = Constants.DotnetCommands.ViewCommandName;
-                });
-
-            _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorView.Single)
-                .WithDisplayName(AspnetStrings.RazorView.SingleDisplayName)
-                .WithCategory(AspnetStrings.Catagories.MVC)
-                .WithDescription(AspnetStrings.RazorView.SingleDescription)
-                .WithExample(AspnetStrings.RazorView.SingleExample, AspnetStrings.RazorView.SingleExampleDescription)
-                .WithOptions([options.Project, options.FileName, options.ViewTemplate, options.ViewModelName,
-                    options.RelativeFolderPath, options.Layout, options.UseDefaultLayout, options.ReferenceScriptLibraries])
-                .WithStep<RazorViewScaffolderStep>(config =>
-                {
-                    var step = config.Step;
-                    var context = config.Context;
-                    step.Project = context.GetOptionResult(options.Project);
-                    step.Name = context.GetOptionResult(options.FileName);
-                    step.Template = context.GetOptionResult(options.ViewTemplate) ?? "Empty";
-                    step.Model = context.GetOptionResult(options.ViewModelName);
-                    step.RelativeFolderPath = context.GetOptionResult(options.RelativeFolderPath);
-                    step.Layout = context.GetOptionResult(options.Layout);
-                    step.UseDefaultLayout = context.GetOptionResult(options.UseDefaultLayout);
-                    step.ReferenceScriptLibraries = context.GetOptionResult(options.ReferenceScriptLibraries);
                 });
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorPage.Empty)

@@ -53,8 +53,6 @@ foreach (var property in entityProperties)
     <a asp-action="Index">Back to List</a>
 </div>
 
-<# if (Model.ReferenceScriptLibraries) { #>
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
-<# } #>

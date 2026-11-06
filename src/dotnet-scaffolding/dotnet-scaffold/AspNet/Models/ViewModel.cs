@@ -8,8 +8,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 /// </summary>
 internal class ViewModel : CrudModel
 {
-    public bool ReferenceScriptLibraries { get; set; } = true;
-
     /// <summary>
     /// Gets the correct CSS class for an input element based on the .NET type name.
     /// </summary>

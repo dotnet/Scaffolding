@@ -3,8 +3,6 @@
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
-using Microsoft.Extensions.Logging;
-using StringUtil = Microsoft.DotNet.Scaffolding.Internal.StringUtil;
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 
 /// <summary>
@@ -12,46 +10,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 /// </summary>
 internal class ViewHelper
 {
-    internal static bool TryGetOutputDirectory(
-        string projectPath, string? relativeFolderPath, string defaultFolder,
-        ILogger logger, out string outputDirectory)
-    {
-        string projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectPath))!;
-        outputDirectory = Path.Combine(projectDirectory, defaultFolder);
-        if (relativeFolderPath is null)
-        {
-            return true;
-        }
-
-        relativeFolderPath = StringUtil.NormalizePathSeparators(relativeFolderPath);
-        if (string.IsNullOrWhiteSpace(relativeFolderPath) || Path.IsPathRooted(relativeFolderPath))
-        {
-            logger.LogError("--relativeFolderPath must be a non-empty path relative to the project directory.");
-            return false;
-        }
-
-        try
-        {
-            outputDirectory = Path.GetFullPath(relativeFolderPath, projectDirectory);
-        }
-        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
-        {
-            logger.LogError(ex, "Invalid --relativeFolderPath.");
-            return false;
-        }
-
-        string relativeOutputPath = Path.GetRelativePath(projectDirectory, outputDirectory);
-        if (relativeOutputPath == ".." ||
-            relativeOutputPath.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal) ||
-            Path.IsPathRooted(relativeOutputPath))
-        {
-            logger.LogError("--relativeFolderPath must not point outside the project directory.");
-            return false;
-        }
-
-        return true;
-    }
-
     /// <summary>
     /// Template file name for the create view.
     /// </summary>

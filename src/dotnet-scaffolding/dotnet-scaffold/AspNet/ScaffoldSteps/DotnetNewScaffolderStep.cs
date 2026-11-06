@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
@@ -35,9 +34,9 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
     /// </summary>
     public string? FileName { get; set; }
     /// <summary>
-    /// Gets or sets the output folder relative to the project directory.
+    /// Gets or sets an optional relative output path under the command's default folder.
     /// </summary>
-    public string? RelativeFolderPath { get; set; }
+    public string? RelativeOutputPath { get; set; }
     private readonly ILogger _logger;
     private readonly IFileSystem _fileSystem;
     private readonly ITelemetryService _telemetryService;
@@ -81,15 +80,23 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
     /// </summary>
     private bool InvokeDotnetNew(DotnetNewStepSettings stepSettings)
     {
-        var outputDirectory = stepSettings.OutputDirectory;
-        if (string.IsNullOrEmpty(outputDirectory))
+        var outputDirectory = Path.GetDirectoryName(stepSettings.Project);
+        //invoking a command with a specific output folder, if not, use the default output folder (project root)
+        if (!string.IsNullOrEmpty(outputDirectory) &&
+            OutputFolders.TryGetValue(stepSettings.CommandName, out var folderName))
         {
-            _logger.LogError("Missing output directory for 'dotnet new'.");
-            return false;
+            outputDirectory = Path.Combine(outputDirectory, folderName);
+            if (!string.IsNullOrEmpty(stepSettings.RelativeOutputPath))
+            {
+                outputDirectory = Path.Combine(outputDirectory, stepSettings.RelativeOutputPath);
+            }
+
+            _fileSystem.CreateDirectoryIfNotExists(outputDirectory);
         }
 
-        _fileSystem.CreateDirectoryIfNotExists(outputDirectory);
-        if (_fileSystem.DirectoryExists(outputDirectory))
+        var projectName = Path.GetFileNameWithoutExtension(stepSettings.Project);
+        if (!string.IsNullOrEmpty(outputDirectory) &&
+            _fileSystem.DirectoryExists(outputDirectory))
         {
             //arguments for 'dotnet new {settings.CommandName}'
             var args = new List<string>()
@@ -136,28 +143,99 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
             _logger.LogInformation("Missing/Invalid --name option.");
             return null;
         }
-        else
+
+        var (nameRelativeOutputPath, normalizedName) = ParseName(FileName);
+        if (normalizedName is null)
         {
-            //Component names cannot start with a lowercase character, capitalize the first letter only
-            FileName = char.ToUpper(FileName[0]) + FileName.Substring(1);
+            _logger.LogInformation("Missing/Invalid --name option.");
+            return null;
         }
 
-        var projectPath = Path.GetFullPath(ProjectPath);
-        if (!ViewHelper.TryGetOutputDirectory(
-            projectPath, RelativeFolderPath, OutputFolders.GetValueOrDefault(CommandName, string.Empty),
-            _logger, out var outputDirectory))
+        var relativeOutputPath = ParseRelativeOutputPath(RelativeOutputPath);
+        if (RelativeOutputPath is not null && relativeOutputPath is null)
+        {
+            _logger.LogInformation($"Missing/Invalid {Constants.CliOptions.RelativeFolderPathOption} option.");
+            return null;
+        }
+
+        relativeOutputPath = string.IsNullOrEmpty(relativeOutputPath)
+            ? nameRelativeOutputPath
+            : string.IsNullOrEmpty(nameRelativeOutputPath)
+                ? relativeOutputPath
+                : Path.Combine(relativeOutputPath, nameRelativeOutputPath);
+
+        relativeOutputPath = TrimLeadingOutputFolder(relativeOutputPath, CommandName);
+
+        FileName = string.IsNullOrEmpty(relativeOutputPath)
+            ? normalizedName
+            : Path.Combine(relativeOutputPath, normalizedName);
+
+        return new DotnetNewStepSettings
+        {
+            Project = ProjectPath,
+            Name = normalizedName,
+            RelativeOutputPath = relativeOutputPath,
+            NamespaceName = NamespaceName,
+            CommandName = CommandName
+        };
+    }
+
+    private static (string? RelativeOutputPath, string? Name) ParseName(string fileName)
+    {
+        var normalizedPath = ParseRelativeOutputPath(fileName);
+        if (normalizedPath is null)
+        {
+            return (null, null);
+        }
+
+        var segments = normalizedPath
+            .Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var normalizedName = char.ToUpper(segments[^1][0]) + segments[^1].Substring(1);
+        var relativeOutputPath = segments.Length > 1
+            ? Path.Combine(segments[..^1])
+            : null;
+
+        return (relativeOutputPath, normalizedName);
+    }
+
+    private static string? ParseRelativeOutputPath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
         {
             return null;
         }
 
-        return new DotnetNewStepSettings
+        var normalizedPath = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+        if (Path.IsPathRooted(normalizedPath))
         {
-            Project = projectPath,
-            Name = FileName,
-            NamespaceName = NamespaceName,
-            CommandName = CommandName,
-            OutputDirectory = outputDirectory
-        };
+            return null;
+        }
+
+        var segments = normalizedPath
+            .Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (segments.Length == 0 || segments.Any(segment => segment == "." || segment == ".."))
+        {
+            return null;
+        }
+
+        return Path.Combine(segments);
+    }
+
+    private static string? TrimLeadingOutputFolder(string? relativeOutputPath, string commandName)
+    {
+        if (string.IsNullOrEmpty(relativeOutputPath) ||
+            !OutputFolders.TryGetValue(commandName, out var outputFolder))
+        {
+            return relativeOutputPath;
+        }
+
+        var segments = relativeOutputPath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+        if (segments.Length == 0 || !string.Equals(segments[0], outputFolder, StringComparison.OrdinalIgnoreCase))
+        {
+            return relativeOutputPath;
+        }
+
+        return segments.Length == 1 ? null : Path.Combine(segments[1..]);
     }
 
     private readonly static Dictionary<string, string> OutputFolders = new()

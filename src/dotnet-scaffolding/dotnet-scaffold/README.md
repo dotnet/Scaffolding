@@ -3,65 +3,23 @@ More details coming soon!
 
 ### Empty MVC Razor views
 
-For .NET 8, 9, 10 and 11 projects, specify the destination relative to the
-project directory, not the current working directory:
+For .NET 8, 9, 10 and 11 projects, `razorview-empty` can place a view under a
+folder relative to the project's default `Views` root:
 
 ```powershell
-dotnet scaffold aspnet razorview-empty --project ".\MyMvcApp\MyMvcApp.csproj" --name Index --relativeFolderPath "Views\Orders"
+dotnet scaffold aspnet razorview-empty --project ".\MyMvcApp\MyMvcApp.csproj" --name Index --relativeFolderPath "Home"
 ```
 
-This creates `Views\Orders\Index.cshtml` inside `MyMvcApp`, creating the
-destination directories as needed. Use the controller name without the
-`Controller` suffix. Destinations such as `Views\Shared` and
-`Areas\Admin\Views\Orders` are also supported. Both slash styles are accepted;
-absolute paths and paths outside the project directory are rejected.
-Existing views are not overwritten.
+This creates `Views\Home\Index.cshtml` inside `MyMvcApp`. If the caller already
+includes the root folder, `--relativeFolderPath "Views\Home"` is normalized to
+the same destination instead of creating `Views\Views\Home`.
 
-Without `--relativeFolderPath`, the existing `Views`-root default is preserved.
-The tool cannot infer a controller from a view name alone. IDE integrations must
-pass the destination for controller-action Add View and use the selected folder
-for project-level Add View.
+The command also accepts a nested path in `--name`, such as `--name "Home/Index"`.
+Absolute paths and traversal segments such as `..` are rejected.
 
-This command creates an empty view using `dotnet new view`; it does not require
-`Microsoft.VisualStudio.Web.CodeGeneration.Design`. It does not expose
-model-based templates, custom layout selection or script-library options.
-Use `razorview` below for those backend capabilities. Visual Studio still needs
-to wire its dialog and command invocation to the richer command.
-
-### Single Razor view with template and layout options
-
-The `razorview` command supports .NET 8, 9, 10 and 11 without installing a
-code-generation design package into the project:
-
-```powershell
-dotnet scaffold aspnet razorview --project ".\MyMvcApp.csproj" --name NewProduct --template Create --model MyMvcApp.Models.Product --relativeFolderPath "Views\Products" --useDefaultLayout --referenceScriptLibraries
-```
-
-| Option | Behavior |
-| --- | --- |
-| `--name` | Required view file name; the `.cshtml` extension is optional. |
-| `--template` | `Empty` (default), `Create`, `Edit`, `Delete`, `Details` or `List`. |
-| `--model` | Required for non-empty templates; use a simple or fully qualified model class name. Ambiguous names are rejected. |
-| `--relativeFolderPath` | Destination relative to the project directory; defaults to `Views`. Pass the controller-specific path explicitly. |
-| `--useDefaultLayout` | Inherit the layout from `_ViewStart.cshtml`. |
-| `--layout` | Custom layout name or application-relative path; cannot be combined with `--useDefaultLayout`. |
-| `--referenceScriptLibraries` | Add a validation-partial reference and copy `_ValidationScriptsPartial.cshtml` to `Views\Shared` if missing. Existing partials are preserved. |
-
-Without either layout option, the view explicitly sets `Layout = null`.
-With a layout, the validation partial is rendered in a `Scripts` section; the
-layout must render that section. Without a layout, the partial is rendered inline.
-The partial references validation libraries; it does not install client-side
-JavaScript assets. The MVC project's existing assets must provide those files.
-Non-empty templates reuse the existing versioned CRUD view templates and require
-a model with public properties and a recognized primary key. `List` uses the
-index/list template, but writes the file name supplied by `--name`.
-Existing views are rejected rather than overwritten.
-
-All options, model-picker metadata and the supported template choices are
-published by `dotnet scaffold get-commands`. This enables consumers to discover
-the richer backend. It does not update Visual Studio's fixed Add Razor View
-dialog, add conditional controls to that dialog, or infer controller context.
-The existing `razorview-empty` and `views` commands retain their behavior.
+This command creates an empty view using `dotnet new view`. It does not infer a
+controller-specific destination from the view name alone; integrations that know
+the controller context must pass the destination explicitly.
 
 ### Entra ID account selection
 

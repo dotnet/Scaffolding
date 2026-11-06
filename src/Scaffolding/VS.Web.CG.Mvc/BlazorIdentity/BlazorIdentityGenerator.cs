@@ -1153,6 +1153,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Blazor
             }
 
             return nameEnd > nameStart &&
+                char.IsLower(contents[nameStart]) &&
                 HtmlVoidElements.Contains(contents.Substring(nameStart, nameEnd - nameStart));
         }
 

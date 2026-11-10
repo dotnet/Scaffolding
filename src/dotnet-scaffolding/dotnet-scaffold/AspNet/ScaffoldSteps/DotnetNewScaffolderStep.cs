@@ -205,7 +205,9 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
             return null;
         }
 
-        var normalizedPath = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+        var normalizedPath = path
+            .Replace('\\', Path.DirectorySeparatorChar)
+            .Replace('/', Path.DirectorySeparatorChar);
         if (Path.IsPathRooted(normalizedPath))
         {
             return null;

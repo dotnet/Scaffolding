@@ -3,7 +3,11 @@
 
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
+using Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.MVC;
@@ -12,6 +16,130 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
 {
     protected override string TargetFramework => "net10.0";
     protected override string TestClassName => nameof(RazorViewsNet10IntegrationTests);
+
+    [Theory]
+    [InlineData("TestProject.Models.Book", "TestProject.Models.Book")]
+    [InlineData("BookStore.Models.Book", "BookStore.Models.Book")]
+    [InlineData("global::BookStore.Models.Book", "BookStore.Models.Book")]
+    [InlineData("BookStore.Models.Catalog.Book", "BookStore.Models.Catalog.Book")]
+    public async Task Scaffold_Views_ResolvesQualifiedModelWithDuplicateShortName(string model, string modelFullName)
+    {
+        var modelsProject = CreateBookModelProject();
+        File.AppendAllText(Path.Combine(Path.GetDirectoryName(modelsProject)!, "Book.cs"), """
+
+            public class Catalog
+            {
+                public class Book
+                {
+                    public int Id { get; set; }
+                    public string Title { get; set; } = string.Empty;
+                }
+            }
+            """);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Book.cs"), """
+            namespace TestProject.Models;
+            public class Book
+            {
+                public int Id { get; set; }
+                public string LocalTitle { get; set; } = string.Empty;
+            }
+            """);
+        await PrepareReferencedBookAppAsync(modelsProject);
+
+        await ScaffoldBookIndexAndVerifyBuildAsync(model, modelFullName);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Scaffold_Views_RejectsAmbiguousShortModelNameWithoutModifyingProject(bool globalNamespace)
+    {
+        var modelsProject = CreateBookModelProject();
+        var localModel = ScaffoldCliHelper.GetModelClassContent("TestProject", "Book");
+        if (globalNamespace)
+        {
+            localModel = "public class Book { public int Id { get; set; } public string Title { get; set; } = string.Empty; }";
+        }
+        File.WriteAllText(Path.Combine(_testProjectDir, "Book.cs"), localModel);
+        await PrepareReferencedBookAppAsync(modelsProject);
+        var originalProject = File.ReadAllText(_testProjectPath);
+        var originalProgram = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework, "views", "--project", _testProjectPath, "--model", "Book", "--page", "Index");
+
+        Assert.Equal(1, exitCode);
+        Assert.Contains("Ambiguous --model 'Book'", output + error);
+        Assert.Contains(globalNamespace ? "global::Book" : "TestProject.Models.Book", output + error);
+        Assert.Contains("BookStore.Models.Book", output + error);
+        Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Views")));
+        Assert.Equal(originalProject, File.ReadAllText(_testProjectPath));
+        Assert.Equal(originalProgram, File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs")));
+    }
+
+    [Theory]
+    [InlineData(false, "Book")]
+    [InlineData(false, "BookStore.Models.Book")]
+    [InlineData(true, "Book")]
+    [InlineData(true, "BookStore.Models.Book")]
+    public async Task Scaffold_Views_RespectsReferencedInternalModelAccessibility(bool friendAssembly, string model)
+    {
+        var modelsProject = CreateBookModelProject();
+        var modelPath = Path.Combine(Path.GetDirectoryName(modelsProject)!, "Book.cs");
+        var modelSource = File.ReadAllText(modelPath).Replace("public class Book", "internal class Book");
+        if (friendAssembly)
+        {
+            modelSource = "[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"TestProject\")]\n" + modelSource;
+        }
+        File.WriteAllText(modelPath, modelSource);
+        await PrepareReferencedBookAppAsync(modelsProject);
+        using var service = new CodeService(NullLogger.Instance, _testProjectPath);
+        var options = await ParameterDiscovery.GetClassDisplayNamesAsync(service, new CommandInfo
+        {
+            Name = "views",
+            DisplayName = "Views",
+            DisplayCategories = [],
+            Parameters = []
+        });
+        Assert.Equal(friendAssembly, options.Exists(option => option.Value == "global::BookStore.Models.Book"));
+
+        if (friendAssembly)
+        {
+            await ScaffoldBookIndexAndVerifyBuildAsync(model);
+        }
+        else
+        {
+            var originalProject = File.ReadAllText(_testProjectPath);
+            var originalProgram = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+
+            var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+                TargetFramework, "views", "--project", _testProjectPath, "--model", model, "--page", "Index");
+
+            Assert.Equal(1, exitCode);
+            Assert.Contains($"Invalid --model '{model}'", output + error);
+            Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Views")));
+            Assert.Equal(originalProject, File.ReadAllText(_testProjectPath));
+            Assert.Equal(originalProgram, File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs")));
+        }
+    }
+
+    private async Task PrepareReferencedBookAppAsync(string modelsProject)
+    {
+        File.WriteAllText(_testProjectPath, $"""
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <PropertyGroup>
+                <TargetFramework>{TargetFramework}</TargetFramework>
+                <ImplicitUsings>enable</ImplicitUsings>
+              </PropertyGroup>
+              <ItemGroup>
+                <ProjectReference Include="{Path.GetRelativePath(_testProjectDir, modelsProject)}" />
+              </ItemGroup>
+            </Project>
+            """);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetMinimalProgramCs());
+        var build = await RunBuildAsync(_testProjectDir);
+        Assert.True(build.ExitCode == 0, $"Sample should build before scaffolding.\n{build.Output}\n{build.Error}");
+    }
 
     [Fact]
     public async Task Scaffold_Views_WithFrameworkConditionalTransitiveModelReference()

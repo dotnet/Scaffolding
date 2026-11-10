@@ -193,6 +193,70 @@ public class CodeServiceTests : IDisposable
         Assert.Equal("LocalBook", Assert.Single(symbols).Name);
     }
 
+    [Theory]
+    [InlineData(null, false)]
+    [InlineData("OtherWebApp", false)]
+    [InlineData("WebApp", true)]
+    public async Task GetAllClassSymbolsAsync_RespectsAccessibilityFromTargetAssembly(string friendAssembly, bool hasInternalAccess)
+    {
+        var friendAttribute = friendAssembly is null
+            ? string.Empty
+            : $"""[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("{friendAssembly}")]""";
+        var modelsProject = CreateProject("Models", friendAttribute + """
+
+            namespace Library.Models;
+            public class PublicBook { }
+            internal class Book { }
+            file class FileBook { }
+            public class Container
+            {
+                public class PublicNested { }
+                private class PrivateNested { }
+                protected class ProtectedNested { }
+                internal class InternalNested { }
+                protected internal class ProtectedInternalNested { }
+                private protected class PrivateProtectedNested { }
+            }
+            internal class InternalContainer
+            {
+                public class NestedBook { }
+            }
+            """);
+        var project = CreateProject("WebApp", "internal class LocalBook { } file class LocalFileBook { }", modelsProject);
+        using var service = new CodeService(NullLogger.Instance, project);
+
+        var symbols = await service.GetAllClassSymbolsAsync(includeReferencedProjects: true);
+
+        Assert.Contains(symbols, symbol => symbol.Name == "LocalBook");
+        Assert.Contains(symbols, symbol => symbol.Name == "PublicBook");
+        Assert.Contains(symbols, symbol => symbol.Name == "PublicNested");
+        Assert.Equal(hasInternalAccess, symbols.Any(symbol => symbol.Name == "Book"));
+        Assert.Equal(hasInternalAccess, symbols.Any(symbol => symbol.Name == "NestedBook"));
+        Assert.Equal(hasInternalAccess, symbols.Any(symbol => symbol.Name == "InternalNested"));
+        Assert.Equal(hasInternalAccess, symbols.Any(symbol => symbol.Name == "ProtectedInternalNested"));
+        Assert.DoesNotContain(symbols, symbol => symbol.Name is "PrivateNested" or "ProtectedNested" or "PrivateProtectedNested");
+        Assert.DoesNotContain(symbols, symbol => symbol.Name is "FileBook" or "LocalFileBook");
+    }
+
+    [Theory]
+    [InlineData("Data", false)]
+    [InlineData("WebApp", true)]
+    public async Task GetAllClassSymbolsAsync_ChecksTransitiveAccessibilityAgainstTargetAssembly(string friendAssembly, bool expected)
+    {
+        var modelsProject = CreateProject("Models", $$"""
+            [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("{{friendAssembly}}")]
+            namespace Library.Models;
+            internal class Book { }
+            """);
+        var dataProject = CreateProject("Data", "public class Store { }", modelsProject);
+        var project = CreateProject("WebApp", "public class LocalBook { }", dataProject);
+        using var service = new CodeService(NullLogger.Instance, project);
+
+        var symbols = await service.GetAllClassSymbolsAsync(includeReferencedProjects: true);
+
+        Assert.Equal(expected, symbols.Any(symbol => symbol.Name == "Book"));
+    }
+
     private string CreateProject(string name, string source, params string[] references)
     {
         var projectDirectory = Path.Combine(_directory, name);

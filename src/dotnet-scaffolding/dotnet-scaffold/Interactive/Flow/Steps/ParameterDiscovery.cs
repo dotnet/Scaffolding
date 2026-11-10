@@ -280,7 +280,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// </summary>
         internal static async Task<List<StepOption>> GetClassDisplayNamesAsync(ICodeService codeService, CommandInfo? command)
         {
-            var allClassSymbols = command?.Name.Equals(AspnetStrings.RazorView.Views, StringComparison.OrdinalIgnoreCase) == true
+            var isViewsCommand = string.Equals(command?.Name, AspnetStrings.RazorView.Views, StringComparison.OrdinalIgnoreCase);
+            var allClassSymbols = isViewsCommand
                 ? await codeService.GetAllClassSymbolsAsync(includeReferencedProjects: true)
                 : await codeService.GetAllClassSymbolsAsync();
 
@@ -292,7 +293,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 {
                     if (x != null)
                     {
-                        classNames.Add(new StepOption() { Name = x.MetadataName, Value = x.Name });
+                        var name = isViewsCommand ? x.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) : x.MetadataName;
+                        var value = isViewsCommand ? name : x.Name;
+                        classNames.Add(new StepOption() { Name = name, Value = value });
                     }
                 });
             }

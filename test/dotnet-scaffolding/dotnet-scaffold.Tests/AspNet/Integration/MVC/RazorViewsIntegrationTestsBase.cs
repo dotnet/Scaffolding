@@ -138,19 +138,19 @@ public abstract class RazorViewsIntegrationTestsBase : IDisposable
         return modelsProjectPath;
     }
 
-    protected async Task ScaffoldBookIndexAndVerifyBuildAsync()
+    protected async Task ScaffoldBookIndexAndVerifyBuildAsync(string model = "Book", string modelFullName = "BookStore.Models.Book")
     {
         var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
             "views",
             "--project", _testProjectPath,
-            "--model", "Book",
+            "--model", model,
             "--page", "Index");
         Assert.True(exitCode == 0, $"Scaffolding failed.\nOutput: {output}\nError: {error}");
 
         var viewPath = Path.Combine(_testProjectDir, "Views", "Book", "Index.cshtml");
         Assert.True(File.Exists(viewPath));
-        Assert.Contains("@model IEnumerable<BookStore.Models.Book>", File.ReadAllText(viewPath));
+        Assert.Contains($"@model IEnumerable<{modelFullName}>", File.ReadAllText(viewPath));
         var build = await RunBuildAsync(_testProjectDir);
         Assert.True(build.ExitCode == 0,
             $"Generated view should build.\nOutput: {build.Output}\nError: {build.Error}");

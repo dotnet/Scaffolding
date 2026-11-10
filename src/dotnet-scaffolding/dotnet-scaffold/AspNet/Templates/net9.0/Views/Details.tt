@@ -5,8 +5,7 @@
 <#@  import namespace="System.Linq" #>
 <#
     string modelName = Model.ModelInfo.ModelTypeName;
-    string modelNamespace = Model.ModelInfo.ModelNamespace;
-    string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";
+    string modelFullName = Model.ModelInfo.ModelFullName;
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;

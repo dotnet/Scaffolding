@@ -355,6 +355,8 @@ public class CodeService : ICodeService, IDisposable
                 $"Unable to discover referenced project classes for '{_projectPath}': {string.Join(Environment.NewLine, failures)}");
         }
 
+        var targetCompilation = await project.GetCompilationAsync()
+            ?? throw new InvalidOperationException($"Unable to compile project '{project.FilePath}' for class discovery.");
         List<ISymbol> classSymbols = [];
         var visitedProjects = new HashSet<ProjectId> { project.Id };
         var pendingProjects = new Queue<Project>();
@@ -363,7 +365,9 @@ public class CodeService : ICodeService, IDisposable
         {
             var compilation = await currentProject.GetCompilationAsync()
                 ?? throw new InvalidOperationException($"Unable to compile project '{currentProject.FilePath}' for class discovery.");
-            classSymbols.AddRange(GetClassSymbols(compilation));
+            classSymbols.AddRange(GetClassSymbols(compilation)
+                .OfType<INamedTypeSymbol>()
+                .Where(symbol => IsAccessibleFromAssembly(symbol, targetCompilation.Assembly)));
 
             // Roslyn's resolved graph honors target-framework selection and ReferenceOutputAssembly.
             foreach (var reference in currentProject.ProjectReferences)
@@ -380,6 +384,28 @@ public class CodeService : ICodeService, IDisposable
         }
 
         return classSymbols;
+    }
+
+    private static bool IsAccessibleFromAssembly(INamedTypeSymbol symbol, IAssemblySymbol targetAssembly)
+    {
+        // Referenced source symbols can belong to a different or retargeted compilation.
+        var hasInternalAccess = SymbolEqualityComparer.Default.Equals(symbol.ContainingAssembly, targetAssembly)
+            || symbol.ContainingAssembly.GivesAccessTo(targetAssembly);
+        for (INamedTypeSymbol? type = symbol; type is not null; type = type.ContainingType)
+        {
+            var accessible = type.DeclaredAccessibility switch
+            {
+                Accessibility.Public => true,
+                Accessibility.Internal or Accessibility.ProtectedOrInternal => hasInternalAccess,
+                _ => false
+            };
+            if (type.IsFileLocal || !accessible)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>

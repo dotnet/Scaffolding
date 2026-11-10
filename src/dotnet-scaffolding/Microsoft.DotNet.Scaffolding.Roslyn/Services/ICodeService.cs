@@ -37,6 +37,7 @@ public interface ICodeService
 
     /// <summary>
     /// Gets class symbols from the current project and, optionally, its transitive project references.
+    /// Reference-aware discovery returns only classes accessible from the current project's assembly.
     /// Classes from the current project are returned first. Package references are not searched.
     /// </summary>
     /// <remarks>

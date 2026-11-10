@@ -16,6 +16,48 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
 
 public class ViewHelperTests
 {
+    [Theory]
+    [InlineData(TargetFramework.Net8)]
+    [InlineData(TargetFramework.Net9)]
+    [InlineData(TargetFramework.Net10)]
+    [InlineData(TargetFramework.Net11)]
+    public void Templates_UseResolvedQualifiedModelName(TargetFramework framework)
+    {
+        var model = new ViewModel
+        {
+            PageType = "CRUD",
+            ProjectInfo = new ProjectInfo(Path.Combine("test", "project", "TestProject.csproj")),
+            DbContextInfo = new DbContextInfo(),
+            ModelInfo = new ModelInfo
+            {
+                ModelTypeName = "Book",
+                ModelNamespace = "Library.Models",
+                ModelFullName = "Library.Models.Catalog.Book",
+                PrimaryKeyName = "Id",
+                ModelProperties = []
+            }
+        };
+        foreach (var templateName in new[]
+        {
+            ViewHelper.CreateTemplate, ViewHelper.DeleteTemplate, ViewHelper.DetailsTemplate,
+            ViewHelper.EditTemplate, ViewHelper.IndexTemplate
+        })
+        {
+            var templateType = ViewHelper.GetTemplateType(templateName, framework);
+            Assert.NotNull(templateType);
+            var template = Assert.IsAssignableFrom<ITextTransformation>(Activator.CreateInstance(templateType));
+            template.Session = new Dictionary<string, object> { ["Model"] = model };
+            template.Initialize();
+
+            var output = template.TransformText();
+
+            var declaration = templateName == ViewHelper.IndexTemplate
+                ? "@model IEnumerable<Library.Models.Catalog.Book>"
+                : "@model Library.Models.Catalog.Book";
+            Assert.StartsWith(declaration, output);
+        }
+    }
+
     [Fact]
     public void GetTextTemplatingProperties_WithValidCreateTemplate_ReturnsExpectedProperty()
     {

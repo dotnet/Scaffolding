@@ -157,6 +157,43 @@ public class BlazorDbContextFactoryStepTests
     }
 
     [Theory]
+    [InlineData("void NotCalled() { builder.Services.AddQuickGridEntityFrameworkAdapter(); }")]
+    [InlineData("if (args.Length > 0) { builder.Services.AddQuickGridEntityFrameworkAdapter(); }")]
+    [InlineData("Action notCalled = () => builder.Services.AddQuickGridEntityFrameworkAdapter();")]
+    [InlineData("new ServiceCollection().AddQuickGridEntityFrameworkAdapter();")]
+    [InlineData("EntityFrameworkServiceCollectionExtensions.Consume(args.Length > 0 ? builder.Services.AddQuickGridEntityFrameworkAdapter() : builder.Services);")]
+    public async Task RegisterFactoryAsync_AddsAdapterWhenExistingCallIsNotOnStartupServices(string registration)
+    {
+        using var workspace = new AdhocWorkspace();
+        var document = CreateDocument(workspace,
+            "builder.Services.AddDbContextFactory<MovieContext>();\n" + registration);
+
+        var updated = await BlazorDbContextFactoryStep.RegisterFactoryAsync(
+            document, "App.MovieContext", """UseSqlServer("Movies")""");
+        var text = (await updated.GetTextAsync()).ToString();
+        var root = Assert.IsType<CompilationUnitSyntax>(await updated.GetSyntaxRootAsync());
+        Assert.Contains(registration, text);
+        Assert.Equal(2, root.DescendantNodes().OfType<InvocationExpressionSyntax>().Count(invocation =>
+            invocation.Expression is MemberAccessExpressionSyntax { Name.Identifier.ValueText: "AddQuickGridEntityFrameworkAdapter" }));
+        var adapter = Assert.Single(root.Members.OfType<GlobalStatementSyntax>(), statement =>
+            statement.Statement is ExpressionStatementSyntax
+            {
+                Expression: InvocationExpressionSyntax invocation
+            } && invocation.Expression.ToString() == "builder.Services.AddQuickGridEntityFrameworkAdapter");
+        var build = Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(), invocation =>
+            invocation.Expression.ToString() == "builder.Build");
+        Assert.True(adapter.SpanStart < build.SpanStart);
+        Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(), invocation =>
+            invocation.Expression.ToString() == "builder.Services.AddDbContextFactory<MovieContext>");
+        var compilation = await updated.WithText(SourceText.From(text)).Project.GetCompilationAsync();
+        Assert.Empty(compilation!.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+
+        var repeated = await BlazorDbContextFactoryStep.RegisterFactoryAsync(
+            updated, "App.MovieContext", """UseSqlServer("Movies")""");
+        Assert.Equal(text, (await repeated.GetTextAsync()).ToString());
+    }
+
+    [Theory]
     [InlineData("webBuilder")]
     [InlineData("@event")]
     public async Task RegisterFactoryAsync_UsesTheActualBuilderIdentifier(string builderName)

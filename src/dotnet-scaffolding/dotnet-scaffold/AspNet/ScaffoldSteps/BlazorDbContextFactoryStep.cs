@@ -164,6 +164,31 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
             return Warn("The Build call is not in unconditional application startup code.");
         }
 
+        bool IsUnconditionalStartupStatement(InvocationExpressionSyntax invocation)
+        {
+            var statement = invocation.Ancestors().OfType<StatementSyntax>().FirstOrDefault();
+            var parent = statement?.Parent is GlobalStatementSyntax wrapper ? wrapper.Parent : statement?.Parent;
+            return parent == container && statement is ExpressionStatementSyntax &&
+                !invocation.Ancestors().TakeWhile(node => node != statement).Any(node =>
+                    node is AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax or ConditionalExpressionSyntax or
+                        ConditionalAccessExpressionSyntax or SwitchExpressionSyntax ||
+                    node.IsKind(SyntaxKind.LogicalAndExpression) || node.IsKind(SyntaxKind.LogicalOrExpression) ||
+                    node.IsKind(SyntaxKind.CoalesceExpression) || node.IsKind(SyntaxKind.CoalesceAssignmentExpression)) &&
+                invocation.SpanStart < build.SpanStart;
+        }
+
+        bool IsCalledOnBuilderServices(InvocationExpressionSyntax invocation)
+        {
+            var services = GetServicesExpression(invocation, semanticModel, cancellationToken);
+            return services is MemberAccessExpressionSyntax
+                {
+                    Expression: IdentifierNameSyntax receiver,
+                    Name.Identifier.ValueText: "Services"
+                } && SymbolEqualityComparer.Default.Equals(
+                    semanticModel.GetSymbolInfo(receiver, cancellationToken).Symbol,
+                    semanticModel.GetDeclaredSymbol(builder, cancellationToken));
+        }
+
         List<InvocationExpressionSyntax> registrations = [];
         foreach (var invocation in root.DescendantNodes().OfType<InvocationExpressionSyntax>())
         {
@@ -202,35 +227,22 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
             { Name: "AddDbContextFactory" or "AddPooledDbContextFactory" }).ToArray();
         foreach (var registration in registrations)
         {
-            var statement = registration.Ancestors().OfType<StatementSyntax>().FirstOrDefault();
-            var parent = statement?.Parent is GlobalStatementSyntax wrapper ? wrapper.Parent : statement?.Parent;
-            if (parent != container || statement is not ExpressionStatementSyntax ||
-                registration.Ancestors().TakeWhile(node => node != statement).Any(node =>
-                    node is AnonymousFunctionExpressionSyntax or LocalFunctionStatementSyntax or ConditionalExpressionSyntax or
-                        ConditionalAccessExpressionSyntax or SwitchExpressionSyntax ||
-                    node.IsKind(SyntaxKind.LogicalAndExpression) || node.IsKind(SyntaxKind.LogicalOrExpression) ||
-                    node.IsKind(SyntaxKind.CoalesceExpression) || node.IsKind(SyntaxKind.CoalesceAssignmentExpression)) ||
-                registration.SpanStart >= build.SpanStart)
+            if (!IsUnconditionalStartupStatement(registration))
             {
                 return Warn($"Registration for '{contextName}' is not an unconditional startup statement before {builderName}.Build().");
             }
 
-            var services = GetServicesExpression(registration, semanticModel, cancellationToken);
-            if (services is not MemberAccessExpressionSyntax
-                {
-                    Expression: IdentifierNameSyntax receiver,
-                    Name.Identifier.ValueText: "Services"
-                } || !SymbolEqualityComparer.Default.Equals(
-                    semanticModel.GetSymbolInfo(receiver, cancellationToken).Symbol,
-                    semanticModel.GetDeclaredSymbol(builder, cancellationToken)))
+            if (!IsCalledOnBuilderServices(registration))
             {
                 return Warn($"Cannot verify that registration '{registration}' uses {builderName}.Services.");
             }
         }
 
         var hasQuickGridAdapter = root.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(invocation =>
-            invocation.Expression is MemberAccessExpressionSyntax { Name.Identifier.ValueText: "AddQuickGridEntityFrameworkAdapter" } &&
-            invocation.SpanStart < build.SpanStart);
+            semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is IMethodSymbol
+                { Name: "AddQuickGridEntityFrameworkAdapter", IsExtensionMethod: true } &&
+            IsUnconditionalStartupStatement(invocation) &&
+            IsCalledOnBuilderServices(invocation));
 
         if (factories.Length != 0 && hasQuickGridAdapter)
         {

@@ -33,6 +33,7 @@ public class BlazorDbContextFactoryStepTests
                     ServiceLifetime lifetime = ServiceLifetime.Singleton) => services;
                 public static ServiceCollection AddDbContextFactory<T, TFactory>(this ServiceCollection services) => services;
                 public static ServiceCollection AddPooledDbContextFactory<T>(this ServiceCollection services) => services;
+                public static ServiceCollection AddQuickGridEntityFrameworkAdapter(this ServiceCollection services) => services;
             }
         }
         namespace Microsoft.EntityFrameworkCore
@@ -109,6 +110,11 @@ public class BlazorDbContextFactoryStepTests
             semanticModel!.GetSymbolInfo(invocation).Symbol is IMethodSymbol method &&
             method.Name is "AddDbContextFactory" or "AddPooledDbContextFactory" &&
             method.TypeArguments[0].ToDisplayString() == "App.MovieContext");
+        var adapter = Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(), invocation =>
+            invocation.Expression.ToString() == "builder.Services.AddQuickGridEntityFrameworkAdapter");
+        var build = Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(), invocation =>
+            invocation.Expression.ToString() == "builder.Build");
+        Assert.True(adapter.SpanStart < build.SpanStart);
         if (registration.Contains(".AddDbContext<", StringComparison.Ordinal))
         {
             Assert.Contains("ServiceLifetime.Scoped", factory.ToString());
@@ -120,19 +126,54 @@ public class BlazorDbContextFactoryStepTests
         Assert.Equal(text, (await repeated.GetTextAsync()).ToString());
     }
 
-    [Fact]
-    public async Task RegisterFactoryAsync_UsesTheActualBuilderIdentifier()
+    [Theory]
+    [InlineData("")]
+    [InlineData("builder.Services.AddDbContext<MovieContext>();")]
+    [InlineData("builder.Services.AddDbContextFactory<MovieContext>();")]
+    [InlineData("builder.Services.AddDbContextFactory<MovieContext, CustomMovieFactory>();")]
+    [InlineData("builder.Services.AddPooledDbContextFactory<MovieContext>();")]
+    public async Task RegisterFactoryAsync_DoesNotDuplicateAnExistingAdapter(string registration)
     {
         using var workspace = new AdhocWorkspace();
-        var document = CreateDocument(workspace, "", builderName: "webBuilder");
+        var document = CreateDocument(workspace, registration + "\nbuilder.Services.AddQuickGridEntityFrameworkAdapter();");
+
+        var updated = await BlazorDbContextFactoryStep.RegisterFactoryAsync(
+            document, "App.MovieContext", """UseSqlServer("Movies")""");
+        var text = (await updated.GetTextAsync()).ToString();
+        var root = (await updated.GetSyntaxRootAsync())!;
+        var semanticModel = (await updated.GetSemanticModelAsync())!;
+        Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(), invocation =>
+            invocation.Expression.ToString() == "builder.Services.AddQuickGridEntityFrameworkAdapter");
+        Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(), invocation =>
+            semanticModel.GetSymbolInfo(invocation).Symbol is IMethodSymbol method &&
+            method.Name is "AddDbContextFactory" or "AddPooledDbContextFactory" &&
+            method.TypeArguments[0].ToDisplayString() == "App.MovieContext");
+        var compilation = await updated.WithText(SourceText.From(text)).Project.GetCompilationAsync();
+        Assert.Empty(compilation!.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+
+        var repeated = await BlazorDbContextFactoryStep.RegisterFactoryAsync(
+            updated, "App.MovieContext", """UseSqlServer("Movies")""");
+        Assert.Equal(text, (await repeated.GetTextAsync()).ToString());
+    }
+
+    [Theory]
+    [InlineData("webBuilder")]
+    [InlineData("@event")]
+    public async Task RegisterFactoryAsync_UsesTheActualBuilderIdentifier(string builderName)
+    {
+        using var workspace = new AdhocWorkspace();
+        var document = CreateDocument(workspace, "", builderName: builderName);
 
         var updated = await BlazorDbContextFactoryStep.RegisterFactoryAsync(
             document, "App.MovieContext", """UseSqlServer(builder.Configuration.GetConnectionString("Movies"))""");
 
         var text = (await updated.GetTextAsync()).ToString();
-        Assert.Contains("webBuilder.Services.AddDbContextFactory<global::App.MovieContext>", text);
-        Assert.Contains("""webBuilder.Configuration.GetConnectionString("Movies")""", text);
+        Assert.Contains($"{builderName}.Services.AddDbContextFactory<global::App.MovieContext>", text);
+        Assert.Contains($"{builderName}.Services.AddQuickGridEntityFrameworkAdapter()", text);
+        Assert.Contains($"""{builderName}.Configuration.GetConnectionString("Movies")""", text);
         Assert.DoesNotContain("builder.", text);
+        var compilation = await updated.WithText(SourceText.From(text)).Project.GetCompilationAsync();
+        Assert.Empty(compilation!.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
     }
 
     [Theory]
@@ -247,11 +288,13 @@ public class BlazorDbContextFactoryStepTests
             invocation.Method.Name == nameof(ILogger.Log) && Equals(invocation.Arguments[0], LogLevel.Warning));
     }
 
-    [Fact]
-    public async Task RegisterFactoryAsync_WarningUsesTheActualBuilderIdentifier()
+    [Theory]
+    [InlineData("webBuilder")]
+    [InlineData("@event")]
+    public async Task RegisterFactoryAsync_WarningUsesTheActualBuilderIdentifier(string builderName)
     {
         using var workspace = new AdhocWorkspace();
-        var document = CreateDocument(workspace, "if (true) { webBuilder.Services.AddDbContext<MovieContext>(); }", builderName: "webBuilder");
+        var document = CreateDocument(workspace, $"if (true) {{ {builderName}.Services.AddDbContext<MovieContext>(); }}", builderName: builderName);
         var logger = new Mock<ILogger<BlazorDbContextFactoryStep>>();
         var before = (await document.GetTextAsync()).ToString();
 
@@ -261,7 +304,7 @@ public class BlazorDbContextFactoryStepTests
         Assert.Equal(before, (await updated.GetTextAsync()).ToString());
         var warning = Assert.Single(logger.Invocations, invocation =>
             invocation.Method.Name == nameof(ILogger.Log) && Equals(invocation.Arguments[0], LogLevel.Warning));
-        Assert.Contains("""Add before webBuilder.Build(): webBuilder.Services.AddDbContextFactory<App.MovieContext>(options => options.UseSqlServer(webBuilder.Configuration.GetConnectionString("Movies")));""",
+        Assert.Contains($"""Add before {builderName}.Build(): {builderName}.Services.AddDbContextFactory<App.MovieContext>(options => options.UseSqlServer({builderName}.Configuration.GetConnectionString("Movies"))); {builderName}.Services.AddQuickGridEntityFrameworkAdapter();""",
             warning.Arguments[2].ToString());
     }
 

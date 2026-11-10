@@ -153,15 +153,23 @@ public class WrappedCodeModificationStepTests
         var build = await ScaffoldCliHelper.RunBuildAsync(project.ProjectDirectory);
         Assert.True(build.ExitCode == 0, $"Input build failed.\n{build.Output}\n{build.Error}");
 
-        foreach (var registration in new[] { "", "AddDbContext", "AddDbContextFactory" })
+        foreach (var (registration, adapterAlreadyRegistered) in new[]
+        {
+            ("", false),
+            ("AddDbContext", false),
+            ("AddDbContextFactory", false),
+            ("AddDbContextFactory", true)
+        })
         {
             var existingRegistration = string.IsNullOrEmpty(registration) ? "" :
                 $"builder.Services.{registration}<MovieContext>(options => options.UseSqlServer(\"ExistingMovies\"));";
+            var existingAdapter = adapterAlreadyRegistered ? "builder.Services.AddQuickGridEntityFrameworkAdapter();" : "";
             File.WriteAllText(programPath, $$"""
                 var builder = WebApplication.CreateBuilder(args);
                 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
                 builder.Services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
                 {{existingRegistration}}
+                {{existingAdapter}}
                 var app = builder.Build();
                 app.Run();
                 """);
@@ -186,6 +194,8 @@ public class WrappedCodeModificationStepTests
             Assert.Equal(string.IsNullOrEmpty(registration) ? 1 : 2, registrations.Length);
             Assert.Single(registrations, invocation =>
                 invocation.Expression.ToString() == "builder.Services.AddDbContextFactory<ApplicationDbContext>");
+            Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(), invocation =>
+                invocation.Expression.ToString() == "builder.Services.AddQuickGridEntityFrameworkAdapter");
             if (!string.IsNullOrEmpty(registration))
             {
                 Assert.Contains(existingRegistration, updatedProgram);
@@ -194,6 +204,37 @@ public class WrappedCodeModificationStepTests
             Assert.True(await step.ExecuteAsync(_context));
             Assert.Equal(updatedProgram, File.ReadAllText(programPath));
         }
+    }
+
+    [Fact]
+    public async Task BlazorCrud_Net8WithoutEfScenario_LeavesProgramUnchanged()
+    {
+        var configPath = Path.Combine(ScaffoldCliHelper.GetRepoRoot(), "src", "dotnet-scaffolding", "dotnet-scaffold",
+            "AspNet", "Templates", "net8.0", "CodeModificationConfigs", "blazorWebCrudChanges.json");
+        using var project = new BlazorTestProject(ScaffoldCliHelper.GetTestTargetFramework());
+        var programPath = Path.Combine(project.ProjectDirectory, "Program.cs");
+        var program = """
+            var builder = WebApplication.CreateBuilder(args);
+            var app = builder.Build();
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHsts();
+            }
+            app.Run();
+            """;
+        File.WriteAllText(programPath, program);
+        var build = await ScaffoldCliHelper.RunBuildAsync(project.ProjectDirectory);
+        Assert.True(build.ExitCode == 0, $"Input build failed.\n{build.Output}\n{build.Error}");
+        var step = new WrappedCodeModificationStep(
+            NullLogger<WrappedCodeModificationStep>.Instance, Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = project.ProjectPath,
+            CodeModifierConfigPath = configPath,
+            CodeChangeOptions = []
+        };
+
+        Assert.True(await step.ExecuteAsync(_context));
+        Assert.Equal(program, File.ReadAllText(programPath));
     }
 
     [Theory]

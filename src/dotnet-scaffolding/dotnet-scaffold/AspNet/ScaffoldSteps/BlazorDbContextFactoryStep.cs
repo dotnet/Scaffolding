@@ -89,7 +89,8 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
                 reason += " Configure the database provider options for this registration.";
             }
 
-            var registration = $"{builderName}.Services.AddDbContextFactory<{contextName}>({arguments});";
+            var registration = $"{builderName}.Services.AddDbContextFactory<{contextName}>({arguments}); " +
+                $"{builderName}.Services.AddQuickGridEntityFrameworkAdapter();";
             logger.LogWarning("Could not safely update Program.cs. Add before {BuilderName}.Build(): {Registration} {Reason}",
                 builderName, registration, reason);
             return null;
@@ -127,7 +128,7 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
         }
 
         var builder = builders[0];
-        builderName = builder.Identifier.ValueText;
+        builderName = builder.Identifier.Text;
         var contextType = semanticModel.Compilation.GetTypeByMetadataName(contextName);
         if (contextType is null)
         {
@@ -227,45 +228,59 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
             }
         }
 
-        if (factories.Length != 0)
+        var hasQuickGridAdapter = root.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(invocation =>
+            invocation.Expression is MemberAccessExpressionSyntax { Name.Identifier.ValueText: "AddQuickGridEntityFrameworkAdapter" } &&
+            invocation.SpanStart < build.SpanStart);
+
+        if (factories.Length != 0 && hasQuickGridAdapter)
         {
             return document;
         }
 
-        // Existing AddDbContext options can depend on scoped services. Reuse those options
-        // with a scoped factory instead of changing the application's context registration.
         List<StatementSyntax> additions = [];
-        var arguments = "lifetime: global::Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped";
-        if (registrations.Count == 0)
+        if (factories.Length == 0)
         {
-            if (string.IsNullOrWhiteSpace(useDbMethod) ||
-                SyntaxFactory.ParseExpression(useDbMethod) is not InvocationExpressionSyntax providerCall ||
-                providerCall.ContainsDiagnostics || providerCall.ArgumentList.Arguments.Count == 0)
+            // Existing AddDbContext options can depend on scoped services. Reuse those options
+            // with a scoped factory instead of changing the application's context registration.
+            var arguments = "lifetime: global::Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped";
+            if (registrations.Count == 0)
             {
-                return Warn("The selected database provider did not produce an options invocation.");
+                if (string.IsNullOrWhiteSpace(useDbMethod) ||
+                    SyntaxFactory.ParseExpression(useDbMethod) is not InvocationExpressionSyntax providerCall ||
+                    providerCall.ContainsDiagnostics || providerCall.ArgumentList.Arguments.Count == 0)
+                {
+                    return Warn("The selected database provider did not produce an options invocation.");
+                }
+
+                providerCall = providerCall.ReplaceNodes(providerCall.DescendantNodes().OfType<IdentifierNameSyntax>()
+                    .Where(identifier => identifier.Identifier.ValueText == "builder"),
+                    (identifier, _) => SyntaxFactory.IdentifierName(builderName).WithTriviaFrom(identifier));
+                var baseName = $"{char.ToLowerInvariant(contextType.Name[0])}{contextType.Name[1..]}ConnectionString";
+                var connectionName = baseName;
+                var suffix = 1;
+                var identifiers = root.DescendantTokens().Where(token => token.IsKind(SyntaxKind.IdentifierToken))
+                    .Select(token => token.ValueText).ToHashSet(StringComparer.Ordinal);
+                while (identifiers.Contains(connectionName))
+                {
+                    connectionName = baseName + suffix++;
+                }
+
+                var connectionArgument = providerCall.ArgumentList.Arguments.First();
+                additions.Add(SyntaxFactory.ParseStatement($"var {connectionName} = {connectionArgument.Expression};"));
+                providerCall = providerCall.ReplaceNode(connectionArgument.Expression, SyntaxFactory.IdentifierName(connectionName));
+                arguments = $"options => options.{providerCall}";
             }
 
-            providerCall = providerCall.ReplaceNodes(providerCall.DescendantNodes().OfType<IdentifierNameSyntax>()
-                .Where(identifier => identifier.Identifier.ValueText == "builder"),
-                (identifier, _) => SyntaxFactory.IdentifierName(builderName).WithTriviaFrom(identifier));
-            var baseName = $"{char.ToLowerInvariant(contextType.Name[0])}{contextType.Name[1..]}ConnectionString";
-            var connectionName = baseName;
-            var suffix = 1;
-            var identifiers = root.DescendantTokens().Where(token => token.IsKind(SyntaxKind.IdentifierToken))
-                .Select(token => token.ValueText).ToHashSet(StringComparer.Ordinal);
-            while (identifiers.Contains(connectionName))
-            {
-                connectionName = baseName + suffix++;
-            }
-
-            var connectionArgument = providerCall.ArgumentList.Arguments.First();
-            additions.Add(SyntaxFactory.ParseStatement($"var {connectionName} = {connectionArgument.Expression};"));
-            providerCall = providerCall.ReplaceNode(connectionArgument.Expression, SyntaxFactory.IdentifierName(connectionName));
-            arguments = $"options => options.{providerCall}";
+            var factory = SyntaxFactory.ParseStatement(
+                $"{builderName}.Services.AddDbContextFactory<global::{contextName}>({arguments});");
+            additions.Add(factory);
         }
-        var factory = SyntaxFactory.ParseStatement(
-            $"{builderName}.Services.AddDbContextFactory<global::{contextName}>({arguments});");
-        additions.Add(factory);
+
+        if (!hasQuickGridAdapter)
+        {
+            additions.Add(SyntaxFactory.ParseStatement($"{builderName}.Services.AddQuickGridEntityFrameworkAdapter();"));
+        }
+
         additions = additions.Select(statement => statement.NormalizeWhitespace()
             .WithLeadingTrivia(buildStatement.GetLeadingTrivia())
             .WithTrailingTrivia(SyntaxFactory.EndOfLine(Environment.NewLine))).ToList();
@@ -273,16 +288,19 @@ internal sealed class BlazorDbContextFactoryStep(ILogger<BlazorDbContextFactoryS
             ? root.InsertNodesBefore(globalStatement, additions.Select(SyntaxFactory.GlobalStatement))
             : root.InsertNodesBefore(buildStatement, additions);
         var updated = document.WithSyntaxRoot(root);
-        var updatedRoot = await updated.GetSyntaxRootAsync(cancellationToken);
-        var updatedModel = await updated.GetSemanticModelAsync(cancellationToken);
-        if (updatedRoot is null || updatedModel is null ||
-            !updatedRoot.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(invocation =>
-                updatedModel.GetSymbolInfo(invocation, cancellationToken).Symbol is IMethodSymbol method &&
-                method.Name == "AddDbContextFactory" &&
-                method.ContainingType.ToDisplayString() == "Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions" &&
-                method.TypeArguments[0].ToDisplayString() == contextType.ToDisplayString()))
+        if (factories.Length == 0)
         {
-            return Warn($"The generated IDbContextFactory<{contextName}> registration could not be resolved.");
+            var updatedRoot = await updated.GetSyntaxRootAsync(cancellationToken);
+            var updatedModel = await updated.GetSemanticModelAsync(cancellationToken);
+            if (updatedRoot is null || updatedModel is null ||
+                !updatedRoot.DescendantNodes().OfType<InvocationExpressionSyntax>().Any(invocation =>
+                    updatedModel.GetSymbolInfo(invocation, cancellationToken).Symbol is IMethodSymbol method &&
+                    method.Name == "AddDbContextFactory" &&
+                    method.ContainingType.ToDisplayString() == "Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions" &&
+                    method.TypeArguments[0].ToDisplayString() == contextType.ToDisplayString()))
+            {
+                return Warn($"The generated IDbContextFactory<{contextName}> registration could not be resolved.");
+            }
         }
 
         return updated;

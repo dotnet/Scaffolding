@@ -2,12 +2,16 @@
   "Files": [
     {
       "FileName": "Program.cs",
+      "Options": [
+        "EfScenario"
+      ],
       "Methods": {
         "Global": {
           "CodeChanges": [
             {
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
               "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
+              "CheckBlock": "AddQuickGridEntityFrameworkAdapter",
               "LeadingTrivia": {
                 "Newline": true
               }
@@ -15,6 +19,7 @@
             {
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContextFactory",
               "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",
+              "CheckBlock": "AddQuickGridEntityFrameworkAdapter",
               "LeadingTrivia": {
                 "Newline": true
               }

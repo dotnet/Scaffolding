@@ -48,6 +48,8 @@ Comparison includes every file except files under `bin` and `obj` directories. C
 | `BlazorIdentity` | `blazor-identity` | `BlazorWebApp` |
 | `BlazorToolkit` | `blazor-syncfusion-toolkit` | `BlazorWebApp` |
 
+`BlazorIdentity` password-reset and confirmation-resend pages send email to the account's stored address, not the submitted lookup address, and reject a missing or empty stored email.
+
 `BlazorToolkit` restores `Syncfusion.Blazor.Toolkit` from nuget.org, which the repository feeds do not include, so its test passes a scoped `NuGet.config` to the runner (the `nugetConfig` argument). Its expected projects differ from the input only by the package reference, the `using` and registration in `Program.cs`, and the `@using` in `Components/_Imports.razor`.
 
 To add coverage, reuse or add a shared input, check in a runnable expected project, and call `ScaffolderBaselineRunner.RunAsync` with named arguments for the scaffolder directory, framework, input template, and callback that runs the scaffolder on the copied input. The runner handles setup, builds, comparison, and cleanup.

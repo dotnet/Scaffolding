@@ -75,8 +75,11 @@ using ");
                     "rlEncode(Encoding.UTF8.GetBytes(code));\r\n            var callbackUrl = Url.Page(" +
                     "\r\n                \"/Account/ResetPassword\",\r\n                pageHandler: null,\r" +
                     "\n                values: new { area = \"Identity\", code },\r\n                proto" +
-                    "col: Request.Scheme)!;\r\n\r\n            await _emailSender.SendEmailAsync(\r\n      " +
-                    "          Input.Email,\r\n                \"Reset Password\",\r\n                $\"Ple" +
+                    "col: Request.Scheme)!;\r\n\r\n            var storedEmail = await _userManager.GetEmailAsync(user);\r\n" +
+                    "            if (string.IsNullOrEmpty(storedEmail))\r\n            {\r\n" +
+                    "                throw new InvalidOperationException(\"Users must have an email.\");\r\n" +
+                    "            }\r\n\r\n            await _emailSender.SendEmailAsync(\r\n" +
+                    "                storedEmail,\r\n                \"Reset Password\",\r\n                $\"Ple" +
                     "ase reset your password by <a href=\'{HtmlEncoder.Default.Encode(callbackUrl)}\'>c" +
                     "licking here</a>.\");\r\n\r\n            return RedirectToPage(\"./ForgotPasswordConfi" +
                     "rmation\");\r\n        }\r\n\r\n        return Page();\r\n    }\r\n}\r\n");

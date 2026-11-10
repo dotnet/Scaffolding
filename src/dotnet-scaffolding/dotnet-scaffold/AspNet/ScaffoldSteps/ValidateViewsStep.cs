@@ -11,6 +11,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
 using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
+using SymbolDisplayFormat = Microsoft.CodeAnalysis.SymbolDisplayFormat;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -24,7 +25,7 @@ internal class ValidateViewsStep : ScaffoldStep
     /// </summary>
     public string? Project { get; set; }
     /// <summary>
-    /// Name of the model class for the view.
+    /// Short or fully qualified name of the model class for the view.
     /// </summary>
     public string? Model { get; set; }
     /// <summary>
@@ -141,19 +142,27 @@ internal class ValidateViewsStep : ScaffoldStep
         }
 
         //find and set --model class properties
-        ModelInfo? modelInfo = null;
-        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync();
-        var modelClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(settings.Model, StringComparison.OrdinalIgnoreCase));
-        if (string.IsNullOrEmpty(settings.Model) || modelClassSymbol is null)
+        var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync(includeReferencedProjects: true);
+        var matchingClasses = allClasses.Where(x =>
+            x.Name.Equals(settings.Model, StringComparison.OrdinalIgnoreCase) ||
+            x.ToDisplayString().Equals(settings.Model, StringComparison.OrdinalIgnoreCase) ||
+            x.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Equals(settings.Model, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (matchingClasses.Count > 1)
         {
-            _logger.LogError($"Invalid {AspNetConstants.CliOptions.ModelCliOption} '{settings.Model}'");
+            var candidates = string.Join(", ", matchingClasses.Select(x => x.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+            _logger.LogError($"Ambiguous {AspNetConstants.CliOptions.ModelCliOption} '{settings.Model}'. Specify a fully qualified model name: {candidates}.");
             return null;
         }
-        else
+        var modelClassSymbol = matchingClasses.SingleOrDefault();
+        if (modelClassSymbol is null)
         {
-            modelInfo = ClassAnalyzers.GetModelClassInfo(modelClassSymbol);
+            _logger.LogError($"Invalid {AspNetConstants.CliOptions.ModelCliOption} '{settings.Model}'. Model was not found or is not accessible from the target project.");
+            return null;
         }
 
+        var modelInfo = ClassAnalyzers.GetModelClassInfo(modelClassSymbol);
+        modelInfo.ModelFullName = modelClassSymbol.ToDisplayString();
         var validateModelInfoResult = ClassAnalyzers.ValidateModelForCrudScaffolders(modelInfo, _logger);
         if (!validateModelInfoResult)
         {

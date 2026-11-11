@@ -79,7 +79,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
     /// <returns>Task indicating the completion of the operation.</returns>
     public override async Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
     {
-        var efControllerSettings = ValidateEfControllerSettings();
+        var efControllerSettings = ValidateEfControllerSettings(context.GetOptionResult<bool>(AspNetConstants.CliOptions.ViewsOption));
         var codeModifierProperties = new Dictionary<string, string>();
         if (efControllerSettings is null)
         {
@@ -132,7 +132,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
     /// Validates the EF Controller settings provided by the user.
     /// </summary>
     /// <returns>Validated EF Controller settings.</returns>
-    private EfControllerSettings? ValidateEfControllerSettings()
+    private EfControllerSettings? ValidateEfControllerSettings(bool generateViews = false)
     {
         if (string.IsNullOrEmpty(Project) || !_fileSystem.FileExists(Project))
         {
@@ -154,6 +154,18 @@ internal class ValidateEfControllerStep : ScaffoldStep
         else
         {
             ControllerName = Path.GetFileNameWithoutExtension(ControllerName);
+        }
+
+        if (!SyntaxFacts.IsValidIdentifier(ControllerName))
+        {
+            _logger.LogError($"Invalid {AspNetConstants.CliOptions.ControllerNameOption}: controller name must be a valid C# identifier.");
+            return null;
+        }
+
+        if (generateViews && !ViewHelper.IsValidControllerViewFolder(ControllerName))
+        {
+            _logger.LogError($"Invalid {AspNetConstants.CliOptions.ControllerNameOption}: controller name must produce a valid, non-reserved view folder.");
+            return null;
         }
 
         if (string.IsNullOrEmpty(ControllerType))

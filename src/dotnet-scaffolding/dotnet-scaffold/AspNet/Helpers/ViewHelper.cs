@@ -60,10 +60,7 @@ internal class ViewHelper
                     string folderName = viewModel.ModelInfo.ModelTypeName;
                     if (!string.IsNullOrEmpty(viewModel.ControllerName))
                     {
-                        const string controllerSuffix = "Controller";
-                        folderName = viewModel.ControllerName.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase)
-                            ? viewModel.ControllerName[..^controllerSuffix.Length]
-                            : viewModel.ControllerName;
+                        folderName = GetControllerFolderName(viewModel.ControllerName);
                     }
 
                     string baseOutputPath = GetBaseOutputPath(folderName, viewModel.ProjectInfo.ProjectPath);
@@ -81,6 +78,39 @@ internal class ViewHelper
         }
         
         return textTemplatingProperties;
+    }
+
+    internal static string GetControllerFolderName(string controllerName)
+    {
+        const string controllerSuffix = "Controller";
+        return controllerName.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase)
+            ? controllerName[..^controllerSuffix.Length]
+            : controllerName;
+    }
+
+    internal static bool IsValidControllerViewFolder(string controllerName)
+    {
+        var folderName = GetControllerFolderName(controllerName);
+        if (string.IsNullOrWhiteSpace(folderName) || folderName is "." or ".." ||
+            folderName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
+            folderName.Contains('/') || folderName.Contains('\\'))
+        {
+            return false;
+        }
+
+        if (OperatingSystem.IsWindows())
+        {
+            var deviceName = folderName.ToUpperInvariant();
+            if (deviceName is "CON" or "PRN" or "AUX" or "NUL" ||
+                (deviceName.Length == 4 &&
+                 (deviceName.StartsWith("COM", StringComparison.Ordinal) || deviceName.StartsWith("LPT", StringComparison.Ordinal)) &&
+                 deviceName[3] is >= '1' and <= '9' or '\u00b9' or '\u00b2' or '\u00b3'))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>

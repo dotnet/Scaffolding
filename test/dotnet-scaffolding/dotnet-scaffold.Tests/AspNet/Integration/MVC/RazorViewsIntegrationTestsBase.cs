@@ -7,32 +7,42 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using System.Linq;
-using System.Threading;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
 using Microsoft.DotNet.Tools.Scaffold.AspNet;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
+using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration;
 
 /// <summary>
-/// Shared base class for Razor View Empty (razorview-empty) integration tests across .NET versions.
+/// Shared base class for Razor Views (CRUD) integration tests across .NET versions.
+/// The 'views' scaffolder generates Razor views for Create, Delete, Details, Edit and List
+/// operations for a given model.
 /// Subclasses provide the target framework via <see cref="TargetFramework"/>.
 /// </summary>
 [Trait("Suite", "ScaffoldIntegration")]
-[Trait("Family", "razorview-empty")]
-public abstract class RazorViewEmptyIntegrationTestsBase : IDisposable
+[Trait("Family", "razorviews")]
+public abstract class RazorViewsIntegrationTestsBase : IDisposable
 {
     protected abstract string TargetFramework { get; }
     protected abstract string TestClassName { get; }
+
+    /// <summary>
+    /// net8.0 uses Bootstrap4/Bootstrap5 subfolders with .cshtml files.
+    /// net9.0+ uses flat T4 templates (.cs, .tt, .Interfaces.cs) directly in Views/.
+    /// </summary>
+    protected virtual bool UsesBootstrapSubfolders => TargetFramework == "net8.0";
 
     protected readonly string _testDirectory;
     protected readonly string _testProjectDir;
@@ -42,7 +52,7 @@ public abstract class RazorViewEmptyIntegrationTestsBase : IDisposable
     protected readonly Mock<IScaffolder> _mockScaffolder;
     protected readonly ScaffolderContext _context;
 
-    protected RazorViewEmptyIntegrationTestsBase()
+    protected RazorViewsIntegrationTestsBase()
     {
         _testDirectory = Path.Combine(Path.GetTempPath(), TestClassName, Guid.NewGuid().ToString());
         _testProjectDir = Path.Combine(_testDirectory, "TestProject");
@@ -52,9 +62,10 @@ public abstract class RazorViewEmptyIntegrationTestsBase : IDisposable
 
         _mockFileSystem = new Mock<IFileSystem>();
         _testTelemetryService = new TestTelemetryService();
+
         _mockScaffolder = new Mock<IScaffolder>();
-        _mockScaffolder.Setup(s => s.DisplayName).Returns(AspnetStrings.RazorView.EmptyDisplayName);
-        _mockScaffolder.Setup(s => s.Name).Returns(AspnetStrings.RazorView.Empty);
+        _mockScaffolder.Setup(s => s.DisplayName).Returns(AspnetStrings.RazorView.ViewsDisplayName);
+        _mockScaffolder.Setup(s => s.Name).Returns(AspnetStrings.RazorView.Views);
         _context = new ScaffolderContext(_mockScaffolder.Object);
     }
 
@@ -74,733 +85,329 @@ public abstract class RazorViewEmptyIntegrationTestsBase : IDisposable
   </PropertyGroup>
 </Project>";
 
-    #region DotnetNewScaffolderStep  Validation
+    #region ValidateViewsStep — Validation Logic
 
     [Fact]
-    public async Task ExecuteAsync_ReturnsFalse_WhenProjectPathIsNull()
+    public async Task ValidateViewsStep_FailsWithNullProject()
     {
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = null,
-            FileName = "Dashboard",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+        var step = CreateValidateViewsStep();
+        step.Project = null;
+        step.Model = "Product";
+        step.Page = "CRUD";
 
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
+        var result = await step.ExecuteAsync(_context);
         Assert.False(result);
     }
 
     [Fact]
-    public async Task ExecuteAsync_ReturnsFalse_WhenProjectPathIsEmpty()
+    public async Task ValidateViewsStep_FailsWithEmptyProject()
     {
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = string.Empty,
-            FileName = "Dashboard",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+        var step = CreateValidateViewsStep();
+        step.Project = string.Empty;
+        step.Model = "Product";
+        step.Page = "CRUD";
 
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
+        var result = await step.ExecuteAsync(_context);
         Assert.False(result);
     }
 
     [Fact]
-    public async Task ExecuteAsync_ReturnsFalse_WhenProjectPathDoesNotExist()
+    public async Task ValidateViewsStep_FailsWithNonExistentProject()
     {
         _mockFileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns(false);
 
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = Path.Combine(_testProjectDir, "NonExistent.csproj"),
-            FileName = "Dashboard",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+        var step = CreateValidateViewsStep();
+        step.Project = @"C:\NonExistent\Project.csproj";
+        step.Model = "Product";
+        step.Page = "CRUD";
 
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
+        var result = await step.ExecuteAsync(_context);
         Assert.False(result);
     }
 
     [Fact]
-    public async Task ExecuteAsync_ReturnsFalse_WhenFileNameIsNull()
+    public async Task ValidateViewsStep_FailsWithNullModel()
     {
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
 
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = null,
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+        var step = CreateValidateViewsStep();
+        step.Project = _testProjectPath;
+        step.Model = null;
+        step.Page = "CRUD";
 
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
+        var result = await step.ExecuteAsync(_context);
         Assert.False(result);
     }
 
     [Fact]
-    public async Task ExecuteAsync_ReturnsFalse_WhenFileNameIsEmpty()
+    public async Task ValidateViewsStep_FailsWithEmptyModel()
     {
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
 
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = string.Empty,
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+        var step = CreateValidateViewsStep();
+        step.Project = _testProjectPath;
+        step.Model = string.Empty;
+        step.Page = "CRUD";
 
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
+        var result = await step.ExecuteAsync(_context);
         Assert.False(result);
     }
 
-    #endregion
-
-    #region DotnetNewScaffolderStep  Property Initialization
-
     [Fact]
-    public void Constructor_InitializesCorrectly()
+    public async Task ValidateViewsStep_FailsWithNullPage()
     {
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        Assert.NotNull(step);
-    }
-
-    [Fact]
-    public void ProjectPath_DefaultsToNull()
-    {
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        Assert.Null(step.ProjectPath);
-    }
-
-    [Fact]
-    public void FileName_DefaultsToNull()
-    {
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        Assert.Null(step.FileName);
-    }
-
-    [Fact]
-    public void NamespaceName_DefaultsToNull()
-    {
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        Assert.Null(step.NamespaceName);
-    }
-
-    [Fact]
-    public void RazorViewEmpty_DoesNotSetNamespace()
-    {
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "Dashboard",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        Assert.Null(step.NamespaceName);
-    }
-
-    #endregion
-
-    #region DotnetNewScaffolderStep  Output Folder Mapping
-
-    [Fact]
-    public async Task ExecuteAsync_CreatesViewsDirectory_WhenProjectExists()
-    {
-        string expectedViewsDir = Path.Combine(_testProjectDir, "Views");
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(expectedViewsDir)).Returns(true);
 
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "Dashboard",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+        var step = CreateValidateViewsStep();
+        step.Project = _testProjectPath;
+        step.Model = "Product";
+        step.Page = null;
 
-        await step.ExecuteAsync(_context, CancellationToken.None);
-
-        _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(expectedViewsDir), Times.Once);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_OutputFolder_IsViews_ForView()
-    {
-        string viewsDir = Path.Combine(_testProjectDir, "Views");
-        string componentsDir = Path.Combine(_testProjectDir, "Components");
-        string pagesDir = Path.Combine(_testProjectDir, "Pages");
-
-        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(viewsDir)).Returns(true);
-
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "TestView",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        await step.ExecuteAsync(_context, CancellationToken.None);
-
-        _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(viewsDir), Times.Once);
-        _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(componentsDir), Times.Never);
-        _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(pagesDir), Times.Never);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_OutputFolder_UsesRelativePathFromName_ForView()
-    {
-        string nestedViewsDir = Path.Combine(_testProjectDir, "Views", "Repro");
-
-        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(nestedViewsDir)).Returns(false);
-
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = Path.Combine("Repro", "index"),
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
+        var result = await step.ExecuteAsync(_context);
         Assert.False(result);
-        Assert.Equal(Path.Combine("Repro", "Index"), step.FileName);
-        _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(nestedViewsDir), Times.Once);
     }
 
     [Fact]
-    public async Task ExecuteAsync_OutputFolder_UsesRelativeFolderOption_ForView()
+    public async Task ValidateViewsStep_FailsWithEmptyPage()
     {
-        string nestedViewsDir = Path.Combine(_testProjectDir, "Views", "Repro");
-
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(nestedViewsDir)).Returns(false);
 
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "Index",
-            RelativeOutputPath = "Repro",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+        var step = CreateValidateViewsStep();
+        step.Project = _testProjectPath;
+        step.Model = "Product";
+        step.Page = string.Empty;
 
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
+        var result = await step.ExecuteAsync(_context);
         Assert.False(result);
-        Assert.Equal(Path.Combine("Repro", "Index"), step.FileName);
-        _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(nestedViewsDir), Times.Once);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_OutputFolder_DoesNotDuplicateViewsSegment_ForView()
-    {
-        string nestedViewsDir = Path.Combine(_testProjectDir, "Views", "Home");
-
-        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(nestedViewsDir)).Returns(false);
-
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "TestView",
-            RelativeOutputPath = Path.Combine("Views", "Home"),
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.False(result);
-        _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(It.IsAny<string>()), Times.Never);
-        _mockFileSystem.Verify(fs => fs.DirectoryExists(It.IsAny<string>()), Times.Never);
-        Assert.Equal(Path.Combine("Home", "TestView"), step.FileName);
-        _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(nestedViewsDir), Times.Once);
-        _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(Path.Combine(_testProjectDir, "Views", "Views", "Home")), Times.Never);
     }
 
     [Theory]
-    [InlineData("../Index", null)]
-    [InlineData("..\\Index", null)]
-    [InlineData("Index", "../Repro")]
-    [InlineData("Index", "..\\Repro")]
-    public async Task ExecuteAsync_ReturnsFalse_WhenNameOrRelativeFolderTraversesDirectories(string fileName, string? relativeOutputPath)
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task ValidateViewsStep_FailsWithInvalidProject(string? project)
+    {
+        var step = CreateValidateViewsStep();
+        step.Project = project;
+        step.Model = "Product";
+        step.Page = "CRUD";
+
+        var result = await step.ExecuteAsync(_context);
+        Assert.False(result);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task ValidateViewsStep_FailsWithInvalidModel(string? model)
     {
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
 
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = fileName,
-            RelativeOutputPath = relativeOutputPath,
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+        var step = CreateValidateViewsStep();
+        step.Project = _testProjectPath;
+        step.Model = model;
+        step.Page = "CRUD";
 
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+        var result = await step.ExecuteAsync(_context);
+        Assert.False(result);
+    }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task ValidateViewsStep_FailsWithInvalidPage(string? page)
+    {
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+
+        var step = CreateValidateViewsStep();
+        step.Project = _testProjectPath;
+        step.Model = "Product";
+        step.Page = page;
+
+        var result = await step.ExecuteAsync(_context);
         Assert.False(result);
     }
 
     #endregion
 
-    #region DotnetNewScaffolderStep  Telemetry
+    #region ValidateViewsStep — Telemetry
 
     [Fact]
-    public async Task ExecuteAsync_TracksTelemetryEvent_OnValidationFailure()
+    public async Task ValidateViewsStep_TracksTelemetry_OnNullProjectFailure()
     {
-        var telemetry = new TestTelemetryService();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            telemetry)
-        {
-            ProjectPath = null,
-            FileName = "Dashboard",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+        var step = CreateValidateViewsStep();
+        step.Project = null;
+        step.Model = "Product";
+        step.Page = "CRUD";
 
-        await step.ExecuteAsync(_context, CancellationToken.None);
+        await step.ExecuteAsync(_context);
 
-        Assert.Single(telemetry.TrackedEvents);
-        Assert.True(telemetry.TrackedEvents[0].Properties.ContainsKey("SettingsValidationResult"));
-        Assert.True(telemetry.TrackedEvents[0].Properties.ContainsKey("Result"));
+        Assert.Single(_testTelemetryService.TrackedEvents);
     }
 
     [Fact]
-    public async Task ExecuteAsync_TracksTelemetryEvent_OnValidFileNameFailure()
+    public async Task ValidateViewsStep_TracksTelemetry_OnNullModelFailure()
     {
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
-        var telemetry = new TestTelemetryService();
 
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            telemetry)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = string.Empty,
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+        var step = CreateValidateViewsStep();
+        step.Project = _testProjectPath;
+        step.Model = null;
+        step.Page = "CRUD";
 
-        await step.ExecuteAsync(_context, CancellationToken.None);
+        await step.ExecuteAsync(_context);
 
-        Assert.Single(telemetry.TrackedEvents);
-        Assert.True(telemetry.TrackedEvents[0].Properties.ContainsKey("SettingsValidationResult"));
+        Assert.Single(_testTelemetryService.TrackedEvents);
     }
 
     [Fact]
-    public async Task ExecuteAsync_TracksTelemetryEvent_WhenSettingsAreValid()
+    public async Task ValidateViewsStep_TracksTelemetry_OnNullPageFailure()
     {
-        string viewsDir = Path.Combine(_testProjectDir, "Views");
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(viewsDir)).Returns(true);
-        var telemetry = new TestTelemetryService();
 
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            telemetry)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "ValidView",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+        var step = CreateValidateViewsStep();
+        step.Project = _testProjectPath;
+        step.Model = "Product";
+        step.Page = null;
 
-        await step.ExecuteAsync(_context, CancellationToken.None);
+        await step.ExecuteAsync(_context);
 
-        Assert.Single(telemetry.TrackedEvents);
-        Assert.True(telemetry.TrackedEvents[0].Properties.ContainsKey("SettingsValidationResult"));
+        Assert.Single(_testTelemetryService.TrackedEvents);
     }
 
     #endregion
 
-    #region DotnetNewScaffolderStep  Cancellation Token
+    #region BlazorCrudHelper — CRUDPages
 
     [Fact]
-    public async Task ExecuteAsync_AcceptsCancellationToken()
+    public void CRUDPages_Has7Entries()
     {
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = null,
-            FileName = "Dashboard",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+        Assert.Equal(7, BlazorCrudHelper.CRUDPages.Count);
+    }
 
-        using var cts = new CancellationTokenSource();
-
-        bool result = await step.ExecuteAsync(_context, cts.Token);
-
-        Assert.False(result);
+    [Theory]
+    [InlineData("Create")]
+    [InlineData("Delete")]
+    [InlineData("Details")]
+    [InlineData("Edit")]
+    [InlineData("Index")]
+    [InlineData("CRUD")]
+    [InlineData("NotFound")]
+    public void CRUDPages_ContainsPageType(string pageType)
+    {
+        Assert.Contains(pageType, BlazorCrudHelper.CRUDPages);
     }
 
     #endregion
 
-    #region GetScaffoldSteps Registration
+    #region ViewHelper — Template Constants (non-string-comparison)
 
     [Fact]
-    public void GetScaffoldSteps_ContainsDotnetNewScaffolderStep()
+    public void ViewHelper_CreateTemplate_IsNotEmpty()
     {
-        var mockBuilder = new Mock<Scaffolding.Core.Builder.IScaffoldRunnerBuilder>();
-        var service = new AspNetCommandService(mockBuilder.Object);
+        Assert.False(string.IsNullOrWhiteSpace(ViewHelper.CreateTemplate));
+    }
 
-        Type[] stepTypes = service.GetScaffoldSteps();
+    [Fact]
+    public void ViewHelper_DeleteTemplate_IsNotEmpty()
+    {
+        Assert.False(string.IsNullOrWhiteSpace(ViewHelper.DeleteTemplate));
+    }
 
-        Assert.Contains(typeof(DotnetNewScaffolderStep), stepTypes);
+    [Fact]
+    public void ViewHelper_DetailsTemplate_IsNotEmpty()
+    {
+        Assert.False(string.IsNullOrWhiteSpace(ViewHelper.DetailsTemplate));
+    }
+
+    [Fact]
+    public void ViewHelper_EditTemplate_IsNotEmpty()
+    {
+        Assert.False(string.IsNullOrWhiteSpace(ViewHelper.EditTemplate));
+    }
+
+    [Fact]
+    public void ViewHelper_IndexTemplate_IsNotEmpty()
+    {
+        Assert.False(string.IsNullOrWhiteSpace(ViewHelper.IndexTemplate));
     }
 
     #endregion
 
-    #region End-to-End File Generation
+    #region Views Templates
 
     [Fact]
-    public async Task ExecuteAsync_GeneratesViewFile_WhenProjectIsValid()
+    public void ViewsTemplates_FolderExists()
     {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "Dashboard",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result, $"dotnet new view should succeed for a valid {TargetFramework} project.");
-        string expectedFile = Path.Combine(_testProjectDir, "Views", $"{step.FileName}.cshtml");
-        Assert.True(File.Exists(expectedFile), $"Expected file '{expectedFile}' was not created.");
+        var basePath = GetActualTemplatesBasePath();
+        var viewsDir = Path.Combine(basePath, TargetFramework, "Views");
+        Assert.True(Directory.Exists(viewsDir),
+            $"Views template folder should exist for {TargetFramework}");
     }
 
     [Fact]
-    public async Task ExecuteAsync_GeneratedViewFile_ContainsValidContent()
+    public void ViewsTemplates_DoesNotHaveFlatT4Templates()
     {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "Dashboard",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        string expectedFile = Path.Combine(_testProjectDir, "Views", $"{step.FileName}.cshtml");
-        string content = File.ReadAllText(expectedFile);
-        Assert.False(string.IsNullOrWhiteSpace(content), "Generated .cshtml file should not be empty.");
+        if (!UsesBootstrapSubfolders) return;
+        var basePath = GetActualTemplatesBasePath();
+        var viewsDir = Path.Combine(basePath, TargetFramework, "Views");
+        var ttFiles = Directory.GetFiles(viewsDir, "*.tt", SearchOption.TopDirectoryOnly);
+        Assert.Empty(ttFiles);
     }
 
     [Fact]
-    public async Task ExecuteAsync_GeneratesViewFile_InNestedControllerFolder_WhenNameIncludesRelativePath()
+    public void ViewsTemplates_HasT4Templates()
     {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = Path.Combine("Repro", "Index"),
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result, $"dotnet new view should succeed for a nested output path in a valid {TargetFramework} project.");
-        string expectedFile = Path.Combine(_testProjectDir, "Views", "Repro", "Index.cshtml");
-        Assert.True(File.Exists(expectedFile), $"Expected file '{expectedFile}' was not created.");
+        if (UsesBootstrapSubfolders) return;
+        var basePath = GetActualTemplatesBasePath();
+        var viewsDir = Path.Combine(basePath, TargetFramework, "Views");
+        var ttFiles = Directory.GetFiles(viewsDir, "*.tt", SearchOption.TopDirectoryOnly);
+        Assert.NotEmpty(ttFiles);
     }
 
-    [Fact]
-    public async Task ExecuteAsync_GeneratesViewFile_InNestedControllerFolder_WhenRelativeFolderOptionIsSet()
+    [Theory]
+    [InlineData("Bootstrap4", "Create.cshtml")]
+    [InlineData("Bootstrap4", "Delete.cshtml")]
+    [InlineData("Bootstrap4", "Details.cshtml")]
+    [InlineData("Bootstrap4", "Edit.cshtml")]
+    [InlineData("Bootstrap4", "Empty.cshtml")]
+    [InlineData("Bootstrap4", "List.cshtml")]
+    [InlineData("Bootstrap4", "_ValidationScriptsPartial.cshtml")]
+    [InlineData("Bootstrap5", "Create.cshtml")]
+    [InlineData("Bootstrap5", "Delete.cshtml")]
+    [InlineData("Bootstrap5", "Details.cshtml")]
+    [InlineData("Bootstrap5", "Edit.cshtml")]
+    [InlineData("Bootstrap5", "Empty.cshtml")]
+    [InlineData("Bootstrap5", "List.cshtml")]
+    [InlineData("Bootstrap5", "_ValidationScriptsPartial.cshtml")]
+    public void ViewsTemplates_HasExpectedFile(string subfolder, string fileName)
     {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "Index",
-            RelativeOutputPath = "Repro",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result, $"dotnet new view should succeed for a relative folder path in a valid {TargetFramework} project.");
-        string expectedFile = Path.Combine(_testProjectDir, "Views", "Repro", "Index.cshtml");
-        Assert.True(File.Exists(expectedFile), $"Expected file '{expectedFile}' was not created.");
+        if (!UsesBootstrapSubfolders) return;
+        var basePath = GetActualTemplatesBasePath();
+        var filePath = Path.Combine(basePath, TargetFramework, "Views", subfolder, fileName);
+        Assert.True(File.Exists(filePath),
+            $"Expected Views template file '{subfolder}/{fileName}' not found for {TargetFramework}");
     }
 
-    [Fact]
-    public async Task ExecuteAsync_GeneratesViewFile_WithoutDuplicatingViewsSegment_WhenRelativeFolderIncludesViews()
+    #endregion
+
+    #region Template Root — Expected Scaffolder Folders
+
+    [Theory]
+    [InlineData("BlazorCrud")]
+    [InlineData("BlazorIdentity")]
+    [InlineData("CodeModificationConfigs")]
+    [InlineData("EfController")]
+    [InlineData("Files")]
+    [InlineData("Identity")]
+    [InlineData("MinimalApi")]
+    [InlineData("RazorPages")]
+    [InlineData("Views")]
+    public void Templates_HasExpectedScaffolderFolder(string folderName)
     {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "TestView",
-            RelativeOutputPath = Path.Combine("Views", "Home"),
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result, $"dotnet new view should succeed when the relative folder path includes the Views segment for {TargetFramework}.");
-        string expectedFile = Path.Combine(_testProjectDir, "Views", "Home", "TestView.cshtml");
-        Assert.True(File.Exists(expectedFile), $"Expected file '{expectedFile}' was not created.");
-        Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Views", "Views")), "A nested Views/Views folder should not be created.");
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_GeneratedViewFile_HasCshtmlExtension()
-    {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "ExtCheck",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        string viewsDir = Path.Combine(_testProjectDir, "Views");
-        string[] files = Directory.GetFiles(viewsDir);
-        Assert.All(files, f => Assert.EndsWith(".cshtml", f));
-        Assert.Empty(Directory.GetFiles(viewsDir, "*.razor"));
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_CreatesViewsSubdirectory()
-    {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "Widget",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        await step.ExecuteAsync(_context, CancellationToken.None);
-
-        string viewsDir = Path.Combine(_testProjectDir, "Views");
-        Assert.True(Directory.Exists(viewsDir), "Views subdirectory should be created.");
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_GeneratesCorrectFileName_WhenLowercaseInput()
-    {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "dashboard",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        string expectedFile = Path.Combine(_testProjectDir, "Views", "Dashboard.cshtml");
-        Assert.True(File.Exists(expectedFile), $"Expected file 'Dashboard.cshtml' (title-cased) was not created. FileName was '{step.FileName}'.");
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_TracksSuccessTelemetry_WhenGenerationSucceeds()
-    {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-
-        var telemetry = new TestTelemetryService();
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            telemetry)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "TelemetryView",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        Assert.Single(telemetry.TrackedEvents);
-        Assert.True(telemetry.TrackedEvents[0].Properties.ContainsKey("SettingsValidationResult"));
-        Assert.True(telemetry.TrackedEvents[0].Properties.ContainsKey("Result"));
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_OnlyGeneratesSingleViewFile()
-    {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "SingleFile",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        string viewsDir = Path.Combine(_testProjectDir, "Views");
-        string[] generatedFiles = Directory.GetFiles(viewsDir);
-        Assert.Single(generatedFiles);
-        Assert.EndsWith(".cshtml", generatedFiles[0]);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_DoesNotCreateComponentsDirectory()
-    {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "NoComponents",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        await step.ExecuteAsync(_context, CancellationToken.None);
-
-        string componentsDir = Path.Combine(_testProjectDir, "Components");
-        Assert.False(Directory.Exists(componentsDir), "Components directory should not be created for Razor views.");
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_DoesNotCreatePagesDirectory()
-    {
-        File.WriteAllText(_testProjectPath, ProjectContent);
-
-        var realFileSystem = new FileSystem();
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            realFileSystem,
-            _testTelemetryService)
-        {
-            ProjectPath = _testProjectPath,
-            FileName = "NoPages",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        await step.ExecuteAsync(_context, CancellationToken.None);
-
-        string pagesDir = Path.Combine(_testProjectDir, "Pages");
-        Assert.False(Directory.Exists(pagesDir), "Pages directory should not be created for Razor views.");
+        var basePath = GetActualTemplatesBasePath();
+        var folderPath = Path.Combine(basePath, TargetFramework, folderName);
+        Assert.True(Directory.Exists(folderPath),
+            $"Expected template folder '{folderName}' not found for {TargetFramework}");
     }
 
     #endregion
@@ -808,77 +415,91 @@ public abstract class RazorViewEmptyIntegrationTestsBase : IDisposable
     #region Regression Guards
 
     [Fact]
-    public async Task RegressionGuard_ValidationFailure_DoesNotThrow()
+    public void ViewsScaffolderName_NotEmpty()
     {
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = null,
-            FileName = null,
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-        Assert.False(result);
+        Assert.False(string.IsNullOrWhiteSpace(AspnetStrings.RazorView.Views));
     }
 
     [Fact]
-    public async Task RegressionGuard_EmptyInputs_DoNotThrow()
+    public void ViewsScaffolderDisplayName_NotEmpty()
     {
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = string.Empty,
-            FileName = string.Empty,
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-        Assert.False(result);
+        Assert.False(string.IsNullOrWhiteSpace(AspnetStrings.RazorView.ViewsDisplayName));
     }
 
     [Fact]
-    public async Task RegressionGuard_NonExistentProject_ReturnsFalseNotException()
+    public void ViewsScaffolderDescription_NotEmpty()
     {
-        _mockFileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns(false);
+        Assert.False(string.IsNullOrWhiteSpace(AspnetStrings.RazorView.ViewsDescription));
+    }
 
-        var step = new DotnetNewScaffolderStep(
-            NullLogger<DotnetNewScaffolderStep>.Instance,
-            _mockFileSystem.Object,
-            _testTelemetryService)
-        {
-            ProjectPath = @"C:\NonExistent\Path\Project.csproj",
-            FileName = "TestView",
-            CommandName = Constants.DotnetCommands.ViewCommandName
-        };
+    [Fact]
+    public void ViewsExample1_NotEmpty()
+    {
+        Assert.False(string.IsNullOrWhiteSpace(AspnetStrings.RazorView.ViewsExample1));
+    }
 
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-        Assert.False(result);
+    [Fact]
+    public void ViewsExample2_NotEmpty()
+    {
+        Assert.False(string.IsNullOrWhiteSpace(AspnetStrings.RazorView.ViewsExample2));
+    }
+
+    [Fact]
+    public void ViewsExample1Description_NotEmpty()
+    {
+        Assert.False(string.IsNullOrWhiteSpace(AspnetStrings.RazorView.ViewsExample1Description));
+    }
+
+    [Fact]
+    public void ViewsExample2Description_NotEmpty()
+    {
+        Assert.False(string.IsNullOrWhiteSpace(AspnetStrings.RazorView.ViewsExample2Description));
+    }
+
+    [Fact]
+    public void ViewExtension_IsNotEmpty()
+    {
+        Assert.False(string.IsNullOrWhiteSpace(AspNetConstants.ViewExtension));
+    }
+
+    [Fact]
+    public void PageTypeOption_IsNotEmpty()
+    {
+        Assert.False(string.IsNullOrWhiteSpace(AspNetConstants.CliOptions.PageTypeOption));
     }
 
     #endregion
 
-    #region Test Helpers
+    #region Helper Methods
+
+    private ValidateViewsStep CreateValidateViewsStep()
+    {
+        return new ValidateViewsStep(
+            _mockFileSystem.Object,
+            NullLogger<ValidateViewsStep>.Instance,
+            _testTelemetryService);
+    }
+
+    protected static string GetActualTemplatesBasePath()
+    {
+        var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+        var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+        var basePath = Path.Combine(assemblyDirectory!, "..", "..", "..", "..", "..", "src", "dotnet-scaffolding", "dotnet-scaffold", "AspNet", "Templates");
+        return Path.GetFullPath(basePath);
+    }
 
     protected Task<(int ExitCode, string Output, string Error)> RunBuildAsync(string workingDirectory)
         => ScaffoldCliHelper.RunBuildForFrameworkAsync(workingDirectory, TargetFramework);
 
     protected class TestTelemetryService : ITelemetryService
     {
-        public List<(string EventName, IReadOnlyDictionary<string, string> Properties, IReadOnlyDictionary<string, double> Measurements)> TrackedEvents { get; } = new();
-
-        public void TrackEvent(string eventName, IReadOnlyDictionary<string, string> properties, IReadOnlyDictionary<string, double> measurements)
+        public List<(string EventName, IReadOnlyDictionary<string, string> Properties, IReadOnlyDictionary<string, double> Measures)> TrackedEvents { get; } = new();
+        public void TrackEvent(string eventName, IReadOnlyDictionary<string, string>? properties = null, IReadOnlyDictionary<string, double>? measures = null)
         {
-            TrackedEvents.Add((eventName, properties, measurements));
+            TrackedEvents.Add((eventName, properties ?? new Dictionary<string, string>(), measures ?? new Dictionary<string, double>()));
         }
 
-        public void Flush()
-        {
-        }
+        public void Flush() { }
     }
 
     #endregion

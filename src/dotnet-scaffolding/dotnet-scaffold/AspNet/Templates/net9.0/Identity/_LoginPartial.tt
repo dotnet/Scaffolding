@@ -1,4 +1,4 @@
-<#@ template hostSpecific="false" linePragmas="false" #>
+<#@ template hostSpecific="true" linePragmas="false" #>
 <#@ parameter type="Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel" name="Model" #>
 @using Microsoft.AspNetCore.Identity
 <# if (Model.UserClassNamespace != "Microsoft.AspNetCore.Identity") { #>

@@ -96,6 +96,49 @@ public class IdentityHelperTests : IDisposable
         Assert.Equal(Path.Combine(model.BaseOutputPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml"), property.OutputPath);
     }
 
+    [Theory]
+    [InlineData("net8.0", true, false)]
+    [InlineData("net8.0", true, true)]
+    [InlineData("net8.0", false, false)]
+    [InlineData("net8.0", false, true)]
+    [InlineData("net9.0", true, false)]
+    [InlineData("net9.0", true, true)]
+    [InlineData("net9.0", false, false)]
+    [InlineData("net9.0", false, true)]
+    [InlineData("net10.0", true, false)]
+    [InlineData("net10.0", true, true)]
+    [InlineData("net10.0", false, false)]
+    [InlineData("net10.0", false, true)]
+    [InlineData("net11.0", true, false)]
+    [InlineData("net11.0", true, true)]
+    [InlineData("net11.0", false, false)]
+    [InlineData("net11.0", false, true)]
+    public async Task GetTextTemplatingProperties_LoginPartial_PreservesRootFileWithoutCreatingSharedDuplicate(
+        string targetFramework, bool isRazorPages, bool overwrite)
+    {
+        IdentityModel model = CreateLoginPartialModel(targetFramework, isRazorPages);
+        model.Overwrite = overwrite;
+        string rootDirectory = Path.Combine(model.BaseOutputPath, isRazorPages ? "Pages" : "Views");
+        Directory.CreateDirectory(rootDirectory);
+        string existingPath = Path.Combine(rootDirectory, "_LoginPartial.cshtml");
+        File.WriteAllText(existingPath, "custom root login partial");
+
+        var properties = IdentityHelper.GetTextTemplatingProperties(
+            [Path.Combine("Identity", "_LoginPartial.tt"), Path.Combine("Identity", "Pages", "Account", "Login.tt")], model);
+
+        var property = Assert.Single(properties);
+        Assert.Equal(Path.Combine(model.BaseOutputPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml"), property.OutputPath);
+        var step = new TextTemplatingStep(NullLogger<TextTemplatingStep>.Instance)
+        {
+            TextTemplatingProperties = [property],
+            Overwrite = model.Overwrite
+        };
+        Assert.True(await step.ExecuteAsync(new ScaffolderContext(Mock.Of<IScaffolder>())));
+        Assert.True(File.Exists(property.OutputPath));
+        Assert.Equal("custom root login partial", File.ReadAllText(existingPath));
+        Assert.False(File.Exists(Path.Combine(rootDirectory, "Shared", "_LoginPartial.cshtml")));
+    }
+
     [Fact]
     public void GetTextTemplatingProperties_WithEmptyFilePaths_ReturnsEmpty()
     {

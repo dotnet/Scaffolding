@@ -374,7 +374,7 @@ public abstract class RazorViewEmptyIntegrationTestsBase : IDisposable
         bool result = await step.ExecuteAsync(_context, CancellationToken.None);
 
         Assert.False(result);
-        Assert.Equal(fileName, step.FileName);
+        Assert.Equal("TestView", step.FileName);
         _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(It.IsAny<string>()), Times.Never);
         _mockFileSystem.Verify(fs => fs.DirectoryExists(It.IsAny<string>()), Times.Never);
         Assert.Equal(Path.Combine("Home", "TestView"), step.FileName);

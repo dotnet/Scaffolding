@@ -33,7 +33,7 @@ I recommend cloning it under your user profile directory.
 
 ### MVC controller view folders
 
-When scaffolding an MVC controller with Entity Framework and views, `dotnet scaffold`places all five CRUD views under `Views/{controller name}`, removing the trailing `Controller` suffix. For example, model `Order` and controller `OrdersController` generate `Views/Orders`, while generated model references remain `Order`. Standalone view scaffolding continues to use the model name for its folder.
+When scaffolding an MVC controller with Entity Framework and views, `dotnet scaffold` places all five CRUD views under `Views/{controller name}`, removing the trailing `Controller` suffix case-insensitively. For example, model `Order` and controller `OrdersController` generate `Views/Orders`, while generated model references remain `Order`. Standalone view scaffolding continues to use the model name for its folder.
 
 1. Open the `all.sln` solution in a separate instance of Visual Studio.
 2. Set any breakpoints you want to hit.

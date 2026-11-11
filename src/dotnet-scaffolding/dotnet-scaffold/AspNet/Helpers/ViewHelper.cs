@@ -61,7 +61,7 @@ internal class ViewHelper
                     if (!string.IsNullOrEmpty(viewModel.ControllerName))
                     {
                         const string controllerSuffix = "Controller";
-                        folderName = viewModel.ControllerName.EndsWith(controllerSuffix, StringComparison.Ordinal)
+                        folderName = viewModel.ControllerName.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase)
                             ? viewModel.ControllerName[..^controllerSuffix.Length]
                             : viewModel.ControllerName;
                     }

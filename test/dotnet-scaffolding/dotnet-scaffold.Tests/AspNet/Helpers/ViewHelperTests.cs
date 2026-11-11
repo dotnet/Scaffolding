@@ -18,6 +18,8 @@ public class ViewHelperTests
 {
     [Theory]
     [InlineData("OrdersController", "Orders")]
+    [InlineData("Orderscontroller", "Orders")]
+    [InlineData("OrdersCONTROLLER", "Orders")]
     [InlineData("PurchasesController", "Purchases")]
     [InlineData("Orders", "Orders")]
     [InlineData("OrderController", "Order")]

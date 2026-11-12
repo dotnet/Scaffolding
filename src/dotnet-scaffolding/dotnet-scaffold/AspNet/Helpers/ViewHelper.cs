@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
@@ -83,9 +84,10 @@ internal class ViewHelper
     internal static string GetControllerFolderName(string controllerName)
     {
         const string controllerSuffix = "Controller";
-        return controllerName.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase)
-            ? controllerName[..^controllerSuffix.Length]
-            : controllerName;
+        var typeName = SyntaxFactory.ParseToken(controllerName).ValueText;
+        return typeName.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase)
+            ? typeName[..^controllerSuffix.Length]
+            : typeName;
     }
 
     internal static bool IsValidControllerViewFolder(string controllerName)

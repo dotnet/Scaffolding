@@ -156,7 +156,9 @@ internal class ValidateEfControllerStep : ScaffoldStep
             ControllerName = Path.GetFileNameWithoutExtension(ControllerName);
         }
 
-        if (!SyntaxFacts.IsValidIdentifier(ControllerName))
+        var controllerIdentifier = SyntaxFactory.ParseToken(ControllerName);
+        if (controllerIdentifier.RawKind != (int)SyntaxKind.IdentifierToken ||
+            controllerIdentifier.ContainsDiagnostics || controllerIdentifier.Text != ControllerName)
         {
             _logger.LogError($"Invalid {AspNetConstants.CliOptions.ControllerNameOption}: controller name must be a valid C# identifier.");
             return null;

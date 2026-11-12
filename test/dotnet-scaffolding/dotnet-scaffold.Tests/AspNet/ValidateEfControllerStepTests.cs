@@ -22,8 +22,11 @@ public class ValidateEfControllerStepTests
     [InlineData(".")]
     [InlineData("123Orders")]
     [InlineData("Orders-Controller")]
+    [InlineData("@@OrdersController")]
+    [InlineData("Orders Controller")]
     [InlineData("Controller")]
     [InlineData("CONTROLLER")]
+    [InlineData("@Controller")]
     public async Task InvalidController_FailsBeforeProjectChanges(string controllerName)
     {
         var fileSystem = new Mock<IFileSystem>(MockBehavior.Strict);
@@ -43,6 +46,7 @@ public class ValidateEfControllerStepTests
 
     [Theory]
     [InlineData("NULController")]
+    [InlineData("@NULController")]
     [InlineData("nulCONTROLLER")]
     [InlineData("CONController")]
     [InlineData("COM1Controller")]
@@ -83,6 +87,22 @@ public class ValidateEfControllerStepTests
 
         Assert.NotNull(validate);
         Assert.NotNull(validate.Invoke(step, new object[] { false }));
+    }
+
+    [Theory]
+    [InlineData("@OrdersController")]
+    [InlineData("@OrdersCONTROLLER")]
+    public void EscapedController_IsAcceptedAndPreserved(string controllerName)
+    {
+        var fileSystem = new Mock<IFileSystem>();
+        fileSystem.Setup(fs => fs.FileExists("Test.csproj")).Returns(true);
+        var step = CreateStep(fileSystem.Object, controllerName);
+        var validate = typeof(ValidateEfControllerStep).GetMethod(
+            "ValidateEfControllerSettings", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        Assert.NotNull(validate);
+        Assert.NotNull(validate.Invoke(step, new object[] { true }));
+        Assert.Equal(controllerName, step.ControllerName);
     }
 
     private static ValidateEfControllerStep CreateStep(IFileSystem fileSystem, string controllerName) =>

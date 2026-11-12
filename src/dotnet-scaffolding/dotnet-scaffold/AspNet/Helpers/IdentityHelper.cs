@@ -57,8 +57,8 @@ internal static class IdentityHelper
                 {
                     string viewDirectory = Path.Combine(identityModel.BaseOutputPath, identityModel.IsRazorPages ? "Pages" : "Views");
                     outputFileName = Path.Combine(viewDirectory, "Shared", "_LoginPartial.cshtml");
-                    // Preserve customized login UI in either lookup location, even when overwriting.
-                    if (File.Exists(outputFileName) || File.Exists(Path.Combine(viewDirectory, "_LoginPartial.cshtml")))
+                    // Preserve customized shared login UI even when Identity pages are overwritten.
+                    if (File.Exists(outputFileName))
                     {
                         continue;
                     }

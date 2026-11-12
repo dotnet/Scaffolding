@@ -113,7 +113,7 @@ public class IdentityHelperTests : IDisposable
     [InlineData("net11.0", true, true)]
     [InlineData("net11.0", false, false)]
     [InlineData("net11.0", false, true)]
-    public async Task GetTextTemplatingProperties_LoginPartial_PreservesRootFileWithoutCreatingSharedDuplicate(
+    public async Task GetTextTemplatingProperties_LoginPartial_PreservesRootFileAndGeneratesSharedFile(
         string targetFramework, bool isRazorPages, bool overwrite)
     {
         IdentityModel model = CreateLoginPartialModel(targetFramework, isRazorPages);
@@ -124,19 +124,24 @@ public class IdentityHelperTests : IDisposable
         File.WriteAllText(existingPath, "custom root login partial");
 
         var properties = IdentityHelper.GetTextTemplatingProperties(
-            [Path.Combine("Identity", "_LoginPartial.tt"), Path.Combine("Identity", "Pages", "Account", "Login.tt")], model);
+            [Path.Combine("Identity", "_LoginPartial.tt"), Path.Combine("Identity", "Pages", "Account", "Login.tt")], model).ToArray();
 
-        var property = Assert.Single(properties);
-        Assert.Equal(Path.Combine(model.BaseOutputPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml"), property.OutputPath);
+        string sharedPath = Path.Combine(rootDirectory, "Shared", "_LoginPartial.cshtml");
+        string accountPath = Path.Combine(model.BaseOutputPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml");
+        Assert.False(File.Exists(sharedPath));
+        Assert.Equal(2, properties.Length);
+        Assert.Single(properties, property => property.OutputPath == sharedPath);
+        Assert.Single(properties, property => property.OutputPath == accountPath);
         var step = new TextTemplatingStep(NullLogger<TextTemplatingStep>.Instance)
         {
-            TextTemplatingProperties = [property],
+            TextTemplatingProperties = properties,
             Overwrite = model.Overwrite
         };
         Assert.True(await step.ExecuteAsync(new ScaffolderContext(Mock.Of<IScaffolder>())));
-        Assert.True(File.Exists(property.OutputPath));
+        Assert.True(File.Exists(accountPath));
         Assert.Equal("custom root login partial", File.ReadAllText(existingPath));
-        Assert.False(File.Exists(Path.Combine(rootDirectory, "Shared", "_LoginPartial.cshtml")));
+        Assert.True(File.Exists(sharedPath));
+        Assert.Contains("@inject SignInManager<CustomUser> SignInManager", File.ReadAllText(sharedPath));
     }
 
     [Fact]

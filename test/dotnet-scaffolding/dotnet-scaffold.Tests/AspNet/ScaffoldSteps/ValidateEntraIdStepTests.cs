@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -23,6 +24,7 @@ public class ValidateEntraIdStepTests
     private readonly Mock<IScaffolder> _mockScaffolder;
     private readonly ScaffolderContext _context;
     private readonly string _testProjectPath;
+    private readonly TestLogger _testLogger = new();
 
     public ValidateEntraIdStepTests()
     {
@@ -246,6 +248,344 @@ public class ValidateEntraIdStepTests
 
         // Assert
         Assert.False(step.UseExistingApplication);
+    }
+
+    [Fact]
+    public void DevelopmentSettingsPreflight_RejectsExistingClientIdBeforeNewRegistration()
+    {
+        string developmentSettingsPath = Path.Combine(
+            Path.GetDirectoryName(_testProjectPath)!,
+            "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns(
+            """
+            {
+              "AzureAd": {
+                "ClientId": "existing-client-id"
+              }
+            }
+            """);
+        var step = CreateValidStep();
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: false,
+            overwrite: false);
+
+        Assert.False(result);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_FailsOnDevelopmentSettingsConflictBeforeModelInitialization()
+    {
+        string developmentSettingsPath = Path.Combine(
+            Path.GetDirectoryName(_testProjectPath)!,
+            "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns(
+            """
+            {
+              "AzureAd": {
+                "ClientId": "existing-client-id"
+              }
+            }
+            """);
+        ValidateEntraIdStep step = CreateValidStep();
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        Assert.False(_context.Properties.ContainsKey("EntraIdModel"));
+        Assert.False(_context.Properties.ContainsKey("EntraIdSettings"));
+    }
+
+    [Fact]
+    public void DevelopmentSettingsPreflight_AllowsConflictsWithOverwrite()
+    {
+        string developmentSettingsPath = Path.Combine(
+            Path.GetDirectoryName(_testProjectPath)!,
+            "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns(
+            """
+            {
+              "AzureAd": {
+                "Instance": "https://login.microsoftonline.us/",
+                "CallbackPath": "/custom-signin",
+                "ClientId": "existing-client-id"
+              }
+            }
+            """);
+        var step = CreateValidStep();
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: false,
+            overwrite: true);
+
+        Assert.True(result);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public void DevelopmentSettingsPreflight_AllowsMatchingExistingRegistrationValues()
+    {
+        const string applicationId = "existing-client-id";
+        string developmentSettingsPath = Path.Combine(
+            Path.GetDirectoryName(_testProjectPath)!,
+            "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns(
+            $$"""
+            {
+              "AzureAd": {
+                "Instance": "https://login.microsoftonline.com/",
+                "TenantId": "test-tenant-id",
+                "Domain": "example.com",
+                "ClientId": "{{applicationId}}",
+                "CallbackPath": "/signin-oidc"
+              }
+            }
+            """);
+        ValidateEntraIdStep step = CreateValidStep();
+        step.Application = applicationId;
+        step.UseExistingApplication = true;
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: true,
+            overwrite: false);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void DevelopmentSettingsPreflight_RejectsMalformedJsonEvenWithOverwrite()
+    {
+        string developmentSettingsPath = Path.Combine(
+            Path.GetDirectoryName(_testProjectPath)!,
+            "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns("{ malformed json");
+        var step = CreateValidStep();
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: false,
+            overwrite: true);
+
+        Assert.False(result);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("null", false)]
+    [InlineData("null", true)]
+    [InlineData("[]", false)]
+    [InlineData("\"text\"", true)]
+    public void DevelopmentSettingsPreflight_RejectsNonObjectRoot(string settings, bool overwrite)
+    {
+        SetDevelopmentSettings(settings);
+        ValidateEntraIdStep step = CreateValidStepWithTestLogger();
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: false,
+            overwrite: overwrite);
+
+        Assert.False(result);
+        AssertErrorLogged("root JSON value must be an object");
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_FailsOnNullDevelopmentSettingsBeforeModelInitialization()
+    {
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        SetDevelopmentSettings("null");
+        ValidateEntraIdStep step = CreateValidStep();
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        Assert.False(_context.Properties.ContainsKey("EntraIdModel"));
+        Assert.False(_context.Properties.ContainsKey("EntraIdSettings"));
+    }
+
+    [Fact]
+    public void DevelopmentSettingsPreflight_AllowsSectionsThatDifferOnlyByCase()
+    {
+        const string applicationId = "existing-client-id";
+        SetDevelopmentSettings(
+            """
+            {
+              "Logging": { "A": "1" },
+              "logging": { "B": "2" },
+              "azuread": { "clientid": "existing-client-id", "tenantid": "test-tenant-id" }
+            }
+            """);
+        ValidateEntraIdStep step = CreateValidStep();
+        step.Application = applicationId;
+        step.UseExistingApplication = true;
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: true,
+            overwrite: false);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void DevelopmentSettingsPreflight_DetectsConflictsInCaseVariantAzureAdKeys()
+    {
+        SetDevelopmentSettings("""{"azuread":{"clientid":"existing-client-id"}}""");
+        ValidateEntraIdStep step = CreateValidStepWithTestLogger();
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: false,
+            overwrite: false);
+
+        Assert.False(result);
+        AssertErrorLogged("'ClientId'");
+    }
+
+    [Theory]
+    [InlineData("""{"AzureAd":{},"azuread":{}}""", "'AzureAd' and 'azuread'", false)]
+    [InlineData("""{"AzureAd":{},"azuread":{}}""", "'AzureAd' and 'azuread'", true)]
+    [InlineData("""{"AzureAd":{"ClientId":"a","clientId":"b"}}""", "'ClientId' and 'clientId'", false)]
+    [InlineData("""{"AzureAd":{"ClientId":"a","clientId":"b"}}""", "'ClientId' and 'clientId'", true)]
+    public void DevelopmentSettingsPreflight_RejectsAmbiguousCaseVariantsWithClearError(
+        string settings,
+        string expectedNames,
+        bool overwrite)
+    {
+        SetDevelopmentSettings(settings);
+        ValidateEntraIdStep step = CreateValidStepWithTestLogger();
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: false,
+            overwrite: overwrite);
+
+        Assert.False(result);
+        AssertErrorLogged(expectedNames);
+    }
+
+    [Fact]
+    public void Overwrite_DefaultsToFalse()
+    {
+        var step = new ValidateEntraIdStep(_mockFileSystem.Object, _mockLogger.Object, _testTelemetryService);
+
+        Assert.False(step.Overwrite);
+    }
+
+    [Theory]
+    [InlineData("AzureAd:Instance", false)]
+    [InlineData("AzureAd:Instance", true)]
+    [InlineData("AzureAd:TenantId", false)]
+    [InlineData("AzureAd:TenantId", true)]
+    [InlineData("AzureAd:Domain", false)]
+    [InlineData("AzureAd:Domain", true)]
+    [InlineData("AzureAd:ClientId", false)]
+    [InlineData("AzureAd:ClientId", true)]
+    [InlineData("AzureAd:CallbackPath", false)]
+    [InlineData("AzureAd:CallbackPath", true)]
+    [InlineData("azuread:clientid", false)]
+    [InlineData("azuread:clientid", true)]
+    public void DevelopmentSettingsPreflight_RejectsFlattenedManagedKeys(string key, bool overwrite)
+    {
+        SetDevelopmentSettings($$"""{"{{key}}":"existing-value"}""");
+        ValidateEntraIdStep step = CreateValidStepWithTestLogger();
+
+        bool result = step.ValidateDevelopmentSettingsPreflight(
+            _testProjectPath,
+            useExistingApplication: false,
+            overwrite: overwrite);
+
+        Assert.False(result);
+        AssertErrorLogged($"flattened managed key '{key}'");
+        AssertErrorLogged("Move this value into a single 'AzureAd' object");
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_RejectsFlattenedManagedKeysBeforeModelInitialization(bool overwrite)
+    {
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        SetDevelopmentSettings("""{"AzureAd:ClientId":"existing-client-id","AzureAd":{"ClientId":"existing-client-id"}}""");
+        ValidateEntraIdStep step = CreateValidStepWithTestLogger();
+        step.Application = "existing-client-id";
+        step.UseExistingApplication = true;
+        step.Overwrite = overwrite;
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        AssertErrorLogged("flattened managed key 'AzureAd:ClientId'");
+        Assert.False(_context.Properties.ContainsKey("EntraIdModel"));
+        Assert.False(_context.Properties.ContainsKey("EntraIdSettings"));
+    }
+
+    private void SetDevelopmentSettings(string settings)
+    {
+        string developmentSettingsPath = Path.Combine(
+            Path.GetDirectoryName(_testProjectPath)!,
+            "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns(settings);
+    }
+
+    private ValidateEntraIdStep CreateValidStepWithTestLogger()
+    {
+        return new ValidateEntraIdStep(_mockFileSystem.Object, _testLogger, _testTelemetryService)
+        {
+            Project = _testProjectPath,
+            Username = "test@example.com",
+            TenantId = "test-tenant-id"
+        };
+    }
+
+    private void AssertErrorLogged(string expectedText)
+    {
+        Assert.Contains(_testLogger.Errors, message => message.Contains(expectedText, StringComparison.Ordinal));
+    }
+
+    private ValidateEntraIdStep CreateValidStep()
+    {
+        return new ValidateEntraIdStep(_mockFileSystem.Object, _mockLogger.Object, _testTelemetryService)
+        {
+            Project = _testProjectPath,
+            Username = "test@example.com",
+            TenantId = "test-tenant-id"
+        };
+    }
+
+    private sealed class TestLogger : ILogger<ValidateEntraIdStep>
+    {
+        public List<string> Errors { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (logLevel == LogLevel.Error)
+            {
+                Errors.Add(formatter(state, exception));
+            }
+        }
     }
 
     private class TestTelemetryService : ITelemetryService

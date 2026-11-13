@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
     internal class ProvisioningToolOptionsBinder
     {
         private readonly Option<bool> _jsonOption;
+        private readonly Option<bool> _registrationOnlyOption;
         private readonly Option<bool> _enableIdTokenOption;
         private readonly Option<bool> _enableAccessToken;
         private readonly Option<bool> _callsGraphOption;
@@ -63,9 +64,11 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             Option<string> tenantOption,
             Option<string> usernameOption,
             Option<string> instanceOption,
-            Option<string> calledApiUrlOption)
+            Option<string> calledApiUrlOption,
+            Option<bool> registrationOnlyOption)
         {
             _jsonOption = jsonOption;
+            _registrationOnlyOption = registrationOnlyOption;
             _enableIdTokenOption = enableIdTokenOption;
             _enableAccessToken = enableAccessToken;
             _callsGraphOption = callsGraphOption;
@@ -96,6 +99,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
             IList<string> redirectUriList = parseResult.GetValue(_redirectUriOption) ?? new List<string>();
             return new ProvisioningToolOptions
             {
+                RegistrationOnly = parseResult.GetValue(_registrationOnlyOption),
                 HostedApiScopes = parseResult.GetValue(_hostedAppIdUriOption),
                 CallsDownstreamApi = parseResult.GetValue(_callsDownstreamApiOption),
                 UpdateUserSecrets = parseResult.GetValue(_updateUserSecretsOption),

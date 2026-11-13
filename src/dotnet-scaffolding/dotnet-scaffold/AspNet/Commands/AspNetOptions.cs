@@ -14,6 +14,7 @@ internal class AspNetOptions
     public ScaffolderOption<string> Project { get; }
     public ScaffolderOption<bool> Prerelease { get; }
     public ScaffolderOption<string> FileName { get; }
+    public ScaffolderOption<string> RelativeFolderPath { get; }
     public ScaffolderOption<bool> Actions { get; }
     public ScaffolderOption<string> AreaName { get; }
     public ScaffolderOption<string> ModelName { get; }
@@ -63,6 +64,14 @@ internal class AspNetOptions
             CliOption = Constants.CliOptions.NameOption,
             Description = AspnetStrings.Options.FileName.Description,
             Required = true,
+        };
+
+        RelativeFolderPath = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.RelativeFolderPath.DisplayName,
+            CliOption = Constants.CliOptions.RelativeFolderPathOption,
+            Description = AspnetStrings.Options.RelativeFolderPath.Description,
+            Required = false,
         };
 
         Actions = new ScaffolderOption<bool>

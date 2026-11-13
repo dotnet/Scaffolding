@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/create\"\r\n@using Microsoft.EntityFrameworkCore\r\n");
+            this.Write("/create\"\r\n@attribute [Microsoft.AspNetCore.Components.ExcludeFromInteractiveRouting]\r\n@using Microsoft.EntityFrameworkCore\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {

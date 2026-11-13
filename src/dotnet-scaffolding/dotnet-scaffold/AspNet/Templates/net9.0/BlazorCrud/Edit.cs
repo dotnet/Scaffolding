@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud
 
             this.Write("@page \"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
-            this.Write("/edit\"\r\n@using Microsoft.EntityFrameworkCore\r\n@implements IDisposable\r\n");
+            this.Write("/edit\"\r\n@attribute [Microsoft.AspNetCore.Components.ExcludeFromInteractiveRouting]\r\n@using Microsoft.EntityFrameworkCore\r\n@implements IDisposable\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {

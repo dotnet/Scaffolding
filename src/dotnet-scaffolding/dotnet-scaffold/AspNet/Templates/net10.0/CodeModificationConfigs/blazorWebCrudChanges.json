@@ -1,6 +1,24 @@
 {
   "Files": [
     {
+      "FileName": "Components\\App.razor",
+      "Options": [ "GlobalInteractive" ],
+      "Replacements": [
+        {
+          "ReplaceSnippet": [ "$(RoutesRenderModeTag)" ],
+          "Block": "$(UpdatedRoutesRenderModeTag)"
+        },
+        {
+          "ReplaceSnippet": [ "$(HeadOutletRenderModeTag)" ],
+          "Block": "$(UpdatedHeadOutletRenderModeTag)"
+        },
+        {
+          "ReplaceSnippet": [ "</html>" ],
+          "Block": "</html>\n\n@code {\n$(BlazorCrudRenderModeMembers)\n}"
+        }
+      ]
+    },
+    {
       "FileName": "Program.cs",
       "Options": [
         "EfScenario"

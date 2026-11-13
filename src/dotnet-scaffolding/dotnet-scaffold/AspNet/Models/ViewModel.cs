@@ -9,6 +9,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 internal class ViewModel : CrudModel
 {
     /// <summary>
+    /// Gets or sets the associated controller name, or null for standalone view scaffolding.
+    /// </summary>
+    public string? ControllerName { get; set; }
+
+    /// <summary>
     /// Gets the correct CSS class for an input element based on the .NET type name.
     /// </summary>
     /// <param name="inputType">The .NET type name.</param>

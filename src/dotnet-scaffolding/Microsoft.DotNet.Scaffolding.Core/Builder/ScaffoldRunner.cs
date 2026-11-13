@@ -3,6 +3,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.Extensions.Logging;
 
@@ -11,8 +12,10 @@ namespace Microsoft.DotNet.Scaffolding.Core.Builder;
 /// <summary>
 /// Executes scaffolders using provided arguments and manages the root command.
 /// </summary>
-internal class ScaffoldRunner(ILogger<ScaffoldRunner> logger) : IScaffoldRunner
+internal class ScaffoldRunner(ILogger<ScaffoldRunner> logger, ScaffoldingErrorCapture errorCapture) : IScaffoldRunner
 {
+    internal ScaffoldingErrorCapture ErrorCapture { get; } = errorCapture;
+
     // Logger instance for runner
     private readonly ILogger<ScaffoldRunner> _logger = logger;
 

@@ -4,17 +4,146 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Files;
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
 
-public class IdentityHelperTests
+public class IdentityHelperTests : IDisposable
 {
+    private readonly string _testDirectory = Directory.CreateTempSubdirectory(nameof(IdentityHelperTests)).FullName;
+
+    [Theory]
+    [InlineData("net8.0", true)]
+    [InlineData("net8.0", false)]
+    [InlineData("net9.0", true)]
+    [InlineData("net9.0", false)]
+    [InlineData("net10.0", true)]
+    [InlineData("net10.0", false)]
+    [InlineData("net11.0", true)]
+    [InlineData("net11.0", false)]
+    public async Task GetTextTemplatingProperties_LoginPartial_GeneratesSharedFileWithoutOverwrite(string targetFramework, bool isRazorPages)
+    {
+        IdentityModel model = CreateLoginPartialModel(targetFramework, isRazorPages);
+        string templatePath = Path.Combine("templates", targetFramework, "Identity", "_LoginPartial.tt");
+        string outputPath = Path.Combine(model.BaseOutputPath, isRazorPages ? "Pages" : "Views", "Shared", "_LoginPartial.cshtml");
+
+        TextTemplatingProperty property = Assert.Single(IdentityHelper.GetTextTemplatingProperties([templatePath], model));
+
+        Assert.Equal(outputPath, property.OutputPath);
+        Assert.Equal(templatePath, property.TemplatePath);
+        Assert.Same(model, property.TemplateModel);
+
+        var step = new TextTemplatingStep(NullLogger<TextTemplatingStep>.Instance)
+        {
+            TextTemplatingProperties = [property],
+            Overwrite = model.Overwrite
+        };
+        Assert.True(await step.ExecuteAsync(new ScaffolderContext(Mock.Of<IScaffolder>())));
+        Assert.True(File.Exists(outputPath));
+        string content = File.ReadAllText(outputPath);
+        Assert.Contains("@using Microsoft.AspNetCore.Identity", content);
+        Assert.Contains("@using TestProject.Data", content);
+        Assert.Contains("@inject SignInManager<CustomUser> SignInManager", content);
+        Assert.Contains("@inject UserManager<CustomUser> UserManager", content);
+        Assert.Contains("SignInManager.IsSignedIn(User)", content);
+        Assert.Contains("asp-page=\"/Account/Manage/Index\"", content);
+        Assert.Contains("asp-page=\"/Account/Logout\"", content);
+        Assert.Contains("asp-page=\"/Account/Register\"", content);
+        Assert.Contains("asp-page=\"/Account/Login\"", content);
+        Assert.Contains(isRazorPages
+            ? "@Url.Page(\"/Index\", new { area = \"\" })"
+            : "@Url.Action(\"Index\", \"Home\", new { area = \"\" })", content);
+        Assert.DoesNotContain(isRazorPages ? "@Url.Action(" : "@Url.Page(", content);
+        Assert.False(File.Exists(Path.Combine(model.BaseOutputPath, "Areas", "Identity", "_LoginPartial.cshtml")));
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    public void GetTextTemplatingProperties_LoginPartial_PreservesExistingFile(bool isRazorPages, bool overwrite)
+    {
+        IdentityModel model = CreateLoginPartialModel("net11.0", isRazorPages);
+        model.Overwrite = overwrite;
+        string outputDirectory = Path.Combine(model.BaseOutputPath, isRazorPages ? "Pages" : "Views", "Shared");
+        string outputPath = Path.Combine(outputDirectory, "_LoginPartial.cshtml");
+        Directory.CreateDirectory(outputDirectory);
+        File.WriteAllText(outputPath, "custom login partial");
+
+        var properties = IdentityHelper.GetTextTemplatingProperties([Path.Combine("Identity", "_LoginPartial.tt")], model);
+
+        Assert.Empty(properties);
+        Assert.Equal("custom login partial", File.ReadAllText(outputPath));
+    }
+
+    [Fact]
+    public void GetTextTemplatingProperties_AccountPage_RemainsUnderIdentityArea()
+    {
+        IdentityModel model = CreateLoginPartialModel("net11.0", true);
+        var property = Assert.Single(IdentityHelper.GetTextTemplatingProperties(
+            [Path.Combine("Identity", "Pages", "Account", "Login.tt")], model));
+
+        Assert.Equal(Path.Combine(model.BaseOutputPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml"), property.OutputPath);
+    }
+
+    [Theory]
+    [InlineData("net8.0", true, false)]
+    [InlineData("net8.0", true, true)]
+    [InlineData("net8.0", false, false)]
+    [InlineData("net8.0", false, true)]
+    [InlineData("net9.0", true, false)]
+    [InlineData("net9.0", true, true)]
+    [InlineData("net9.0", false, false)]
+    [InlineData("net9.0", false, true)]
+    [InlineData("net10.0", true, false)]
+    [InlineData("net10.0", true, true)]
+    [InlineData("net10.0", false, false)]
+    [InlineData("net10.0", false, true)]
+    [InlineData("net11.0", true, false)]
+    [InlineData("net11.0", true, true)]
+    [InlineData("net11.0", false, false)]
+    [InlineData("net11.0", false, true)]
+    public async Task GetTextTemplatingProperties_LoginPartial_PreservesRootFileAndGeneratesSharedFile(
+        string targetFramework, bool isRazorPages, bool overwrite)
+    {
+        IdentityModel model = CreateLoginPartialModel(targetFramework, isRazorPages);
+        model.Overwrite = overwrite;
+        string rootDirectory = Path.Combine(model.BaseOutputPath, isRazorPages ? "Pages" : "Views");
+        Directory.CreateDirectory(rootDirectory);
+        string existingPath = Path.Combine(rootDirectory, "_LoginPartial.cshtml");
+        File.WriteAllText(existingPath, "custom root login partial");
+
+        var properties = IdentityHelper.GetTextTemplatingProperties(
+            [Path.Combine("Identity", "_LoginPartial.tt"), Path.Combine("Identity", "Pages", "Account", "Login.tt")], model).ToArray();
+
+        string sharedPath = Path.Combine(rootDirectory, "Shared", "_LoginPartial.cshtml");
+        string accountPath = Path.Combine(model.BaseOutputPath, "Areas", "Identity", "Pages", "Account", "Login.cshtml");
+        Assert.False(File.Exists(sharedPath));
+        Assert.Equal(2, properties.Length);
+        Assert.Single(properties, property => property.OutputPath == sharedPath);
+        Assert.Single(properties, property => property.OutputPath == accountPath);
+        var step = new TextTemplatingStep(NullLogger<TextTemplatingStep>.Instance)
+        {
+            TextTemplatingProperties = properties,
+            Overwrite = model.Overwrite
+        };
+        Assert.True(await step.ExecuteAsync(new ScaffolderContext(Mock.Of<IScaffolder>())));
+        Assert.True(File.Exists(accountPath));
+        Assert.Equal("custom root login partial", File.ReadAllText(existingPath));
+        Assert.True(File.Exists(sharedPath));
+        Assert.Contains("@inject SignInManager<CustomUser> SignInManager", File.ReadAllText(sharedPath));
+    }
+
     [Fact]
     public void GetTextTemplatingProperties_WithEmptyFilePaths_ReturnsEmpty()
     {
@@ -149,5 +278,35 @@ public class IdentityHelperTests
             UserClassNamespace = "TestNamespace.Data",
             DbContextInfo = new DbContextInfo()
         };
+    }
+
+    private IdentityModel CreateLoginPartialModel(string targetFramework, bool isRazorPages)
+    {
+        string projectDirectory = Path.Combine(_testDirectory, "TestProject");
+        Directory.CreateDirectory(projectDirectory);
+        string projectPath = Path.Combine(projectDirectory, "TestProject.csproj");
+        File.WriteAllText(projectPath, $"""
+            <Project Sdk="Microsoft.NET.Sdk.Web">
+              <PropertyGroup>
+                <TargetFramework>{targetFramework}</TargetFramework>
+              </PropertyGroup>
+            </Project>
+            """);
+        return new IdentityModel
+        {
+            ProjectInfo = new ProjectInfo(projectPath),
+            IdentityNamespace = "TestProject.Areas.Identity",
+            BaseOutputPath = projectDirectory,
+            UserClassName = "CustomUser",
+            UserClassNamespace = "TestProject.Data",
+            DbContextInfo = new DbContextInfo(),
+            IsRazorPages = isRazorPages,
+            Overwrite = false
+        };
+    }
+
+    public void Dispose()
+    {
+        Directory.Delete(_testDirectory, recursive: true);
     }
 }

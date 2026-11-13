@@ -53,6 +53,17 @@ internal static class IdentityHelper
                 string formattedTemplateName = templateFullName.Replace("Model", string.Empty, StringComparison.OrdinalIgnoreCase);
                 string templateNameWithNamespace = $"{identityModel.IdentityNamespace}.{formattedTemplateName}";
                 string outputFileName = $"{StringUtil.ToPath(templateNameWithNamespace, identityModel.BaseOutputPath, projectName)}{extension}";
+                if (templateFullName.Equals("_LoginPartial", StringComparison.OrdinalIgnoreCase))
+                {
+                    string viewDirectory = Path.Combine(identityModel.BaseOutputPath, identityModel.IsRazorPages ? "Pages" : "Views");
+                    outputFileName = Path.Combine(viewDirectory, "Shared", "_LoginPartial.cshtml");
+                    // Preserve customized shared login UI even when Identity pages are overwritten.
+                    if (File.Exists(outputFileName))
+                    {
+                        continue;
+                    }
+                }
+
                 textTemplatingProperties.Add(new()
                 {
                     TemplateModel = identityModel,
@@ -128,6 +139,7 @@ internal static class IdentityHelper
 
     private static readonly IList<Type> _identityTemplateTypesNet10 =
     [
+        typeof(Templates.net10.Identity._LoginPartial),
         typeof(Templates.net10.Identity.Pages._ViewImports),
         typeof(Templates.net10.Identity.Pages._ViewStart),
         typeof(Templates.net10.Identity.Pages.Account._StatusMessage),
@@ -203,6 +215,7 @@ internal static class IdentityHelper
 
     private static readonly IList<Type> _identityTemplateTypesNet11 =
     [
+        typeof(Templates.net11.Identity._LoginPartial),
         typeof(Templates.net11.Identity.Pages._ViewImports),
         typeof(Templates.net11.Identity.Pages._ViewStart),
         typeof(Templates.net11.Identity.Pages.Account._StatusMessage),

@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud
 
             this.Write("@implements IAsyncDisposable\r\n@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Index</PageTitle>\r\n\r\n" +
+            this.Write("\r\n@inject NavigationManager Navigation\r\n\r\n<PageTitle>Index</PageTitle>\r\n\r\n" +
                     "<h1>Index</h1>\r\n\r\n<p>\r\n    <a href=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));
             this.Write("/create\">Create New</a>\r\n</p>\r\n\r\n<QuickGrid Class=\"table\" Items=\"context.");

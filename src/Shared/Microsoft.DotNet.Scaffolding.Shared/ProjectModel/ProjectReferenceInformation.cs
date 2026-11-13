@@ -26,6 +26,21 @@ namespace Microsoft.DotNet.Scaffolding.Shared.ProjectModel
         public string AssemblyName { get; set; }
 
         /// <summary>
+        /// Root namespace for the project reference.
+        /// </summary>
+        public string RootNamespace { get; set; }
+
+        /// <summary>
+        /// Whether the project reference imports the Razor SDK.
+        /// </summary>
+        public bool IsRazorProject { get; set; }
+
+        /// <summary>
+        /// Razor component items included in the project reference.
+        /// </summary>
+        public List<string> RazorComponentItems { get; set; }
+
+        /// <summary>
         /// Items included in the project reference for compilation
         /// &lt;Compile Include="" /&gt;
         /// </summary>

@@ -52,19 +52,11 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Design
             AddCodeGenerationServices(serviceProvider);
             var codeGenCommand = serviceProvider.GetService<CodeGenCommand>();
 
-            try
-            {
-                codeGenCommand.Execute(_codeGenArguments);
+            codeGenCommand.Execute(_codeGenArguments);
 
-                if (_isSimulationMode && simModeAction != null)
-                {
-                    simModeAction.Invoke(SimulationModeFileSystem.Instance.FileSystemChanges);
-                }
-            }
-            catch (InvalidOperationException ioe)
+            if (_isSimulationMode && simModeAction != null)
             {
-                _logger.LogMessage(ioe.Message, LogMessageLevel.Error);
-                _logger.LogMessage(ioe.StackTrace, LogMessageLevel.Trace);
+                simModeAction.Invoke(SimulationModeFileSystem.Instance.FileSystemChanges);
             }
 
             return 0;

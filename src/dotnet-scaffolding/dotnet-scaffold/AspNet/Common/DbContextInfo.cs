@@ -11,6 +11,9 @@ internal class DbContextInfo
     /// Gets or sets the name of the DbContext class.
     /// </summary>
     public string? DbContextClassName { get; set; }
+    public string? DbContextFullName { get; set; }
+    public string? ModelFullName { get; set; }
+    public string? ModelAssemblyIdentity { get; set; }
     /// <summary>
     /// Gets or sets the file path of the DbContext class.
     /// </summary>

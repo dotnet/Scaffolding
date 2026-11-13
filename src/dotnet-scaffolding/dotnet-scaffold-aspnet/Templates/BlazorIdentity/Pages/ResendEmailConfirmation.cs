@@ -65,9 +65,12 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "ode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        var ca" +
                     "llbackUrl = NavigationManager.GetUriWithQueryParameters(\r\n            Navigation" +
                     "Manager.ToAbsoluteUri(\"Account/ConfirmEmail\").AbsoluteUri,\r\n            new Dict" +
-                    "ionary<string, object?> { [\"userId\"] = userId, [\"code\"] = code });\r\n        awai" +
-                    "t EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.E" +
-                    "ncode(callbackUrl));\r\n\r\n        message = \"Verification email sent. Please check" +
+                    "ionary<string, object?> { [\"userId\"] = userId, [\"code\"] = code });\r\n" +
+                    "        var storedEmail = await UserManager.GetEmailAsync(user);\r\n" +
+                    "        if (string.IsNullOrEmpty(storedEmail))\r\n        {\r\n" +
+                    "            throw new InvalidOperationException(\"Users must have an email.\");\r\n" +
+                    "        }\r\n\r\n        await EmailSender.SendConfirmationLinkAsync(user, storedEmail, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n" +
+                    "        message = \"Verification email sent. Please check" +
                     " your email.\";\r\n    }\r\n\r\n    private sealed class InputModel\r\n    {\r\n        [Re" +
                     "quired]\r\n        [EmailAddress]\r\n        public string Email { get; set; } = \"\";" +
                     "\r\n    }\r\n}\r\n");

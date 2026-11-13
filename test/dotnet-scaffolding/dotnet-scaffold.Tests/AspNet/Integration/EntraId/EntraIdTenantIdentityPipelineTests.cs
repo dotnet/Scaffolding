@@ -189,7 +189,7 @@ public class EntraIdTenantIdentityPipelineTests
     }
 
     [Fact]
-    public void EntraPipeline_ValidatesIdentityBeforeMutationsAndAuthorizesBeforeSecretAndSettings()
+    public void EntraPipeline_ValidatesIdentityBeforeMutationsAndDoesNotCreateClientSecrets()
     {
         var builder = new Mock<IScaffoldBuilder>();
         builder.SetReturnsDefault(builder.Object);
@@ -211,8 +211,9 @@ public class EntraIdTenantIdentityPipelineTests
         Assert.Equal(new[]
         {
             typeof(ValidateEntraIdStep), typeof(ValidateAzureCliIdentityStep), typeof(DetectBlazorWasmStep), typeof(RegisterAppStep),
-            typeof(UpdateAppAuthorizationStep), typeof(AddClientSecretStep), typeof(UpdateAppSettingsStep)
+            typeof(UpdateAppAuthorizationStep), typeof(UpdateAppSettingsStep)
         }, steps);
+        Assert.DoesNotContain(typeof(AddClientSecretStep), steps);
         Assert.Contains(typeof(ValidateAzureCliIdentityStep), service.GetScaffoldSteps());
     }
 

@@ -1,32 +1,21 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using System;
+
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
-using Microsoft.Extensions.Logging;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
 {
     /// <summary>
-    /// Scaffold step to update Azure AD configuration in appsettings.json and appsettings.Development.json files.
+    /// Scaffold step to update Azure AD development configuration in appsettings.Development.json.
     /// </summary>
     internal class UpdateAppSettingsStep : ScaffoldStep
     {
-        private static readonly JsonNodeOptions ConfigurationNodeOptions = new()
-        {
-            PropertyNameCaseInsensitive = true
-        };
-
-        private static readonly JsonDocumentOptions ConfigurationJsonOptions = new()
-        {
-            CommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true
-        };
-
         // Required properties for the AzureAD configuration
         /// <summary>
         /// Path to the project file.
@@ -60,6 +49,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// Azure AD client secret.
         /// </summary>
         public string? ClientSecret { get; set; }
+        /// <summary>
+        /// Indicates whether existing managed AzureAd values should be overwritten.
+        /// </summary>
+        public bool Overwrite { get; set; }
 
         private readonly ILogger _logger;
         private readonly IFileSystem _fileSystem;
@@ -89,7 +82,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// <returns>Task representing the asynchronous operation.</returns>
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
         {
-            var succeeded = false;
+            bool succeeded = false;
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -113,268 +106,340 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
             try
             {
                 var baseProjectPath = Path.GetDirectoryName(ProjectPath);
-                // Validate project path
-                if (string.IsNullOrEmpty(ProjectPath) || baseProjectPath is null || !_fileSystem.DirectoryExists(baseProjectPath))
+                if (string.IsNullOrEmpty(baseProjectPath))
+                {
+                    baseProjectPath = Directory.GetCurrentDirectory();
+                }
+
+                if (string.IsNullOrEmpty(ProjectPath) || !_fileSystem.DirectoryExists(baseProjectPath))
                 {
                     _logger.LogError($"Invalid project path: {ProjectPath}");
                     return false;
                 }
 
-                // Find or create appsettings.json file
-                var appSettingsFileSearch = _fileSystem.EnumerateFiles(baseProjectPath, "appsettings.json", SearchOption.AllDirectories);
-
-                string? appSettingsFile = null;
-
-                if (appSettingsFileSearch.Any())
+                if (string.IsNullOrWhiteSpace(ClientId) || string.IsNullOrWhiteSpace(TenantId))
                 {
-                    appSettingsFile = appSettingsFileSearch.FirstOrDefault();
+                    _logger.LogError("Both ClientId and TenantId are required to write AzureAd development settings.");
+                    return false;
                 }
 
-                JsonNode? content;
+                var devSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
+                JsonObject developmentSettings;
                 string? originalContent = null;
-                bool writeContent = false;
 
-                // If appsettings.json doesn't exist, create a new one
-                if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
+                if (_fileSystem.FileExists(devSettingsPath))
                 {
-                    appSettingsFile = Path.Combine(baseProjectPath, "appsettings.json");
-                    content = new JsonObject();
-                    writeContent = true;
-                    _logger.LogInformation($"Creating new appsettings.json file at {appSettingsFile}");
-                }
-                else
-                {
-                    // Read existing appsettings.json
-                    var jsonString = _fileSystem.ReadAllText(appSettingsFile);
-                    originalContent = jsonString;
-                    try
-                    {
-                        content = JsonNode.Parse(jsonString, ConfigurationNodeOptions, ConfigurationJsonOptions);
-                    }
-                    catch (JsonException ex)
-                    {
-                        _logger.LogError($"Failed to parse appsettings.json file at {appSettingsFile}: {ex.Message}");
-                        return false;
-                    }
-                }
-
-                if (content is null)
-                {
-                    _logger.LogError($"Failed to parse or create appsettings.json file at {appSettingsFile}");
-                    return false;
-                }
-
-                // Look for the "AzureAd" node or create it if it doesn't exist
-                const string azureAdNodeName = "AzureAd";
-                if (content[azureAdNodeName] is null)
-                {
-                    writeContent = true;
-                    content[azureAdNodeName] = new JsonObject();
-                }
-
-                // Update AzureAd configuration properties
-                if (content[azureAdNodeName] is JsonObject azureAdObject)
-                {
-                    // Update properties only if they have values
-                    if (!string.IsNullOrEmpty(ClientId) && (azureAdObject["ClientId"] is null || azureAdObject["ClientId"]?.ToString() != ClientId))
-                    {
-                        writeContent = true;
-                        azureAdObject["ClientId"] = ClientId;
-                    }
-                    if (!string.IsNullOrEmpty(Domain) && (azureAdObject["Domain"] is null || azureAdObject["Domain"]?.ToString() != Domain))
-                    {
-                        writeContent = true;
-                        azureAdObject["Domain"] = Domain;
-                    }
-                    else if (string.IsNullOrEmpty(Domain) &&
-                        !string.IsNullOrEmpty(Username) && Username.Contains('@') &&
-                        azureAdObject["Domain"]?.ToString() == $"{Username}.onmicrosoft.com")
-                    {
-                        // Remove only the malformed value generated by the old username-based default.
-                        azureAdObject.Remove("Domain");
-                        writeContent = true;
-                    }
-
-                    if (!string.IsNullOrEmpty(TenantId) && (azureAdObject["TenantId"] is null || azureAdObject["TenantId"]?.ToString() != TenantId))
-                    {
-                        writeContent = true;
-                        azureAdObject["TenantId"] = TenantId;
-                    }
-
-                    if (!string.IsNullOrEmpty(Instance) && (azureAdObject["Instance"] is null || azureAdObject["Instance"]?.ToString() != Instance))
-                    {
-                        writeContent = true;
-                        azureAdObject["Instance"] = Instance;
-                    }
-                    else
-                    {
-                        writeContent = true;
-                        azureAdObject["Instance"] = "https://login.microsoftonline.com/";
-                    }
-
-                    if (!string.IsNullOrEmpty(CallbackPath) && (azureAdObject["CallbackPath"] is null || azureAdObject["CallbackPath"]?.ToString() != CallbackPath))
-                    {
-                        writeContent = true;
-                        azureAdObject["CallbackPath"] = CallbackPath;
-                    }
-                    else
-                    {
-                        writeContent = true;
-                        azureAdObject["CallbackPath"] = "/signin-oidc";
-                    }
-                    // Update the AzureAd node
-                    content[azureAdNodeName] = azureAdObject;
-                }
-                else
-                {
-                    _logger.LogError("The AzureAd section in {AppSettingsFile} must be a JSON object.", appSettingsFile);
-                    return false;
-                }
-
-                // Write the updated content if changes were made
-                if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
-                {
-                    var options = new JsonSerializerOptions { WriteIndented = true };
-
-                    var changes = new List<(string Path, string? Original, string Updated)>
-                    {
-                        (appSettingsFile, originalContent, content.ToJsonString(options))
-                    };
-                    if (!PrepareDevelopmentSettings(baseProjectPath, content, changes))
-                    {
-                        return false;
-                    }
-                    return PersistSettings(changes);
-                }
-                else
-                {
-                    _logger.LogInformation("No changes needed for AzureAd configuration in appsettings.json");
-                }
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Failed to persist Entra ID application settings.");
-            }
-
-            return false;
-
-        }
-
-        /// <summary>
-        /// Prepares the appsettings.Development.json update before any settings are written.
-        /// </summary>
-        /// <param name="baseProjectPath">Base project path.</param>
-        /// <param name="content">Content of the appsettings.json file.</param>
-        /// <param name="changes">Pending settings writes and their original contents.</param>
-        private bool PrepareDevelopmentSettings(string baseProjectPath, JsonNode content,
-            List<(string Path, string? Original, string Updated)> changes)
-        {
-            var devSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
-
-            if (_fileSystem.FileExists(devSettingsPath))
-            {
-                try
-                {
-                    JsonNode? devContent;
-                    var devJsonString = _fileSystem.ReadAllText(devSettingsPath);
+                    var devSettingsJson = _fileSystem.ReadAllText(devSettingsPath);
+                    originalContent = devSettingsJson;
 
                     try
                     {
-                        devContent = JsonNode.Parse(devJsonString, ConfigurationNodeOptions, ConfigurationJsonOptions);
-                    }
-                    catch (JsonException ex)
-                    {
-                        _logger.LogError(ex, "Failed to parse appsettings.Development.json at {Path}.", devSettingsPath);
-                        return false;
-                    }
+                        JsonNode? parsedSettings = ParseDevelopmentSettings(devSettingsJson);
 
-                    if (devContent is not JsonObject)
-                    {
-                        _logger.LogError("appsettings.Development.json at {Path} must contain a JSON object.", devSettingsPath);
-                        return false;
-                    }
-
-                    if (content["AzureAd"] is JsonObject sourceAzureAd)
-                    {
-                        if (devContent["AzureAd"] is not null && devContent["AzureAd"] is not JsonObject)
+                        if (parsedSettings is null)
                         {
-                            _logger.LogError("The AzureAd section in {Path} must be a JSON object.", devSettingsPath);
+                            developmentSettings = new JsonObject();
+                        }
+                        else if (parsedSettings is JsonObject parsedObject)
+                        {
+                            developmentSettings = parsedObject;
+                        }
+                        else
+                        {
+                            _logger.LogError($"Failed to parse appsettings.Development.json file at {devSettingsPath}: root JSON value must be an object.");
                             return false;
                         }
-
-                        var developmentAzureAd = devContent["AzureAd"] as JsonObject ?? new JsonObject();
-                        foreach (var property in new[] { "ClientId", "TenantId", "Instance", "CallbackPath" })
-                        {
-                            if (sourceAzureAd.TryGetPropertyValue(property, out var value))
-                            {
-                                developmentAzureAd[property] = value?.DeepClone();
-                            }
-                        }
-                        if (!string.IsNullOrEmpty(Domain))
-                        {
-                            developmentAzureAd["Domain"] = Domain;
-                        }
-                        else if (!string.IsNullOrEmpty(Username) && Username.Contains('@') &&
-                            developmentAzureAd["Domain"]?.ToString() == $"{Username}.onmicrosoft.com")
-                        {
-                            developmentAzureAd.Remove("Domain");
-                        }
-                        devContent["AzureAd"] = developmentAzureAd;
-
-                        var options = new JsonSerializerOptions { WriteIndented = true };
-                        changes.Add((devSettingsPath, devJsonString, devContent.ToJsonString(options)));
+                    }
+                    catch (JsonException ex)
+                    {
+                        _logger.LogError($"Failed to parse appsettings.Development.json file at {devSettingsPath}: {ex.Message}");
+                        return false;
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.LogError(ex, "Failed to prepare appsettings.Development.json.");
+                    _logger.LogInformation($"Creating new appsettings.Development.json file at {devSettingsPath}");
+                    developmentSettings = new JsonObject();
+                }
+
+                var azureAdConfig = CreateAzureAdConfiguration(Username, TenantId, ClientId, Domain, Instance, CallbackPath);
+                bool removedLegacyDomain = RemoveLegacyUsernameDerivedDomain(developmentSettings, Username, Domain);
+
+                JsonObject? existingAzureAd = GetAzureAdSections(developmentSettings).FirstOrDefault();
+
+                if (!Overwrite)
+                {
+                    string? conflictingKey = GetFirstConflictingAzureAdKey(developmentSettings, azureAdConfig);
+                    if (!string.IsNullOrEmpty(conflictingKey))
+                    {
+                        _logger.LogError($"Conflicting AzureAd value for key '{conflictingKey}' already exists in appsettings.Development.json. Re-run with '--overwrite' to replace existing managed settings.");
+                        return false;
+                    }
+                }
+
+                if (!Overwrite && HasNonObjectAzureAdSection(developmentSettings))
+                {
+                    _logger.LogError("Conflicting AzureAd value for key 'AzureAd' in appsettings.Development.json: the section is not a JSON object. Re-run with '--overwrite' to replace it.");
                     return false;
                 }
-            }
-            return true;
-        }
 
-        private bool PersistSettings(List<(string Path, string? Original, string Updated)> changes)
-        {
-            var attempted = new List<(string Path, string? Original)>();
-            try
-            {
-                foreach (var change in changes)
+                if (existingAzureAd is not null &&
+                    !removedLegacyDomain &&
+                    !HasNonObjectAzureAdSection(developmentSettings) &&
+                    !HasFlatManagedAzureAdSettings(developmentSettings, azureAdConfig) &&
+                    HasMatchingManagedAzureAdSettings(developmentSettings, azureAdConfig))
                 {
-                    // A failed write may have truncated the file, so include it in recovery.
-                    attempted.Add((change.Path, change.Original));
-                    _fileSystem.WriteAllText(change.Path, change.Updated);
-                    _logger.LogInformation("Updated '{FileName}' with AzureAd configuration", Path.GetFileName(change.Path));
+                    _logger.LogInformation("No changes needed for AzureAd configuration in appsettings.Development.json.");
+                    LogDevelopmentEnvironmentNotice();
+                    return true;
                 }
+
+                JsonObject targetAzureAd = existingAzureAd ?? new JsonObject();
+
+                RemoveFlatManagedAzureAdSettings(developmentSettings, azureAdConfig);
+
+                foreach (var setting in azureAdConfig)
+                {
+                    string targetKey = targetAzureAd
+                        .FirstOrDefault(property => property.Key.Equals(setting.Key, StringComparison.OrdinalIgnoreCase)).Key
+                        ?? setting.Key;
+                    foreach (JsonObject section in GetAzureAdSections(developmentSettings))
+                    {
+                        foreach (string key in section
+                            .Where(property => property.Key.Equals(setting.Key, StringComparison.OrdinalIgnoreCase))
+                            .Select(property => property.Key).ToList())
+                        {
+                            section.Remove(key);
+                        }
+                    }
+                    targetAzureAd[targetKey] = setting.Value?.DeepClone();
+                }
+
+                foreach (string key in developmentSettings
+                    .Where(property => property.Key.Equals("AzureAd", StringComparison.OrdinalIgnoreCase) &&
+                        (property.Value is not JsonObject ||
+                         property.Value is JsonObject section && section.Count == 0))
+                    .Select(property => property.Key).ToList())
+                {
+                    developmentSettings.Remove(key);
+                }
+
+                if (existingAzureAd is null)
+                {
+                    developmentSettings["AzureAd"] = targetAzureAd;
+                }
+
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                if (!PersistSettings(devSettingsPath, originalContent, developmentSettings.ToJsonString(options)))
+                {
+                    return false;
+                }
+
+                _logger.LogInformation($"Updated '{Path.GetFileName(devSettingsPath)}' with AzureAd development configuration.");
+                LogDevelopmentEnvironmentNotice();
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to persist Entra ID settings. Restoring attempted settings writes.");
-                foreach (var change in attempted.AsEnumerable().Reverse())
+                _logger.LogError($"Failed to update appsettings.Development.json: {ex.Message}");
+                return false;
+            }
+        }
+
+        private void LogDevelopmentEnvironmentNotice()
+        {
+            _logger.LogInformation("The generated AzureAd app registration and settings are intended for development environments.");
+        }
+
+        internal static JsonNode? ParseDevelopmentSettings(string json)
+        {
+            return JsonNode.Parse(
+                json,
+                new JsonNodeOptions { PropertyNameCaseInsensitive = false },
+                new JsonDocumentOptions
                 {
-                    try
+                    CommentHandling = JsonCommentHandling.Skip,
+                    AllowTrailingCommas = true
+                });
+        }
+
+        internal static JsonObject CreateAzureAdConfiguration(
+            string? username, string? tenantId, string? clientId,
+            string? domain = null, string? instance = null, string? callbackPath = null)
+        {
+            var configuration = new JsonObject
+            {
+                ["Instance"] = !string.IsNullOrWhiteSpace(instance) ? instance : "https://login.microsoftonline.com/",
+                ["TenantId"] = tenantId,
+                ["ClientId"] = clientId,
+                ["CallbackPath"] = !string.IsNullOrWhiteSpace(callbackPath) ? callbackPath : "/signin-oidc"
+            };
+
+            if (!string.IsNullOrWhiteSpace(domain))
+            {
+                configuration["Domain"] = domain;
+            }
+
+            return configuration;
+        }
+
+        private static bool RemoveLegacyUsernameDerivedDomain(
+            JsonObject developmentSettings,
+            string? username,
+            string? configuredDomain)
+        {
+            if (!string.IsNullOrWhiteSpace(configuredDomain) ||
+                string.IsNullOrWhiteSpace(username) ||
+                !username.Contains('@'))
+            {
+                return false;
+            }
+
+            string legacyDomain = $"{username}.onmicrosoft.com";
+            bool removed = false;
+
+            foreach (JsonObject section in GetAzureAdSections(developmentSettings))
+            {
+                foreach (string key in section
+                    .Where(property => property.Key.Equals("Domain", StringComparison.OrdinalIgnoreCase) &&
+                        property.Value?.ToString() == legacyDomain)
+                    .Select(property => property.Key).ToList())
+                {
+                    removed = section.Remove(key) || removed;
+                }
+            }
+
+            foreach (string key in developmentSettings
+                .Where(property => property.Key.Equals("AzureAd:Domain", StringComparison.OrdinalIgnoreCase) &&
+                    property.Value?.ToString() == legacyDomain)
+                .Select(property => property.Key).ToList())
+            {
+                removed = developmentSettings.Remove(key) || removed;
+            }
+
+            return removed;
+        }
+
+        internal static string? GetFirstConflictingAzureAdKey(JsonObject developmentSettings, JsonObject generatedAzureAd)
+        {
+            foreach (var setting in generatedAzureAd)
+            {
+                foreach (JsonNode? value in GetNestedAzureAdValues(developmentSettings, setting.Key))
+                {
+                    if (IsConflictingValue(value, setting.Value))
                     {
-                        if (change.Original is null)
+                        return setting.Key;
+                    }
+                }
+                foreach (var property in developmentSettings)
+                {
+                    if (property.Key.Equals($"AzureAd:{setting.Key}", StringComparison.OrdinalIgnoreCase) &&
+                        IsConflictingValue(property.Value, setting.Value))
+                    {
+                        return setting.Key;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private static IEnumerable<JsonObject> GetAzureAdSections(JsonObject developmentSettings)
+            => developmentSettings
+                .Where(property => property.Key.Equals("AzureAd", StringComparison.OrdinalIgnoreCase))
+                .Select(property => property.Value)
+                .OfType<JsonObject>();
+
+        internal static bool HasNonObjectAzureAdSection(JsonObject developmentSettings)
+            => developmentSettings.Any(property =>
+                property.Key.Equals("AzureAd", StringComparison.OrdinalIgnoreCase) &&
+                property.Value is not null && property.Value is not JsonObject);
+
+        private static IEnumerable<JsonNode?> GetNestedAzureAdValues(JsonObject developmentSettings, string key)
+            => GetAzureAdSections(developmentSettings)
+                .SelectMany(section => section)
+                .Where(property => property.Key.Equals(key, StringComparison.OrdinalIgnoreCase))
+                .Select(property => property.Value);
+
+        private static bool IsConflictingValue(JsonNode? existingValue, JsonNode? generatedValue)
+        {
+            return !string.IsNullOrEmpty(existingValue?.ToString()) &&
+                !JsonNode.DeepEquals(existingValue, generatedValue);
+        }
+
+        private static bool HasFlatManagedAzureAdSettings(
+            JsonObject developmentSettings,
+            JsonObject generatedAzureAd)
+        {
+            foreach (var setting in generatedAzureAd)
+            {
+                if (developmentSettings.Any(property =>
+                    property.Key.Equals($"AzureAd:{setting.Key}", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static void RemoveFlatManagedAzureAdSettings(
+            JsonObject developmentSettings,
+            JsonObject generatedAzureAd)
+        {
+            foreach (var setting in generatedAzureAd)
+            {
+                foreach (string key in developmentSettings
+                    .Where(property => property.Key.Equals($"AzureAd:{setting.Key}", StringComparison.OrdinalIgnoreCase))
+                    .Select(property => property.Key).ToList())
+                {
+                    developmentSettings.Remove(key);
+                }
+            }
+        }
+
+        private static bool HasMatchingManagedAzureAdSettings(JsonObject developmentSettings, JsonObject generatedAzureAd)
+        {
+            foreach (var setting in generatedAzureAd)
+            {
+                JsonNode?[] values = GetNestedAzureAdValues(developmentSettings, setting.Key).ToArray();
+                if (values.Length != 1 || !JsonNode.DeepEquals(values[0], setting.Value))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool PersistSettings(string path, string? original, string updated)
+        {
+            try
+            {
+                _fileSystem.WriteAllText(path, updated);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to persist Entra ID settings. Restoring the attempted settings write.");
+                try
+                {
+                    if (original is null)
+                    {
+                        if (_fileSystem.FileExists(path))
                         {
-                            if (_fileSystem.FileExists(change.Path))
-                            {
-                                _fileSystem.DeleteFile(change.Path);
-                            }
-                        }
-                        else if (!_fileSystem.FileExists(change.Path) ||
-                            _fileSystem.ReadAllText(change.Path) != change.Original)
-                        {
-                            _fileSystem.WriteAllText(change.Path, change.Original);
+                            _fileSystem.DeleteFile(path);
                         }
                     }
-                    catch (Exception restoreException)
+                    else if (!_fileSystem.FileExists(path) || _fileSystem.ReadAllText(path) != original)
                     {
-                        _logger.LogError(restoreException,
-                            "Could not restore settings file {Path}. Restore this file manually before retrying.", change.Path);
+                        _fileSystem.WriteAllText(path, original);
                     }
+                }
+                catch (Exception restoreException)
+                {
+                    _logger.LogError(restoreException,
+                        "Could not restore settings file {Path}. Restore this file manually before retrying.", path);
                 }
                 return false;
             }

@@ -238,7 +238,8 @@ internal class AspNetOptions
     public ScaffolderOption<string> TenantId => _tenantId ??= new()
     {
         DisplayName = AspnetStrings.Options.TenantId.DisplayName,
-        CliOption = Constants.CliOptions.TenantIdOption,
+        CliOption = Constants.CliOptions.TenantIdKebabCaseOption,
+        Aliases = [Constants.CliOptions.TenantIdOption],
         Description = AspnetStrings.Options.TenantId.Description,
         Required = true,
         PickerType = InteractivePickerType.DynamicPicker,
@@ -247,7 +248,8 @@ internal class AspNetOptions
     public ScaffolderOption<string> ApplicationId => _applicationId ??= new()
     {
         DisplayName = AspnetStrings.Options.SelectApplication.DisplayName,
-        CliOption = Constants.CliOptions.ApplicationIdOption,
+        CliOption = Constants.CliOptions.ApplicationIdKebabCaseOption,
+        Aliases = [Constants.CliOptions.ApplicationIdOption],
         Description = AspnetStrings.Options.SelectApplication.Description,
         Required = false,
         PickerType = InteractivePickerType.DynamicPicker,

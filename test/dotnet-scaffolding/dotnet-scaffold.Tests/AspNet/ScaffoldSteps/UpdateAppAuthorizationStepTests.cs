@@ -14,8 +14,21 @@ using Xunit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.ScaffoldSteps;
 
+/// <summary>
+/// Unit tests for the app registration settings applied by UpdateAppAuthorizationStep during Entra ID scaffolding.
+/// </summary>
 public class UpdateAppAuthorizationStepTests
 {
+    [Fact]
+    public void BuildBaseUpdateCommand_DisablesImplicitGrantIssuance()
+    {
+        var command = UpdateAppAuthorizationStep.BuildBaseUpdateCommand("11111111-2222-3333-4444-555555555555");
+
+        Assert.Equal(
+            "ad app update --id 11111111-2222-3333-4444-555555555555 --enable-id-token-issuance false --enable-access-token-issuance false",
+            command);
+    }
+
     [Fact]
     public async Task ExecuteAsync_RechecksIdentityBeforeEachUpdate()
     {
@@ -41,7 +54,7 @@ public class UpdateAppAuthorizationStepTests
         step.Error = error;
 
         Assert.Equal(expected, await step.ExecuteAsync(new ScaffolderContext(Mock.Of<IScaffolder>())));
-        Assert.Equal("ad app update --id app-id --enable-id-token-issuance true --web-redirect-uris \"https://localhost:5001/signin-oidc\"",
+        Assert.Equal("ad app update --id app-id --enable-id-token-issuance false --enable-access-token-issuance false --web-redirect-uris \"https://localhost:5001/signin-oidc\"",
             step.Command);
     }
 
@@ -154,6 +167,9 @@ public class UpdateAppAuthorizationStepTests
                 command),
             command =>
             {
+                Assert.StartsWith(
+                    "ad app update --id client-id --enable-id-token-issuance false --enable-access-token-issuance false",
+                    command);
                 Assert.Contains("\"https://production.contoso.com/signin-oidc\"", command);
                 Assert.Contains("\"https://localhost:7188/signin-oidc\"", command);
                 Assert.Contains("\"http://localhost:5012/signin-oidc\"", command);

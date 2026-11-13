@@ -66,9 +66,12 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        var callback" +
                     "Url = NavigationManager.GetUriWithQueryParameters(\r\n            NavigationManage" +
                     "r.ToAbsoluteUri(\"Account/ResetPassword\").AbsoluteUri,\r\n            new Dictionar" +
-                    "y<string, object?> { [\"code\"] = code });\r\n\r\n        await EmailSender.SendPasswo" +
-                    "rdResetLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r" +
-                    "\n        RedirectManager.RedirectTo(\"Account/ForgotPasswordConfirmation\");\r\n    " +
+                    "y<string, object?> { [\"code\"] = code });\r\n\r\n" +
+                    "        var storedEmail = await UserManager.GetEmailAsync(user);\r\n" +
+                    "        if (string.IsNullOrEmpty(storedEmail))\r\n        {\r\n" +
+                    "            throw new InvalidOperationException(\"Users must have an email.\");\r\n" +
+                    "        }\r\n\r\n        await EmailSender.SendPasswordResetLinkAsync(user, storedEmail, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n" +
+                    "        RedirectManager.RedirectTo(\"Account/ForgotPasswordConfirmation\");\r\n    " +
                     "}\r\n\r\n    private sealed class InputModel\r\n    {\r\n        [Required]\r\n        [Em" +
                     "ailAddress]\r\n        public string Email { get; set; } = \"\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();

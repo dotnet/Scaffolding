@@ -13,8 +13,11 @@ public class ApiControllerNet10IntegrationTests : ApiControllerIntegrationTestsB
     protected override string TargetFramework => "net10.0";
     protected override string TestClassName => nameof(ApiControllerNet10IntegrationTests);
 
-    [Fact]
-    public async Task Scaffold_ApiControllerCrud_Net10_CliInvocation()
+    [Theory]
+    [InlineData("TestApiController")]
+    [InlineData("ConController")]
+    [InlineData("NULController")]
+    public async Task Scaffold_ApiControllerCrud_Net10_CliInvocation(string controllerName)
     {
         // Arrange — set up project with Program.cs and a model class
         File.WriteAllText(_testProjectPath, ProjectContent);
@@ -33,14 +36,16 @@ public class ApiControllerNet10IntegrationTests : ApiControllerIntegrationTestsB
             "apicontroller-crud",
             "--project", _testProjectPath,
             "--model", "TestModel",
-            "--controller", "TestApiController",
+            "--controller", controllerName,
             "--dataContext", "TestDbContext",
             "--dbProvider", "sqlite-efcore");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
         // Assert — expected files were created
-        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Controllers", "TestApiController.cs")),
-            "Controller file 'Controllers/TestApiController.cs' should be created.");
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Controllers", $"{controllerName}.cs")),
+            $"Controller file 'Controllers/{controllerName}.cs' should be created.");
+        Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Views")),
+            "API controller scaffolding should not generate views.");
         Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
             "DbContext file 'Data/TestDbContext.cs' should be created.");
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));

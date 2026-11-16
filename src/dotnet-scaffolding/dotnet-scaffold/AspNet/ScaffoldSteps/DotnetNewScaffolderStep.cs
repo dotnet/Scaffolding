@@ -215,7 +215,7 @@ internal class DotnetNewScaffolderStep : ScaffoldStep
 
         var segments = normalizedPath
             .Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if (segments.Length == 0 || segments.Any(segment => segment == "." || segment == ".."))
+        if (segments.Length == 0 || segments.Any(segment => segment == "." || segment == ".." || Path.IsPathRooted(segment)))
         {
             return null;
         }

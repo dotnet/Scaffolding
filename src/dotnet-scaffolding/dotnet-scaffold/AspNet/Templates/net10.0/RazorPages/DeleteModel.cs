@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages
     string modelName = Model.ModelInfo.ModelTypeName;
     string modelNameCapitalized = Model.ModelInfo.ModelTypeNameCapitalized;
     string modelNameLowerVariant = modelName.ToLowerInvariant();
+    modelNameLowerVariant = modelNameLowerVariant == "id" ? "entity" : modelNameLowerVariant;
     string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
     string dbContextName = Model.DbContextInfo.DbContextClassName;
     string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;

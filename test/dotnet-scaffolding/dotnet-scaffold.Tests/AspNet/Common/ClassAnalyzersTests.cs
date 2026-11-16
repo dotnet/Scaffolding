@@ -6,10 +6,13 @@ using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using ScaffoldTemplates = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Common;
 
@@ -470,6 +473,99 @@ namespace MyApp.Data
 
         Assert.Equal("Blog", result.EntitySetVariableName);
         Assert.Contains("DbSet<Other.Models.Blog> Blog", result.NewDbSetStatement);
+    }
+
+    [Theory]
+    [InlineData(9, true)]
+    [InlineData(9, false)]
+    [InlineData(10, true)]
+    [InlineData(10, false)]
+    [InlineData(11, true)]
+    [InlineData(11, false)]
+    public void GetDbContextInfo_OtherCrudTemplates_UseDiscoveredOrNewDbSet(int version, bool existingDbSet)
+    {
+        string property = existingDbSet ? "public DbSet<Blog> Blogs { get; set; } = null!;" : "";
+        CSharpCompilation compilation = CreateCompilation($$"""
+            using Microsoft.EntityFrameworkCore;
+            namespace Models
+            {
+                public class BloggingContext : DbContext { {{property}} }
+                public class Blog
+                {
+                    public int BlogId { get; set; }
+                    public string Url { get; set; } = "";
+                }
+            }
+            """);
+        Assert.DoesNotContain(compilation.GetDiagnostics(), diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+        ModelInfo model = ClassAnalyzers.GetModelClassInfo(GetTypeSymbol(compilation, "Blog"));
+        DbContextInfo context = ClassAnalyzers.GetDbContextInfo(
+            "TestProject.csproj", GetTypeSymbol(compilation, "BloggingContext"),
+            "BloggingContext", "sqlite-efcore", model);
+        string expectedSet = existingDbSet ? "Blogs" : "Blog";
+        Assert.Equal(expectedSet, context.EntitySetVariableName);
+        if (existingDbSet)
+        {
+            Assert.Null(context.NewDbSetStatement);
+        }
+        else
+        {
+            Assert.Contains("DbSet<Models.Blog> Blog", context.NewDbSetStatement);
+        }
+
+        (ITextTransformation mvc, ITextTransformation api, ITextTransformation minimal, ITextTransformation blazor) templates = version switch
+        {
+            9 => (new ScaffoldTemplates.net9.EfController.MvcEfController(),
+                new ScaffoldTemplates.net9.EfController.ApiEfController(),
+                new ScaffoldTemplates.net9.MinimalApi.MinimalApiEf(),
+                new ScaffoldTemplates.net9.BlazorCrud.Index()),
+            10 => (new ScaffoldTemplates.net10.EfController.MvcEfController(),
+                new ScaffoldTemplates.net10.EfController.ApiEfController(),
+                new ScaffoldTemplates.net10.MinimalApi.MinimalApiEf(),
+                new ScaffoldTemplates.net10.BlazorCrud.Index()),
+            11 => (new ScaffoldTemplates.net11.EfController.MvcEfController(),
+                new ScaffoldTemplates.net11.EfController.ApiEfController(),
+                new ScaffoldTemplates.net11.MinimalApi.MinimalApiEf(),
+                new ScaffoldTemplates.net11.BlazorCrud.Index()),
+            _ => throw new ArgumentOutOfRangeException(nameof(version))
+        };
+        var project = new Microsoft.DotNet.Tools.Scaffold.AspNet.Common.ProjectInfo(null);
+        var controller = new EfControllerModel
+        {
+            ControllerType = "MvcController",
+            ControllerName = "BlogsController",
+            ControllerOutputPath = "BlogsController.cs",
+            DbContextInfo = context,
+            ModelInfo = model,
+            ProjectInfo = project
+        };
+        Assert.Contains($"_context.{expectedSet}", Transform(templates.mvc, controller));
+        controller.ControllerType = "ApiController";
+        Assert.Contains($"_context.{expectedSet}", Transform(templates.api, controller));
+        Assert.Contains($"db.{expectedSet}", Transform(templates.minimal, new MinimalApiModel
+        {
+            EndpointsClassName = "BlogEndpoints",
+            EndpointsMethodName = "MapBlogEndpoints",
+            DbContextInfo = context,
+            ModelInfo = model,
+            ProjectInfo = project
+        }));
+        Assert.Contains($"context.{expectedSet}", Transform(templates.blazor, new BlazorCrudModel
+        {
+            PageType = "Index",
+            DbContextInfo = context,
+            ModelInfo = model,
+            ProjectInfo = project
+        }));
+    }
+
+    private static string Transform(ITextTransformation template, object model)
+    {
+        template.Session = new Dictionary<string, object> { ["Model"] = model };
+        template.Initialize();
+        string output = template.TransformText();
+        Assert.False(template.Errors.HasErrors);
+        return output;
     }
 
     [Fact]

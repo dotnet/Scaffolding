@@ -1,6 +1,7 @@
 <Project>
     <Import Project="$(RepoRoot)src\dotnet-scaffolding\Directory.Packages.props" />
     <ItemGroup>
+        <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(MicrosoftEntityFrameworkCorePackageVersion)" />
         <PackageVersion Include="Moq" Version="$(MoqPackageVersion)" />
         <PackageVersion Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
         <PackageVersion Include="xunit.skippablefact" Version="$(XunitSkippableFactPackageVersion)" />

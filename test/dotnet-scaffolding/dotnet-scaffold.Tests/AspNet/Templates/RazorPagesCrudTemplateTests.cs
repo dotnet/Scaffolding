@@ -87,6 +87,68 @@ public class RazorPagesCrudTemplateTests
     }
 
     [Theory]
+    [InlineData(8)]
+    [InlineData(9)]
+    [InlineData(10)]
+    [InlineData(11)]
+    public void PageModels_ForIdModel_CompileWithoutIdentifierCollisions(int version)
+    {
+        const string modelName = "Id";
+        const string keyName = "IdId";
+        RazorPageModel model = CreateModel(keyName, "int", modelName);
+        TargetFramework framework = version switch
+        {
+            8 => TargetFramework.Net8,
+            9 => TargetFramework.Net9,
+            10 => TargetFramework.Net10,
+            11 => TargetFramework.Net11,
+            _ => throw new ArgumentOutOfRangeException(nameof(version))
+        };
+        var trees = new List<SyntaxTree>
+        {
+            CSharpSyntaxTree.ParseText($$"""
+                global using System.Linq;
+                global using System.Threading.Tasks;
+                namespace Models
+                {
+                    public class {{modelName}}
+                    {
+                        public int {{keyName}} { get; set; }
+                        public string? Url { get; set; }
+                    }
+                    public class BloggingContext : Microsoft.EntityFrameworkCore.DbContext
+                    {
+                        public Microsoft.EntityFrameworkCore.DbSet<{{modelName}}> Blogs { get; set; } = default!;
+                    }
+                }
+                """)
+        };
+        foreach (string templateName in new[] { "EditModel.tt", "DetailsModel.tt", "DeleteModel.tt" })
+        {
+            Type templateType = RazorPagesHelper.GetTemplateType(templateName, framework)!;
+            var template = (ITextTransformation)Activator.CreateInstance(templateType)!;
+            trees.Add(CSharpSyntaxTree.ParseText(Transform(template, model)));
+        }
+
+        string[] platformAssemblies = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
+            .Split(Path.PathSeparator);
+        var references = platformAssemblies.Concat(
+            [
+                typeof(Microsoft.EntityFrameworkCore.DbContext).Assembly.Location,
+                typeof(Microsoft.EntityFrameworkCore.DeleteBehavior).Assembly.Location
+            ])
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(path => MetadataReference.CreateFromFile(path));
+        CSharpCompilation compilation = CSharpCompilation.Create(
+            "GeneratedPageModels", trees, references,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        using var assembly = new MemoryStream();
+        var result = compilation.Emit(assembly);
+
+        Assert.True(result.Success, string.Join(Environment.NewLine, result.Diagnostics));
+    }
+
+    [Theory]
     [MemberData(nameof(KeyCases))]
     public void Links_UseRouteId_AndPreserveEntityKey(int version, string keyName, string keyType)
     {
@@ -171,12 +233,12 @@ public class RazorPagesCrudTemplateTests
         Assert.Equal($"{keyType}?", parameter.Type?.ToString());
     }
 
-    private static RazorPageModel CreateModel(string keyName, string keyType)
+    private static RazorPageModel CreateModel(string keyName, string keyType, string modelName = "Blog")
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText($$"""
             namespace Models
             {
-                public class Blog
+                public class {{modelName}}
                 {
                     public {{keyType}} {{keyName}} { get; set; }
                     public string? Url { get; set; }
@@ -188,7 +250,7 @@ public class RazorPagesCrudTemplateTests
             [syntaxTree],
             [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-        INamedTypeSymbol symbol = compilation.GetTypeByMetadataName("Models.Blog")!;
+        INamedTypeSymbol symbol = compilation.GetTypeByMetadataName($"Models.{modelName}")!;
 
         return new RazorPageModel
         {
@@ -202,9 +264,9 @@ public class RazorPagesCrudTemplateTests
             },
             ModelInfo = new ModelInfo
             {
-                ModelTypeName = "Blog",
+                ModelTypeName = modelName,
                 ModelNamespace = "Models",
-                ModelFullName = "Models.Blog",
+                ModelFullName = $"Models.{modelName}",
                 PrimaryKeyName = keyName,
                 PrimaryKeyTypeName = keyType,
                 PrimaryKeyShortTypeName = keyType,

@@ -68,6 +68,8 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
     [SkippableFact]
     public async Task Scaffold_Interactive_StandaloneBlazorWasm_IsRejected()
     {
+        var entraSettings = GetRequiredExternalEntraSettings();
+
         File.WriteAllText(_testProjectPath, """
             <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
             <PropertyGroup>
@@ -79,7 +81,11 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
         var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
             TargetFramework,
             "entra-id",
-            "--project", _testProjectPath);
+            "--project", _testProjectPath,
+            "--username", entraSettings.Username,
+            "--tenantId", entraSettings.TenantId,
+            "--use-existing-application",
+            "--applicationId", entraSettings.ApplicationId);
 
         Assert.NotEqual(0, exitCode);
         Assert.Contains("does not support directly selected Blazor WebAssembly projects", output + error);
@@ -132,26 +138,6 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
         var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
         Assert.True(postExitCode == 0, $"Project should build after scaffolding. Error: {postError}");
     }
-    [SkippableFact]
-    public async Task Scaffold_Interactive_StandaloneBlazorWasm_IsRejected()
-    {
-        File.WriteAllText(_testProjectPath, """
-            <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
-            <PropertyGroup>
-                <TargetFramework>net10.0</TargetFramework>
-              </PropertyGroup>
-            </Project>
-            """);
-
-        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
-            TargetFramework,
-            "entra-id",
-            "--project", _testProjectPath);
-
-        Assert.NotEqual(0, exitCode);
-        Assert.Contains("does not support directly selected Blazor WebAssembly projects", output + error);
-    }
-
     [Fact]
     public async Task UpdateAppAuthorizationStep_Fails_When_AzureCliMissing()
     {

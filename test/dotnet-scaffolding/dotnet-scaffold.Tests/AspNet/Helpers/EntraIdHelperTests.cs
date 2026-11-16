@@ -368,6 +368,7 @@ public class EntraIdHelperTests
         {
             Directory.CreateDirectory(Path.Combine(clientDirectory, "Components"));
             File.WriteAllText(Path.Combine(clientDirectory, "Components", "Routes.razor"), string.Empty);
+            Directory.CreateDirectory(Path.Combine(serverDirectory, "Components", "Layout"));
             File.WriteAllText(Path.Combine(serverDirectory, "Components", "Layout", "NavMenu.razor"), string.Empty);
 
             EntraIdModel entraIdModel = new()

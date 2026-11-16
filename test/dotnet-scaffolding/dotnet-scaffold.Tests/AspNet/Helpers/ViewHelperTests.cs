@@ -56,7 +56,7 @@ public class ViewHelperTests
                 : "@model Library.Models.Catalog.Book";
             Assert.StartsWith(declaration, output);
         }
-
+    }
     [Theory]  
     [InlineData("OrdersController", "Orders")]
     [InlineData("@OrdersController", "Orders")]

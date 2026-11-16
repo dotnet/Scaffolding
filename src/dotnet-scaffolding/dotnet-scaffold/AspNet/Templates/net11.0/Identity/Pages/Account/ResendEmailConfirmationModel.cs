@@ -73,8 +73,10 @@ using ");
                     "(user);\r\n        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code)" +
                     ");\r\n        var callbackUrl = Url.Page(\r\n            \"/Account/ConfirmEmail\",\r\n " +
                     "           pageHandler: null,\r\n            values: new { userId = userId, code =" +
-                    " code },\r\n            protocol: Request.Scheme)!;\r\n        await _emailSender.Se" +
-                    "ndEmailAsync(\r\n            Input.Email,\r\n            \"Confirm your email\",\r\n    " +
+                    " code },\r\n            protocol: Request.Scheme)!;\r\n        var storedEmail = await _userManager.GetEmailAsync(user);\r\n" +
+                    "        if (string.IsNullOrEmpty(storedEmail))\r\n        {\r\n" +
+                    "            throw new InvalidOperationException(\"Users must have an email.\");\r\n" +
+                    "        }\r\n\r\n        await _emailSender.SendEmailAsync(\r\n            storedEmail,\r\n            \"Confirm your email\",\r\n    " +
                     "        $\"Please confirm your account by <a href=\'{HtmlEncoder.Default.Encode(ca" +
                     "llbackUrl)}\'>clicking here</a>.\");\r\n\r\n        ModelState.AddModelError(string.Em" +
                     "pty, \"Verification email sent. Please check your email.\");\r\n        return Page(" +

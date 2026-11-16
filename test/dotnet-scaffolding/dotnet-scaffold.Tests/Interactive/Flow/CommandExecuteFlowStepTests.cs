@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
 using Microsoft.DotNet.Scaffolding.Core.Hosting;
+using Microsoft.DotNet.Scaffolding.Core.Logging;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -17,6 +18,7 @@ using Microsoft.DotNet.Tools.Scaffold.Interactive.Flow;
 using Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32.SafeHandles;
 using Moq;
 using Spectre.Console.Flow;
@@ -26,6 +28,25 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.Interactive.Flow;
 
 public class CommandExecuteFlowStepTests
 {
+    [Fact]
+    public async Task ErrorCapture_IsScopedAcrossAwaitAndRestoresPreviousCapture()
+    {
+        using var provider = new ScaffoldingErrorCapture();
+        var logger = provider.CreateLogger("test");
+        logger.LogError("Outside capture");
+        using var outer = provider.BeginCapture();
+        logger.LogInformation("Not an error");
+        logger.LogError("Outer error");
+        using (var inner = provider.BeginCapture())
+        {
+            await Task.Yield();
+            logger.LogError("Inner error");
+            Assert.Equal("Inner error", inner.Message);
+        }
+        logger.LogError("Restored outer error");
+        Assert.Equal($"Outer error{Environment.NewLine}Restored outer error", outer.Message);
+    }
+
     [Theory]
     [InlineData(ScaffolderCatagory.AspNet, true)]
     [InlineData(ScaffolderCatagory.AspNet, false)]
@@ -34,11 +55,15 @@ public class CommandExecuteFlowStepTests
     public async Task Execution_PropagatesCommandResultWithoutRetrying(ScaffolderCatagory category, bool succeeds)
     {
         var builder = Host.CreateScaffoldBuilder();
-        var step = new TestStep { Succeeds = succeeds };
-        builder.Services.AddSingleton(step);
+        builder.Services.AddSingleton<TestStep>(services => new TestStep
+        {
+            Succeeds = succeeds,
+            Logger = services.GetRequiredService<ILogger<TestStep>>()
+        });
         builder.AddScaffolder(category, "test").WithStep<TestStep>();
         var runner = builder.Build();
         using var services = Assert.IsType<ServiceProvider>(builder.ServiceProvider);
+        var step = services.GetRequiredService<TestStep>();
         var telemetry = new Mock<ITelemetryService>();
         var executeStep = new CommandExecuteFlowStep(telemetry.Object, runner);
         FlowStepResult? fallbackResult = null;
@@ -87,6 +112,7 @@ public class CommandExecuteFlowStepTests
         {
             Assert.Equal(FlowStepState.Failure, Assert.IsType<FlowStepResult>(fallbackResult).State);
             Assert.Contains("exit code: 1", fallbackResult!.Message);
+            Assert.Contains("Underlying test failure [details].", fallbackResult.Message);
         }
         Assert.Equal(1, step.ExecutionCount);
         telemetry.Verify(t => t.TrackEvent(
@@ -202,6 +228,7 @@ public class CommandExecuteFlowStepTests
     private sealed class TestStep : ScaffoldStep
     {
         public bool Succeeds { get; init; }
+        public required ILogger Logger { get; init; }
         public int ExecutionCount { get; private set; }
 
         public override Task<bool> ExecuteAsync(ScaffolderContext context, CancellationToken cancellationToken = default)
@@ -209,6 +236,10 @@ public class CommandExecuteFlowStepTests
             if (++ExecutionCount > 1)
             {
                 throw new InvalidOperationException("The scaffolder must not be retried automatically after a failure.");
+            }
+            if (!Succeeds)
+            {
+                Logger.LogError("Underlying test failure [details].");
             }
             return Task.FromResult(Succeeds);
         }

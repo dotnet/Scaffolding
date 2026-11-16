@@ -18,6 +18,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet;
 public class ValidateEfControllerStepTests
 {
     [Theory]
+    [InlineData("Store-Web", "Store_Web.Controllers")]
+    [InlineData("Store.123Web.class", "Store._123Web.@class.Controllers")]
+    [InlineData("Store.@class", "Store.@class.Controllers")]
+    [InlineData("...", "_.Controllers")]
+    [InlineData("", "Controllers")]
+    public void ControllerNamespace_NormalizesInvalidSegments(string rootNamespace, string expected)
+    {
+        Assert.Equal(expected, ValidateEfControllerStep.GetControllerNamespace(rootNamespace));
+    }
+
+    [Theory]
     [InlineData("..")]
     [InlineData(".")]
     [InlineData("123Orders")]

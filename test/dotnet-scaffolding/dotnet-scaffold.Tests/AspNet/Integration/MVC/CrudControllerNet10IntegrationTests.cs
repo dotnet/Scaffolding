@@ -13,15 +13,17 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
     protected override string TargetFramework => "net10.0";
     protected override string TestClassName => nameof(CrudControllerNet10IntegrationTests);
 
-    [Fact]
-    public async Task Scaffold_ProductWithExistingContextAndCommentedSettings_Net10()
+    [Theory]
+    [InlineData("Store.Web", "Store.Web")]
+    [InlineData("Store-Web", "Store_Web")]
+    public async Task Scaffold_ProductWithExistingContextAndCommentedSettings_Net10(string rootNamespace, string controllerNamespace)
     {
-        File.WriteAllText(_testProjectPath, """
+        File.WriteAllText(_testProjectPath, $$"""
             <Project Sdk="Microsoft.NET.Sdk.Web">
               <PropertyGroup>
                 <TargetFramework>net10.0</TargetFramework>
                 <ImplicitUsings>enable</ImplicitUsings>
-                <RootNamespace>Store.Web</RootNamespace>
+                <RootNamespace>{{rootNamespace}}</RootNamespace>
               </PropertyGroup>
               <ItemGroup>
                 <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.10" />
@@ -80,7 +82,7 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
         Assert.True(exitCode == 0, $"Scaffolding failed:\n{output}\n{error}");
 
         string controller = File.ReadAllText(Path.Combine(_testProjectDir, "Controllers", "ProductsController.cs"));
-        Assert.Contains("namespace Store.Web.Controllers;", controller);
+        Assert.Contains($"namespace {controllerNamespace}.Controllers;", controller);
         Assert.Contains("Details(int? id)", controller);
         Assert.Contains("m.ProductId == id", controller);
         foreach (string view in new[] { "Create", "Edit", "Details", "Delete", "Index" })

@@ -4,6 +4,7 @@ More details coming soon!
 ### MVC controller scaffolding
 
 EF MVC controllers use the project's evaluated root namespace with `.Controllers`
+after normalizing invalid identifier characters and escaping C# keywords,
 and conventional `id` route parameters, including models whose key is named
 `ProductId`. With `--views`, views are written beneath `Views\<controller-name>`
 with the trailing `Controller` suffix removed, independently of the model name.
@@ -17,7 +18,8 @@ Existing connection-string values are not overwritten.
 The new `dotnet scaffold` engine uses compiled T4 templates; it does not load
 legacy `CodeTemplates\ControllerViews\*.cshtml` overrides. For legacy Razor
 template customization, use `dotnet aspnet-codegenerator` with project-local
-`Templates\ControllerViews\*.cshtml` templates. Installing
+`Templates\ViewGenerator\*.cshtml` view templates and
+`Templates\ControllerGenerator\*.cshtml` controller templates. Installing
 `Microsoft.VisualStudio.Web.CodeGeneration.Design` does not switch the new
 scaffolder to the legacy template engine.
 

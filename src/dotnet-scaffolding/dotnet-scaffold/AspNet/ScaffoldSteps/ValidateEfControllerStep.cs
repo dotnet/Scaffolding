@@ -273,7 +273,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
         }
 
         string rootNamespace = properties["RootNamespace"];
-        string controllerNamespace = string.IsNullOrEmpty(rootNamespace) ? "Controllers" : $"{rootNamespace}.Controllers";
+        string controllerNamespace = GetControllerNamespace(rootNamespace);
 
         EfControllerModel scaffoldingModel = new()
         {
@@ -295,5 +295,44 @@ internal class ValidateEfControllerStep : ScaffoldStep
         }
 
         return scaffoldingModel;
+    }
+
+    internal static string GetControllerNamespace(string rootNamespace)
+    {
+        if (string.IsNullOrEmpty(rootNamespace))
+        {
+            return "Controllers";
+        }
+
+        var segments = rootNamespace.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        for (int i = 0; i < segments.Length; i++)
+        {
+            var token = SyntaxFactory.ParseToken(segments[i]);
+            if (token.RawKind == (int)SyntaxKind.IdentifierToken && !token.ContainsDiagnostics && token.Text == segments[i])
+            {
+                continue;
+            }
+
+            var name = new System.Text.StringBuilder();
+            foreach (char character in segments[i])
+            {
+                name.Append(SyntaxFacts.IsIdentifierPartCharacter(character) ? character : '_');
+            }
+
+            if (name.Length == 0 || !SyntaxFacts.IsIdentifierStartCharacter(name[0]))
+            {
+                name.Insert(0, '_');
+            }
+
+            string identifier = name.ToString();
+            if (SyntaxFacts.GetKeywordKind(identifier) != SyntaxKind.None)
+            {
+                identifier = "@" + identifier;
+            }
+
+            segments[i] = identifier;
+        }
+
+        return $"{(segments.Length == 0 ? "_" : string.Join(".", segments))}.Controllers";
     }
 }

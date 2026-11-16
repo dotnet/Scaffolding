@@ -125,8 +125,11 @@ internal static class ClassAnalyzers
     /// Gets information about a model class, including its name, namespace, full name, primary key, and properties.
     /// </summary>
     /// <param name="modelClassSymbol">The symbol representing the model class.</param>
+    /// <param name="isPropertyAccessible">Optional predicate for excluding properties unavailable to the generated code.</param>
     /// <returns>A <see cref="ModelInfo"/> object with details about the model class.</returns>
-    internal static ModelInfo GetModelClassInfo(ISymbol modelClassSymbol)
+    internal static ModelInfo GetModelClassInfo(
+        ISymbol modelClassSymbol,
+        Func<IPropertySymbol, bool>? isPropertyAccessible = null)
     {
         var modelInfo = new ModelInfo();
         modelInfo.ModelTypeName = modelClassSymbol.Name;
@@ -148,7 +151,9 @@ internal static class ClassAnalyzers
             modelInfo.ModelFullName = modelInfo.ModelTypeName;
         }
 
-        var efModelProperties = EfDbContextHelpers.GetModelProperties(modelClassSymbol);
+        var efModelProperties = isPropertyAccessible is null
+            ? EfDbContextHelpers.GetModelProperties(modelClassSymbol)
+            : EfDbContextHelpers.GetModelProperties(modelClassSymbol, isPropertyAccessible);
         if (efModelProperties != null)
         {
             modelInfo.PrimaryKeyName = efModelProperties.PrimaryKeyName;

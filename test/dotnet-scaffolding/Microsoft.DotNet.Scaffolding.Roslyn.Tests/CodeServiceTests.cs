@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -85,6 +86,7 @@ public class CodeServiceTests : IDisposable
         var modelsProject = CreateProject("Models", "public class Book { }");
         var dataProject = CreateProject("Data", "public class BookStoreContext { }", modelsProject);
         var project = CreateProject("WebApp", "public class LocalBook { }", dataProject);
+        await RestoreProjectAsync(project);
         using var service = new CodeService(NullLogger.Instance, project);
 
         var symbols = await service.GetAllClassSymbolsAsync(includeReferencedProjects: true);
@@ -92,6 +94,103 @@ public class CodeServiceTests : IDisposable
         Assert.Single(symbols, symbol => symbol.Name == "Book");
         Assert.Single(symbols, symbol => symbol.Name == "BookStoreContext");
         Assert.Single(symbols, symbol => symbol.Name == "LocalBook");
+    }
+
+    [Theory]
+    [InlineData(false, false, true)]
+    [InlineData(true, false, false)]
+    [InlineData(true, true, true)]
+    public async Task GetAllClassSymbolsAsync_RespectsDisabledTransitiveProjectReferences(
+        bool disableTransitiveReferences, bool explicitModelReference, bool expected)
+    {
+        var modelsProject = CreateProject("Models", "public class Book { }");
+        var dataProject = CreateProject("Data", "public class BookStoreContext { }", modelsProject);
+        var references = explicitModelReference ? new[] { dataProject, modelsProject } : new[] { dataProject };
+        var project = CreateProject("WebApp", "public class LocalBook { }", references);
+        File.WriteAllText(project, File.ReadAllText(project).Replace(
+            "</PropertyGroup>",
+            $"<DisableTransitiveProjectReferences>{disableTransitiveReferences}</DisableTransitiveProjectReferences></PropertyGroup>"));
+        await RestoreProjectAsync(project);
+        using var service = new CodeService(NullLogger.Instance, project);
+
+        var symbols = await service.GetAllClassSymbolsAsync(includeReferencedProjects: true);
+
+        Assert.Equal(expected, symbols.Any(symbol => symbol.Name == "Book"));
+        Assert.Single(symbols, symbol => symbol.Name == "BookStoreContext");
+        Assert.Single(symbols, symbol => symbol.Name == "LocalBook");
+        if (expected)
+        {
+            var model = Assert.Single(symbols, symbol => symbol.Name == "Book");
+            Assert.Contains(model.Locations, location => location.IsInSource &&
+                location.SourceTree?.FilePath == Path.Combine(Path.GetDirectoryName(modelsProject), "Models.cs"));
+        }
+    }
+
+    [Fact]
+    public async Task GetAllClassSymbolsAsync_ConsolidatesTargetFrameworkVariantsUsingResolvedTypes()
+    {
+        var modelsDirectory = Path.Combine(_directory, "MultiTargetModels");
+        Directory.CreateDirectory(modelsDirectory);
+        var modelsProject = Path.Combine(modelsDirectory, "MultiTargetModels.csproj");
+        File.WriteAllText(modelsProject, """
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFrameworks>net8.0;net11.0</TargetFrameworks>
+              </PropertyGroup>
+            </Project>
+            """);
+        File.WriteAllText(Path.Combine(modelsDirectory, "Book.cs"), """
+            public class Book
+            {
+                public int Id { get; set; }
+            #if NET8_0
+                public string Net8Property { get; set; } = string.Empty;
+            #else
+                public string Net11Property { get; set; } = string.Empty;
+            #endif
+            }
+            """);
+        var dataDirectory = Path.Combine(_directory, "Net8Data");
+        Directory.CreateDirectory(dataDirectory);
+        var dataProject = Path.Combine(dataDirectory, "Net8Data.csproj");
+        File.WriteAllText(dataProject, $"""
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFramework>net8.0</TargetFramework>
+              </PropertyGroup>
+              <ItemGroup>
+                <ProjectReference Include="{Path.GetRelativePath(dataDirectory, modelsProject)}" />
+              </ItemGroup>
+            </Project>
+            """);
+        File.WriteAllText(Path.Combine(dataDirectory, "Data.cs"), "public class Store { }");
+        var project = CreateProject("MultiTargetWebApp", "public class Program { }", dataProject, modelsProject);
+        await RestoreProjectAsync(project);
+        using var service = new CodeService(NullLogger.Instance, project);
+
+        var symbols = await service.GetAllClassSymbolsAsync(includeReferencedProjects: true);
+
+        var model = Assert.IsAssignableFrom<INamedTypeSymbol>(Assert.Single(symbols, symbol => symbol.Name == "Book"));
+        Assert.Contains(model.GetMembers(), member => member.Name == "Net11Property");
+        Assert.DoesNotContain(model.GetMembers(), member => member.Name == "Net8Property");
+    }
+
+    [Fact]
+    public async Task GetAllClassSymbolsAsync_PreservesSameNameTypesFromDifferentAssemblies()
+    {
+        var firstModelProject = CreateProject("FirstModels", "namespace Shared; public class Book { }");
+        var secondModelProject = CreateProject("SecondModels", "namespace Shared; public class Book { }");
+        var project = CreateProject("ConflictingWebApp", "public class Program { }", firstModelProject, secondModelProject);
+        await RestoreProjectAsync(project);
+        using var service = new CodeService(NullLogger.Instance, project);
+
+        var symbols = await service.GetAllClassSymbolsAsync(includeReferencedProjects: true);
+
+        var books = symbols.OfType<INamedTypeSymbol>()
+            .Where(symbol => symbol.ToDisplayString() == "Shared.Book")
+            .ToList();
+        Assert.Equal(2, books.Count);
+        Assert.NotEqual(books[0].ContainingAssembly.Identity, books[1].ContainingAssembly.Identity);
     }
 
     [Fact]
@@ -171,6 +270,7 @@ public class CodeServiceTests : IDisposable
             </Project>
             """);
         var project = CreateProject("WebApp", "public class LocalBook { }", dataProject);
+        await RestoreProjectAsync(project);
         using var service = new CodeService(NullLogger.Instance, project);
 
         var symbols = await service.GetAllClassSymbolsAsync(includeReferencedProjects: true);
@@ -250,11 +350,32 @@ public class CodeServiceTests : IDisposable
             """);
         var dataProject = CreateProject("Data", "public class Store { }", modelsProject);
         var project = CreateProject("WebApp", "public class LocalBook { }", dataProject);
+        await RestoreProjectAsync(project);
         using var service = new CodeService(NullLogger.Instance, project);
 
         var symbols = await service.GetAllClassSymbolsAsync(includeReferencedProjects: true);
 
         Assert.Equal(expected, symbols.Any(symbol => symbol.Name == "Book"));
+    }
+
+    private static async Task RestoreProjectAsync(string projectPath)
+    {
+        var startInfo = new ProcessStartInfo("dotnet")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            WorkingDirectory = Path.GetDirectoryName(projectPath)
+        };
+        startInfo.ArgumentList.Add("restore");
+        startInfo.ArgumentList.Add(projectPath);
+        startInfo.Environment["MSBUILDDISABLENODEREUSE"] = "1";
+        using var process = Process.Start(startInfo);
+        Assert.NotNull(process);
+        var output = process.StandardOutput.ReadToEndAsync();
+        var error = process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+        Assert.True(process.ExitCode == 0, $"Project restore failed.\n{await output}\n{await error}");
     }
 
     private string CreateProject(string name, string source, params string[] references)

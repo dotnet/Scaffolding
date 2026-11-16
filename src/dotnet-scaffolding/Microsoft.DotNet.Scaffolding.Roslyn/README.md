@@ -8,8 +8,11 @@ Use `GetAllClassSymbolsAsync(includeReferencedProjects: true)` for model
 discovery across direct and transitive project references, including already-built class
 libraries. `CodeService` uses an MSBuild workspace with source references enabled, so
 the selected target frameworks, imports, properties, conditions, and
-`ReferenceOutputAssembly` metadata are respected. Current-project classes are returned
-first, and each resolved project is searched once. Package assemblies are not searched.
+`ReferenceOutputAssembly` metadata are respected. The project graph supplies source declarations,
+which are matched to types in the target compilation's resolved assembly references. This omits
+libraries excluded by `DisableTransitiveProjectReferences` and consolidates framework variants
+to the type identity actually resolved by the target project, without merging types from
+different assemblies. Current-project classes are returned first. Package assemblies are not searched.
 Reference-aware discovery returns only classes accessible from the target assembly,
 including internal classes exposed to that assembly through `InternalsVisibleTo`.
 Accessibility checks also account for containing types and nested class visibility.
@@ -27,5 +30,7 @@ The `--model` option accepts qualified names such as `BookStore.Models.Book` or
 Ambiguous names are rejected with qualified candidates instead of selecting the first
 match. Inaccessible types are omitted from the picker and rejected during validation.
 View templates retain the selected qualified identity, including containing types for nested models.
+Generated view properties and getters are filtered for accessibility from the target assembly,
+and primary-key validation uses that filtered property set.
 EF scaffolders retain target-project-only discovery and short-name picker values; editing and registering
 DbContexts from referenced projects is outside the scope of this Razor Views fix.

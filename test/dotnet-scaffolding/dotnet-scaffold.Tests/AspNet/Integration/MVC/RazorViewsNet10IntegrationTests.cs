@@ -49,6 +49,36 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
         await ScaffoldBookIndexAndVerifyBuildAsync(model, modelFullName);
     }
 
+    [Fact]
+    public async Task Scaffold_Views_PrefersCurrentProjectModelWithSameQualifiedNameAsReference()
+    {
+        var modelsProject = CreateBookModelProject();
+        var referencedModelPath = Path.Combine(Path.GetDirectoryName(modelsProject)!, "Book.cs");
+        File.WriteAllText(referencedModelPath, """
+            namespace Shared;
+            public class Book
+            {
+                public int Id { get; set; }
+                public string ReferencedTitle { get; set; } = string.Empty;
+            }
+            """);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Book.cs"), """
+            namespace Shared;
+            public class Book
+            {
+                public int Id { get; set; }
+                public string LocalTitle { get; set; } = string.Empty;
+            }
+            """);
+        await PrepareReferencedBookAppAsync(modelsProject);
+
+        await ScaffoldBookIndexAndVerifyBuildAsync("global::Shared.Book", "Shared.Book");
+
+        var indexView = File.ReadAllText(Path.Combine(_testProjectDir, "Views", "Book", "Index.cshtml"));
+        Assert.Contains("LocalTitle", indexView);
+        Assert.DoesNotContain("ReferencedTitle", indexView);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -123,6 +153,51 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
         }
     }
 
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public async Task Scaffold_Views_UsesOnlyAccessibleReferencedModelProperties(
+        bool friendAssembly, bool publicPrimaryKey)
+    {
+        var modelsProject = CreateBookModelProject();
+        var modelPath = Path.Combine(Path.GetDirectoryName(modelsProject)!, "Book.cs");
+        var primaryKey = publicPrimaryKey ? "public int Id { get; set; }" : "internal int Id { get; set; }";
+        var friendAttribute = friendAssembly
+            ? "[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(\"TestProject\")]\n"
+            : string.Empty;
+        File.WriteAllText(modelPath, $$"""
+            {{friendAttribute}}
+            namespace BookStore.Models;
+            public class Book
+            {
+                {{primaryKey}}
+                public string Title { get; set; } = string.Empty;
+                internal string Notes { get; set; } = string.Empty;
+            }
+            """);
+        await PrepareReferencedBookAppAsync(modelsProject);
+
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework, "views", "--project", _testProjectPath,
+            "--model", "BookStore.Models.Book", "--page", "CRUD");
+
+        if (!publicPrimaryKey)
+        {
+            Assert.Equal(1, exitCode);
+            Assert.Contains("No primary key found for --model 'Book'", output + error);
+            Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Views")));
+            return;
+        }
+
+        Assert.Equal(0, exitCode);
+        var viewsDirectory = Path.Combine(_testProjectDir, "Views", "Book");
+        Assert.All(new[] { "Create.cshtml", "Edit.cshtml", "Details.cshtml", "Index.cshtml", "Delete.cshtml" },
+            view => Assert.Equal(friendAssembly, File.ReadAllText(Path.Combine(viewsDirectory, view)).Contains("Notes")));
+        var build = await RunBuildAsync(_testProjectDir);
+        Assert.True(build.ExitCode == 0, $"Generated views should build.\n{build.Output}\n{build.Error}");
+    }
+
     private async Task PrepareReferencedBookAppAsync(string modelsProject)
     {
         File.WriteAllText(_testProjectPath, $"""
@@ -141,8 +216,12 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
         Assert.True(build.ExitCode == 0, $"Sample should build before scaffolding.\n{build.Output}\n{build.Error}");
     }
 
-    [Fact]
-    public async Task Scaffold_Views_WithFrameworkConditionalTransitiveModelReference()
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task Scaffold_Views_WithFrameworkConditionalTransitiveModelReference(
+        bool disableTransitiveReferences, bool explicitModelReference)
     {
         var modelsProject = CreateBookModelProject();
         var dataDirectory = Path.Combine(_testDirectory, "BookStore Data");
@@ -164,9 +243,11 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
               <PropertyGroup>
                 <TargetFramework>{TargetFramework}</TargetFramework>
                 <ImplicitUsings>enable</ImplicitUsings>
+                <DisableTransitiveProjectReferences>{disableTransitiveReferences}</DisableTransitiveProjectReferences>
               </PropertyGroup>
               <ItemGroup>
                 <ProjectReference Include="{Path.GetRelativePath(_testProjectDir, dataProject)}" />
+                {(explicitModelReference ? $"<ProjectReference Include=\"{Path.GetRelativePath(_testProjectDir, modelsProject)}\" />" : string.Empty)}
               </ItemGroup>
             </Project>
             """);
@@ -174,7 +255,36 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
         var build = await RunBuildAsync(_testProjectDir);
         Assert.True(build.ExitCode == 0, $"Sample should build before scaffolding.\n{build.Output}\n{build.Error}");
 
-        await ScaffoldBookIndexAndVerifyBuildAsync();
+        var modelIsAvailable = !disableTransitiveReferences || explicitModelReference;
+        using var service = new CodeService(NullLogger.Instance, _testProjectPath);
+        var options = await ParameterDiscovery.GetClassDisplayNamesAsync(service, new CommandInfo
+        {
+            Name = "views",
+            DisplayName = "Views",
+            DisplayCategories = [],
+            Parameters = []
+        });
+        Assert.Equal(modelIsAvailable, options.Exists(option => option.Value == "global::BookStore.Models.Book"));
+
+        if (modelIsAvailable)
+        {
+            await ScaffoldBookIndexAndVerifyBuildAsync();
+        }
+        else
+        {
+            var originalProject = File.ReadAllText(_testProjectPath);
+            var originalProgram = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+            var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+                TargetFramework, "views", "--project", _testProjectPath, "--model", "Book", "--page", "Index");
+
+            Assert.Equal(1, exitCode);
+            Assert.Contains("Invalid --model 'Book'", output + error);
+            Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Views")));
+            Assert.Equal(originalProject, File.ReadAllText(_testProjectPath));
+            Assert.Equal(originalProgram, File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs")));
+            build = await RunBuildAsync(_testProjectDir);
+            Assert.True(build.ExitCode == 0, $"Rejected scaffolding must leave a buildable project.\n{build.Output}\n{build.Error}");
+        }
     }
 
     [Fact]

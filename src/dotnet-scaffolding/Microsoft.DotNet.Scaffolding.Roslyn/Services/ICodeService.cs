@@ -36,8 +36,16 @@ public interface ICodeService
     Task <List<ISymbol>> GetAllClassSymbolsAsync();
 
     /// <summary>
+    /// Determines whether a symbol is accessible from the target project's assembly after reference-aware class discovery.
+    /// </summary>
+    /// <param name="symbol">The symbol to check.</param>
+    /// <returns>True when the symbol is accessible from the target project.</returns>
+    bool IsSymbolAccessibleFromTargetProject(ISymbol symbol) => true;
+
+    /// <summary>
     /// Gets class symbols from the current project and, optionally, its transitive project references.
-    /// Reference-aware discovery returns only classes accessible from the current project's assembly.
+    /// Reference-aware discovery returns only classes available in the current project's compilation
+    /// and accessible from its assembly.
     /// Classes from the current project are returned first. Package references are not searched.
     /// </summary>
     /// <remarks>

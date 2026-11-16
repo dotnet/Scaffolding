@@ -26,6 +26,7 @@ public class CodeService : ICodeService, IDisposable
     private AdhocWorkspace? _fallbackWorkspace;
     private IDisposable? _workspaceFailedRegistration;
     private Compilation? _compilation;
+    private Compilation? _referenceDiscoveryTargetCompilation;
     private readonly string _projectPath;
     private bool _initialized;
     private readonly object _initLock = new();
@@ -309,6 +310,12 @@ public class CodeService : ICodeService, IDisposable
         return _compilation is null ? [] : GetClassSymbols(_compilation);
     }
 
+    public bool IsSymbolAccessibleFromTargetProject(ISymbol symbol)
+    {
+        var targetCompilation = _referenceDiscoveryTargetCompilation;
+        return targetCompilation is null || IsAccessibleFromAssembly(symbol, targetCompilation.Assembly);
+    }
+
     private static List<ISymbol> GetClassSymbols(Compilation compilation)
     {
         List<ISymbol> classSymbols = [];
@@ -357,19 +364,57 @@ public class CodeService : ICodeService, IDisposable
 
         var targetCompilation = await project.GetCompilationAsync()
             ?? throw new InvalidOperationException($"Unable to compile project '{project.FilePath}' for class discovery.");
-        List<ISymbol> classSymbols = [];
+        _referenceDiscoveryTargetCompilation = targetCompilation;
+        var currentProjectClasses = GetClassSymbols(targetCompilation).OfType<INamedTypeSymbol>().ToList();
+        var currentProjectTypeNames = currentProjectClasses
+            .Select(GetMetadataTypeName)
+            .ToHashSet(StringComparer.Ordinal);
+        List<ISymbol> classSymbols = currentProjectClasses
+            .Where(symbol => IsAccessibleFromAssembly(symbol, targetCompilation.Assembly))
+            .Cast<ISymbol>()
+            .ToList();
+        var discoveredReferencedTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+        var resolvedReferencedAssemblies = targetCompilation.References
+            .Select(reference => targetCompilation.GetAssemblyOrModuleSymbol(reference))
+            .OfType<IAssemblySymbol>()
+            .ToList();
         var visitedProjects = new HashSet<ProjectId> { project.Id };
         var pendingProjects = new Queue<Project>();
         pendingProjects.Enqueue(project);
         while (pendingProjects.TryDequeue(out var currentProject))
         {
-            var compilation = await currentProject.GetCompilationAsync()
-                ?? throw new InvalidOperationException($"Unable to compile project '{currentProject.FilePath}' for class discovery.");
-            classSymbols.AddRange(GetClassSymbols(compilation)
-                .OfType<INamedTypeSymbol>()
-                .Where(symbol => IsAccessibleFromAssembly(symbol, targetCompilation.Assembly)));
+            if (currentProject.Id != project.Id)
+            {
+                var compilation = await currentProject.GetCompilationAsync()
+                    ?? throw new InvalidOperationException($"Unable to compile project '{currentProject.FilePath}' for class discovery.");
+                foreach (var sourceType in GetClassSymbols(compilation).OfType<INamedTypeSymbol>())
+                {
+                    var metadataName = GetMetadataTypeName(sourceType);
+                    if (currentProjectTypeNames.Contains(metadataName))
+                    {
+                        continue;
+                    }
 
-            // Roslyn's resolved graph honors target-framework selection and ReferenceOutputAssembly.
+                    foreach (var referencedAssembly in resolvedReferencedAssemblies.Where(
+                        assembly => assembly.Identity.Equals(sourceType.ContainingAssembly.Identity)))
+                    {
+                        var referencedType = referencedAssembly.GetTypeByMetadataName(metadataName);
+                        if (referencedType is null ||
+                            !IsAccessibleFromAssembly(referencedType, targetCompilation.Assembly))
+                        {
+                            continue;
+                        }
+
+                        if (discoveredReferencedTypes.Add(referencedType))
+                        {
+                            classSymbols.Add(referencedType);
+                        }
+                    }
+                }
+            }
+
+            // Traverse the source graph to recover declarations, but only expose types
+            // that bind through the target project's resolved assembly references.
             foreach (var reference in currentProject.ProjectReferences)
             {
                 if (!visitedProjects.Add(reference.ProjectId))
@@ -386,20 +431,35 @@ public class CodeService : ICodeService, IDisposable
         return classSymbols;
     }
 
-    private static bool IsAccessibleFromAssembly(INamedTypeSymbol symbol, IAssemblySymbol targetAssembly)
+    private static string GetMetadataTypeName(INamedTypeSymbol type)
+    {
+        var containingTypes = new Stack<string>();
+        for (var currentType = type; currentType is not null; currentType = currentType.ContainingType)
+        {
+            containingTypes.Push(currentType.MetadataName);
+        }
+
+        var namespaceName = type.ContainingNamespace.IsGlobalNamespace
+            ? string.Empty
+            : $"{type.ContainingNamespace.ToDisplayString()}.";
+        return namespaceName + string.Join("+", containingTypes);
+    }
+
+    private static bool IsAccessibleFromAssembly(ISymbol symbol, IAssemblySymbol targetAssembly)
     {
         // Referenced source symbols can belong to a different or retargeted compilation.
-        var hasInternalAccess = SymbolEqualityComparer.Default.Equals(symbol.ContainingAssembly, targetAssembly)
-            || symbol.ContainingAssembly.GivesAccessTo(targetAssembly);
-        for (INamedTypeSymbol? type = symbol; type is not null; type = type.ContainingType)
+        var containingAssembly = symbol.ContainingAssembly;
+        var hasInternalAccess = containingAssembly is not null &&
+            (SymbolEqualityComparer.Default.Equals(containingAssembly, targetAssembly)
+             || containingAssembly.GivesAccessTo(targetAssembly));
+        if (!IsAccessibilityAllowed(symbol.DeclaredAccessibility, hasInternalAccess))
         {
-            var accessible = type.DeclaredAccessibility switch
-            {
-                Accessibility.Public => true,
-                Accessibility.Internal or Accessibility.ProtectedOrInternal => hasInternalAccess,
-                _ => false
-            };
-            if (type.IsFileLocal || !accessible)
+            return false;
+        }
+
+        for (var type = symbol.ContainingType; type is not null; type = type.ContainingType)
+        {
+            if (type.IsFileLocal || !IsAccessibilityAllowed(type.DeclaredAccessibility, hasInternalAccess))
             {
                 return false;
             }
@@ -407,6 +467,14 @@ public class CodeService : ICodeService, IDisposable
 
         return true;
     }
+
+    private static bool IsAccessibilityAllowed(Accessibility accessibility, bool hasInternalAccess) =>
+        accessibility switch
+        {
+            Accessibility.Public => true,
+            Accessibility.Internal or Accessibility.ProtectedOrInternal => hasInternalAccess,
+            _ => false
+        };
 
     /// <summary>
     /// Fallback compilation built by directly parsing the project's .cs source files.

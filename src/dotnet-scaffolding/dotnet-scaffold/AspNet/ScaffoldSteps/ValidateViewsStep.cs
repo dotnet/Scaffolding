@@ -145,8 +145,8 @@ internal class ValidateViewsStep : ScaffoldStep
         var allClasses = await projectInfo.CodeService.GetAllClassSymbolsAsync(includeReferencedProjects: true);
         var matchingClasses = allClasses.Where(x =>
             x.Name.Equals(settings.Model, StringComparison.OrdinalIgnoreCase) ||
-            x.ToDisplayString().Equals(settings.Model, StringComparison.OrdinalIgnoreCase) ||
-            x.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Equals(settings.Model, StringComparison.OrdinalIgnoreCase))
+            x.ToDisplayString().Equals(settings.Model, StringComparison.Ordinal) ||
+            x.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Equals(settings.Model, StringComparison.Ordinal))
             .ToList();
         if (matchingClasses.Count > 1)
         {
@@ -161,7 +161,10 @@ internal class ValidateViewsStep : ScaffoldStep
             return null;
         }
 
-        var modelInfo = ClassAnalyzers.GetModelClassInfo(modelClassSymbol);
+        var modelInfo = ClassAnalyzers.GetModelClassInfo(modelClassSymbol, property =>
+            property.GetMethod is not null &&
+            projectInfo.CodeService.IsSymbolAccessibleFromTargetProject(property) &&
+            projectInfo.CodeService.IsSymbolAccessibleFromTargetProject(property.GetMethod));
         modelInfo.ModelFullName = modelClassSymbol.ToDisplayString();
         var validateModelInfoResult = ClassAnalyzers.ValidateModelForCrudScaffolders(modelInfo, _logger);
         if (!validateModelInfoResult)

@@ -14,7 +14,7 @@ internal static class EntraRegistrationCleanup
     internal static void TryCleanup(ScaffolderContext context, string? tenantId, string? username, ILogger logger)
         => TryCleanup(context, tenantId, username, logger, args =>
         {
-            var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
+            var runner = MsIdentityToolHelper.CreateMsIdentityRunner(args);
             var exitCode = runner.ExecuteAndCaptureOutput(out _, out var error);
             return (exitCode, error);
         });

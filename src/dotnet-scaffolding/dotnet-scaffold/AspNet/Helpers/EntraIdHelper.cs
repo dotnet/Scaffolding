@@ -52,12 +52,21 @@ internal static class EntraIdHelper
             ? projectOutputPath
             : Path.Combine(projectOutputPath, "Components");
         string redirectToLoginOutputPath = Path.Combine(componentsOutputPath, "RedirectToLogin.razor");
-        if (!isStandaloneWasmProject && !string.IsNullOrEmpty(blazorWasmClientProjectPath))
+        if (!string.IsNullOrEmpty(blazorWasmClientProjectPath))
         {
             string? clientDirectory = Path.GetDirectoryName(blazorWasmClientProjectPath);
-            if (clientDirectory is not null && File.Exists(Path.Combine(clientDirectory, "Routes.razor")))
+            if (clientDirectory is not null)
             {
-                redirectToLoginOutputPath = Path.Combine(clientDirectory, "RedirectToLogin.razor");
+                string clientRoutesPath = Path.Combine(clientDirectory, "Routes.razor");
+                string relocatedClientRoutesPath = Path.Combine(clientDirectory, "Components", "Routes.razor");
+                if (File.Exists(clientRoutesPath))
+                {
+                    redirectToLoginOutputPath = Path.Combine(clientDirectory, "RedirectToLogin.razor");
+                }
+                else if (File.Exists(relocatedClientRoutesPath))
+                {
+                    redirectToLoginOutputPath = Path.Combine(clientDirectory, "Components", "RedirectToLogin.razor");
+                }
             }
         }
 

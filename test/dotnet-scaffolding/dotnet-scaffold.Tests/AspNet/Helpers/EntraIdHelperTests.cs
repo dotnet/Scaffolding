@@ -356,6 +356,40 @@ public class EntraIdHelperTests
             }
         }
     }
+    [Fact]
+    public void GetTextTemplatingProperties_UsesRelocatedRouterPath()
+    {
+        string testDirectory = Path.Combine(Path.GetTempPath(), nameof(EntraIdHelperTests), Guid.NewGuid().ToString());
+        string serverDirectory = Path.Combine(testDirectory, "Server");
+        string clientDirectory = Path.Combine(testDirectory, "Client");
+        string clientProjectPath = Path.Combine(clientDirectory, "Client.csproj");
+
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(clientDirectory, "Components"));
+            File.WriteAllText(Path.Combine(clientDirectory, "Components", "Routes.razor"), string.Empty);
+            File.WriteAllText(Path.Combine(serverDirectory, "Components", "Layout", "NavMenu.razor"), string.Empty);
+
+            EntraIdModel entraIdModel = new()
+            {
+                ProjectInfo = new ProjectInfo(Path.Combine(serverDirectory, "Server.csproj")),
+                BaseOutputPath = serverDirectory
+            };
+            TextTemplatingProperty property = Assert.Single(EntraIdHelper.GetTextTemplatingProperties(
+                [Path.Combine("BlazorEntraId", "RedirectToLogin.tt")],
+                entraIdModel,
+                clientProjectPath));
+
+            Assert.Equal(Path.Combine(clientDirectory, "Components", "RedirectToLogin.razor"), property.OutputPath);
+        }
+        finally
+        {
+            if (Directory.Exists(testDirectory))
+            {
+                Directory.Delete(testDirectory, recursive: true);
+            }
+        }
+    }
 
     [Fact]
     public void GetTextTemplatingProperties_WithoutNavMenu_Throws()

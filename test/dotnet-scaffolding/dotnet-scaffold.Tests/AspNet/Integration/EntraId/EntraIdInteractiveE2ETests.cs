@@ -65,6 +65,25 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
         var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
         Assert.True(postExitCode == 0, $"Project should build after scaffolding. Error: {postError}");
     }
+    [SkippableFact]
+    public async Task Scaffold_Interactive_StandaloneBlazorWasm_IsRejected()
+    {
+        File.WriteAllText(_testProjectPath, """
+            <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+            <PropertyGroup>
+                <TargetFramework>net10.0</TargetFramework>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "entra-id",
+            "--project", _testProjectPath);
+
+        Assert.NotEqual(0, exitCode);
+        Assert.Contains("does not support directly selected Blazor WebAssembly projects", output + error);
+    }
 
     [SkippableTheory]
     [InlineData("WebAssembly")]
@@ -112,6 +131,25 @@ public class EntraIdInteractiveE2ETests : EntraIdIntegrationTestsBase
             File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs")));
         var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
         Assert.True(postExitCode == 0, $"Project should build after scaffolding. Error: {postError}");
+    }
+    [SkippableFact]
+    public async Task Scaffold_Interactive_StandaloneBlazorWasm_IsRejected()
+    {
+        File.WriteAllText(_testProjectPath, """
+            <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+            <PropertyGroup>
+                <TargetFramework>net10.0</TargetFramework>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "entra-id",
+            "--project", _testProjectPath);
+
+        Assert.NotEqual(0, exitCode);
+        Assert.Contains("does not support directly selected Blazor WebAssembly projects", output + error);
     }
 
     [Fact]

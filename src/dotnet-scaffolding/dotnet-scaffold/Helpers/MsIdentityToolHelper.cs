@@ -26,7 +26,7 @@ internal static class MsIdentityToolHelper
 
     internal static (int ExitCode, string? Output, string? Error) ReadCapabilities()
     {
-        var exitCode = DotnetCliRunner.CreateDotNet(MsIdentityCommandName, ["--get-capabilities"])
+        var exitCode = CreateMsIdentityRunner(["--get-capabilities"])
             .ExecuteAndCaptureOutput(out var output, out var error);
         return (exitCode, output, error);
     }

@@ -22,6 +22,40 @@ internal static class MsIdentityToolHelper
     /// </summary>
     internal const string MsIdentityCommandName = "msidentity";
 
+    internal static (int ExitCode, string? Output, string? Error) ReadCapabilities()
+    {
+        var exitCode = DotnetCliRunner.CreateDotNet(MsIdentityCommandName, ["--get-capabilities"])
+            .ExecuteAndCaptureOutput(out var output, out var error);
+        return (exitCode, output, error);
+    }
+
+    internal static bool SupportsRegistrationCleanup(ILogger logger,
+        Func<(int ExitCode, string? Output, string? Error)> readCapabilities)
+    {
+        try
+        {
+            var (exitCode, output, error) = readCapabilities();
+            if (exitCode == 0 && output is not null &&
+                output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+                    .Any(line => line.Trim() == "registration-cleanup"))
+            {
+                return true;
+            }
+            logger.LogError(
+                "The invoked {ToolName} tool does not report the required registration-cleanup capability. " +
+                "No application has been created. Install a build containing the partial-registration cleanup fix " +
+                "(use 'dotnet tool update --global {ToolName}', or update the local tool manifest if applicable), " +
+                "then verify 'dotnet msidentity --get-capabilities' reports 'registration-cleanup'. Tool error: {Error}",
+                MsIdentityToolName, MsIdentityToolName, error);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Could not verify {ToolName} registration-cleanup capability. " +
+                "Install a build containing the partial-registration cleanup fix before retrying.", MsIdentityToolName);
+        }
+        return false;
+    }
+
     /// <summary>
     /// A clear, actionable message explaining that the msidentity tool is missing and how to install it.
     /// </summary>

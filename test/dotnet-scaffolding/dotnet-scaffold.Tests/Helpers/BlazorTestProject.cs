@@ -22,7 +22,7 @@ internal sealed class BlazorTestProject : IDisposable
         ProjectDirectory = ScaffoldCliHelper.SetupTestProject(DirectoryPath, targetFramework);
         File.WriteAllText(ProjectPath, File.ReadAllText(ProjectPath).Replace(
             "</PropertyGroup>", "  <Nullable>enable</Nullable>\n  </PropertyGroup>"));
-        File.WriteAllText(Path.Combine(DirectoryPath, "NuGet.config"), ScaffoldCliHelper.PreviewNuGetConfig);
+        File.WriteAllText(Path.Combine(DirectoryPath, "NuGet.config"), ScaffoldCliHelper.GetTestNuGetConfig(targetFramework));
     }
 
     public void AddWebAssemblyClient(string aspNetCoreVersion, bool usesInteractiveServer, string clientNamespace = "TestProject.Client")

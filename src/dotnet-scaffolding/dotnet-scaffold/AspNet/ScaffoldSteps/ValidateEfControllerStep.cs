@@ -155,9 +155,12 @@ internal class ValidateEfControllerStep : ScaffoldStep
         string controllerName = ControllerName.EndsWith(AspNetConstants.CSharpExtension, StringComparison.OrdinalIgnoreCase)
             ? ControllerName[..^AspNetConstants.CSharpExtension.Length]
             : ControllerName;
-        if (!SyntaxFacts.IsValidIdentifier(controllerName) ||
-            SyntaxFacts.GetKeywordKind(controllerName) != SyntaxKind.None ||
-            !string.Equals(SyntaxFactory.ParseToken(controllerName).ValueText, controllerName, StringComparison.Ordinal) ||
+        var controllerIdentifier = SyntaxFactory.ParseToken(controllerName);
+        string identifierText = controllerName.StartsWith('@') ? controllerName[1..] : controllerName;
+        if (controllerIdentifier.RawKind != (int)SyntaxKind.IdentifierToken ||
+            controllerIdentifier.ContainsDiagnostics ||
+            !string.Equals(controllerIdentifier.Text, controllerName, StringComparison.Ordinal) ||
+            !string.Equals(controllerIdentifier.ValueText, identifierText, StringComparison.Ordinal) ||
             IsReservedFileName(controllerName))
         {
             _logger.LogError($"Invalid {AspNetConstants.CliOptions.ControllerNameOption} option. " +
@@ -167,10 +170,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
 
         if (addViews)
         {
-            const string controllerSuffix = "Controller";
-            string viewFolderName = controllerName.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase)
-                ? controllerName[..^controllerSuffix.Length]
-                : controllerName;
+            string viewFolderName = ViewHelper.GetControllerFolderName(controllerName);
             if (string.IsNullOrEmpty(viewFolderName) || IsReservedFileName(viewFolderName))
             {
                 _logger.LogError($"Invalid {AspNetConstants.CliOptions.ControllerNameOption} option. " +

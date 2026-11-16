@@ -26,11 +26,22 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
         private const string BlazorWasmCallbackPath = "authentication/login-callback";
         GraphServiceClient? _graphServiceClient;
 
+        public MicrosoftIdentityPlatformApplicationManager()
+        {
+        }
+
+        internal MicrosoftIdentityPlatformApplicationManager(GraphServiceClient graphServiceClient)
+        {
+            _graphServiceClient = graphServiceClient;
+        }
+
         internal async Task<ApplicationParameters?> CreateNewAppAsync(
             TokenCredential tokenCredential,
             ApplicationParameters applicationParameters,
             IConsoleLogger consoleLogger)
         {
+            string? createdApplicationId = null;
+            string? createdClientId = null;
             try
             {
                 var graphServiceClient = GetGraphServiceClient(tokenCredential, applicationParameters);
@@ -44,12 +55,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 }
 
                 // Create the app.
-                Application application = new Application()
-                {
-                    DisplayName = applicationParameters.ApplicationDisplayName,
-                    SignInAudience = applicationParameters.IsCiam ? "AzureADMyOrg" : AppParameterAudienceToMicrosoftIdentityPlatformAppAudience(applicationParameters.SignInAudience!),
-                    Description = applicationParameters.Description
-                };
+                Application application = CreateApplication(applicationParameters);
 
                 if (applicationParameters.IsWebApi.GetValueOrDefault())
                 {
@@ -78,14 +84,16 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
                 if (createdApplication is null)
                 {
-                    consoleLogger.LogFailureAndExit(Resources.FailedToCreateApp);
+                    throw new InvalidOperationException(Resources.FailedToCreateApp);
                 }
 
+                createdApplicationId = createdApplication.Id;
+                createdClientId = createdApplication.AppId;
                 await AddCurrentUserAsOwner(graphServiceClient, createdApplication);
 
                 // Create service principal, necessary for Web API applications
                 // and useful for Blazorwasm hosted applications. We create it always.
-                var createdSp = await GetOrCreateSP(graphServiceClient, createdApplication!.AppId, consoleLogger);
+                var createdSp = await GetOrCreateSP(graphServiceClient, createdApplication!.AppId, consoleLogger, throwOnFailure: true);
 
                 // B2C and CIAM don't allow user consent, and therefore we need to explicitly grant permissions
                 if (applicationParameters.IsB2C || applicationParameters.IsCiam)
@@ -119,8 +127,7 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
                 // log json console message inside this method since we need the Microsoft.Graph.Application
                 if (createdApplication is null)
                 {
-                    consoleLogger.LogFailureAndExit(Resources.FailedToCreateApp);
-                    return null;
+                    throw new InvalidOperationException(Resources.FailedToCreateApp);
                 }
 
                 ApplicationParameters? effectiveApplicationParameters = GetEffectiveApplicationParameters(tenant!, createdApplication, applicationParameters);
@@ -142,6 +149,21 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             }
             catch (Exception ex)
             {
+                if (!string.IsNullOrEmpty(createdApplicationId))
+                {
+                    try
+                    {
+                        await _graphServiceClient!.Applications[createdApplicationId].DeleteAsync();
+                        consoleLogger.LogMessage($"Removed application '{createdClientId}' after registration failed.");
+                    }
+                    catch (Exception cleanupException)
+                    {
+                        consoleLogger.LogJsonMessage(State.Fail, output:
+                            $"Failed to remove application '{createdClientId}' (object ID '{createdApplicationId}') " +
+                            $"in tenant '{applicationParameters.TenantId}' after registration failed: {cleanupException.Message}. " +
+                            "Remove this application manually in the selected tenant.");
+                    }
+                }
                 var errorMessage = string.IsNullOrEmpty(ex.Message) ? ex.ToString() : ex.Message;
                 consoleLogger.LogFailureAndExit(errorMessage);
                 return null;
@@ -322,7 +344,8 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             }
         }
 
-        internal static async Task<ServicePrincipal> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId, IConsoleLogger consoleLogger)
+        internal static async Task<ServicePrincipal> GetOrCreateSP(GraphServiceClient graphServiceClient, string? clientId,
+            IConsoleLogger consoleLogger, bool throwOnFailure = false)
         {
             ServicePrincipal? servicePrincipal = (await graphServiceClient.ServicePrincipals
                 .GetAsync(options => options.QueryParameters.Filter = $"appId eq '{clientId}'"))?.Value?.FirstOrDefault();
@@ -342,6 +365,10 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
 
             if (servicePrincipal is null)
             {
+                if (throwOnFailure)
+                {
+                    throw new InvalidOperationException(Resources.FailedToGetServicePrincipal);
+                }
                 consoleLogger.LogFailureAndExit(Resources.FailedToGetServicePrincipal);
             }
 
@@ -866,7 +893,28 @@ namespace Microsoft.DotNet.MSIdentity.MicrosoftIdentityPlatform
             };
         }
 
-        private string AppParameterAudienceToMicrosoftIdentityPlatformAppAudience(string audience)
+        internal static Application CreateApplication(ApplicationParameters applicationParameters)
+        {
+            string? audience = applicationParameters.SignInAudience;
+            string? tenantId = applicationParameters.TenantId;
+            bool defaultToSingleTenant = string.IsNullOrEmpty(audience)
+                && !applicationParameters.IsB2C
+                && !string.IsNullOrWhiteSpace(tenantId)
+                && !string.Equals(tenantId, "common", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(tenantId, "organizations", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(tenantId, "consumers", StringComparison.OrdinalIgnoreCase);
+
+            return new Application
+            {
+                DisplayName = applicationParameters.ApplicationDisplayName,
+                SignInAudience = applicationParameters.IsCiam || defaultToSingleTenant
+                    ? "AzureADMyOrg"
+                    : AppParameterAudienceToMicrosoftIdentityPlatformAppAudience(audience),
+                Description = applicationParameters.Description
+            };
+        }
+
+        private static string AppParameterAudienceToMicrosoftIdentityPlatformAppAudience(string? audience)
         {
             return audience switch
             {

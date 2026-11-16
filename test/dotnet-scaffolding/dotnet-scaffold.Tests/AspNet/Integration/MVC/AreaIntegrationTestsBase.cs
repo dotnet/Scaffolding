@@ -49,6 +49,7 @@ public abstract class AreaIntegrationTestsBase : IDisposable
         _testProjectDir = Path.Combine(_testDirectory, "TestProject");
         _testProjectPath = Path.Combine(_testProjectDir, "TestProject.csproj");
         Directory.CreateDirectory(_testProjectDir);
+        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.GetTestNuGetConfig(TargetFramework));
 
         _mockFileSystem = new Mock<IFileSystem>();
         _mockEnvironmentService = new Mock<IEnvironmentService>();

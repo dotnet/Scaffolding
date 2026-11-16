@@ -27,9 +27,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.P
         {
             this.Write("@page \"/Account/ResendEmailConfirmation\"\r\n\r\n@using System.ComponentModel.DataAnno" +
                     "tations\r\n@using System.Text\r\n@using System.Text.Encodings.Web\r\n@using Microsoft." +
-                    "AspNetCore.Identity\r\n@using Microsoft.AspNetCore.WebUtilities\r\n@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.DbContextNamespace));
-            this.Write("\r\n\r\n@inject UserManager<");
+                    "AspNetCore.Identity\r\n@using Microsoft.AspNetCore.WebUtilities\r\n");
+
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+
+            this.Write("@using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
+            this.Write("\r\n");
+}
+            this.Write("\r\n@inject UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject IEmailSender<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
@@ -56,9 +63,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.P
                     "4UrlEncode(Encoding.UTF8.GetBytes(code));\r\n        var callbackUrl = NavigationM" +
                     "anager.GetUriWithQueryParameters(\r\n            NavigationManager.ToAbsoluteUri(\"" +
                     "Account/ConfirmEmail\").AbsoluteUri,\r\n            new Dictionary<string, object?>" +
-                    " { [\"userId\"] = userId, [\"code\"] = code });\r\n        await EmailSender.SendConfi" +
-                    "rmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r" +
-                    "\n        message = \"Verification email sent. Please check your email.\";\r\n    }\r\n" +
+                    " { [\"userId\"] = userId, [\"code\"] = code });\r\n" +
+                    "        var storedEmail = await UserManager.GetEmailAsync(user);\r\n" +
+                    "        if (string.IsNullOrEmpty(storedEmail))\r\n        {\r\n" +
+                    "            throw new InvalidOperationException(\"Users must have an email.\");\r\n" +
+                    "        }\r\n\r\n        await EmailSender.SendConfirmationLinkAsync(user, storedEmail, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n" +
+                    "        message = \"Verification email sent. Please check your email.\";\r\n    }\r\n" +
                     "\r\n    private sealed class InputModel\r\n    {\r\n        [Required]\r\n        [Email" +
                     "Address]\r\n        public string Email { get; set; } = \"\";\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();

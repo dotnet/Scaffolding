@@ -48,6 +48,7 @@ public abstract class IdentityIntegrationTestsBase : IDisposable
         _testProjectPath = Path.Combine(_testProjectDir, "TestProject.csproj");
         _templatesDirectory = Path.Combine(_testDirectory, "Templates");
         Directory.CreateDirectory(_testProjectDir);
+        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.GetTestNuGetConfig(TargetFramework));
         Directory.CreateDirectory(_templatesDirectory);
 
         _mockFileSystem = new Mock<IFileSystem>();

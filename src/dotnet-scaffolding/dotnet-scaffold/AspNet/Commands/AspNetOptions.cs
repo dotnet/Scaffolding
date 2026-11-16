@@ -30,6 +30,8 @@ internal class AspNetOptions
     public ScaffolderOption<bool> Views { get; }
     public ScaffolderOption<bool> Overwrite { get; }
     public ScaffolderOption<bool> UseExistingApplication { get; }
+    public ScaffolderOption<string> IgniteUITheme { get; }
+    public ScaffolderOption<string> IgniteUIThemeVariant { get; }
 
     private ScaffolderOption<string>? _username = null;
     private ScaffolderOption<string>? _tenantId = null;
@@ -201,6 +203,26 @@ internal class AspNetOptions
             CliOption = Constants.CliOptions.UseExistingApplicationOption,
             Required = true,
             PickerType = InteractivePickerType.YesNo
+        };
+
+        IgniteUITheme = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.IgniteUITheme.DisplayName,
+            CliOption = Constants.CliOptions.IgniteUIThemeOption,
+            Description = AspnetStrings.Options.IgniteUITheme.Description,
+            Required = false,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = IgniteUIBlazorHelper.Themes
+        };
+
+        IgniteUIThemeVariant = new ScaffolderOption<string>
+        {
+            DisplayName = AspnetStrings.Options.IgniteUIThemeVariant.DisplayName,
+            CliOption = Constants.CliOptions.IgniteUIThemeVariantOption,
+            Description = AspnetStrings.Options.IgniteUIThemeVariant.Description,
+            Required = false,
+            PickerType = InteractivePickerType.CustomPicker,
+            CustomPickerValues = IgniteUIBlazorHelper.ThemeVariants
         };
     }
 

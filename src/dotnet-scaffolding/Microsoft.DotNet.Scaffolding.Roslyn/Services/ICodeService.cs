@@ -16,6 +16,10 @@ public interface ICodeService
     /// <summary>
     /// Attempts to apply changes to current Roslyn workspace and returns true if it was successful.
     /// </summary>
+    /// <remarks>
+    /// For source-file-backed fallback workspaces, success requires saving changed documents to disk.
+    /// Persistence exceptions propagate to the calling scaffolding boundary for logging and failure handling.
+    /// </remarks>
     /// <param name="solution"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>

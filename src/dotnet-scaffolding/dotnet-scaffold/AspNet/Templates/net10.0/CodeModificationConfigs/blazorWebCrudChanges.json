@@ -55,13 +55,38 @@
       },
       "Replacements": [
         {
+          "ReplaceSnippet": [
+            "app.UseHsts();",
+            "    app.UseMigrationsEndPoint();",
+            "}"
+          ],
           "MultiLineBlock": [
             "app.UseHsts();",
-            "    app.UseMigrationsEndPoint()"
-          ],
-          "ReplaceSnippet": [
-            "app.UseHsts()"
+            "}",
+            "if (app.Environment.IsDevelopment())",
+            "{",
+            "    app.UseMigrationsEndPoint();",
+            "}"
           ]
+        },
+        {
+          "ReplaceSnippet": [ "if (!app.Environment.IsDevelopment())" ],
+          "MultiLineBlock": [
+            "if (app.Environment.IsDevelopment())",
+            "{",
+            "    app.UseMigrationsEndPoint();",
+            "}",
+            "else"
+          ],
+          "CheckBlock": "app.UseMigrationsEndPoint()"
+        },
+        {
+          "ReplaceSnippet": [ "app.UseWebAssemblyDebugging();" ],
+          "MultiLineBlock": [
+            "app.UseWebAssemblyDebugging();",
+            "    app.UseMigrationsEndPoint();"
+          ],
+          "CheckBlock": "app.UseMigrationsEndPoint()"
         },
         {
           "ReplaceSnippet": [ "app.UseHttpsRedirection();" ],

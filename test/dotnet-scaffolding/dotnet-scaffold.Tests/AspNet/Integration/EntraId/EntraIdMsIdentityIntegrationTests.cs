@@ -32,7 +32,7 @@ public class EntraIdMsIdentityIntegrationTests
         
         // Act & Assert
         // Verify that RegisterAppStep type exists and can be instantiated
-        // This step is responsible for calling "dotnet msidentity --register-app" or "--update-app-registration"
+        // This step calls "dotnet msidentity --create-app-registration" or "--update-app-registration".
         Type registerAppStepType = typeof(RegisterAppStep);
         Assert.NotNull(registerAppStepType);
         Assert.True(registerAppStepType.IsAssignableTo(typeof(ScaffoldStep)));
@@ -105,9 +105,11 @@ public class EntraIdMsIdentityIntegrationTests
         
         // The actual scaffolding order in AspNetCommandService.cs is:
         // .WithStep<ValidateEntraIdStep>()
-        // .WithRegisterAppStep()           <- Uses msidentity CLI
-        // .WithAddClientSecretStep()       <- Ensures msidentity is installed, then uses it
+        // .WithValidateAzureCliIdentityStep()
         // .WithDetectBlazorWasmStep()
+        // .WithRegisterAppStep()           <- Uses msidentity CLI
+        // .WithUpdateAppAuthorizationStep()
+        // .WithAddClientSecretStep()       <- Ensures msidentity is installed, then uses it
         // ... other steps
         
         // This test verifies the key steps exist in the expected namespace

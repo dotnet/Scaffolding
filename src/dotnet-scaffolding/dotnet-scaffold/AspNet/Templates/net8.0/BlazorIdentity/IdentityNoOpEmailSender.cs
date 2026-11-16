@@ -25,10 +25,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity
         /// </summary>
         public virtual string TransformText()
         {
+
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+
             this.Write("using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.DbContextNamespace));
-            this.Write(";\r\nusing Microsoft.AspNetCore.Identity;\r\nusing Microsoft.AspNetCore.Identity.UI.S" +
-                    "ervices;\r\n\r\nnamespace ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
+            this.Write(";\r\n");
+}
+            this.Write("using Microsoft.AspNetCore.Identity;\r\nusing Microsoft.AspNetCore.Identity.UI.Serv" +
+                    "ices;\r\nusing ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
+            this.Write(";\r\nnamespace ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.IdentityNamespace));
             this.Write("\r\n{\r\n    // Remove the \"else if (EmailSender is IdentityNoOpEmailSender)\" block f" +
                     "rom RegisterConfirmation.razor after updating with a real implementation.\r\n    i" +

@@ -62,7 +62,7 @@ internal class DotnetCliRunner
         return process.ExitCode;
     }
 
-    public int ExecuteAndCaptureOutput(out string? stdOut, out string? stdErr)
+    public int ExecuteAndCaptureOutput(out string? stdOut, out string? stdErr, string? standardInput = null)
     {
         using var outStream = new ProcessOutputStreamReader();
         using var errStream = new ProcessOutputStreamReader();
@@ -74,6 +74,7 @@ internal class DotnetCliRunner
         {
             StartInfo = _psi
         };
+        process.StartInfo.RedirectStandardInput = standardInput is not null;
 
         process.EnableRaisingEvents = true;
 
@@ -90,6 +91,12 @@ internal class DotnetCliRunner
 
         var taskOut = outStream.BeginRead(process.StandardOutput);
         var taskErr = errStream.BeginRead(process.StandardError);
+
+        if (standardInput is not null)
+        {
+            using var input = process.StandardInput;
+            input.Write(standardInput);
+        }
 
         process.WaitForExit();
 

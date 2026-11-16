@@ -31,6 +31,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorEntraId
     <AuthorizeView>
         <Authorized>
             <form action=""authentication/logout"" method=""post"">
+                @* Required until the fix for https://github.com/AzureAD/microsoft-identity-web/issues/4057 is available in a consumable package. *@
                 <AntiforgeryToken />
                 <input type=""hidden"" name=""ReturnUrl"" value=""@currentUrl"" />
                 <button type=""submit"" class=""nav-link"">

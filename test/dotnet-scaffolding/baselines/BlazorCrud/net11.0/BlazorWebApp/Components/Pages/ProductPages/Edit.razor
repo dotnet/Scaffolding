@@ -74,6 +74,7 @@ else
             if (!ProductExists(Product!.Id))
             {
                 NavigationManager.NotFound();
+                return;
             }
             else
             {

@@ -16,4 +16,8 @@ internal interface IMSBuildProjectService
         IEnumerable<string> propertyNames,
         out IReadOnlyDictionary<string, string> propertyValues,
         out string? error);
+    bool TryGetEvaluatedItems(
+        IEnumerable<string> itemTypes,
+        out IReadOnlyList<EvaluatedProjectItem> items,
+        out string? error);
 }

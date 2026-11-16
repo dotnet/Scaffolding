@@ -26,9 +26,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.P
         public virtual string TransformText()
         {
             this.Write("@page \"/Account/Manage/DeletePersonalData\"\r\n\r\n@using System.ComponentModel.DataAn" +
-                    "notations\r\n@using Microsoft.AspNetCore.Identity\r\n@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.DbContextNamespace));
-            this.Write("\r\n\r\n@inject UserManager<");
+                    "notations\r\n@using Microsoft.AspNetCore.Identity\r\n");
+
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+
+            this.Write("@using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
+            this.Write("\r\n");
+}
+            this.Write("\r\n@inject UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));

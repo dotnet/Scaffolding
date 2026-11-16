@@ -1,0 +1,25 @@
+{
+  "Files": [
+    {
+      "FileName": "MauiProgram.cs",
+      "Methods": {
+        "CreateMauiApp": {
+          "Parameters": [],
+          "CodeChanges": [
+            {
+              "InsertAfter": "builder.Services.AddMauiBlazorWebView();",
+              "CheckBlock": "AddIgniteUIBlazor",
+              "Block": "builder.Services.AddIgniteUIBlazor()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "IgniteUI.Blazor.Controls"
+      ]
+    }
+  ]
+}

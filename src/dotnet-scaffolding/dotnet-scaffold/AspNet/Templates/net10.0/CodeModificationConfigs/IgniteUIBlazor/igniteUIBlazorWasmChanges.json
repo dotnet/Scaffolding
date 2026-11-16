@@ -1,0 +1,24 @@
+{
+  "Files": [
+    {
+      "FileName": "Program.cs",
+      "Methods": {
+        "Global": {
+          "CodeChanges": [
+            {
+              "InsertBefore": [ "await builder.Build().RunAsync();", "builder.Build().RunAsync()" ],
+              "CheckBlock": "AddIgniteUIBlazor",
+              "Block": "builder.Services.AddIgniteUIBlazor()",
+              "LeadingTrivia": {
+                "Newline": true
+              }
+            }
+          ]
+        }
+      },
+      "Usings": [
+        "IgniteUI.Blazor.Controls"
+      ]
+    }
+  ]
+}

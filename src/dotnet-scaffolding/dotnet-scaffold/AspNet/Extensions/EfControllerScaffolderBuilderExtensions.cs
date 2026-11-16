@@ -62,7 +62,11 @@ internal static class EfControllerScaffolderBuilderExtensions
             if (context.Properties.TryGetValue(nameof(EfControllerSettings), out var commandSettingsObj) &&
                 commandSettingsObj is EfControllerSettings commandSettings)
             {
-                List<Package> packages = [PackageConstants.EfConstants.EfCoreToolsPackage];
+                List<Package> packages =
+                [
+                    PackageConstants.EfConstants.EfCoreToolsPackage,
+                    PackageConstants.EfConstants.EfCoreDesignPackage
+                ];
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
@@ -176,6 +180,7 @@ internal static class EfControllerScaffolderBuilderExtensions
                 context.Properties.TryGetValue(nameof(EfControllerModel), out var efControllerModelObj);
                 EfControllerModel efControllerModel = efControllerModelObj as EfControllerModel ??
                     throw new InvalidOperationException("missing 'EfControllerModel' in 'ScaffolderContext.Properties'");
+                viewModel.ControllerName = efControllerModel.ControllerName;
 
                 if (viewModel.ProjectInfo is null || string.IsNullOrEmpty(viewModel.ProjectInfo.ProjectPath))
                 {
@@ -185,7 +190,7 @@ internal static class EfControllerScaffolderBuilderExtensions
 
                 //TODO add extensions if 'TemplateFoldersUtilities' is not reworked.
                 var allT4TemplatePaths = new TemplateFoldersUtilities().GetAllT4TemplatesForTargetFramework(["Views"], viewModel.ProjectInfo.ProjectPath);
-                var viewTemplateProperties = ViewHelper.GetTextTemplatingProperties(allT4TemplatePaths, viewModel, efControllerModel.ControllerName);
+                var viewTemplateProperties = ViewHelper.GetTextTemplatingProperties(allT4TemplatePaths, viewModel);
                 if (viewTemplateProperties.Any())
                 {
                     step.TextTemplatingProperties = viewTemplateProperties;

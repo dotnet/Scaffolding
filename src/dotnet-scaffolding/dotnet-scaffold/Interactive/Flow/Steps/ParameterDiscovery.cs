@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Core.ComponentModel;
@@ -11,6 +12,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Spectre.Console;
 using Spectre.Console.Flow;
+using Spectre.Console.Rendering;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
 {
@@ -160,14 +162,80 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 stepOptions.Insert(0, new StepOption() { Name = "None", Value = string.Empty });
             }
 
-            var prompt = new FlowSelectionPrompt<StepOption>()
-                .Title($"[lightseagreen]{_parameter.DisplayName}: [/]")
-                .Converter(converter)
-                .AddChoices(stepOptions, navigation: context.Navigation);
+            var prompt = CreateSelectionPrompt(stepOptions, context.Navigation, converter);
 
             var result = prompt.Show();
             State = result.State;
             return result.Value?.Value;
+        }
+
+        internal FlowSelectionPrompt<StepOption> CreateSelectionPrompt(
+            IEnumerable<StepOption> stepOptions,
+            IFlowNavigation navigation,
+            Func<StepOption, string>? converter = null,
+            IAnsiConsole? console = null)
+        {
+            console ??= AnsiConsole.Console;
+            converter ??= GetDisplayName;
+            var choices = stepOptions.ToList();
+            var title = $"[lightseagreen]{_parameter.DisplayName}: [/]";
+            var prompt = new FlowSelectionPrompt<StepOption>()
+                .Title(title)
+                .Converter(converter)
+                .AddChoices(choices, navigation: navigation);
+
+            var renderOptions = new RenderOptions(console.Profile.Capabilities, new Size(console.Profile.Width, console.Profile.Height));
+            int CountRows(string markup, int width) =>
+                Segment.SplitLines(((IRenderable)new Markup(markup)).Render(renderOptions, Math.Max(1, width))).Count;
+
+            // Spectre budgets choices, not wrapped rows; overflowing the screen crops the selected first choice.
+            int choiceHeight = choices.Select(option => CountRows("> " + converter(option), console.Profile.Width - 1))
+                .DefaultIfEmpty(1)
+                .Max();
+            int reservedRows = CountRows(title, console.Profile.Width) +
+                CountRows(prompt.Raw.MoreChoicesText!, console.Profile.Width) + 2;
+            int maxChoiceRows = Math.Max(1, (console.Profile.Height - reservedRows) / 3);
+            if (choiceHeight > maxChoiceRows)
+            {
+                // Spectre requires at least three choices; shorten display labels, not their values.
+                var originalConverter = converter;
+                converter = option =>
+                {
+                    var markup = originalConverter(option);
+                    if (CountRows("> " + markup, console.Profile.Width - 1) <= maxChoiceRows)
+                    {
+                        return markup;
+                    }
+
+                    var label = markup.RemoveMarkup();
+                    var textElements = StringInfo.ParseCombiningCharacters(label);
+                    string Shorten(int count) =>
+                        Markup.Escape(label[..textElements[(count + 1) / 2]] + "..." +
+                            (count / 2 == 0 ? string.Empty : label[textElements[^(count / 2)]..]));
+
+                    int low = 0;
+                    int high = textElements.Length - 1;
+                    while (low < high)
+                    {
+                        int retained = (low + high + 1) / 2;
+                        if (CountRows("> " + Shorten(retained), console.Profile.Width - 1) <= maxChoiceRows)
+                        {
+                            low = retained;
+                        }
+                        else
+                        {
+                            high = retained - 1;
+                        }
+                    }
+
+                    return Shorten(low);
+                };
+                prompt.Converter(converter);
+                choiceHeight = choices.Select(option => CountRows("> " + converter(option), console.Profile.Width - 1)).Max();
+            }
+            int pageSize = Math.Clamp((console.Profile.Height - reservedRows) / Math.Max(1, choiceHeight), 3, prompt.Raw.PageSize);
+
+            return prompt.PageSize(pageSize);
         }
 
         /// <summary>
@@ -237,7 +305,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         private static string GetDisplayName(StepOption stepOption)
         {
             bool displayNone = stepOption.Name.Equals("None", StringComparison.OrdinalIgnoreCase);
-            return displayNone ? $"[sandybrown]{stepOption.Name} (empty to skip parameter)[/]" : $"{stepOption.Name} {stepOption.Value.ToSuggestion(withBrackets: true)}";
+            if (displayNone)
+            {
+                return $"[sandybrown]{stepOption.Name} (empty to skip parameter)[/]";
+            }
+
+            return string.Equals(stepOption.Name, stepOption.Value, StringComparison.Ordinal)
+                ? Markup.Escape(stepOption.Name)
+                : $"{stepOption.Name} {stepOption.Value.ToSuggestion(withBrackets: true)}";
         }
 
         /// <summary>

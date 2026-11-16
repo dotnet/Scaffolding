@@ -27,8 +27,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.S
         {
             this.Write("@using Microsoft.AspNetCore.Authentication\r\n@using Microsoft.AspNetCore.Identity\r" +
                     "\n@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.DbContextNamespace));
-            this.Write("\r\n\r\n@inject SignInManager<");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassNamespace));
+            this.Write("\r\n");
+
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+
+            this.Write("@using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
+            this.Write("\r\n");
+}
+            this.Write("\r\n@inject SignInManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write(@"> SignInManager
 @inject IdentityRedirectManager RedirectManager

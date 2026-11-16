@@ -197,7 +197,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("!.");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write("))\r\n            {\r\n                NavigationManager.NotFound();\r\n   " +
+            this.Write("))\r\n            {\r\n                NavigationManager.NotFound();\r\n                return;\r\n   " +
                     "         }\r\n            else\r\n            {\r\n                throw;\r\n           " +
                     " }\r\n        }\r\n\r\n        NavigationManager.NavigateTo(\"/");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModelLowerInv));

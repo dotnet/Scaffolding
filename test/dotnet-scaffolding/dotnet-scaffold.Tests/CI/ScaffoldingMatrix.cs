@@ -37,7 +37,8 @@ public static class ScaffoldingMatrix
         "area",
         "blazor-identity",
         "identity",
-        "entra-id"
+        "entra-id",
+        "blazor-igniteui"
     ];
 
     /// <summary>Aspire scaffolder families.</summary>

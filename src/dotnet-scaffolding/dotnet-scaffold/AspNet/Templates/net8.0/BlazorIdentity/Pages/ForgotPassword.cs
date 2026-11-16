@@ -27,9 +27,16 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.P
         {
             this.Write("@page \"/Account/ForgotPassword\"\r\n\r\n@using System.ComponentModel.DataAnnotations\r\n" +
                     "@using System.Text\r\n@using System.Text.Encodings.Web\r\n@using Microsoft.AspNetCor" +
-                    "e.Identity\r\n@using Microsoft.AspNetCore.WebUtilities\r\n@using ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextInfo.DbContextNamespace));
-            this.Write("\r\n\r\n@inject UserManager<");
+                    "e.Identity\r\n@using Microsoft.AspNetCore.WebUtilities\r\n");
+
+if (!string.IsNullOrEmpty(Model.DbContextNamespace))
+{
+
+            this.Write("@using ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(Model.DbContextNamespace));
+            this.Write("\r\n");
+}
+            this.Write("\r\n@inject UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> UserManager\r\n@inject IEmailSender<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
@@ -58,8 +65,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity.P
                     "code(Encoding.UTF8.GetBytes(code));\r\n        var callbackUrl = NavigationManager" +
                     ".GetUriWithQueryParameters(\r\n            NavigationManager.ToAbsoluteUri(\"Accoun" +
                     "t/ResetPassword\").AbsoluteUri,\r\n            new Dictionary<string, object?> { [\"" +
-                    "code\"] = code });\r\n\r\n        await EmailSender.SendPasswordResetLinkAsync(user, " +
-                    "Input.Email, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n        RedirectManage" +
+                    "code\"] = code });\r\n\r\n" +
+                    "        var storedEmail = await UserManager.GetEmailAsync(user);\r\n" +
+                    "        if (string.IsNullOrEmpty(storedEmail))\r\n        {\r\n" +
+                    "            throw new InvalidOperationException(\"Users must have an email.\");\r\n" +
+                    "        }\r\n\r\n        await EmailSender.SendPasswordResetLinkAsync(user, storedEmail, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n" +
+                    "        RedirectManage" +
                     "r.RedirectTo(\"Account/ForgotPasswordConfirmation\");\r\n    }\r\n\r\n    private sealed" +
                     " class InputModel\r\n    {\r\n        [Required]\r\n        [EmailAddress]\r\n        pu" +
                     "blic string Email { get; set; } = \"\";\r\n    }\r\n}\r\n");

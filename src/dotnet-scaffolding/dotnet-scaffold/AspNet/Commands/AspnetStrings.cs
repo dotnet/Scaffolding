@@ -26,6 +26,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string CrudExample1Description = "Generate all CRUD pages for Product model:";
             internal const string CrudExample2 = "dotnet scaffold aspnet blazor-crud --project C:/MyApp/MyApp.csproj --model Customer --data-context ShopContext --database-provider PostgreSQL --page List,Edit";
             internal const string CrudExample2Description = "Generate only List and Edit pages with PostgreSQL:";
+
+            internal const string IgniteUI = "blazor-igniteui";
+            internal const string IgniteUIDisplayName = "Ignite UI for Blazor";
+            internal const string IgniteUIDescription = "Add Ignite UI for Blazor (MIT licensed) to a Blazor project: installs the IgniteUI.Blazor.Lite and IgniteUI.Blazor.GridLite NuGet packages, registers the services, imports the IgniteUI.Blazor.Controls namespace and links a theme stylesheet in the host page.";
+            internal const string IgniteUIExample1 = "dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp.csproj";
+            internal const string IgniteUIExample1Description = "Add Ignite UI for Blazor with the default light bootstrap theme:";
+            internal const string IgniteUIExample2 = "dotnet scaffold aspnet blazor-igniteui --project C:/MyBlazorApp/MyBlazorApp.csproj --theme material --theme-variant dark";
+            internal const string IgniteUIExample2Description = "Add Ignite UI for Blazor with the dark material theme:";
         }
 
         internal class RazorView
@@ -137,6 +145,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string EntraIdExample1Description = "Add Microsoft Entra ID authentication using an existing Azure application:";
             internal const string EntraIdExample2 = "dotnet scaffold aspnet entra-id --project C:/MyWebApp/MyWebApp.csproj --tenant-id your-tenant-id --use-existing-application false";
             internal const string EntraIdExample2Description = "Add Microsoft Entra ID authentication by creating a new Azure application:";
+        }
+
+        internal class SyncfusionBlazorToolkit
+        {
+            internal const string Name = "blazor-syncfusion-toolkit";
+            internal const string DisplayName = "Syncfusion Blazor Toolkit";
+            internal const string Description = "Sets up the Syncfusion Blazor Toolkit (package, service registration, and imports) in an existing Blazor app.";
+            internal const string SyncfusionBlazorToolkitExample = "dotnet scaffold aspnet blazor-syncfusion-toolkit --project ./MyBlazorApp.csproj";
+            internal const string SyncfusionBlazorToolkitExampleDescription = "Configure the Syncfusion Blazor Toolkit in an existing Blazor app:";
         }
 
         internal class Catagories
@@ -263,6 +280,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             {
                 internal const string DisplayName = "Select Existing Application";
                 internal const string Description = "Select existing application";
+            }
+
+            internal static class IgniteUITheme
+            {
+                internal const string DisplayName = "Ignite UI theme";
+                internal const string Description = "Ignite UI theme stylesheet to link in the host page: bootstrap, material, fluent or indigo. When omitted, the theme already linked in the host page is kept; otherwise bootstrap is used.";
+            }
+
+            internal static class IgniteUIThemeVariant
+            {
+                internal const string DisplayName = "Ignite UI theme variant";
+                internal const string Description = "Variant of the Ignite UI theme stylesheet to link: light or dark. When omitted, the variant already linked in the host page is kept; otherwise light is used.";
             }
         }
     }

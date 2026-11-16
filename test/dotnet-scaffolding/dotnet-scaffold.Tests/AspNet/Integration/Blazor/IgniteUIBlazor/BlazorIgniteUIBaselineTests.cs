@@ -13,9 +13,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Integration.Blazor;
 [Trait("Family", "blazor-igniteui")]
 public class BlazorIgniteUIBaselineTests(ITestOutputHelper output)
 {
-    // The Ignite UI packages are published only to nuget.org, which the repository feeds do not mirror.
-    private static readonly string[] s_packageSources = ["https://api.nuget.org/v3/index.json"];
-
     [Theory]
     [InlineData("net10.0")]
     [InlineData("net11.0")]
@@ -30,7 +27,6 @@ public class BlazorIgniteUIBaselineTests(ITestOutputHelper output)
             template: "BlazorWebApp",
             scaffold: actual => ScaffoldCliHelper.RunScaffoldAsync(ScaffoldCliHelper.GetTestTargetFramework(), "blazor-igniteui", [
                 "--project", Path.Combine(actual, "BlazorWebApp.csproj")
-            ]),
-            additionalPackageSources: s_packageSources);
+            ]));
     }
 }

@@ -405,10 +405,10 @@ public abstract class RazorViewEmptyIntegrationTestsBase : IDisposable
         _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(It.IsAny<string>()), Times.Never);
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task ExecuteAsync_ReturnsFalse_WhenRelativeFolderContainsDriveQualifiedSegment()
     {
-        Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+        Skip.IfNot(OperatingSystem.IsWindows(), "Drive-qualified path segments are Windows-specific.");
 
         _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
 
@@ -419,7 +419,7 @@ public abstract class RazorViewEmptyIntegrationTestsBase : IDisposable
         {
             ProjectPath = _testProjectPath,
             FileName = "Index",
-            RelativeOutputPath = Path.Combine("Home", "C:", "Outside"),
+            RelativeOutputPath = @"Home\C:\Outside",
             CommandName = Constants.DotnetCommands.ViewCommandName
         };
 
@@ -427,7 +427,6 @@ public abstract class RazorViewEmptyIntegrationTestsBase : IDisposable
 
         Assert.False(result);
         _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(It.IsAny<string>()), Times.Never);
-
     }
 
     #endregion

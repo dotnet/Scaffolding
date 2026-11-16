@@ -1,7 +1,27 @@
 New and improved scaffolding experience. 
 More details coming soon!
 
+### Existing template files and failures
+
+When a template file already exists, scaffolding compares its decoded text,
+allowing equivalent files with or without a Unicode byte order mark. Matching
+files are preserved without rewriting their encoding. Different text remains a
+conflict unless the step explicitly enables overwriting.
+When overwriting is disabled, files that cannot be decoded for comparison are
+also reported as conflicts and preserved.
+
+Interactive ASP.NET and Aspire failures include logged errors along with the
+command exit code. A failed operation may have already modified the project;
+review those changes before retrying.
+
 ### Entra ID account selection
+
+The interactive **Select Existing Application** picker displays each application's
+name and client ID once. It starts at the first application and sizes pages to
+the terminal's available rows, including wrapped labels, to keep the selection
+visible while navigating with the Up and Down arrow keys.
+If three full labels cannot fit, the picker shortens the middle of long display
+labels with `...`. Selecting an application still uses its complete original value.
 
 Entra ID scaffolding currently uses both `dotnet msidentity` and the Azure CLI.
 Before creating or updating an application, scaffolding verifies that the Azure

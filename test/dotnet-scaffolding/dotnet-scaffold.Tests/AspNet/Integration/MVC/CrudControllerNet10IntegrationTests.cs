@@ -44,8 +44,10 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
                 "Controller file 'Controllers/TestController.cs' should be created.");
             Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "TestDbContext.cs")),
                 "DbContext file 'Data/TestDbContext.cs' should be created.");
-            var viewsDir = Path.Combine(_testProjectDir, "Views", "TestModel");
-            Assert.True(Directory.Exists(viewsDir), "Views/TestModel directory should be created.");
+            var viewsDir = Path.Combine(_testProjectDir, "Views", "Test");
+            Assert.True(Directory.Exists(viewsDir), "Views/Test directory should be created for TestController.");
+            Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Views", "TestModel")),
+                "The model name should not determine the controller's views folder.");
             foreach (var view in new[] { "Create.cshtml", "Delete.cshtml", "Details.cshtml", "Edit.cshtml", "Index.cshtml" })
             {
                 Assert.True(File.Exists(Path.Combine(viewsDir, view)), $"View '{view}' should be created.");

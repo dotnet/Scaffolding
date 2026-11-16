@@ -290,7 +290,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     }
                     catch (JsonException ex)
                     {
-                        _logger.LogWarning($"Failed to parse {devSettingsPath}. The file contains invalid JSON (possibly comments or trailing commas). " +
+                        _logger.LogWarning($"Failed to parse {devSettingsPath}. The file contains invalid JSON. " +
                             $"The file will not be modified to preserve existing settings. Error: {ex.Message}");
                         _logger.LogError(ex, "Failed to parse appsettings.Development.json at {Path}.", devSettingsPath);
                         return false;

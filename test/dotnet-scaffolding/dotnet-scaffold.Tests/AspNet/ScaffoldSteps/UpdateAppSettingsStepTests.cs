@@ -596,7 +596,10 @@ public class UpdateAppSettingsStepTests
         Assert.Contains(mockLogger.Invocations, invocation =>
             invocation.Method.Name == nameof(ILogger.Log) &&
             invocation.Arguments[0] is LogLevel.Warning &&
-            invocation.Arguments[2]?.ToString()?.Contains("Failed to parse") == true);
+            invocation.Arguments[2]?.ToString()?.Contains("Failed to parse") == true &&
+            invocation.Arguments[2]?.ToString()?.Contains("The file contains invalid JSON.") == true &&
+            invocation.Arguments[2]?.ToString()?.Contains("Error:") == true &&
+            invocation.Arguments[2]?.ToString()?.Contains("comments or trailing commas") == false);
         _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 }

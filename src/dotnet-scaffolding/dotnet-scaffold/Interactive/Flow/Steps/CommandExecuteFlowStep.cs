@@ -86,12 +86,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
 
                     // Invoke the command directly (async)
                     ParseResult aspireParseResult = runner.RootCommand.Parse([.. parameterValues]);
+                    using var errors = runner.ErrorCapture.BeginCapture();
                     int aspireExitCode = await aspireParseResult.InvokeAsync();
 
                     _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandInfo, aspireExitCode, chosenCategory));
                     if (aspireExitCode != 0)
                     {
-                        return FlowStepResult.Failure($"Aspire command exit code: {aspireExitCode}");
+                        return FlowStepResult.Failure(FormatFailure("Aspire", aspireExitCode, errors.Message));
                     }
                     return FlowStepResult.Success;
                 }
@@ -106,11 +107,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                     }
                     // Invoke the command directly (async)
                     ParseResult aspnetParseResult = runner.RootCommand.Parse([.. parameterValues]);
+                    using var errors = runner.ErrorCapture.BeginCapture();
                     int aspnetExitCode = await aspnetParseResult.InvokeAsync();
                     _telemetryService.TrackEvent(new CommandExecuteTelemetryEvent(dotnetToolInfo, commandInfo, aspnetExitCode, chosenCategory));
                     if (aspnetExitCode != 0)
                     {
-                        return FlowStepResult.Failure($"AspNet command exit code: {aspnetExitCode}");
+                        return FlowStepResult.Failure(FormatFailure("AspNet", aspnetExitCode, errors.Message));
                     }
                     return FlowStepResult.Success;
                 }
@@ -141,6 +143,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
             }
             return FlowStepResult.Failure();
         }
+
+        private static string FormatFailure(string command, int exitCode, string errors)
+            => string.IsNullOrEmpty(errors)
+                ? $"{command} command exit code: {exitCode}"
+                : $"{command} command exit code: {exitCode}{Environment.NewLine}{errors}";
 
         /// <summary>
         /// Gathers all parameter values from the context for the given command.

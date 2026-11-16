@@ -17,29 +17,40 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
 public class ViewHelperTests
 {
     [Theory]
-    [InlineData("ProductsController", "Products")]
-    [InlineData("CatalogController", "Catalog")]
-    [InlineData("Catalog", "Catalog")]
-    [InlineData(null, "Product")]
-    public void GetTextTemplatingProperties_UsesControllerViewFolder(string? controllerName, string folder)
+    [InlineData("OrdersController", "Orders")]
+    [InlineData("@OrdersController", "Orders")]
+    [InlineData("@OrdersCONTROLLER", "Orders")]
+    [InlineData("Orderscontroller", "Orders")]
+    [InlineData("OrdersCONTROLLER", "Orders")]
+    [InlineData("PurchasesController", "Purchases")]
+    [InlineData("Orders", "Orders")]
+    [InlineData("OrderController", "Order")]
+    [InlineData("ControllerOrdersController", "ControllerOrders")]
+    [InlineData(null, "Order")]
+    public void GetTextTemplatingProperties_UsesControllerFolderForAllCrudViews(string? controllerName, string expectedFolder)
     {
         string projectPath = Path.Combine("test", "project", "TestProject.csproj");
-        var model = new ViewModel
+        string[] templates =
+        [
+            ViewHelper.CreateTemplate, ViewHelper.EditTemplate, ViewHelper.DeleteTemplate,
+            ViewHelper.DetailsTemplate, ViewHelper.IndexTemplate
+        ];
+        var viewModel = new ViewModel
         {
+            ControllerName = controllerName,
             PageType = "CRUD",
-            ModelInfo = new ModelInfo { ModelTypeName = "Product" },
+            ModelInfo = new ModelInfo { ModelTypeName = "Order" },
             ProjectInfo = new ProjectInfo(projectPath),
             DbContextInfo = new DbContextInfo()
         };
-        string[] templates = [ViewHelper.CreateTemplate, ViewHelper.EditTemplate, ViewHelper.DetailsTemplate,
-            ViewHelper.DeleteTemplate, ViewHelper.IndexTemplate];
 
-        var result = ViewHelper.GetTextTemplatingProperties(templates, model, controllerName).ToList();
+        var properties = ViewHelper.GetTextTemplatingProperties(templates, viewModel).ToList();
 
-        Assert.Equal(5, result.Count);
-        Assert.All(result, property => Assert.Equal(
-            Path.Combine("test", "project", "Views", folder, Path.GetFileNameWithoutExtension(property.TemplatePath) + ".cshtml"),
-            property.OutputPath));
+        Assert.Equal(5, properties.Count);
+        Assert.Equal(templates.Select(template => Path.Combine("test", "project", "Views", expectedFolder,
+            Path.ChangeExtension(template, ".cshtml"))), properties.Select(property => property.OutputPath));
+        Assert.All(properties, property => Assert.Same(viewModel, property.TemplateModel));
+        Assert.Equal("Order", viewModel.ModelInfo.ModelTypeName);
     }
 
     [Fact]

@@ -8,8 +8,12 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Commands;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Extensions.Syncfusion;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Syncfusion.Settings;
 using Microsoft.DotNet.Tools.Scaffold.Command;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet
@@ -40,6 +44,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(ValidateBlazorCrudStep),
                 typeof(ValidateEfControllerStep),
                 typeof(ValidateEntraIdStep),
+                typeof(ValidateSyncfusionBlazorToolkitStep),
+                typeof(ApplySyncfusionBlazorToolkitImportsStep),
+                typeof(ApplySyncfusionBlazorToolkitProgramCsStep),
+                typeof(VerifySyncfusionBlazorToolkitStep),
+                typeof(SummarizeSyncfusionBlazorToolkitStep),
                 typeof(ValidateAzureCliIdentityStep),
                 typeof(ValidateIdentityStep),
                 typeof(ValidateIgniteUIBlazorStep),
@@ -216,6 +225,28 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 .WithAspNetConnectionStringStep()
                 .WithBlazorCrudTextTemplatingStep()
                 .WithBlazorCrudCodeChangeStep();
+
+            _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.SyncfusionBlazorToolkit.Name)
+                .WithDisplayName(AspnetStrings.SyncfusionBlazorToolkit.DisplayName)
+                .WithCategory(AspnetStrings.Catagories.Blazor)
+                .WithDescription(AspnetStrings.SyncfusionBlazorToolkit.Description)
+                .WithExample(AspnetStrings.SyncfusionBlazorToolkit.SyncfusionBlazorToolkitExample, AspnetStrings.SyncfusionBlazorToolkit.SyncfusionBlazorToolkitExampleDescription)
+                .WithOptions([options.Project, options.Prerelease])
+                .WithStep<ValidateSyncfusionBlazorToolkitStep>(config =>
+                {
+                    var step = config.Step;
+                    var context = config.Context;
+                    step.Project = context.GetOptionResult(options.Project);
+                    step.Prerelease = context.GetOptionResult(options.Prerelease);
+                })
+                .WithSyncfusionBlazorToolkitAddPackagesStep()
+                .WithSyncfusionBlazorToolkitAddClientPackagesStep()
+                .WithSyncfusionBlazorToolkitProgramCsStep()
+                .WithSyncfusionBlazorToolkitClientProgramCsStep()
+                .WithSyncfusionBlazorToolkitImportsStep()
+                .WithSyncfusionBlazorToolkitImportsClientStep()
+                .WithStep<VerifySyncfusionBlazorToolkitStep>()
+                .WithStep<SummarizeSyncfusionBlazorToolkitStep>();
 
             _builder.AddScaffolder(ScaffolderCatagory.AspNet, AspnetStrings.RazorPage.Crud)
                 .WithDisplayName(AspnetStrings.RazorPage.CrudDisplayName)

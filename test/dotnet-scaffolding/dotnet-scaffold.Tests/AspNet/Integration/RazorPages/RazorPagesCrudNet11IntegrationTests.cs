@@ -4,6 +4,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
 
@@ -95,6 +96,13 @@ public class RazorPagesCrudNet11IntegrationTests : RazorPagesCrudIntegrationTest
 
         // Assert no NuGet errors during scaffolding
         Assert.DoesNotContain("error: NU", combinedOutput);
+
+        var packageReferences = XDocument.Load(_testProjectPath).Descendants("PackageReference");
+        var designPackage = Assert.Single(packageReferences,
+            package => (string?)package.Attribute("Include") == "Microsoft.EntityFrameworkCore.Design");
+        var toolsPackage = Assert.Single(packageReferences,
+            package => (string?)package.Attribute("Include") == "Microsoft.EntityFrameworkCore.Tools");
+        Assert.Equal((string?)toolsPackage.Attribute("Version"), (string?)designPackage.Attribute("Version"));
 
         // Assert — project builds after scaffolding
         var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);

@@ -197,8 +197,10 @@ public class UpdateAppAuthorizationStepTests
         Assert.Contains("\"https://example.com/app/signin-oidc\"", updateCommand);
     }
 
-    [Fact]
-    public async Task ExecuteAsync_DoesNotUpdateWhenExistingWebRedirectUrisCannotBeRead()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("[]")]
+    public async Task ExecuteAsync_DoesNotUpdateWhenExistingWebRedirectUrisCannotBeRead(string? output)
     {
         // Arrange
         var commands = new List<string>();
@@ -208,7 +210,7 @@ public class UpdateAppAuthorizationStepTests
         _step.AzCliCommand = command =>
         {
             commands.Add(command);
-            return new(1, null, "Unable to read the app registration.");
+            return new(1, output, "Unable to read the app registration.");
         };
 
         // Act
@@ -238,7 +240,7 @@ public class UpdateAppAuthorizationStepTests
         _step.AzCliCommand = command =>
         {
             commands.Add(command);
-            return new(0, output, null);
+            return new(0, output, "Azure CLI read diagnostic");
         };
 
         // Act

@@ -66,9 +66,12 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
                     "enAsync(user);\r\n        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetByte" +
                     "s(code));\r\n        var callbackUrl = NavigationManager.GetUriWithQueryParameters" +
                     "(\r\n            NavigationManager.ToAbsoluteUri(\"Account/ResetPassword\").Absolute" +
-                    "Uri,\r\n            new Dictionary<string, object?> { [\"code\"] = code });\r\n\r\n     " +
-                    "   await EmailSender.SendPasswordResetLinkAsync(user, Input.Email, HtmlEncoder.D" +
-                    "efault.Encode(callbackUrl));\r\n\r\n        RedirectManager.RedirectTo(\"Account/Forg" +
+                    "Uri,\r\n            new Dictionary<string, object?> { [\"code\"] = code });\r\n\r\n" +
+                    "        var storedEmail = await UserManager.GetEmailAsync(user);\r\n" +
+                    "        if (string.IsNullOrEmpty(storedEmail))\r\n        {\r\n" +
+                    "            throw new InvalidOperationException(\"Users must have an email.\");\r\n" +
+                    "        }\r\n\r\n        await EmailSender.SendPasswordResetLinkAsync(user, storedEmail, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n" +
+                    "        RedirectManager.RedirectTo(\"Account/Forg" +
                     "otPasswordConfirmation\");\r\n    }\r\n\r\n    private sealed class InputModel\r\n    {\r\n" +
                     "        [Required]\r\n        [EmailAddress]\r\n        public string Email { get; s" +
                     "et; } = \"\";\r\n    }\r\n}\r\n");

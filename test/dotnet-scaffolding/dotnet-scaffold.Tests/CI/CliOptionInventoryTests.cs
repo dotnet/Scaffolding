@@ -86,7 +86,7 @@ public class CliOptionInventoryTests
         ["area"] = new() { "--project", "--name" },
         ["blazor-identity"] = new() { "--project", "--dataContext", "--dbProvider", "--overwrite", "--prerelease" },
         ["identity"] = new() { "--project", "--dataContext", "--dbProvider", "--overwrite", "--prerelease" },
-        ["entra-id"] = new() { "--username", "--project", "--tenantId", "--use-existing-application", "--applicationId" },
+        ["entra-id"] = new() { "--username", "--project", "--tenantId", "--use-existing-application", "--applicationId", "--overwrite" },
         ["blazor-igniteui"] = new() { "--project", "--theme", "--theme-variant", "--prerelease" },
     };
 

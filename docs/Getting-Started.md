@@ -33,7 +33,9 @@ I recommend cloning it under your user profile directory.
 
 ### MVC controller view folders
 
-Controller names are validated as C# identifiers before scaffolding modifies the project.
+Controller names are validated as unqualified C# identifiers before scaffolding modifies the project.
+An optional `.cs` extension and escaped identifiers such as `@OrdersController` are supported.
+Directory paths, other extensions, Unicode formatting characters, and reserved device filenames are rejected.
 When views are requested, the derived folder must be a nonempty single path segment;
 on Windows, reserved device names such as `NUL` are rejected. These folder restrictions
 do not apply when views are not requested.

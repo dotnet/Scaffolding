@@ -51,6 +51,7 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
         var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
         JsonNode? content;
         bool writeContent = false;
+        bool containsComments = false;
         if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
         {
             content = new JsonObject();
@@ -61,11 +62,17 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
             try
             {
                 var jsonString = _fileSystem.ReadAllText(appSettingsFile);
-                content = JsonNode.Parse(jsonString, documentOptions: new JsonDocumentOptions
+                content = JsonNode.Parse(jsonString, new JsonNodeOptions { PropertyNameCaseInsensitive = true }, new JsonDocumentOptions
                 {
                     CommentHandling = JsonCommentHandling.Skip,
                     AllowTrailingCommas = true
                 });
+                var reader = new Utf8JsonReader(System.Text.Encoding.UTF8.GetBytes(jsonString),
+                    new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow, AllowTrailingCommas = true });
+                while (reader.Read())
+                {
+                    containsComments |= reader.TokenType == JsonTokenType.Comment;
+                }
             }
             catch (Exception ex)
             {
@@ -103,6 +110,11 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
 
         if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
         {
+            if (containsComments)
+            {
+                _logger.LogWarning("Updating '{File}' will remove JSON comments and original formatting.", appSettingsFile);
+            }
+
             var options = new JsonSerializerOptions { WriteIndented = true };
             _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");

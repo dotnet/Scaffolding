@@ -38,7 +38,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views
             this.Write("\r\n\r\n@{\r\n    ViewData[\"Title\"] = \"Edit\";\r\n}\r\n\r\n<h1>Edit</h1>\r\n\r\n<h4>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h4>\r\n<hr />\r\n<div class=\"row\">\r\n    <div class=\"col-md-4\">\r\n        <form asp-a" +
-                    "ction=\"Edit\">\r\n            <div asp-validation-summary=\"ModelOnly\" class=\"text-d" +
+                    "ction=\"Edit\" asp-route-id=\"@Model.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write("\">\r\n            <div asp-validation-summary=\"ModelOnly\" class=\"text-d" +
                     "anger\"></div>\r\n            <input type=\"hidden\" asp-for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write("\" />\r\n");

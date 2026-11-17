@@ -10,9 +10,16 @@ and conventional `id` route parameters, including models whose key is named
 with the trailing `Controller` suffix removed, independently of the model name.
 Standalone `views` scaffolding continues to use the model name.
 
+If the namespace root conflicts with an existing global class, underscores are
+prefixed until it is distinct, and scaffolding logs the chosen namespace.
+Edit and Delete forms explicitly include the entity key as the `id` route value,
+including when their GET pages were opened with a query-string ID.
+
 Connection-string updates accept JSON comments and trailing commas in
 `appsettings.json`, matching ASP.NET Core configuration. When an update is needed,
 the file is serialized without preserving comments or original formatting.
+A warning is logged before rewriting a file containing comments. Section and
+connection-string names are matched case-insensitively, like ASP.NET Core configuration.
 Existing connection-string values are not overwritten.
 
 The new `dotnet scaffold` engine uses compiled T4 templates; it does not load

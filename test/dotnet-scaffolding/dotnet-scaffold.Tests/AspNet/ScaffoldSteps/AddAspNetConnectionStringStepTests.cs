@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
@@ -201,8 +202,9 @@ public class AddAspNetConnectionStringStepTests
         _mockFileSystem.Setup(fs => fs.WriteAllText(appSettingsPath, It.IsAny<string>()))
             .Callback<string, string>((_, content) => writtenContent = content);
 
+        var logger = new Mock<ILogger<AddAspNetConnectionStringStep>>();
         var step = new AddAspNetConnectionStringStep(
-            NullLogger<AddAspNetConnectionStringStep>.Instance,
+            logger.Object,
             _mockFileSystem.Object,
             Mock.Of<ITelemetryService>())
         {
@@ -216,6 +218,51 @@ public class AddAspNetConnectionStringStepTests
         var result = JsonNode.Parse(writtenContent);
         Assert.Equal("*", result?["AllowedHosts"]?.GetValue<string>());
         Assert.Equal(step.ConnectionString, result?["ConnectionStrings"]?["AppDbContext"]?.GetValue<string>());
+        var warnings = logger.Invocations.Where(invocation => invocation.Method.Name == nameof(ILogger.Log) &&
+            Equals(invocation.Arguments[0], LogLevel.Warning)).ToList();
+        if (json.Contains("development settings"))
+        {
+            Assert.Contains("remove JSON comments", Assert.Single(warnings).Arguments[2].ToString());
+        }
+        else
+        {
+            Assert.Empty(warnings);
+        }
+    }
+
+    [Theory]
+    [InlineData("{ /* config */ \"connectionstrings\": {} }", true)]
+    [InlineData("{ /* config */ \"connectionstrings\": { \"appdbcontext\": \"existing\" } }", false)]
+    public async Task ExecuteAsync_MatchesConfigurationKeysIgnoringCase(string json, bool shouldWrite)
+    {
+        string path = Path.Combine(_testProjectPath, "appsettings.json");
+        _mockFileSystem.Setup(fs => fs.EnumerateFiles(_testProjectPath, "appsettings.json", SearchOption.AllDirectories))
+            .Returns(new[] { path });
+        _mockFileSystem.Setup(fs => fs.FileExists(path)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(path)).Returns(json);
+        string? written = null;
+        _mockFileSystem.Setup(fs => fs.WriteAllText(path, It.IsAny<string>()))
+            .Callback<string, string>((_, value) => written = value);
+        var step = new AddAspNetConnectionStringStep(NullLogger<AddAspNetConnectionStringStep>.Instance,
+            _mockFileSystem.Object, Mock.Of<ITelemetryService>())
+        {
+            BaseProjectPath = _testProjectPath,
+            ConnectionStringName = "AppDbContext",
+            ConnectionString = "new connection"
+        };
+
+        Assert.True(await step.ExecuteAsync(_context));
+        if (shouldWrite)
+        {
+            Assert.NotNull(written);
+            var root = JsonNode.Parse(written)!.AsObject();
+            Assert.Single(root);
+            Assert.Equal("new connection", root["connectionstrings"]!["AppDbContext"]!.GetValue<string>());
+        }
+        else
+        {
+            _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
     }
 
     [Fact]

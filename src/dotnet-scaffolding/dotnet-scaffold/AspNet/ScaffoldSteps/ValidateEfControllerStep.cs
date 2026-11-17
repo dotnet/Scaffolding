@@ -294,6 +294,19 @@ internal class ValidateEfControllerStep : ScaffoldStep
 
         string rootNamespace = properties["RootNamespace"];
         string controllerNamespace = GetControllerNamespace(rootNamespace);
+        var globalTypes = allClasses.Where(symbol => symbol.ContainingNamespace?.IsGlobalNamespace == true &&
+            symbol.ContainingType is null).Select(symbol => symbol.Name).ToHashSet(StringComparer.Ordinal);
+        string originalNamespace = controllerNamespace;
+        while (globalTypes.Contains(SyntaxFactory.ParseToken(controllerNamespace.Split('.')[0]).ValueText))
+        {
+            controllerNamespace = "_" + controllerNamespace.TrimStart('@');
+        }
+
+        if (controllerNamespace != originalNamespace)
+        {
+            _logger.LogWarning("Controller namespace '{OriginalNamespace}' conflicts with a global type. Using '{ControllerNamespace}'.",
+                originalNamespace, controllerNamespace);
+        }
 
         EfControllerModel scaffoldingModel = new()
         {

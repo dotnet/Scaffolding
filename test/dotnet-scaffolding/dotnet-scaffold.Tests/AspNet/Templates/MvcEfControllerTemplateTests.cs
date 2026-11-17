@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Xunit;
@@ -27,6 +28,60 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;
 /// </summary>
 public class MvcEfControllerTemplateTests
 {
+    [Theory]
+    [InlineData(9, "Edit")]
+    [InlineData(9, "Delete")]
+    [InlineData(10, "Edit")]
+    [InlineData(10, "Delete")]
+    [InlineData(11, "Edit")]
+    [InlineData(11, "Delete")]
+    public void MvcView_PostForm_ExplicitlyCarriesEntityKey(int version, string action)
+    {
+        ITextTransformation template = (version, action) switch
+        {
+            (9, "Edit") => new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.Views.Edit(),
+            (9, _) => new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.Views.Delete(),
+            (10, "Edit") => new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views.Edit(),
+            (10, _) => new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views.Delete(),
+            (11, "Edit") => new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Views.Edit(),
+            _ => new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Views.Delete()
+        };
+        var controller = CreateProductEfControllerModel();
+        template.Session = new Dictionary<string, object>
+        {
+            ["Model"] = new ViewModel
+            {
+                PageType = action,
+                ModelInfo = controller.ModelInfo,
+                DbContextInfo = controller.DbContextInfo,
+                ProjectInfo = controller.ProjectInfo
+            }
+        };
+        template.Initialize();
+        Assert.Contains($"asp-action=\"{action}\" asp-route-id=\"@Model.ProductId\"", template.TransformText());
+    }
+
+    [Theory]
+    [InlineData(9)]
+    [InlineData(10)]
+    [InlineData(11)]
+    public void MvcController_IdModel_DoesNotShadowRouteParameter(int version)
+    {
+        var model = CreateProductEfControllerModel();
+        model.ModelInfo.ModelTypeName = "Id";
+        string result = version switch
+        {
+            9 => CreateNet9Template(model).TransformText(),
+            10 => CreateNet10Template(model).TransformText(),
+            _ => CreateNet11Template(model).TransformText()
+        };
+        Assert.Contains("Details(int? id)", result);
+        Assert.Contains("var entity = await", result);
+        Assert.Contains("] Id entity)", result);
+        Assert.Contains("if (id != entity.ProductId)", result);
+        Assert.DoesNotContain("var id =", result);
+    }
+
     [Theory]
     [InlineData(9)]
     [InlineData(10)]

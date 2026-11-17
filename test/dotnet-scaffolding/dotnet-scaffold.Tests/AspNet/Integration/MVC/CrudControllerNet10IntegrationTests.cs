@@ -15,9 +15,11 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
     protected override string TestClassName => nameof(CrudControllerNet10IntegrationTests);
 
     [Theory]
-    [InlineData("Store.Web", "Store.Web")]
-    [InlineData("Store-Web", "Store_Web")]
-    public async Task Scaffold_ProductWithExistingContextAndCommentedSettings_Net10(string rootNamespace, string controllerNamespace)
+    [InlineData("Store.Web", "Store.Web", "Product", false)]
+    [InlineData("Store-Web", "Store_Web", "Product", false)]
+    [InlineData("Collision", "_Collision", "Id", true)]
+    public async Task Scaffold_ProductWithExistingContextAndCommentedSettings_Net10(
+        string rootNamespace, string controllerNamespace, string modelName, bool globalTypeCollision)
     {
         File.WriteAllText(_testProjectPath, $$"""
             <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -44,24 +46,29 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
             app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             app.Run();
             """);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Product.cs"), """
+        File.WriteAllText(Path.Combine(_testProjectDir, "Product.cs"), $$"""
             namespace Store.Web.Models;
-            public class Product
+            public class {{modelName}}
             {
+                [System.ComponentModel.DataAnnotations.Key]
                 public int ProductId { get; set; }
                 public string Name { get; set; } = "";
                 public decimal Price { get; set; }
             }
             """);
-        File.WriteAllText(Path.Combine(_testProjectDir, "AppDbContext.cs"), """
+        File.WriteAllText(Path.Combine(_testProjectDir, "AppDbContext.cs"), $$"""
             using Microsoft.EntityFrameworkCore;
             using Store.Web.Models;
             namespace Store.Web.Data;
             public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
             {
-                public DbSet<Product> Products { get; set; }
+                public DbSet<{{modelName}}> Products { get; set; }
             }
             """);
+        if (globalTypeCollision)
+        {
+            File.WriteAllText(Path.Combine(_testProjectDir, "Collision.cs"), "public class Collision { }");
+        }
         File.WriteAllText(Path.Combine(_testProjectDir, "appsettings.json"), """
             {
               "AllowedHosts": "*", // valid ASP.NET Core configuration
@@ -75,7 +82,7 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
             ScaffoldCliHelper.GetTestTargetFramework(),
             "mvccontroller-crud",
             "--project", _testProjectPath,
-            "--model", "Product",
+            "--model", modelName,
             "--controller", "ProductsController",
             "--dataContext", "AppDbContext",
             "--dbProvider", "sqlserver-efcore",
@@ -93,6 +100,11 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
         Assert.False(Directory.Exists(Path.Combine(_testProjectDir, "Views", "Product")));
         string index = File.ReadAllText(Path.Combine(_testProjectDir, "Views", "Products", "Index.cshtml"));
         Assert.Contains("asp-route-id=\"@item.ProductId\"", index);
+        foreach (string view in new[] { "Edit", "Delete" })
+        {
+            string form = File.ReadAllText(Path.Combine(_testProjectDir, "Views", "Products", $"{view}.cshtml"));
+            Assert.Contains($"asp-action=\"{view}\" asp-route-id=\"@Model.ProductId\"", form);
+        }
 
         var (afterExit, afterOutput, afterError) = await RunBuildAsync(_testProjectDir);
         Assert.True(afterExit == 0, $"Generated project failed to build:\n{afterOutput}\n{afterError}");

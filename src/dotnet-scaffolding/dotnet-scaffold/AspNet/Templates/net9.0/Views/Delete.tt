@@ -39,7 +39,7 @@ foreach (var property in entityProperties)
 <#
 }
 #>
-    <form asp-action="Delete">
+    <form asp-action="Delete" asp-route-id="@Model.<#= primaryKeyName #>">
         <input type="hidden" asp-for="<#= primaryKeyName #>" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
         <a asp-action="Index">Back to List</a>

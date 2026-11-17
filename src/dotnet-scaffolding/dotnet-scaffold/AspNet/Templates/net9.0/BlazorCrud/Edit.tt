@@ -21,6 +21,7 @@
     string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
 #>
 @page "/<#= pluralModelLowerInv #>/edit"
+@attribute [Microsoft.AspNetCore.Components.ExcludeFromInteractiveRouting]
 @using Microsoft.EntityFrameworkCore
 @implements IDisposable
 <#

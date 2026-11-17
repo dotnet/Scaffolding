@@ -17,6 +17,7 @@
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>/create"
+@attribute [Microsoft.AspNetCore.Components.ExcludeFromInteractiveRouting]
 @using Microsoft.EntityFrameworkCore
 <#
     if (!string.IsNullOrEmpty(modelNamespace))

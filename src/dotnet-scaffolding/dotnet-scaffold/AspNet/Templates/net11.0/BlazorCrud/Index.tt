@@ -20,6 +20,7 @@
     string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
 #>
 @page "/<#= pluralModelLowerInv #>"
+@attribute [Microsoft.AspNetCore.Components.ExcludeFromInteractiveRouting]
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Microsoft.EntityFrameworkCore
 <#

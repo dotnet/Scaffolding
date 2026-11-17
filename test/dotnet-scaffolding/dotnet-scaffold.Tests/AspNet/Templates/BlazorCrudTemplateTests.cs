@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.Scaffolding.Core.Model;
+using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Xunit;
 
@@ -12,6 +15,29 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;
 
 public class BlazorCrudTemplateTests
 {
+    [Fact]
+    public void CrudTemplates_ExcludeServerOnlyPagesFromInteractiveRouting()
+    {
+        foreach (var framework in new[] { TargetFramework.Net9, TargetFramework.Net10, TargetFramework.Net11 })
+        {
+            foreach (string page in new[] { "Index", "Create", "Edit", "Details", "Delete" })
+            {
+                var templateType = BlazorCrudHelper.GetTemplateType(page + ".tt", framework);
+                Assert.NotNull(templateType);
+                var template = Assert.IsAssignableFrom<ITextTransformation>(System.Activator.CreateInstance(templateType));
+
+                string result = Transform(template, CreateModel(page));
+
+                Assert.Contains("@attribute [Microsoft.AspNetCore.Components.ExcludeFromInteractiveRouting]", result);
+                if (page == "Edit" && framework != TargetFramework.Net9)
+                {
+                    Assert.DoesNotContain("[PersistentState]", result);
+                    Assert.DoesNotContain("EmployeeState", result);
+                }
+            }
+        }
+    }
+
     [Theory]
     [InlineData(10)]
     [InlineData(11)]
@@ -102,7 +128,7 @@ public class BlazorCrudTemplateTests
     [InlineData(9)]
     [InlineData(10)]
     [InlineData(11)]
-    public void EditTemplate_RetainsLoadedModelWhenInteractiveRenderingStarts(int frameworkVersion)
+    public void EditTemplate_PreservesFormModelWhenLoadingData(int frameworkVersion)
     {
         BlazorCrudModel model = CreateModel("Edit");
 
@@ -112,9 +138,8 @@ public class BlazorCrudTemplateTests
 
         if (frameworkVersion >= 10)
         {
-            Assert.Contains("[PersistentState]\n    public Employee? EmployeeState { get; set; }", result);
-            Assert.Contains("Employee ??= EmployeeState ??= await context.Employees.FirstOrDefaultAsync", result);
-            Assert.DoesNotContain("[SupplyParameterFromForm]\n    [PersistentState]", result);
+            Assert.Contains("Employee ??= await context.Employees.FirstOrDefaultAsync", result);
+            Assert.DoesNotContain("[PersistentState]", result);
         }
         else
         {

@@ -21,6 +21,7 @@
     string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
 #>
 @page "/<#= pluralModelLowerInv #>/edit"
+@attribute [Microsoft.AspNetCore.Components.ExcludeFromInteractiveRouting]
 @using Microsoft.EntityFrameworkCore
 <#
     if (!string.IsNullOrEmpty(modelNamespace))
@@ -98,13 +99,10 @@ else
     [SupplyParameterFromForm]
     private <#= modelName #>? <#= modelName #> { get; set; }
 
-    [PersistentState]
-    public <#= modelName #>? <#= modelName #>State { get; set; }
-
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        <#= modelName #> ??= <#= modelName #>State ??= await context.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
+        <#= modelName #> ??= await context.<#= entitySetName #>.FirstOrDefaultAsync(m => m.<#= primaryKeyName #> == <#= primaryKeyName #>);
 
         if (<#= modelName #> is null)
         {

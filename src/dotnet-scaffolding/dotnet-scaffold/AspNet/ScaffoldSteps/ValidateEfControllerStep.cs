@@ -5,6 +5,7 @@ using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -14,6 +15,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
 using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
+using INamespaceSymbol = Microsoft.CodeAnalysis.INamespaceSymbol;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -284,9 +286,34 @@ internal class ValidateEfControllerStep : ScaffoldStep
             dbContextInfo.EfScenario = true;
         }
 
+        var projectService = new MSBuildProjectService(settings.Project);
+        if (!projectService.TryGetEvaluatedProperties(["RootNamespace"], out var properties, out var error))
+        {
+            _logger.LogError("Unable to determine the controller namespace for '{Project}': {Error}", settings.Project, error);
+            return null;
+        }
+
+        string rootNamespace = properties["RootNamespace"];
+        string originalNamespace = GetControllerNamespace(rootNamespace);
+        var documents = await projectInfo.CodeService.GetAllDocumentsAsync();
+        var compilation = documents.Count > 0 ? await documents[0].Project.GetCompilationAsync() : null;
+        if (compilation is null)
+        {
+            _logger.LogError("Unable to check controller namespace conflicts for '{Project}'.", settings.Project);
+            return null;
+        }
+
+        string controllerNamespace = GetNonConflictingControllerNamespace(originalNamespace, compilation.Assembly.GlobalNamespace);
+        if (controllerNamespace != originalNamespace)
+        {
+            _logger.LogWarning("Controller namespace '{OriginalNamespace}' conflicts with an existing type. Using '{ControllerNamespace}'.",
+                originalNamespace, controllerNamespace);
+        }
+
         EfControllerModel scaffoldingModel = new()
         {
             ControllerName = settings.ControllerName,
+            ControllerNamespace = controllerNamespace,
             ControllerType = settings.ControllerType,
             ProjectInfo = projectInfo,
             ModelInfo = modelInfo,
@@ -303,5 +330,63 @@ internal class ValidateEfControllerStep : ScaffoldStep
         }
 
         return scaffoldingModel;
+    }
+
+    internal static string GetNonConflictingControllerNamespace(string controllerNamespace, INamespaceSymbol globalNamespace)
+    {
+        var segments = controllerNamespace.Split('.');
+        INamespaceSymbol? currentNamespace = globalNamespace;
+        for (int i = 0; i < segments.Length && currentNamespace is not null; i++)
+        {
+            string name = SyntaxFactory.ParseToken(segments[i]).ValueText;
+            while (currentNamespace.GetTypeMembers(name).Length > 0)
+            {
+                name = "_" + name;
+                segments[i] = name;
+            }
+
+            currentNamespace = currentNamespace.GetNamespaceMembers().FirstOrDefault(symbol => symbol.Name == name);
+        }
+
+        return string.Join(".", segments);
+    }
+
+    internal static string GetControllerNamespace(string rootNamespace)
+    {
+        if (string.IsNullOrEmpty(rootNamespace))
+        {
+            return "Controllers";
+        }
+
+        var segments = rootNamespace.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        for (int i = 0; i < segments.Length; i++)
+        {
+            var token = SyntaxFactory.ParseToken(segments[i]);
+            if (token.RawKind == (int)SyntaxKind.IdentifierToken && !token.ContainsDiagnostics && token.Text == segments[i])
+            {
+                continue;
+            }
+
+            var name = new System.Text.StringBuilder();
+            foreach (char character in segments[i])
+            {
+                name.Append(SyntaxFacts.IsIdentifierPartCharacter(character) ? character : '_');
+            }
+
+            if (name.Length == 0 || !SyntaxFacts.IsIdentifierStartCharacter(name[0]))
+            {
+                name.Insert(0, '_');
+            }
+
+            string identifier = name.ToString();
+            if (SyntaxFacts.GetKeywordKind(identifier) != SyntaxKind.None)
+            {
+                identifier = "@" + identifier;
+            }
+
+            segments[i] = identifier;
+        }
+
+        return $"{(segments.Length == 0 ? "_" : string.Join(".", segments))}.Controllers";
     }
 }

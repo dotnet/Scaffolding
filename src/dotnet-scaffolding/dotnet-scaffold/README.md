@@ -1,6 +1,34 @@
 New and improved scaffolding experience. 
 More details coming soon!
 
+### MVC controller scaffolding
+
+EF MVC controllers use the project's evaluated root namespace with `.Controllers`
+after normalizing invalid identifier characters and escaping C# keywords,
+and conventional `id` route parameters, including models whose key is named
+`ProductId`. With `--views`, views are written beneath `Views\<controller-name>`
+with the trailing `Controller` suffix removed, independently of the model name.
+Standalone `views` scaffolding continues to use the model name.
+
+If a namespace segment conflicts with an existing type, underscores are
+prefixed to that segment until it is distinct, and scaffolding logs the chosen namespace.
+Edit and Delete forms explicitly include the entity key as the `id` route value,
+including when their GET pages were opened with a query-string ID.
+Their POST actions bind `id` from the route, not from a non-key `Id` form field.
+GET actions continue to accept route or query-string IDs. Model and context type
+references are globally qualified to avoid shadowing by namespace segments.
+
+Connection-string updates accept JSON comments and trailing commas in
+`appsettings.json`, matching ASP.NET Core configuration. Updates insert only the
+required property or replace a null value, preserving existing comments and
+surrounding formatting. Section and connection-string names are matched
+case-insensitively, like ASP.NET Core configuration.
+Existing connection-string values are not overwritten.
+
+The new `dotnet scaffold` engine uses compiled T4 templates; it does not load
+legacy custom Razor template overrides. Adding support for these overrides is
+outside the scope of this fix.
+
 ### Existing template files and failures
 
 When a template file already exists, scaffolding compares its decoded text,

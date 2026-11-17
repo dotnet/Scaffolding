@@ -3,6 +3,7 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Builder;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -17,6 +18,34 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet;
 
 public class ValidateEfControllerStepTests
 {
+    [Theory]
+    [InlineData("public struct Product { }", "Product.Controllers", "_Product.Controllers")]
+    [InlineData("public enum Product { One }", "Product.Controllers", "_Product.Controllers")]
+    [InlineData("public interface Product { }", "Product.Controllers", "_Product.Controllers")]
+    [InlineData("public delegate void Product();", "Product.Controllers", "_Product.Controllers")]
+    [InlineData("public record Product;", "Product.Controllers", "_Product.Controllers")]
+    [InlineData("namespace Store { public class Controllers { } }", "Store.Controllers", "Store._Controllers")]
+    [InlineData("namespace Store { public class Controllers { } public struct _Controllers { } }",
+        "Store.Controllers", "Store.__Controllers")]
+    [InlineData("namespace Store { public class Other { } }", "Store.Controllers", "Store.Controllers")]
+    public void ControllerNamespace_AvoidsTypeConflictsAtEverySegment(string source, string requested, string expected)
+    {
+        var compilation = CSharpCompilation.Create("NamespaceConflicts", new[] { CSharpSyntaxTree.ParseText(source) });
+        Assert.Equal(expected, ValidateEfControllerStep.GetNonConflictingControllerNamespace(
+            requested, compilation.Assembly.GlobalNamespace));
+    }
+
+    [Theory]
+    [InlineData("Store-Web", "Store_Web.Controllers")]
+    [InlineData("Store.123Web.class", "Store._123Web.@class.Controllers")]
+    [InlineData("Store.@class", "Store.@class.Controllers")]
+    [InlineData("...", "_.Controllers")]
+    [InlineData("", "Controllers")]
+    public void ControllerNamespace_NormalizesInvalidSegments(string rootNamespace, string expected)
+    {
+        Assert.Equal(expected, ValidateEfControllerStep.GetControllerNamespace(rootNamespace));
+    }
+
     [Theory]
     [InlineData("..")]
     [InlineData(".")]

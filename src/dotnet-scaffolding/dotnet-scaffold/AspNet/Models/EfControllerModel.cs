@@ -18,6 +18,10 @@ internal class EfControllerModel
     /// </summary>
     public required string ControllerName { get; set; }
     /// <summary>
+    /// Gets or sets the namespace for the generated controller.
+    /// </summary>
+    public string ControllerNamespace { get; set; } = string.Empty;
+    /// <summary>
     /// Gets or sets the output path for the generated controller file.
     /// </summary>
     public required string ControllerOutputPath { get; set; }

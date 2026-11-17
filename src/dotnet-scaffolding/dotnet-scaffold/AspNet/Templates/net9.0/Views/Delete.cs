@@ -54,7 +54,9 @@ foreach (var property in entityProperties)
 
 }
 
-            this.Write("    <form asp-action=\"Delete\">\r\n        <input type=\"hidden\" asp-for=\"");
+            this.Write("    <form asp-action=\"Delete\" asp-route-id=\"@Model.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
+            this.Write("\">\r\n        <input type=\"hidden\" asp-for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write("\" />\r\n        <input type=\"submit\" value=\"Delete\" class=\"btn btn-danger\" /> |\r\n  " +
                     "      <a asp-action=\"Index\">Back to List</a>\r\n    </form>\r\n</div>\r\n");

@@ -186,6 +186,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
                 internal const string Description = "File name for new file being created with 'dotnet new'";
             }
 
+            internal static class RelativeFolderPath
+            {
+                internal const string DisplayName = "Relative folder path";
+                internal const string Description = "Optional relative output folder beneath the scaffolder's default location.";
+            }
+
             internal static class Actions
             {
                 internal const string DisplayName = "Read/Write Actions?";

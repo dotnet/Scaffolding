@@ -34,11 +34,9 @@ public class EntraIdTenantIdentityPipelineTests
     {
         var files = new Mock<IFileSystem>();
         var projectPath = Path.Combine("project", "Test.csproj");
-        var settingsPath = Path.Combine("project", "appsettings.json");
+        var settingsPath = Path.Combine("project", "appsettings.Development.json");
         files.Setup(f => f.FileExists(projectPath)).Returns(true);
         files.Setup(f => f.DirectoryExists("project")).Returns(true);
-        files.Setup(f => f.EnumerateFiles("project", "appsettings.json", SearchOption.AllDirectories))
-            .Returns(new[] { settingsPath });
         files.Setup(f => f.FileExists(settingsPath)).Returns(true);
         files.Setup(f => f.ReadAllText(settingsPath)).Returns("""{"Keep":"original"}""");
         string? writtenSettings = null;
@@ -100,6 +98,8 @@ public class EntraIdTenantIdentityPipelineTests
 
         Assert.Equal(expectedSuccess, await scaffolder.ExecuteAsync(context));
 
+        files.Verify(f => f.ReadAllText(Path.Combine("project", "appsettings.json")), Times.Never);
+        files.Verify(f => f.WriteAllText(Path.Combine("project", "appsettings.json"), It.IsAny<string>()), Times.Never);
         registration.Verify(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>()), Times.Never);
         Assert.False(context.Properties.ContainsKey("ClientSecret"));
         Assert.Equal(readExitCode == 0 ? 2 : 1, commands.Count);

@@ -18,6 +18,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
 using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
+using INamedTypeSymbol = Microsoft.CodeAnalysis.INamedTypeSymbol;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -136,8 +137,14 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
                     $@"\b{Regex.Escape(existingProperty)}\s*=>\s*\w+\.AcceptsInteractiveRouting\(\)", RegexOptions.None, TimeSpan.FromSeconds(1)))
                 {
                     blazorCrudModel.ProjectInfo.CodeChangeOptions!.Add("GlobalInteractive");
-                    var httpContextName = GetUniqueMemberName("HttpContext", appContent);
-                    var pageRenderModeName = GetUniqueMemberName("PageRenderMode", appContent);
+                    var appMembers = (await blazorCrudModel.ProjectInfo.CodeService!.GetAllClassSymbolsAsync())
+                        .OfType<INamedTypeSymbol>()
+                        .Where(type => type.Name == "App")
+                        .SelectMany(type => type.GetMembers())
+                        .Select(member => member.Name);
+                    var memberContent = appContent + "\n" + string.Join("\n", appMembers);
+                    var httpContextName = GetUniqueMemberName("HttpContext", memberContent);
+                    var pageRenderModeName = GetUniqueMemberName("PageRenderMode", memberContent);
                     var members = $$"""
                             [CascadingParameter]
                             private HttpContext {{httpContextName}} { get; set; } = default!;
@@ -157,7 +164,7 @@ internal class ValidateBlazorCrudStep : ScaffoldStep
                         var headOutletRenderModeName = pageRenderModeName;
                         if (headOutletExpression != expression)
                         {
-                            headOutletRenderModeName = GetUniqueMemberName("HeadOutletRenderMode", appContent);
+                            headOutletRenderModeName = GetUniqueMemberName("HeadOutletRenderMode", memberContent);
                             members += $"""
 
 

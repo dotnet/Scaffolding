@@ -28,7 +28,8 @@ public class BlazorCrudInteractivityIntegrationTests
         "@rendermode=\"@(new InteractiveServerRenderMode(prerender: \"server\" == \"server\"))\"")]
     [InlineData("net10.0", "InteractiveAuto", false, null, "@* <Routes /> <HeadOutlet /> *@")]
     [InlineData("net10.0", "InteractiveAuto", false, null, "<!-- <Routes /> <HeadOutlet /> -->")]
-    public async Task Scaffold_BlazorCrud_GlobalInteractivityKeepsCrudRoutesOnServer(string framework, string renderMode, bool individualAccounts, string? routesRenderModeAttribute = null, string? commentedMarkup = null)
+    [InlineData("net10.0", "InteractiveAuto", false, null, null, true)]
+    public async Task Scaffold_BlazorCrud_GlobalInteractivityKeepsCrudRoutesOnServer(string framework, string renderMode, bool individualAccounts, string? routesRenderModeAttribute = null, string? commentedMarkup = null, bool codeBehindMembers = false)
     {
         using var project = new BlazorTestProject(framework);
         project.AddWebAssemblyClient(framework == "net11.0" ? "11.0.*-*" : framework == "net9.0" ? "9.0.*" : "10.0.*",
@@ -56,6 +57,19 @@ public class BlazorCrudInteractivityIntegrationTests
                 .Replace("<Routes />", routesRenderModeAttribute is null
                     ? $"<Routes @rendermode=\"{(renderMode == "InteractiveServer" ? "@" : "")}{renderMode}\" />"
                     : $"<Routes {routesRenderModeAttribute} />"));
+        if (codeBehindMembers)
+        {
+            File.WriteAllText(Path.Combine(componentsDirectory, "App.razor.cs"), """
+                namespace TestProject.Components;
+
+                public partial class App
+                {
+                    [Microsoft.AspNetCore.Components.CascadingParameter]
+                    private Microsoft.AspNetCore.Http.HttpContext HttpContext { get; set; } = default!;
+                    private Microsoft.AspNetCore.Components.IComponentRenderMode? PageRenderMode => null;
+                }
+                """);
+        }
         Directory.CreateDirectory(Path.Combine(serverDirectory, "Models"));
         File.WriteAllText(Path.Combine(serverDirectory, "Models", "Movie.cs"), """
             namespace TestProject.Models;
@@ -100,16 +114,17 @@ public class BlazorCrudInteractivityIntegrationTests
         }
 
         string app = File.ReadAllText(Path.Combine(serverDirectory, "Components", "App.razor"));
-        Assert.Contains($"HttpContext.AcceptsInteractiveRouting() ? {renderMode} : null", app);
-        Assert.Contains("<Routes @rendermode=\"PageRenderMode\"", app);
-        Assert.Contains("<HeadOutlet @rendermode=\"PageRenderMode\"", app);
+        string suffix = codeBehindMembers ? "1" : string.Empty;
+        Assert.Contains($"HttpContext{suffix}.AcceptsInteractiveRouting() ? {renderMode} : null", app);
+        Assert.Contains($"<Routes @rendermode=\"PageRenderMode{suffix}\"", app);
+        Assert.Contains($"<HeadOutlet @rendermode=\"PageRenderMode{suffix}\"", app);
         if (commentedMarkup is not null)
         {
             Assert.Contains(commentedMarkup, app);
         }
 
-        Assert.Equal(1, app.Split("private IComponentRenderMode? PageRenderMode").Length - 1);
-        Assert.Equal(1, app.Split("private HttpContext HttpContext").Length - 1);
+        Assert.Equal(1, app.Split($"private IComponentRenderMode? PageRenderMode{suffix}").Length - 1);
+        Assert.Equal(1, app.Split($"private HttpContext HttpContext{suffix}").Length - 1);
         if (individualAccounts)
         {
             Assert.Equal(appBeforeCrud, app);

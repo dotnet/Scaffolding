@@ -14,6 +14,58 @@ public class IdentityNet10IntegrationTests : IdentityIntegrationTestsBase
     protected override string TargetFramework => "net10.0";
     protected override string TestClassName => nameof(IdentityNet10IntegrationTests);
 
+    [Theory]
+    [InlineData("identity")]
+    [InlineData("blazor-identity")]
+    public async Task Scaffold_Identity_DoesNotSelectReferencedUserContext(string scaffolder)
+    {
+        var libraryDirectory = Directory.CreateDirectory(Path.Combine(_testProjectDir, "..", "IdentityLibrary")).FullName;
+        var libraryPath = Path.Combine(libraryDirectory, "IdentityLibrary.csproj");
+        File.WriteAllText(libraryPath, """
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+              <ItemGroup><PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.9" /></ItemGroup>
+            </Project>
+            """);
+        const string librarySource = """
+            using Microsoft.AspNetCore.Identity;
+            using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+            using Microsoft.EntityFrameworkCore;
+            namespace IdentityLibrary;
+            public class LibraryUser : IdentityUser { }
+            public class LibraryContext : IdentityDbContext<LibraryUser>
+            {
+                public LibraryContext(DbContextOptions<LibraryContext> options) : base(options) { }
+            }
+            """;
+        var sourcePath = Path.Combine(libraryDirectory, "LibraryContext.cs");
+        File.WriteAllText(sourcePath, librarySource);
+        File.WriteAllText(_testProjectPath, ProjectContent.Replace("</Project>", """
+            <ItemGroup><ProjectReference Include="..\IdentityLibrary\IdentityLibrary.csproj" /></ItemGroup>
+            </Project>
+            """));
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), scaffolder == "identity"
+            ? ScaffoldCliHelper.GetMinimalProgramCs() : ScaffoldCliHelper.GetBlazorProgramCs("TestProject"));
+        if (scaffolder == "blazor-identity")
+        {
+            ScaffoldCliHelper.SetupBlazorProjectStructure(_testProjectDir);
+        }
+
+        var (exitCode, output, error) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework, scaffolder, "--project", _testProjectPath,
+            "--dataContext", "LibraryContext", "--dbProvider", "sqlite-efcore");
+
+        Assert.True(exitCode == 0, $"Scaffolding failed.\n{output}\n{error}");
+        Assert.True(File.Exists(Path.Combine(_testProjectDir, "Data", "LibraryContext.cs")));
+        var program = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
+        Assert.Contains("AddDbContext<LibraryContext>", program);
+        Assert.Contains("AddEntityFrameworkStores<LibraryContext>", program);
+        Assert.DoesNotContain("IdentityLibrary.LibraryContext", program);
+        Assert.Equal(librarySource, File.ReadAllText(sourcePath));
+        var (buildCode, buildOutput, buildError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(buildCode == 0, $"Generated project failed to build.\n{buildOutput}\n{buildError}");
+    }
+
     // net10.0 Identity templates use Pages/ (T4) instead of Bootstrap4/Bootstrap5 (.cshtml)
     [Fact]
     public override void Identity_Bootstrap5_FolderExists()

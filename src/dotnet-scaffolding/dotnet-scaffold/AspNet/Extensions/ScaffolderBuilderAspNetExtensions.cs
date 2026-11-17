@@ -65,8 +65,8 @@ internal static class ScaffolderBuilderAspNetExtensions
 
     /// <summary>
     /// Adds a step that inserts a missing DbSet property into a DbContext class.
-    /// This step may run after <c>WithDbContextStep</c>, including when a new DbContext has just been created,
-    /// and relies on the underlying step to avoid introducing duplicate DbSet properties when one already exists.
+    /// Run after validation and before package or template changes so inaccessible models are rejected
+    /// without changing files. New contexts are handled by <c>WithDbContextStep</c>.
     /// Delegates modification to <see cref="Microsoft.DotNet.Scaffolding.CodeModification.CodeModificationStep"/>
     /// via an in-memory JSON config, consistent with how all other code changes are applied.
     /// </summary>

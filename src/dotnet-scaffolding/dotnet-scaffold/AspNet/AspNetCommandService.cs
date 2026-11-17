@@ -167,9 +167,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.ControllerType = AspnetStrings.Catagories.API;
                     step.ControllerName = context.GetOptionResult(options.ControllerName);
                 })
+                .WithAddDbSetStep()
                 .WithEfControllerAddPackagesStep()
                 .WithDbContextStep()
-                .WithAddDbSetStep()
                 .WithAspNetConnectionStringStep()
                 .WithEfControllerTextTemplatingStep()
                 .WithEfControllerCodeChangeStep();
@@ -193,9 +193,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.ControllerType = AspnetStrings.Catagories.MVC;
                     step.ControllerName = context.GetOptionResult(options.ControllerName);
                 })
+                .WithAddDbSetStep()
                 .WithEfControllerAddPackagesStep()
                 .WithDbContextStep()
-                .WithAddDbSetStep()
                 .WithAspNetConnectionStringStep()
                 .WithEfControllerTextTemplatingStep()
                 .WithEfControllerCodeChangeStep()
@@ -219,9 +219,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.Prerelease = context.GetOptionResult(options.Prerelease);
                     step.Page = context.GetOptionResult(options.PageType);
                 })
+                .WithAddDbSetStep()
                 .WithBlazorCrudAddPackagesStep()
                 .WithDbContextStep()
-                .WithAddDbSetStep()
                 .WithAspNetConnectionStringStep()
                 .WithBlazorCrudTextTemplatingStep()
                 .WithBlazorCrudCodeChangeStep();
@@ -266,9 +266,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.Prerelease = context.GetOptionResult(options.Prerelease);
                     step.Page = context.GetOptionResult(options.PageType);
                 })
+                .WithAddDbSetStep()
                 .WithRazorPagesAddPackagesStep()
                 .WithDbContextStep()
-                .WithAddDbSetStep()
                 .WithAspNetConnectionStringStep()
                 .WithRazorPagesTextTemplatingStep()
                 .WithRazorPagesCodeChangeStep();
@@ -311,9 +311,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                     step.TypedResults = context.GetOptionResult(options.TypedResults);
                     step.Endpoints = context.GetOptionResult(options.EndpointsClass);
                 })
+                .WithAddDbSetStep()
                 .WithMinimalApiAddPackagesStep()
                 .WithDbContextStep()
-                .WithAddDbSetStep()
                 .WithAspNetConnectionStringStep()
                 .WithMinimalApiTextTemplatingStep()
                 .WithMinimalApiCodeChangeStep();

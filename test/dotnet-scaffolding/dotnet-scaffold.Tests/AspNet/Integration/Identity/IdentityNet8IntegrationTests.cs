@@ -52,7 +52,8 @@ public class IdentityNet8IntegrationTests : IdentityIntegrationTestsBase
         Assert.True(Directory.Exists(manageDir), "Manage directory should be created.");
         Assert.True(File.Exists(Path.Combine(manageDir, "Index.cshtml")), "Manage/Index.cshtml should be created.");
         var programContent = File.ReadAllText(Path.Combine(_testProjectDir, "Program.cs"));
-        Assert.Contains("TestDbContext", programContent);
+        Assert.Contains("AddDbContext<TestDbContext>", programContent);
+        Assert.Contains("AddEntityFrameworkStores<TestDbContext>", programContent);
 
         // Assert — no NuGet errors and project builds after scaffolding
         Assert.False(cliOutput.Contains("error: NU"),

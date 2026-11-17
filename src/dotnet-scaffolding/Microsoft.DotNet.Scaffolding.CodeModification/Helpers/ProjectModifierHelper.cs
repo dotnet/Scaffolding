@@ -28,7 +28,7 @@ internal static class ProjectModifierHelper
     public static async Task<bool> IsMinimalApp(ICodeService codeService)
     {
         //find Startup if named Startup.
-        var allClassSymbols = await codeService.GetAllClassSymbolsAsync();
+        var allClassSymbols = await codeService.GetAllClassSymbolsAsync(includeReferencedProjects: false);
         var startupType = allClassSymbols.FirstOrDefault(x => x.Name.Equals("Startup", StringComparison.OrdinalIgnoreCase));
         if (startupType == null)
         {

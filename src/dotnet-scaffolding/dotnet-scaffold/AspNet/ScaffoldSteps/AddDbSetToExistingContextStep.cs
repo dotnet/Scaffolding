@@ -1,9 +1,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Text.Json;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.CodeModification;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
+using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Scaffolding.TextTemplating.DbContext;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -14,6 +19,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 /// Scaffold step that adds a missing DbSet property to an existing DbContext class.
 /// This is needed when a pre-existing DbContext is selected for CRUD scaffolding but does
 /// not yet contain a DbSet property for the model being scaffolded.
+/// Existing contexts are checked against the selected model's type and assembly identity even
+/// when a DbSet already exists.
 /// Delegates the actual code modification to <see cref="CodeModificationStep"/> using its
 /// in-memory JSON config path, consistent with how all other code changes are applied in
 /// this project.
@@ -49,40 +56,81 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
         string? dbContextPath = dbContextProperties.DbContextPath;
         string? dbSetStatement = dbContextProperties.DbSetStatement;
 
-        // Only act when:
-        //   The target file already exists on disk (existing context — new contexts are
-        //     handled by WithDbContextStep via its T4 template which already includes the DbSet).
-        //   A DbSet statement was produced (only set when GetDbContextInfo found no existing DbSet).
-        //   The project path is available to initialise the Roslyn workspace.
-        if (string.IsNullOrEmpty(dbContextPath) || !File.Exists(dbContextPath) || string.IsNullOrWhiteSpace(dbSetStatement) || string.IsNullOrEmpty(ProjectPath))
+        // Validate existing contexts even when they already have a DbSet for a same-named model.
+        // New contexts are handled by WithDbContextStep.
+        if (string.IsNullOrEmpty(dbContextPath) || !File.Exists(dbContextPath) || string.IsNullOrEmpty(ProjectPath) ||
+            (string.IsNullOrWhiteSpace(dbContextProperties.ModelFullName) && string.IsNullOrWhiteSpace(dbSetStatement)))
         {
             return true;
         }
 
-        dbSetStatement = NormalizeDbSetStatement(dbSetStatement);
+        using var codeService = new CodeService(_logger, ProjectPath);
+        var solution = (await codeService.GetWorkspaceAsync())?.CurrentSolution;
+        var documentId = solution?.GetDocumentIdsWithFilePath(dbContextPath).FirstOrDefault();
+        var document = documentId is null ? null : solution?.GetDocument(documentId);
+        string? contextProjectPath = document?.Project.FilePath;
+        if (document is null || string.IsNullOrEmpty(contextProjectPath))
+        {
+            _logger.LogError("Unable to find the project owning DbContext '{DbContextPath}'.", dbContextPath);
+            return false;
+        }
+
+        var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
+        var contextDeclaration = FindContextDeclaration(semanticModel, dbContextProperties.DbContextFullName);
+        if (contextDeclaration is null || semanticModel?.GetDeclaredSymbol(contextDeclaration, cancellationToken) is not INamedTypeSymbol contextSymbol)
+        {
+            _logger.LogError("Unable to find DbContext '{DbContextFullName}' in '{DbContextPath}'.", dbContextProperties.DbContextFullName, dbContextPath);
+            return false;
+        }
+
+        var modelTypeSyntax = SyntaxFactory.ParseTypeName(dbContextProperties.ModelFullName ?? string.Empty);
+        var modelType = semanticModel.GetSpeculativeTypeInfo(contextDeclaration.OpenBraceToken.Span.End,
+            modelTypeSyntax, SpeculativeBindingOption.BindAsTypeOrNamespace).Type;
+        if (modelType is not INamedTypeSymbol { TypeKind: not TypeKind.Error } ||
+            !semanticModel.Compilation.IsSymbolAccessibleWithin(modelType, contextSymbol))
+        {
+            _logger.LogError("Model '{ModelType}' is not accessible to DbContext '{DbContextFullName}'. Place the model in the context project or a shared project referenced by it.",
+                modelTypeSyntax.ToString(), dbContextProperties.DbContextFullName);
+            return false;
+        }
+
+        if (modelType.ToDisplayString() != dbContextProperties.ModelFullName ||
+            modelType.ContainingAssembly.Identity.ToString() != dbContextProperties.ModelAssemblyIdentity)
+        {
+            _logger.LogError("DbContext '{DbContextFullName}' does not reference the selected model '{ModelType}' from assembly '{ModelAssembly}'.",
+                dbContextProperties.DbContextFullName, dbContextProperties.ModelFullName, dbContextProperties.ModelAssemblyIdentity);
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(dbSetStatement))
         {
             return true;
         }
 
-        // Fast pre-check: if the DbSet property is already present in the file
-        // (e.g. because WithDbContextStep just created the file with the DbSet included),
-        // skip the modification pass to avoid a redundant Roslyn workspace update.
-        string fileContent = await File.ReadAllTextAsync(dbContextPath, cancellationToken);
-        if (DbSetAlreadyPresent(fileContent, dbSetStatement))
+        dbSetStatement = NormalizeDbSetStatement(dbSetStatement);
+        if (SyntaxFactory.ParseMemberDeclaration(dbSetStatement) is not PropertyDeclarationSyntax dbSetProperty ||
+            dbSetProperty.ContainsDiagnostics ||
+            dbSetProperty.Type is not GenericNameSyntax { Identifier.ValueText: "DbSet" } dbSetType ||
+            dbSetType.TypeArgumentList.Arguments.Count != 1)
+        {
+            _logger.LogError("Invalid DbSet property declaration '{DbSetStatement}'.", dbSetStatement);
+            return false;
+        }
+
+        if (DbSetAlreadyPresent(contextDeclaration, dbSetProperty))
         {
             return true;
         }
 
         string dbContextFileName = Path.GetFileName(dbContextPath);
-        string configJson = BuildCodeModifierConfig(dbContextFileName, dbSetStatement);
+        string configJson = BuildCodeModifierConfig(dbContextPath, dbSetStatement, dbContextProperties.DbContextFullName);
 
         _logger.LogInformation($"Adding DbSet property to '{dbContextFileName}'...");
 
         CodeModificationStep codeModificationStep = new CodeModificationStep(NullLogger<CodeModificationStep>.Instance)
         {
             CodeModifierConfigJsonText = configJson,
-            ProjectPath = ProjectPath,
+            ProjectPath = contextProjectPath,
             CodeChangeOptions = CodeChangeOptions
         };
 
@@ -90,9 +138,20 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
         if (!result)
         {
             _logger.LogError($"Failed to add '{dbSetStatement}' to '{dbContextFileName}'.");
+            return false;
         }
 
-        return result;
+        string fileContent = await File.ReadAllTextAsync(dbContextPath, cancellationToken);
+        var savedDocument = document.WithText(SourceText.From(fileContent));
+        var savedSemanticModel = await savedDocument.GetSemanticModelAsync(cancellationToken);
+        var savedContext = FindContextDeclaration(savedSemanticModel, dbContextProperties.DbContextFullName);
+        if (savedContext is null || !DbSetAlreadyPresent(savedContext, dbSetProperty))
+        {
+            _logger.LogError("DbSet property was not saved to DbContext '{DbContextFullName}' in '{DbContextPath}'.", dbContextProperties.DbContextFullName, dbContextPath);
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -100,7 +159,10 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
     /// to insert <paramref name="dbSetStatement"/> as a class property via
     /// <c>ClassProperties</c>. Duplicate detection is built into DocumentBuilder.
     /// </summary>
-    internal static string BuildCodeModifierConfig(string dbContextFileName, string dbSetStatement)
+    /// <param name="dbContextFilePath">The context's full source path, used to select the exact document.</param>
+    /// <param name="dbSetStatement">The property declaration to insert.</param>
+    /// <param name="dbContextFullName">The exact selected context type identity.</param>
+    internal static string BuildCodeModifierConfig(string dbContextFilePath, string dbSetStatement, string? dbContextFullName)
     {
         dbSetStatement = NormalizeDbSetStatement(dbSetStatement);
 
@@ -110,7 +172,8 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
             {
                 new
                 {
-                    FileName = dbContextFileName,
+                    FileName = dbContextFilePath,
+                    ClassFullName = dbContextFullName,
                     ClassProperties = new[]
                     {
                         new { Block = dbSetStatement }
@@ -135,24 +198,21 @@ internal class AddDbSetToExistingContextStep : ScaffoldStep
     }
 
     /// <summary>
-    /// Returns <c>true</c> when <paramref name="fileContent"/> already contains a
-    /// <c>DbSet&lt;T&gt;</c> property for the same type as <paramref name="dbSetStatement"/>
-    /// would introduce, preventing a duplicate insertion.
+    /// Checks only properties directly owned by the selected context, not comments or other classes.
     /// </summary>
-    internal static bool DbSetAlreadyPresent(string fileContent, string dbSetStatement)
+    internal static bool DbSetAlreadyPresent(ClassDeclarationSyntax contextDeclaration, PropertyDeclarationSyntax dbSetProperty)
     {
-        // dbSetStatement looks like:
-        //   "public DbSet<Full.Type.Name> TypeName { get; set; } = default!;"
-        // Extract "DbSet<Full.Type.Name>" to check whether the file already has it.
-        int start = dbSetStatement.IndexOf("DbSet<", StringComparison.Ordinal);
-        int end = start >= 0 ? dbSetStatement.IndexOf('>', start) : -1;
-        if (start < 0 || end < 0)
-        {
-            return false;
-        }
+        return dbSetProperty.Type is GenericNameSyntax { Identifier.ValueText: "DbSet" } &&
+            contextDeclaration.Members.OfType<PropertyDeclarationSyntax>().Any(property =>
+                property.Identifier.ValueText == dbSetProperty.Identifier.ValueText &&
+                SyntaxFactory.AreEquivalent(property.Type, dbSetProperty.Type));
+    }
 
-        string dbSetMarker = dbSetStatement[start..(end + 1)];
-        return fileContent.Contains(dbSetMarker, StringComparison.Ordinal);
+    private static ClassDeclarationSyntax? FindContextDeclaration(SemanticModel? semanticModel, string? fullName)
+    {
+        return string.IsNullOrEmpty(fullName) ? null : semanticModel?.SyntaxTree.GetRoot()
+            .DescendantNodes().OfType<ClassDeclarationSyntax>()
+            .FirstOrDefault(node => semanticModel.GetDeclaredSymbol(node)?.ToDisplayString() == fullName);
     }
 }
 

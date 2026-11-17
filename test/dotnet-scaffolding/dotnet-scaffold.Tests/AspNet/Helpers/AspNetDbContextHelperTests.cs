@@ -10,6 +10,28 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
 
 public class AspNetDbContextHelperTests
 {
+    [Theory]
+    [InlineData(null, "MyDbContext")]
+    [InlineData("", "MyDbContext")]
+    [InlineData("Library.Data", "Library.Data.MyDbContext")]
+    public void GetDbContextCodeModifierProperties_QualifiesOnlyTypeNames(string? contextNamespace, string expectedType)
+    {
+        var context = new DbContextInfo
+        {
+            EfScenario = true,
+            DatabaseProvider = PackageConstants.EfConstants.CosmosDb,
+            DbContextClassName = "MyDbContext",
+            DbContextNamespace = contextNamespace
+        };
+
+        var properties = AspNetDbContextHelper.GetDbContextCodeModifierProperties(context);
+
+        Assert.Equal(expectedType, properties[Microsoft.DotNet.Scaffolding.Internal.Constants.CodeModifierPropertyConstants.DbContextName]);
+        Assert.Equal("MyDbContext", properties[Microsoft.DotNet.Scaffolding.Internal.Constants.CodeModifierPropertyConstants.ConnectionStringName]);
+        Assert.Equal("UseCosmos(connectionString, \"MyDbContext\")",
+            properties[Microsoft.DotNet.Scaffolding.Internal.Constants.CodeModifierPropertyConstants.UseDbMethod]);
+    }
+
     [Fact]
     public void GetDbContextCodeModifierProperties_WithEfScenarioAndSqlServer_ReturnsExpectedProperties()
     {
@@ -29,7 +51,8 @@ public class AspNetDbContextHelperTests
         Assert.NotNull(result);
         Assert.True(result.ContainsKey(Microsoft.DotNet.Scaffolding.Internal.Constants.CodeModifierPropertyConstants.UseDbMethod));
         Assert.Equal("UseSqlServer(connectionString)", result[Microsoft.DotNet.Scaffolding.Internal.Constants.CodeModifierPropertyConstants.UseDbMethod]);
-        Assert.Equal("ApplicationDbContext", result[Microsoft.DotNet.Scaffolding.Internal.Constants.CodeModifierPropertyConstants.DbContextName]);
+        Assert.Equal("MyApp.Data.ApplicationDbContext", result[Microsoft.DotNet.Scaffolding.Internal.Constants.CodeModifierPropertyConstants.DbContextName]);
+        Assert.Equal("ApplicationDbContext", result[Microsoft.DotNet.Scaffolding.Internal.Constants.CodeModifierPropertyConstants.ConnectionStringName]);
         Assert.Equal("MyApp.Data", result[Microsoft.DotNet.Scaffolding.Internal.Constants.CodeModifierPropertyConstants.DbContextNamespace]);
     }
 

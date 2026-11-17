@@ -9,7 +9,15 @@ public static class EfDbContextHelpers
     /// <summary>
     /// Given a model class' ISymbol, initialize an EfModelProperties object.
     /// </summary>
-    public static EfModelProperties? GetModelProperties(ISymbol modelSymbol)
+    public static EfModelProperties? GetModelProperties(ISymbol modelSymbol) =>
+        GetModelProperties(modelSymbol, null);
+
+    /// <summary>
+    /// Initializes model property information after filtering out properties unavailable to the caller.
+    /// </summary>
+    public static EfModelProperties? GetModelProperties(
+        ISymbol modelSymbol,
+        Func<IPropertySymbol, bool>? isPropertyAccessible)
     {
         if (modelSymbol is INamedTypeSymbol namedTypeSymbol)
         {
@@ -19,22 +27,25 @@ public static class EfDbContextHelpers
             {
                 foreach (var propertySymbol in currentType.GetMembers().OfType<IPropertySymbol>())
                 {
-                    propertySymbols.Add(propertySymbol);
+                    if (isPropertyAccessible is null || isPropertyAccessible(propertySymbol))
+                    {
+                        propertySymbols.Add(propertySymbol);
+                    }
                 }
 
                 currentType = currentType.BaseType; // Traverse to the base type
             }
 
             var primaryKey = propertySymbols.FirstOrDefault(IsPrimaryKey);
-            if (primaryKey != null)
+            if (primaryKey != null || isPropertyAccessible is not null)
             {
                 EfModelProperties efModelProperties = new()
                 {
-                    PrimaryKeyName = primaryKey.Name,
+                    PrimaryKeyName = primaryKey?.Name ?? string.Empty,
                     //using the same type name for both short and long type name.
                     //unwanted values for base types ('Int32' instead of 'int')
-                    PrimaryKeyShortTypeName = primaryKey.Type.ToDisplayString(),
-                    PrimaryKeyTypeName = primaryKey.Type.ToDisplayString(),
+                    PrimaryKeyShortTypeName = primaryKey?.Type.ToDisplayString() ?? string.Empty,
+                    PrimaryKeyTypeName = primaryKey?.Type.ToDisplayString() ?? string.Empty,
                     AllModelProperties = propertySymbols
                 };
 

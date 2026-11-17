@@ -107,7 +107,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                     }
                     else
                     {
-                        stepOptions = await GetClassDisplayNamesAsync(codeService);
+                        stepOptions = await AnsiConsole
+                            .Status()
+                            .WithSpinner()
+                            .StartAsync("Finding model classes", _ => GetClassDisplayNamesAsync(codeService, context.GetCommandObj()));
                     }
                     break;
                 case InteractivePickerType.FilePicker:
@@ -350,20 +353,12 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
         /// <summary>
         /// Gets all class display names from the code service.
         /// </summary>
-        private static async Task<List<StepOption>> GetClassDisplayNamesAsync(ICodeService codeService)
+        internal static async Task<List<StepOption>> GetClassDisplayNamesAsync(ICodeService codeService, CommandInfo? command)
         {
-            var allClassSymbols = await AnsiConsole
-                .Status()
-                .WithSpinner()
-                .StartAsync("Finding model classes", async statusContext =>
-                {
-                    if (codeService is null)
-                    {
-                        return [];
-                    }
-
-                    return await codeService.GetAllClassSymbolsAsync();
-                });
+            var isViewsCommand = string.Equals(command?.Name, AspnetStrings.RazorView.Views, StringComparison.OrdinalIgnoreCase);
+            var allClassSymbols = isViewsCommand
+                ? await codeService.GetAllClassSymbolsAsync(includeReferencedProjects: true)
+                : await codeService.GetAllClassSymbolsAsync();
 
             List<StepOption> classNames = [];
             if (allClassSymbols != null && allClassSymbols.Count != 0)
@@ -373,7 +368,9 @@ namespace Microsoft.DotNet.Tools.Scaffold.Interactive.Flow.Steps
                 {
                     if (x != null)
                     {
-                        classNames.Add(new StepOption() { Name = x.MetadataName, Value = x.Name });
+                        var name = isViewsCommand ? x.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) : x.MetadataName;
+                        var value = isViewsCommand ? name : x.Name;
+                        classNames.Add(new StepOption() { Name = name, Value = value });
                     }
                 });
             }

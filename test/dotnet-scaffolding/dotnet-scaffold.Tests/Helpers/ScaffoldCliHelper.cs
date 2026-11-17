@@ -138,6 +138,8 @@ internal static class ScaffoldCliHelper
         startInfo.Environment.Remove("MSBUILD_EXE_PATH");
         startInfo.Environment.Remove("MSBuildSDKsPath");
         startInfo.Environment.Remove("MSBuildExtensionsPath");
+        // Reused build nodes can keep redirected output pipes open after the command exits.
+        startInfo.Environment["MSBUILDDISABLENODEREUSE"] = "1";
     }
 
     /// <summary>

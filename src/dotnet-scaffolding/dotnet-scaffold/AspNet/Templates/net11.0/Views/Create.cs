@@ -28,8 +28,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Views
 
     string modelName = Model.ModelInfo.ModelTypeName;
     string modelNameLowerVariant = modelName.ToLowerInvariant();
-    string modelNamespace = Model.ModelInfo.ModelNamespace;
-    string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";
+    string modelFullName = Model.ModelInfo.ModelFullName;
     
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();

@@ -34,6 +34,31 @@ public interface ICodeService
     Task ReloadWorkspaceAsync();
 
     Task <List<ISymbol>> GetAllClassSymbolsAsync();
+
+    /// <summary>
+    /// Determines whether a symbol is accessible from the target project's assembly after reference-aware class discovery.
+    /// </summary>
+    /// <param name="symbol">The symbol to check.</param>
+    /// <returns>True when the symbol is accessible from the target project.</returns>
+    bool IsSymbolAccessibleFromTargetProject(ISymbol symbol) => true;
+
+    /// <summary>
+    /// Gets class symbols from the current project and, optionally, its transitive project references.
+    /// Reference-aware discovery returns only classes available in the current project's compilation
+    /// and accessible from its assembly.
+    /// Classes from the current project are returned first. Package references are not searched.
+    /// </summary>
+    /// <remarks>
+    /// Implementations predating this overload retain current-project-only discovery.
+    /// They must override this method to support referenced projects.
+    /// </remarks>
+    /// <param name="includeReferencedProjects">Whether to include classes declared in referenced projects.</param>
+    /// <exception cref="NotSupportedException">The implementation does not support referenced-project discovery.</exception>
+    Task<List<ISymbol>> GetAllClassSymbolsAsync(bool includeReferencedProjects)
+        => includeReferencedProjects
+            ? throw new NotSupportedException("This code service does not support referenced-project class discovery.")
+            : GetAllClassSymbolsAsync();
+
     Task<List<Document>> GetAllDocumentsAsync();
     Task<Document?> GetDocumentAsync(string? documentName);
 }

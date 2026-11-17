@@ -15,6 +15,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Telemetry;
 using Microsoft.Extensions.Logging;
 using AspNetConstants = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.Constants;
 using Constants = Microsoft.DotNet.Scaffolding.Internal.Constants;
+using INamespaceSymbol = Microsoft.CodeAnalysis.INamespaceSymbol;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps;
 
@@ -293,18 +294,19 @@ internal class ValidateEfControllerStep : ScaffoldStep
         }
 
         string rootNamespace = properties["RootNamespace"];
-        string controllerNamespace = GetControllerNamespace(rootNamespace);
-        var globalTypes = allClasses.Where(symbol => symbol.ContainingNamespace?.IsGlobalNamespace == true &&
-            symbol.ContainingType is null).Select(symbol => symbol.Name).ToHashSet(StringComparer.Ordinal);
-        string originalNamespace = controllerNamespace;
-        while (globalTypes.Contains(SyntaxFactory.ParseToken(controllerNamespace.Split('.')[0]).ValueText))
+        string originalNamespace = GetControllerNamespace(rootNamespace);
+        var documents = await projectInfo.CodeService.GetAllDocumentsAsync();
+        var compilation = documents.Count > 0 ? await documents[0].Project.GetCompilationAsync() : null;
+        if (compilation is null)
         {
-            controllerNamespace = "_" + controllerNamespace.TrimStart('@');
+            _logger.LogError("Unable to check controller namespace conflicts for '{Project}'.", settings.Project);
+            return null;
         }
 
+        string controllerNamespace = GetNonConflictingControllerNamespace(originalNamespace, compilation.Assembly.GlobalNamespace);
         if (controllerNamespace != originalNamespace)
         {
-            _logger.LogWarning("Controller namespace '{OriginalNamespace}' conflicts with a global type. Using '{ControllerNamespace}'.",
+            _logger.LogWarning("Controller namespace '{OriginalNamespace}' conflicts with an existing type. Using '{ControllerNamespace}'.",
                 originalNamespace, controllerNamespace);
         }
 
@@ -328,6 +330,25 @@ internal class ValidateEfControllerStep : ScaffoldStep
         }
 
         return scaffoldingModel;
+    }
+
+    internal static string GetNonConflictingControllerNamespace(string controllerNamespace, INamespaceSymbol globalNamespace)
+    {
+        var segments = controllerNamespace.Split('.');
+        INamespaceSymbol? currentNamespace = globalNamespace;
+        for (int i = 0; i < segments.Length && currentNamespace is not null; i++)
+        {
+            string name = SyntaxFactory.ParseToken(segments[i]).ValueText;
+            while (currentNamespace.GetTypeMembers(name).Length > 0)
+            {
+                name = "_" + name;
+                segments[i] = name;
+            }
+
+            currentNamespace = currentNamespace.GetNamespaceMembers().FirstOrDefault(symbol => symbol.Name == name);
+        }
+
+        return string.Join(".", segments);
     }
 
     internal static string GetControllerNamespace(string rootNamespace)

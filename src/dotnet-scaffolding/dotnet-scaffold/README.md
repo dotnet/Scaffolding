@@ -10,8 +10,8 @@ and conventional `id` route parameters, including models whose key is named
 with the trailing `Controller` suffix removed, independently of the model name.
 Standalone `views` scaffolding continues to use the model name.
 
-If the namespace root conflicts with an existing global class, underscores are
-prefixed until it is distinct, and scaffolding logs the chosen namespace.
+If a namespace segment conflicts with an existing type, underscores are
+prefixed to that segment until it is distinct, and scaffolding logs the chosen namespace.
 Edit and Delete forms explicitly include the entity key as the `id` route value,
 including when their GET pages were opened with a query-string ID.
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
@@ -13,6 +14,7 @@ using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
 
@@ -263,6 +265,11 @@ public class AddAspNetConnectionStringStepTests
         {
             _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
+
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(written ?? json));
+        using var configuration = new ConfigurationManager();
+        configuration.AddJsonStream(stream);
+        Assert.Equal(shouldWrite ? "new connection" : "existing", configuration.GetConnectionString("AppDbContext"));
     }
 
     [Fact]

@@ -15,11 +15,14 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
     protected override string TestClassName => nameof(CrudControllerNet10IntegrationTests);
 
     [Theory]
-    [InlineData("Store.Web", "Store.Web", "Product", false)]
-    [InlineData("Store-Web", "Store_Web", "Product", false)]
-    [InlineData("Collision", "_Collision", "Id", true)]
+    [InlineData("Store.Web", "Store.Web.Controllers", "Product", false, null)]
+    [InlineData("Store-Web", "Store_Web.Controllers", "Product", false, null)]
+    [InlineData("Collision", "_Collision.Controllers", "Id", true, null)]
+    [InlineData("Product", "_Product.Controllers", "Product", true, null)]
+    [InlineData("NonClass", "_NonClass.Controllers", "Product", false, "public struct NonClass { }")]
+    [InlineData("Store.Web", "Store.Web._Controllers", "Product", false, "namespace Store.Web { public class Controllers { } }")]
     public async Task Scaffold_ProductWithExistingContextAndCommentedSettings_Net10(
-        string rootNamespace, string controllerNamespace, string modelName, bool globalTypeCollision)
+        string rootNamespace, string controllerNamespace, string modelName, bool globalTypeCollision, string? collisionSource)
     {
         File.WriteAllText(_testProjectPath, $$"""
             <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -47,7 +50,7 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
             app.Run();
             """);
         File.WriteAllText(Path.Combine(_testProjectDir, "Product.cs"), $$"""
-            namespace Store.Web.Models;
+            {{(globalTypeCollision && modelName == "Product" ? "" : "namespace Store.Web.Models;")}}
             public class {{modelName}}
             {
                 [System.ComponentModel.DataAnnotations.Key]
@@ -58,16 +61,20 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
             """);
         File.WriteAllText(Path.Combine(_testProjectDir, "AppDbContext.cs"), $$"""
             using Microsoft.EntityFrameworkCore;
-            using Store.Web.Models;
+            {{(globalTypeCollision && modelName == "Product" ? "" : "using Store.Web.Models;")}}
             namespace Store.Web.Data;
             public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
             {
                 public DbSet<{{modelName}}> Products { get; set; }
             }
             """);
-        if (globalTypeCollision)
+        if (globalTypeCollision && modelName != "Product")
         {
             File.WriteAllText(Path.Combine(_testProjectDir, "Collision.cs"), "public class Collision { }");
+        }
+        if (collisionSource is not null)
+        {
+            File.WriteAllText(Path.Combine(_testProjectDir, "NamespaceCollision.cs"), collisionSource);
         }
         File.WriteAllText(Path.Combine(_testProjectDir, "appsettings.json"), """
             {
@@ -90,7 +97,7 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
         Assert.True(exitCode == 0, $"Scaffolding failed:\n{output}\n{error}");
 
         string controller = File.ReadAllText(Path.Combine(_testProjectDir, "Controllers", "ProductsController.cs"));
-        Assert.Contains($"namespace {controllerNamespace}.Controllers;", controller);
+        Assert.Contains($"namespace {controllerNamespace};", controller);
         Assert.Contains("Details(int? id)", controller);
         Assert.Contains("m.ProductId == id", controller);
         foreach (string view in new[] { "Create", "Edit", "Details", "Delete", "Index" })

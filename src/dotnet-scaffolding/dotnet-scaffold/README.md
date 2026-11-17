@@ -23,12 +23,8 @@ connection-string names are matched case-insensitively, like ASP.NET Core config
 Existing connection-string values are not overwritten.
 
 The new `dotnet scaffold` engine uses compiled T4 templates; it does not load
-legacy `CodeTemplates\ControllerViews\*.cshtml` overrides. For legacy Razor
-template customization, use `dotnet aspnet-codegenerator` with project-local
-`Templates\ViewGenerator\*.cshtml` view templates and
-`Templates\ControllerGenerator\*.cshtml` controller templates. Installing
-`Microsoft.VisualStudio.Web.CodeGeneration.Design` does not switch the new
-scaffolder to the legacy template engine.
+legacy custom Razor template overrides. Adding support for these overrides is
+outside the scope of this fix.
 
 ### Existing template files and failures
 

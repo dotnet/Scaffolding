@@ -12,6 +12,8 @@
     string dbContextName = Model.DbContextInfo.DbContextClassName;
     string entitySetName = string.IsNullOrWhiteSpace(Model.DbContextInfo.EntitySetVariableName) ? modelName : Model.DbContextInfo.EntitySetVariableName;
     string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string modelTypeName = string.IsNullOrEmpty(modelNamespace) ? $"global::{modelName}" : $"global::{modelNamespace}.{modelName}";
+    string dbContextTypeName = string.IsNullOrEmpty(dbContextNamespace) ? $"global::{dbContextName}" : $"global::{dbContextNamespace}.{dbContextName}";
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string routeParameterName = "id";
     string primaryKeyTypeName = Model.ModelInfo.PrimaryKeyTypeName;
@@ -40,9 +42,9 @@ namespace <#= Model.ControllerNamespace #>;
 <# } #>
 public class <#= Model.ControllerName #> : Controller
 {
-    private readonly <#= dbContextName #> _context;
+    private readonly <#= dbContextTypeName #> _context;
 
-    public <#= Model.ControllerName #>(<#= dbContextName #> context)
+    public <#= Model.ControllerName #>(<#= dbContextTypeName #> context)
     {
         _context = context;
     }
@@ -82,7 +84,7 @@ public class <#= Model.ControllerName #> : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("<#= bindProperties #>")] <#= modelName #> <#= modelNameLowerInv #>)
+    public async Task<IActionResult> Create([Bind("<#= bindProperties #>")] <#= modelTypeName #> <#= modelNameLowerInv #>)
     {
         if (ModelState.IsValid)
         {
@@ -114,7 +116,7 @@ public class <#= Model.ControllerName #> : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(<#= primaryKeyTypeName #>? <#= routeParameterName #>, [Bind("<#= bindProperties #>")] <#= modelName #> <#= modelNameLowerInv #>)
+    public async Task<IActionResult> Edit([FromRoute] <#= primaryKeyTypeName #>? <#= routeParameterName #>, [Bind("<#= bindProperties #>")] <#= modelTypeName #> <#= modelNameLowerInv #>)
     {
         if (<#= routeParameterName #> != <#= modelNameLowerInv #>.<#= primaryKeyName #>)
         {
@@ -165,7 +167,7 @@ public class <#= Model.ControllerName #> : Controller
     // POST: <#= pluralModel #>/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(<#= primaryKeyTypeName #>? <#= routeParameterName #>)
+    public async Task<IActionResult> DeleteConfirmed([FromRoute] <#= primaryKeyTypeName #>? <#= routeParameterName #>)
     {
         var <#= modelNameLowerInv #> = await _context.<#= entitySetName #>.FindAsync(<#= routeParameterName #>);
         if (<#= modelNameLowerInv #> != null)

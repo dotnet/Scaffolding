@@ -14,6 +14,9 @@ If a namespace segment conflicts with an existing type, underscores are
 prefixed to that segment until it is distinct, and scaffolding logs the chosen namespace.
 Edit and Delete forms explicitly include the entity key as the `id` route value,
 including when their GET pages were opened with a query-string ID.
+Their POST actions bind `id` from the route, not from a non-key `Id` form field.
+GET actions continue to accept route or query-string IDs. Model and context type
+references are globally qualified to avoid shadowing by namespace segments.
 
 Connection-string updates accept JSON comments and trailing commas in
 `appsettings.json`, matching ASP.NET Core configuration. Updates insert only the

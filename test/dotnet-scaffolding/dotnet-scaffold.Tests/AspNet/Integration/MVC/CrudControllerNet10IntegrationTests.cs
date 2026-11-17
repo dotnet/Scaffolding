@@ -21,9 +21,11 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
     [InlineData("Product", "_Product.Controllers", "Product", true, null)]
     [InlineData("NonClass", "_NonClass.Controllers", "Product", false, "public struct NonClass { }")]
     [InlineData("Store.Web", "Store.Web._Controllers", "Product", false, "namespace Store.Web { public class Controllers { } }")]
+    [InlineData("Contoso.Inventory", "Contoso.Inventory.Controllers", "Inventory", false, null)]
     public async Task Scaffold_ProductWithExistingContextAndCommentedSettings_Net10(
         string rootNamespace, string controllerNamespace, string modelName, bool globalTypeCollision, string? collisionSource)
     {
+        string modelNamespace = modelName == "Inventory" ? "Contoso.Inventory.Models" : "Store.Web.Models";
         File.WriteAllText(_testProjectPath, $$"""
             <Project Sdk="Microsoft.NET.Sdk.Web">
               <PropertyGroup>
@@ -50,7 +52,7 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
             app.Run();
             """);
         File.WriteAllText(Path.Combine(_testProjectDir, "Product.cs"), $$"""
-            {{(globalTypeCollision && modelName == "Product" ? "" : "namespace Store.Web.Models;")}}
+            {{(globalTypeCollision && modelName == "Product" ? "" : $"namespace {modelNamespace};")}}
             public class {{modelName}}
             {
                 [System.ComponentModel.DataAnnotations.Key]
@@ -61,7 +63,7 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
             """);
         File.WriteAllText(Path.Combine(_testProjectDir, "AppDbContext.cs"), $$"""
             using Microsoft.EntityFrameworkCore;
-            {{(globalTypeCollision && modelName == "Product" ? "" : "using Store.Web.Models;")}}
+            {{(globalTypeCollision && modelName == "Product" ? "" : $"using {modelNamespace};")}}
             namespace Store.Web.Data;
             public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
             {
@@ -166,7 +168,7 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
     }
 
     [Fact]
-    public async Task Scaffold_MovieWithPluralController_RendersControllerViews()
+    public async Task Scaffold_MovieWithPluralController_RendersViewsAndPreservesRouteKey()
     {
         File.WriteAllText(_testProjectPath, ProjectContent);
         File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.StableNuGetConfig);
@@ -187,6 +189,8 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
 
             public class Movie
             {
+                [System.ComponentModel.DataAnnotations.Key]
+                public int MovieId { get; set; }
                 public int ID { get; set; }
                 public string Title { get; set; } = string.Empty;
                 public DateTime ReleaseDate { get; set; }
@@ -242,6 +246,12 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
             {
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 await context.Database.EnsureCreatedAsync();
+                context.Set<TestProject.Models.Movie>().Add(new TestProject.Models.Movie
+                {
+                    MovieId = 7, ID = 42, Title = "Before", Genre = "Test",
+                    ReleaseDate = new DateTime(2025, 1, 1), Price = 1
+                });
+                await context.SaveChangesAsync();
             }
             app.Urls.Add("http://127.0.0.1:0");
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
@@ -264,6 +274,36 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
                     }
                     Console.WriteLine($"MVC_ACCEPTANCE {path} 200");
                 }
+                foreach (var action in new[] { "Edit", "Delete" })
+                {
+                    using var page = await client.GetAsync($"/Movies/{action}?id=7", timeout.Token);
+                    page.EnsureSuccessStatusCode();
+                    var html = await page.Content.ReadAsStringAsync(timeout.Token);
+                    var form = System.Text.RegularExpressions.Regex.Match(html, "<form[^>]*action=\"([^\"]+)\"");
+                    var token = System.Text.RegularExpressions.Regex.Match(html,
+                        "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"");
+                    var formAction = System.Net.WebUtility.HtmlDecode(form.Groups[1].Value);
+                    if (formAction != $"/Movies/{action}/7" || !token.Success)
+                    {
+                        throw new InvalidOperationException($"Unexpected {action} form: {html}");
+                    }
+                    using var content = new FormUrlEncodedContent(new Dictionary<string, string>
+                    {
+                        ["MovieId"] = "7", ["ID"] = "42", ["Title"] = "After",
+                        ["Genre"] = "Test", ["ReleaseDate"] = "2025-01-01", ["Price"] = "1",
+                        ["__RequestVerificationToken"] = System.Net.WebUtility.HtmlDecode(token.Groups[1].Value)
+                    });
+                    using var response = await client.PostAsync(formAction, content, timeout.Token);
+                    response.EnsureSuccessStatusCode();
+                    using var scope = app.Services.CreateScope();
+                    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    var entity = await context.Set<TestProject.Models.Movie>().FindAsync(7);
+                    if (action == "Edit" ? entity?.Title != "After" || entity.ID != 42 : entity is not null)
+                    {
+                        throw new InvalidOperationException($"{action} did not operate on the route key.");
+                    }
+                    Console.WriteLine($"MVC_ACCEPTANCE {action} route=7 formId=42");
+                }
                 using var missing = await client.GetAsync("/Movie", timeout.Token);
                 if (missing.StatusCode != System.Net.HttpStatusCode.NotFound)
                 {
@@ -281,6 +321,8 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
         Assert.True(runtimeExitCode == 0, $"Scaffolded MVC views should render.\nOutput: {runtimeOutput}\nError: {runtimeError}");
         Assert.Contains("MVC_ACCEPTANCE /Movies 200", runtimeOutput);
         Assert.Contains("MVC_ACCEPTANCE /Movies/Create 200", runtimeOutput);
+        Assert.Contains("MVC_ACCEPTANCE Edit route=7 formId=42", runtimeOutput);
+        Assert.Contains("MVC_ACCEPTANCE Delete route=7 formId=42", runtimeOutput);
         Assert.DoesNotContain("was not found", runtimeOutput);
     }
 }

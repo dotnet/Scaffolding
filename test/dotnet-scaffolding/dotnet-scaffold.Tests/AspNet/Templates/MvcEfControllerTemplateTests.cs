@@ -1,13 +1,25 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Common;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Primitives;
 using Xunit;
 
 using AspNetProjectInfo = Microsoft.DotNet.Tools.Scaffold.AspNet.Common.ProjectInfo;
@@ -28,6 +40,81 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;
 /// </summary>
 public class MvcEfControllerTemplateTests
 {
+    [Theory]
+    [InlineData(9)]
+    [InlineData(10)]
+    [InlineData(11)]
+    public async Task MvcController_ShadowedTypesCompileAndPostIdIgnoresFormFields(int version)
+    {
+        var model = CreateProductEfControllerModel();
+        model.ControllerNamespace = "Contoso.Inventory.Controllers";
+        model.ModelInfo.ModelTypeName = "Inventory";
+        model.ModelInfo.ModelNamespace = "Contoso.Inventory.Models";
+        model.DbContextInfo.DbContextClassName = "Inventory";
+        model.DbContextInfo.DbContextNamespace = "Contoso.Inventory.Data";
+        string controller = version switch
+        {
+            9 => CreateNet9Template(model).TransformText(),
+            10 => CreateNet10Template(model).TransformText(),
+            _ => CreateNet11Template(model).TransformText()
+        };
+        const string supportingTypes = """
+            global using System;
+            global using System.Linq;
+            global using System.Threading.Tasks;
+            namespace Contoso.Inventory.Models
+            {
+                public class Inventory
+                {
+                    public int ProductId { get; set; }
+                    public int Id { get; set; }
+                    public string Name { get; set; }
+                    public decimal Price { get; set; }
+                }
+            }
+            namespace Contoso.Inventory.Data
+            {
+                public class Inventory : Microsoft.EntityFrameworkCore.DbContext
+                {
+                    public Microsoft.EntityFrameworkCore.DbSet<global::Contoso.Inventory.Models.Inventory> Products { get; set; }
+                }
+            }
+            """;
+        string[] assemblies = Assert.IsType<string>(AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator);
+        var compilation = CSharpCompilation.Create($"ControllerTypeCollision{version}",
+            new[] { CSharpSyntaxTree.ParseText(controller), CSharpSyntaxTree.ParseText(supportingTypes) },
+            assemblies.Select(path => MetadataReference.CreateFromFile(path)),
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        Assert.Empty(compilation.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        using var stream = new MemoryStream();
+        Assert.True(compilation.Emit(stream).Success);
+        var assembly = Assembly.Load(stream.ToArray());
+        var controllerType = assembly.GetType("Contoso.Inventory.Controllers.ProductsController", throwOnError: true)!;
+        var postActions = controllerType.GetMethods().Where(method =>
+            method.Name == "DeleteConfirmed" || (method.Name == "Edit" && method.GetParameters().Length == 2)).ToList();
+        Assert.Equal(2, postActions.Count);
+        foreach (var action in postActions)
+        {
+            var route = new RouteData();
+            route.Values["id"] = "7";
+            var values = new CompositeValueProvider
+            {
+                new FormValueProvider(BindingSource.Form, new FormCollection(new Dictionary<string, StringValues>
+                {
+                    ["ProductId"] = "7", ["Id"] = "42"
+                }), CultureInfo.InvariantCulture),
+                new RouteValueProvider(BindingSource.Path, route.Values, CultureInfo.InvariantCulture)
+            };
+            var binding = BindingInfo.GetBindingInfo(action.GetParameters()[0].GetCustomAttributes());
+            Assert.NotNull(binding);
+            var context = DefaultModelBindingContext.CreateBindingContext(
+                new ActionContext(new DefaultHttpContext(), route, new ActionDescriptor()), values,
+                new EmptyModelMetadataProvider().GetMetadataForType(typeof(int?)), binding, "id");
+            await new SimpleTypeModelBinder(typeof(int?), NullLoggerFactory.Instance).BindModelAsync(context);
+            Assert.Equal(7, Assert.IsType<int>(context.Result.Model));
+        }
+    }
+
     [Theory]
     [InlineData(9, "Edit")]
     [InlineData(9, "Delete")]
@@ -77,7 +164,7 @@ public class MvcEfControllerTemplateTests
         };
         Assert.Contains("Details(int? id)", result);
         Assert.Contains("var entity = await", result);
-        Assert.Contains("] Id entity)", result);
+        Assert.Contains("] global::Models.Id entity)", result);
         Assert.Contains("if (id != entity.ProductId)", result);
         Assert.DoesNotContain("var id =", result);
     }
@@ -98,9 +185,9 @@ public class MvcEfControllerTemplateTests
 
         Assert.Contains("Details(int? id)", result);
         Assert.Contains("Edit(int? id)", result);
-        Assert.Contains("Edit(int? id, [Bind(", result);
+        Assert.Contains("Edit([FromRoute] int? id, [Bind(", result);
         Assert.Contains("Delete(int? id)", result);
-        Assert.Contains("DeleteConfirmed(int? id)", result);
+        Assert.Contains("DeleteConfirmed([FromRoute] int? id)", result);
         Assert.Contains("m.ProductId == id", result);
         Assert.Contains("if (id != product.ProductId)", result);
         Assert.DoesNotContain("int? productid", result);
@@ -155,8 +242,8 @@ public class MvcEfControllerTemplateTests
 
         // Assert – parameter must be named 'blog', not 'movie'
         Assert.Contains("Create([Bind(", result);
-        Assert.Contains("] Blog blog)", result);
-        Assert.DoesNotContain("] Blog movie)", result);
+        Assert.Contains("] global::Models.Blog blog)", result);
+        Assert.DoesNotContain("] global::Models.Blog movie)", result);
     }
 
     [Fact]
@@ -197,8 +284,8 @@ public class MvcEfControllerTemplateTests
         string result = template.TransformText();
 
         // Assert – Edit POST parameter must be named 'blog', not 'movie'
-        Assert.DoesNotContain("] Blog movie)", result);
-        Assert.Contains("] Blog blog)", result);
+        Assert.DoesNotContain("] global::Models.Blog movie)", result);
+        Assert.Contains("] global::Models.Blog blog)", result);
     }
 
     [Fact]
@@ -255,7 +342,7 @@ public class MvcEfControllerTemplateTests
 
         // Assert
         Assert.Contains("[Bind(\"ProductId,Name,Price\")]", result);
-        Assert.Contains("] Product product)", result);
+        Assert.Contains("] global::Models.Product product)", result);
     }
 
     #endregion
@@ -287,8 +374,8 @@ public class MvcEfControllerTemplateTests
         string result = template.TransformText();
 
         // Assert
-        Assert.Contains("] Blog blog)", result);
-        Assert.DoesNotContain("] Blog movie)", result);
+        Assert.Contains("] global::Models.Blog blog)", result);
+        Assert.DoesNotContain("] global::Models.Blog movie)", result);
     }
 
     [Fact]
@@ -388,8 +475,8 @@ public class MvcEfControllerTemplateTests
         string result = template.TransformText();
 
         // Assert
-        Assert.Contains("] Blog blog)", result);
-        Assert.DoesNotContain("] Blog movie)", result);
+        Assert.Contains("] global::Models.Blog blog)", result);
+        Assert.DoesNotContain("] global::Models.Blog movie)", result);
     }
 
     [Fact]

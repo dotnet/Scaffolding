@@ -34,6 +34,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController
     string dbContextName = Model.DbContextInfo.DbContextClassName;
     string entitySetName = string.IsNullOrWhiteSpace(Model.DbContextInfo.EntitySetVariableName) ? modelName : Model.DbContextInfo.EntitySetVariableName;
     string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string modelTypeName = string.IsNullOrEmpty(modelNamespace) ? $"global::{modelName}" : $"global::{modelNamespace}.{modelName}";
+    string dbContextTypeName = string.IsNullOrEmpty(dbContextNamespace) ? $"global::{dbContextName}" : $"global::{dbContextNamespace}.{dbContextName}";
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string routeParameterName = "id";
     string primaryKeyTypeName = Model.ModelInfo.PrimaryKeyTypeName;
@@ -68,11 +70,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController
             this.Write("public class ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.ControllerName));
             this.Write(" : Controller\r\n{\r\n    private readonly ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextTypeName));
             this.Write(" _context;\r\n\r\n    public ");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.ControllerName));
             this.Write("(");
-            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(dbContextTypeName));
             this.Write(" context)\r\n    {\r\n        _context = context;\r\n    }\r\n\r\n    // GET: ");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
             this.Write("\r\n    public async Task<IActionResult> Index()    \r\n    {\r\n        return View(aw" +
@@ -112,7 +114,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController
     public async Task<IActionResult> Create([Bind(""");
             this.Write(this.ToStringHelper.ToStringWithCulture(bindProperties));
             this.Write(@""")] ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelTypeName));
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(")\r\n    {\r\n        if (ModelState.IsValid)\r\n        {\r\n            _context." +
@@ -147,14 +149,14 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(");
+    public async Task<IActionResult> Edit([FromRoute] ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyTypeName));
             this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(routeParameterName));
             this.Write(", [Bind(\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(bindProperties));
             this.Write("\")] ");
-            this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelTypeName));
             this.Write(" ");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(")\r\n    {\r\n        if (");
@@ -211,7 +213,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.EfController
             this.Write(");\r\n    }\r\n\r\n    // POST: ");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
             this.Write("/Delete/5\r\n    [HttpPost, ActionName(\"Delete\")]\r\n    [ValidateAntiForgeryToken]\r\n" +
-                    "    public async Task<IActionResult> DeleteConfirmed(");
+                    "    public async Task<IActionResult> DeleteConfirmed([FromRoute] ");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyTypeName));
             this.Write("? ");
             this.Write(this.ToStringHelper.ToStringWithCulture(routeParameterName));

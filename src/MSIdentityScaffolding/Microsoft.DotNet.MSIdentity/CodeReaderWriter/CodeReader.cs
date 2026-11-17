@@ -185,13 +185,18 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
                                 string replaceFrom = element.ValueKind == JsonValueKind.Number
                                     ? element.GetInt32().ToString(CultureInfo.InvariantCulture)
                                     : element.ToString()!;
+                                string settingValue = propertyMapping.Represents == "Application.CalledApiScopes"
+                                    && element.ValueKind == JsonValueKind.Array
+                                        ? string.Join(" ", element.EnumerateArray().Select(scope => scope.GetString()))
+                                        : replaceFrom;
 
                                 UpdatePropertyRepresents(
                                     projectAuthenticationSettings,
                                     filePath,
                                     propertyMapping,
                                     index,
-                                    replaceFrom);
+                                    replaceFrom,
+                                    settingValue);
                             }
                         }
 
@@ -238,13 +243,14 @@ namespace Microsoft.DotNet.MSIdentity.CodeReaderWriter
             string filePath,
             PropertyMapping propertyMapping,
             int index,
-            string replaceFrom)
+            string replaceFrom,
+            string? settingValue = null)
         {
             if (!string.IsNullOrEmpty(propertyMapping.Represents))
             {
                 ReadCodeSetting(
                     propertyMapping.Represents,
-                    replaceFrom,
+                    settingValue ?? replaceFrom,
                     propertyMapping.Default,
                     projectAuthenticationSettings);
                 int length = replaceFrom.Length;

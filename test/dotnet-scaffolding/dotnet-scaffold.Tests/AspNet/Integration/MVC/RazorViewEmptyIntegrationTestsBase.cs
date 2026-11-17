@@ -405,6 +405,36 @@ public abstract class RazorViewEmptyIntegrationTestsBase : IDisposable
         _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(It.IsAny<string>()), Times.Never);
     }
 
+    [SkippableTheory]
+    [InlineData("Index", "Home|Admin")]
+    [InlineData("Home|Admin/Index", null)]
+    [InlineData("Ind|ex", null)]
+    public async Task ExecuteAsync_ReturnsFalse_WhenNameOrRelativeFolderContainsInvalidCharacter(string fileName, string? relativeOutputPath)
+    {
+        Skip.IfNot(OperatingSystem.IsWindows(), "The pipe character is invalid in Windows file names.");
+
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+
+        var step = new DotnetNewScaffolderStep(
+            NullLogger<DotnetNewScaffolderStep>.Instance,
+            _mockFileSystem.Object,
+            _testTelemetryService)
+        {
+            ProjectPath = _testProjectPath,
+            FileName = fileName,
+            RelativeOutputPath = relativeOutputPath,
+            CommandName = Constants.DotnetCommands.ViewCommandName
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        _mockFileSystem.Verify(fs => fs.CreateDirectoryIfNotExists(It.IsAny<string>()), Times.Never);
+        var telemetryEvent = Assert.Single(_testTelemetryService.TrackedEvents);
+        Assert.Equal("Failure", telemetryEvent.Properties["SettingsValidationResult"]);
+        Assert.Equal("Failure", telemetryEvent.Properties["Result"]);
+    }
+
     [SkippableFact]
     public async Task ExecuteAsync_ReturnsFalse_WhenRelativeFolderContainsDriveQualifiedSegment()
     {

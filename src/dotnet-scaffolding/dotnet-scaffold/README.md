@@ -28,7 +28,8 @@ includes the root folder, `--relativeFolderPath "Views\Home"` is normalized to
 the same destination instead of creating `Views\Views\Home`.
 
 The command also accepts a nested path in `--name`, such as `--name "Home/Index"`.
-Absolute paths and traversal segments such as `..` are rejected.
+Absolute paths, traversal segments such as `..`, and segments containing invalid
+file name characters for the current platform are rejected before creating folders.
 
 This command creates an empty view using `dotnet new view`. It does not infer a
 controller-specific destination from the view name alone; integrations that know

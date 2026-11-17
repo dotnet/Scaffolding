@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
@@ -51,7 +52,7 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
         var appSettingsFile = appSettingsFileSearch.FirstOrDefault();
         JsonNode? content;
         bool writeContent = false;
-        bool containsComments = false;
+        string? originalContent = null;
         if (string.IsNullOrEmpty(appSettingsFile) || !_fileSystem.FileExists(appSettingsFile))
         {
             content = new JsonObject();
@@ -61,18 +62,12 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
         {
             try
             {
-                var jsonString = _fileSystem.ReadAllText(appSettingsFile);
-                content = JsonNode.Parse(jsonString, new JsonNodeOptions { PropertyNameCaseInsensitive = true }, new JsonDocumentOptions
+                originalContent = _fileSystem.ReadAllText(appSettingsFile);
+                content = JsonNode.Parse(originalContent, new JsonNodeOptions { PropertyNameCaseInsensitive = true }, new JsonDocumentOptions
                 {
                     CommentHandling = JsonCommentHandling.Skip,
                     AllowTrailingCommas = true
                 });
-                var reader = new Utf8JsonReader(System.Text.Encoding.UTF8.GetBytes(jsonString),
-                    new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow, AllowTrailingCommas = true });
-                while (reader.Read())
-                {
-                    containsComments |= reader.TokenType == JsonTokenType.Comment;
-                }
             }
             catch (Exception ex)
             {
@@ -82,14 +77,23 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
             }
         }
 
-        if (content is null)
+        if (content is not JsonObject)
         {
-            _logger.LogError($"Failed to parse appsettings.json file at {appSettingsFile}");
+            _logger.LogError("Failed to parse appsettings.json file at {File}: root JSON value must be an object.", appSettingsFile);
             _telemetryService.TrackEvent(new AddAspNetConnectionStringTelemetryEvent(context.Scaffolder.DisplayName, TelemetryConstants.Failure, "Failed to parse appsettings.json"));
             return Task.FromResult(false);
         }
 
         string connectionStringNodeName = "ConnectionStrings";
+        bool createSection = content[connectionStringNodeName] is null;
+
+        if (!createSection && content[connectionStringNodeName] is not JsonObject)
+        {
+            _logger.LogError("Failed to update '{File}': ConnectionStrings must be an object or null.", appSettingsFile);
+            _telemetryService.TrackEvent(new AddAspNetConnectionStringTelemetryEvent(context.Scaffolder.DisplayName,
+                TelemetryConstants.Failure, "Invalid ConnectionStrings section"));
+            return Task.FromResult(false);
+        }
 
         //find the "ConnectionStrings" node.
         if (content[connectionStringNodeName] is null)
@@ -110,13 +114,12 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
 
         if (writeContent && !string.IsNullOrEmpty(appSettingsFile))
         {
-            if (containsComments)
-            {
-                _logger.LogWarning("Updating '{File}' will remove JSON comments and original formatting.", appSettingsFile);
-            }
-
             var options = new JsonSerializerOptions { WriteIndented = true };
-            _fileSystem.WriteAllText(appSettingsFile, content.ToJsonString(options));
+            string updatedContent = originalContent is null ? content.ToJsonString(options)
+                : createSection
+                    ? SetJsonProperty(originalContent, null, connectionStringNodeName, content[connectionStringNodeName]!.ToJsonString())
+                    : SetJsonProperty(originalContent, connectionStringNodeName, ConnectionStringName, JsonSerializer.Serialize(ConnectionString));
+            _fileSystem.WriteAllText(appSettingsFile, updatedContent);
             _logger.LogInformation($"Updated '{Path.GetFileName(appSettingsFile)}' with connection string '{ConnectionStringName}'");
             _telemetryService.TrackEvent(new AddAspNetConnectionStringTelemetryEvent(context.Scaffolder.Name, TelemetryConstants.Added));
         }
@@ -126,5 +129,80 @@ internal class AddAspNetConnectionStringStep : ScaffoldStep
         }
 
         return Task.FromResult(true);
+    }
+
+    private static string SetJsonProperty(string json, string? sectionName, string propertyName, string serializedValue)
+    {
+        byte[] utf8 = Encoding.UTF8.GetBytes(json);
+        var reader = new Utf8JsonReader(utf8,
+            new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+        reader.Read();
+        if (sectionName is not null)
+        {
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.PropertyName && reader.CurrentDepth == 1 &&
+                    string.Equals(reader.GetString(), sectionName, StringComparison.OrdinalIgnoreCase))
+                {
+                    reader.Read();
+                    break;
+                }
+            }
+        }
+
+        if (reader.TokenType != JsonTokenType.StartObject)
+        {
+            throw new JsonException("The configuration section must be a JSON object.");
+        }
+
+        int insertionIndex = Encoding.UTF8.GetCharCount(utf8.AsSpan(0, (int)reader.BytesConsumed));
+        int objectDepth = reader.CurrentDepth;
+        int? firstPropertyIndex = null;
+        while (reader.Read())
+        {
+            if (reader.TokenType == JsonTokenType.EndObject && reader.CurrentDepth == objectDepth)
+            {
+                int closingIndex = Encoding.UTF8.GetCharCount(utf8.AsSpan(0, (int)reader.TokenStartIndex));
+                string property = $"{JsonSerializer.Serialize(propertyName)}: {serializedValue}";
+                if (firstPropertyIndex is not null)
+                {
+                    property += ",";
+                }
+
+                if (json.AsSpan(insertionIndex, closingIndex - insertionIndex).Contains('\n'))
+                {
+                    int referenceIndex = firstPropertyIndex ?? closingIndex;
+                    int lineStart = json.LastIndexOf('\n', referenceIndex - 1) + 1;
+                    string indent = new string(json[lineStart..referenceIndex].TakeWhile(c => c is ' ' or '\t').ToArray());
+                    if (firstPropertyIndex is null)
+                    {
+                        indent += "  ";
+                    }
+
+                    string newline = json.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+                    property = newline + indent + property;
+                }
+
+                // Prepending avoids changing existing trailing commas and comments.
+                return json.Insert(insertionIndex, property);
+            }
+
+            if (reader.TokenType == JsonTokenType.PropertyName && reader.CurrentDepth == objectDepth + 1)
+            {
+                firstPropertyIndex ??= Encoding.UTF8.GetCharCount(utf8.AsSpan(0, (int)reader.TokenStartIndex));
+                bool matches = string.Equals(reader.GetString(), propertyName, StringComparison.OrdinalIgnoreCase);
+                reader.Read();
+                int valueStartByte = (int)reader.TokenStartIndex;
+                reader.Skip();
+                if (matches)
+                {
+                    int valueStart = Encoding.UTF8.GetCharCount(utf8.AsSpan(0, valueStartByte));
+                    int valueEnd = Encoding.UTF8.GetCharCount(utf8.AsSpan(0, (int)reader.BytesConsumed));
+                    return json[..valueStart] + serializedValue + json[valueEnd..];
+                }
+            }
+        }
+
+        throw new JsonException("The configuration section is incomplete.");
     }
 }

@@ -95,6 +95,8 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
             "--dbProvider", "sqlserver-efcore",
             "--views");
         Assert.True(exitCode == 0, $"Scaffolding failed:\n{output}\n{error}");
+        Assert.Contains("// valid ASP.NET Core configuration",
+            File.ReadAllText(Path.Combine(_testProjectDir, "appsettings.json")));
 
         string controller = File.ReadAllText(Path.Combine(_testProjectDir, "Controllers", "ProductsController.cs"));
         Assert.Contains($"namespace {controllerNamespace};", controller);

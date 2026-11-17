@@ -16,10 +16,10 @@ Edit and Delete forms explicitly include the entity key as the `id` route value,
 including when their GET pages were opened with a query-string ID.
 
 Connection-string updates accept JSON comments and trailing commas in
-`appsettings.json`, matching ASP.NET Core configuration. When an update is needed,
-the file is serialized without preserving comments or original formatting.
-A warning is logged before rewriting a file containing comments. Section and
-connection-string names are matched case-insensitively, like ASP.NET Core configuration.
+`appsettings.json`, matching ASP.NET Core configuration. Updates insert only the
+required property or replace a null value, preserving existing comments and
+surrounding formatting. Section and connection-string names are matched
+case-insensitively, like ASP.NET Core configuration.
 Existing connection-string values are not overwritten.
 
 The new `dotnet scaffold` engine uses compiled T4 templates; it does not load

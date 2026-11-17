@@ -13,8 +13,7 @@
           "Block": "$(UpdatedHeadOutletRenderModeTag)"
         },
         {
-          "ReplaceSnippet": [ "</html>" ],
-          "Block": "</html>\n\n@code {\n$(BlazorCrudRenderModeMembers)\n}"
+          "Block": "\n\n@code {\n$(BlazorCrudRenderModeMembers)\n}"
         }
       ]
     },

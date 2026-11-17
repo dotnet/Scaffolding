@@ -29,7 +29,10 @@ public class BlazorCrudInteractivityIntegrationTests
     [InlineData("net10.0", "InteractiveAuto", false, null, "@* <Routes /> <HeadOutlet /> *@")]
     [InlineData("net10.0", "InteractiveAuto", false, null, "<!-- <Routes /> <HeadOutlet /> -->")]
     [InlineData("net10.0", "InteractiveAuto", false, null, null, true)]
-    public async Task Scaffold_BlazorCrud_GlobalInteractivityKeepsCrudRoutesOnServer(string framework, string renderMode, bool individualAccounts, string? routesRenderModeAttribute = null, string? commentedMarkup = null, bool codeBehindMembers = false)
+    [InlineData("net9.0", "InteractiveAuto", false, null, null, false, true)]
+    [InlineData("net10.0", "InteractiveAuto", false, null, null, false, true)]
+    [InlineData("net11.0", "InteractiveAuto", false, null, null, false, true)]
+    public async Task Scaffold_BlazorCrud_GlobalInteractivityKeepsCrudRoutesOnServer(string framework, string renderMode, bool individualAccounts, string? routesRenderModeAttribute = null, string? commentedMarkup = null, bool codeBehindMembers = false, bool spacedHtmlClosingTag = false)
     {
         using var project = new BlazorTestProject(framework);
         project.AddWebAssemblyClient(framework == "net11.0" ? "11.0.*-*" : framework == "net9.0" ? "9.0.*" : "10.0.*",
@@ -56,7 +59,8 @@ public class BlazorCrudInteractivityIntegrationTests
                     : $"<HeadOutlet {routesRenderModeAttribute} />")
                 .Replace("<Routes />", routesRenderModeAttribute is null
                     ? $"<Routes @rendermode=\"{(renderMode == "InteractiveServer" ? "@" : "")}{renderMode}\" />"
-                    : $"<Routes {routesRenderModeAttribute} />"));
+                    : $"<Routes {routesRenderModeAttribute} />")
+                .Replace("</html>", spacedHtmlClosingTag ? "</html >" : "</html>"));
         if (codeBehindMembers)
         {
             File.WriteAllText(Path.Combine(componentsDirectory, "App.razor.cs"), """
@@ -118,6 +122,10 @@ public class BlazorCrudInteractivityIntegrationTests
         Assert.Contains($"HttpContext{suffix}.AcceptsInteractiveRouting() ? {renderMode} : null", app);
         Assert.Contains($"<Routes @rendermode=\"PageRenderMode{suffix}\"", app);
         Assert.Contains($"<HeadOutlet @rendermode=\"PageRenderMode{suffix}\"", app);
+        if (spacedHtmlClosingTag)
+        {
+            Assert.Contains("</html >", app);
+        }
         if (commentedMarkup is not null)
         {
             Assert.Contains(commentedMarkup, app);

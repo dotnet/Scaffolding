@@ -375,6 +375,8 @@ public class CodeService : ICodeService, IDisposable
             .ToList();
         var discoveredReferencedTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
         var resolvedReferencedAssemblies = targetCompilation.References
+            .Where(reference => reference.Properties.Aliases.IsDefaultOrEmpty ||
+                reference.Properties.Aliases.Contains(MetadataReferenceProperties.GlobalAlias, StringComparer.Ordinal))
             .Select(reference => targetCompilation.GetAssemblyOrModuleSymbol(reference))
             .OfType<IAssemblySymbol>()
             .ToList();
@@ -439,9 +441,15 @@ public class CodeService : ICodeService, IDisposable
             containingTypes.Push(currentType.MetadataName);
         }
 
-        var namespaceName = type.ContainingNamespace.IsGlobalNamespace
-            ? string.Empty
-            : $"{type.ContainingNamespace.ToDisplayString()}.";
+        var namespaces = new Stack<string>();
+        for (var currentNamespace = type.ContainingNamespace;
+             !currentNamespace.IsGlobalNamespace;
+             currentNamespace = currentNamespace.ContainingNamespace)
+        {
+            namespaces.Push(currentNamespace.MetadataName);
+        }
+
+        var namespaceName = namespaces.Count == 0 ? string.Empty : $"{string.Join(".", namespaces)}.";
         return namespaceName + string.Join("+", containingTypes);
     }
 

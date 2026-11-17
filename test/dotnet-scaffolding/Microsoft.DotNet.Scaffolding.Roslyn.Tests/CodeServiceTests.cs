@@ -293,6 +293,34 @@ public class CodeServiceTests : IDisposable
         Assert.Equal("LocalBook", Assert.Single(symbols).Name);
     }
 
+    [Fact]
+    public async Task GetAllClassSymbolsAsync_ExcludesReferencesWithoutGlobalAlias()
+    {
+        var modelsProject = CreateProject("Models", "public class Book { }");
+        var project = CreateProject("WebApp", "public class LocalBook { }", modelsProject);
+        File.WriteAllText(project, File.ReadAllText(project).Replace(
+            "<ProjectReference ", "<ProjectReference Aliases=\"ModelsAlias\" "));
+        await RestoreProjectAsync(project);
+        using var service = new CodeService(NullLogger.Instance, project);
+
+        var symbols = await service.GetAllClassSymbolsAsync(includeReferencedProjects: true);
+
+        Assert.Equal("LocalBook", Assert.Single(symbols).Name);
+    }
+
+    [Fact]
+    public async Task GetAllClassSymbolsAsync_ResolvesTypesInKeywordNamespaces()
+    {
+        var modelsProject = CreateProject("Models", "namespace Library.@event; public class Book { }");
+        var project = CreateProject("WebApp", "public class LocalBook { }", modelsProject);
+        await RestoreProjectAsync(project);
+        using var service = new CodeService(NullLogger.Instance, project);
+
+        var symbols = await service.GetAllClassSymbolsAsync(includeReferencedProjects: true);
+
+        Assert.Single(symbols, symbol => symbol.ToDisplayString() == "Library.@event.Book");
+    }
+
     [Theory]
     [InlineData(null, false)]
     [InlineData("OtherWebApp", false)]

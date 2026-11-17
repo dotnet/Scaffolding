@@ -1,6 +1,19 @@
 New and improved scaffolding experience. 
 More details coming soon!
 
+### Razor Pages CRUD identifiers
+
+Generated Edit, Details, and Delete handlers bind the `id` route/query value,
+matching the generated links, regardless of the entity's key property name
+(for example, `BlogId`). Delete POST also binds `id`; Edit POST binds the entity,
+including its original key property. Entity locals avoid colliding with `id`,
+including for models named `Id`.
+
+Existing matching DbSet properties such as `DbSet<Blog> Blogs` are reused rather
+than adding another property. These changes apply to newly scaffolded pages;
+existing generated applications are not migrated. Custom callers of newly
+generated handlers should use `id`, not a key-derived query name such as `blogid`.
+
 ### Existing template files and failures
 
 When a template file already exists, scaffolding compares its decoded text,

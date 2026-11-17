@@ -10,6 +10,7 @@ using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
 using IdentityTemplates = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates;
+using ScaffoldIdentityModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Models.IdentityModel;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;
 
@@ -32,7 +33,7 @@ public class IdentityEmailTemplateTests
     [InlineData(typeof(IdentityTemplates.net11.Identity.Pages.Account.ResendEmailConfirmationModel))]
     public void PrecompiledTemplate_SendsToStoredEmailAndRejectsMissingEmail(Type templateType)
     {
-        var model = new IdentityModel
+        var model = new ScaffoldIdentityModel
         {
             DbContextInfo = new DbContextInfo { DbContextNamespace = "TestApp.Data" },
             ProjectInfo = new ProjectInfo(Path.Combine("TestApp", "TestApp.csproj")),

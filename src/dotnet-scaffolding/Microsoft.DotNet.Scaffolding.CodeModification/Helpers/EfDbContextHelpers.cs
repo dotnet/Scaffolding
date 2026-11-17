@@ -76,14 +76,14 @@ public static class EfDbContextHelpers
     {
         if (dbContextSymbol is INamedTypeSymbol dbContextTypeSymbol)
         {
-            string dbSetType = $"Microsoft.EntityFrameworkCore.DbSet<{modelTypeName}>";
-            string dbSetWithFullType = string.IsNullOrEmpty(modelTypeFullName) ?
-                string.Empty : $"Microsoft.EntityFrameworkCore.DbSet<{modelTypeFullName}>";
-            //get the DbSet pertaining our given modelSymbol
+            // Match the constructed DbSet and its entity type separately; the display
+            // format of the constructed type can omit the entity's namespace.
             var dbSetProperty = dbContextTypeSymbol.GetMembers().OfType<IPropertySymbol>().FirstOrDefault(p =>
-                p.Type is INamedTypeSymbol &&
-                (p.Type.ToDisplayString().Equals(dbSetType) ||
-                p.Type.ToDisplayString().Equals(dbSetWithFullType)));
+                p.Type is INamedTypeSymbol { Name: "DbSet", Arity: 1 } dbSetType &&
+                dbSetType.ContainingNamespace.ToDisplayString() == "Microsoft.EntityFrameworkCore" &&
+                (string.IsNullOrEmpty(modelTypeFullName)
+                    ? dbSetType.TypeArguments[0].Name == modelTypeName
+                    : dbSetType.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == $"global::{modelTypeFullName}"));
 
             if (dbSetProperty != null)
             {

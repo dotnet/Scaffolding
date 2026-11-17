@@ -18,28 +18,23 @@ internal static class GlobalToolFileFinder
             return null;
         }
 
-        // Use provided target framework folder or default to net11.0
-        var tfmFolder = targetFrameworkFolder ?? "net11.0";
-        
-        // Search in Aspnet folder first
-        var aspnetConfigFolder = Path.Combine(toolsFolderPath, "Aspnet", "CodeModificationConfigs", tfmFolder);
-        var result = SearchForConfigFile(aspnetConfigFolder, fileName);
+        var frameworkFolder = targetFrameworkFolder ?? "net11.0";
+        var aspnetConfigsFolder = Path.Combine(toolsFolderPath, "Aspnet", "CodeModificationConfigs", frameworkFolder);
+        var result = SearchForConfigFile(aspnetConfigsFolder, fileName);
         if (result != null)
         {
             return result;
         }
 
-        // Search in Aspire folder
-        var aspireConfigFolder = Path.Combine(toolsFolderPath, "Aspire", tfmFolder, "CodeModificationConfigs");
-        result = SearchForConfigFile(aspireConfigFolder, fileName);
+        var aspireConfigsFolder = Path.Combine(toolsFolderPath, "Aspire", frameworkFolder, "CodeModificationConfigs");
+        result = SearchForConfigFile(aspireConfigsFolder, fileName);
         if (result != null)
         {
             return result;
         }
 
-        // Fallback: Search in old Templates folder for backward compatibility
-        var templatesConfigFolder = Path.Combine(toolsFolderPath, "Templates", tfmFolder, "CodeModificationConfigs");
-        return SearchForConfigFile(templatesConfigFolder, fileName);
+        var templatesConfigsFolder = Path.Combine(toolsFolderPath, "Templates", frameworkFolder, "CodeModificationConfigs");
+        return SearchForConfigFile(templatesConfigsFolder, fileName);
     }
 
     private static string? SearchForConfigFile(string configFolder, string fileName)

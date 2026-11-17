@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
-using Microsoft.DotNet.Scaffolding.Internal.CliHelpers;
+using Microsoft.DotNet.Tools.Scaffold.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -14,7 +14,7 @@ internal static class EntraRegistrationCleanup
     internal static void TryCleanup(ScaffolderContext context, string? tenantId, string? username, ILogger logger)
         => TryCleanup(context, tenantId, username, logger, args =>
         {
-            var runner = DotnetCliRunner.CreateDotNet("msidentity", args);
+            var runner = MsIdentityToolHelper.CreateMsIdentityRunner(args);
             var exitCode = runner.ExecuteAndCaptureOutput(out _, out var error);
             return (exitCode, error);
         });

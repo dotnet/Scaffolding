@@ -147,6 +147,15 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
             internal const string EntraIdExample2Description = "Add Microsoft Entra ID authentication by creating a new Azure application:";
         }
 
+        internal class SyncfusionBlazorToolkit
+        {
+            internal const string Name = "blazor-syncfusion-toolkit";
+            internal const string DisplayName = "Syncfusion Blazor Toolkit";
+            internal const string Description = "Sets up the Syncfusion Blazor Toolkit (package, service registration, and imports) in an existing Blazor app.";
+            internal const string SyncfusionBlazorToolkitExample = "dotnet scaffold aspnet blazor-syncfusion-toolkit --project ./MyBlazorApp.csproj";
+            internal const string SyncfusionBlazorToolkitExampleDescription = "Configure the Syncfusion Blazor Toolkit in an existing Blazor app:";
+        }
+
         internal class Catagories
         {
             internal const string Blazor = "Blazor";
@@ -245,8 +254,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
 
             internal static class Overwrite
             {
-                internal const string DisplayName = "Overwrite existing files?";
-                internal const string Description = "Overwrite existing Identity files if they already exist. Use --overwrite to enable, omit the flag to preserve existing files (default: false).";
+                internal const string DisplayName = "Overwrite existing generated content?";
+                internal const string Description = "Overwrite existing Identity files or managed configuration values. Use --overwrite to enable, omit the flag to preserve existing content (default: false).";
             }
 
             internal static class Username

@@ -149,7 +149,7 @@ public class CliOptionInventoryTests
         ["blazor-identity"] = new() { "--project", "--dataContext", "--dbProvider", "--overwrite", "--prerelease" },
         ["identity"] = new() { "--project", "--dataContext", "--dbProvider", "--overwrite", "--prerelease" },
         // entra-id options — kebab-case is canonical; camelCase forms are legacy aliases.
-        ["entra-id"] = new() { "--username", "--project", "--tenant-id", "--use-existing-application", "--tenantId", "--application-id", "--applicationId" },
+        ["entra-id"] = new() { "--username", "--project", "--tenant-id", "--use-existing-application", "--tenantId", "--application-id", "--applicationId", "--overwrite" },
         ["blazor-igniteui"] = new() { "--project", "--theme", "--theme-variant", "--prerelease" },
     };
 

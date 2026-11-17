@@ -247,6 +247,13 @@ public class AspNetOptionCoverageTests
     public void Overwrite_IsNotRequired()
         => Assert.False(_options.Overwrite.Required);
 
+    [Fact]
+    public void Overwrite_DescribesIdentityFilesAndManagedConfiguration()
+    {
+        Assert.Contains("Identity files", _options.Overwrite.Description);
+        Assert.Contains("managed configuration values", _options.Overwrite.Description);
+    }
+
     #endregion
 
     #region --use-existing-application

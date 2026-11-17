@@ -148,6 +148,11 @@ Existing locally configured credentials are left unchanged. Configure a supporte
 a confidential client credential. Reusing a registration does not require permission
 to create new app registrations.
 
+When reusing a registration, the scaffolder preserves its existing Web redirect
+URIs before updating authorization and appsettings files. Azure CLI warnings on a
+successful read are logged without stopping scaffolding; failed commands or invalid
+redirect URI data still stop the operation before settings are written.
+
 Use a separate app registration for production and configure managed identity,
 federated identity credentials, or a certificate through deployment tooling. Do not
 use the generated development client secret in production or scaffold a production

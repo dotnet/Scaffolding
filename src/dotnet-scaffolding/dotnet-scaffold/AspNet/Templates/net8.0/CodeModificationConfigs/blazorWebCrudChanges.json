@@ -2,9 +2,23 @@
   "Files": [
     {
       "FileName": "Program.cs",
+      "Options": [
+        "EfScenario"
+      ],
       "Methods": {
         "Global": {
           "CodeChanges": [
+            {
+              "InsertAfter": "WebApplication.CreateBuilder",
+              "CheckBlock": "var connectionString =",
+              "Block": "\nvar connectionString = WebApplication.CreateBuilder.Configuration.GetConnectionString(\"$(ConnectionStringName)\") ?? throw new InvalidOperationException(\"Connection string '$(ConnectionStringName)' not found.\")"
+            },
+            {
+              "InsertAfter": "WebApplication.CreateBuilder.Configuration.GetConnectionString",
+              "CheckBlock": "AddDbContextFactory<$(DbContextName)>",
+              "Block": "WebApplication.CreateBuilder.Services.AddDbContextFactory<$(DbContextName)>(options => options.$(UseDbMethod))",
+              "LeadingTrivia": { "Newline": true }
+            },
             {
               "InsertAfter": "WebApplication.CreateBuilder.Services.AddDbContext",
               "Block": "WebApplication.CreateBuilder.Services.AddQuickGridEntityFrameworkAdapter()",

@@ -71,9 +71,29 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.MSBuild
                 Assert.True(projectContext.PackageDependencies.Any());
                 Assert.True(projectContext.CompilationAssemblies.Any());
                 Assert.True(projectContext.PackageDependencies.Where(x => x.Name.Equals("Microsoft.VisualStudio.Web.CodeGeneration.Design")).Any());
-                Assert.True(projectContext.ProjectReferences.Any());
-                Assert.True(projectContext.ProjectReferenceInformation.Any());
-                Assert.True(projectContext.ProjectReferenceInformation.FirstOrDefault(x => x.CompilationItems.Contains("Blog.cs")) != null);
+                var directReference = Assert.Single(projectContext.ProjectReferences);
+                Assert.EndsWith(
+                    Path.Combine(MsBuildProjectStrings.LibraryProjectFolder, MsBuildProjectStrings.Library2ProjectName),
+                    directReference,
+                    StringComparison.OrdinalIgnoreCase);
+                Assert.Equal(2, projectContext.ProjectReferenceInformation.Count());
+                Assert.DoesNotContain(
+                    projectContext.ProjectReferenceInformation,
+                    reference => string.Equals(
+                        reference.ProjectName,
+                        Path.GetFileNameWithoutExtension(MsBuildProjectStrings.BuildOnlyProjectName),
+                        StringComparison.OrdinalIgnoreCase));
+                var referencedProject = projectContext.ProjectReferenceInformation.FirstOrDefault(x => x.CompilationItems.Contains("Blog.cs"));
+                Assert.NotNull(referencedProject);
+                Assert.Equal("Custom.Library.Root", referencedProject.RootNamespace);
+                Assert.True(referencedProject.IsRazorProject);
+                Assert.Contains(Path.Combine("Layout", "MainLayout.razor"), referencedProject.RazorComponentItems);
+                Assert.Contains(
+                    projectContext.ProjectReferenceInformation,
+                    reference => string.Equals(
+                        reference.ProjectName,
+                        Path.GetFileNameWithoutExtension(MsBuildProjectStrings.ThemeProjectName),
+                        StringComparison.OrdinalIgnoreCase));
             }
         }
 

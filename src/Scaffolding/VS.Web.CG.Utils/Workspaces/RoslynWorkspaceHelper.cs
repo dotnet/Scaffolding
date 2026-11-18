@@ -40,6 +40,22 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
         internal static ProjectReferenceInformation GetProjectInformation(Project project)
         {
             var compileItems = project.GetItems("Compile").Select(i => i.EvaluatedInclude);
+            var isRazorProject = string.Equals(
+                project.GetPropertyValue("UsingMicrosoftNETSdkRazor"),
+                "true",
+                StringComparison.OrdinalIgnoreCase);
+            var razorComponentItems = project.GetItems("RazorComponent")
+                .Select(item => item.EvaluatedInclude);
+            if (!string.Equals(
+                project.GetPropertyValue("EnableDefaultRazorComponentItems"),
+                "false",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                razorComponentItems = razorComponentItems.Concat(
+                    project.GetItems("Content")
+                        .Select(item => item.EvaluatedInclude)
+                        .Where(path => string.Equals(Path.GetExtension(path), ".razor", StringComparison.OrdinalIgnoreCase)));
+            }
             var fullPath = project.FullPath;
             var name = project.GetProperty("ProjectName")
                 ?.EvaluatedValue
@@ -51,11 +67,15 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Utils
             var assemblyName = string.IsNullOrEmpty(assemblyPath)
                 ? name
                 : Path.GetFileNameWithoutExtension(assemblyPath);
+            var rootNamespace = project.GetPropertyValue("RootNamespace");
 
             return new ProjectReferenceInformation()
             {
                 ProjectName = name,
                 AssemblyName = assemblyName,
+                RootNamespace = string.IsNullOrEmpty(rootNamespace) ? name : rootNamespace,
+                IsRazorProject = isRazorProject,
+                RazorComponentItems = razorComponentItems.ToList(),
                 CompilationItems = compileItems.ToList(),
                 FullPath = fullPath
             };

@@ -17,6 +17,8 @@ using Net11MvcEfController = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.ne
 using Net9RazorCreateModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.RazorPages.CreateModel;
 using Net10RazorCreateModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.CreateModel;
 using Net11RazorCreateModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.RazorPages.CreateModel;
+using Net11CreateView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Views.Create;
+using Net11EditView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Views.Edit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;
 
@@ -399,7 +401,146 @@ public class MvcEfControllerTemplateTests
 
     #endregion
 
+    #region Foreign keys — SelectList and <select> parity with legacy scaffolder
+
+    [Fact]
+    public void Net11_ModelWithForeignKey_RendersSelectListAndSkipsNavigation()
+    {
+        ModelInfo modelInfo = CreateCountryCityModelInfo("City");
+
+        string controller = CreateNet11Template(CreateCountryCityEfControllerModel(modelInfo)).TransformText();
+        string createView = CreateNet11CreateViewTemplate(CreateCountryCityViewModel(modelInfo)).TransformText();
+        string editView = CreateNet11EditViewTemplate(CreateCountryCityViewModel(modelInfo)).TransformText();
+
+        Assert.Contains("using Microsoft.AspNetCore.Mvc.Rendering;", controller);
+        Assert.Equal(1, CountOccurrences(controller, "ViewData[\"CountryId\"] = new SelectList(_context.Countries, \"Id\", \"Name\");"));
+        Assert.Equal(3, CountOccurrences(controller, "ViewData[\"CountryId\"] = new SelectList(_context.Countries, \"Id\", \"Name\", city.CountryId);"));
+        foreach (string view in new[] { createView, editView })
+        {
+            Assert.Contains("<label asp-for=\"CountryId\" class=\"control-label\"></label>", view);
+            Assert.Contains("<select asp-for=\"CountryId\" class=\"form-control\" asp-items=\"ViewBag.CountryId\"></select>", view);
+            Assert.Contains("<span asp-validation-for=\"CountryId\" class=\"text-danger\"></span>", view);
+            Assert.DoesNotContain("<input asp-for=\"CountryId\"", view);
+            Assert.DoesNotContain("asp-for=\"Country\"", view);
+        }
+    }
+
+    [Fact]
+    public void Net11_ModelWithoutForeignKey_RendersNoSelectList()
+    {
+        // Country has a collection navigation but no foreign key; output must stay as before.
+        ModelInfo modelInfo = CreateCountryCityModelInfo("Country");
+
+        string controller = CreateNet11Template(CreateCountryCityEfControllerModel(modelInfo)).TransformText();
+        string createView = CreateNet11CreateViewTemplate(CreateCountryCityViewModel(modelInfo)).TransformText();
+        string editView = CreateNet11EditViewTemplate(CreateCountryCityViewModel(modelInfo)).TransformText();
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+        Assert.DoesNotContain("SelectList", controller);
+        Assert.DoesNotContain("Microsoft.AspNetCore.Mvc.Rendering", controller);
+        foreach (string view in new[] { createView, editView })
+        {
+            Assert.DoesNotContain("<select", view);
+            Assert.Contains("<input asp-for=\"Name\" class=\"form-control\" />", view);
+            Assert.Contains("<input asp-for=\"Cities\" class=\"form-control\" />", view);
+        }
+    }
+
+    #endregion
+
     #region Helpers
+
+    private static ModelInfo CreateCountryCityModelInfo(string modelTypeName)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(@"
+#nullable enable
+using System.Collections.Generic;
+namespace Microsoft.EntityFrameworkCore
+{
+    public class DbContext { }
+    public class DbSet<T> { }
+}
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+        public ICollection<City> Cities { get; set; } = new List<City>();
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+        public int CountryId { get; set; }
+        public virtual Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<City> Cities { get; set; } = null!;
+        public Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
+    }
+}");
+        CSharpCompilation compilation = CSharpCompilation.Create(
+            "TestAssembly",
+            [syntaxTree],
+            [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        INamedTypeSymbol modelSymbol = compilation.GetTypeByMetadataName($"Models.{modelTypeName}")!;
+        INamedTypeSymbol dbContextSymbol = compilation.GetTypeByMetadataName("Models.AppDbContext")!;
+        ModelInfo modelInfo = ClassAnalyzers.GetModelClassInfo(modelSymbol);
+        modelInfo.ForeignKeyNavigations = ClassAnalyzers.GetForeignKeyNavigations(modelInfo, dbContextSymbol);
+        return modelInfo;
+    }
+
+    private static EfControllerModel CreateCountryCityEfControllerModel(ModelInfo modelInfo)
+    {
+        return new EfControllerModel
+        {
+            ControllerType = "MVC",
+            ControllerName = $"{modelInfo.ModelTypeName}sController",
+            ControllerOutputPath = Path.Combine("Controllers", $"{modelInfo.ModelTypeName}sController.cs"),
+            DbContextInfo = new DbContextInfo
+            {
+                DbContextClassName = "AppDbContext",
+                DbContextNamespace = "Models",
+                EfScenario = true,
+                EntitySetVariableName = modelInfo.ModelTypeName == "City" ? "Cities" : "Countries"
+            },
+            ModelInfo = modelInfo,
+            ProjectInfo = new AspNetProjectInfo(null)
+        };
+    }
+
+    private static ViewModel CreateCountryCityViewModel(ModelInfo modelInfo)
+    {
+        return new ViewModel
+        {
+            PageType = "CRUD",
+            DbContextInfo = new DbContextInfo(),
+            ModelInfo = modelInfo,
+            ProjectInfo = new AspNetProjectInfo(null)
+        };
+    }
+
+    private static Net11CreateView CreateNet11CreateViewTemplate(ViewModel model)
+    {
+        var template = new Net11CreateView();
+        template.Session = new Dictionary<string, object> { { "Model", model } };
+        template.Initialize();
+        return template;
+    }
+
+    private static Net11EditView CreateNet11EditViewTemplate(ViewModel model)
+    {
+        var template = new Net11EditView();
+        template.Session = new Dictionary<string, object> { { "Model", model } };
+        template.Initialize();
+        return template;
+    }
 
     private static EfControllerModel CreateBlogEfControllerModel()
     {

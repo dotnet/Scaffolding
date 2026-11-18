@@ -181,6 +181,8 @@ internal static class EfControllerScaffolderBuilderExtensions
                 EfControllerModel efControllerModel = efControllerModelObj as EfControllerModel ??
                     throw new InvalidOperationException("missing 'EfControllerModel' in 'ScaffolderContext.Properties'");
                 viewModel.ControllerName = efControllerModel.ControllerName;
+                // Only the MVC controller scaffolder populates the SelectLists that the FK <select> elements bind to.
+                viewModel.ModelInfo.ForeignKeyNavigations = efControllerModel.ModelInfo.ForeignKeyNavigations;
 
                 if (viewModel.ProjectInfo is null || string.IsNullOrEmpty(viewModel.ProjectInfo.ProjectPath))
                 {

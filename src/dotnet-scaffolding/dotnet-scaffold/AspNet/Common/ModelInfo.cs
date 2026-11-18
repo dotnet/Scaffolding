@@ -50,4 +50,8 @@ internal class ModelInfo
     /// Gets or sets the full type name of the primary key.
     /// </summary>
     public string? PrimaryKeyTypeName { get; set; }
+    /// <summary>
+    /// Gets or sets the reference navigations that have a scalar foreign key property on the model.
+    /// </summary>
+    public List<ForeignKeyNavigationInfo> ForeignKeyNavigations { get; set; } = [];
 }

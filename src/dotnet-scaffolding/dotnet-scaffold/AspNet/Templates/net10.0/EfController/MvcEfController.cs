@@ -38,8 +38,17 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string primaryKeyTypeName = Model.ModelInfo.PrimaryKeyTypeName;
     string bindProperties = string.Join(",", Model.ModelInfo.ModelProperties?.Select(p => p.Name) ?? Enumerable.Empty<string>());
+    var foreignKeyNavigations = Model.ModelInfo.ForeignKeyNavigations;
 
-            this.Write("\r\nusing Microsoft.AspNetCore.Mvc;\r\nusing Microsoft.EntityFrameworkCore;\r\n");
+            this.Write("\r\nusing Microsoft.AspNetCore.Mvc;\r\n");
+
+    if (foreignKeyNavigations.Count > 0)
+    {
+        
+            this.Write("using Microsoft.AspNetCore.Mvc.Rendering;\r\n");
+  }
+
+            this.Write("using Microsoft.EntityFrameworkCore;\r\n");
 
     if (!string.IsNullOrEmpty(modelNamespace))
     {
@@ -95,8 +104,24 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(");\r\n    }\r\n\r\n    // GET: ");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
-            this.Write("/Create\r\n    public IActionResult Create()\r\n    {\r\n        return View();\r\n    }\r" +
-                    "\n\r\n    // POST: ");
+            this.Write("/Create\r\n    public IActionResult Create()\r\n    {\r\n");
+
+    foreach (var navigation in foreignKeyNavigations)
+    {
+
+            this.Write("        ViewData[\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.ForeignKeyPropertyName));
+            this.Write("\"] = new SelectList(_context.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.EntitySetName));
+            this.Write(", \"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.PrincipalPrimaryKeyName));
+            this.Write("\", \"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.DisplayPropertyName));
+            this.Write("\");\r\n");
+
+    }
+
+            this.Write("        return View();\r\n    }\r\n\r\n    // POST: ");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
             this.Write(@"/Create
     // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -112,7 +137,28 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController
             this.Write(")\r\n    {\r\n        if (ModelState.IsValid)\r\n        {\r\n            _context.Add(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(");\r\n            await _context.SaveChangesAsync();\r\n            return RedirectTo" +
-                    "Action(nameof(Index));\r\n        }\r\n        return View(");
+                    "Action(nameof(Index));\r\n        }\r\n");
+
+    foreach (var navigation in foreignKeyNavigations)
+    {
+
+            this.Write("        ViewData[\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.ForeignKeyPropertyName));
+            this.Write("\"] = new SelectList(_context.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.EntitySetName));
+            this.Write(", \"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.PrincipalPrimaryKeyName));
+            this.Write("\", \"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.DisplayPropertyName));
+            this.Write("\", ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.ForeignKeyPropertyName));
+            this.Write(");\r\n");
+
+    }
+
+            this.Write("        return View(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(");\r\n    }\r\n\r\n    // GET: ");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
@@ -130,8 +176,28 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyNameLowerInv));
             this.Write(");\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(" == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n        return V" +
-                    "iew(");
+            this.Write(" == null)\r\n        {\r\n            return NotFound();\r\n        }\r\n");
+
+    foreach (var navigation in foreignKeyNavigations)
+    {
+
+            this.Write("        ViewData[\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.ForeignKeyPropertyName));
+            this.Write("\"] = new SelectList(_context.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.EntitySetName));
+            this.Write(", \"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.PrincipalPrimaryKeyName));
+            this.Write("\", \"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.DisplayPropertyName));
+            this.Write("\", ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.ForeignKeyPropertyName));
+            this.Write(");\r\n");
+
+    }
+
+            this.Write("        return View(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(");\r\n    }\r\n\r\n    // POST: ");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));
@@ -178,7 +244,28 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController
             }
             return RedirectToAction(nameof(Index));
         }
-        return View(");
+");
+
+    foreach (var navigation in foreignKeyNavigations)
+    {
+
+            this.Write("        ViewData[\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.ForeignKeyPropertyName));
+            this.Write("\"] = new SelectList(_context.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.EntitySetName));
+            this.Write(", \"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.PrincipalPrimaryKeyName));
+            this.Write("\", \"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.DisplayPropertyName));
+            this.Write("\", ");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
+            this.Write(".");
+            this.Write(this.ToStringHelper.ToStringWithCulture(navigation.ForeignKeyPropertyName));
+            this.Write(");\r\n");
+
+    }
+
+            this.Write("        return View(");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(");\r\n    }\r\n\r\n    // GET: ");
             this.Write(this.ToStringHelper.ToStringWithCulture(pluralModel));

@@ -16,9 +16,16 @@
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
     string primaryKeyTypeName = Model.ModelInfo.PrimaryKeyTypeName;
     string bindProperties = string.Join(",", Model.ModelInfo.ModelProperties?.Select(p => p.Name) ?? Enumerable.Empty<string>());
+    var foreignKeyNavigations = Model.ModelInfo.ForeignKeyNavigations;
 #>
 
 using Microsoft.AspNetCore.Mvc;
+<#
+    if (foreignKeyNavigations.Count > 0)
+    {
+        #>using Microsoft.AspNetCore.Mvc.Rendering;
+<#  }
+#>
 using Microsoft.EntityFrameworkCore;
 <#
     if (!string.IsNullOrEmpty(modelNamespace))
@@ -70,6 +77,14 @@ public class <#= Model.ControllerName #> : Controller
     // GET: <#= pluralModel #>/Create
     public IActionResult Create()
     {
+<#
+    foreach (var navigation in foreignKeyNavigations)
+    {
+#>
+        ViewData["<#= navigation.ForeignKeyPropertyName #>"] = new SelectList(_context.<#= navigation.EntitySetName #>, "<#= navigation.PrincipalPrimaryKeyName #>", "<#= navigation.DisplayPropertyName #>");
+<#
+    }
+#>
         return View();
     }
 
@@ -86,6 +101,14 @@ public class <#= Model.ControllerName #> : Controller
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+<#
+    foreach (var navigation in foreignKeyNavigations)
+    {
+#>
+        ViewData["<#= navigation.ForeignKeyPropertyName #>"] = new SelectList(_context.<#= navigation.EntitySetName #>, "<#= navigation.PrincipalPrimaryKeyName #>", "<#= navigation.DisplayPropertyName #>", <#= modelNameLowerInv #>.<#= navigation.ForeignKeyPropertyName #>);
+<#
+    }
+#>
         return View(<#= modelNameLowerInv #>);
     }
 
@@ -102,6 +125,14 @@ public class <#= Model.ControllerName #> : Controller
         {
             return NotFound();
         }
+<#
+    foreach (var navigation in foreignKeyNavigations)
+    {
+#>
+        ViewData["<#= navigation.ForeignKeyPropertyName #>"] = new SelectList(_context.<#= navigation.EntitySetName #>, "<#= navigation.PrincipalPrimaryKeyName #>", "<#= navigation.DisplayPropertyName #>", <#= modelNameLowerInv #>.<#= navigation.ForeignKeyPropertyName #>);
+<#
+    }
+#>
         return View(<#= modelNameLowerInv #>);
     }
 
@@ -137,6 +168,14 @@ public class <#= Model.ControllerName #> : Controller
             }
             return RedirectToAction(nameof(Index));
         }
+<#
+    foreach (var navigation in foreignKeyNavigations)
+    {
+#>
+        ViewData["<#= navigation.ForeignKeyPropertyName #>"] = new SelectList(_context.<#= navigation.EntitySetName #>, "<#= navigation.PrincipalPrimaryKeyName #>", "<#= navigation.DisplayPropertyName #>", <#= modelNameLowerInv #>.<#= navigation.ForeignKeyPropertyName #>);
+<#
+    }
+#>
         return View(<#= modelNameLowerInv #>);
     }
 

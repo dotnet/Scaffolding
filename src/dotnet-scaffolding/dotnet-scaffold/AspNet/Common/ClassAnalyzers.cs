@@ -161,6 +161,147 @@ internal static class ClassAnalyzers
     }
 
     /// <summary>
+    /// Finds reference navigations on the model that are paired with a single scalar foreign key property,
+    /// using [ForeignKey] attributes or EF Core naming conventions.
+    /// </summary>
+    /// <param name="modelInfo">The model information whose properties are analyzed.</param>
+    /// <param name="dbContextSymbol">The existing DbContext symbol used to resolve principal entity sets, or null.</param>
+    /// <returns>The foreign key navigations found on the model.</returns>
+    internal static List<ForeignKeyNavigationInfo> GetForeignKeyNavigations(ModelInfo modelInfo, ISymbol? dbContextSymbol)
+    {
+        var navigations = new List<ForeignKeyNavigationInfo>();
+        var modelProperties = modelInfo.ModelProperties;
+        if (modelProperties is null)
+        {
+            return navigations;
+        }
+
+        foreach (var navigationProperty in modelProperties)
+        {
+            // Reference navigations only; strings, value types and collections are skipped.
+            if (navigationProperty.Type is not INamedTypeSymbol principalType ||
+                principalType.TypeKind != TypeKind.Class ||
+                principalType.SpecialType != SpecialType.None ||
+                principalType.AllInterfaces.Any(i => i.SpecialType == SpecialType.System_Collections_IEnumerable))
+            {
+                continue;
+            }
+
+            // A principal entity must have a discoverable primary key.
+            var principalProperties = EfDbContextHelpers.GetModelProperties(principalType);
+            if (principalProperties is null)
+            {
+                continue;
+            }
+
+            var foreignKeyProperty = FindForeignKeyProperty(navigationProperty, principalType, principalProperties.PrimaryKeyName, modelProperties);
+            if (foreignKeyProperty is null ||
+                string.Equals(foreignKeyProperty.Name, modelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase) ||
+                navigations.Any(n => string.Equals(n.ForeignKeyPropertyName, foreignKeyProperty.Name, StringComparison.Ordinal)))
+            {
+                continue;
+            }
+
+            string principalFullName = principalType.ContainingNamespace is null || principalType.ContainingNamespace.IsGlobalNamespace
+                ? principalType.Name
+                : $"{principalType.ContainingNamespace.ToDisplayString()}.{principalType.Name}";
+            string? entitySetName = dbContextSymbol is null
+                ? null
+                : EfDbContextHelpers.GetEntitySetVariableName(dbContextSymbol, principalType.Name, principalFullName);
+
+            navigations.Add(new ForeignKeyNavigationInfo
+            {
+                NavigationPropertyName = navigationProperty.Name,
+                ForeignKeyPropertyName = foreignKeyProperty.Name,
+                PrincipalPrimaryKeyName = principalProperties.PrimaryKeyName,
+                DisplayPropertyName = GetDisplayPropertyName(principalProperties.AllModelProperties) ?? principalProperties.PrimaryKeyName,
+                EntitySetName = string.IsNullOrEmpty(entitySetName) ? $"Set<{principalFullName}>()" : entitySetName
+            });
+        }
+
+        return navigations;
+    }
+
+    private static IPropertySymbol? FindForeignKeyProperty(
+        IPropertySymbol navigationProperty,
+        INamedTypeSymbol principalType,
+        string principalKeyName,
+        List<IPropertySymbol> modelProperties)
+    {
+        List<string> candidateNames;
+        var navigationForeignKeyName = GetForeignKeyAttributeName(navigationProperty);
+        if (navigationForeignKeyName is not null)
+        {
+            // Composite foreign keys ("A,B") are not supported.
+            if (navigationForeignKeyName.Contains(','))
+            {
+                return null;
+            }
+
+            candidateNames = [navigationForeignKeyName];
+        }
+        else
+        {
+            var attributedProperty = modelProperties.FirstOrDefault(p =>
+                string.Equals(GetForeignKeyAttributeName(p), navigationProperty.Name, StringComparison.OrdinalIgnoreCase));
+            if (attributedProperty is not null)
+            {
+                return IsScalarProperty(attributedProperty) ? attributedProperty : null;
+            }
+
+            candidateNames =
+            [
+                $"{navigationProperty.Name}{principalKeyName}",
+                $"{navigationProperty.Name}Id",
+                $"{principalType.Name}{principalKeyName}",
+                $"{principalType.Name}Id"
+            ];
+        }
+
+        foreach (var candidateName in candidateNames)
+        {
+            var match = modelProperties.FirstOrDefault(p =>
+                !SymbolEqualityComparer.Default.Equals(p, navigationProperty) &&
+                string.Equals(p.Name, candidateName, StringComparison.OrdinalIgnoreCase) &&
+                IsScalarProperty(p));
+            if (match is not null)
+            {
+                return match;
+            }
+        }
+
+        return null;
+    }
+
+    private static bool IsScalarProperty(IPropertySymbol propertySymbol)
+    {
+        return propertySymbol.Type.IsValueType || propertySymbol.Type.SpecialType == SpecialType.System_String;
+    }
+
+    private static string? GetForeignKeyAttributeName(IPropertySymbol propertySymbol)
+    {
+        var attribute = propertySymbol.GetAttributes().FirstOrDefault(a =>
+            a.AttributeClass is not null && a.AttributeClass.Name.Equals("ForeignKeyAttribute", StringComparison.Ordinal));
+        return attribute?.ConstructorArguments.FirstOrDefault().Value as string;
+    }
+
+    /// <summary>
+    /// Mirrors the legacy scaffolder: the first (ordinal by name, as EF Core orders properties) non-nullable
+    /// string property of the principal entity; null when there is none.
+    /// </summary>
+    private static string? GetDisplayPropertyName(List<IPropertySymbol> principalProperties)
+    {
+        return principalProperties
+            .Where(p => !p.IsStatic &&
+                p.Type.SpecialType == SpecialType.System_String &&
+                (p.NullableAnnotation == NullableAnnotation.NotAnnotated ||
+                 p.GetAttributes().Any(a => a.AttributeClass is not null && a.AttributeClass.Name.Equals("RequiredAttribute", StringComparison.Ordinal))))
+            .Select(p => p.Name)
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .FirstOrDefault();
+    }
+
+    /// <summary>
     /// Check if atleast one property and a primary key property were found for given --model class.
     /// </summary>
     /// <param name="modelInfo">The model information to validate.</param>

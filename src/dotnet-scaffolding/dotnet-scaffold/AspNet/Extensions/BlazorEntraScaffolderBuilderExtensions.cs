@@ -136,9 +136,10 @@ internal static class BlazorEntraScaffolderBuilderExtensions
     /// Adds a step to update the application settings in Entra ID.
     /// </summary>
     /// <param name="builder">The scaffold builder.</param>
+    /// <param name="useExistingApplication">When specified, runs only for the matching registration mode.</param>
     /// <returns>The updated scaffold builder.</returns>
     /// <exception cref="InvalidOperationException">Thrown when required properties are missing.</exception>
-    public static IScaffoldBuilder WithUpdateAppSettingsStep(this IScaffoldBuilder builder)
+    public static IScaffoldBuilder WithUpdateAppSettingsStep(this IScaffoldBuilder builder, bool? useExistingApplication = null)
     {
         return builder.WithStep<UpdateAppSettingsStep>(config =>
         {
@@ -151,6 +152,8 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             context.Properties.TryGetValue(nameof(EntraIdSettings), out var entraIdSettings);
             EntraIdSettings entraSettings = entraIdSettings as EntraIdSettings ??
                 throw new InvalidOperationException("missing 'EntraIdSettings' in 'ScaffolderContext.Properties'");
+
+            step.SkipStep = useExistingApplication.HasValue && entraSettings.UseExistingApplication != useExistingApplication.Value;
 
             if (string.IsNullOrEmpty(entraSettings.Project))
             {

@@ -54,7 +54,7 @@ internal class AddFileStep : ScaffoldStep
         if (string.IsNullOrEmpty(BaseOutputDirectory) ||
             string.IsNullOrEmpty(FileName))
         {
-            _logger.LogError("A file name and output directory are required to add a file.");
+            _logger.LogError("A file name and output directory are required to add a template file.");
             return Task.FromResult(false);
         }
 
@@ -104,6 +104,7 @@ internal class AddFileStep : ScaffoldStep
         }
         catch (DecoderFallbackException)
         {
+            // Undecodable text is a conflict; the caller logs it and preserves the existing file.
             return false;
         }
     }

@@ -295,8 +295,9 @@ public class EntraIdTenantIdentityPipelineTests
         Assert.Equal(new[]
         {
             typeof(ValidateEntraIdStep), typeof(ValidateAzureCliIdentityStep), typeof(DetectBlazorWasmStep), typeof(RegisterAppStep),
-            typeof(UpdateAppSettingsStep), typeof(UpdateAppAuthorizationStep), typeof(AddClientSecretStep), typeof(UpdateAppSettingsStep)
+            typeof(UpdateAppSettingsStep), typeof(UpdateAppAuthorizationStep)
         }, steps);
+        Assert.DoesNotContain(typeof(AddClientSecretStep), steps);
         Assert.Contains(typeof(ValidateAzureCliIdentityStep), service.GetScaffoldSteps());
     }
 

@@ -183,6 +183,8 @@ internal static class BlazorEntraScaffolderBuilderExtensions
             {
                 step.ClientSecret = clientSecret;
             }
+
+            step.Overwrite = entraSettings.Overwrite;
         });
     }
 

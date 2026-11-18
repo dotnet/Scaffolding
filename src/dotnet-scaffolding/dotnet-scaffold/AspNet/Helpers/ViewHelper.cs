@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.DotNet.Scaffolding.Core.Model;
 using Microsoft.DotNet.Scaffolding.TextTemplating;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Models;
@@ -57,7 +58,13 @@ internal class ViewHelper
                         continue;
                     }
 
-                    string baseOutputPath = GetBaseOutputPath(viewModel.ModelInfo.ModelTypeName, viewModel.ProjectInfo.ProjectPath);
+                    string folderName = viewModel.ModelInfo.ModelTypeName;
+                    if (!string.IsNullOrEmpty(viewModel.ControllerName))
+                    {
+                        folderName = GetControllerFolderName(viewModel.ControllerName);
+                    }
+
+                    string baseOutputPath = GetBaseOutputPath(folderName, viewModel.ProjectInfo.ProjectPath);
                     string outputFileName = Path.Combine(baseOutputPath, $"{templateName}{Common.Constants.ViewExtension}");
                     textTemplatingProperties.Add(new()
                     {
@@ -72,6 +79,40 @@ internal class ViewHelper
         }
         
         return textTemplatingProperties;
+    }
+
+    internal static string GetControllerFolderName(string controllerName)
+    {
+        const string controllerSuffix = "Controller";
+        var typeName = SyntaxFactory.ParseToken(controllerName).ValueText;
+        return typeName.EndsWith(controllerSuffix, StringComparison.OrdinalIgnoreCase)
+            ? typeName[..^controllerSuffix.Length]
+            : typeName;
+    }
+
+    internal static bool IsValidControllerViewFolder(string controllerName)
+    {
+        var folderName = GetControllerFolderName(controllerName);
+        if (string.IsNullOrWhiteSpace(folderName) || folderName is "." or ".." ||
+            folderName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
+            folderName.Contains('/') || folderName.Contains('\\'))
+        {
+            return false;
+        }
+
+        if (OperatingSystem.IsWindows())
+        {
+            var deviceName = folderName.ToUpperInvariant();
+            if (deviceName is "CON" or "PRN" or "AUX" or "NUL" ||
+                (deviceName.Length == 4 &&
+                 (deviceName.StartsWith("COM", StringComparison.Ordinal) || deviceName.StartsWith("LPT", StringComparison.Ordinal)) &&
+                 deviceName[3] is >= '1' and <= '9' or '\u00b9' or '\u00b2' or '\u00b3'))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -143,14 +184,14 @@ internal class ViewHelper
     }
 
     /// <summary>
-    /// Gets the base output path for the specified model name and project path.
+    /// Gets the base output path for the specified view folder name and project path.
     /// </summary>
-    /// <param name="modelName">The model name.</param>
+    /// <param name="folderName">The controller-based folder name, or model name for standalone views.</param>
     /// <param name="projectPath">The project path.</param>
     /// <returns>The base output path as a string.</returns>
-    private static string GetBaseOutputPath(string modelName, string? projectPath)
+    private static string GetBaseOutputPath(string folderName, string? projectPath)
     {
         string projectBasePath = Path.GetDirectoryName(projectPath) ?? Directory.GetCurrentDirectory();
-        return Path.Combine(projectBasePath, "Views", modelName);
+        return Path.Combine(projectBasePath, "Views", folderName);
     }
 }

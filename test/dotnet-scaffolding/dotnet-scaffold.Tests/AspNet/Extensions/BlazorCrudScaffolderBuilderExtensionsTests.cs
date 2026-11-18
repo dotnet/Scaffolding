@@ -48,6 +48,8 @@ public class BlazorCrudScaffolderBuilderExtensionsTests
     {
         // Arrange
         Mock<IScaffoldBuilder> mockBuilder = new Mock<IScaffoldBuilder>();
+        mockBuilder.Setup(b => b.WithStep<BlazorDbContextFactoryStep>(It.IsAny<Action<ScaffoldStepConfigurator<BlazorDbContextFactoryStep>>>()))
+            .Returns(mockBuilder.Object);
         mockBuilder.Setup(b => b.WithStep<WrappedCodeModificationStep>(It.IsAny<Action<ScaffoldStepConfigurator<WrappedCodeModificationStep>>>()))
             .Returns(mockBuilder.Object);
 
@@ -56,6 +58,7 @@ public class BlazorCrudScaffolderBuilderExtensionsTests
 
         // Assert
         Assert.NotNull(result);
+        mockBuilder.Verify(b => b.WithStep<BlazorDbContextFactoryStep>(It.IsAny<Action<ScaffoldStepConfigurator<BlazorDbContextFactoryStep>>>()), Times.Once);
         // Verify WithStep is called twice (once for main changes, once for additional changes)
         mockBuilder.Verify(b => b.WithStep<WrappedCodeModificationStep>(It.IsAny<Action<ScaffoldStepConfigurator<WrappedCodeModificationStep>>>()), Times.Exactly(2));
     }
@@ -66,6 +69,8 @@ public class BlazorCrudScaffolderBuilderExtensionsTests
         // Arrange
         Mock<IScaffoldBuilder> mockBuilder = new Mock<IScaffoldBuilder>();
         int callCount = 0;
+        mockBuilder.Setup(b => b.WithStep<BlazorDbContextFactoryStep>(It.IsAny<Action<ScaffoldStepConfigurator<BlazorDbContextFactoryStep>>>()))
+            .Returns(mockBuilder.Object);
         
         mockBuilder.Setup(b => b.WithStep<WrappedCodeModificationStep>(It.IsAny<Action<ScaffoldStepConfigurator<WrappedCodeModificationStep>>>()))
             .Callback(() => callCount++)

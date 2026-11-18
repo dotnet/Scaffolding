@@ -139,6 +139,105 @@ public class WrappedCodeModificationStepTests
     }
 
     [Theory]
+    [InlineData("net8.0")]
+    [InlineData("net9.0")]
+    [InlineData("net10.0")]
+    [InlineData("net11.0")]
+    public async Task BlazorCrud_LeavesContextRegistrationsToFactoryStep_AndIsIdempotent(string framework)
+    {
+        var configPath = Path.Combine(ScaffoldCliHelper.GetRepoRoot(), "src", "dotnet-scaffolding", "dotnet-scaffold",
+            "AspNet", "Templates", framework, "CodeModificationConfigs", "blazorWebCrudChanges.json");
+        using var project = new BlazorTestProject(framework);
+        var programPath = Path.Combine(project.ProjectDirectory, "Program.cs");
+        File.WriteAllText(programPath, ScaffoldCliHelper.GetMinimalProgramCs());
+        var build = await ScaffoldCliHelper.RunBuildAsync(project.ProjectDirectory);
+        Assert.True(build.ExitCode == 0, $"Input build failed.\n{build.Output}\n{build.Error}");
+
+        foreach (var (registration, adapterAlreadyRegistered) in new[]
+        {
+            ("", false),
+            ("AddDbContext", false),
+            ("AddDbContextFactory", false),
+            ("AddDbContextFactory", true)
+        })
+        {
+            var existingRegistration = string.IsNullOrEmpty(registration) ? "" :
+                $"builder.Services.{registration}<MovieContext>(options => options.UseSqlServer(\"ExistingMovies\"));";
+            var existingAdapter = adapterAlreadyRegistered ? "builder.Services.AddQuickGridEntityFrameworkAdapter();" : "";
+            File.WriteAllText(programPath, $$"""
+                var builder = WebApplication.CreateBuilder(args);
+                var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+                builder.Services.AddDbContextFactory<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+                {{existingRegistration}}
+                {{existingAdapter}}
+                var app = builder.Build();
+                app.Run();
+                """);
+            var step = new WrappedCodeModificationStep(
+                NullLogger<WrappedCodeModificationStep>.Instance, Mock.Of<ITelemetryService>())
+            {
+                ProjectPath = project.ProjectPath,
+                CodeModifierConfigPath = configPath,
+                CodeChangeOptions = ["EfScenario"]
+            };
+            step.CodeModifierProperties.Add("$(DbContextName)", "MovieContext");
+            step.CodeModifierProperties.Add("$(ConnectionStringName)", "MovieContext");
+            step.CodeModifierProperties.Add("$(UseDbMethod)",
+                "UseSqlServer(builder.Configuration.GetConnectionString(\"MovieContext\") ?? throw new InvalidOperationException(\"Connection string 'MovieContext' not found.\"))");
+
+            Assert.True(await step.ExecuteAsync(_context));
+            var updatedProgram = File.ReadAllText(programPath);
+            var root = CSharpSyntaxTree.ParseText(updatedProgram).GetRoot();
+            Assert.Empty(root.GetDiagnostics());
+            var registrations = root.DescendantNodes().OfType<InvocationExpressionSyntax>()
+                .Where(invocation => invocation.Expression.ToString().Contains("AddDbContext")).ToArray();
+            Assert.Equal(string.IsNullOrEmpty(registration) ? 1 : 2, registrations.Length);
+            Assert.Single(registrations, invocation =>
+                invocation.Expression.ToString() == "builder.Services.AddDbContextFactory<ApplicationDbContext>");
+            Assert.Single(root.DescendantNodes().OfType<InvocationExpressionSyntax>(), invocation =>
+                invocation.Expression.ToString() == "builder.Services.AddQuickGridEntityFrameworkAdapter");
+            if (!string.IsNullOrEmpty(registration))
+            {
+                Assert.Contains(existingRegistration, updatedProgram);
+            }
+
+            Assert.True(await step.ExecuteAsync(_context));
+            Assert.Equal(updatedProgram, File.ReadAllText(programPath));
+        }
+    }
+
+    [Fact]
+    public async Task BlazorCrud_Net8WithoutEfScenario_LeavesProgramUnchanged()
+    {
+        var configPath = Path.Combine(ScaffoldCliHelper.GetRepoRoot(), "src", "dotnet-scaffolding", "dotnet-scaffold",
+            "AspNet", "Templates", "net8.0", "CodeModificationConfigs", "blazorWebCrudChanges.json");
+        using var project = new BlazorTestProject(ScaffoldCliHelper.GetTestTargetFramework());
+        var programPath = Path.Combine(project.ProjectDirectory, "Program.cs");
+        var program = """
+            var builder = WebApplication.CreateBuilder(args);
+            var app = builder.Build();
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHsts();
+            }
+            app.Run();
+            """;
+        File.WriteAllText(programPath, program);
+        var build = await ScaffoldCliHelper.RunBuildAsync(project.ProjectDirectory);
+        Assert.True(build.ExitCode == 0, $"Input build failed.\n{build.Output}\n{build.Error}");
+        var step = new WrappedCodeModificationStep(
+            NullLogger<WrappedCodeModificationStep>.Instance, Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = project.ProjectPath,
+            CodeModifierConfigPath = configPath,
+            CodeChangeOptions = []
+        };
+
+        Assert.True(await step.ExecuteAsync(_context));
+        Assert.Equal(program, File.ReadAllText(programPath));
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task BlazorCrudWebAssemblyMigrationsEndpoint_IsDevelopmentOnlyAndNotDuplicated(bool previouslyScaffolded)
@@ -147,7 +246,7 @@ public class WrappedCodeModificationStepTests
             "AspNet", "Templates", "net11.0", "CodeModificationConfigs", "blazorWebCrudChanges.json");
         using var config = JsonDocument.Parse(File.ReadAllText(configPath));
         var replacements = config.RootElement.GetProperty("Files").EnumerateArray()
-            .Single(file => file.GetProperty("FileName").GetString() == "Program.cs")
+            .Last(file => file.GetProperty("FileName").GetString() == "Program.cs")
             .GetProperty("Replacements").EnumerateArray()
             .Where(replacement => replacement.ToString().Contains("UseMigrationsEndPoint")).ToArray();
 

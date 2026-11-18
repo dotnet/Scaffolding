@@ -35,7 +35,7 @@ internal class AspNetDbContextHelper
     /// <summary>
     /// Gets code modifier properties for a given DbContextInfo.
     /// </summary>
-    internal static Dictionary<string, string> GetDbContextCodeModifierProperties(DbContextInfo dbContextInfo)
+    internal static Dictionary<string, string> GetDbContextCodeModifierProperties(DbContextInfo dbContextInfo, string connectionStringExpression = "connectionString")
     {
         var dbContextProperties = new Dictionary<string, string>();
         if (dbContextInfo.EfScenario)
@@ -44,8 +44,8 @@ internal class AspNetDbContextHelper
                 PackageConstants.EfConstants.UseDatabaseMethods.TryGetValue(dbContextInfo.DatabaseProvider, out var useDbMethod))
             {
                 string useDbMethodFull = dbContextInfo.DatabaseProvider.Equals(PackageConstants.EfConstants.CosmosDb, StringComparison.OrdinalIgnoreCase) ?
-                    $"{useDbMethod}(connectionString, \"{dbContextInfo.DbContextClassName}\")" :
-                    $"{useDbMethod}(connectionString)"; 
+                    $"{useDbMethod}({connectionStringExpression}, \"{dbContextInfo.DbContextClassName}\")" :
+                    $"{useDbMethod}({connectionStringExpression})";
                 dbContextProperties.Add(Constants.CodeModifierPropertyConstants.UseDbMethod, useDbMethodFull);
             }
 

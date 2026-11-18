@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet
                 typeof(AddClientSecretStep),
                 typeof(AddAspNetConnectionStringStep),
                 typeof(AddDbSetToExistingContextStep),
+                typeof(BlazorDbContextFactoryStep),
                 typeof(AddFileStep),
                 typeof(IgniteUIBlazorGuidanceStep),
                 typeof(IgniteUICodeModificationStep),

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Scaffolding.Core.Builder;
+using Microsoft.DotNet.Scaffolding.Core.Hosting;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
 using Microsoft.DotNet.Scaffolding.Internal.Telemetry;
@@ -248,6 +250,138 @@ public class ValidateEntraIdStepTests
 
         // Assert
         Assert.False(step.UseExistingApplication);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsFalse_WhenCreatingNewAppAndDevelopmentAzureAdClientIdExistsWithoutOverwrite()
+    {
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(Path.Combine("test", "project", "appsettings.Development.json"))).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(Path.Combine("test", "project", "appsettings.Development.json"))).Returns(
+            """
+            {
+              "AzureAd": {
+                "ClientId": "existing-client-id"
+              }
+            }
+            """);
+
+        var step = new ValidateEntraIdStep(_mockFileSystem.Object, _mockLogger.Object, _testTelemetryService)
+        {
+            Project = _testProjectPath,
+            Username = "test@example.com",
+            TenantId = "test-tenant-id",
+            UseExistingApplication = false,
+            Overwrite = false
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        Assert.Single(_testTelemetryService.TrackedEvents);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsFalse_WhenCreatingNewAppAndAzureAdSectionIsNotObjectWithoutOverwrite()
+    {
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(Path.Combine("test", "project", "appsettings.Development.json"))).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(Path.Combine("test", "project", "appsettings.Development.json"))).Returns(
+            """
+            {
+              "AzureAd": "invalid-shape"
+            }
+            """);
+
+        var step = new ValidateEntraIdStep(_mockFileSystem.Object, _mockLogger.Object, _testTelemetryService)
+        {
+            Project = _testProjectPath,
+            Username = "test@example.com",
+            TenantId = "test-tenant-id",
+            UseExistingApplication = false,
+            Overwrite = false
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.False(result);
+        Assert.Single(_testTelemetryService.TrackedEvents);
+    }
+
+    [Theory]
+    [InlineData("""{"AzureAd":{"ClientId":"existing-client-id"}}""", false, false, "ClientId", false)]
+    [InlineData("""{"AzureAd":{"ClientId":"different-client-id"}}""", true, false, "ClientId", false)]
+    [InlineData("""{"AzureAd":{"Instance":"https://other-instance/"}}""", false, false, "Instance", false)]
+    [InlineData("""{"AzureAd":{"Instance":"https://login.microsoftonline.us/","CallbackPath":"/custom-signin"}}""", true, false, "Instance", false)]
+    [InlineData("""{"AzureAd":{"TenantId":"different-tenant"}}""", false, false, "TenantId", false)]
+    [InlineData("""{"AzureAd":{"CallbackPath":"/different-callback"}}""", false, false, "CallbackPath", false)]
+    [InlineData("""{"AzureAd":{"TenantId":"different-tenant"}}""", true, false, "TenantId", false)]
+    [InlineData("""{"AzureAd":"invalid-shape"}""", true, false, "AzureAd", false)]
+    [InlineData("{ invalid json", false, false, null, false)]
+    [InlineData("{ invalid json", true, true, null, false)]
+    [InlineData("[]", false, true, null, false)]
+    [InlineData("""{"AzureAd":{"ClientId":"existing-client-id"}}""", false, false, "ClientId", true)]
+    [InlineData("""{"AzureAd":{"ClientId":"different-client-id"}}""", true, false, "ClientId", true)]
+    [InlineData("""{"AzureAd":{"TenantId":"different-tenant"}}""", false, false, "TenantId", true)]
+    [InlineData("{ invalid json", false, true, null, true)]
+    [InlineData("""{"azuread":{"ClientId":"existing-client-id"}}""", false, false, "ClientId", false)]
+    [InlineData("""{"AzureAd":{"clientid":"existing-client-id"}}""", false, false, "ClientId", false)]
+    [InlineData("""{"AZUREAD":{"CLIENTID":"different-client-id"}}""", true, false, "ClientId", false)]
+    [InlineData("""{"azuread":{"instance":"https://other-instance/"}}""", false, false, "Instance", false)]
+    [InlineData("""{"azuread":{"tenantid":"different-tenant"}}""", false, false, "TenantId", false)]
+    [InlineData("""{"azuread":{"callbackpath":"/different-callback"}}""", false, false, "CallbackPath", false)]
+    [InlineData("""{"azuread":"invalid-shape"}""", false, false, "AzureAd", false)]
+    [InlineData("""{ /* development settings */ "azuread": { "clientid": "existing-client-id" } }""", false, false, "ClientId", false)]
+    [InlineData("""{ "AzureAd": { "ClientId": "existing-client-id", }, }""", false, false, "ClientId", false)]
+    public async Task ExecuteAsync_PreflightFailure_StopsRegistrationAndClientSecretSteps(
+        string settings, bool useExistingApplication, bool overwrite, string? conflictingKey, bool bareProjectFilename)
+    {
+        string projectPath = bareProjectFilename ? "TestProject.csproj" : _testProjectPath;
+        string projectDirectory = bareProjectFilename ? string.Empty : Path.Combine("test", "project");
+        string devSettingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
+        _mockFileSystem.Setup(fs => fs.FileExists(projectPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.FileExists(devSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(devSettingsPath)).Returns(settings);
+
+        var logger = new TestLogger();
+        var step = new ValidateEntraIdStep(_mockFileSystem.Object, logger, _testTelemetryService)
+        {
+            Project = projectPath,
+            Username = "devuser",
+            TenantId = "tenant-id",
+            UseExistingApplication = useExistingApplication,
+            Application = useExistingApplication ? "Existing application client-id" : null,
+            Overwrite = overwrite
+        };
+        var registration = new Mock<RegisterAppStep>(
+            Mock.Of<ILogger<AddClientSecretStep>>(), _mockFileSystem.Object, _testTelemetryService);
+        var secret = new Mock<AddClientSecretStep>(
+            Mock.Of<ILogger<AddClientSecretStep>>(), _mockFileSystem.Object, Mock.Of<IEnvironmentService>());
+        var services = new Mock<IServiceProvider>();
+        services.Setup(s => s.GetService(typeof(ValidateEntraIdStep))).Returns(step);
+        services.Setup(s => s.GetService(typeof(RegisterAppStep))).Returns(registration.Object);
+        services.Setup(s => s.GetService(typeof(AddClientSecretStep))).Returns(secret.Object);
+
+        IScaffolder scaffolder = new ScaffoldBuilder("entra-preflight-test")
+            .WithStep<ValidateEntraIdStep>()
+            .WithRegisterAppStep()
+            .WithAddClientSecretStep()
+            .Build(services.Object);
+        var context = new ScaffolderContext(scaffolder);
+
+        await scaffolder.ExecuteAsync(context);
+
+        Assert.Empty(context.Properties);
+        Assert.Single(_testTelemetryService.TrackedEvents);
+        _mockFileSystem.Verify(fs => fs.ReadAllText(devSettingsPath), Times.Once);
+        registration.Verify(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>()), Times.Never);
+        secret.Verify(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        if (conflictingKey is not null)
+        {
+            Assert.Contains(logger.Errors, message => message.Contains($"key '{conflictingKey}'"));
+            Assert.DoesNotContain(logger.Errors, message => message.Contains("existing-client-id") || message.Contains("different-"));
+        }
     }
 
     [Fact]

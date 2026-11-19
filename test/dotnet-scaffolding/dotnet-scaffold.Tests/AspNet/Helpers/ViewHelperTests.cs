@@ -16,6 +16,43 @@ namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Helpers;
 
 public class ViewHelperTests
 {
+    [Theory]
+    [InlineData("OrdersController", "Orders")]
+    [InlineData("@OrdersController", "Orders")]
+    [InlineData("@OrdersCONTROLLER", "Orders")]
+    [InlineData("Orderscontroller", "Orders")]
+    [InlineData("OrdersCONTROLLER", "Orders")]
+    [InlineData("PurchasesController", "Purchases")]
+    [InlineData("Orders", "Orders")]
+    [InlineData("OrderController", "Order")]
+    [InlineData("ControllerOrdersController", "ControllerOrders")]
+    [InlineData(null, "Order")]
+    public void GetTextTemplatingProperties_UsesControllerFolderForAllCrudViews(string? controllerName, string expectedFolder)
+    {
+        string projectPath = Path.Combine("test", "project", "TestProject.csproj");
+        string[] templates =
+        [
+            ViewHelper.CreateTemplate, ViewHelper.EditTemplate, ViewHelper.DeleteTemplate,
+            ViewHelper.DetailsTemplate, ViewHelper.IndexTemplate
+        ];
+        var viewModel = new ViewModel
+        {
+            ControllerName = controllerName,
+            PageType = "CRUD",
+            ModelInfo = new ModelInfo { ModelTypeName = "Order" },
+            ProjectInfo = new ProjectInfo(projectPath),
+            DbContextInfo = new DbContextInfo()
+        };
+
+        var properties = ViewHelper.GetTextTemplatingProperties(templates, viewModel).ToList();
+
+        Assert.Equal(5, properties.Count);
+        Assert.Equal(templates.Select(template => Path.Combine("test", "project", "Views", expectedFolder,
+            Path.ChangeExtension(template, ".cshtml"))), properties.Select(property => property.OutputPath));
+        Assert.All(properties, property => Assert.Same(viewModel, property.TemplateModel));
+        Assert.Equal("Order", viewModel.ModelInfo.ModelTypeName);
+    }
+
     [Fact]
     public void GetTextTemplatingProperties_WithValidCreateTemplate_ReturnsExpectedProperty()
     {
@@ -111,9 +148,46 @@ public class ViewHelperTests
         Assert.All(result, property =>
         {
             Assert.NotNull(property.TemplateType);
-            Assert.Contains("Product", property.OutputPath);
-            Assert.EndsWith(".cshtml", property.OutputPath);
+            Assert.Equal(
+                Path.Combine("test", "project", "Views", "Product", Path.ChangeExtension(Path.GetFileName(property.TemplatePath), ".cshtml")),
+                property.OutputPath);
         });
+    }
+
+    [Theory]
+    [InlineData("Movie", "MovieController", "Movie")]
+    [InlineData("Movie", "MoviesController", "Movies")]
+    [InlineData("Movie", "CatalogController", "Catalog")]
+    [InlineData("Person", "PeopleController", "People")]
+    [InlineData("Movie", "Movies", "Movies")]
+    [InlineData("Movie", "Moviescontroller", "Movies")]
+    [InlineData("Movie", "MoviesCONTROLLER", "Movies")]
+    [InlineData("Movie", "MovieControllerController", "MovieController")]
+    [InlineData("Movie", "ControllerMoviesController", "ControllerMovies")]
+    [InlineData("Movie", null, "Movie")]
+    [InlineData("MovieController", null, "MovieController")]
+    public void GetTextTemplatingProperties_WithControllerName_UsesControllerViewFolder(
+        string modelName, string? controllerName, string viewFolderName)
+    {
+        string projectPath = Path.Combine("test", "project", "TestProject.csproj");
+        string[] templateNames = ["Create", "Edit", "Delete", "Details", "Index"];
+        string[] templatePaths = templateNames.Select(name => Path.Combine("templates", $"{name}.tt")).ToArray();
+        ViewModel viewModel = new ViewModel
+        {
+            ControllerName = controllerName,
+            PageType = "CRUD",
+            ModelInfo = new ModelInfo { ModelTypeName = modelName },
+            ProjectInfo = new ProjectInfo(projectPath),
+            DbContextInfo = new DbContextInfo()
+        };
+
+        TextTemplatingProperty[] result = ViewHelper.GetTextTemplatingProperties(templatePaths, viewModel).ToArray();
+
+        Assert.Equal(
+            templateNames.Select(name => Path.Combine("test", "project", "Views", viewFolderName, $"{name}.cshtml")),
+            result.Select(property => property.OutputPath));
+        Assert.All(result, property => Assert.Same(viewModel, property.TemplateModel));
+        Assert.Equal(modelName, viewModel.ModelInfo.ModelTypeName);
     }
 
     [Fact]

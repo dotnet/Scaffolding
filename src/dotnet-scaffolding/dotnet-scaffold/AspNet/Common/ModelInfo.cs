@@ -78,7 +78,11 @@ internal class ForeignKeyNavigationInfo
     /// </summary>
     public required string DisplayPropertyName { get; init; }
     /// <summary>
-    /// Gets the DbContext member expression for the principal entity set (e.g. "Countries" or "Set&lt;Models.Country&gt;()").
+    /// Gets the DbContext member expression for the principal entity set (e.g. "Countries" or "Set&lt;global::Models.Country&gt;()").
     /// </summary>
     public required string EntitySetName { get; init; }
+    /// <summary>
+    /// Gets whether the foreign key property is nullable (Nullable&lt;T&gt; or an annotated reference type).
+    /// </summary>
+    public required bool IsNullable { get; init; }
 }

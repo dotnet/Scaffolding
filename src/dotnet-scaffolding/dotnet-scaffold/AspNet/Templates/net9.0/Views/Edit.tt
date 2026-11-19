@@ -10,6 +10,7 @@
     var foreignKeyNavigations = Model.ModelInfo.ForeignKeyNavigations;
     var navigationPropertyNames = new HashSet<string>(foreignKeyNavigations.Select(n => n.NavigationPropertyName));
     var foreignKeyPropertyNames = new HashSet<string>(foreignKeyNavigations.Select(n => n.ForeignKeyPropertyName));
+    var nullableForeignKeyPropertyNames = new HashSet<string>(foreignKeyNavigations.Where(n => n.IsNullable).Select(n => n.ForeignKeyPropertyName));
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase) &&
             !navigationPropertyNames.Contains(x.Name)).ToList();
@@ -41,7 +42,15 @@ foreach (var property in entityProperties)
             <div class="form-group">
                 <label asp-for="<#= modelPropertyName #>" class="control-label"></label>
 <#
-    if (foreignKeyPropertyNames.Contains(modelPropertyName))
+    if (nullableForeignKeyPropertyNames.Contains(modelPropertyName))
+    {
+#>
+                <select asp-for="<#= modelPropertyName #>" class="form-control" asp-items="ViewBag.<#= modelPropertyName #>">
+                    <option value="">-- select --</option>
+                </select>
+<#
+    }
+    else if (foreignKeyPropertyNames.Contains(modelPropertyName))
     {
 #>
                 <select asp-for="<#= modelPropertyName #>" class="form-control" asp-items="ViewBag.<#= modelPropertyName #>"></select>

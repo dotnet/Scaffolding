@@ -469,11 +469,33 @@ public class MvcEfControllerTemplateTests
         Assert.DoesNotContain("<select", editView);
     }
 
+    [Fact]
+    public void NullableForeignKey_RendersEmptyOption()
+    {
+        ModelInfo modelInfo = CreateCountryCityModelInfo("City", countryIdDeclaration: "public int? CountryId { get; set; }");
+
+        var (_, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.True(Assert.Single(modelInfo.ForeignKeyNavigations).IsNullable);
+        foreach (string view in new[] { createView, editView })
+        {
+            Assert.Contains("<select asp-for=\"CountryId\" class=\"form-control\" asp-items=\"ViewBag.CountryId\">\r\n                    <option value=\"\">-- select --</option>\r\n                </select>", view);
+        }
+    }
+
+    [Fact]
+    public void NotMappedForeignKeyProperty_IsNotTreatedAsForeignKey()
+    {
+        ModelInfo modelInfo = CreateCountryCityModelInfo("City", countryIdDeclaration: "[System.ComponentModel.DataAnnotations.Schema.NotMapped] public int CountryId { get; set; }");
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+    }
+
     #endregion
 
     #region Helpers
 
-    private static ModelInfo CreateCountryCityModelInfo(string modelTypeName, string countryNavigationAttribute = "")
+    private static ModelInfo CreateCountryCityModelInfo(string modelTypeName, string countryNavigationAttribute = "", string countryIdDeclaration = "public int CountryId { get; set; }")
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(@"
 #nullable enable
@@ -500,7 +522,7 @@ namespace Models
     {
         public int Id { get; set; }
         public string Name { get; set; } = """";
-        public int CountryId { get; set; }
+        " + countryIdDeclaration + @"
         " + countryNavigationAttribute + @"
         public virtual Country? Country { get; set; }
     }

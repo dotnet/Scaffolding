@@ -32,6 +32,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.Views
     var foreignKeyNavigations = Model.ModelInfo.ForeignKeyNavigations;
     var navigationPropertyNames = new HashSet<string>(foreignKeyNavigations.Select(n => n.NavigationPropertyName));
     var foreignKeyPropertyNames = new HashSet<string>(foreignKeyNavigations.Select(n => n.ForeignKeyPropertyName));
+    var nullableForeignKeyPropertyNames = new HashSet<string>(foreignKeyNavigations.Where(n => n.IsNullable).Select(n => n.ForeignKeyPropertyName));
     var entityProperties =  Model.ModelInfo.ModelProperties
         .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase) &&
             !navigationPropertyNames.Contains(x.Name)).ToList();
@@ -58,7 +59,18 @@ foreach (var property in entityProperties)
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write("\" class=\"control-label\"></label>\r\n");
 
-    if (foreignKeyPropertyNames.Contains(modelPropertyName))
+    if (nullableForeignKeyPropertyNames.Contains(modelPropertyName))
+    {
+
+            this.Write("                <select asp-for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\" class=\"form-control\" asp-items=\"ViewBag.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\">\r\n                    <option value=\"\">-- select --</option>\r\n                <" +
+                    "/select>\r\n");
+
+    }
+    else if (foreignKeyPropertyNames.Contains(modelPropertyName))
     {
 
             this.Write("                <select asp-for=\"");

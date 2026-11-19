@@ -189,9 +189,13 @@ internal static class ClassAnalyzers
                 continue;
             }
 
-            // A principal entity must have a discoverable primary key.
+            // A principal entity must have a discoverable primary key. GetModelProperties returns the first
+            // [Key] or convention key in declaration order, so skip when a different property carries [Key].
             var principalProperties = EfDbContextHelpers.GetModelProperties(principalType);
-            if (principalProperties is null)
+            if (principalProperties is null ||
+                principalProperties.AllModelProperties.Any(p =>
+                    HasAttribute(p, "KeyAttribute") &&
+                    !string.Equals(p.Name, principalProperties.PrimaryKeyName, StringComparison.Ordinal)))
             {
                 continue;
             }
@@ -222,7 +226,11 @@ internal static class ClassAnalyzers
                 ForeignKeyPropertyName = foreignKeyProperty.Name,
                 PrincipalPrimaryKeyName = principalProperties.PrimaryKeyName,
                 DisplayPropertyName = GetDisplayPropertyName(principalProperties.AllModelProperties, principalProperties.PrimaryKeyName) ?? principalProperties.PrimaryKeyName,
-                EntitySetName = string.IsNullOrEmpty(entitySetName) ? $"Set<{principalFullName}>()" : entitySetName
+                EntitySetName = string.IsNullOrEmpty(entitySetName)
+                    ? $"Set<{principalType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>()"
+                    : entitySetName,
+                IsNullable = foreignKeyProperty.Type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T ||
+                    foreignKeyProperty.Type.NullableAnnotation == NullableAnnotation.Annotated
             });
         }
 
@@ -253,7 +261,7 @@ internal static class ClassAnalyzers
                 string.Equals(GetForeignKeyAttributeName(p), navigationProperty.Name, StringComparison.OrdinalIgnoreCase));
             if (attributedProperty is not null)
             {
-                return IsScalarProperty(attributedProperty) ? attributedProperty : null;
+                return IsScalarProperty(attributedProperty) && !HasAttribute(attributedProperty, "NotMappedAttribute") ? attributedProperty : null;
             }
 
             candidateNames =
@@ -270,7 +278,8 @@ internal static class ClassAnalyzers
             var match = modelProperties.FirstOrDefault(p =>
                 !SymbolEqualityComparer.Default.Equals(p, navigationProperty) &&
                 string.Equals(p.Name, candidateName, StringComparison.OrdinalIgnoreCase) &&
-                IsScalarProperty(p));
+                IsScalarProperty(p) &&
+                !HasAttribute(p, "NotMappedAttribute"));
             if (match is not null)
             {
                 return match;

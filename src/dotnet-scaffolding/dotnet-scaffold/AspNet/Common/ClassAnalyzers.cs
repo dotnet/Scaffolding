@@ -214,7 +214,7 @@ internal static class ClassAnalyzers
                 NavigationPropertyName = navigationProperty.Name,
                 ForeignKeyPropertyName = foreignKeyProperty.Name,
                 PrincipalPrimaryKeyName = principalProperties.PrimaryKeyName,
-                DisplayPropertyName = GetDisplayPropertyName(principalProperties.AllModelProperties) ?? principalProperties.PrimaryKeyName,
+                DisplayPropertyName = GetDisplayPropertyName(principalProperties.AllModelProperties, principalProperties.PrimaryKeyName) ?? principalProperties.PrimaryKeyName,
                 EntitySetName = string.IsNullOrEmpty(entitySetName) ? $"Set<{principalFullName}>()" : entitySetName
             });
         }
@@ -286,19 +286,32 @@ internal static class ClassAnalyzers
     }
 
     /// <summary>
-    /// Mirrors the legacy scaffolder: the first (ordinal by name, as EF Core orders properties) non-nullable
-    /// string property of the principal entity; null when there is none.
+    /// Mirrors the legacy scaffolder: the first non-nullable string property of the principal entity in EF Core
+    /// property order (primary key first, then ordinal by name), limited to convention-mapped properties;
+    /// null when there is none.
     /// </summary>
-    private static string? GetDisplayPropertyName(List<IPropertySymbol> principalProperties)
+    private static string? GetDisplayPropertyName(List<IPropertySymbol> principalProperties, string principalKeyName)
     {
         return principalProperties
             .Where(p => !p.IsStatic &&
+                !p.IsIndexer &&
+                p.GetMethod?.DeclaredAccessibility == Accessibility.Public &&
+                p.SetMethod is not null &&
+                !HasAttribute(p, "NotMappedAttribute") &&
                 p.Type.SpecialType == SpecialType.System_String &&
                 (p.NullableAnnotation == NullableAnnotation.NotAnnotated ||
-                 p.GetAttributes().Any(a => a.AttributeClass is not null && a.AttributeClass.Name.Equals("RequiredAttribute", StringComparison.Ordinal))))
+                 string.Equals(p.Name, principalKeyName, StringComparison.Ordinal) ||
+                 HasAttribute(p, "RequiredAttribute")))
             .Select(p => p.Name)
-            .OrderBy(name => name, StringComparer.Ordinal)
+            .OrderBy(name => string.Equals(name, principalKeyName, StringComparison.Ordinal) ? 0 : 1)
+            .ThenBy(name => name, StringComparer.Ordinal)
             .FirstOrDefault();
+    }
+
+    private static bool HasAttribute(IPropertySymbol propertySymbol, string attributeName)
+    {
+        return propertySymbol.GetAttributes().Any(a =>
+            a.AttributeClass is not null && a.AttributeClass.Name.Equals(attributeName, StringComparison.Ordinal));
     }
 
     /// <summary>

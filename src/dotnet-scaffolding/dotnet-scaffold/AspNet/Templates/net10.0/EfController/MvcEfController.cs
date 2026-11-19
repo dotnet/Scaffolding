@@ -233,18 +233,10 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.EfController
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
             this.Write(".");
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
-            this.Write(@"))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return RedirectToAction(nameof(Index));
-        }
-");
+            this.Write("))\r\n                {\r\n                    return NotFound();\r\n                }\r" +
+                    "\n                else\r\n                {\r\n                    throw;\r\n          " +
+                    "      }\r\n            }\r\n            return RedirectToAction(nameof(Index));\r\n   " +
+                    "     }\r\n");
 
     foreach (var navigation in foreignKeyNavigations)
     {

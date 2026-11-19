@@ -17,7 +17,11 @@ using Net11MvcEfController = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.ne
 using Net9RazorCreateModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.RazorPages.CreateModel;
 using Net10RazorCreateModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.CreateModel;
 using Net11RazorCreateModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.RazorPages.CreateModel;
+using Net9CreateView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.Views.Create;
+using Net10CreateView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views.Create;
 using Net11CreateView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Views.Create;
+using Net9EditView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.Views.Edit;
+using Net10EditView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views.Edit;
 using Net11EditView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Views.Edit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;
@@ -403,14 +407,15 @@ public class MvcEfControllerTemplateTests
 
     #region Foreign keys — SelectList and <select> parity with legacy scaffolder
 
-    [Fact]
-    public void Net11_ModelWithForeignKey_RendersSelectListAndSkipsNavigation()
+    [Theory]
+    [InlineData("net9")]
+    [InlineData("net10")]
+    [InlineData("net11")]
+    public void ModelWithForeignKey_RendersSelectListAndSkipsNavigation(string targetFramework)
     {
         ModelInfo modelInfo = CreateCountryCityModelInfo("City");
 
-        string controller = CreateNet11Template(CreateCountryCityEfControllerModel(modelInfo)).TransformText();
-        string createView = CreateNet11CreateViewTemplate(CreateCountryCityViewModel(modelInfo)).TransformText();
-        string editView = CreateNet11EditViewTemplate(CreateCountryCityViewModel(modelInfo)).TransformText();
+        var (controller, createView, editView) = TransformCountryCityTemplates(targetFramework, modelInfo);
 
         Assert.Contains("using Microsoft.AspNetCore.Mvc.Rendering;", controller);
         Assert.Equal(1, CountOccurrences(controller, "ViewData[\"CountryId\"] = new SelectList(_context.Countries, \"Id\", \"Name\");"));
@@ -425,19 +430,24 @@ public class MvcEfControllerTemplateTests
         }
     }
 
-    [Fact]
-    public void Net11_ModelWithoutForeignKey_RendersNoSelectList()
+    [Theory]
+    [InlineData("net9")]
+    [InlineData("net10")]
+    [InlineData("net11")]
+    public void ModelWithoutForeignKey_RendersNoSelectList(string targetFramework)
     {
         // Country has a collection navigation but no foreign key; output must stay as before.
         ModelInfo modelInfo = CreateCountryCityModelInfo("Country");
 
-        string controller = CreateNet11Template(CreateCountryCityEfControllerModel(modelInfo)).TransformText();
-        string createView = CreateNet11CreateViewTemplate(CreateCountryCityViewModel(modelInfo)).TransformText();
-        string editView = CreateNet11EditViewTemplate(CreateCountryCityViewModel(modelInfo)).TransformText();
+        var (controller, createView, editView) = TransformCountryCityTemplates(targetFramework, modelInfo);
 
         Assert.Empty(modelInfo.ForeignKeyNavigations);
         Assert.DoesNotContain("SelectList", controller);
         Assert.DoesNotContain("Microsoft.AspNetCore.Mvc.Rendering", controller);
+        Assert.StartsWith(
+            "\r\nusing Microsoft.AspNetCore.Mvc;\r\nusing Microsoft.EntityFrameworkCore;\r\nusing Models;\r\n\r\npublic class CountrysController",
+            controller,
+            System.StringComparison.Ordinal);
         foreach (string view in new[] { createView, editView })
         {
             Assert.DoesNotContain("<select", view);
@@ -526,20 +536,31 @@ namespace Models
         };
     }
 
-    private static Net11CreateView CreateNet11CreateViewTemplate(ViewModel model)
+    private static (string Controller, string CreateView, string EditView) TransformCountryCityTemplates(string targetFramework, ModelInfo modelInfo)
     {
-        var template = new Net11CreateView();
-        template.Session = new Dictionary<string, object> { { "Model", model } };
-        template.Initialize();
-        return template;
-    }
-
-    private static Net11EditView CreateNet11EditViewTemplate(ViewModel model)
-    {
-        var template = new Net11EditView();
-        template.Session = new Dictionary<string, object> { { "Model", model } };
-        template.Initialize();
-        return template;
+        EfControllerModel controllerModel = CreateCountryCityEfControllerModel(modelInfo);
+        var viewSession = new Dictionary<string, object> { { "Model", CreateCountryCityViewModel(modelInfo) } };
+        switch (targetFramework)
+        {
+            case "net9":
+                var net9Create = new Net9CreateView { Session = viewSession };
+                var net9Edit = new Net9EditView { Session = viewSession };
+                net9Create.Initialize();
+                net9Edit.Initialize();
+                return (CreateNet9Template(controllerModel).TransformText(), net9Create.TransformText(), net9Edit.TransformText());
+            case "net10":
+                var net10Create = new Net10CreateView { Session = viewSession };
+                var net10Edit = new Net10EditView { Session = viewSession };
+                net10Create.Initialize();
+                net10Edit.Initialize();
+                return (CreateNet10Template(controllerModel).TransformText(), net10Create.TransformText(), net10Edit.TransformText());
+            default:
+                var net11Create = new Net11CreateView { Session = viewSession };
+                var net11Edit = new Net11EditView { Session = viewSession };
+                net11Create.Initialize();
+                net11Edit.Initialize();
+                return (CreateNet11Template(controllerModel).TransformText(), net11Create.TransformText(), net11Edit.TransformText());
+        }
     }
 
     private static EfControllerModel CreateBlogEfControllerModel()

@@ -2,7 +2,7 @@
 @using Microsoft.EntityFrameworkCore
 @using BlazorWebApp.Models
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
-@inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 
 <PageTitle>Delete</PageTitle>
 
@@ -41,7 +41,7 @@
 
         if (product is null)
         {
-            NavigationManager.NotFound();
+            Navigation.NotFound();
         }
     }
 
@@ -50,6 +50,6 @@
         using var context = DbFactory.CreateDbContext();
         context.Product.Remove(product!);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/products");
+        Navigation.NavigateTo("/products");
     }
 }

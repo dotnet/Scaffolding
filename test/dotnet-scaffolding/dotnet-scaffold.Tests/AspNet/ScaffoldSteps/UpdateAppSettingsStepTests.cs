@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1183,5 +1184,416 @@ public class UpdateAppSettingsStepTests
                 InformationMessages.Add(formatter(state, exception));
             }
         }
+    }
+    [Fact]
+    public async Task ExecuteAsync_UpdatesConfigurationKeysCaseInsensitively()
+    {
+        var fileSystem = CreateFileSystem();
+        var path = Path.Combine("project", "appsettings.Development.json");
+        fileSystem.Setup(fs => fs.ReadAllText(path))
+            .Returns("""{"azuread":{"clientid":"old-app","TENANTID":"old-tenant","clientcredentials":[{"SourceType":"StoreWithDistinguishedName","CertificateDistinguishedName":"CN=Dev"}]}}""");
+        string? written = null;
+        fileSystem.Setup(fs => fs.WriteAllText(path, It.IsAny<string>()))
+            .Callback((string _, string json) => written = json);
+        var step = CreateStep(fileSystem);
+
+        Assert.True(await step.ExecuteAsync(CreateContext(existingApp: true)));
+
+        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(Assert.IsType<string>(written)));
+        var configuration = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+            .AddJsonStream(stream).Build();
+        Assert.Equal("app-id", configuration["AzureAd:ClientId"]);
+        Assert.Equal("tenant-a", configuration["AzureAd:TenantId"]);
+        Assert.Equal("CN=Dev", configuration["AzureAd:ClientCredentials:0:CertificateDistinguishedName"]);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_PreservesDevelopmentOnlyCredentialsAndUnrelatedProperties()
+    {
+        var fileSystem = CreateFileSystem();
+        var developmentPath = Path.Combine("project", "appsettings.Development.json");
+        const string original = """
+            {"AzureAd":{"ClientId":"old-app","Domain":"development.contoso.com",
+            "ClientCredentials":[{"SourceType":"StoreWithDistinguishedName","CertificateDistinguishedName":"CN=Dev"}],
+            "SignUpSignInPolicyId":"B2C_1_dev"},"Keep":"development"}
+            """;
+        fileSystem.Setup(fs => fs.ReadAllText(developmentPath)).Returns(original);
+        fileSystem.Setup(fs => fs.ReadAllText(Path.Combine("project", "appsettings.json")))
+            .Returns("""{"AzureAd":{"ClientCredentials":[{"SourceType":"ClientSecret","ClientSecret":"primary-only"}],"SignUpSignInPolicyId":"B2C_1_primary"}}""");
+        string? written = null;
+        fileSystem.Setup(fs => fs.WriteAllText(developmentPath, It.IsAny<string>()))
+            .Callback((string _, string json) => written = json);
+        var step = CreateStep(fileSystem);
+        var context = CreateContext(existingApp: true);
+
+        Assert.True(await step.ExecuteAsync(context));
+
+        var result = JsonNode.Parse(Assert.IsType<string>(written))!;
+        var originalNode = JsonNode.Parse(original)!;
+        Assert.True(JsonNode.DeepEquals(originalNode["AzureAd"]!["ClientCredentials"], result["AzureAd"]!["ClientCredentials"]));
+        Assert.Equal("development.contoso.com", result["AzureAd"]!["Domain"]!.GetValue<string>());
+        Assert.Equal("B2C_1_dev", result["AzureAd"]!["SignUpSignInPolicyId"]!.GetValue<string>());
+        Assert.Equal("development", result["Keep"]!.GetValue<string>());
+        Assert.Equal("app-id", result["AzureAd"]!["ClientId"]!.GetValue<string>());
+        Assert.Equal("tenant-a", result["AzureAd"]!["TenantId"]!.GetValue<string>());
+        Assert.Empty(step.CleanupCommands);
+    }
+
+    [Theory]
+    [InlineData("{/* supported comment */\"AzureAd\":{}}")]
+    [InlineData("{\"AzureAd\":{\"ClientId\":\"old-app\",},}")]
+    public async Task ExecuteAsync_AcceptsConfigurationJsonFormats(string json)
+    {
+        var fileSystem = CreateFileSystem();
+        var path = Path.Combine("project", "appsettings.Development.json");
+        fileSystem.Setup(fs => fs.ReadAllText(path)).Returns(json);
+        var step = CreateStep(fileSystem);
+
+        Assert.True(await step.ExecuteAsync(CreateContext(existingApp: false)));
+
+        Assert.Empty(step.CleanupCommands);
+        fileSystem.Verify(fs => fs.WriteAllText(path,
+            It.Is<string>(content => content.Contains("app-id") && content.Contains("tenant-a"))), Times.Once);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_OnWriteFailure_CleansUpOnlyCurrentRunApplication(bool existingApp)
+    {
+        var fileSystem = CreateFileSystem();
+        var failingPath = Path.Combine("project", "appsettings.Development.json");
+        fileSystem.Setup(fs => fs.WriteAllText(failingPath, It.IsAny<string>()))
+            .Throws(new IOException("Write failed."));
+        var step = CreateStep(fileSystem);
+        var context = CreateContext(existingApp);
+
+        Assert.False(await step.ExecuteAsync(context));
+
+        if (existingApp)
+        {
+            Assert.Empty(step.CleanupCommands);
+            Assert.Equal("app-id", context.Properties["ClientId"]);
+        }
+        else
+        {
+            Assert.Equal(new[] { "--unregister-app", "--client-id", "app-id", "--tenant-id", "tenant-a",
+            "--username", "user@example.com" }, Assert.Single(step.CleanupCommands));
+            Assert.Empty(context.Properties);
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_InvalidDevelopmentSettings_FailsWithoutOverwritingThem()
+    {
+        var fileSystem = CreateFileSystem();
+        var developmentPath = Path.Combine("project", "appsettings.Development.json");
+        fileSystem.Setup(fs => fs.ReadAllText(developmentPath)).Returns("invalid JSON");
+        var step = CreateStep(fileSystem);
+
+        Assert.False(await step.ExecuteAsync(CreateContext(false)));
+
+        Assert.Single(step.CleanupCommands);
+        fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_PartialDevelopmentWriteFailure_RestoresOriginalSettings(bool missingPrimary)
+    {
+        var primary = Path.Combine("project", "appsettings.json");
+        var development = Path.Combine("project", "appsettings.Development.json");
+        var originalPrimary = """{"Keep":"primary","AzureAd":{"ClientId":"previous-app"}}""";
+        var originalDevelopment = """{"Keep":"development"}""";
+        var files = new Dictionary<string, string> { [development] = originalDevelopment };
+        if (!missingPrimary)
+        {
+            files[primary] = originalPrimary;
+        }
+        var fileSystem = CreateFileSystem();
+        fileSystem.Setup(fs => fs.FileExists(It.IsAny<string>()))
+            .Returns((string path) => files.ContainsKey(path));
+        fileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>()))
+            .Returns((string path) => files[path]);
+        fileSystem.Setup(fs => fs.DeleteFile(It.IsAny<string>()))
+            .Callback((string path) => files.Remove(path));
+        var failed = false;
+        fileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
+            .Callback((string path, string content) =>
+            {
+                if (path == development && !failed)
+                {
+                    failed = true;
+                    files[path] = "partially written";
+                    throw new IOException("Development write failed after truncation.");
+                }
+                files[path] = content;
+            });
+        var step = CreateStep(fileSystem);
+
+        Assert.False(await step.ExecuteAsync(CreateContext(false)));
+
+        Assert.True(failed);
+        Assert.Equal(originalDevelopment, files[development]);
+        if (missingPrimary)
+        {
+            Assert.False(files.ContainsKey(primary));
+        }
+        else
+        {
+            Assert.Equal(originalPrimary, files[primary]);
+        }
+        Assert.Single(step.CleanupCommands);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_SuccessPersistsDevelopmentSettingsWithoutCleanup()
+    {
+        var fileSystem = CreateFileSystem();
+        var step = CreateStep(fileSystem);
+        var context = CreateContext(false);
+
+        Assert.True(await step.ExecuteAsync(context));
+
+        Assert.Empty(step.CleanupCommands);
+        Assert.Equal("app-id", context.Properties["ClientId"]);
+        foreach (var name in new[] { "appsettings.Development.json" })
+        {
+            fileSystem.Verify(fs => fs.WriteAllText(Path.Combine("project", name),
+                It.Is<string>(json => json.Contains("app-id") && json.Contains("tenant-a"))), Times.Once);
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_MissingSettings_CreatesFileInProjectDirectory()
+    {
+        var fileSystem = CreateFileSystem();
+        fileSystem.Setup(fs => fs.EnumerateFiles("project", "appsettings.json", SearchOption.AllDirectories))
+            .Returns(Array.Empty<string>());
+        fileSystem.Setup(fs => fs.FileExists(Path.Combine("project", "appsettings.Development.json"))).Returns(false);
+        var step = CreateStep(fileSystem);
+
+        Assert.True(await step.ExecuteAsync(CreateContext(false)));
+
+        fileSystem.Verify(fs => fs.WriteAllText(Path.Combine("project", "appsettings.Development.json"), It.IsAny<string>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WritesAppSettingsWithTrailingNewLine()
+    {
+        string baseProjectPath = Path.Combine("test", "project");
+        string projectPath = Path.Combine(baseProjectPath, "TestProject.csproj");
+        string generatedAppSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
+
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(baseProjectPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.EnumerateFiles(baseProjectPath, "appsettings.json", SearchOption.AllDirectories))
+            .Returns(new List<string>());
+
+        string? appSettingsContent = null;
+        _mockFileSystem.Setup(fs => fs.WriteAllText(generatedAppSettingsPath, It.IsAny<string>()))
+            .Callback<string, string>((_, content) => appSettingsContent = content);
+
+        _mockFileSystem.Setup(fs => fs.FileExists(Path.Combine(baseProjectPath, "appsettings.Development.json"))).Returns(false);
+
+        UpdateAppSettingsStep step = new UpdateAppSettingsStep(
+            NullLogger<UpdateAppSettingsStep>.Instance,
+            _mockFileSystem.Object,
+            _mockTelemetryService.Object)
+        {
+            ProjectPath = projectPath,
+            Username = "testuser",
+            ClientId = "client-id",
+            TenantId = "tenant-id"
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.True(result);
+        Assert.NotNull(appSettingsContent);
+        Assert.EndsWith(Environment.NewLine, appSettingsContent);
+
+        using JsonDocument document = JsonDocument.Parse(appSettingsContent);
+        Assert.True(document.RootElement.TryGetProperty("AzureAd", out JsonElement azureAd));
+        Assert.Equal("client-id", azureAd.GetProperty("ClientId").GetString());
+
+        _mockFileSystem.Verify(fs => fs.WriteAllText(generatedAppSettingsPath, It.IsAny<string>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_PreservesMissingTrailingNewLine()
+    {
+        string baseProjectPath = Path.Combine("test", "project");
+        string projectPath = Path.Combine(baseProjectPath, "TestProject.csproj");
+        string appSettingsPath = Path.Combine(baseProjectPath, "appsettings.json");
+        string developmentSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
+
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(baseProjectPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.EnumerateFiles(baseProjectPath, "appsettings.json", SearchOption.AllDirectories))
+            .Returns(new List<string> { appSettingsPath });
+        _mockFileSystem.Setup(fs => fs.FileExists(appSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(appSettingsPath)).Returns("{}");
+
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns("{}");
+
+        string? developmentContent = null;
+        _mockFileSystem.Setup(fs => fs.WriteAllText(developmentSettingsPath, It.IsAny<string>()))
+            .Callback<string, string>((_, content) => developmentContent = content);
+
+        UpdateAppSettingsStep step = new UpdateAppSettingsStep(
+            NullLogger<UpdateAppSettingsStep>.Instance,
+            _mockFileSystem.Object,
+            _mockTelemetryService.Object)
+        {
+            ProjectPath = projectPath,
+            Username = "testuser",
+            ClientId = "client-id",
+            TenantId = "tenant-id"
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.True(result);
+        Assert.NotNull(developmentContent);
+        Assert.False(developmentContent.EndsWith(Environment.NewLine, StringComparison.Ordinal));
+
+        using JsonDocument document = JsonDocument.Parse(developmentContent);
+        Assert.True(document.RootElement.TryGetProperty("AzureAd", out _));
+
+        _mockFileSystem.Verify(fs => fs.WriteAllText(developmentSettingsPath, It.IsAny<string>()), Times.Once);
+    }
+
+    [Theory]
+    [InlineData("{\n  // Preserve this comment\n  \"FeatureEnabled\": true\n}")]
+    [InlineData("{\n  \"FeatureEnabled\": true,\n}")]
+    public async Task ExecuteAsync_AcceptsCommentsAndTrailingCommasInDevelopmentSettings(string developmentSettingsContent)
+    {
+        string projectPath = Path.Combine("test", "project", "TestProject.csproj");
+        string baseProjectPath = Path.GetDirectoryName(projectPath)!;
+        string appSettingsPath = Path.Combine(baseProjectPath, "appsettings.json");
+        string developmentSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
+
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(baseProjectPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.EnumerateFiles(baseProjectPath, "appsettings.json", SearchOption.AllDirectories))
+            .Returns(new List<string> { appSettingsPath });
+        _mockFileSystem.Setup(fs => fs.FileExists(appSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(appSettingsPath)).Returns("{}");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath)).Returns(developmentSettingsContent);
+
+        string? writtenContent = null;
+
+        _mockFileSystem
+            .Setup(fs => fs.WriteAllText(
+                developmentSettingsPath,
+                It.IsAny<string>()))
+            .Callback<string, string>((_, content) =>
+            {
+                writtenContent = content;
+            });
+        UpdateAppSettingsStep step = new UpdateAppSettingsStep(
+            _mockLogger.Object,
+            _mockFileSystem.Object,
+            _mockTelemetryService.Object)
+        {
+            ProjectPath = projectPath,
+            ClientId = "client-id",
+            TenantId = "tenant-id"
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+
+        Assert.True(result);
+        using JsonDocument document = JsonDocument.Parse(Assert.IsType<string>(writtenContent));
+        Assert.True(document.RootElement.GetProperty("FeatureEnabled").GetBoolean());
+        Assert.Equal("client-id", document.RootElement.GetProperty("AzureAd").GetProperty("ClientId").GetString());
+        _mockFileSystem.Verify(fs => fs.WriteAllText(developmentSettingsPath, It.IsAny<string>()), Times.Once);
+    }
+    [Fact]
+    public async Task ExecuteAsync_LogsWarningWhenDevelopmentJsonInvalid()
+    {
+        string baseProjectPath = Path.Combine("test", "project");
+        string projectPath = Path.Combine(baseProjectPath, "TestProject.csproj");
+        string appSettingsPath = Path.Combine(baseProjectPath, "appsettings.json");
+        string developmentSettingsPath = Path.Combine(baseProjectPath, "appsettings.Development.json");
+
+        _mockFileSystem.Setup(fs => fs.DirectoryExists(baseProjectPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.EnumerateFiles(baseProjectPath, "appsettings.json", SearchOption.AllDirectories))
+            .Returns(new List<string> { appSettingsPath });
+        _mockFileSystem.Setup(fs => fs.FileExists(appSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(appSettingsPath)).Returns("{}");
+        _mockFileSystem.Setup(fs => fs.FileExists(developmentSettingsPath)).Returns(true);
+        _mockFileSystem.Setup(fs => fs.ReadAllText(developmentSettingsPath))
+            .Returns("{ invalid json }");
+
+        var mockLogger = new Mock<ILogger<UpdateAppSettingsStep>>();
+
+        UpdateAppSettingsStep step = new UpdateAppSettingsStep(
+            mockLogger.Object,
+            _mockFileSystem.Object,
+            _mockTelemetryService.Object)
+        {
+            ProjectPath = projectPath,
+            Username = "testuser",
+            ClientId = "client-id",
+            TenantId = "tenant-id"
+        };
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+        Assert.False(result);
+
+        Assert.Contains(mockLogger.Invocations, invocation =>
+            invocation.Method.Name == nameof(ILogger.Log) &&
+            invocation.Arguments[0] is LogLevel.Warning &&
+            invocation.Arguments[2]?.ToString()?.Contains("Failed to parse") == true &&
+            invocation.Arguments[2]?.ToString()?.Contains("The file contains invalid JSON.") == true &&
+            invocation.Arguments[2]?.ToString()?.Contains("Error:") == true &&
+            invocation.Arguments[2]?.ToString()?.Contains("comments or trailing commas") == false);
+        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    private static Mock<IFileSystem> CreateFileSystem()
+    {
+        var fileSystem = new Mock<IFileSystem>();
+        fileSystem.Setup(fs => fs.DirectoryExists("project")).Returns(true);
+        fileSystem.Setup(fs => fs.EnumerateFiles("project", "appsettings.json", SearchOption.AllDirectories))
+            .Returns(new[] { Path.Combine("project", "appsettings.json") });
+        fileSystem.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns(true);
+        fileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>())).Returns("{}");
+        return fileSystem;
+    }
+
+    private static TestStep CreateStep(Mock<IFileSystem> fileSystem) => new(fileSystem.Object)
+    {
+        ProjectPath = Path.Combine("project", "Test.csproj"),
+        ClientId = "app-id",
+        TenantId = "tenant-a",
+        Username = "user@example.com",
+        Overwrite = true
+    };
+
+    private static ScaffolderContext CreateContext(bool existingApp)
+    {
+        var context = new ScaffolderContext(Mock.Of<IScaffolder>());
+        context.Properties["ClientId"] = "app-id";
+        if (!existingApp)
+        {
+            context.Properties[EntraRegistrationCleanup.CreatedClientIdKey] = "app-id";
+            context.Properties["ClientSecret"] = "development-secret";
+        }
+        return context;
+    }
+
+    private sealed class TestStep(IFileSystem fileSystem) : UpdateAppSettingsStep(
+        NullLogger<UpdateAppSettingsStep>.Instance, fileSystem, Mock.Of<ITelemetryService>())
+    {
+        public List<string[]> CleanupCommands { get; } = [];
+
+        protected override void CleanupRegistration(ScaffolderContext context)
+            => EntraRegistrationCleanup.TryCleanup(context, TenantId, Username, NullLogger.Instance, args =>
+            {
+                CleanupCommands.Add(args);
+                return (0, null);
+            });
     }
 }

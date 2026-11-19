@@ -77,6 +77,7 @@ public class AddAspireConnectionStringStepTests : IDisposable
         // Assert
         Assert.True(result);
         _mockFileSystem.Verify(x => x.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        Assert.EndsWith(Environment.NewLine, capturedContent);
         
         JsonDocument doc = JsonDocument.Parse(capturedContent);
         Assert.True(doc.RootElement.TryGetProperty("ConnectionStrings", out JsonElement connectionStrings));
@@ -119,6 +120,7 @@ public class AddAspireConnectionStringStepTests : IDisposable
         // Assert
         Assert.True(result);
         _mockFileSystem.Verify(x => x.WriteAllText(_appSettingsPath, It.IsAny<string>()), Times.Once);
+        Assert.False(capturedContent.EndsWith(Environment.NewLine, StringComparison.Ordinal));
 
         JsonDocument doc = JsonDocument.Parse(capturedContent);
         Assert.True(doc.RootElement.TryGetProperty("ConnectionStrings", out JsonElement connectionStrings));
@@ -169,7 +171,7 @@ public class AddAspireConnectionStringStepTests : IDisposable
   ""ConnectionStrings"": {
     ""ExistingConnection"": ""Server=existing;Database=Existing""
   }
-}";
+}" + Environment.NewLine;
         string capturedContent = string.Empty;
 
         _mockFileSystem.Setup(x => x.EnumerateFiles(_testProjectDirectory, "appsettings.json", SearchOption.AllDirectories))
@@ -194,6 +196,7 @@ public class AddAspireConnectionStringStepTests : IDisposable
         // Assert
         Assert.True(result);
         _mockFileSystem.Verify(x => x.WriteAllText(_appSettingsPath, It.IsAny<string>()), Times.Once);
+        Assert.EndsWith(Environment.NewLine, capturedContent);
 
         JsonDocument doc = JsonDocument.Parse(capturedContent);
         Assert.True(doc.RootElement.TryGetProperty("ConnectionStrings", out JsonElement connectionStrings));

@@ -152,6 +152,8 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     }
                     catch (JsonException ex)
                     {
+                        _logger.LogWarning($"Failed to parse {devSettingsPath}. The file contains invalid JSON. " +
+                            $"The file will not be modified to preserve existing settings. Error: {ex.Message}");
                         _logger.LogError($"Failed to parse appsettings.Development.json file at {devSettingsPath}: {ex.Message}");
                         return false;
                     }
@@ -230,7 +232,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                 }
 
                 var options = new JsonSerializerOptions { WriteIndented = true };
-                if (!PersistSettings(devSettingsPath, originalContent, developmentSettings.ToJsonString(options)))
+                var serializedContent = developmentSettings.ToJsonString(options);
+                bool appendFinalNewLine = originalContent is null ||
+                    originalContent.EndsWith('\n') || originalContent.EndsWith('\r');
+                if (!PersistSettings(devSettingsPath, originalContent,
+                    appendFinalNewLine ? serializedContent + Environment.NewLine : serializedContent))
                 {
                     return false;
                 }

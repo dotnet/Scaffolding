@@ -2,7 +2,7 @@
 @using Microsoft.EntityFrameworkCore
 @using BlazorWebApp.Models
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
-@inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 
 <PageTitle>Details</PageTitle>
 
@@ -40,7 +40,7 @@
 
         if (product is null)
         {
-            NavigationManager.NotFound();
+            Navigation.NotFound();
         }
     }
 }

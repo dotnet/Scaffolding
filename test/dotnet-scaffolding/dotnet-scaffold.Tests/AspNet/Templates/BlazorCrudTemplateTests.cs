@@ -21,7 +21,7 @@ public class BlazorCrudTemplateTests
 
         string result = TransformTemplate(frameworkVersion, "Edit", model).Replace("\r\n", "\n");
 
-        Assert.Contains("if (!EmployeeExists(Employee!.Id))\n            {\n                NavigationManager.NotFound();\n                return;\n            }", result);
+        Assert.Contains("if (!EmployeeExists(Employee!.Id))\n            {\n                Navigation.NotFound();\n                return;\n            }", result);
     }
 
     [Theory]
@@ -159,7 +159,36 @@ public class BlazorCrudTemplateTests
 
         Assert.Contains("ApplicationState.TryTakeFromJson<Employee>(nameof(Employee), out var restoredEmployee)", result);
         Assert.Contains("Employee = restoredEmployee", result);
-        Assert.Contains("NavigationManager.NavigateTo(\"notfound\");\n            return;", result);
+        Assert.Contains("Navigation.NavigateTo(\"notfound\");\n            return;", result);
+    }
+
+    [Theory]
+    [InlineData(9, "TestProject.Data")]
+    [InlineData(9, "")]
+    [InlineData(9, null)]
+    [InlineData(10, "TestProject.Data")]
+    [InlineData(10, "")]
+    [InlineData(10, null)]
+    [InlineData(11, "TestProject.Data")]
+    [InlineData(11, "")]
+    [InlineData(11, null)]
+    public void IndexTemplate_UsesDbContextClassNameForFactory(int frameworkVersion, string? dbContextNamespace)
+    {
+        BlazorCrudModel model = CreateModel("Index");
+        model.DbContextInfo.DbContextNamespace = dbContextNamespace;
+
+        string result = TransformTemplate(frameworkVersion, "Index", model).Replace("\r\n", "\n");
+
+        Assert.Contains("@inject IDbContextFactory<AppDbContext> DbFactory\n", result);
+        if (!string.IsNullOrEmpty(dbContextNamespace))
+        {
+            Assert.Contains($"@using {dbContextNamespace}\n", result);
+        }
+        else
+        {
+            Assert.DoesNotContain("@using TestProject.Data", result);
+            Assert.DoesNotContain("@using \n", result);
+        }
     }
 
     private static BlazorCrudModel CreateModel(string pageType)
@@ -213,10 +242,13 @@ public class BlazorCrudTemplateTests
         {
             8 when pageType == "Create" => Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Create(), model),
             8 => Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorCrud.Edit(), model),
+            9 when pageType == "Index" => Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud.Index(), model),
             9 when pageType == "Create" => Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud.Create(), model),
             9 => Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.BlazorCrud.Edit(), model),
+            10 when pageType == "Index" => Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud.Index(), model),
             10 when pageType == "Create" => Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud.Create(), model),
             10 => Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud.Edit(), model),
+            11 when pageType == "Index" => Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorCrud.Index(), model),
             11 when pageType == "Create" => Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorCrud.Create(), model),
             11 => Transform(new Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.BlazorCrud.Edit(), model),
             _ => throw new System.ArgumentOutOfRangeException(nameof(frameworkVersion), frameworkVersion, "Unsupported framework version.")

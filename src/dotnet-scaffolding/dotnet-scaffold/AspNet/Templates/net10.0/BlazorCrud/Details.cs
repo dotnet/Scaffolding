@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud
 
             this.Write("@inject ");
             this.Write(this.ToStringHelper.ToStringWithCulture(dbContextFactory));
-            this.Write("\r\n@inject NavigationManager NavigationManager\r\n\r\n<PageTitle>Details</PageTitle>\r\n" +
+            this.Write("\r\n@inject NavigationManager Navigation\r\n\r\n<PageTitle>Details</PageTitle>\r\n" +
                     "\r\n<h1>Details</h1>\r\n\r\n<div>\r\n    <h2>");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelName));
             this.Write("</h2>\r\n    <hr />\r\n    @if (");
@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.BlazorCrud
             this.Write(this.ToStringHelper.ToStringWithCulture(primaryKeyName));
             this.Write(");\r\n\r\n        if (");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelNameLowerInv));
-            this.Write(" is null)\r\n        {\r\n            NavigationManager.NotFound();\r\n    " +
+            this.Write(" is null)\r\n        {\r\n            Navigation.NotFound();\r\n    " +
                     "    }\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }

@@ -182,7 +182,9 @@ internal static class ClassAnalyzers
             if (navigationProperty.Type is not INamedTypeSymbol principalType ||
                 principalType.TypeKind != TypeKind.Class ||
                 principalType.SpecialType != SpecialType.None ||
-                principalType.AllInterfaces.Any(i => i.SpecialType == SpecialType.System_Collections_IEnumerable))
+                principalType.AllInterfaces.Any(i => i.SpecialType == SpecialType.System_Collections_IEnumerable) ||
+                HasAttribute(navigationProperty, "NotMappedAttribute") ||
+                principalType.GetAttributes().Any(a => a.AttributeClass?.Name is "NotMappedAttribute" or "OwnedAttribute"))
             {
                 continue;
             }
@@ -195,7 +197,12 @@ internal static class ClassAnalyzers
             }
 
             var foreignKeyProperty = FindForeignKeyProperty(navigationProperty, principalType, principalProperties.PrimaryKeyName, modelProperties);
+            var principalKeyProperty = principalProperties.AllModelProperties.FirstOrDefault(p =>
+                string.Equals(p.Name, principalProperties.PrimaryKeyName, StringComparison.Ordinal));
+            // Skip FKs that cannot target the principal primary key (e.g. alternate keys); int? matches int.
             if (foreignKeyProperty is null ||
+                principalKeyProperty is null ||
+                !SymbolEqualityComparer.Default.Equals(GetNonNullableType(foreignKeyProperty.Type), GetNonNullableType(principalKeyProperty.Type)) ||
                 string.Equals(foreignKeyProperty.Name, modelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase) ||
                 navigations.Any(n => string.Equals(n.ForeignKeyPropertyName, foreignKeyProperty.Name, StringComparison.Ordinal)))
             {
@@ -271,6 +278,13 @@ internal static class ClassAnalyzers
         }
 
         return null;
+    }
+
+    private static ITypeSymbol GetNonNullableType(ITypeSymbol type)
+    {
+        return type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableType
+            ? nullableType.TypeArguments[0]
+            : type.WithNullableAnnotation(NullableAnnotation.NotAnnotated);
     }
 
     private static bool IsScalarProperty(IPropertySymbol propertySymbol)

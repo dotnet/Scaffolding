@@ -456,15 +456,32 @@ public class MvcEfControllerTemplateTests
         }
     }
 
+    [Fact]
+    public void NotMappedNavigation_IsNotTreatedAsForeignKey()
+    {
+        ModelInfo modelInfo = CreateCountryCityModelInfo("City", "[System.ComponentModel.DataAnnotations.Schema.NotMapped]");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+        Assert.DoesNotContain("SelectList", controller);
+        Assert.DoesNotContain("<select", createView);
+        Assert.DoesNotContain("<select", editView);
+    }
+
     #endregion
 
     #region Helpers
 
-    private static ModelInfo CreateCountryCityModelInfo(string modelTypeName)
+    private static ModelInfo CreateCountryCityModelInfo(string modelTypeName, string countryNavigationAttribute = "")
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(@"
 #nullable enable
 using System.Collections.Generic;
+namespace System.ComponentModel.DataAnnotations.Schema
+{
+    public class NotMappedAttribute : System.Attribute { }
+}
 namespace Microsoft.EntityFrameworkCore
 {
     public class DbContext { }
@@ -484,6 +501,7 @@ namespace Models
         public int Id { get; set; }
         public string Name { get; set; } = """";
         public int CountryId { get; set; }
+        " + countryNavigationAttribute + @"
         public virtual Country? Country { get; set; }
     }
 

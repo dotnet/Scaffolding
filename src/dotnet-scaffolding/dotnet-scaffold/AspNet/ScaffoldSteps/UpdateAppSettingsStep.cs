@@ -136,7 +136,11 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                     {
                         JsonNode? parsedSettings = ParseDevelopmentSettings(devSettingsJson);
 
-                        if (parsedSettings is JsonObject parsedObject)
+                        if (parsedSettings is null)
+                        {
+                            developmentSettings = new JsonObject();
+                        }
+                        else if (parsedSettings is JsonObject parsedObject)
                         {
                             developmentSettings = parsedObject;
                         }

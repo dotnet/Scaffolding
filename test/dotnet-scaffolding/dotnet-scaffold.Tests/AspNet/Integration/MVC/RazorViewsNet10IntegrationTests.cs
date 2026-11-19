@@ -14,6 +14,44 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
     protected override string TestClassName => nameof(RazorViewsNet10IntegrationTests);
 
     [Fact]
+    public async Task Scaffold_Views_Net10_CreateWithKeylessModel()
+    {
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetMinimalProgramCs());
+        File.WriteAllText(Path.Combine(_testProjectDir, "LoginViewModel.cs"), """
+            namespace TestProject;
+
+            public class LoginViewModel
+            {
+                public string Email { get; set; }
+                public string Password { get; set; }
+                public bool RememberMe { get; set; }
+            }
+            """);
+
+        var (preExitCode, preOutput, preError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(preExitCode == 0,
+            $"Project should build before scaffolding.\nOutput: {preOutput}\nError: {preError}");
+
+        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "views",
+            "--project", _testProjectPath,
+            "--model", "LoginViewModel",
+            "--page", "Create");
+        Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
+
+        var view = File.ReadAllText(Path.Combine(_testProjectDir, "Views", "LoginViewModel", "Create.cshtml"));
+        Assert.Contains("asp-for=\"Email\"", view);
+        Assert.Contains("asp-for=\"Password\"", view);
+        Assert.Contains("asp-for=\"RememberMe\"", view);
+
+        var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(postExitCode == 0,
+            $"Project should build after scaffolding.\nOutput: {postOutput}\nError: {postError}");
+    }
+
+    [Fact]
     public async Task Scaffold_Views_Net10_CliInvocation()
     {
         File.WriteAllText(_testProjectPath, ProjectContent);

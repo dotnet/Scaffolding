@@ -35,8 +35,10 @@ public class RegisterAppStepTests
 
         Assert.True(await step.ExecuteAsync(context));
 
-        Assert.Equal(new[] { "--create-app-registration", "--tenant-id", "tenant-a",
-            "--username", "user@example.com" }, step.Arguments);
+        Assert.Equal(new[] { "--register-app", "--registration-only",
+            "--project-file-path", Path.GetFullPath("Test.csproj"),
+            "--project-type", "webapp", "--app-display-name", "Test",
+            "--tenant-id", "tenant-a", "--username", "user@example.com" }, step.Arguments);
         Assert.Equal("12345678-1234-1234-1234-123456789abc", context.Properties["ClientId"]);
         Assert.Equal(context.Properties["ClientId"], context.Properties["EntraCreatedClientId"]);
         fileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
@@ -53,7 +55,7 @@ public class RegisterAppStepTests
         protected override (int ExitCode, string? Output, string? Error) RunRegistration(string[] args)
         {
             Arguments = args;
-            return (0, "Created app Test - 12345678-1234-1234-1234-123456789abc.", null);
+            return (0, "ClientId: 12345678-1234-1234-1234-123456789abc", null);
         }
     }
 
@@ -247,6 +249,42 @@ public class RegisterAppStepTests
         };
 
         Assert.NotNull(step.ProjectPath);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("Created app Development - 22222222-2222-2222-2222-222222222222.")]
+    [InlineData("ClientId: not-a-guid")]
+    public async Task ExecuteAsync_RejectsMissingRegistrationOnlyClientId(string output)
+    {
+        _mockFileSystem.Setup(fs => fs.FileExists(_testProjectPath)).Returns(true);
+        var step = new OutputRegisterStep(_mockLogger.Object, _mockFileSystem.Object, _testTelemetryService, output)
+        {
+            ProjectPath = _testProjectPath
+        };
+
+        Assert.False(await step.ExecuteAsync(_context));
+        Assert.False(_context.Properties.ContainsKey("ClientId"));
+    }
+
+    private sealed class OutputRegisterStep : RegisterAppStep
+    {
+        private readonly string _output;
+
+        public OutputRegisterStep(ILogger<AddClientSecretStep> logger, IFileSystem fileSystem, ITelemetryService telemetryService, string output)
+            : base(logger, fileSystem, telemetryService) => _output = output;
+
+        protected override bool EnsureMsIdentityIsInstalled() => true;
+
+        protected override (int ExitCode, string? Output, string? Error) ReadCapabilities()
+            => (0, "registration-cleanup", null);
+
+        protected override int ExecuteMsIdentity(string[] args, out string? stdOut, out string? stdErr)
+        {
+            stdOut = _output;
+            stdErr = string.Empty;
+            return 0;
+        }
     }
 
     private class TestTelemetryService : ITelemetryService

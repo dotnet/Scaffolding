@@ -172,74 +172,75 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps
             };
         }
 
-        internal bool ValidateDevelopmentSettingsPreflight(string projectPath, bool useExistingApplication, bool overwrite)
+        internal bool ValidateDevelopmentSettingsPreflight(
+            string projectPath,
+            bool useExistingApplication,
+            bool overwrite)
         {
-            string? projectDirectory = Path.GetDirectoryName(projectPath);
-            if (string.IsNullOrEmpty(projectDirectory))
-            {
-                projectDirectory = Directory.GetCurrentDirectory();
-            }
-
-            string devSettingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
-            if (!_fileSystem.FileExists(devSettingsPath))
+            string projectDirectory = Path.GetDirectoryName(projectPath) ?? Directory.GetCurrentDirectory();
+            string developmentSettingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
+            if (!_fileSystem.FileExists(developmentSettingsPath))
             {
                 return true;
             }
 
-            JsonNode? parsedSettings;
+            // Validate everything the update step will rely on before any app registration work, even with
+            // --overwrite: a non-object root (including null) or ambiguous AzureAd names can't be updated safely.
+            JsonNode? azureAdNode;
             try
             {
-                parsedSettings = UpdateAppSettingsStep.ParseDevelopmentSettings(_fileSystem.ReadAllText(devSettingsPath));
+                JsonObject developmentSettings = UpdateAppSettingsStep.ParseDevelopmentSettings(
+                    _fileSystem.ReadAllText(developmentSettingsPath));
+                azureAdNode = UpdateAppSettingsStep.GetAzureAdSection(developmentSettings, out _);
+                if (azureAdNode is JsonObject azureAdToValidate)
+                {
+                    UpdateAppSettingsStep.EnsureUnambiguousManagedKeys(azureAdToValidate);
+                }
             }
             catch (JsonException ex)
             {
-                _logger.LogError($"Failed to parse appsettings.Development.json file at {devSettingsPath}: {ex.Message}");
+                _logger.LogError($"Failed to parse appsettings.Development.json file at {developmentSettingsPath}: {ex.Message}");
                 return false;
             }
-            catch (IOException ex)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                _logger.LogError($"Failed to read appsettings.Development.json file at {devSettingsPath}: {ex.Message}");
-                return false;
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                _logger.LogError($"Failed to read appsettings.Development.json file at {devSettingsPath}: {ex.Message}");
+                _logger.LogError($"Failed to read appsettings.Development.json file at {developmentSettingsPath}: {ex.Message}");
                 return false;
             }
 
-            if (parsedSettings is null)
+            if (overwrite || azureAdNode is null)
             {
                 return true;
             }
 
-            if (parsedSettings is not JsonObject devSettingsObject)
+            if (azureAdNode is not JsonObject azureAd)
             {
-                _logger.LogError($"Failed to parse appsettings.Development.json file at {devSettingsPath}: root JSON value must be an object.");
+                LogDevelopmentSettingsConflict("AzureAd");
                 return false;
             }
 
-            if (overwrite)
-            {
-                return true;
-            }
-
-            if (UpdateAppSettingsStep.HasNonObjectAzureAdSection(devSettingsObject))
-            {
-                _logger.LogError("Conflicting AzureAd value for key 'AzureAd' already exists in appsettings.Development.json. Re-run with '--overwrite' to replace existing managed settings.");
-                return false;
-            }
-
-            // A new registration's ClientId is unknown, so any existing value conflicts.
             string? clientId = useExistingApplication ? Application?.Split(" ").Last() : null;
-            var expectedSettings = UpdateAppSettingsStep.CreateAzureAdConfiguration(Username, TenantId, clientId);
-            string? conflictingKey = UpdateAppSettingsStep.GetFirstConflictingAzureAdKey(devSettingsObject, expectedSettings);
+            JsonObject expectedAzureAd = UpdateAppSettingsStep.CreateAzureAdConfiguration(
+                Username,
+                TenantId,
+                clientId);
+            string? conflictingKey = UpdateAppSettingsStep.GetFirstConflictingAzureAdKey(
+                azureAd,
+                expectedAzureAd);
             if (conflictingKey is not null)
             {
-                _logger.LogError($"Conflicting AzureAd value for key '{conflictingKey}' already exists in appsettings.Development.json. Re-run with '--overwrite' to replace existing managed settings.");
+                LogDevelopmentSettingsConflict(conflictingKey);
                 return false;
             }
 
             return true;
+        }
+
+        private void LogDevelopmentSettingsConflict(string key)
+        {
+            _logger.LogError(
+                $"Conflicting AzureAd value for key '{key}' already exists in appsettings.Development.json. " +
+                "Re-run with '--overwrite' to replace existing managed settings.");
         }
 
         /// <summary>

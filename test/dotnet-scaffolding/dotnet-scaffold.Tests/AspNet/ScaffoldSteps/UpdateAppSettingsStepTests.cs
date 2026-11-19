@@ -4,1156 +4,223 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
-using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings;
 using Microsoft.Extensions.Configuration;
+using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
-namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings.Tests;
+namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.ScaffoldSteps;
 
 public class UpdateAppSettingsStepTests
 {
-    private readonly Mock<IFileSystem> _mockFileSystem;
-    private readonly Mock<IScaffolder> _mockScaffolder;
-    private readonly ScaffolderContext _context;
-    private readonly string _projectDirectory;
-    private readonly string _projectPath;
-    private readonly string _devSettingsPath;
-    private readonly string _appSettingsPath;
-    private readonly Mock<ILogger<UpdateAppSettingsStep>> _mockLogger;
-    private readonly Mock<ITelemetryService> _mockTelemetryService;
-    private readonly UpdateAppSettingsStep _step;
+    private const string TenantId = "new-tenant-id";
+    private const string ClientId = "new-client-id";
+    private const string Domain = "contoso.com";
+    private const string Username = "developer@contoso.com";
 
-    /// <summary>
-    /// Helper method to create a mock ScaffolderContext for testing.
-    /// </summary>
-    private ScaffolderContext CreateMockContext()
-    {
-        var mockScaffolder = new Mock<IScaffolder>();
-        mockScaffolder.Setup(s => s.DisplayName).Returns("Test");
-        mockScaffolder.Setup(s => s.Name).Returns("test");
-        return new ScaffolderContext(mockScaffolder.Object);
-    }
+    private readonly Mock<IFileSystem> _fileSystem = new();
+    private readonly Dictionary<string, string> _files = new();
+    private readonly ScaffolderContext _context;
+    private readonly string _projectDirectory = Path.Combine("test", "project");
+    private readonly string _projectPath;
+    private readonly string _developmentSettingsPath;
+    private readonly string _appSettingsPath;
+    private string? _writtenContent;
 
     public UpdateAppSettingsStepTests()
     {
-        _mockFileSystem = new Mock<IFileSystem>();
-        _mockScaffolder = new Mock<IScaffolder>();
-        _projectDirectory = Path.Combine("test", "project");
         _projectPath = Path.Combine(_projectDirectory, "TestProject.csproj");
-        _devSettingsPath = Path.Combine(_projectDirectory, "appsettings.Development.json");
+        _developmentSettingsPath = Path.Combine(_projectDirectory, "appsettings.Development.json");
         _appSettingsPath = Path.Combine(_projectDirectory, "appsettings.json");
 
-        _mockScaffolder.Setup(s => s.DisplayName).Returns("TestScaffolder");
-        _mockScaffolder.Setup(s => s.Name).Returns("test-scaffolder");
-        _context = new ScaffolderContext(_mockScaffolder.Object);
+        var scaffolder = new Mock<IScaffolder>();
+        scaffolder.Setup(s => s.DisplayName).Returns("TestScaffolder");
+        scaffolder.Setup(s => s.Name).Returns("test-scaffolder");
+        _context = new ScaffolderContext(scaffolder.Object);
 
-        _mockLogger = new Mock<ILogger<UpdateAppSettingsStep>>();
-        _mockTelemetryService = new Mock<ITelemetryService>();
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(It.IsAny<string>())).Returns(true);
-        _mockFileSystem.Setup(fs => fs.EnumerateFiles(It.IsAny<string>(), It.IsAny<string>(), System.IO.SearchOption.AllDirectories))
-            .Returns(new List<string>());
-
-        _step = new UpdateAppSettingsStep(_mockLogger.Object, _mockFileSystem.Object, _mockTelemetryService.Object)
-        {
-            ProjectPath = Path.Combine(Path.GetTempPath(), "UpdateAppSettingsStepTests", "TestApp.csproj"),
-            ClientId = "test-client-id",
-            Instance = "https://login.microsoftonline.com/",
-            CallbackPath = "/signin-oidc"
-        };
-    }
-
-    [Theory]
-    [InlineData("12345678-1234-1234-1234-123456789012")]
-    [InlineData("contoso.onmicrosoft.com")]
-    [InlineData("contoso.com")]
-    public async Task ExecuteAsync_DoesNotGenerateDomain(string tenantId)
-    {
-        _step.TenantId = tenantId;
-        _step.Username = "user@contoso.onmicrosoft.com";
-
-        var azureAd = await ExecuteAndReadAzureAdAsync();
-        Assert.False(azureAd.ContainsKey("Domain"));
-        Assert.Equal(tenantId, azureAd["TenantId"]?.GetValue<string>());
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_Issue3849_Reproduction_OmitsDomain()
-    {
-        _step.Username = "user@contoso.onmicrosoft.com";
-        _step.TenantId = "contoso.onmicrosoft.com";
-
-        var azureAd = await ExecuteAndReadAzureAdAsync(new JsonObject());
-        Assert.False(azureAd.ContainsKey("Domain"));
-        Assert.Equal("contoso.onmicrosoft.com", azureAd["TenantId"]?.GetValue<string>());
-    }
-
-    [Theory]
-    [InlineData("12345678-1234-1234-1234-123456789012", "contoso.onmicrosoft.com")]
-    [InlineData("contoso.onmicrosoft.com", "fabrikam.onmicrosoft.com")]
-    [InlineData("12345678-1234-1234-1234-123456789012", "login.contoso.com")]
-    [InlineData("contoso.onmicrosoft.com", "login.contoso.com")]
-    [InlineData("12345678-1234-1234-1234-123456789012", "another@contoso.onmicrosoft.com.onmicrosoft.com")]
-    public async Task ExecuteAsync_PreservesExistingDomain(string? tenantId, string domain)
-    {
-        _step.Username = "user@contoso.onmicrosoft.com";
-        _step.TenantId = tenantId;
-
-        var azureAd = await ExecuteAndReadAzureAdAsync(new JsonObject
-        {
-            ["Domain"] = domain,
-            ["SignUpSignInPolicyId"] = "B2C_1_signupsignin"
-        });
-
-        Assert.Equal(domain, azureAd["Domain"]?.GetValue<string>());
-        Assert.Equal("B2C_1_signupsignin", azureAd["SignUpSignInPolicyId"]?.GetValue<string>());
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("contoso")]
-    public async Task ExecuteAsync_PreservesExistingDomainWithoutEmailUsername(string? username)
-    {
-        _step.Username = username;
-        _step.TenantId = "12345678-1234-1234-1234-123456789012";
-
-        var azureAd = await ExecuteAndReadAzureAdAsync(new JsonObject
-        {
-            ["Domain"] = "contoso.onmicrosoft.com"
-        });
-
-        Assert.Equal("contoso.onmicrosoft.com", azureAd["Domain"]?.GetValue<string>());
-    }
-
-    [Theory]
-    [InlineData("12345678-1234-1234-1234-123456789012", null)]
-    [InlineData("contoso.onmicrosoft.com", null)]
-    [InlineData("contoso.onmicrosoft.com", "")]
-    public async Task ExecuteAsync_RemovesLegacyUsernameDerivedDomain(string? tenantId, string? explicitDomain)
-    {
-        _step.Username = "user@contoso.onmicrosoft.com";
-        _step.TenantId = tenantId;
-        _step.Domain = explicitDomain;
-
-        var azureAd = await ExecuteAndReadAzureAdAsync(new JsonObject
-        {
-            ["Domain"] = "user@contoso.onmicrosoft.com.onmicrosoft.com"
-        });
-
-        Assert.False(azureAd.ContainsKey("Domain"));
-    }
-
-    [Theory]
-    [InlineData(null, "contoso.onmicrosoft.com")]
-    [InlineData("contoso.onmicrosoft.com", "contoso.onmicrosoft.com")]
-    [InlineData("fabrikam.onmicrosoft.com", "contoso.onmicrosoft.com")]
-    [InlineData("user@contoso.onmicrosoft.com.onmicrosoft.com", "contoso.onmicrosoft.com")]
-    [InlineData("user@contoso.onmicrosoft.com.onmicrosoft.com", "user@contoso.onmicrosoft.com.onmicrosoft.com")]
-    public async Task ExecuteAsync_HonorsExplicitDomain(string? existingDomain, string explicitDomain)
-    {
-        _step.Username = "user@contoso.onmicrosoft.com";
-        _step.TenantId = "12345678-1234-1234-1234-123456789012";
-        _step.Domain = explicitDomain;
-        _step.Overwrite = true;
-
-        var azureAd = await ExecuteAndReadAzureAdAsync(new JsonObject
-        {
-            ["Domain"] = existingDomain
-        });
-
-        Assert.Equal(explicitDomain, azureAd["Domain"]?.GetValue<string>());
-    }
-
-    private async Task<JsonObject> ExecuteAndReadAzureAdAsync(JsonObject? existingAzureAd = null)
-    {
-        if (existingAzureAd is not null)
-        {
-            var devSettingsPath = Path.Combine(Path.GetTempPath(), "UpdateAppSettingsStepTests", "appsettings.Development.json");
-            var initialContent = new JsonObject { ["AzureAd"] = existingAzureAd };
-            _mockFileSystem.Setup(fs => fs.FileExists(devSettingsPath)).Returns(true);
-            _mockFileSystem.Setup(fs => fs.ReadAllText(devSettingsPath)).Returns(initialContent.ToJsonString());
-        }
-
-        string? capturedContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
-            .Callback<string, string>((path, content) => capturedContent = content);
-
-        var result = await _step.ExecuteAsync(CreateMockContext());
-        Assert.True(result);
-        Assert.NotNull(capturedContent);
-        var azureAd = Assert.IsType<JsonObject>(JsonNode.Parse(capturedContent)?["AzureAd"]);
-        Assert.Equal(_step.ClientId, azureAd["ClientId"]?.GetValue<string>());
-        Assert.Equal(_step.Instance, azureAd["Instance"]?.GetValue<string>());
-        Assert.Equal(_step.CallbackPath, azureAd["CallbackPath"]?.GetValue<string>());
-        return azureAd;
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_UpdatesDevelopmentSettingsOnly_PreservingUnrelatedSettings()
-    {
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(
-            """
+        _fileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
+        _fileSystem.Setup(fs => fs.FileExists(It.IsAny<string>()))
+            .Returns<string>(path => _files.ContainsKey(path));
+        _fileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>()))
+            .Returns<string>(path => _files[path]);
+        _fileSystem.Setup(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<string, string>((path, content) => _files[path] = content);
+        _fileSystem.Setup(fs => fs.ReplaceFilePreservingPermissions(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            .Callback<string, string, bool>((source, destination, _) =>
             {
-              "Logging": {
-                "LogLevel": {
-                  "Default": "Information"
-                }
-              },
-              "AzureAd": {
-                "Instance": "https://old-instance/",
-                "TenantId": "old-tenant",
-                "Domain": "old-domain",
-                "ClientId": "old-client",
-                "CallbackPath": "/old-callback",
-                "SignedOutCallbackPath": "/signout-callback-oidc"
-              }
-            }
-            """);
-
-        string? writtenPath = null;
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()))
-            .Callback<string, string>((path, content) =>
-            {
-                writtenPath = path;
-                writtenContent = content;
+                _writtenContent = _files[source];
+                _files[destination] = _writtenContent;
+                _files.Remove(source);
             });
-
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            Domain = "tenant-domain",
-            TenantId = "new-tenant-id",
-            ClientId = "new-client-id",
-            ClientSecret = "do-not-write-this",
-            Overwrite = true
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        Assert.Equal(_devSettingsPath, writtenPath);
-        Assert.NotNull(writtenContent);
-
-        JsonNode? json = JsonNode.Parse(writtenContent);
-        Assert.NotNull(json);
-        Assert.Equal("Information", json["Logging"]?["LogLevel"]?["Default"]?.ToString());
-        Assert.Equal("https://login.microsoftonline.com/", json["AzureAd"]?["Instance"]?.ToString());
-        Assert.Equal("new-tenant-id", json["AzureAd"]?["TenantId"]?.ToString());
-        Assert.Equal("tenant-domain", json["AzureAd"]?["Domain"]?.ToString());
-        Assert.Equal("new-client-id", json["AzureAd"]?["ClientId"]?.ToString());
-        Assert.Equal("/signin-oidc", json["AzureAd"]?["CallbackPath"]?.ToString());
-        Assert.Equal("/signout-callback-oidc", json["AzureAd"]?["SignedOutCallbackPath"]?.ToString());
-        Assert.Null(json["AzureAd"]?["ClientSecret"]);
-
-        _mockFileSystem.Verify(
-            fs => fs.EnumerateFiles(It.IsAny<string>(), "appsettings.json", SearchOption.AllDirectories),
-            Times.Never);
-        _mockFileSystem.Verify(fs => fs.WriteAllText(_appSettingsPath, It.IsAny<string>()), Times.Never);
-        _mockFileSystem.Verify(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()), Times.Once);
+        _fileSystem.Setup(fs => fs.DeleteFile(It.IsAny<string>()))
+            .Callback<string>(path => _files.Remove(path));
     }
 
     [Fact]
-    public async Task ExecuteAsync_ReturnsFalse_WhenAzureAdConflictsAndOverwriteIsDisabled()
+    public async Task ExecuteAsync_UpdatesConfigurationKeysCaseInsensitivelyAndPreservesCredentials()
     {
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(
-            """
-            {
-              "AzureAd": {
-                "Instance": "https://login.microsoftonline.com/",
-                "TenantId": "existing-tenant-id",
-                "Domain": "existing-domain",
-                "ClientId": "existing-client-id",
-                "CallbackPath": "/signin-oidc"
-              }
-            }
+        SetExistingSettingsJson("""
+            {"azuread":{"clientid":"old-app","TENANTID":"old-tenant",
+            "clientcredentials":[{"SourceType":"StoreWithDistinguishedName","CertificateDistinguishedName":"CN=Dev"}]}}
             """);
 
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            Domain = "tenant-domain",
-            TenantId = "new-tenant-id",
-            ClientId = "new-client-id",
-            Overwrite = false
-        };
+        (bool result, _) = await ExecuteAsync(overwrite: true);
 
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.False(result);
-        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        Assert.True(result);
+        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(_writtenContent!));
+        var configuration = new ConfigurationBuilder().AddJsonStream(stream).Build();
+        Assert.Equal(ClientId, configuration["AzureAd:ClientId"]);
+        Assert.Equal(TenantId, configuration["AzureAd:TenantId"]);
+        Assert.Equal("CN=Dev", configuration["AzureAd:ClientCredentials:0:CertificateDistinguishedName"]);
     }
 
     [Fact]
-    public async Task ExecuteAsync_OverwritesConflictingAzureAd_WhenOverwriteIsEnabled()
+    public async Task ExecuteAsync_PreservesDevelopmentOnlyCredentialsAndUnrelatedProperties()
     {
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(
-            """
-            {
-              "AzureAd": {
-                "Instance": "https://login.microsoftonline.com/",
-                "TenantId": "existing-tenant-id",
-                "Domain": "existing-domain",
-                "ClientId": "existing-client-id",
-                "CallbackPath": "/signin-oidc"
-              }
-            }
-            """);
-
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => writtenContent = content);
-
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            Domain = "tenant-domain",
-            TenantId = "new-tenant-id",
-            ClientId = "new-client-id",
-            Overwrite = true
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        Assert.NotNull(writtenContent);
-        JsonNode? json = JsonNode.Parse(writtenContent);
-        Assert.NotNull(json);
-        Assert.Equal("new-tenant-id", json["AzureAd"]?["TenantId"]?.ToString());
-        Assert.Equal("new-client-id", json["AzureAd"]?["ClientId"]?.ToString());
-        Assert.Equal("tenant-domain", json["AzureAd"]?["Domain"]?.ToString());
-    }
-
-    [Theory]
-    [InlineData(false, "client-id", true)]
-    [InlineData(false, "old-client-id", false)]
-    [InlineData(true, "old-client-id", true)]
-    public async Task ExecuteAsync_NormalizesFlatManagedAzureAdKeys(
-        bool overwrite, string existingClientId, bool expectedResult)
-    {
-        string settings =
-            $$"""
-            {
-              "AzureAd:ClientId": "{{existingClientId}}",
-              "AzureAd:SignedOutCallbackPath": "/custom-signout",
-              "Logging": { "LogLevel": { "Default": "Information" } }
-            }
+        const string original = """
+            {"AzureAd":{"ClientId":"old-app","Domain":"development.contoso.com",
+            "ClientCredentials":[{"SourceType":"StoreWithDistinguishedName","CertificateDistinguishedName":"CN=Dev"}],
+            "SignUpSignInPolicyId":"B2C_1_dev"},"Keep":"development"}
             """;
-        using var originalConfiguration = LoadConfiguration(settings);
-        Assert.Equal(existingClientId, originalConfiguration["AzureAd:ClientId"]);
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(settings);
+        SetExistingSettingsJson(original);
+        const string primary = """
+            {"AzureAd":{"ClientCredentials":[{"SourceType":"ClientSecret","ClientSecret":"primary-only"}],
+            "SignUpSignInPolicyId":"B2C_1_primary"}}
+            """;
+        _files[_appSettingsPath] = primary;
 
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => writtenContent = content);
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            TenantId = "tenant-id",
-            ClientId = "client-id",
-            Overwrite = overwrite
-        };
+        (bool result, _) = await ExecuteAsync(overwrite: true, domain: null);
 
-        Assert.Equal(expectedResult, await step.ExecuteAsync(_context, CancellationToken.None));
-
-        if (!expectedResult)
-        {
-            Assert.Null(writtenContent);
-            _mockFileSystem.Verify(
-                fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()),
-                Times.Never);
-            return;
-        }
-
-        Assert.NotNull(writtenContent);
-        using var configuration = LoadConfiguration(writtenContent);
-        Assert.Equal("client-id", configuration["AzureAd:ClientId"]);
-        Assert.Equal("tenant-id", configuration["AzureAd:TenantId"]);
-        Assert.Equal("/custom-signout", configuration["AzureAd:SignedOutCallbackPath"]);
-        Assert.Equal("Information", configuration["Logging:LogLevel:Default"]);
-
-        JsonObject json = Assert.IsType<JsonObject>(JsonNode.Parse(writtenContent));
-        Assert.False(json.ContainsKey("AzureAd:ClientId"));
-        Assert.True(json.ContainsKey("AzureAd:SignedOutCallbackPath"));
+        Assert.True(result);
+        JsonNode settings = ParseWrittenSettings();
+        Assert.True(JsonNode.DeepEquals(
+            JsonNode.Parse(original)!["AzureAd"]!["ClientCredentials"],
+            settings["AzureAd"]!["ClientCredentials"]));
+        Assert.Equal("development.contoso.com", settings["AzureAd"]!["Domain"]!.GetValue<string>());
+        Assert.Equal("B2C_1_dev", settings["AzureAd"]!["SignUpSignInPolicyId"]!.GetValue<string>());
+        Assert.Equal("development", settings["Keep"]!.GetValue<string>());
+        Assert.Equal(primary, _files[_appSettingsPath]);
+        _fileSystem.Verify(fs => fs.ReadAllText(_appSettingsPath), Times.Never);
     }
 
     [Theory]
     [InlineData(false, false)]
-    [InlineData(true, false)]
     [InlineData(false, true)]
+    [InlineData(true, false)]
     [InlineData(true, true)]
-    public async Task ExecuteAsync_SucceedsWithoutWrite_WhenManagedAzureAdAlreadyMatches(bool overwrite, bool bareProjectFilename)
+    public async Task ExecuteAsync_OnWriteFailure_CleansUpOnlyCurrentRunApplication(
+        bool existingApp, bool replacementFails)
     {
-        string projectPath = bareProjectFilename ? "TestProject.csproj" : _projectPath;
-        string projectDirectory = bareProjectFilename ? Directory.GetCurrentDirectory() : _projectDirectory;
-        string devSettingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(devSettingsPath)).Returns(
-            """
-            {
-              "AzureAd": {
-                "Instance": "https://login.microsoftonline.com/",
-                "TenantId": "tenant-id",
-                "Domain": "devuser.onmicrosoft.com",
-                "ClientId": "client-id",
-                "CallbackPath": "/signin-oidc",
-                "SignedOutCallbackPath": "/signout-callback-oidc"
-              }
-            }
-            """);
-
-        var logger = new TestLogger();
-        var step = new UpdateAppSettingsStep(
-            logger,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
+        const string originalDevelopment = """{"Keep":"development"}""";
+        const string originalPrimary = """{"AzureAd":{"ClientId":"production"}}""";
+        SetExistingSettingsJson(originalDevelopment);
+        _files[_appSettingsPath] = originalPrimary;
+        if (replacementFails)
         {
-            ProjectPath = projectPath,
-            Username = "devuser",
-            TenantId = "tenant-id",
-            ClientId = "client-id",
-            Overwrite = overwrite
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        _mockFileSystem.Verify(fs => fs.ReadAllText(devSettingsPath), Times.Once);
-        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-        Assert.Contains(
-            "The generated AzureAd app registration and settings are intended for development environments.",
-            logger.InformationMessages);
-    }
-
-    [Theory]
-    [InlineData("azuread", false, false)]
-    [InlineData("AZUREAD", true, false)]
-    [InlineData("azuread", false, true)]
-    [InlineData("AZUREAD", true, true)]
-    [InlineData("AzureAd", false, false)]
-    [InlineData("AzureAd", true, false)]
-    [InlineData("AzureAd", false, true)]
-    [InlineData("AzureAd", true, true)]
-    public async Task ExecuteAsync_ResolvesAzureAdSettingsCaseInsensitively(
-        string sectionName, bool overwrite, bool settingsMatch)
-    {
-        string existingTenantId = settingsMatch ? "tenant-id" : overwrite ? "old-tenant-id" : "";
-        string settings =
-            $$"""
-            {
-              "{{sectionName}}": {
-                "instance": "https://login.microsoftonline.com/",
-                "tenantid": "{{existingTenantId}}",
-                "domain": "devuser.onmicrosoft.com",
-                "clientid": "client-id",
-                "callbackpath": "/signin-oidc",
-                "SignedOutCallbackPath": "/custom-signout"
-              },
-              "Logging": { "LogLevel": { "Default": "Information" } }
-            }
-            """;
-        using var originalConfiguration = LoadConfiguration(settings);
-        Assert.Equal("client-id", originalConfiguration["AzureAd:ClientId"]);
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(settings);
-
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => writtenContent = content);
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance, _mockFileSystem.Object, Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            TenantId = "tenant-id",
-            ClientId = "client-id",
-            Overwrite = overwrite
-        };
-
-        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
-        if (settingsMatch)
-        {
-            Assert.Null(writtenContent);
-            _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _fileSystem.Setup(fs => fs.ReplaceFilePreservingPermissions(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Throws(new IOException("Replacement failed."));
         }
         else
         {
-            Assert.NotNull(writtenContent);
-            using var configuration = LoadConfiguration(writtenContent);
-            Assert.Equal("https://login.microsoftonline.com/", configuration["AzureAd:Instance"]);
-            Assert.Equal("tenant-id", configuration["AzureAd:TenantId"]);
-            Assert.Equal("devuser.onmicrosoft.com", configuration["AzureAd:Domain"]);
-            Assert.Equal("client-id", configuration["AzureAd:ClientId"]);
-            Assert.Equal("/signin-oidc", configuration["AzureAd:CallbackPath"]);
-            Assert.Equal("/custom-signout", configuration["AzureAd:SignedOutCallbackPath"]);
-            Assert.Equal("Information", configuration["Logging:LogLevel:Default"]);
-
-            JsonObject json = Assert.IsType<JsonObject>(JsonNode.Parse(writtenContent));
-            Assert.True(json.ContainsKey(sectionName));
-            JsonObject azureAd = Assert.IsType<JsonObject>(json[sectionName]);
-            Assert.True(azureAd.ContainsKey("tenantid"));
-            Assert.False(azureAd.ContainsKey("TenantId"));
-            _mockFileSystem.Verify(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()), Times.Once);
-        }
-    }
-
-    [Theory]
-    [InlineData("""{ /* development settings */ "Logging": { "LogLevel": { "Default": "Information" } }, "AzureAd": { "ClientId": "client-id" } }""")]
-    [InlineData("""{ "Logging": { "LogLevel": { "Default": "Information", }, }, "AzureAd": { "ClientId": "client-id", }, }""")]
-    public async Task ExecuteAsync_AcceptsAspNetJsonConfigurationSyntax(string settings)
-    {
-        using var originalConfiguration = LoadConfiguration(settings);
-        Assert.Equal("client-id", originalConfiguration["AzureAd:ClientId"]);
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(settings);
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => writtenContent = content);
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance, _mockFileSystem.Object, Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            TenantId = "tenant-id",
-            ClientId = "client-id"
-        };
-
-        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
-        Assert.NotNull(writtenContent);
-        using var configuration = LoadConfiguration(writtenContent);
-        Assert.Equal("tenant-id", configuration["AzureAd:TenantId"]);
-        Assert.Equal("client-id", configuration["AzureAd:ClientId"]);
-        Assert.Equal("Information", configuration["Logging:LogLevel:Default"]);
-        _mockFileSystem.Verify(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()), Times.Once);
-    }
-
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task ExecuteAsync_MatchingSettingsWithCommentsAndTrailingCommas_DoesNotWrite(bool overwrite)
-    {
-        const string settings =
-            """
-            {
-              /* development identity */
-              "AzureAd": {
-                "Instance": "https://login.microsoftonline.com/",
-                "TenantId": "tenant-id",
-                "Domain": "devuser.onmicrosoft.com",
-                "ClientId": "client-id",
-                "CallbackPath": "/signin-oidc",
-                "SignedOutCallbackPath": "/custom-signout",
-              },
-            }
-            """;
-        using var configuration = LoadConfiguration(settings);
-        Assert.Equal("client-id", configuration["AzureAd:ClientId"]);
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(settings);
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance, _mockFileSystem.Object, Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            TenantId = "tenant-id",
-            ClientId = "client-id",
-            Overwrite = overwrite
-        };
-
-        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
-        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-    }
-
-    private static ConfigurationManager LoadConfiguration(string json)
-    {
-        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
-        var configuration = new ConfigurationManager();
-        configuration.AddJsonStream(stream);
-        return configuration;
-    }
-
-    [Theory]
-    [InlineData(null, false)]
-    [InlineData("client-id", false)]
-    [InlineData("old-client-id", true)]
-    public async Task ExecuteAsync_BareProjectFilename_WritesDevelopmentSettingsInCurrentDirectory(
-        string? existingClientId, bool overwrite)
-    {
-        string projectDirectory = Directory.GetCurrentDirectory();
-        string devSettingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(devSettingsPath)).Returns(existingClientId is not null);
-        if (existingClientId is not null)
-        {
-            _mockFileSystem.Setup(fs => fs.ReadAllText(devSettingsPath)).Returns(
-                $$"""
+            _fileSystem.Setup(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()))
+                .Callback<string, string>((path, _) =>
                 {
-                  "Logging": { "LogLevel": { "Default": "Information" } },
-                  "AzureAd": {
-                    "ClientId": "{{existingClientId}}",
-                    "SignedOutCallbackPath": "/custom-signout"
-                  }
-                }
-                """);
-        }
-
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => writtenContent = content);
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = "TestProject.csproj",
-            Username = "devuser",
-            Domain = "tenant-domain",
-            TenantId = "tenant-id",
-            ClientId = "client-id",
-            Overwrite = overwrite
-        };
-
-        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
-        Assert.NotNull(writtenContent);
-        JsonNode? json = JsonNode.Parse(writtenContent);
-        Assert.NotNull(json);
-        Assert.Equal("https://login.microsoftonline.com/", json["AzureAd"]?["Instance"]?.ToString());
-        Assert.Equal("tenant-id", json["AzureAd"]?["TenantId"]?.ToString());
-        Assert.Equal("tenant-domain", json["AzureAd"]?["Domain"]?.ToString());
-        Assert.Equal("client-id", json["AzureAd"]?["ClientId"]?.ToString());
-        Assert.Equal("/signin-oidc", json["AzureAd"]?["CallbackPath"]?.ToString());
-        if (existingClientId is not null)
-        {
-            Assert.Equal("Information", json["Logging"]?["LogLevel"]?["Default"]?.ToString());
-            Assert.Equal("/custom-signout", json["AzureAd"]?["SignedOutCallbackPath"]?.ToString());
-        }
-
-        _mockFileSystem.Verify(fs => fs.WriteAllText(devSettingsPath, It.IsAny<string>()), Times.Once);
-        _mockFileSystem.Verify(fs => fs.ReadAllText(Path.Combine(projectDirectory, "appsettings.json")), Times.Never);
-        _mockFileSystem.Verify(fs => fs.WriteAllText(Path.Combine(projectDirectory, "appsettings.json"), It.IsAny<string>()), Times.Never);
-    }
-
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task ExecuteAsync_PreservesExtraAzureAdProperties_WhenAddingMissingManagedSettings(bool overwrite)
-    {
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(
-            """
-            {
-              "AzureAd": {
-                "ClientId": "client-id",
-                "SignedOutCallbackPath": "/signout-callback-oidc",
-                "ExtraOptions": { "Enabled": true }
-              }
-            }
-            """);
-
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => writtenContent = content);
-
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            TenantId = "tenant-id",
-            ClientId = "client-id",
-            Overwrite = overwrite
-        };
-
-        Assert.True(await step.ExecuteAsync(_context, CancellationToken.None));
-        Assert.NotNull(writtenContent);
-        JsonNode? json = JsonNode.Parse(writtenContent);
-        Assert.NotNull(json);
-        Assert.Equal("tenant-id", json["AzureAd"]?["TenantId"]?.ToString());
-        Assert.Equal("/signout-callback-oidc", json["AzureAd"]?["SignedOutCallbackPath"]?.ToString());
-        Assert.True(json["AzureAd"]?["ExtraOptions"]?["Enabled"]?.GetValue<bool>());
-        _mockFileSystem.Verify(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_ReturnsFalse_WhenAzureAdSectionIsNotObjectAndOverwriteIsDisabled()
-    {
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(
-            """
-            {
-              "AzureAd": "invalid-shape"
-            }
-            """);
-
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            TenantId = "tenant-id",
-            ClientId = "client-id",
-            Overwrite = false
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.False(result);
-        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_ReplacesAzureAdSection_WhenItIsNotObjectAndOverwriteIsEnabled()
-    {
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(
-            """
-            {
-              "AzureAd": "invalid-shape"
-            }
-            """);
-
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => writtenContent = content);
-
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            TenantId = "tenant-id",
-            ClientId = "client-id",
-            Overwrite = true
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        Assert.NotNull(writtenContent);
-        JsonNode? json = JsonNode.Parse(writtenContent);
-        Assert.NotNull(json);
-        Assert.Equal("tenant-id", json["AzureAd"]?["TenantId"]?.ToString());
-        Assert.Equal("client-id", json["AzureAd"]?["ClientId"]?.ToString());
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_CreatesDevelopmentSettingsFile_WhenMissing()
-    {
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(false);
-
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => writtenContent = content);
-
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            TenantId = "tenant-id",
-            ClientId = "client-id"
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        Assert.NotNull(writtenContent);
-        JsonNode? json = JsonNode.Parse(writtenContent);
-        Assert.NotNull(json);
-        Assert.Equal("tenant-id", json["AzureAd"]?["TenantId"]?.ToString());
-        Assert.Equal("client-id", json["AzureAd"]?["ClientId"]?.ToString());
-        _mockFileSystem.Verify(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_ReturnsFalse_WhenDevelopmentSettingsIsInvalidJson()
-    {
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns("{ invalid json");
-
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            TenantId = "tenant-id",
-            ClientId = "client-id"
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.False(result);
-        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_ReturnsFalse_WhenClientIdIsMissing()
-    {
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            TenantId = "tenant-id",
-            ClientId = null
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.False(result);
-        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_ReturnsFalse_WhenTenantIdIsMissing()
-    {
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = "devuser",
-            TenantId = null,
-            ClientId = "client-id"
-        };
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.False(result);
-        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_OmitsDomain_WhenDomainAndUsernameAreMissing()
-    {
-        _mockFileSystem.Setup(fs => fs.DirectoryExists(_projectDirectory)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(false);
-
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance,
-            _mockFileSystem.Object,
-            Mock.Of<ITelemetryService>())
-        {
-            ProjectPath = _projectPath,
-            Username = null,
-            Domain = null,
-            TenantId = "tenant-id",
-            ClientId = "client-id"
-        };
-
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => writtenContent = content);
-
-        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
-
-        Assert.True(result);
-        Assert.NotNull(writtenContent);
-        JsonNode? json = JsonNode.Parse(writtenContent);
-        Assert.NotNull(json);
-        Assert.Null(json["AzureAd"]?["Domain"]);
-    }
-
-    [Theory]
-    [InlineData("user@contoso.com", null, null)]
-    [InlineData("devuser", null, null)]
-    [InlineData("user@contoso.com", "tenant.onmicrosoft.com", "tenant.onmicrosoft.com")]
-    public void CreateAzureAdConfiguration_UsesOnlyExplicitDomain(
-        string username, string? domain, string? expectedDomain)
-    {
-        JsonObject configuration = UpdateAppSettingsStep.CreateAzureAdConfiguration(
-            username, "tenant-id", "client-id", domain);
-
-        Assert.Equal(expectedDomain, configuration["Domain"]?.ToString());
-    }
-
-    [Theory]
-    [InlineData(false, false)]
-    [InlineData(true, false)]
-    [InlineData(false, true)]
-    [InlineData(true, true)]
-    public async Task ExecuteAsync_PreservesSplitSectionsAndUnmanagedValues(bool overwrite, bool reverseSectionOrder)
-    {
-        string settings = """
-            {
-              "AzureAd": {
-                "ClientId": "client-id", "Extra": { "One": "first" }, "ExtraProperty": "keep-first"
-              },
-              "azuread": {
-                "tenantid": "", "extra": { "Two": "second" },
-                "SignedOutCallbackPath": "/custom-signout", "AnotherProperty": "keep-second"
-              },
-              "Logging": { "LogLevel": { "Default": "Information" } },
-              "logging": { "loglevel": { "Microsoft": "Warning" } },
-              "AzureAd:OtherClientId": "unmanaged-client",
-              "AzureAd:Options:ClientId": "unmanaged-nested-client"
-            }
-            """;
-        if (reverseSectionOrder)
-        {
-            JsonObject reorderedSettings = Assert.IsType<JsonObject>(JsonNode.Parse(settings));
-            JsonNode? azureAd = reorderedSettings["AzureAd"];
-            reorderedSettings.Remove("AzureAd");
-            reorderedSettings.Add("AzureAd", azureAd);
-            settings = reorderedSettings.ToJsonString();
-        }
-        using var originalConfiguration = LoadConfiguration(settings);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(settings);
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => writtenContent = content);
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance, _mockFileSystem.Object, _mockTelemetryService.Object)
-        {
-            ProjectPath = _projectPath, ClientId = "client-id", TenantId = "tenant-id", Overwrite = overwrite
-        };
-
-        Assert.True(await step.ExecuteAsync(_context));
-        Assert.NotNull(writtenContent);
-        using var configuration = LoadConfiguration(writtenContent);
-        Assert.Equal("client-id", configuration["AzureAd:ClientId"]);
-        Assert.Equal("tenant-id", configuration["AzureAd:TenantId"]);
-        Assert.Equal("https://login.microsoftonline.com/", configuration["AzureAd:Instance"]);
-        Assert.Equal("/signin-oidc", configuration["AzureAd:CallbackPath"]);
-        foreach (string key in new[]
-        {
-            "AzureAd:Extra:One", "AzureAd:Extra:Two", "AzureAd:ExtraProperty",
-            "AzureAd:AnotherProperty", "AzureAd:SignedOutCallbackPath",
-            "Logging:LogLevel:Default", "Logging:LogLevel:Microsoft",
-            "AzureAd:OtherClientId", "AzureAd:Options:ClientId"
-        })
-        {
-            Assert.Equal(originalConfiguration[key], configuration[key]);
-        }
-        JsonObject json = Assert.IsType<JsonObject>(JsonNode.Parse(writtenContent));
-        Assert.True(json.ContainsKey("AzureAd"));
-        Assert.True(json.ContainsKey("azuread"));
-        Assert.True(json.ContainsKey("Logging"));
-        Assert.True(json.ContainsKey("logging"));
-        _mockFileSystem.Verify(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()), Times.Once);
-    }
-
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task ExecuteAsync_MatchingSplitSections_DoesNotWrite(bool overwrite)
-    {
-        string settings = """
-            {
-              "AzureAd": { "ClientId": "client-id", "Instance": "https://login.microsoftonline.com/" },
-              "azuread": { "tenantid": "tenant-id", "callbackpath": "/signin-oidc" },
-              "Logging": { "LogLevel": { "Default": "Information" } },
-              "logging": { "LogLevel": { "Microsoft": "Warning" } }
-            }
-            """;
-        using var configuration = LoadConfiguration(settings);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(settings);
-        var logger = new TestLogger();
-        var step = new UpdateAppSettingsStep(logger, _mockFileSystem.Object, _mockTelemetryService.Object)
-        {
-            ProjectPath = _projectPath, ClientId = "client-id", TenantId = "tenant-id", Overwrite = overwrite
-        };
-
-        Assert.True(await step.ExecuteAsync(_context));
-        _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-        Assert.Contains(logger.InformationMessages, message => message.Contains("intended for development environments"));
-    }
-
-    [Theory]
-    [InlineData("""{"azuread:clientid":"client-id","AZUREAD:TENANTID":"tenant-id"}""", false, true)]
-    [InlineData("""{"AzureAd:OtherClientId":"other","AzureAd:Options:ClientId":"nested"}""", false, true)]
-    [InlineData("""{"azuread":{"clientid":"old-client","ExtraProperty":"keep"}}""", true, true)]
-    [InlineData("""{"AzureAd":{},"azuread":{"clientid":"old-client"}}""", false, false)]
-    [InlineData("""{"AzureAd":{},"azuread":{"clientid":"old-client"}}""", true, true)]
-    [InlineData("""{"AzureAd":{"ExtraProperty":"keep"},"azuread":"invalid-shape"}""", false, false)]
-    [InlineData("""{"azuread":"invalid-shape"}""", true, true)]
-    [InlineData("""{"AzureAd":{},"azuread:clientid":"old-client"}""", false, false)]
-    [InlineData("""{"AzureAd":{},"azuread:clientid":"old-client"}""", true, true)]
-    [InlineData("""{"AzureAd":{"ClientId":"client-id"},"azuread":{"tenantid":""},"AZUREAD":{"callbackpath":"/signin-oidc"}}""", false, true)]
-    [InlineData("""{"AzureAd":{"ClientId":"client-id"},"azuread":{"tenantid":""},"AZUREAD":{"callbackpath":"/signin-oidc"}}""", true, true)]
-    public async Task ExecuteAsync_ResolvesAllManagedAliases(string settings, bool overwrite, bool expectedResult)
-    {
-        using var originalConfiguration = LoadConfiguration(settings);
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(settings);
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => writtenContent = content);
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance, _mockFileSystem.Object, _mockTelemetryService.Object)
-        {
-            ProjectPath = _projectPath, ClientId = "client-id", TenantId = "tenant-id", Overwrite = overwrite
-        };
-
-        Assert.Equal(expectedResult, await step.ExecuteAsync(_context));
-        if (!expectedResult)
-        {
-            Assert.Null(writtenContent);
-            _mockFileSystem.Verify(fs => fs.WriteAllText(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            return;
-        }
-        Assert.NotNull(writtenContent);
-        using var configuration = LoadConfiguration(writtenContent);
-        Assert.Equal("client-id", configuration["AzureAd:ClientId"]);
-        Assert.Equal("tenant-id", configuration["AzureAd:TenantId"]);
-        foreach (string key in new[] { "AzureAd:OtherClientId", "AzureAd:Options:ClientId", "AzureAd:ExtraProperty" })
-        {
-            Assert.Equal(originalConfiguration[key], configuration[key]);
-        }
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("intentional.example")]
-    public async Task ExecuteAsync_RepairsLegacyDomainAcrossSplitSections(string? configuredDomain)
-    {
-        string settings = """
-            {
-              "AzureAd": { "ClientId": "client-id" },
-              "azuread": { "domain": "user@contoso.com.onmicrosoft.com", "ExtraProperty": "keep" },
-              "AZUREAD:DOMAIN": "user@contoso.com.onmicrosoft.com"
-            }
-            """;
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(true);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath)).Returns(settings);
-        string? writtenContent = null;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) => writtenContent = content);
-        var step = new UpdateAppSettingsStep(
-            NullLogger<UpdateAppSettingsStep>.Instance, _mockFileSystem.Object, _mockTelemetryService.Object)
-        {
-            ProjectPath = _projectPath, ClientId = "client-id", TenantId = "tenant-id",
-            Username = "user@contoso.com", Domain = configuredDomain, Overwrite = configuredDomain is not null
-        };
-
-        Assert.True(await step.ExecuteAsync(_context));
-        Assert.NotNull(writtenContent);
-        using var configuration = LoadConfiguration(writtenContent);
-        Assert.Equal(configuredDomain, configuration["AzureAd:Domain"]);
-        Assert.Equal("keep", configuration["AzureAd:ExtraProperty"]);
-    }
-
-    [Theory]
-    [InlineData(false, false)]
-    [InlineData(true, false)]
-    [InlineData(false, true)]
-    [InlineData(true, true)]
-    public async Task ExecuteAsync_PartialWriteFailure_RestoresSettingsAndCleansUpOnlyNewRegistration(
-        bool existingApp, bool settingsExist)
-    {
-        const string original = """{"Keep":"development","AzureAd":{"ClientId":"old-client"}}""";
-        string? current = settingsExist ? original : null;
-        _mockFileSystem.Setup(fs => fs.FileExists(_devSettingsPath)).Returns(() => current is not null);
-        _mockFileSystem.Setup(fs => fs.ReadAllText(_devSettingsPath))
-            .Returns(() => current ?? throw new FileNotFoundException());
-        _mockFileSystem.Setup(fs => fs.DeleteFile(_devSettingsPath)).Callback(() => current = null);
-        bool failed = false;
-        _mockFileSystem.Setup(fs => fs.WriteAllText(_devSettingsPath, It.IsAny<string>()))
-            .Callback<string, string>((_, content) =>
-            {
-                current = content;
-                if (!failed)
-                {
-                    failed = true;
-                    current = "partially written";
+                    _files[path] = "partially written";
                     throw new IOException("Write failed after truncation.");
-                }
-            });
-        var step = new CleanupTestStep(_mockFileSystem.Object)
-        {
-            ProjectPath = _projectPath, ClientId = "client-id", TenantId = "tenant-id",
-            Username = "user@contoso.com", Overwrite = true
-        };
-        _context.Properties["ClientId"] = "client-id";
-        if (!existingApp)
-        {
-            _context.Properties[EntraRegistrationCleanup.CreatedClientIdKey] = "client-id";
+                });
         }
+        TestStep step = CreateCleanupStep(existingApp);
 
         Assert.False(await step.ExecuteAsync(_context));
-        Assert.True(failed);
-        Assert.Equal(settingsExist ? original : null, current);
-        _mockFileSystem.Verify(fs => fs.DeleteFile(_devSettingsPath), settingsExist ? Times.Never() : Times.Once());
+
+        Assert.Equal(originalDevelopment, _files[_developmentSettingsPath]);
+        Assert.Equal(originalPrimary, _files[_appSettingsPath]);
+        Assert.Equal(2, _files.Count);
         if (existingApp)
         {
             Assert.Empty(step.CleanupCommands);
-            Assert.Equal("client-id", _context.Properties["ClientId"]);
+            Assert.Equal(ClientId, _context.Properties["ClientId"]);
         }
         else
         {
-            Assert.Equal(new[] { "--unregister-app", "--client-id", "client-id", "--tenant-id", "tenant-id",
-                "--username", "user@contoso.com" }, Assert.Single(step.CleanupCommands));
-            Assert.Empty(_context.Properties);
+            Assert.Equal(new[] { "--unregister-app", "--client-id", ClientId, "--tenant-id", TenantId,
+                "--username", Username }, Assert.Single(step.CleanupCommands));
+            Assert.False(_context.Properties.ContainsKey("ClientId"));
+            Assert.False(_context.Properties.ContainsKey("ClientSecret"));
+            Assert.False(_context.Properties.ContainsKey(EntraRegistrationCleanup.CreatedClientIdKey));
         }
-        _mockFileSystem.Verify(fs => fs.WriteAllText(_appSettingsPath, It.IsAny<string>()), Times.Never);
     }
 
-    private sealed class CleanupTestStep(IFileSystem fileSystem) : UpdateAppSettingsStep(
+    [Fact]
+    public async Task ExecuteAsync_InvalidDevelopmentSettings_CleansUpWithoutOverwriting()
+    {
+        SetExistingSettingsJson("invalid JSON");
+        TestStep step = CreateCleanupStep(existingApp: false);
+
+        Assert.False(await step.ExecuteAsync(_context));
+
+        Assert.Single(step.CleanupCommands);
+        Assert.Equal("invalid JSON", _files[_developmentSettingsPath]);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_CancellationCleansUpCurrentRunApplication()
+    {
+        TestStep step = CreateCleanupStep(existingApp: false);
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            async () => await step.ExecuteAsync(_context, new CancellationToken(canceled: true)));
+
+        Assert.Single(step.CleanupCommands);
+        Assert.Empty(_files);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_SuccessPersistsOnlyDevelopmentSettingsWithoutCleanup()
+    {
+        TestStep step = CreateCleanupStep(existingApp: false);
+
+        Assert.True(await step.ExecuteAsync(_context));
+
+        Assert.Empty(step.CleanupCommands);
+        Assert.Equal(ClientId, _context.Properties[EntraRegistrationCleanup.CreatedClientIdKey]);
+        Assert.Single(_files);
+        AssertManagedValuesMatch(ParseWrittenSettings()["AzureAd"]!);
+        _fileSystem.Verify(fs => fs.ReadAllText(_appSettingsPath), Times.Never);
+    }
+
+    private TestStep CreateCleanupStep(bool existingApp)
+    {
+        _context.Properties["ClientId"] = ClientId;
+        if (!existingApp)
+        {
+            _context.Properties[EntraRegistrationCleanup.CreatedClientIdKey] = ClientId;
+            _context.Properties["ClientSecret"] = "development-secret";
+        }
+        return new TestStep(_fileSystem.Object)
+        {
+            ProjectPath = _projectPath,
+            ClientId = ClientId,
+            TenantId = TenantId,
+            Username = Username,
+            Domain = Domain
+        };
+    }
+
+    private sealed class TestStep(IFileSystem fileSystem) : UpdateAppSettingsStep(
         NullLogger<UpdateAppSettingsStep>.Instance, fileSystem, Mock.Of<ITelemetryService>())
     {
-        public List<string[]> CleanupCommands { get; } = new();
+        public List<string[]> CleanupCommands { get; } = [];
 
         protected override void CleanupRegistration(ScaffolderContext context)
             => EntraRegistrationCleanup.TryCleanup(context, TenantId, Username, NullLogger.Instance, args =>
@@ -1163,9 +230,654 @@ public class UpdateAppSettingsStepTests
             });
     }
 
+    [Fact]
+    public async Task ExecuteAsync_CreatesDevelopmentSettingsWithoutReadingOrWritingBaseSettings()
+    {
+        _fileSystem.Setup(fs => fs.FileExists(_developmentSettingsPath)).Returns(false);
+        _fileSystem.Setup(fs => fs.FileExists(_appSettingsPath)).Returns(true);
+
+        (bool result, _) = await ExecuteAsync();
+
+        Assert.True(result);
+        JsonNode writtenSettings = ParseWrittenSettings();
+        Assert.Equal(UpdateAppSettingsStep.DefaultInstance, writtenSettings["AzureAd"]?["Instance"]?.ToString());
+        Assert.Equal(TenantId, writtenSettings["AzureAd"]?["TenantId"]?.ToString());
+        Assert.Equal(Domain, writtenSettings["AzureAd"]?["Domain"]?.ToString());
+        Assert.Equal(ClientId, writtenSettings["AzureAd"]?["ClientId"]?.ToString());
+        Assert.Equal(UpdateAppSettingsStep.DefaultCallbackPath, writtenSettings["AzureAd"]?["CallbackPath"]?.ToString());
+        Assert.Null(writtenSettings["AzureAd"]?["ClientSecret"]);
+
+        _fileSystem.Verify(
+            fs => fs.EnumerateFiles(
+                It.IsAny<string>(),
+                "appsettings.json",
+                SearchOption.AllDirectories),
+            Times.Never);
+        _fileSystem.Verify(fs => fs.ReadAllText(_appSettingsPath), Times.Never);
+        _fileSystem.Verify(fs => fs.WriteAllText(_appSettingsPath, It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.WriteAllText(_developmentSettingsPath, It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(
+            It.Is<string>(path => Path.GetDirectoryName(path) == _projectDirectory && path != _developmentSettingsPath),
+            It.IsAny<string>()), Times.Once);
+        _fileSystem.Verify(fs => fs.ReplaceFilePreservingPermissions(
+            It.Is<string>(path => Path.GetDirectoryName(path) == _projectDirectory && path != _developmentSettingsPath),
+            _developmentSettingsPath,
+            true), Times.Once);
+        Assert.Single(_files);
+    }
+
+    [Theory]
+    [InlineData("Instance")]
+    [InlineData("TenantId")]
+    [InlineData("Domain")]
+    [InlineData("ClientId")]
+    [InlineData("CallbackPath")]
+    public async Task ExecuteAsync_PopulatesMissingManagedValue(string missingKey)
+    {
+        JsonObject azureAd = CreateExpectedAzureAd();
+        azureAd.Remove(missingKey);
+        SetExistingSettings(new JsonObject
+        {
+            ["Logging"] = new JsonObject { ["Level"] = "Debug" },
+            ["AzureAd"] = azureAd
+        });
+
+        (bool result, _) = await ExecuteAsync();
+
+        Assert.True(result);
+        JsonNode writtenSettings = ParseWrittenSettings();
+        Assert.Equal(CreateExpectedAzureAd()[missingKey]?.ToString(), writtenSettings["AzureAd"]?[missingKey]?.ToString());
+        Assert.Equal("Debug", writtenSettings["Logging"]?["Level"]?.ToString());
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_LeavesMatchingManagedValuesUnchanged()
+    {
+        SetExistingSettings(new JsonObject
+        {
+            ["AzureAd"] = CreateExpectedAzureAd()
+        });
+
+        (bool result, _) = await ExecuteAsync();
+
+        Assert.True(result);
+        Assert.Null(_writtenContent);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("Instance", "https://login.microsoftonline.us/")]
+    [InlineData("TenantId", "existing-tenant-id")]
+    [InlineData("Domain", "fabrikam.com")]
+    [InlineData("ClientId", "existing-client-id")]
+    [InlineData("CallbackPath", "/custom-signin")]
+    public async Task ExecuteAsync_ReportsConflictAndDoesNotWrite_WhenOverwriteIsDisabled(
+        string conflictingKey,
+        string conflictingValue)
+    {
+        JsonObject azureAd = CreateExpectedAzureAd();
+        azureAd[conflictingKey] = conflictingValue;
+        SetExistingSettings(new JsonObject { ["AzureAd"] = azureAd });
+
+        (bool result, TestLogger logger) = await ExecuteAsync();
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains($"'{conflictingKey}'", StringComparison.Ordinal));
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_OverwriteUpdatesOnlyManagedValuesAndPreservesOtherSettings()
+    {
+        SetExistingSettings(new JsonObject
+        {
+            ["Logging"] = new JsonObject
+            {
+                ["LogLevel"] = new JsonObject { ["Default"] = "Information" }
+            },
+            ["AzureAd"] = new JsonObject
+            {
+                ["Instance"] = "https://login.microsoftonline.us/",
+                ["TenantId"] = "existing-tenant-id",
+                ["Domain"] = "fabrikam.com",
+                ["ClientId"] = "existing-client-id",
+                ["CallbackPath"] = "/custom-signin",
+                ["SignedOutCallbackPath"] = "/custom-signout"
+            }
+        });
+
+        (bool result, _) = await ExecuteAsync(overwrite: true);
+
+        Assert.True(result);
+        JsonNode writtenSettings = ParseWrittenSettings();
+        Assert.Equal("Information", writtenSettings["Logging"]?["LogLevel"]?["Default"]?.ToString());
+        Assert.Equal("/custom-signout", writtenSettings["AzureAd"]?["SignedOutCallbackPath"]?.ToString());
+        AssertManagedValuesMatch(writtenSettings["AzureAd"]!);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_FailsWithoutWrite_WhenDevelopmentSettingsIsMalformed()
+    {
+        _fileSystem.Setup(fs => fs.FileExists(_developmentSettingsPath)).Returns(true);
+        _fileSystem.Setup(fs => fs.ReadAllText(_developmentSettingsPath)).Returns("{ malformed json");
+
+        (bool result, _) = await ExecuteAsync(overwrite: true);
+
+        Assert.False(result);
+        Assert.Null(_writtenContent);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_PreservesOriginalSettingsWhenTemporaryWriteFails(bool fileExists)
+    {
+        const string originalContent = """{"Logging":{"LogLevel":{"Default":"Debug"}}}""";
+        if (fileExists)
+        {
+            SetExistingSettingsJson(originalContent);
+        }
+        string? temporaryPath = null;
+        _fileSystem.Setup(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<string, string>((path, content) =>
+            {
+                temporaryPath = path;
+                _files[path] = content[..(content.Length / 2)];
+                throw new IOException("write failed after partial output");
+            });
+
+        (bool result, TestLogger logger) = await ExecuteAsync();
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("write failed", StringComparison.Ordinal));
+        Assert.NotNull(temporaryPath);
+        Assert.Equal(fileExists, _files.ContainsKey(_developmentSettingsPath));
+        if (fileExists)
+        {
+            Assert.Equal(originalContent, _files[_developmentSettingsPath]);
+        }
+        Assert.False(_files.ContainsKey(temporaryPath));
+        _fileSystem.Verify(fs => fs.DeleteFile(temporaryPath), Times.Once);
+        _fileSystem.Verify(fs => fs.ReplaceFilePreservingPermissions(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_PreservesOriginalSettingsWhenReplacementFails(bool fileExists)
+    {
+        const string originalContent = """{"Logging":{"LogLevel":{"Default":"Debug"}}}""";
+        if (fileExists)
+        {
+            SetExistingSettingsJson(originalContent);
+        }
+        string? temporaryPath = null;
+        _fileSystem.Setup(fs => fs.ReplaceFilePreservingPermissions(It.IsAny<string>(), _developmentSettingsPath, true))
+            .Callback<string, string, bool>((source, _, _) =>
+            {
+                temporaryPath = source;
+                Assert.NotNull(JsonNode.Parse(_files[source])?["AzureAd"]);
+                throw new IOException("replacement failed");
+            });
+
+        (bool result, TestLogger logger) = await ExecuteAsync();
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("replacement failed", StringComparison.Ordinal));
+        Assert.NotNull(temporaryPath);
+        Assert.Equal(fileExists, _files.ContainsKey(_developmentSettingsPath));
+        if (fileExists)
+        {
+            Assert.Equal(originalContent, _files[_developmentSettingsPath]);
+        }
+        Assert.False(_files.ContainsKey(temporaryPath));
+        _fileSystem.Verify(fs => fs.DeleteFile(temporaryPath), Times.Once);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReportsCleanupFailureWithoutHidingWriteFailure()
+    {
+        _fileSystem.Setup(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<string, string>((path, _) =>
+            {
+                _files[path] = "{";
+                throw new IOException("write failed");
+            });
+        _fileSystem.Setup(fs => fs.DeleteFile(It.IsAny<string>()))
+            .Throws(new IOException("cleanup failed"));
+
+        (bool result, TestLogger logger) = await ExecuteAsync();
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("write failed", StringComparison.Ordinal));
+        Assert.Contains(logger.WarningMessages, message => message.Contains("cleanup failed", StringComparison.Ordinal));
+        Assert.False(_files.ContainsKey(_developmentSettingsPath));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_SavesCompleteSettingsUsingRealFileSystem(bool fileExists)
+    {
+        string projectDirectory = Path.Combine(Directory.GetCurrentDirectory(), $"UpdateAppSettingsStepTests-{Guid.NewGuid():N}");
+        string settingsPath = Path.Combine(projectDirectory, "appsettings.Development.json");
+        Directory.CreateDirectory(projectDirectory);
+        try
+        {
+            if (fileExists)
+            {
+                File.WriteAllText(settingsPath, """{"Logging":{"LogLevel":{"Default":"Debug"}}}""");
+            }
+            var step = new UpdateAppSettingsStep(new TestLogger(), new FileSystem(), Mock.Of<ITelemetryService>())
+            {
+                ProjectPath = Path.Combine(projectDirectory, "TestProject.csproj"),
+                Username = Username,
+                TenantId = TenantId,
+                Domain = Domain,
+                ClientId = ClientId
+            };
+
+            bool result = await step.ExecuteAsync(_context);
+
+            Assert.True(result);
+            JsonNode settings = JsonNode.Parse(File.ReadAllText(settingsPath))!;
+            AssertManagedValuesMatch(settings["AzureAd"]!);
+            if (fileExists)
+            {
+                Assert.Equal("Debug", settings["Logging"]?["LogLevel"]?["Default"]?.ToString());
+            }
+            Assert.Equal(settingsPath, Assert.Single(Directory.GetFiles(projectDirectory)));
+        }
+        finally
+        {
+            Directory.Delete(projectDirectory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_UsesCustomCallbackPathForConfigurationAndAuthorization()
+    {
+        const string callbackPath = "/custom-signin";
+        _fileSystem.Setup(fs => fs.FileExists(_developmentSettingsPath)).Returns(false);
+
+        (bool result, _) = await ExecuteAsync(callbackPath: callbackPath);
+
+        Assert.True(result);
+        Assert.Equal(callbackPath, ParseWrittenSettings()["AzureAd"]?["CallbackPath"]?.ToString());
+        Assert.Equal(callbackPath, _context.Properties["CallbackPath"]);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ResolvesManagedKeysCaseInsensitively()
+    {
+        _fileSystem.Setup(fs => fs.FileExists(_developmentSettingsPath)).Returns(true);
+        _fileSystem.Setup(fs => fs.ReadAllText(_developmentSettingsPath)).Returns(
+            """
+            {
+              "azuread": {
+                "instance": "https://login.microsoftonline.com/",
+                "tenantid": "new-tenant-id",
+                "domain": "contoso.com",
+                "clientid": "new-client-id",
+                "callbackpath": "/signin-oidc"
+              }
+            }
+            """);
+
+        (bool result, _) = await ExecuteAsync();
+
+        Assert.True(result);
+        Assert.Null(_writtenContent);
+    }
+
+    [Theory]
+    [InlineData("null", false)]
+    [InlineData("null", true)]
+    [InlineData("/* development settings */ null", false)]
+    [InlineData("[]", true)]
+    [InlineData("\"text\"", false)]
+    [InlineData("42", true)]
+    public async Task ExecuteAsync_FailsWithoutWrite_WhenDevelopmentSettingsRootIsNotObject(string settings, bool overwrite)
+    {
+        SetExistingSettingsJson(settings);
+
+        (bool result, TestLogger logger) = await ExecuteAsync(overwrite: overwrite);
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("root JSON value must be an object", StringComparison.Ordinal));
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_PreservesSectionsThatDifferOnlyByCase()
+    {
+        SetExistingSettingsJson("""{"Logging":{"A":"1"},"logging":{"B":"2"}}""");
+
+        (bool result, _) = await ExecuteAsync();
+
+        Assert.True(result);
+        JsonNode writtenSettings = ParseWrittenSettings();
+        Assert.Equal("1", writtenSettings["Logging"]?["A"]?.ToString());
+        Assert.Equal("2", writtenSettings["logging"]?["B"]?.ToString());
+        AssertManagedValuesMatch(writtenSettings["AzureAd"]!);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_UpdatesCaseVariantAzureAdKeysInPlace()
+    {
+        SetExistingSettingsJson(
+            """
+            {
+              "azuread": {
+                "clientid": "existing-client-id",
+                "signedOutCallbackPath": "/custom-signout"
+              }
+            }
+            """);
+
+        (bool result, _) = await ExecuteAsync(overwrite: true);
+
+        Assert.True(result);
+        JsonObject writtenSettings = ParseWrittenSettings().AsObject();
+        Assert.False(writtenSettings.ContainsKey("AzureAd"));
+        JsonObject azureAd = Assert.IsType<JsonObject>(writtenSettings["azuread"]);
+        Assert.Equal(ClientId, azureAd["clientid"]?.ToString());
+        Assert.False(azureAd.ContainsKey("ClientId"));
+        Assert.Equal(TenantId, azureAd["TenantId"]?.ToString());
+        Assert.Equal("/custom-signout", azureAd["signedOutCallbackPath"]?.ToString());
+    }
+
+    [Theory]
+    [InlineData("""{"AzureAd":{"ClientId":"new-client-id"},"azuread":{"TenantId":"new-tenant-id"}}""", "'AzureAd' and 'azuread'", false)]
+    [InlineData("""{"AzureAd":{"ClientId":"new-client-id"},"azuread":{"TenantId":"new-tenant-id"}}""", "'AzureAd' and 'azuread'", true)]
+    [InlineData("""{"AzureAd":{"ClientId":"new-client-id","clientId":"other-client-id"}}""", "'ClientId' and 'clientId'", false)]
+    [InlineData("""{"AzureAd":{"ClientId":"new-client-id","clientId":"other-client-id"}}""", "'ClientId' and 'clientId'", true)]
+    public async Task ExecuteAsync_ReportsAmbiguousCaseVariantsWithoutWrite(string settings, string expectedNames, bool overwrite)
+    {
+        SetExistingSettingsJson(settings);
+
+        (bool result, TestLogger logger) = await ExecuteAsync(overwrite: overwrite);
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains(expectedNames, StringComparison.Ordinal));
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("AzureAd:Instance", false)]
+    [InlineData("AzureAd:Instance", true)]
+    [InlineData("AzureAd:TenantId", false)]
+    [InlineData("AzureAd:TenantId", true)]
+    [InlineData("AzureAd:Domain", false)]
+    [InlineData("AzureAd:Domain", true)]
+    [InlineData("AzureAd:ClientId", false)]
+    [InlineData("AzureAd:ClientId", true)]
+    [InlineData("AzureAd:CallbackPath", false)]
+    [InlineData("AzureAd:CallbackPath", true)]
+    [InlineData("azuread:clientid", false)]
+    [InlineData("azuread:clientid", true)]
+    public async Task ExecuteAsync_RejectsFlattenedManagedKeysWithoutWrite(string key, bool overwrite)
+    {
+        SetExistingSettings(new JsonObject { [key] = "existing-value" });
+        string originalContent = _files[_developmentSettingsPath];
+
+        (bool result, TestLogger logger) = await ExecuteAsync(overwrite: overwrite);
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains($"flattened managed key '{key}'", StringComparison.Ordinal));
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("Move this value into a single 'AzureAd' object", StringComparison.Ordinal));
+        Assert.Equal(originalContent, _files[_developmentSettingsPath]);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.ReplaceFilePreservingPermissions(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ExecuteAsync_RejectsFlattenedManagedKeyEvenWhenNestedSettingsMatch(bool overwrite)
+    {
+        SetExistingSettings(new JsonObject
+        {
+            ["AzureAd:ClientId"] = ClientId,
+            ["AzureAd"] = CreateExpectedAzureAd()
+        });
+
+        (bool result, TestLogger logger) = await ExecuteAsync(overwrite: overwrite);
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("flattened managed key 'AzureAd:ClientId'", StringComparison.Ordinal));
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("developer@contoso.com", null, null)]
+    [InlineData("developer", null, null)]
+    [InlineData(null, null, null)]
+    [InlineData("", "", null)]
+    [InlineData("developer@contoso.com", " ", null)]
+    [InlineData("developer@contoso.com", "tenant.onmicrosoft.com", "tenant.onmicrosoft.com")]
+    public void CreateAzureAdConfiguration_OnlyIncludesExplicitDomain(
+        string? username,
+        string? domain,
+        string? expectedDomain)
+    {
+        JsonObject configuration = UpdateAppSettingsStep.CreateAzureAdConfiguration(
+            username,
+            TenantId,
+            ClientId,
+            domain);
+
+        Assert.Equal(expectedDomain, configuration["Domain"]?.ToString());
+        Assert.Equal(expectedDomain is not null, configuration.ContainsKey("Domain"));
+    }
+
+    [Theory]
+    [InlineData("12345678-1234-1234-1234-123456789012", false)]
+    [InlineData("contoso.onmicrosoft.com", false)]
+    [InlineData("contoso.com", false)]
+    [InlineData("contoso.onmicrosoft.com", true)]
+    public async Task ExecuteAsync_DoesNotGenerateDomain(string tenantId, bool existingSection)
+    {
+        if (existingSection)
+        {
+            SetExistingSettings(new JsonObject { ["AzureAd"] = new JsonObject() });
+        }
+
+        (bool result, _) = await ExecuteAsync(
+            domain: null, username: "user@contoso.onmicrosoft.com", tenantId: tenantId);
+
+        Assert.True(result);
+        JsonObject azureAd = Assert.IsType<JsonObject>(ParseWrittenSettings()["AzureAd"]);
+        Assert.False(azureAd.ContainsKey("Domain"));
+        Assert.Equal(tenantId, azureAd["TenantId"]?.GetValue<string>());
+        Assert.Equal(ClientId, azureAd["ClientId"]?.GetValue<string>());
+    }
+
+    [Theory]
+    [InlineData("12345678-1234-1234-1234-123456789012", "contoso.onmicrosoft.com")]
+    [InlineData("contoso.onmicrosoft.com", "fabrikam.onmicrosoft.com")]
+    [InlineData("12345678-1234-1234-1234-123456789012", "login.contoso.com")]
+    [InlineData("contoso.onmicrosoft.com", "login.contoso.com")]
+    [InlineData("12345678-1234-1234-1234-123456789012", "another@contoso.onmicrosoft.com.onmicrosoft.com")]
+    public async Task ExecuteAsync_PreservesExistingDomain(string tenantId, string domain)
+    {
+        SetExistingSettings(new JsonObject
+        {
+            ["AzureAd"] = new JsonObject
+            {
+                ["Domain"] = domain,
+                ["SignUpSignInPolicyId"] = "B2C_1_signupsignin"
+            }
+        });
+
+        (bool result, _) = await ExecuteAsync(
+            domain: null, username: "user@contoso.onmicrosoft.com", tenantId: tenantId);
+
+        Assert.True(result);
+        JsonNode azureAd = ParseWrittenSettings()["AzureAd"]!;
+        Assert.Equal(domain, azureAd["Domain"]?.GetValue<string>());
+        Assert.Equal("B2C_1_signupsignin", azureAd["SignUpSignInPolicyId"]?.GetValue<string>());
+    }
+
+    [Theory]
+    [InlineData(null, false)]
+    [InlineData("", false)]
+    [InlineData("contoso", false)]
+    [InlineData("user@contoso.onmicrosoft.com", true)]
+    public async Task ExecuteAsync_PreservesExistingDomainWhenUnspecified(string? username, bool overwrite)
+    {
+        JsonObject azureAd = CreateExpectedAzureAd();
+        azureAd["Domain"] = "contoso.onmicrosoft.com";
+        SetExistingSettings(new JsonObject { ["AzureAd"] = azureAd });
+
+        (bool result, _) = await ExecuteAsync(overwrite: overwrite, domain: null, username: username);
+
+        Assert.True(result);
+        Assert.Null(_writtenContent);
+        Assert.Equal("contoso.onmicrosoft.com",
+            JsonNode.Parse(_files[_developmentSettingsPath])?["AzureAd"]?["Domain"]?.GetValue<string>());
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("12345678-1234-1234-1234-123456789012", null, "Domain", false)]
+    [InlineData("contoso.onmicrosoft.com", null, "Domain", true)]
+    [InlineData("contoso.onmicrosoft.com", "", "Domain", false)]
+    [InlineData("contoso.onmicrosoft.com", " ", "domain", false)]
+    public async Task ExecuteAsync_RemovesLegacyUsernameDerivedDomain(
+        string tenantId, string? explicitDomain, string domainKey, bool overwrite)
+    {
+        JsonObject azureAd = UpdateAppSettingsStep.CreateAzureAdConfiguration(
+            "user@contoso.onmicrosoft.com", tenantId, ClientId);
+        azureAd[domainKey] = "user@contoso.onmicrosoft.com.onmicrosoft.com";
+        azureAd["SignUpSignInPolicyId"] = "B2C_1_signupsignin";
+        SetExistingSettings(new JsonObject { ["azuread"] = azureAd });
+
+        (bool result, _) = await ExecuteAsync(
+            overwrite: overwrite, domain: explicitDomain, username: "user@contoso.onmicrosoft.com", tenantId: tenantId);
+
+        Assert.True(result);
+        JsonObject writtenAzureAd = Assert.IsType<JsonObject>(ParseWrittenSettings()["azuread"]);
+        Assert.False(writtenAzureAd.ContainsKey(domainKey));
+        Assert.Equal(tenantId, writtenAzureAd["TenantId"]?.GetValue<string>());
+        Assert.Equal(ClientId, writtenAzureAd["ClientId"]?.GetValue<string>());
+        Assert.Equal("B2C_1_signupsignin", writtenAzureAd["SignUpSignInPolicyId"]?.GetValue<string>());
+    }
+
+    [Theory]
+    [InlineData(null, "contoso.onmicrosoft.com")]
+    [InlineData("contoso.onmicrosoft.com", "contoso.onmicrosoft.com")]
+    [InlineData("fabrikam.onmicrosoft.com", "contoso.onmicrosoft.com")]
+    [InlineData("user@contoso.onmicrosoft.com.onmicrosoft.com", "contoso.onmicrosoft.com")]
+    [InlineData("user@contoso.onmicrosoft.com.onmicrosoft.com", "user@contoso.onmicrosoft.com.onmicrosoft.com")]
+    public async Task ExecuteAsync_HonorsExplicitDomainWithOverwrite(string? existingDomain, string explicitDomain)
+    {
+        SetExistingSettings(new JsonObject
+        {
+            ["AzureAd"] = new JsonObject { ["Domain"] = existingDomain }
+        });
+
+        (bool result, _) = await ExecuteAsync(
+            overwrite: true, domain: explicitDomain, username: "user@contoso.onmicrosoft.com");
+
+        Assert.True(result);
+        Assert.Equal(explicitDomain, ParseWrittenSettings()["AzureAd"]?["Domain"]?.GetValue<string>());
+    }
+
+    [Theory]
+    [InlineData(null, ClientId, "contoso.onmicrosoft.com")]
+    [InlineData(null, ClientId, "user@contoso.onmicrosoft.com.onmicrosoft.com")]
+    [InlineData("", ClientId, "contoso.onmicrosoft.com")]
+    [InlineData(TenantId, null, "contoso.onmicrosoft.com")]
+    [InlineData(TenantId, "", "contoso.onmicrosoft.com")]
+    [InlineData(TenantId, " ", "contoso.onmicrosoft.com")]
+    public async Task ExecuteAsync_RequiresTenantAndClientIdWithoutChangingExistingDomain(
+        string? tenantId, string? clientId, string domain)
+    {
+        SetExistingSettings(new JsonObject
+        {
+            ["AzureAd"] = new JsonObject { ["Domain"] = domain }
+        });
+        string originalContent = _files[_developmentSettingsPath];
+
+        (bool result, TestLogger logger) = await ExecuteAsync(
+            domain: null, username: "user@contoso.onmicrosoft.com", tenantId: tenantId, clientId: clientId);
+
+        Assert.False(result);
+        Assert.Contains(logger.ErrorMessages, message => message.Contains("Both ClientId and TenantId are required", StringComparison.Ordinal));
+        Assert.Equal(originalContent, _files[_developmentSettingsPath]);
+        _fileSystem.Verify(fs => fs.WriteAllTextRestricted(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        _fileSystem.Verify(fs => fs.ReplaceFilePreservingPermissions(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    private async Task<(bool Result, TestLogger Logger)> ExecuteAsync(
+        bool overwrite = false,
+        string? callbackPath = null,
+        string? domain = Domain,
+        string? username = Username,
+        string? tenantId = TenantId,
+        string? clientId = ClientId)
+    {
+        var logger = new TestLogger();
+        var step = new UpdateAppSettingsStep(
+            logger,
+            _fileSystem.Object,
+            Mock.Of<ITelemetryService>())
+        {
+            ProjectPath = _projectPath,
+            Username = username,
+            TenantId = tenantId,
+            Domain = domain,
+            ClientId = clientId,
+            CallbackPath = callbackPath,
+            Overwrite = overwrite
+        };
+
+        bool result = await step.ExecuteAsync(_context, CancellationToken.None);
+        return (result, logger);
+    }
+
+    private void SetExistingSettings(JsonObject settings)
+    {
+        SetExistingSettingsJson(settings.ToJsonString());
+    }
+
+    private void SetExistingSettingsJson(string settings)
+    {
+        _files[_developmentSettingsPath] = settings;
+    }
+
+    private JsonNode ParseWrittenSettings()
+    {
+        Assert.NotNull(_writtenContent);
+        JsonNode? settings = JsonNode.Parse(_writtenContent);
+        Assert.NotNull(settings);
+        return settings;
+    }
+
+    private static JsonObject CreateExpectedAzureAd()
+    {
+        return UpdateAppSettingsStep.CreateAzureAdConfiguration(
+            Username,
+            TenantId,
+            ClientId,
+            Domain);
+    }
+
+    private static void AssertManagedValuesMatch(JsonNode azureAd)
+    {
+        JsonObject expected = CreateExpectedAzureAd();
+        foreach ((string key, JsonNode? value) in expected)
+        {
+            Assert.Equal(value?.ToString(), azureAd[key]?.ToString());
+        }
+    }
+
     private sealed class TestLogger : ILogger<UpdateAppSettingsStep>
     {
-        public List<string> InformationMessages { get; } = new();
+        public List<string> ErrorMessages { get; } = [];
+        public List<string> WarningMessages { get; } = [];
 
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
 
@@ -1178,9 +890,13 @@ public class UpdateAppSettingsStepTests
             Exception? exception,
             Func<TState, Exception?, string> formatter)
         {
-            if (logLevel == LogLevel.Information)
+            if (logLevel == LogLevel.Error)
             {
-                InformationMessages.Add(formatter(state, exception));
+                ErrorMessages.Add(formatter(state, exception));
+            }
+            else if (logLevel == LogLevel.Warning)
+            {
+                WarningMessages.Add(formatter(state, exception));
             }
         }
     }

@@ -19,6 +19,11 @@ namespace Microsoft.DotNet.MSIdentity.Tool
         public string? ProjectFilePath { get; set; }
 
         /// <summary>
+        /// Provision using explicit options only, without reading or updating project configuration.
+        /// </summary>
+        public bool RegistrationOnly { get; set; }
+
+        /// <summary>
         /// Short target framework from the given ProjectFilePath. List to allow multiple tfms.
         /// eg. net6.0, net7.0 etc.
         /// </summary>
@@ -227,6 +232,7 @@ namespace Microsoft.DotNet.MSIdentity.Tool
                 Username = Username,
                 ProjectPath = ProjectPath,
                 ProjectFilePath = ProjectFilePath,
+                RegistrationOnly = RegistrationOnly,
                 AppSettingsFilePath = AppSettingsFilePath,
                 WebApiClientId = WebApiClientId,
                 HostedAppIdUri = HostedAppIdUri,

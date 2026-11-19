@@ -28,7 +28,6 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
         /// Option to use existing application.
         /// </summary>
         public bool UseExistingApplication { get; set; }
-
         /// <summary>
         /// Whether existing managed AzureAd settings can be overwritten.
         /// </summary>

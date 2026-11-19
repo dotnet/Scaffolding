@@ -43,7 +43,7 @@ internal class DocumentBuilder
             var scopedChanges = new Dictionary<SyntaxNode, List<CodeSnippet>>();
             foreach (var method in _codeFile.Methods.Values)
             {
-                method.CodeChanges = ExpandInvocationArguments(method.CodeChanges ?? [], syntaxRoot, semanticModel, scopedChanges);
+                method.CodeChanges = ExpandInvocationArguments(ProjectModifierHelper.FilterCodeSnippets(method.CodeChanges, _options) ?? [], syntaxRoot, semanticModel, scopedChanges);
             }
 
             syntaxRoot = syntaxRoot.TrackNodes(scopedChanges.Keys);

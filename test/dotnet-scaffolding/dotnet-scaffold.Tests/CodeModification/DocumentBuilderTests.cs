@@ -106,6 +106,58 @@ public class DocumentBuilderTests
         }
     }
 
+    [Theory]
+    [InlineData("ConfigureCodeFlow", false)]
+    [InlineData("!UseTopLevelStatements", false)]
+    [InlineData("UseTopLevelStatements", true)]
+    [InlineData("!ConfigureCodeFlow", true)]
+    public async Task InvocationArguments_FiltersOptionsBeforeAnalyzingRegistrations(string option, bool applies)
+    {
+        using var workspace = new AdhocWorkspace();
+        var document = CreateRegistrationDocument(workspace, """
+            var services = new Services();
+            services.AddAuthentication().AddMicrosoftIdentityWebApp(new object(), openIdConnectScheme: NextScheme());
+            static string NextScheme() => "CustomOidc";
+            """);
+        var originalText = (await document.GetTextAsync()).ToString();
+        var compilation = (await document.Project.GetCompilationAsync())!;
+        Assert.Empty(compilation.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var file = new CodeFile
+        {
+            FileName = "Program.cs",
+            Methods = new()
+            {
+                ["Global"] = new Method
+                {
+                    CodeChanges =
+                    [
+                        new CodeSnippet
+                        {
+                            Options = [option],
+                            Parent = "AddMicrosoftIdentityWebApp",
+                            InvocationArguments = new() { ["openIdConnectScheme"] = "\"Default\"" },
+                            Block = "builder.Services.PostConfigure<OpenIdConnectOptions>($openIdConnectScheme$, options => { options.ResponseType = \"code\"; });"
+                        }
+                    ]
+                }
+            }
+        };
+        var builder = new DocumentBuilder(document, file, [Constants.UseTopLevelStatements], NullLogger.Instance);
+
+        if (applies)
+        {
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => builder.RunAsync());
+            Assert.Contains("Unable to safely reuse 'openIdConnectScheme' expression 'NextScheme()'", error.Message);
+        }
+        else
+        {
+            var updated = await builder.RunAsync();
+            Assert.Equal(originalText, (await updated.GetTextAsync()).ToString());
+        }
+
+        Assert.Equal(originalText, (await document.GetTextAsync()).ToString());
+    }
+
     [Fact]
     public void CheckInvocation_MethodGuardDoesNotSearchSiblingMethods()
     {

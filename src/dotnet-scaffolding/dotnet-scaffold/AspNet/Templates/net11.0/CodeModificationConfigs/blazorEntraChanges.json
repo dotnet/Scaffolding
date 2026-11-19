@@ -7,9 +7,26 @@
                   "CodeChanges": [
                     {
                       "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+                      "CheckInvocation": "AddMicrosoftIdentityWebApp",
                       "MultiLineBlock": [
                         "builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)",
                         "    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection(\"AzureAd\"))"
+                      ],
+                      "LeadingTrivia": {
+                        "Newline": true
+                      }
+                    },
+                    {
+                      "InsertBefore": [ "var app = WebApplication.CreateBuilder.Build();" ],
+                      "Parent": "AddMicrosoftIdentityWebApp",
+                      "InvocationArguments": {
+                        "openIdConnectScheme": "OpenIdConnectDefaults.AuthenticationScheme"
+                      },
+                      "MultiLineBlock": [
+                        "builder.Services.PostConfigure<OpenIdConnectOptions>($openIdConnectScheme$, options =>",
+                        "{",
+                        "    options.ResponseType = OpenIdConnectResponseType.Code;",
+                        "})"
                       ],
                       "LeadingTrivia": {
                         "Newline": true
@@ -58,7 +75,8 @@
             },
             "Usings": [
                 "Microsoft.AspNetCore.Authentication.OpenIdConnect",
-                "Microsoft.Identity.Web"
+                "Microsoft.Identity.Web",
+                "Microsoft.IdentityModel.Protocols.OpenIdConnect"
             ],
             "Replacements": [
                 {

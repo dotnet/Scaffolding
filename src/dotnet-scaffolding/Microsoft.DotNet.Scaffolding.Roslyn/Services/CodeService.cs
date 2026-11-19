@@ -1,11 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
+using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.DotNet.Scaffolding.Roslyn.Extensions;
+using Microsoft.DotNet.Scaffolding.Roslyn.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.DotNet.Scaffolding.Roslyn.Services;
@@ -79,7 +82,7 @@ public class CodeService : ICodeService, IDisposable
 
         // Fallback: MSBuildWorkspace didn't load the project (e.g., a preview SDK version
         // such as net11.0 where the SDK resolver fails silently). Build an AdhocWorkspace
-        // backed by the project's source files so that GetAllDocumentsAsync, GetDocumentAsync,
+        // from the SDK's compiler inputs so that GetAllDocumentsAsync, GetDocumentAsync,
         // and ProjectModifier.RunAsync can still read and write files.
         _fallbackWorkspace = await BuildFallbackWorkspaceAsync();
         return (Workspace?)_fallbackWorkspace ?? msBuildWorkspace;
@@ -150,57 +153,138 @@ public class CodeService : ICodeService, IDisposable
     }
 
     /// <summary>
-    /// Builds an <see cref="AdhocWorkspace"/> populated with the project's .cs source files.
+    /// Builds an <see cref="AdhocWorkspace"/> using the project's compiler inputs.
     /// Used when <see cref="MSBuildWorkspace"/> cannot load the project (e.g., preview SDK
     /// versions such as net11.0).  Document changes are written to disk manually inside
     /// <see cref="TryApplyChanges"/> before the in-memory workspace state is updated.
     /// </summary>
     private async Task<AdhocWorkspace?> BuildFallbackWorkspaceAsync()
     {
-        var projectDirectory = Path.GetDirectoryName(_projectPath);
+        var projectDirectory = Path.GetDirectoryName(Path.GetFullPath(_projectPath));
         if (string.IsNullOrEmpty(projectDirectory) || !Directory.Exists(projectDirectory))
         {
             return null;
         }
 
-        var workspace = new AdhocWorkspace();
+        if (!Path.GetExtension(_projectPath).Equals(".csproj", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new NotSupportedException("The fallback workspace supports C# projects only.");
+        }
+
+        // Use the SDK's reference resolution and compiler command line, not assemblies loaded
+        // by the scaffolding tool. This preserves targeting-pack/package references, aliases,
+        // language options, conditional symbols, and generated implicit global usings.
+        using var properties = await RunFallbackMsBuildAsync(["-getProperty:TargetFramework,TargetFrameworks"]);
+        var evaluatedProperties = properties.RootElement.GetProperty("Properties");
+        var targetFramework = evaluatedProperties.GetProperty("TargetFramework").GetString();
+        if (string.IsNullOrEmpty(targetFramework))
+        {
+            targetFramework = evaluatedProperties.GetProperty("TargetFrameworks").GetString()?
+                .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .OrderBy(MSBuildProjectServiceHelper.ParseFrameworkVersion).FirstOrDefault();
+        }
+
+        var arguments = new List<string>
+        {
+            "-target:Compile",
+            "-property:DesignTimeBuild=true",
+            "-property:BuildProjectReferences=false",
+            "-property:SkipCompilerExecution=true",
+            "-property:ProvideCommandLineArgs=true",
+            "-getItem:CscCommandLineArgs"
+        };
+        if (!string.IsNullOrEmpty(targetFramework))
+        {
+            arguments.Add($"-property:TargetFramework={targetFramework}");
+        }
+        using var inputs = await RunFallbackMsBuildAsync(arguments);
+        var compilerArguments = inputs.RootElement.GetProperty("Items").GetProperty("CscCommandLineArgs")
+            .EnumerateArray().Select(item => item.GetProperty("Identity").GetString()!).ToArray();
+        if (compilerArguments.Length == 0)
+        {
+            throw new InvalidOperationException($"The project '{_projectPath}' did not provide C# compiler inputs.");
+        }
+
+        var commandLine = CSharpCommandLineParser.Default.Parse(compilerArguments, projectDirectory, sdkDirectory: null);
+        var diagnostics = commandLine.Errors.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray();
+        if (diagnostics.Length > 0)
+        {
+            throw new InvalidOperationException($"Invalid compiler inputs for '{_projectPath}': {string.Join(Environment.NewLine, diagnostics.Select(diagnostic => diagnostic.ToString()))}");
+        }
+
+        var references = commandLine.MetadataReferences.Select(reference =>
+            MetadataReference.CreateFromFile(Path.GetFullPath(reference.Reference, projectDirectory), reference.Properties)).ToArray();
         var projectInfo = ProjectInfo.Create(
             ProjectId.CreateNewId(),
             VersionStamp.Create(),
             name: Path.GetFileNameWithoutExtension(_projectPath),
-            assemblyName: Path.GetFileNameWithoutExtension(_projectPath),
+            assemblyName: commandLine.CompilationName ?? Path.GetFileNameWithoutExtension(_projectPath),
             language: LanguageNames.CSharp,
-            filePath: _projectPath);
-        workspace.AddProject(projectInfo);
-        var addedProject = workspace.CurrentSolution.Projects.First();
+            filePath: _projectPath,
+            compilationOptions: commandLine.CompilationOptions,
+            parseOptions: commandLine.ParseOptions,
+            metadataReferences: references);
 
-        var sourceFiles = Directory.GetFiles(projectDirectory, "*.cs", SearchOption.AllDirectories)
-            .Where(f =>
-            {
-                var rel = Path.GetRelativePath(projectDirectory, f);
-                return !rel.StartsWith("obj" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
-                    && !rel.StartsWith("bin" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
-            });
-
-        foreach (var file in sourceFiles)
+        var documents = new List<DocumentInfo>();
+        foreach (var source in commandLine.SourceFiles)
         {
-            try
-            {
-                var text = await File.ReadAllTextAsync(file);
-                var docInfo = DocumentInfo.Create(
-                    DocumentId.CreateNewId(addedProject.Id),
-                    Path.GetFileName(file),
-                    filePath: file,
-                    loader: TextLoader.From(TextAndVersion.Create(
-                        SourceText.From(text, Encoding.UTF8),
-                        VersionStamp.Create(),
-                        file)));
-                workspace.AddDocument(docInfo);
-            }
-            catch { /* skip unreadable files */ }
+            var file = source.Path;
+            var text = await File.ReadAllTextAsync(file);
+            documents.Add(DocumentInfo.Create(
+                DocumentId.CreateNewId(projectInfo.Id),
+                Path.GetFileName(file),
+                filePath: file,
+                loader: TextLoader.From(TextAndVersion.Create(
+                    SourceText.From(text, Encoding.UTF8),
+                    VersionStamp.Create(),
+                    file))));
         }
 
+        var workspace = new AdhocWorkspace();
+        workspace.AddProject(projectInfo.WithDocuments(documents));
         return workspace;
+    }
+
+    private async Task<JsonDocument> RunFallbackMsBuildAsync(IEnumerable<string> arguments)
+    {
+        // Run under the project's SDK host: the in-process SDK resolver may be precisely
+        // why MSBuildWorkspace failed. Match DotnetCliRunner's environment isolation.
+        var host = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+        if (string.IsNullOrEmpty(host))
+        {
+            var root = Environment.GetEnvironmentVariable("DOTNET_ROOT");
+            host = string.IsNullOrEmpty(root) ? "dotnet" :
+                Path.Combine(root, OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet");
+        }
+        var startInfo = new ProcessStartInfo(host)
+        {
+            WorkingDirectory = Path.GetDirectoryName(Path.GetFullPath(_projectPath))!,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+        startInfo.Environment.Remove("MSBuildSDKsPath");
+        startInfo.Environment.Remove("MSBuildExtensionsPath");
+        startInfo.Environment.Remove("MSBUILD_EXE_PATH");
+        startInfo.ArgumentList.Add("msbuild");
+        startInfo.ArgumentList.Add(Path.GetFullPath(_projectPath));
+        startInfo.ArgumentList.Add("-nologo");
+        foreach (var argument in arguments)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
+        using var process = Process.Start(startInfo)
+            ?? throw new InvalidOperationException("Unable to start the .NET SDK host.");
+        var outputTask = process.StandardOutput.ReadToEndAsync();
+        var errorTask = process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+        var output = await outputTask;
+        var error = await errorTask;
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException($"Unable to resolve compiler inputs for '{_projectPath}'.{Environment.NewLine}{output}{error}");
+        }
+        return JsonDocument.Parse(output);
     }
 
     public async Task OpenProjectAsync()
@@ -275,10 +359,8 @@ public class CodeService : ICodeService, IDisposable
         List<ISymbol> classSymbols = [];
         if (_compilation is null)
         {
-            // Explicitly use only the MSBuildWorkspace for compilation — the fallback
-            // AdhocWorkspace doesn't carry NuGet/SDK reference assemblies, so its
-            // GetCompilationAsync() would produce a poorly-resolved compilation that is
-            // no better than GetFallbackCompilationAsync() below.
+            // Model discovery retains its lightweight source-only fallback below.
+            // Document modifications instead use the SDK-resolved fallback workspace.
             var msBuildWorkspace = await GetMsBuildWorkspaceAsync();
             var project = msBuildWorkspace?.CurrentSolution?.GetProject(_projectPath);
             if (project is not null)
@@ -415,5 +497,3 @@ public class CodeService : ICodeService, IDisposable
         return null;
     }
 }
-
-

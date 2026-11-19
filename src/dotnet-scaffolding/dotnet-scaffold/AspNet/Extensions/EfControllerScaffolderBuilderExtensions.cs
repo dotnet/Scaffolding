@@ -62,7 +62,11 @@ internal static class EfControllerScaffolderBuilderExtensions
             if (context.Properties.TryGetValue(nameof(EfControllerSettings), out var commandSettingsObj) &&
                 commandSettingsObj is EfControllerSettings commandSettings)
             {
-                List<Package> packages = [PackageConstants.EfConstants.EfCoreToolsPackage];
+                List<Package> packages =
+                [
+                    PackageConstants.EfConstants.EfCoreToolsPackage,
+                    PackageConstants.EfConstants.EfCoreDesignPackage
+                ];
                 step.ProjectPath = commandSettings.Project;
                 step.Prerelease = commandSettings.Prerelease;
                 if (!string.IsNullOrEmpty(commandSettings.DatabaseProvider) &&
@@ -172,6 +176,11 @@ internal static class EfControllerScaffolderBuilderExtensions
                 context.Properties.TryGetValue(nameof(ViewModel), out var viewModelObj);
                 ViewModel viewModel = viewModelObj as ViewModel ??
                     throw new InvalidOperationException(missingViewModelExceptionMssg);
+
+                context.Properties.TryGetValue(nameof(EfControllerModel), out var efControllerModelObj);
+                EfControllerModel efControllerModel = efControllerModelObj as EfControllerModel ??
+                    throw new InvalidOperationException("missing 'EfControllerModel' in 'ScaffolderContext.Properties'");
+                viewModel.ControllerName = efControllerModel.ControllerName;
 
                 if (viewModel.ProjectInfo is null || string.IsNullOrEmpty(viewModel.ProjectInfo.ProjectPath))
                 {

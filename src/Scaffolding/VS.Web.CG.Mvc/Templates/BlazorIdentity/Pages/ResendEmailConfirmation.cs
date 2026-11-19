@@ -57,9 +57,12 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "\n        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));\r\n    " +
                     "    var callbackUrl = NavigationManager.GetUriWithQueryParameters(\r\n            " +
                     "NavigationManager.ToAbsoluteUri(\"Account/ConfirmEmail\").AbsoluteUri,\r\n          " +
-                    "  new Dictionary<string, object?> { [\"userId\"] = userId, [\"code\"] = code });\r\n  " +
-                    "      await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder" +
-                    ".Default.Encode(callbackUrl));\r\n\r\n        message = \"Verification email sent. Pl" +
+                    "  new Dictionary<string, object?> { [\"userId\"] = userId, [\"code\"] = code });\r\n" +
+                    "        var storedEmail = await UserManager.GetEmailAsync(user);\r\n" +
+                    "        if (string.IsNullOrEmpty(storedEmail))\r\n        {\r\n" +
+                    "            throw new InvalidOperationException(\"Users must have an email.\");\r\n" +
+                    "        }\r\n\r\n        await EmailSender.SendConfirmationLinkAsync(user, storedEmail, HtmlEncoder.Default.Encode(callbackUrl));\r\n\r\n" +
+                    "        message = \"Verification email sent. Pl" +
                     "ease check your email.\";\r\n    }\r\n\r\n    private sealed class InputModel\r\n    {\r\n " +
                     "       [Required]\r\n        [EmailAddress]\r\n        public string Email { get; se" +
                     "t; } = \"\";\r\n    }\r\n}\r\n");

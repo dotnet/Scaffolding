@@ -153,11 +153,13 @@ public class EntraIdTenantIdentityPipelineTests
         var registration = new Mock<RegisterAppStep>(NullLogger<AddClientSecretStep>.Instance, files.Object, telemetry);
         var authorization = new Mock<UpdateAppAuthorizationStep>(NullLogger<UpdateAppAuthorizationStep>.Instance, files.Object, telemetry);
         var settings = new Mock<UpdateAppSettingsStep>(NullLogger<UpdateAppSettingsStep>.Instance, files.Object, telemetry);
+        var secrets = new Mock<AddClientSecretStep>(NullLogger<AddClientSecretStep>.Instance, files.Object, Mock.Of<IEnvironmentService>());
         var services = new Dictionary<Type, object>
         {
             [typeof(ValidateAzureCliIdentityStep)] = identity,
             [typeof(RegisterAppStep)] = registration.Object,
             [typeof(UpdateAppAuthorizationStep)] = authorization.Object,
+            [typeof(AddClientSecretStep)] = secrets.Object,
             [typeof(UpdateAppSettingsStep)] = settings.Object
         };
         var provider = new Mock<IServiceProvider>();
@@ -167,6 +169,7 @@ public class EntraIdTenantIdentityPipelineTests
             .WithValidateAzureCliIdentityStep()
             .WithRegisterAppStep()
             .WithUpdateAppAuthorizationStep()
+            .WithAddClientSecretStep()
             .WithUpdateAppSettingsStep()
             .Build(provider.Object);
         var context = new ScaffolderContext(scaffolder);
@@ -180,6 +183,7 @@ public class EntraIdTenantIdentityPipelineTests
 
         registration.Verify(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>()), Times.Never);
         authorization.Verify(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>()), Times.Never);
+        secrets.Verify(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>()), Times.Never);
         settings.Verify(s => s.ExecuteAsync(It.IsAny<ScaffolderContext>(), It.IsAny<CancellationToken>()), Times.Never);
         files.VerifyNoOtherCalls();
         Assert.DoesNotContain("ClientId", context.Properties.Keys);

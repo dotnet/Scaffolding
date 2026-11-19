@@ -31,6 +31,17 @@ I recommend cloning it under your user profile directory.
 
 ## 🧪 Debugging Setup
 
+### MVC controller view folders
+
+Controller names are validated as unqualified C# identifiers before scaffolding modifies the project.
+An optional `.cs` extension and escaped identifiers such as `@OrdersController` are supported.
+Directory paths, other extensions, Unicode formatting characters, and reserved device filenames are rejected.
+When views are requested, the derived folder must be a nonempty single path segment;
+on Windows, reserved device names such as `NUL` are rejected. These folder restrictions
+do not apply when views are not requested.
+
+When scaffolding an MVC controller with Entity Framework and views, `dotnet scaffold` places all five CRUD views under `Views/{controller name}`, removing the trailing `Controller` suffix case-insensitively. For example, model `Order` and controller `OrdersController` generate `Views/Orders`, while generated model references remain `Order`. Standalone view scaffolding continues to use the model name for its folder.
+
 1. Open the `all.sln` solution in a separate instance of Visual Studio.
 2. Set any breakpoints you want to hit.
 3. Before running the install script, add the following line near the top of the project you want to debug (e.g., `dotnet-scaffold-aspnet`, etc.):

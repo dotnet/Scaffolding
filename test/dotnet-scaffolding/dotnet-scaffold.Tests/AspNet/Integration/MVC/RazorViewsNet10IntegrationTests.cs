@@ -17,7 +17,27 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
     public async Task Scaffold_Views_Net10_CreateWithKeylessModel()
     {
         File.WriteAllText(_testProjectPath, ProjectContent);
-        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), ScaffoldCliHelper.GetMinimalProgramCs());
+        var viewsDir = Directory.CreateDirectory(Path.Combine(_testProjectDir, "Views")).FullName;
+        File.WriteAllText(Path.Combine(viewsDir, "_ViewImports.cshtml"), "@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers");
+        File.WriteAllText(Path.Combine(_testProjectDir, "Program.cs"), """
+            using Microsoft.AspNetCore.Mvc;
+
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddControllersWithViews();
+            await using var app = builder.Build();
+            app.MapControllerRoute("default", "{controller}/{action}");
+            app.Urls.Add("http://127.0.0.1:0");
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            await app.StartAsync(timeout.Token);
+            using var client = new HttpClient(new HttpClientHandler { UseProxy = false });
+            Console.WriteLine(await client.GetStringAsync(app.Urls.Single() + "/LoginViewModel/Create", timeout.Token));
+            await app.StopAsync(timeout.Token);
+
+            public class LoginViewModelController : Controller
+            {
+                public IActionResult Create() => View(new TestProject.LoginViewModel());
+            }
+            """);
         File.WriteAllText(Path.Combine(_testProjectDir, "LoginViewModel.cs"), """
             namespace TestProject;
 
@@ -26,6 +46,10 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
                 public string Email { get; set; }
                 public string Password { get; set; }
                 public bool RememberMe { get; set; }
+                private string PrivateProperty { get; set; }
+                public static string StaticProperty { get; set; }
+                public string this[int index] => "";
+                public string ReadOnlyProperty => "";
             }
             """);
 
@@ -41,14 +65,14 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
             "--page", "Create");
         Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
 
-        var view = File.ReadAllText(Path.Combine(_testProjectDir, "Views", "LoginViewModel", "Create.cshtml"));
-        Assert.Contains("asp-for=\"Email\"", view);
-        Assert.Contains("asp-for=\"Password\"", view);
-        Assert.Contains("asp-for=\"RememberMe\"", view);
-
-        var (postExitCode, postOutput, postError) = await RunBuildAsync(_testProjectDir);
-        Assert.True(postExitCode == 0,
-            $"Project should build after scaffolding.\nOutput: {postOutput}\nError: {postError}");
+        var (runExitCode, html, runError) = await ScaffoldCliHelper.RunDotNetAsync(_testProjectDir, "run", "--no-launch-profile");
+        Assert.True(runExitCode == 0, $"The generated MVC view should render.\nOutput: {html}\nError: {runError}");
+        Assert.Matches("<input[^>]*name=\"Email\"", html);
+        Assert.Matches("<input[^>]*name=\"Password\"", html);
+        Assert.Matches("<input[^>]*type=\"checkbox\"[^>]*name=\"RememberMe\"", html);
+        Assert.DoesNotContain("PrivateProperty", html);
+        Assert.DoesNotContain("StaticProperty", html);
+        Assert.DoesNotContain("ReadOnlyProperty", html);
     }
 
     [Fact]

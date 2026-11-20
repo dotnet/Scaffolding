@@ -282,6 +282,7 @@ internal class ValidateEfControllerStep : ScaffoldStep
             var dbContextClassSymbol = allClasses.FirstOrDefault(x => x.Name.Equals(dbContextClassName, StringComparison.OrdinalIgnoreCase));
             dbContextInfo = ClassAnalyzers.GetDbContextInfo(settings.Project, dbContextClassSymbol, dbContextClassName, settings.DatabaseProvider, modelInfo);
             dbContextInfo.EfScenario = true;
+            modelInfo.ForeignKeyNavigations = ClassAnalyzers.GetForeignKeyNavigations(modelInfo, dbContextClassSymbol);
         }
 
         EfControllerModel scaffoldingModel = new()

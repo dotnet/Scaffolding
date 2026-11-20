@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -177,5 +178,194 @@ public class CrudControllerNet10IntegrationTests : CrudControllerIntegrationTest
         Assert.Contains("MVC_ACCEPTANCE /Movies 200", runtimeOutput);
         Assert.Contains("MVC_ACCEPTANCE /Movies/Create 200", runtimeOutput);
         Assert.DoesNotContain("was not found", runtimeOutput);
+    }
+
+    [Fact]
+    public async Task Scaffold_ForeignKeys_RendersSelectListsAndSavesNullableForeignKeys()
+    {
+        File.WriteAllText(_testProjectPath, ProjectContent);
+        File.WriteAllText(Path.Combine(_testProjectDir, "NuGet.config"), ScaffoldCliHelper.StableNuGetConfig);
+        File.WriteAllText(Path.Combine(_testProjectDir, "appsettings.json"), "{}");
+        var programPath = Path.Combine(_testProjectDir, "Program.cs");
+        File.WriteAllText(programPath, """
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddControllersWithViews();
+            var app = builder.Build();
+            app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+            app.Run();
+            """);
+        var modelsDir = Path.Combine(_testProjectDir, "Models");
+        Directory.CreateDirectory(modelsDir);
+        // Nested principal type that never gets a DbSet; City has a required FK (Country) and an optional FK (Region).
+        File.WriteAllText(Path.Combine(modelsDir, "Outer.cs"), """
+            #nullable enable
+            namespace TestProject.Models;
+
+            public class Outer
+            {
+                public class Country
+                {
+                    public int Id { get; set; }
+                    public string Name { get; set; } = string.Empty;
+                }
+            }
+            """);
+        File.WriteAllText(Path.Combine(modelsDir, "City.cs"), """
+            #nullable enable
+            namespace TestProject.Models;
+
+            public class City
+            {
+                public int Id { get; set; }
+                public string Name { get; set; } = string.Empty;
+                public int CountryId { get; set; }
+                public Outer.Country? Country { get; set; }
+                public int? RegionId { get; set; }
+                public Outer.Country? Region { get; set; }
+            }
+            """);
+        var viewsDir = Path.Combine(_testProjectDir, "Views");
+        Directory.CreateDirectory(viewsDir);
+        File.WriteAllText(Path.Combine(viewsDir, "_ViewImports.cshtml"),
+            "@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers");
+
+        var (beforeExitCode, beforeOutput, beforeError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(beforeExitCode == 0, $"Project should build before scaffolding.\nOutput: {beforeOutput}\nError: {beforeError}");
+
+        var (cliExitCode, cliOutput, cliError) = await ScaffoldCliHelper.RunScaffoldAsync(
+            TargetFramework,
+            "mvccontroller-crud",
+            "--project", _testProjectPath,
+            "--model", "City",
+            "--controller", "CitiesController",
+            "--dataContext", "AppDbContext",
+            "--dbProvider", "sqlite-efcore",
+            "--views");
+        Assert.True(cliExitCode == 0, $"CLI scaffold should succeed.\nOutput: {cliOutput}\nError: {cliError}");
+        Assert.DoesNotContain("An error occurred", cliOutput);
+        Assert.DoesNotContain("Failed", cliOutput);
+
+        var controllerContent = File.ReadAllText(Path.Combine(_testProjectDir, "Controllers", "CitiesController.cs"));
+        foreach (var foreignKey in new[] { "CountryId", "RegionId" })
+        {
+            var selectList = $"new SelectList(_context.Set<global::TestProject.Models.Outer.Country>(), \"Id\", \"Name\", city.{foreignKey})";
+            Assert.Equal(3, controllerContent.Split(selectList).Length - 1);
+        }
+        foreach (var view in new[] { "Create.cshtml", "Edit.cshtml" })
+        {
+            var viewContent = File.ReadAllText(Path.Combine(viewsDir, "Cities", view));
+            Assert.Contains("<select asp-for=\"CountryId\" class=\"form-control\" asp-items=\"ViewBag.CountryId\"></select>", viewContent);
+            var regionSelectStart = viewContent.IndexOf("<select asp-for=\"RegionId\" class=\"form-control\" asp-items=\"ViewBag.RegionId\">", StringComparison.Ordinal);
+            Assert.True(regionSelectStart >= 0, $"{view} should render a select for RegionId.");
+            var regionSelect = viewContent.Substring(regionSelectStart, viewContent.IndexOf("</select>", regionSelectStart, StringComparison.Ordinal) - regionSelectStart);
+            Assert.Contains("<option value=\"\">", regionSelect);
+            Assert.Equal(1, viewContent.Split("<option value=\"\">").Length - 1);
+            Assert.DoesNotContain("asp-for=\"Country\"", viewContent);
+            Assert.DoesNotContain("asp-for=\"Region\"", viewContent);
+        }
+
+        var (afterExitCode, afterOutput, afterError) = await RunBuildAsync(_testProjectDir);
+        Assert.True(afterExitCode == 0, $"Scaffolded project should build.\nOutput: {afterOutput}\nError: {afterError}");
+
+        var programContent = File.ReadAllText(programPath);
+        Assert.Contains("app.Run();", programContent);
+        // Host the app against a temporary SQLite database and drive the scaffolded forms over HTTP.
+        File.WriteAllText(programPath, programContent.Replace("app.Run();", """
+            int countryId, cityId;
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                await context.Database.EnsureCreatedAsync();
+                var country = new TestProject.Models.Outer.Country { Name = "France" };
+                var city = new TestProject.Models.City { Name = "Paris", Country = country, Region = country };
+                context.AddRange(country, city);
+                await context.SaveChangesAsync();
+                (countryId, cityId) = (country.Id, city.Id);
+            }
+            int? GetCityRegionId(string name)
+            {
+                using var scope = app.Services.CreateScope();
+                return scope.ServiceProvider.GetRequiredService<AppDbContext>()
+                    .Set<TestProject.Models.City>().Single(c => c.Name == name).RegionId;
+            }
+            app.Urls.Add("http://127.0.0.1:0");
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+            await app.StartAsync(timeout.Token);
+            try
+            {
+                var server = app.Services.GetRequiredService<Microsoft.AspNetCore.Hosting.Server.IServer>();
+                var addresses = server.Features.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>()
+                    ?? throw new InvalidOperationException("The server did not publish its address.");
+                using var handler = new HttpClientHandler { UseProxy = false };
+                using var client = new HttpClient(handler) { BaseAddress = new Uri(addresses.Addresses.Single()) };
+                async Task<string> GetAsync(string path)
+                {
+                    using var response = await client.GetAsync(path, timeout.Token);
+                    var body = await response.Content.ReadAsStringAsync(timeout.Token);
+                    return response.StatusCode == System.Net.HttpStatusCode.OK
+                        ? body
+                        : throw new InvalidOperationException($"GET {path} returned {response.StatusCode}: {body}");
+                }
+                async Task<string> PostAsync(string path, Dictionary<string, string> fields)
+                {
+                    var form = await GetAsync(path);
+                    fields["__RequestVerificationToken"] = System.Text.RegularExpressions.Regex.Match(
+                        form, "name=\"__RequestVerificationToken\" type=\"hidden\" value=\"([^\"]+)\"").Groups[1].Value;
+                    using var response = await client.PostAsync(path, new FormUrlEncodedContent(fields), timeout.Token);
+                    var body = await response.Content.ReadAsStringAsync(timeout.Token);
+                    return response.StatusCode == System.Net.HttpStatusCode.OK
+                        ? body
+                        : throw new InvalidOperationException($"POST {path} returned {response.StatusCode}: {body}");
+                }
+                void AssertCountrySelected(string label, string body)
+                {
+                    var countrySelect = System.Text.RegularExpressions.Regex.Match(
+                        body, "<select[^>]*name=\"CountryId\"[^>]*>(.*?)</select>", System.Text.RegularExpressions.RegexOptions.Singleline);
+                    if (!countrySelect.Success ||
+                        !countrySelect.Groups[1].Value.Contains($"<option selected=\"selected\" value=\"{countryId}\">France</option>"))
+                    {
+                        throw new InvalidOperationException($"{label} did not keep the selected CountryId: {body}");
+                    }
+                    Console.WriteLine($"FK_ACCEPTANCE {label} CountryId selected");
+                }
+
+                AssertCountrySelected("City Edit GET", await GetAsync($"/Cities/Edit/{cityId}"));
+                AssertCountrySelected("City Create invalid POST", await PostAsync("/Cities/Create",
+                    new() { ["Name"] = "", ["CountryId"] = countryId.ToString(), ["RegionId"] = "" }));
+                AssertCountrySelected("City Edit invalid POST", await PostAsync($"/Cities/Edit/{cityId}",
+                    new() { ["Id"] = cityId.ToString(), ["Name"] = "", ["CountryId"] = countryId.ToString(), ["RegionId"] = countryId.ToString() }));
+
+                await PostAsync("/Cities/Create", new() { ["Name"] = "Lyon", ["CountryId"] = countryId.ToString(), ["RegionId"] = "" });
+                if (GetCityRegionId("Lyon") is not null)
+                {
+                    throw new InvalidOperationException("City Create without a region did not save null.");
+                }
+                Console.WriteLine("FK_ACCEPTANCE City Create RegionId null");
+
+                await PostAsync($"/Cities/Edit/{cityId}",
+                    new() { ["Id"] = cityId.ToString(), ["Name"] = "Paris", ["CountryId"] = countryId.ToString(), ["RegionId"] = "" });
+                if (GetCityRegionId("Paris") is not null)
+                {
+                    throw new InvalidOperationException("Clearing the region on City Edit did not save null.");
+                }
+                Console.WriteLine("FK_ACCEPTANCE City Edit RegionId null");
+            }
+            finally
+            {
+                await app.StopAsync();
+                await app.DisposeAsync();
+            }
+            """));
+        var (runtimeExitCode, runtimeOutput, runtimeError) = await ScaffoldCliHelper.RunDotNetAsync(
+            _testProjectDir, "run", "--no-launch-profile");
+        Assert.True(runtimeExitCode == 0, $"Scaffolded FK forms should work.\nOutput: {runtimeOutput}\nError: {runtimeError}");
+        foreach (var marker in new[]
+        {
+            "City Edit GET CountryId selected", "City Create invalid POST CountryId selected", "City Edit invalid POST CountryId selected",
+            "City Create RegionId null", "City Edit RegionId null"
+        })
+        {
+            Assert.Contains($"FK_ACCEPTANCE {marker}", runtimeOutput);
+        }
     }
 }

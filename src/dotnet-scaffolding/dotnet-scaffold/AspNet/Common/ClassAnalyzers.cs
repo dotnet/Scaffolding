@@ -191,9 +191,9 @@ internal static class ClassAnalyzers
                 continue;
             }
 
-            // A principal entity must have a discoverable primary key. A single [Key] wins over the
-            // convention key regardless of declaration order; composite keys ([Key] on several properties
-            // or a class-level [PrimaryKey]) are not supported.
+            // A principal entity must have a discoverable primary key, resolved with EF Core precedence:
+            // a single [Key], then "Id", then "<Type>Id", regardless of declaration order. Composite keys
+            // ([Key] on several properties or a class-level [PrimaryKey]) are not supported.
             var principalProperties = EfDbContextHelpers.GetModelProperties(principalType);
             if (principalProperties is null)
             {
@@ -209,7 +209,9 @@ internal static class ClassAnalyzers
 
             var principalKeyProperty = keyAttributeProperties.SingleOrDefault() ??
                 principalProperties.AllModelProperties.FirstOrDefault(p =>
-                    string.Equals(p.Name, principalProperties.PrimaryKeyName, StringComparison.Ordinal));
+                    !p.IsStatic && string.Equals(p.Name, "Id", StringComparison.OrdinalIgnoreCase)) ??
+                principalProperties.AllModelProperties.FirstOrDefault(p =>
+                    !p.IsStatic && string.Equals(p.Name, $"{principalType.Name}Id", StringComparison.OrdinalIgnoreCase));
             if (principalKeyProperty is null)
             {
                 continue;
@@ -222,12 +224,16 @@ internal static class ClassAnalyzers
                 !SymbolEqualityComparer.Default.Equals(GetNonNullableType(foreignKeyProperty.Type), GetNonNullableType(principalKeyProperty.Type)) ||
                 string.Equals(foreignKeyProperty.Name, modelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase) ||
                 navigations.Any(n => string.Equals(n.ForeignKeyPropertyName, foreignKeyProperty.Name, StringComparison.Ordinal)) ||
-                HasPrincipalKeyConfiguration(dbContextSymbol, modelInfo.ModelTypeName, principalType, navigationProperty))
+                HasPrincipalKeyConfiguration(dbContextSymbol, modelInfo.ModelTypeName, principalType, navigationProperty) ||
+                HasConflictingForeignKeyConfiguration(dbContextSymbol, modelInfo.ModelTypeName, principalType, navigationProperty, foreignKeyProperty.Name))
             {
                 continue;
             }
 
+            // The generated controller reads the DbSet through _context, so it must be an accessible instance property.
             string? entitySetName = (dbContextSymbol as INamedTypeSymbol)?.GetMembers().OfType<IPropertySymbol>().FirstOrDefault(p =>
+                !p.IsStatic &&
+                p.GetMethod?.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal &&
                 p.Type is INamedTypeSymbol { Name: "DbSet", TypeArguments.Length: 1 } dbSetType &&
                 SymbolEqualityComparer.Default.Equals(dbSetType.TypeArguments[0], principalType))?.Name;
 
@@ -240,8 +246,9 @@ internal static class ClassAnalyzers
                 EntitySetName = string.IsNullOrEmpty(entitySetName)
                     ? $"Set<{principalType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>()"
                     : entitySetName,
-                IsNullable = foreignKeyProperty.Type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T ||
-                    foreignKeyProperty.Type.NullableAnnotation == NullableAnnotation.Annotated
+                IsNullable = (foreignKeyProperty.Type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T ||
+                    foreignKeyProperty.Type.NullableAnnotation == NullableAnnotation.Annotated) &&
+                    !HasAttribute(foreignKeyProperty, "RequiredAttribute")
             });
         }
 
@@ -308,9 +315,48 @@ internal static class ClassAnalyzers
     /// </summary>
     private static bool HasPrincipalKeyConfiguration(ISymbol? dbContextSymbol, string dependentTypeName, INamedTypeSymbol principalType, IPropertySymbol navigationProperty)
     {
+        return GetRelationshipInvocations(dbContextSymbol, "HasPrincipalKey", dependentTypeName, principalType, navigationProperty).Any();
+    }
+
+    /// <summary>
+    /// Same syntax scan as <see cref="HasPrincipalKeyConfiguration"/> for HasForeignKey: true when a matching statement
+    /// configures a foreign key that is not exactly the single property <paramref name="foreignKeyPropertyName"/>
+    /// (a different member, several members, or an argument that cannot be read such as a variable).
+    /// </summary>
+    private static bool HasConflictingForeignKeyConfiguration(ISymbol? dbContextSymbol, string dependentTypeName, INamedTypeSymbol principalType, IPropertySymbol navigationProperty, string foreignKeyPropertyName)
+    {
+        return GetRelationshipInvocations(dbContextSymbol, "HasForeignKey", dependentTypeName, principalType, navigationProperty)
+            .Any(invocation => !string.Equals(GetSingleForeignKeyName(invocation), foreignKeyPropertyName, StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// Reads the property name from HasForeignKey(x => x.Prop) or HasForeignKey("Prop"); null for anything else.
+    /// </summary>
+    private static string? GetSingleForeignKeyName(InvocationExpressionSyntax invocation)
+    {
+        if (invocation.ArgumentList.Arguments.Count != 1)
+        {
+            return null;
+        }
+
+        return invocation.ArgumentList.Arguments[0].Expression switch
+        {
+            LambdaExpressionSyntax { ExpressionBody: MemberAccessExpressionSyntax { Expression: IdentifierNameSyntax } member } => member.Name.Identifier.ValueText,
+            LiteralExpressionSyntax literal when literal.IsKind(SyntaxKind.StringLiteralExpression) => literal.Token.ValueText,
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// Returns calls to <paramref name="methodName"/> in the DbContext's OnModelCreating whose enclosing statement names
+    /// both ends of this relationship (the dependent type or the principal's collection navigation, and the principal
+    /// type or the dependent's navigation).
+    /// </summary>
+    private static IEnumerable<InvocationExpressionSyntax> GetRelationshipInvocations(ISymbol? dbContextSymbol, string methodName, string dependentTypeName, INamedTypeSymbol principalType, IPropertySymbol navigationProperty)
+    {
         if (dbContextSymbol is null)
         {
-            return false;
+            yield break;
         }
 
         var principalNames = new HashSet<string>(StringComparer.Ordinal) { principalType.Name, navigationProperty.Name };
@@ -319,13 +365,13 @@ internal static class ClassAnalyzers
             .Where(p => p.Type is INamedTypeSymbol { IsGenericType: true } type && type.TypeArguments.Any(t => t.Name == dependentTypeName))
             .Select(p => p.Name));
 
-        var hasPrincipalKeyCalls = dbContextSymbol.DeclaringSyntaxReferences
+        var invocations = dbContextSymbol.DeclaringSyntaxReferences
             .SelectMany(r => r.GetSyntax().DescendantNodes().OfType<MethodDeclarationSyntax>())
             .Where(m => m.Identifier.ValueText == "OnModelCreating")
             .SelectMany(m => m.DescendantNodes().OfType<InvocationExpressionSyntax>())
-            .Where(i => i.Expression is MemberAccessExpressionSyntax { Name.Identifier.ValueText: "HasPrincipalKey" });
+            .Where(i => i.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == methodName);
 
-        foreach (var invocation in hasPrincipalKeyCalls)
+        foreach (var invocation in invocations)
         {
             SyntaxNode statement = (SyntaxNode?)invocation.FirstAncestorOrSelf<StatementSyntax>() ??
                 invocation.AncestorsAndSelf().OfType<ExpressionSyntax>().Last();
@@ -335,11 +381,9 @@ internal static class ClassAnalyzers
                 .ToHashSet(StringComparer.Ordinal);
             if (identifiers.Overlaps(principalNames) && identifiers.Overlaps(dependentNames))
             {
-                return true;
+                yield return invocation;
             }
         }
-
-        return false;
     }
 
     private static ITypeSymbol GetNonNullableType(ITypeSymbol type)

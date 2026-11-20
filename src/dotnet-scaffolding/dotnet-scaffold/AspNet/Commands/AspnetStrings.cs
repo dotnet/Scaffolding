@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Commands
 
             internal const string Views = "views";
             internal const string ViewsDisplayName = "Razor Views";
-            internal const string ViewsDescription = "Generates Razor views for Create, Delete, Details, Edit and List operations for the given model";
+            internal const string ViewsDescription = "Generates Razor views for Create, Delete, Details, Edit and List operations for the given model. Only Create supports models without a primary key.";
             internal const string ViewsExample1 = "dotnet scaffold aspnet views --project C:/MyMvcApp/MyMvcApp.csproj --model Product --page All";
             internal const string ViewsExample1Description = "Generate all CRUD views for Product model:";
             internal const string ViewsExample2 = "dotnet scaffold aspnet views --project C:/MyApp/MyApp.csproj --model Customer --page Create,Edit";

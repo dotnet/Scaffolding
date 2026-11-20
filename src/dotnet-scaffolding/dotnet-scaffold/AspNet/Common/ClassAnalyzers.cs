@@ -161,12 +161,13 @@ internal static class ClassAnalyzers
     }
 
     /// <summary>
-    /// Check if atleast one property and a primary key property were found for given --model class.
+    /// Checks that at least one property and, when required, a primary key were found for the given --model class.
     /// </summary>
     /// <param name="modelInfo">The model information to validate.</param>
     /// <param name="logger">The logger to use for error messages.</param>
+    /// <param name="requirePrimaryKey">Whether the scaffolder requires a primary key.</param>
     /// <returns>True if the model is valid for CRUD scaffolders; otherwise, false.</returns>
-    internal static bool ValidateModelForCrudScaffolders(ModelInfo modelInfo, ILogger logger)
+    internal static bool ValidateModelForCrudScaffolders(ModelInfo modelInfo, ILogger logger, bool requirePrimaryKey = true)
     {
         if (modelInfo is null || string.IsNullOrEmpty(modelInfo.ModelTypeName))
         {
@@ -177,7 +178,7 @@ internal static class ClassAnalyzers
             logger.LogError($"No properties found for --model '{modelInfo.ModelTypeName}'");
             return false;
         }
-        else if (string.IsNullOrEmpty(modelInfo.PrimaryKeyName))
+        else if (requirePrimaryKey && string.IsNullOrEmpty(modelInfo.PrimaryKeyName))
         {
             logger.LogError($"No primary key found for --model '{modelInfo.ModelTypeName}'");
             return false;

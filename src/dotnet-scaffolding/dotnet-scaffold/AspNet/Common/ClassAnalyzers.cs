@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.DotNet.Scaffolding.CodeModification.Helpers;
 using Microsoft.DotNet.Scaffolding.Roslyn.Services;
 using Microsoft.DotNet.Tools.Scaffold.AspNet.Helpers;
@@ -189,43 +191,52 @@ internal static class ClassAnalyzers
                 continue;
             }
 
-            // A principal entity must have a discoverable primary key. GetModelProperties returns the first
-            // [Key] or convention key in declaration order, so skip when a different property carries [Key].
+            // A principal entity must have a discoverable primary key. A single [Key] wins over the
+            // convention key regardless of declaration order; composite keys ([Key] on several properties
+            // or a class-level [PrimaryKey]) are not supported.
             var principalProperties = EfDbContextHelpers.GetModelProperties(principalType);
-            if (principalProperties is null ||
-                principalProperties.AllModelProperties.Any(p =>
-                    HasAttribute(p, "KeyAttribute") &&
-                    !string.Equals(p.Name, principalProperties.PrimaryKeyName, StringComparison.Ordinal)))
+            if (principalProperties is null)
             {
                 continue;
             }
 
-            var foreignKeyProperty = FindForeignKeyProperty(navigationProperty, principalType, principalProperties.PrimaryKeyName, modelProperties);
-            var principalKeyProperty = principalProperties.AllModelProperties.FirstOrDefault(p =>
-                string.Equals(p.Name, principalProperties.PrimaryKeyName, StringComparison.Ordinal));
+            var keyAttributeProperties = principalProperties.AllModelProperties.Where(p => HasAttribute(p, "KeyAttribute")).ToList();
+            if (keyAttributeProperties.Count > 1 ||
+                principalType.GetAttributes().Any(a => a.AttributeClass?.Name == "PrimaryKeyAttribute"))
+            {
+                continue;
+            }
+
+            var principalKeyProperty = keyAttributeProperties.SingleOrDefault() ??
+                principalProperties.AllModelProperties.FirstOrDefault(p =>
+                    string.Equals(p.Name, principalProperties.PrimaryKeyName, StringComparison.Ordinal));
+            if (principalKeyProperty is null)
+            {
+                continue;
+            }
+
+            string principalKeyName = principalKeyProperty.Name;
+            var foreignKeyProperty = FindForeignKeyProperty(navigationProperty, principalType, principalKeyName, modelProperties);
             // Skip FKs that cannot target the principal primary key (e.g. alternate keys); int? matches int.
             if (foreignKeyProperty is null ||
-                principalKeyProperty is null ||
                 !SymbolEqualityComparer.Default.Equals(GetNonNullableType(foreignKeyProperty.Type), GetNonNullableType(principalKeyProperty.Type)) ||
                 string.Equals(foreignKeyProperty.Name, modelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase) ||
-                navigations.Any(n => string.Equals(n.ForeignKeyPropertyName, foreignKeyProperty.Name, StringComparison.Ordinal)))
+                navigations.Any(n => string.Equals(n.ForeignKeyPropertyName, foreignKeyProperty.Name, StringComparison.Ordinal)) ||
+                HasPrincipalKeyConfiguration(dbContextSymbol, modelInfo.ModelTypeName, principalType, navigationProperty))
             {
                 continue;
             }
 
-            string principalFullName = principalType.ContainingNamespace is null || principalType.ContainingNamespace.IsGlobalNamespace
-                ? principalType.Name
-                : $"{principalType.ContainingNamespace.ToDisplayString()}.{principalType.Name}";
-            string? entitySetName = dbContextSymbol is null
-                ? null
-                : EfDbContextHelpers.GetEntitySetVariableName(dbContextSymbol, principalType.Name, principalFullName);
+            string? entitySetName = (dbContextSymbol as INamedTypeSymbol)?.GetMembers().OfType<IPropertySymbol>().FirstOrDefault(p =>
+                p.Type is INamedTypeSymbol { Name: "DbSet", TypeArguments.Length: 1 } dbSetType &&
+                SymbolEqualityComparer.Default.Equals(dbSetType.TypeArguments[0], principalType))?.Name;
 
             navigations.Add(new ForeignKeyNavigationInfo
             {
                 NavigationPropertyName = navigationProperty.Name,
                 ForeignKeyPropertyName = foreignKeyProperty.Name,
-                PrincipalPrimaryKeyName = principalProperties.PrimaryKeyName,
-                DisplayPropertyName = GetDisplayPropertyName(principalProperties.AllModelProperties, principalProperties.PrimaryKeyName) ?? principalProperties.PrimaryKeyName,
+                PrincipalPrimaryKeyName = principalKeyName,
+                DisplayPropertyName = GetDisplayPropertyName(principalProperties.AllModelProperties, principalKeyName) ?? principalKeyName,
                 EntitySetName = string.IsNullOrEmpty(entitySetName)
                     ? $"Set<{principalType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>()"
                     : entitySetName,
@@ -287,6 +298,48 @@ internal static class ClassAnalyzers
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Simple syntax check for an alternate principal key: true when a single fluent statement in the DbContext's
+    /// OnModelCreating calls HasPrincipalKey and names both ends of this relationship (the dependent type or the
+    /// principal's collection navigation, and the principal type or the dependent's navigation).
+    /// Configuration split across statements or placed in IEntityTypeConfiguration classes is not detected.
+    /// </summary>
+    private static bool HasPrincipalKeyConfiguration(ISymbol? dbContextSymbol, string dependentTypeName, INamedTypeSymbol principalType, IPropertySymbol navigationProperty)
+    {
+        if (dbContextSymbol is null)
+        {
+            return false;
+        }
+
+        var principalNames = new HashSet<string>(StringComparer.Ordinal) { principalType.Name, navigationProperty.Name };
+        var dependentNames = new HashSet<string>(StringComparer.Ordinal) { dependentTypeName };
+        dependentNames.UnionWith(principalType.GetMembers().OfType<IPropertySymbol>()
+            .Where(p => p.Type is INamedTypeSymbol { IsGenericType: true } type && type.TypeArguments.Any(t => t.Name == dependentTypeName))
+            .Select(p => p.Name));
+
+        var hasPrincipalKeyCalls = dbContextSymbol.DeclaringSyntaxReferences
+            .SelectMany(r => r.GetSyntax().DescendantNodes().OfType<MethodDeclarationSyntax>())
+            .Where(m => m.Identifier.ValueText == "OnModelCreating")
+            .SelectMany(m => m.DescendantNodes().OfType<InvocationExpressionSyntax>())
+            .Where(i => i.Expression is MemberAccessExpressionSyntax { Name.Identifier.ValueText: "HasPrincipalKey" });
+
+        foreach (var invocation in hasPrincipalKeyCalls)
+        {
+            SyntaxNode statement = (SyntaxNode?)invocation.FirstAncestorOrSelf<StatementSyntax>() ??
+                invocation.AncestorsAndSelf().OfType<ExpressionSyntax>().Last();
+            var identifiers = statement.DescendantTokens()
+                .Where(t => t.IsKind(SyntaxKind.IdentifierToken))
+                .Select(t => t.ValueText)
+                .ToHashSet(StringComparer.Ordinal);
+            if (identifiers.Overlaps(principalNames) && identifiers.Overlaps(dependentNames))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static ITypeSymbol GetNonNullableType(ITypeSymbol type)

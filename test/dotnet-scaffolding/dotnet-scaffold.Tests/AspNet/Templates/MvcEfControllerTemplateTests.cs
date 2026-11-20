@@ -491,6 +491,113 @@ public class MvcEfControllerTemplateTests
         Assert.Empty(modelInfo.ForeignKeyNavigations);
     }
 
+    [Fact]
+    public void SingleKeyAttribute_DeclaredAfterId_IsUsedAsPrincipalKey()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+        [System.ComponentModel.DataAnnotations.Key]
+        public int Code { get; set; }
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int CountryCode { get; set; }
+        public Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
+    }
+}", "City");
+
+        var (controller, _, _) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Equal("CountryCode", Assert.Single(modelInfo.ForeignKeyNavigations).ForeignKeyPropertyName);
+        Assert.Contains("ViewData[\"CountryCode\"] = new SelectList(_context.Countries, \"Code\", \"Name\");", controller);
+    }
+
+    [Fact]
+    public void HasPrincipalKeyInOnModelCreating_RendersNoSelectList()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public int Code { get; set; }
+        public string Name { get; set; } = """";
+        public ICollection<City> Cities { get; set; } = new List<City>();
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int CountryId { get; set; }
+        public Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
+
+        protected override void OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<City>().HasOne(c => c.Country).WithMany(c => c.Cities).HasForeignKey(c => c.CountryId).HasPrincipalKey(c => c.Code);
+        }
+    }
+}", "City");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+        Assert.DoesNotContain("SelectList", controller);
+        Assert.DoesNotContain("<select", createView);
+        Assert.DoesNotContain("<select", editView);
+    }
+
+    [Fact]
+    public void NestedPrincipalWithoutDbSet_UsesFullyQualifiedSetFallback()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Outer
+    {
+        public class Country
+        {
+            public int Id { get; set; }
+            public string Name { get; set; } = """";
+        }
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int CountryId { get; set; }
+        public Outer.Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<City> Cities { get; set; } = null!;
+    }
+}", "City");
+
+        var (controller, _, _) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Equal("Set<global::Models.Outer.Country>()", Assert.Single(modelInfo.ForeignKeyNavigations).EntitySetName);
+        Assert.Contains("ViewData[\"CountryId\"] = new SelectList(_context.Set<global::Models.Outer.Country>(), \"Id\", \"Name\");", controller);
+    }
+
     #endregion
 
     #region Helpers
@@ -533,6 +640,29 @@ namespace Models
         public Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
     }
 }");
+        return CreateModelInfoFromSyntaxTree(syntaxTree, modelTypeName);
+    }
+
+    private static ModelInfo CreateModelInfoFromSource(string modelsSource, string modelTypeName)
+    {
+        return CreateModelInfoFromSyntaxTree(CSharpSyntaxTree.ParseText(@"
+#nullable enable
+using System.Collections.Generic;
+namespace System.ComponentModel.DataAnnotations
+{
+    public class KeyAttribute : System.Attribute { }
+}
+namespace Microsoft.EntityFrameworkCore
+{
+    public class ModelBuilder { }
+    public class DbContext { protected virtual void OnModelCreating(ModelBuilder modelBuilder) { } }
+    public class DbSet<T> { }
+}
+" + modelsSource), modelTypeName);
+    }
+
+    private static ModelInfo CreateModelInfoFromSyntaxTree(SyntaxTree syntaxTree, string modelTypeName)
+    {
         CSharpCompilation compilation = CSharpCompilation.Create(
             "TestAssembly",
             [syntaxTree],

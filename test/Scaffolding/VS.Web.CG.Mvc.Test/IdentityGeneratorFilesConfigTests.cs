@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity;
 using Xunit;
 
@@ -10,6 +11,29 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 {
     public class IdentityGeneratorFilesConfigTests
     {
+        [Theory]
+        [InlineData("Bootstrap4")]
+        [InlineData("Bootstrap5")]
+        public void IdentityLayoutsUseConfiguredAssetPathPrefix(string bootstrapVersion)
+        {
+            DirectoryInfo directory = new DirectoryInfo(AppContext.BaseDirectory);
+            while (directory != null && !File.Exists(Path.Combine(directory.FullName, "All.sln")))
+            {
+                directory = directory.Parent;
+            }
+
+            Assert.NotNull(directory);
+            string templatePath = Path.Combine(
+                directory.FullName,
+                "src", "Scaffolding", "VS.Web.CG.Mvc",
+                "Templates", "Identity", bootstrapVersion,
+                "Pages", "_Layout.cshtml");
+            string template = File.ReadAllText(templatePath);
+
+            Assert.Contains("Model.GetAssetPath", template);
+            Assert.DoesNotContain("~/Identity/", template);
+        }
+
         [Fact]
         public void TestExistingWwwRootDataIsNotOverwrittenWhenScaffoldAllFilesSelected()
         {

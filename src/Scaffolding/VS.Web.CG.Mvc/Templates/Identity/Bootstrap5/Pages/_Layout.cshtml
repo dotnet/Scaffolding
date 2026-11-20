@@ -1,6 +1,14 @@
 ﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @{
     var currentYear = System.DateTime.Now.Year;
+    var bootstrapCssPath = Model.GetAssetPath("/lib/bootstrap/dist/css/bootstrap.css");
+    var bootstrapMinCssPath = Model.GetAssetPath("/lib/bootstrap/dist/css/bootstrap.min.css");
+    var siteCssPath = Model.GetAssetPath("/css/site.css");
+    var jqueryJsPath = Model.GetAssetPath("/lib/jquery/dist/jquery.js");
+    var jqueryMinJsPath = Model.GetAssetPath("/lib/jquery/dist/jquery.min.js");
+    var bootstrapJsPath = Model.GetAssetPath("/lib/bootstrap/dist/js/bootstrap.bundle.js");
+    var bootstrapMinJsPath = Model.GetAssetPath("/lib/bootstrap/dist/js/bootstrap.bundle.min.js");
+    var siteJsPath = Model.GetAssetPath("/js/site.js");
 }
 @{
 @:@@using Microsoft.AspNetCore.Hosting
@@ -16,15 +24,15 @@
     <title>@@ViewData["Title"] - @Model.ApplicationName</title>
 
     <environment include="Development">
-        <link rel="stylesheet" href="~/Identity/lib/bootstrap/dist/css/bootstrap.css" />
-        <link rel="stylesheet" href="~/Identity/css/site.css" />
+        <link rel="stylesheet" href="@bootstrapCssPath" />
+        <link rel="stylesheet" href="@siteCssPath" />
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
               integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous"
-              asp-fallback-href="~/Identity/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-href="@bootstrapMinCssPath"
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
-        <link rel="stylesheet" href="~/Identity/css/site.css" asp-append-version="true" />
+        <link rel="stylesheet" href="@siteCssPath" asp-append-version="true" />
     </environment>
 </head>
 <body>
@@ -75,24 +83,24 @@
     </footer>
 
     <environment include="Development">
-        <script src="~/Identity/lib/jquery/dist/jquery.js"></script>
-        <script src="~/Identity/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
-        <script src="~/Identity/js/site.js" asp-append-version="true"></script>
+        <script src="@jqueryJsPath"></script>
+        <script src="@bootstrapJsPath"></script>
+        <script src="@siteJsPath" asp-append-version="true"></script>
     </environment>
     <environment exclude="Development">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
-                asp-fallback-src="~/Identity/lib/jquery/dist/jquery.min.js"
+                asp-fallback-src="@jqueryMinJsPath"
                 asp-fallback-test="window.jQuery"
                 crossorigin="anonymous"
                 integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2">
         </script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
-                asp-fallback-src="~/Identity/lib/bootstrap/dist/js/bootstrap.bundle.min.js"
+                asp-fallback-src="@bootstrapMinJsPath"
                 asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
                 crossorigin="anonymous"
                 integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj">
         </script>
-        <script src="~/Identity/js/site.js" asp-append-version="true"></script>
+        <script src="@siteJsPath" asp-append-version="true"></script>
     </environment>
 
     @@await RenderSectionAsync("Scripts", required: false)

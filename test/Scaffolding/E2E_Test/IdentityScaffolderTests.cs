@@ -40,6 +40,13 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
 
                 Scaffold(args, TestProjectPath);
 
+                string layoutPath = Path.Combine(TestProjectPath, "Pages", "Shared", "_Layout.cshtml");
+                string layoutContent = File.ReadAllText(layoutPath);
+                Assert.Contains("href='~/lib/bootstrap/dist/css/bootstrap.css'", layoutContent);
+                Assert.Contains("href='~/css/site.css'", layoutContent);
+                Assert.DoesNotContain("~ /", layoutContent);
+                Assert.DoesNotContain("~/Identity/lib/", layoutContent);
+
                 foreach (var file in IdentityGeneratorFilesConfig.Templates)
                 {
                     Assert.True(File.Exists(Path.Combine(TestProjectPath, file)), $"Template file does not exist: '{Path.Combine(TestProjectPath, file)}'");

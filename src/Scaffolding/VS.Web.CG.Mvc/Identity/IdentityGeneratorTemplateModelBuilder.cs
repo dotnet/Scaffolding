@@ -172,6 +172,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                 LayoutPageNoExtension = Path.GetFileNameWithoutExtension(layout),
                 SupportFileLocation = supportFileLocation,
                 HasExistingNonEmptyWwwRoot = HasExistingNonEmptyWwwRootDirectory,
+                AssetPathPrefix = HasExistingNonEmptyWwwRootDirectory ? "~/Identity" : "~",
                 BootstrapVersion = boostrapVersion,
                 IsRazorPagesProject = IsRazorPagesLayout(),
                 IsBlazorProject = IsBlazorProjectLayout()

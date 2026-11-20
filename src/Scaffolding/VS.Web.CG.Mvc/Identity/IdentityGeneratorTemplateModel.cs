@@ -23,5 +23,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
         public string LayoutPageNoExtension { get; set; }
         public string SupportFileLocation { get; set; }
         public bool HasExistingNonEmptyWwwRoot { get; set; }
+        public string AssetPathPrefix { get; set; }
+
+        public string GetAssetPath(string assetPath) => AssetPathPrefix + assetPath;
     }
 }

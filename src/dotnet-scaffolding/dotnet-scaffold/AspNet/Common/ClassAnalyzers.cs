@@ -224,8 +224,7 @@ internal static class ClassAnalyzers
                 !SymbolEqualityComparer.Default.Equals(GetNonNullableType(foreignKeyProperty.Type), GetNonNullableType(principalKeyProperty.Type)) ||
                 string.Equals(foreignKeyProperty.Name, modelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase) ||
                 navigations.Any(n => string.Equals(n.ForeignKeyPropertyName, foreignKeyProperty.Name, StringComparison.Ordinal)) ||
-                HasPrincipalKeyConfiguration(dbContextSymbol, modelInfo.ModelTypeName, principalType, navigationProperty) ||
-                HasConflictingForeignKeyConfiguration(dbContextSymbol, modelInfo.ModelTypeName, principalType, navigationProperty, foreignKeyProperty.Name))
+                HasBlockingRelationshipConfiguration(dbContextSymbol, principalType, navigationProperty, foreignKeyProperty.Name))
             {
                 continue;
             }
@@ -246,9 +245,12 @@ internal static class ClassAnalyzers
                 EntitySetName = string.IsNullOrEmpty(entitySetName)
                     ? $"Set<{principalType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>()"
                     : entitySetName,
+                // Optional only when both the FK and the navigation allow null and neither is [Required].
                 IsNullable = (foreignKeyProperty.Type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T ||
-                    foreignKeyProperty.Type.NullableAnnotation == NullableAnnotation.Annotated) &&
-                    !HasAttribute(foreignKeyProperty, "RequiredAttribute")
+                    (foreignKeyProperty.Type.IsReferenceType && foreignKeyProperty.Type.NullableAnnotation != NullableAnnotation.NotAnnotated)) &&
+                    !HasAttribute(foreignKeyProperty, "RequiredAttribute") &&
+                    !HasAttribute(navigationProperty, "RequiredAttribute") &&
+                    navigationProperty.NullableAnnotation != NullableAnnotation.NotAnnotated
             });
         }
 
@@ -308,29 +310,136 @@ internal static class ClassAnalyzers
     }
 
     /// <summary>
-    /// Simple syntax check for an alternate principal key: true when a single fluent statement in the DbContext's
-    /// OnModelCreating calls HasPrincipalKey and names both ends of this relationship (the dependent type or the
-    /// principal's collection navigation, and the principal type or the dependent's navigation).
-    /// Configuration split across statements or placed in IEntityTypeConfiguration classes is not detected.
+    /// Fail-safe syntax check for fluent configuration this analysis cannot model; true means "no dropdown".
+    /// Sources: every method of every DbContext declaration (all partial parts), and the Configure methods of types in
+    /// the dependent's assembly that implement IEntityTypeConfiguration&lt;T&gt; for the dependent or principal type.
+    /// Each top-level statement of a method body (or an expression body) is one unit. A unit is related when its
+    /// identifiers include the navigation, the principal type, or a principal property whose generic type argument is the
+    /// dependent type (e.g. a Cities collection). A related unit blocks the dropdown when it calls HasPrincipalKey, calls
+    /// HasForeignKey with anything other than exactly the chosen foreign key (different, several or unreadable arguments),
+    /// or calls Ignore on the foreign key, the navigation or the principal type. Ignore naming the foreign key property
+    /// blocks in any unit, because such a statement need not mention either end of the relationship.
     /// </summary>
-    private static bool HasPrincipalKeyConfiguration(ISymbol? dbContextSymbol, string dependentTypeName, INamedTypeSymbol principalType, IPropertySymbol navigationProperty)
+    private static bool HasBlockingRelationshipConfiguration(ISymbol? dbContextSymbol, INamedTypeSymbol principalType, IPropertySymbol navigationProperty, string foreignKeyPropertyName)
     {
-        return GetRelationshipInvocations(dbContextSymbol, "HasPrincipalKey", dependentTypeName, principalType, navigationProperty).Any();
+        var dependentType = navigationProperty.ContainingType;
+        var relatedNames = new HashSet<string>(StringComparer.Ordinal) { navigationProperty.Name, principalType.Name };
+        relatedNames.UnionWith(principalType.GetMembers().OfType<IPropertySymbol>()
+            .Where(p => p.Type is INamedTypeSymbol { IsGenericType: true } type &&
+                type.TypeArguments.Any(t => SymbolEqualityComparer.Default.Equals(t, dependentType)))
+            .Select(p => p.Name));
+        var ignoredNames = new HashSet<string>(StringComparer.Ordinal) { foreignKeyPropertyName, navigationProperty.Name, principalType.Name };
+
+        foreach (var method in GetModelConfigurationMethods(dbContextSymbol, dependentType, principalType))
+        {
+            SyntaxNode? body = (SyntaxNode?)method.Body ?? method.ExpressionBody?.Expression;
+            if (body is null)
+            {
+                continue;
+            }
+
+            var units = body is BlockSyntax block ? block.Statements.Cast<SyntaxNode>() : new SyntaxNode[] { body };
+            foreach (var unit in units)
+            {
+                bool isRelated = unit.DescendantTokens().Any(t => t.IsKind(SyntaxKind.IdentifierToken) && relatedNames.Contains(t.ValueText));
+                foreach (var invocation in unit.DescendantNodesAndSelf().OfType<InvocationExpressionSyntax>())
+                {
+                    SimpleNameSyntax? name = invocation.Expression switch
+                    {
+                        MemberAccessExpressionSyntax member => member.Name,
+                        SimpleNameSyntax simpleName => simpleName,
+                        _ => null
+                    };
+                    if (!isRelated)
+                    {
+                        // e.g. Entity<City>().Ignore(c => c.CountryId) names neither end of the relationship.
+                        if (name?.Identifier.ValueText == "Ignore" &&
+                            string.Equals(GetSingleForeignKeyName(invocation), foreignKeyPropertyName, StringComparison.Ordinal))
+                        {
+                            return true;
+                        }
+
+                        continue;
+                    }
+
+                    switch (name?.Identifier.ValueText)
+                    {
+                        case "HasPrincipalKey":
+                            return true;
+                        case "HasForeignKey" when !string.Equals(GetSingleForeignKeyName(invocation), foreignKeyPropertyName, StringComparison.Ordinal):
+                            return true;
+                        case "Ignore" when ignoredNames.Contains(GetSingleForeignKeyName(invocation) ?? string.Empty) ||
+                            (name is GenericNameSyntax generic && generic.TypeArgumentList.Arguments.Any(a => ignoredNames.Contains(a switch
+                            {
+                                QualifiedNameSyntax qualified => qualified.Right.Identifier.ValueText,
+                                AliasQualifiedNameSyntax aliasQualified => aliasQualified.Name.Identifier.ValueText,
+                                SimpleNameSyntax simple => simple.Identifier.ValueText,
+                                _ => string.Empty
+                            }))):
+                            return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static IEnumerable<MethodDeclarationSyntax> GetModelConfigurationMethods(ISymbol? dbContextSymbol, INamedTypeSymbol dependentType, INamedTypeSymbol principalType)
+    {
+        if (dbContextSymbol is not null)
+        {
+            foreach (var method in GetDeclaredMethods(dbContextSymbol))
+            {
+                yield return method;
+            }
+        }
+
+        if (dependentType.ContainingAssembly is null)
+        {
+            yield break;
+        }
+
+        foreach (var type in GetAllTypes(dependentType.ContainingAssembly.GlobalNamespace))
+        {
+            if (type.AllInterfaces.Any(i => i.Name == "IEntityTypeConfiguration" && i.TypeArguments.Length == 1 &&
+                (SymbolEqualityComparer.Default.Equals(i.TypeArguments[0], dependentType) ||
+                 SymbolEqualityComparer.Default.Equals(i.TypeArguments[0], principalType))))
+            {
+                foreach (var method in GetDeclaredMethods(type).Where(m => m.Identifier.ValueText == "Configure"))
+                {
+                    yield return method;
+                }
+            }
+        }
+    }
+
+    private static IEnumerable<MethodDeclarationSyntax> GetDeclaredMethods(ISymbol typeSymbol)
+    {
+        return typeSymbol.DeclaringSyntaxReferences
+            .Select(r => r.GetSyntax())
+            .OfType<TypeDeclarationSyntax>()
+            .SelectMany(t => t.Members.OfType<MethodDeclarationSyntax>());
+    }
+
+    private static IEnumerable<INamedTypeSymbol> GetAllTypes(INamespaceOrTypeSymbol container)
+    {
+        foreach (var member in container.GetMembers().OfType<INamespaceOrTypeSymbol>())
+        {
+            if (member is INamedTypeSymbol type)
+            {
+                yield return type;
+            }
+
+            foreach (var nested in GetAllTypes(member))
+            {
+                yield return nested;
+            }
+        }
     }
 
     /// <summary>
-    /// Same syntax scan as <see cref="HasPrincipalKeyConfiguration"/> for HasForeignKey: true when a matching statement
-    /// configures a foreign key that is not exactly the single property <paramref name="foreignKeyPropertyName"/>
-    /// (a different member, several members, or an argument that cannot be read such as a variable).
-    /// </summary>
-    private static bool HasConflictingForeignKeyConfiguration(ISymbol? dbContextSymbol, string dependentTypeName, INamedTypeSymbol principalType, IPropertySymbol navigationProperty, string foreignKeyPropertyName)
-    {
-        return GetRelationshipInvocations(dbContextSymbol, "HasForeignKey", dependentTypeName, principalType, navigationProperty)
-            .Any(invocation => !string.Equals(GetSingleForeignKeyName(invocation), foreignKeyPropertyName, StringComparison.Ordinal));
-    }
-
-    /// <summary>
-    /// Reads the property name from HasForeignKey(x => x.Prop) or HasForeignKey("Prop"); null for anything else.
+    /// Reads the property name from a single x => x.Prop or "Prop" argument (HasForeignKey, Ignore); null for anything else.
     /// </summary>
     private static string? GetSingleForeignKeyName(InvocationExpressionSyntax invocation)
     {
@@ -345,45 +454,6 @@ internal static class ClassAnalyzers
             LiteralExpressionSyntax literal when literal.IsKind(SyntaxKind.StringLiteralExpression) => literal.Token.ValueText,
             _ => null
         };
-    }
-
-    /// <summary>
-    /// Returns calls to <paramref name="methodName"/> in the DbContext's OnModelCreating whose enclosing statement names
-    /// both ends of this relationship (the dependent type or the principal's collection navigation, and the principal
-    /// type or the dependent's navigation).
-    /// </summary>
-    private static IEnumerable<InvocationExpressionSyntax> GetRelationshipInvocations(ISymbol? dbContextSymbol, string methodName, string dependentTypeName, INamedTypeSymbol principalType, IPropertySymbol navigationProperty)
-    {
-        if (dbContextSymbol is null)
-        {
-            yield break;
-        }
-
-        var principalNames = new HashSet<string>(StringComparer.Ordinal) { principalType.Name, navigationProperty.Name };
-        var dependentNames = new HashSet<string>(StringComparer.Ordinal) { dependentTypeName };
-        dependentNames.UnionWith(principalType.GetMembers().OfType<IPropertySymbol>()
-            .Where(p => p.Type is INamedTypeSymbol { IsGenericType: true } type && type.TypeArguments.Any(t => t.Name == dependentTypeName))
-            .Select(p => p.Name));
-
-        var invocations = dbContextSymbol.DeclaringSyntaxReferences
-            .SelectMany(r => r.GetSyntax().DescendantNodes().OfType<MethodDeclarationSyntax>())
-            .Where(m => m.Identifier.ValueText == "OnModelCreating")
-            .SelectMany(m => m.DescendantNodes().OfType<InvocationExpressionSyntax>())
-            .Where(i => i.Expression is MemberAccessExpressionSyntax member && member.Name.Identifier.ValueText == methodName);
-
-        foreach (var invocation in invocations)
-        {
-            SyntaxNode statement = (SyntaxNode?)invocation.FirstAncestorOrSelf<StatementSyntax>() ??
-                invocation.AncestorsAndSelf().OfType<ExpressionSyntax>().Last();
-            var identifiers = statement.DescendantTokens()
-                .Where(t => t.IsKind(SyntaxKind.IdentifierToken))
-                .Select(t => t.ValueText)
-                .ToHashSet(StringComparer.Ordinal);
-            if (identifiers.Overlaps(principalNames) && identifiers.Overlaps(dependentNames))
-            {
-                yield return invocation;
-            }
-        }
     }
 
     private static ITypeSymbol GetNonNullableType(ITypeSymbol type)

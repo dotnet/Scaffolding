@@ -741,6 +741,126 @@ namespace Models
         }
     }
 
+    [Fact]
+    public void HasForeignKeyInsideEntityLambda_RendersNoSelectList()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(NationCitySource(@"
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        protected override void OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<City>(e => { e.HasOne(c => c.Nation).WithMany().HasForeignKey(c => c.ActualNationId); });
+        }
+    }"), "City");
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+    }
+
+    [Fact]
+    public void HasForeignKeyInEntityTypeConfiguration_RendersNoSelectList()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(NationCitySource(@"
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext { }
+
+    public class CityConfig : Microsoft.EntityFrameworkCore.IEntityTypeConfiguration<City>
+    {
+        public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<City> builder)
+        {
+            builder.HasOne(c => c.Nation).WithMany().HasForeignKey(c => c.ActualNationId);
+        }
+    }"), "City");
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+    }
+
+    [Fact]
+    public void IgnoredForeignKeyProperty_RendersNoSelectList()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int CountryId { get; set; }
+        public Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        protected override void OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<City>().Ignore(c => c.CountryId);
+        }
+    }
+}", "City");
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+    }
+
+    [Fact]
+    public void NullableForeignKeyWithNonNullableNavigation_RendersNoEmptyOption()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int? CountryId { get; set; }
+        public Country Country { get; set; } = null!;
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
+    }
+}", "City");
+
+        var (_, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.False(Assert.Single(modelInfo.ForeignKeyNavigations).IsNullable);
+        foreach (string view in new[] { createView, editView })
+        {
+            Assert.Contains("<select asp-for=\"CountryId\" class=\"form-control\" asp-items=\"ViewBag.CountryId\"></select>", view);
+            Assert.DoesNotContain("<option value=\"\">", view);
+        }
+    }
+
+    private static string NationCitySource(string configurationSource)
+    {
+        return @"
+namespace Models
+{
+    public class Nation
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int NationId { get; set; }
+        public int ActualNationId { get; set; }
+        public Nation? Nation { get; set; }
+    }
+" + configurationSource + @"
+}";
+    }
+
     #endregion
 
     #region Helpers
@@ -800,6 +920,11 @@ namespace Microsoft.EntityFrameworkCore
     public class ModelBuilder { }
     public class DbContext { protected virtual void OnModelCreating(ModelBuilder modelBuilder) { } }
     public class DbSet<T> { }
+    public interface IEntityTypeConfiguration<T> where T : class { void Configure(Metadata.Builders.EntityTypeBuilder<T> builder); }
+}
+namespace Microsoft.EntityFrameworkCore.Metadata.Builders
+{
+    public class EntityTypeBuilder<T> where T : class { }
 }
 " + modelsSource), modelTypeName);
     }

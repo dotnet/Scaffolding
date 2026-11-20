@@ -82,7 +82,9 @@ internal class ForeignKeyNavigationInfo
     /// </summary>
     public required string EntitySetName { get; init; }
     /// <summary>
-    /// Gets whether the foreign key property is nullable (Nullable&lt;T&gt; or an annotated reference type).
+    /// Gets whether the relationship is optional, so the view adds an empty option: the foreign key is Nullable&lt;T&gt; or a
+    /// reference type not annotated as non-nullable, neither the foreign key nor the navigation has [Required], and the
+    /// navigation is not annotated as non-nullable.
     /// </summary>
     public required bool IsNullable { get; init; }
 }

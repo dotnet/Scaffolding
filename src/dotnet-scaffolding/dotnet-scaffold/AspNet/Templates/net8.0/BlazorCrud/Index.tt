@@ -4,18 +4,18 @@
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
 <#
-    string modelName = Model.ModelType.Name;
-    string pluralModel = Model.ModelType.PluralName;
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName;
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : Model.DbContextNamespace;
-    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.ContextTypeName : $"{dbContextNamespace}.{Model.ContextTypeName}";
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
+    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.DbContextInfo.DbContextClassName : $"{dbContextNamespace}.{Model.DbContextInfo.DbContextClassName}";
     string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
-    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
-    string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
-    string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
+    string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
-    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
+    var entityProperties = Model.ModelInfo.ModelProperties.Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>"
 @using Microsoft.EntityFrameworkCore
@@ -43,11 +43,11 @@
     <a href="<#= pluralModelLowerInv #>/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.<#= Model.ModelMetadata.EntitySetName #>">
+<QuickGrid Class="table" Items="context.<#= Model.DbContextInfo.EntitySetVariableName ?? modelName #>">
 <#
     foreach (var property in entityProperties)
     {
-        string modelPropertyName = property.PropertyName;
+        string modelPropertyName = property.Name;
 #>
     <PropertyColumn Property="<#= modelNameLowerInv #> => <#= modelNameLowerInv #>.<#=modelPropertyName #>" />
 <#  } #>
@@ -60,7 +60,7 @@
 </QuickGrid>
 
 @code {
-    private <#= Model.ContextTypeName #> context = default!;
+    private <#= Model.DbContextInfo.DbContextClassName #> context = default!;
 
     protected override void OnInitialized()
     {

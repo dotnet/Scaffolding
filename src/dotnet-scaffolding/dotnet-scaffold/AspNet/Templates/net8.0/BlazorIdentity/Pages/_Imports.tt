@@ -4,5 +4,5 @@
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
 @using <#= Model.UserClassNamespace #>
-@using <#= Model.BlazorIdentityNamespace #>.Shared
+@using <#= Model.IdentityNamespace #>.Shared
 @layout AccountLayout

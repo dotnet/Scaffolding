@@ -31,29 +31,35 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity
                     " = new()\r\n        {\r\n            SameSite = SameSiteMode.Strict,\r\n            Ht" +
                     "tpOnly = true,\r\n            IsEssential = true,\r\n            MaxAge = TimeSpan.F" +
                     "romSeconds(5),\r\n        };\r\n\r\n        [DoesNotReturn]\r\n        public void Redir" +
-                    "ectTo(string? uri)\r\n        {\r\n            uri ??= \"\";\r\n\r\n            // Prevent" +
-                    " open redirects.\r\n            if (!Uri.IsWellFormedUriString(uri, UriKind.Relati" +
-                    "ve))\r\n            {\r\n                uri = navigationManager.ToBaseRelativePath(" +
-                    "uri);\r\n            }\r\n\r\n            // During static rendering, NavigateTo throw" +
-                    "s a NavigationException which is handled by the framework as a redirect.\r\n      " +
-                    "      // So as long as this is called from a statically rendered Identity compon" +
-                    "ent, the InvalidOperationException is never thrown.\r\n            navigationManag" +
-                    "er.NavigateTo(uri);\r\n            throw new InvalidOperationException($\"{nameof(I" +
-                    "dentityRedirectManager)} can only be used during static rendering.\");\r\n        }" +
-                    "\r\n\r\n        [DoesNotReturn]\r\n        public void RedirectTo(string uri, Dictiona" +
-                    "ry<string, object?> queryParameters)\r\n        {\r\n            var uriWithoutQuery" +
-                    " = navigationManager.ToAbsoluteUri(uri).GetLeftPart(UriPartial.Path);\r\n         " +
-                    "   var newUri = navigationManager.GetUriWithQueryParameters(uriWithoutQuery, que" +
-                    "ryParameters);\r\n            RedirectTo(newUri);\r\n        }\r\n\r\n        [DoesNotRe" +
-                    "turn]\r\n        public void RedirectToWithStatus(string uri, string message, Http" +
-                    "Context context)\r\n        {\r\n            context.Response.Cookies.Append(StatusC" +
-                    "ookieName, message, StatusCookieBuilder.Build(context));\r\n            RedirectTo" +
-                    "(uri);\r\n        }\r\n\r\n        private string CurrentPath => navigationManager.ToA" +
-                    "bsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);\r\n\r\n        [Does" +
-                    "NotReturn]\r\n        public void RedirectToCurrentPage() => RedirectTo(CurrentPat" +
-                    "h);\r\n\r\n        [DoesNotReturn]\r\n        public void RedirectToCurrentPageWithSta" +
-                    "tus(string message, HttpContext context)\r\n            => RedirectToWithStatus(Cu" +
-                    "rrentPath, message, context);\r\n    }\r\n}\r\n");
+                    "ectTo(string? uri)\r\n        {\r\n            // The URI often comes from a \"return" +
+                    "Url\" query string parameter, which anyone can set in a link to the app.\r\n       " +
+                    "     // To prevent open redirects, resolve it to an absolute URI and only use it" +
+                    " if it\'s within the app.\r\n            // Appending \"/\" to the path also accepts " +
+                    "the app\'s root URI without a trailing slash, such as \"/app?page=2\".\r\n           " +
+                    " var baseUri = new Uri(navigationManager.BaseUri);\r\n            if (!Uri.TryCrea" +
+                    "te(baseUri, uri, out var redirectUri)\r\n                || !(redirectUri.GetLeftP" +
+                    "art(UriPartial.Path) + \"/\").StartsWith(baseUri.AbsoluteUri, StringComparison.Ord" +
+                    "inal))\r\n            {\r\n                redirectUri = baseUri;\r\n            }\r\n\r\n" +
+                    "            // During static rendering, NavigateTo throws a NavigationException " +
+                    "which is handled by the framework as a redirect.\r\n            // So as long as t" +
+                    "his is called from a statically rendered Identity component, the InvalidOperatio" +
+                    "nException is never thrown.\r\n            navigationManager.NavigateTo(redirectUr" +
+                    "i.AbsoluteUri);\r\n            throw new InvalidOperationException($\"{nameof(Ident" +
+                    "ityRedirectManager)} can only be used during static rendering.\");\r\n        }\r\n\r\n" +
+                    "        [DoesNotReturn]\r\n        public void RedirectTo(string uri, Dictionary<s" +
+                    "tring, object?> queryParameters)\r\n        {\r\n            var uriWithoutQuery = n" +
+                    "avigationManager.ToAbsoluteUri(uri).GetLeftPart(UriPartial.Path);\r\n            v" +
+                    "ar newUri = navigationManager.GetUriWithQueryParameters(uriWithoutQuery, queryPa" +
+                    "rameters);\r\n            RedirectTo(newUri);\r\n        }\r\n\r\n        [DoesNotReturn" +
+                    "]\r\n        public void RedirectToWithStatus(string uri, string message, HttpCont" +
+                    "ext context)\r\n        {\r\n            context.Response.Cookies.Append(StatusCooki" +
+                    "eName, message, StatusCookieBuilder.Build(context));\r\n            RedirectTo(uri" +
+                    ");\r\n        }\r\n\r\n        private string CurrentPath => navigationManager.ToAbsol" +
+                    "uteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);\r\n\r\n        [DoesNotR" +
+                    "eturn]\r\n        public void RedirectToCurrentPage() => RedirectTo(CurrentPath);\r" +
+                    "\n\r\n        [DoesNotReturn]\r\n        public void RedirectToCurrentPageWithStatus(" +
+                    "string message, HttpContext context)\r\n            => RedirectToWithStatus(Curren" +
+                    "tPath, message, context);\r\n    }\r\n}\r\n");
             return this.GenerationEnvironment.ToString();
         }
         private global::Microsoft.VisualStudio.TextTemplating.ITextTemplatingEngineHost hostValue;

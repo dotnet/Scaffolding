@@ -35,22 +35,28 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "\n\r\n    private static readonly CookieBuilder StatusCookieBuilder = new()\r\n    {\r" +
                     "\n        SameSite = SameSiteMode.Strict,\r\n        HttpOnly = true,\r\n        IsEs" +
                     "sential = true,\r\n        MaxAge = TimeSpan.FromSeconds(5),\r\n    };\r\n\r\n    public" +
-                    " void RedirectTo(string? uri)\r\n    {\r\n        uri ??= \"\";\r\n\r\n        // Prevent " +
-                    "open redirects.\r\n        if (!Uri.IsWellFormedUriString(uri, UriKind.Relative))\r" +
-                    "\n        {\r\n            uri = navigationManager.ToBaseRelativePath(uri);\r\n      " +
-                    "  }\r\n\r\n        navigationManager.NavigateTo(uri);\r\n    }\r\n\r\n    public void Redi" +
-                    "rectTo(string uri, Dictionary<string, object?> queryParameters)\r\n    {\r\n        " +
-                    "var uriWithoutQuery = navigationManager.ToAbsoluteUri(uri).GetLeftPart(UriPartia" +
-                    "l.Path);\r\n        var newUri = navigationManager.GetUriWithQueryParameters(uriWi" +
-                    "thoutQuery, queryParameters);\r\n        RedirectTo(newUri);\r\n    }\r\n\r\n    public " +
-                    "void RedirectToWithStatus(string uri, string message, HttpContext context)\r\n    " +
-                    "{\r\n        context.Response.Cookies.Append(StatusCookieName, message, StatusCook" +
-                    "ieBuilder.Build(context));\r\n        RedirectTo(uri);\r\n    }\r\n\r\n    private strin" +
-                    "g CurrentPath => navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftP" +
-                    "art(UriPartial.Path);\r\n\r\n    public void RedirectToCurrentPage() => RedirectTo(C" +
-                    "urrentPath);\r\n\r\n    public void RedirectToCurrentPageWithStatus(string message, " +
-                    "HttpContext context)\r\n        => RedirectToWithStatus(CurrentPath, message, cont" +
-                    "ext);\r\n\r\n    public void RedirectToInvalidUser(UserManager<");
+                    " void RedirectTo(string? uri)\r\n    {\r\n        // The URI often comes from a \"ret" +
+                    "urnUrl\" query string parameter, which anyone can set in a link to the app.\r\n    " +
+                    "    // To prevent open redirects, resolve it to an absolute URI and only use it " +
+                    "if it\'s within the app.\r\n        // Appending \"/\" to the path also accepts the a" +
+                    "pp\'s root URI without a trailing slash, such as \"/app?page=2\".\r\n        var base" +
+                    "Uri = new Uri(navigationManager.BaseUri);\r\n        if (!Uri.TryCreate(baseUri, u" +
+                    "ri, out var redirectUri)\r\n            || !(redirectUri.GetLeftPart(UriPartial.Pa" +
+                    "th) + \"/\").StartsWith(baseUri.AbsoluteUri, StringComparison.Ordinal))\r\n        {" +
+                    "\r\n            redirectUri = baseUri;\r\n        }\r\n\r\n        navigationManager.Nav" +
+                    "igateTo(redirectUri.AbsoluteUri);\r\n    }\r\n\r\n    public void RedirectTo(string ur" +
+                    "i, Dictionary<string, object?> queryParameters)\r\n    {\r\n        var uriWithoutQu" +
+                    "ery = navigationManager.ToAbsoluteUri(uri).GetLeftPart(UriPartial.Path);\r\n      " +
+                    "  var newUri = navigationManager.GetUriWithQueryParameters(uriWithoutQuery, quer" +
+                    "yParameters);\r\n        RedirectTo(newUri);\r\n    }\r\n\r\n    public void RedirectToW" +
+                    "ithStatus(string uri, string message, HttpContext context)\r\n    {\r\n        conte" +
+                    "xt.Response.Cookies.Append(StatusCookieName, message, StatusCookieBuilder.Build(" +
+                    "context));\r\n        RedirectTo(uri);\r\n    }\r\n\r\n    private string CurrentPath =>" +
+                    " navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.P" +
+                    "ath);\r\n\r\n    public void RedirectToCurrentPage() => RedirectTo(CurrentPath);\r\n\r\n" +
+                    "    public void RedirectToCurrentPageWithStatus(string message, HttpContext cont" +
+                    "ext)\r\n        => RedirectToWithStatus(CurrentPath, message, context);\r\n\r\n    pub" +
+                    "lic void RedirectToInvalidUser(UserManager<");
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.UserClassName));
             this.Write("> userManager, HttpContext context)\r\n        => RedirectToWithStatus(\"Account/Inv" +
                     "alidUser\", $\"Error: Unable to load user with ID \'{userManager.GetUserId(context." +

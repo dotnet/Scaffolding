@@ -35,7 +35,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity
                     "\n\r\n    private static readonly CookieBuilder StatusCookieBuilder = new()\r\n    {\r" +
                     "\n        SameSite = SameSiteMode.Strict,\r\n        HttpOnly = true,\r\n        IsEs" +
                     "sential = true,\r\n        MaxAge = TimeSpan.FromSeconds(5),\r\n    };\r\n\r\n    public" +
-                    " void RedirectTo(string? uri)\r\n    {\r\n        // The URI often comes from a \"ret" +
+                    " void RedirectTo(string? uri)\r\n    {\r\n        // The URI can come from a \"ret" +
                     "urnUrl\" query string parameter, which anyone can set in a link to the app.\r\n    " +
                     "    // To prevent open redirects, resolve it to an absolute URI and only use it " +
                     "if it\'s within the app.\r\n        // Appending \"/\" to the path also accepts the a" +

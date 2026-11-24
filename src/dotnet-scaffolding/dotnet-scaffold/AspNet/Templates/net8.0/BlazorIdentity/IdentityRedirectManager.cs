@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net8.BlazorIdentity
                     " = new()\r\n        {\r\n            SameSite = SameSiteMode.Strict,\r\n            Ht" +
                     "tpOnly = true,\r\n            IsEssential = true,\r\n            MaxAge = TimeSpan.F" +
                     "romSeconds(5),\r\n        };\r\n\r\n        [DoesNotReturn]\r\n        public void Redir" +
-                    "ectTo(string? uri)\r\n        {\r\n            // The URI often comes from a \"return" +
+                    "ectTo(string? uri)\r\n        {\r\n            // The URI can come from a \"return" +
                     "Url\" query string parameter, which anyone can set in a link to the app.\r\n       " +
                     "     // To prevent open redirects, resolve it to an absolute URI and only use it" +
                     " if it\'s within the app.\r\n            // Appending \"/\" to the path also accepts " +

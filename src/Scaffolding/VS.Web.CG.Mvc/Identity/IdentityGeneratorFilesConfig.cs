@@ -112,7 +112,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     Name = "_ValidationScriptsPartial",
                     SourcePath = "Pages/_ValidationScriptsPartial.cshtml",
                     OutputPath = "Areas/Identity/Pages/_ValidationScriptsPartial.cshtml",
-                    IsTemplate = false,
+                    IsTemplate = true,
                     ShouldOverWrite = OverWriteCondition.Never
                 };
                 filesToGenerate.Add(validationScriptsPartial);
@@ -128,7 +128,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     Name = "_ValidationScriptsPartial",
                     SourcePath = "Pages/_ValidationScriptsPartial.cshtml",
                     OutputPath = Path.Combine(templateModel.SupportFileLocation, "_ValidationScriptsPartial.cshtml"),
-                    IsTemplate = false,
+                    IsTemplate = true,
                     ShouldOverWrite = OverWriteCondition.Never
                 };
                 filesToGenerate.Add(layoutPeerValidationScriptsPartial);

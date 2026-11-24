@@ -59,6 +59,67 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.E2E_Test
             }
         }
 
+        [SkippableTheory]
+        [InlineData("4", false)]
+        [InlineData("5", false)]
+        [InlineData("4", true)]
+        [InlineData("5", true)]
+        public void TestIdentityValidationScriptsPartialBuilds(string bootstrapVersion, bool hasExistingLayout)
+        {
+            string runSkippableTests = Environment.GetEnvironmentVariable("SCAFFOLDING_RunSkippableTests");
+            Skip.If(string.IsNullOrEmpty(runSkippableTests));
+
+            using (var fileProvider = new TemporaryFileProvider())
+            {
+                new MsBuildProjectSetupHelper().SetupProjectsForIdentityScaffolder(fileProvider, Output);
+                TestProjectPath = Path.Combine(fileProvider.Root, "Root");
+                string sharedPagesPath = Path.Combine(TestProjectPath, "Pages", "Shared");
+                Directory.CreateDirectory(sharedPagesPath);
+
+                if (hasExistingLayout)
+                {
+                    File.WriteAllText(
+                        Path.Combine(sharedPagesPath, "_Layout.cshtml"),
+                        "<!DOCTYPE html><html><body>@RenderBody()</body></html>");
+                }
+
+                var args = new List<string>
+                {
+                    "-p",
+                    Path.Combine(TestProjectPath, "Test.csproj"),
+                    "-c",
+                    Configuration,
+                    "identity",
+                    "--bootstrapVersion",
+                    bootstrapVersion,
+                    "-f"
+                };
+
+                Scaffold(args.ToArray(), TestProjectPath);
+
+                string validationPartialPath = hasExistingLayout
+                    ? Path.Combine(TestProjectPath, "Areas", "Identity", "Pages", "_ValidationScriptsPartial.cshtml")
+                    : Path.Combine(sharedPagesPath, "_ValidationScriptsPartial.cshtml");
+                string validationPartial = File.ReadAllText(validationPartialPath);
+                Assert.DoesNotContain("@inherits", validationPartial);
+                Assert.DoesNotContain("Model.GetAssetPath", validationPartial);
+                Assert.Contains("src=\"~/lib/jquery-validation/dist/jquery.validate.min.js\"", validationPartial);
+                Assert.Contains("src=\"~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js\"", validationPartial);
+
+                var result = Command.CreateDotNet("build", new string[] { "-c", Configuration })
+                    .WithEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "true")
+                    .InWorkingDirectory(TestProjectPath)
+                    .OnErrorLine(l => Output.WriteLine(l))
+                    .OnOutputLine(l => Output.WriteLine(l))
+                    .Execute();
+
+                if (result.ExitCode != 0)
+                {
+                    throw new InvalidOperationException($"Build failed with exit code: {result.ExitCode}");
+                }
+            }
+        }
+
         [SkippableFact]
         public void TestIdentityGenerator_WithExistingUser()
         {

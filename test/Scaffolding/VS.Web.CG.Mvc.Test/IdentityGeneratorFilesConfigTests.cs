@@ -100,6 +100,30 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             }
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void IdentityValidationScriptsPartialIsRenderedAsATemplate(bool generateLayout)
+        {
+            IdentityGeneratorTemplateModel model = new IdentityGeneratorTemplateModel()
+            {
+                GenerateLayout = generateLayout,
+                Layout = generateLayout ? "Pages/Shared/_Layout.cshtml" : null,
+                SupportFileLocation = "Pages/Shared"
+            };
+
+            IdentityGeneratorFile[] files = IdentityGeneratorFilesConfig.GetFilesToGenerate(null, model);
+            string expectedOutputPath = generateLayout
+                ? Path.Combine("Pages", "Shared", "_ValidationScriptsPartial.cshtml")
+                : Path.Combine("Areas", "Identity", "Pages", "_ValidationScriptsPartial.cshtml");
+            IdentityGeneratorFile validationPartial = Assert.Single(
+                files,
+                file => file.Name == "_ValidationScriptsPartial"
+                    && file.OutputPath.Replace('\\', '/') == expectedOutputPath.Replace('\\', '/'));
+
+            Assert.True(validationPartial.IsTemplate);
+        }
+
         [Fact]
         public void TestExistingWwwRootDataIsNotOverwrittenWhenScaffoldAllFilesSelected()
         {

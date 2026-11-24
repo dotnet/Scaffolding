@@ -4,19 +4,19 @@
 <#@  import namespace="System.Text" #>
 <#@  import namespace="System.Linq" #>
 <#
-    string modelName = Model.ModelType.Name;
-    string pluralModel = Model.ModelType.PluralName;
+    string modelName = Model.ModelInfo.ModelTypeName;
+    string pluralModel = Model.ModelInfo.ModelTypePluralName;
     string modelNameLowerInv = modelName.ToLowerInvariant();
     string pluralModelLowerInv = pluralModel.ToLowerInvariant();
-    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextNamespace) ? string.Empty : Model.DbContextNamespace;
-    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.ContextTypeName : $"{dbContextNamespace}.{Model.ContextTypeName}";
+    string dbContextNamespace = string.IsNullOrEmpty(Model.DbContextInfo.DbContextNamespace) ? string.Empty : Model.DbContextInfo.DbContextNamespace;
+    string dbContextFullName = string.IsNullOrEmpty(dbContextNamespace) ? Model.DbContextInfo.DbContextClassName : $"{dbContextNamespace}.{Model.DbContextInfo.DbContextClassName}";
     string dbContextFactory = $"IDbContextFactory<{dbContextFullName}> DbFactory";
-    string modelNamespace = Model.Namespace ?? Model.ModelType.Namespace;
-    string primaryKeyName = Model.ModelMetadata.PrimaryKeys[0].PropertyName;
+    string modelNamespace = Model.ModelInfo.ModelNamespace;
+    string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
     string primaryKeyNameLowerInv = primaryKeyName.ToLowerInvariant();
-    string primaryKeyShortTypeName = Model.ModelMetadata.PrimaryKeys[0].ShortTypeName;
-    string entitySetName = Model.ModelMetadata.EntitySetName;
-    var entityProperties = Model.ModelMetadata.Properties.Where(x => !x.IsPrimaryKey).ToList();
+    string primaryKeyShortTypeName = Model.ModelInfo.PrimaryKeyTypeName;
+    string entitySetName = Model.DbContextInfo.EntitySetVariableName ?? modelName;
+    var entityProperties = Model.ModelInfo.ModelProperties.Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
 #>
 @page "/<#= pluralModelLowerInv #>/delete"
 @using Microsoft.EntityFrameworkCore
@@ -45,7 +45,7 @@
 <#
         foreach (var property in entityProperties)
         {
-            string modelPropertyName = property.PropertyName;
+            string modelPropertyName = property.Name;
     #>
         <dl class="row">
             <dt class="col-sm-2"><#= modelPropertyName #></dt>

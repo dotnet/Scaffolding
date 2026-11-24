@@ -8,11 +8,10 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 {
 #>using <#= Model.DbContextNamespace #>;
 <#} #>
-using <#= Model.UserClassNamespace #>;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-
-namespace <#= Model.BlazorIdentityNamespace #>
+using <#= Model.UserClassNamespace #>;
+namespace <#= Model.IdentityNamespace #>
 {
     // Remove the "else if (EmailSender is IdentityNoOpEmailSender)" block from RegisterConfirmation.razor after updating with a real implementation.
     internal sealed class IdentityNoOpEmailSender : IEmailSender<<#= Model.UserClassName #>>

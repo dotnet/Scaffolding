@@ -8,7 +8,7 @@ if (!string.IsNullOrEmpty(Model.DbContextNamespace))
 using <#= Model.UserClassNamespace #>;
 using Microsoft.AspNetCore.Identity;
 
-namespace <#= Model.BlazorIdentityNamespace #>
+namespace <#= Model.IdentityNamespace #>
 {
     internal sealed class IdentityUserAccessor(UserManager<<#= Model.UserClassName #>> userManager, IdentityRedirectManager redirectManager)
     {

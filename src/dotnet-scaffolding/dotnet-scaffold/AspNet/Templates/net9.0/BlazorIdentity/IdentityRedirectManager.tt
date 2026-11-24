@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 using System.Diagnostics.CodeAnalysis;
 using <#= Model.UserClassNamespace #>;
 
-namespace <#= Model.BlazorIdentityNamespace #>
+namespace <#= Model.IdentityNamespace #>
 {
     internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
     {

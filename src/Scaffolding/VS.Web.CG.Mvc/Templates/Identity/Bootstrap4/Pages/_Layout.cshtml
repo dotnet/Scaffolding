@@ -1,6 +1,11 @@
 ﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
 @{
     var currentYear = System.DateTime.Now.Year;
+    var bootstrapMinCssPath = Model.GetAssetPath("/lib/bootstrap/dist/css/bootstrap.min.css");
+    var siteCssPath = Model.GetAssetPath("/css/site.css");
+    var jqueryMinJsPath = Model.GetAssetPath("/lib/jquery/dist/jquery.min.js");
+    var bootstrapMinJsPath = Model.GetAssetPath("/lib/bootstrap/dist/js/bootstrap.bundle.min.js");
+    var siteJsPath = Model.GetAssetPath("/js/site.js");
 }
 @{
 @:@@using Microsoft.AspNetCore.Hosting
@@ -14,8 +19,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@@ViewData["Title"] - @Model.ApplicationName</title>
-    <link rel="stylesheet" href="~/Identity/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/Identity/css/site.css" />
+    <link rel="stylesheet" href="@bootstrapMinCssPath" />
+    <link rel="stylesheet" href="@siteCssPath" />
 </head>
 <body>
     <header>
@@ -55,9 +60,9 @@
             &copy; @currentYear - @Model.ApplicationName - <a asp-area="" asp-page="Privacy">Privacy</a>
         </div>
     </footer>
-    <script src="~/Identity/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/Identity/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/Identity/js/site.js" asp-append-version="true"></script>
+    <script src="@jqueryMinJsPath"></script>
+    <script src="@bootstrapMinJsPath"></script>
+    <script src="@siteJsPath" asp-append-version="true"></script>
     @@RenderSection("Scripts", required: false)
 </body>
 </html>

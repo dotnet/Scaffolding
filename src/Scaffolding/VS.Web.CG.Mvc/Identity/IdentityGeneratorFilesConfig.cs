@@ -112,7 +112,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     Name = "_ValidationScriptsPartial",
                     SourcePath = "Pages/_ValidationScriptsPartial.cshtml",
                     OutputPath = "Areas/Identity/Pages/_ValidationScriptsPartial.cshtml",
-                    IsTemplate = false,
+                    IsTemplate = true,
                     ShouldOverWrite = OverWriteCondition.Never
                 };
                 filesToGenerate.Add(validationScriptsPartial);
@@ -128,7 +128,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
                     Name = "_ValidationScriptsPartial",
                     SourcePath = "Pages/_ValidationScriptsPartial.cshtml",
                     OutputPath = Path.Combine(templateModel.SupportFileLocation, "_ValidationScriptsPartial.cshtml"),
-                    IsTemplate = false,
+                    IsTemplate = true,
                     ShouldOverWrite = OverWriteCondition.Never
                 };
                 filesToGenerate.Add(layoutPeerValidationScriptsPartial);
@@ -167,12 +167,41 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Identity
             {
                 filesToGenerate.AddRange(config.NamedFileConfig["WwwRoot"]);
             }
+            else
+            {
+                filesToGenerate = filesToGenerate
+                    .Select(file => GetWwwRootAssetFile(file))
+                    .ToList();
+                filesToGenerate.AddRange(config.NamedFileConfig["WwwRoot"].Select(GetWwwRootAssetFile));
+            }
             filesToGenerate.Add(IdentityHostingStartup);
 
 
             filesToGenerate.Add(ReadMe);
 
             return filesToGenerate.Distinct(new IdentityGeneratorFileComparer()).ToArray();
+        }
+
+        private static IdentityGeneratorFile GetWwwRootAssetFile(IdentityGeneratorFile file)
+        {
+            const string wwwRootPrefix = "wwwroot/";
+            if (file.IsTemplate || !file.OutputPath.StartsWith(wwwRootPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return file;
+            }
+
+            return new IdentityGeneratorFile
+            {
+                Name = file.Name,
+                SourcePath = file.SourcePath,
+                OutputPath = Path.Combine(
+                    "wwwroot",
+                    "Identity",
+                    file.OutputPath.Substring(wwwRootPrefix.Length).Replace('/', Path.DirectorySeparatorChar)),
+                IsTemplate = file.IsTemplate,
+                ShowInListFiles = file.ShowInListFiles,
+                ShouldOverWrite = OverWriteCondition.Never
+            };
         }
 
         /// <summary>

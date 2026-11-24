@@ -717,9 +717,23 @@
         "ShowInListFiles": false
       },
       {
+        "Name": "Bootstrap.bundle.js",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.js",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
         "Name": "Bootstrap.min.js",
         "SourcePath": "wwwroot/lib/bootstrap/dist/js/bootstrap.min.js",
         "OutputPath": "wwwroot/lib/bootstrap/dist/js/bootstrap.min.js",
+        "IsTemplate": false,
+        "ShowInListFiles": false
+      },
+      {
+        "Name": "Bootstrap.bundle.min.js",
+        "SourcePath": "wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js",
+        "OutputPath": "wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js",
         "IsTemplate": false,
         "ShowInListFiles": false
       },

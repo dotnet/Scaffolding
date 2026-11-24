@@ -32,6 +32,17 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
 
             Assert.Contains("Model.GetAssetPath", template);
             Assert.DoesNotContain("~/Identity/", template);
+
+            string validationPartialPath = Path.Combine(
+                directory.FullName,
+                "src", "Scaffolding", "VS.Web.CG.Mvc",
+                "Templates", "Identity", bootstrapVersion,
+                "Pages", "_ValidationScriptsPartial.cshtml");
+            string validationPartial = File.ReadAllText(validationPartialPath);
+
+            Assert.Contains("Model.GetAssetPath(\"/lib/jquery-validation/dist/jquery.validate.min.js\")", validationPartial);
+            Assert.Contains("Model.GetAssetPath(\"/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js\")", validationPartial);
+            Assert.DoesNotContain("src=\"~/lib/jquery-validation/", validationPartial);
         }
 
         [Theory]
@@ -55,6 +66,8 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             IdentityGeneratorFile siteCss = Assert.Single(files, file => file.Name == "Site.css");
             IdentityGeneratorFile bootstrapBundle = Assert.Single(files, file => file.Name == "Bootstrap.bundle.js");
             IdentityGeneratorFile minifiedBootstrapBundle = Assert.Single(files, file => file.Name == "Bootstrap.bundle.min.js");
+            IdentityGeneratorFile jqueryValidate = Assert.Single(files, file => file.Name == "Jquery.validate.min.js");
+            IdentityGeneratorFile jqueryValidateUnobtrusive = Assert.Single(files, file => file.Name == "Jquery.validate.unobtrusive.min.js");
             string expectedAssetRoot = hasExistingNonEmptyWwwRoot
                 ? Path.Combine("wwwroot", "Identity")
                 : "wwwroot";
@@ -62,14 +75,28 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc
             Assert.Equal(Path.Combine(expectedAssetRoot, "css", "site.css"), siteCss.OutputPath.Replace('/', Path.DirectorySeparatorChar));
             Assert.Equal(Path.Combine(expectedAssetRoot, "lib", "bootstrap", "dist", "js", "bootstrap.bundle.js"), bootstrapBundle.OutputPath.Replace('/', Path.DirectorySeparatorChar));
             Assert.Equal(Path.Combine(expectedAssetRoot, "lib", "bootstrap", "dist", "js", "bootstrap.bundle.min.js"), minifiedBootstrapBundle.OutputPath.Replace('/', Path.DirectorySeparatorChar));
+            Assert.Equal(Path.Combine(expectedAssetRoot, "lib", "jquery-validation", "dist", "jquery.validate.min.js"), jqueryValidate.OutputPath.Replace('/', Path.DirectorySeparatorChar));
+            Assert.Equal(Path.Combine(expectedAssetRoot, "lib", "jquery-validation-unobtrusive", "dist", "jquery.validate.unobtrusive.min.js"), jqueryValidateUnobtrusive.OutputPath.Replace('/', Path.DirectorySeparatorChar));
             Assert.Equal(
                 hasExistingNonEmptyWwwRoot ? "~/Identity/css/site.css" : "~/css/site.css",
                 model.GetAssetPath("/css/site.css"));
+            Assert.Equal(
+                hasExistingNonEmptyWwwRoot
+                    ? "~/Identity/lib/jquery-validation/dist/jquery.validate.min.js"
+                    : "~/lib/jquery-validation/dist/jquery.validate.min.js",
+                model.GetAssetPath("/lib/jquery-validation/dist/jquery.validate.min.js"));
+            Assert.Equal(
+                hasExistingNonEmptyWwwRoot
+                    ? "~/Identity/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"
+                    : "~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js",
+                model.GetAssetPath("/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"));
             if (hasExistingNonEmptyWwwRoot)
             {
                 Assert.Equal(OverWriteCondition.Never, siteCss.ShouldOverWrite);
                 Assert.Equal(OverWriteCondition.Never, bootstrapBundle.ShouldOverWrite);
                 Assert.Equal(OverWriteCondition.Never, minifiedBootstrapBundle.ShouldOverWrite);
+                Assert.Equal(OverWriteCondition.Never, jqueryValidate.ShouldOverWrite);
+                Assert.Equal(OverWriteCondition.Never, jqueryValidateUnobtrusive.ShouldOverWrite);
             }
         }
 

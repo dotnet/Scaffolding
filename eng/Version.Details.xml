@@ -5,6 +5,10 @@
       <Uri>https://github.com/dotnet/dotnet</Uri>
       <Sha>2900cad7b0526c64f7e6d3036b6c546782c9996a</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="11.0.0-beta.26565.102">
+      <Uri>https://github.com/dotnet/dotnet</Uri>
+      <Sha>2900cad7b0526c64f7e6d3036b6c546782c9996a</Sha>
+    </Dependency>
   </ToolsetDependencies>
   <ProductDependencies>
     <Dependency Name="Microsoft.EntityFrameworkCore.Design" Version="11.0.1">

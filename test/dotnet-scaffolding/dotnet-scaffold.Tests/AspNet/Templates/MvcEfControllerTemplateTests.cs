@@ -17,6 +17,12 @@ using Net11MvcEfController = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.ne
 using Net9RazorCreateModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.RazorPages.CreateModel;
 using Net10RazorCreateModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.RazorPages.CreateModel;
 using Net11RazorCreateModel = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.RazorPages.CreateModel;
+using Net9CreateView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.Views.Create;
+using Net10CreateView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views.Create;
+using Net11CreateView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Views.Create;
+using Net9EditView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.Views.Edit;
+using Net10EditView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net10.Views.Edit;
+using Net11EditView = Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net11.Views.Edit;
 
 namespace Microsoft.DotNet.Tools.Scaffold.Tests.AspNet.Templates;
 
@@ -399,7 +405,750 @@ public class MvcEfControllerTemplateTests
 
     #endregion
 
+    #region Foreign keys — SelectList and <select> parity with legacy scaffolder
+
+    [Theory]
+    [InlineData("net9")]
+    [InlineData("net10")]
+    [InlineData("net11")]
+    public void ModelWithForeignKey_RendersSelectListAndSkipsNavigation(string targetFramework)
+    {
+        ModelInfo modelInfo = CreateCountryCityModelInfo("City");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates(targetFramework, modelInfo);
+
+        Assert.Contains("using Microsoft.AspNetCore.Mvc.Rendering;", controller);
+        Assert.Equal(1, CountOccurrences(controller, "ViewData[\"CountryId\"] = new SelectList(_context.Countries, \"Id\", \"Name\");"));
+        Assert.Equal(3, CountOccurrences(controller, "ViewData[\"CountryId\"] = new SelectList(_context.Countries, \"Id\", \"Name\", city.CountryId);"));
+        foreach (string view in new[] { createView, editView })
+        {
+            Assert.Contains("<label asp-for=\"CountryId\" class=\"control-label\"></label>", view);
+            Assert.Contains("<select asp-for=\"CountryId\" class=\"form-control\" asp-items=\"ViewBag.CountryId\"></select>", view);
+            Assert.Contains("<span asp-validation-for=\"CountryId\" class=\"text-danger\"></span>", view);
+            Assert.DoesNotContain("<input asp-for=\"CountryId\"", view);
+            Assert.DoesNotContain("asp-for=\"Country\"", view);
+        }
+    }
+
+    [Theory]
+    [InlineData("net9")]
+    [InlineData("net10")]
+    [InlineData("net11")]
+    public void ModelWithoutForeignKey_RendersNoSelectList(string targetFramework)
+    {
+        // Country has a collection navigation but no foreign key; output must stay as before.
+        ModelInfo modelInfo = CreateCountryCityModelInfo("Country");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates(targetFramework, modelInfo);
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+        Assert.DoesNotContain("SelectList", controller);
+        Assert.DoesNotContain("Microsoft.AspNetCore.Mvc.Rendering", controller);
+        Assert.StartsWith(
+            "\r\nusing Microsoft.AspNetCore.Mvc;\r\nusing Microsoft.EntityFrameworkCore;\r\nusing Models;\r\n\r\npublic class CountrysController",
+            controller,
+            System.StringComparison.Ordinal);
+        foreach (string view in new[] { createView, editView })
+        {
+            Assert.DoesNotContain("<select", view);
+            Assert.Contains("<input asp-for=\"Name\" class=\"form-control\" />", view);
+            Assert.Contains("<input asp-for=\"Cities\" class=\"form-control\" />", view);
+        }
+    }
+
+    [Fact]
+    public void NotMappedNavigation_IsNotTreatedAsForeignKey()
+    {
+        ModelInfo modelInfo = CreateCountryCityModelInfo("City", "[System.ComponentModel.DataAnnotations.Schema.NotMapped]");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+        Assert.DoesNotContain("SelectList", controller);
+        Assert.DoesNotContain("<select", createView);
+        Assert.DoesNotContain("<select", editView);
+    }
+
+    [Fact]
+    public void NullableForeignKey_RendersEmptyOption()
+    {
+        ModelInfo modelInfo = CreateCountryCityModelInfo("City", countryIdDeclaration: "public int? CountryId { get; set; }");
+
+        var (_, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.True(Assert.Single(modelInfo.ForeignKeyNavigations).IsNullable);
+        foreach (string view in new[] { createView, editView })
+        {
+            Assert.Contains("<select asp-for=\"CountryId\" class=\"form-control\" asp-items=\"ViewBag.CountryId\">\r\n                    <option value=\"\">-- select --</option>\r\n                </select>", view);
+        }
+    }
+
+    [Fact]
+    public void NotMappedForeignKeyProperty_IsNotTreatedAsForeignKey()
+    {
+        ModelInfo modelInfo = CreateCountryCityModelInfo("City", countryIdDeclaration: "[System.ComponentModel.DataAnnotations.Schema.NotMapped] public int CountryId { get; set; }");
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+    }
+
+    [Fact]
+    public void SingleKeyAttribute_DeclaredAfterId_IsUsedAsPrincipalKey()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+        [System.ComponentModel.DataAnnotations.Key]
+        public int Code { get; set; }
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int CountryCode { get; set; }
+        public Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
+    }
+}", "City");
+
+        var (controller, _, _) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Equal("CountryCode", Assert.Single(modelInfo.ForeignKeyNavigations).ForeignKeyPropertyName);
+        Assert.Contains("ViewData[\"CountryCode\"] = new SelectList(_context.Countries, \"Code\", \"Name\");", controller);
+    }
+
+    [Fact]
+    public void HasPrincipalKeyInOnModelCreating_RendersNoSelectList()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public int Code { get; set; }
+        public string Name { get; set; } = """";
+        public ICollection<City> Cities { get; set; } = new List<City>();
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int CountryId { get; set; }
+        public Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
+
+        protected override void OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<City>().HasOne(c => c.Country).WithMany(c => c.Cities).HasForeignKey(c => c.CountryId).HasPrincipalKey(c => c.Code);
+        }
+    }
+}", "City");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+        Assert.DoesNotContain("SelectList", controller);
+        Assert.DoesNotContain("<select", createView);
+        Assert.DoesNotContain("<select", editView);
+    }
+
+    [Fact]
+    public void NestedPrincipalWithoutDbSet_UsesFullyQualifiedSetFallback()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Outer
+    {
+        public class Country
+        {
+            public int Id { get; set; }
+            public string Name { get; set; } = """";
+        }
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int CountryId { get; set; }
+        public Outer.Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<City> Cities { get; set; } = null!;
+    }
+}", "City");
+
+        var (controller, _, _) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Equal("Set<global::Models.Outer.Country>()", Assert.Single(modelInfo.ForeignKeyNavigations).EntitySetName);
+        Assert.Contains("ViewData[\"CountryId\"] = new SelectList(_context.Set<global::Models.Outer.Country>(), \"Id\", \"Name\");", controller);
+    }
+
+    [Fact]
+    public void PrincipalDeclaringTypeIdBeforeId_UsesIdAsPrincipalKey()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Country
+    {
+        public int CountryId { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int CountryId { get; set; }
+        public Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
+    }
+}", "City");
+
+        var (controller, _, _) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Equal("Id", Assert.Single(modelInfo.ForeignKeyNavigations).PrincipalPrimaryKeyName);
+        Assert.Contains("ViewData[\"CountryId\"] = new SelectList(_context.Countries, \"Id\", \"Name\");", controller);
+    }
+
+    [Fact]
+    public void HasForeignKeyOnDifferentProperty_RendersNoSelectList()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Nation
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int NationId { get; set; }
+        public int ActualNationId { get; set; }
+        public Nation? Nation { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<Nation> Nations { get; set; } = null!;
+
+        protected override void OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<City>().HasOne(c => c.Nation).WithMany().HasForeignKey(c => c.ActualNationId);
+        }
+    }
+}", "City");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+        Assert.DoesNotContain("SelectList", controller);
+        Assert.DoesNotContain("<select", createView);
+        Assert.DoesNotContain("<select", editView);
+    }
+
+    [Fact]
+    public void PrivateDbSet_UsesFullyQualifiedSetFallback()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int CountryId { get; set; }
+        public Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        private Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
+    }
+}", "City");
+
+        var (controller, _, _) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Equal("Set<global::Models.Country>()", Assert.Single(modelInfo.ForeignKeyNavigations).EntitySetName);
+        Assert.Contains("new SelectList(_context.Set<global::Models.Country>(), \"Id\", \"Name\");", controller);
+        Assert.DoesNotContain("_context.Countries", controller);
+    }
+
+    [Fact]
+    public void RequiredNullableForeignKey_RendersNoEmptyOption()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace System.ComponentModel.DataAnnotations
+{
+    public class RequiredAttribute : System.Attribute { }
+}
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        [System.ComponentModel.DataAnnotations.Required]
+        public int? CountryId { get; set; }
+        public Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
+    }
+}", "City");
+
+        var (_, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.False(Assert.Single(modelInfo.ForeignKeyNavigations).IsNullable);
+        foreach (string view in new[] { createView, editView })
+        {
+            Assert.Contains("<select asp-for=\"CountryId\" class=\"form-control\" asp-items=\"ViewBag.CountryId\"></select>", view);
+            Assert.DoesNotContain("<option value=\"\">", view);
+        }
+    }
+
+    [Fact]
+    public void HasForeignKeyInsideEntityLambda_RendersNoSelectList()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(NationCitySource(@"
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        protected override void OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<City>(e => { e.HasOne(c => c.Nation).WithMany().HasForeignKey(c => c.ActualNationId); });
+        }
+    }"), "City");
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+    }
+
+    [Fact]
+    public void HasForeignKeyInEntityTypeConfiguration_RendersNoSelectList()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(NationCitySource(@"
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext { }
+
+    public class CityConfig : Microsoft.EntityFrameworkCore.IEntityTypeConfiguration<City>
+    {
+        public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<City> builder)
+        {
+            builder.HasOne(c => c.Nation).WithMany().HasForeignKey(c => c.ActualNationId);
+        }
+    }"), "City");
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+    }
+
+    [Fact]
+    public void IgnoredForeignKeyProperty_RendersNoSelectList()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int CountryId { get; set; }
+        public Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        protected override void OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<City>().Ignore(c => c.CountryId);
+        }
+    }
+}", "City");
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+    }
+
+    [Fact]
+    public void NullableForeignKeyWithNonNullableNavigation_RendersNoEmptyOption()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(@"
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int? CountryId { get; set; }
+        public Country Country { get; set; } = null!;
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
+    }
+}", "City");
+
+        var (_, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.False(Assert.Single(modelInfo.ForeignKeyNavigations).IsNullable);
+        foreach (string view in new[] { createView, editView })
+        {
+            Assert.Contains("<select asp-for=\"CountryId\" class=\"form-control\" asp-items=\"ViewBag.CountryId\"></select>", view);
+            Assert.DoesNotContain("<option value=\"\">", view);
+        }
+    }
+
+    [Fact]
+    public void FluentPrincipalKey_OverridesConventionKey()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(CountryCityConfigurationSource(
+            "modelBuilder.Entity<Country>().HasKey(c => c.Code);",
+            "public int CountryCode { get; set; }"), "City");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Equal("Code", Assert.Single(modelInfo.ForeignKeyNavigations).PrincipalPrimaryKeyName);
+        Assert.Contains("new SelectList(_context.Countries, \"Code\", \"Name\");", controller);
+        foreach (string view in new[] { createView, editView })
+        {
+            Assert.Contains("<select asp-for=\"CountryCode\"", view);
+        }
+    }
+
+    [Fact]
+    public void CompositeFluentPrincipalKey_RendersNoSelectList()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(CountryCityConfigurationSource(
+            "modelBuilder.Entity<Country>().HasKey(c => new { c.Id, c.Code });",
+            "public int CountryId { get; set; }"), "City");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+        Assert.DoesNotContain("SelectList", controller);
+        Assert.DoesNotContain("<select", createView);
+        Assert.DoesNotContain("<select", editView);
+    }
+
+    [Fact]
+    public void FluentForeignKeyForCountry_KeepsBothNavigationDropdowns()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(CountryCityConfigurationSource(
+            "modelBuilder.Entity<City>().HasOne(c => c.Country).WithMany().HasForeignKey(c => c.CountryId);",
+            "public int CountryId { get; set; } public int? RegionId { get; set; } public Country? Region { get; set; }"), "City");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Equal(2, modelInfo.ForeignKeyNavigations.Count);
+        foreach (string foreignKey in new[] { "CountryId", "RegionId" })
+        {
+            Assert.Contains($"ViewData[\"{foreignKey}\"] = new SelectList(_context.Countries, \"Id\", \"Name\");", controller);
+            foreach (string view in new[] { createView, editView })
+            {
+                Assert.Contains($"<select asp-for=\"{foreignKey}\"", view);
+            }
+        }
+    }
+
+    [Fact]
+    public void ConflictingFluentForeignKeyForRegion_KeepsCountryDropdown()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(CountryCityConfigurationSource(
+            "modelBuilder.Entity<City>().HasOne(c => c.Region).WithMany().HasForeignKey(c => c.OtherRegionId);",
+            "public int CountryId { get; set; } public int? RegionId { get; set; } public Country? Region { get; set; } public int OtherRegionId { get; set; }"), "City");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Equal("CountryId", Assert.Single(modelInfo.ForeignKeyNavigations).ForeignKeyPropertyName);
+        Assert.Contains("ViewData[\"CountryId\"] = new SelectList(_context.Countries, \"Id\", \"Name\");", controller);
+        Assert.DoesNotContain("ViewData[\"RegionId\"]", controller);
+        foreach (string view in new[] { createView, editView })
+        {
+            Assert.Contains("<select asp-for=\"CountryId\"", view);
+            Assert.DoesNotContain("<select asp-for=\"RegionId\"", view);
+        }
+    }
+
+    [Fact]
+    public void FluentKeyOnLocalBuilder_RendersNoSelectList()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(CountryCityConfigurationSource(
+            "var e = modelBuilder.Entity<Country>(); e.HasKey(c => c.Code);",
+            "public int CountryId { get; set; }"), "City");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+        Assert.DoesNotContain("SelectList", controller);
+        Assert.DoesNotContain("<select", createView);
+        Assert.DoesNotContain("<select", editView);
+    }
+
+    [Fact]
+    public void FluentForeignKeyOnLocalBuilder_SkipsRegionDropdown()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(CountryCityConfigurationSource(
+            "var r = modelBuilder.Entity<City>().HasOne(c => c.Region).WithMany(); r.HasForeignKey(c => c.OtherRegionId);",
+            "public int CountryId { get; set; } public int? RegionId { get; set; } public Country? Region { get; set; } public int OtherRegionId { get; set; }"), "City");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.DoesNotContain(modelInfo.ForeignKeyNavigations, navigation => navigation.ForeignKeyPropertyName == "RegionId");
+        Assert.DoesNotContain("ViewData[\"RegionId\"]", controller);
+        Assert.DoesNotContain("<select asp-for=\"RegionId\"", createView);
+        Assert.DoesNotContain("<select asp-for=\"RegionId\"", editView);
+    }
+
+    [Fact]
+    public void PrincipalSideOneToOneWithConflictingForeignKey_SkipsCountryDropdown()
+    {
+        ModelInfo modelInfo = CreateModelInfoFromSource(CountryCityConfigurationSource(
+            "modelBuilder.Entity<Country>().HasOne(c => c.Capital).WithOne(x => x.Country).HasForeignKey<City>(x => x.OtherId);",
+            "public int CountryId { get; set; } public int OtherId { get; set; }",
+            "public City? Capital { get; set; }"), "City");
+
+        var (controller, createView, editView) = TransformCountryCityTemplates("net11", modelInfo);
+
+        Assert.Empty(modelInfo.ForeignKeyNavigations);
+        Assert.DoesNotContain("SelectList", controller);
+        Assert.DoesNotContain("<select", createView);
+        Assert.DoesNotContain("<select", editView);
+    }
+
+    private static string CountryCityConfigurationSource(string configuration, string foreignKeyProperties, string principalProperties = "")
+    {
+        return @"
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public int Code { get; set; }
+        public string Name { get; set; } = """";
+        " + principalProperties + @"
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public Country? Country { get; set; }
+        " + foreignKeyProperties + @"
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
+
+        protected override void OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder)
+        {
+            " + configuration + @"
+        }
+    }
+}";
+    }
+
+    private static string NationCitySource(string configurationSource)
+    {
+        return @"
+namespace Models
+{
+    public class Nation
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public int NationId { get; set; }
+        public int ActualNationId { get; set; }
+        public Nation? Nation { get; set; }
+    }
+" + configurationSource + @"
+}";
+    }
+
+    #endregion
+
     #region Helpers
+
+    private static ModelInfo CreateCountryCityModelInfo(string modelTypeName, string countryNavigationAttribute = "", string countryIdDeclaration = "public int CountryId { get; set; }")
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(@"
+#nullable enable
+using System.Collections.Generic;
+namespace System.ComponentModel.DataAnnotations.Schema
+{
+    public class NotMappedAttribute : System.Attribute { }
+}
+namespace Microsoft.EntityFrameworkCore
+{
+    public class DbContext { }
+    public class DbSet<T> { }
+}
+namespace Models
+{
+    public class Country
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+        public ICollection<City> Cities { get; set; } = new List<City>();
+    }
+
+    public class City
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = """";
+        " + countryIdDeclaration + @"
+        " + countryNavigationAttribute + @"
+        public virtual Country? Country { get; set; }
+    }
+
+    public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+    {
+        public Microsoft.EntityFrameworkCore.DbSet<City> Cities { get; set; } = null!;
+        public Microsoft.EntityFrameworkCore.DbSet<Country> Countries { get; set; } = null!;
+    }
+}");
+        return CreateModelInfoFromSyntaxTree(syntaxTree, modelTypeName);
+    }
+
+    private static ModelInfo CreateModelInfoFromSource(string modelsSource, string modelTypeName)
+    {
+        return CreateModelInfoFromSyntaxTree(CSharpSyntaxTree.ParseText(@"
+#nullable enable
+using System.Collections.Generic;
+namespace System.ComponentModel.DataAnnotations
+{
+    public class KeyAttribute : System.Attribute { }
+}
+namespace Microsoft.EntityFrameworkCore
+{
+    public class ModelBuilder { }
+    public class DbContext { protected virtual void OnModelCreating(ModelBuilder modelBuilder) { } }
+    public class DbSet<T> { }
+    public interface IEntityTypeConfiguration<T> where T : class { void Configure(Metadata.Builders.EntityTypeBuilder<T> builder); }
+}
+namespace Microsoft.EntityFrameworkCore.Metadata.Builders
+{
+    public class EntityTypeBuilder<T> where T : class { }
+}
+" + modelsSource), modelTypeName);
+    }
+
+    private static ModelInfo CreateModelInfoFromSyntaxTree(SyntaxTree syntaxTree, string modelTypeName)
+    {
+        CSharpCompilation compilation = CSharpCompilation.Create(
+            "TestAssembly",
+            [syntaxTree],
+            [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        INamedTypeSymbol modelSymbol = compilation.GetTypeByMetadataName($"Models.{modelTypeName}")!;
+        INamedTypeSymbol dbContextSymbol = compilation.GetTypeByMetadataName("Models.AppDbContext")!;
+        ModelInfo modelInfo = ClassAnalyzers.GetModelClassInfo(modelSymbol);
+        modelInfo.ForeignKeyNavigations = ClassAnalyzers.GetForeignKeyNavigations(modelInfo, dbContextSymbol);
+        return modelInfo;
+    }
+
+    private static EfControllerModel CreateCountryCityEfControllerModel(ModelInfo modelInfo)
+    {
+        return new EfControllerModel
+        {
+            ControllerType = "MVC",
+            ControllerName = $"{modelInfo.ModelTypeName}sController",
+            ControllerOutputPath = Path.Combine("Controllers", $"{modelInfo.ModelTypeName}sController.cs"),
+            DbContextInfo = new DbContextInfo
+            {
+                DbContextClassName = "AppDbContext",
+                DbContextNamespace = "Models",
+                EfScenario = true,
+                EntitySetVariableName = modelInfo.ModelTypeName == "City" ? "Cities" : "Countries"
+            },
+            ModelInfo = modelInfo,
+            ProjectInfo = new AspNetProjectInfo(null)
+        };
+    }
+
+    private static ViewModel CreateCountryCityViewModel(ModelInfo modelInfo)
+    {
+        return new ViewModel
+        {
+            PageType = "CRUD",
+            DbContextInfo = new DbContextInfo(),
+            ModelInfo = modelInfo,
+            ProjectInfo = new AspNetProjectInfo(null)
+        };
+    }
+
+    private static (string Controller, string CreateView, string EditView) TransformCountryCityTemplates(string targetFramework, ModelInfo modelInfo)
+    {
+        EfControllerModel controllerModel = CreateCountryCityEfControllerModel(modelInfo);
+        var viewSession = new Dictionary<string, object> { { "Model", CreateCountryCityViewModel(modelInfo) } };
+        switch (targetFramework)
+        {
+            case "net9":
+                var net9Create = new Net9CreateView { Session = viewSession };
+                var net9Edit = new Net9EditView { Session = viewSession };
+                net9Create.Initialize();
+                net9Edit.Initialize();
+                return (CreateNet9Template(controllerModel).TransformText(), net9Create.TransformText(), net9Edit.TransformText());
+            case "net10":
+                var net10Create = new Net10CreateView { Session = viewSession };
+                var net10Edit = new Net10EditView { Session = viewSession };
+                net10Create.Initialize();
+                net10Edit.Initialize();
+                return (CreateNet10Template(controllerModel).TransformText(), net10Create.TransformText(), net10Edit.TransformText());
+            default:
+                var net11Create = new Net11CreateView { Session = viewSession };
+                var net11Edit = new Net11EditView { Session = viewSession };
+                net11Create.Initialize();
+                net11Edit.Initialize();
+                return (CreateNet11Template(controllerModel).TransformText(), net11Create.TransformText(), net11Edit.TransformText());
+        }
+    }
 
     private static EfControllerModel CreateBlogEfControllerModel()
     {

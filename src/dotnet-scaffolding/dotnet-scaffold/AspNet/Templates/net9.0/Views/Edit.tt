@@ -7,8 +7,13 @@
     string modelName = Model.ModelInfo.ModelTypeName;
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";
+    var foreignKeyNavigations = Model.ModelInfo.ForeignKeyNavigations;
+    var navigationPropertyNames = new HashSet<string>(foreignKeyNavigations.Select(n => n.NavigationPropertyName));
+    var foreignKeyPropertyNames = new HashSet<string>(foreignKeyNavigations.Select(n => n.ForeignKeyPropertyName));
+    var nullableForeignKeyPropertyNames = new HashSet<string>(foreignKeyNavigations.Where(n => n.IsNullable).Select(n => n.ForeignKeyPropertyName));
     var entityProperties =  Model.ModelInfo.ModelProperties
-        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase) &&
+            !navigationPropertyNames.Contains(x.Name)).ToList();
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
 #>
 @model <#= modelFullName #>
@@ -36,7 +41,28 @@ foreach (var property in entityProperties)
 #>
             <div class="form-group">
                 <label asp-for="<#= modelPropertyName #>" class="control-label"></label>
+<#
+    if (nullableForeignKeyPropertyNames.Contains(modelPropertyName))
+    {
+#>
+                <select asp-for="<#= modelPropertyName #>" class="form-control" asp-items="ViewBag.<#= modelPropertyName #>">
+                    <option value="">-- select --</option>
+                </select>
+<#
+    }
+    else if (foreignKeyPropertyNames.Contains(modelPropertyName))
+    {
+#>
+                <select asp-for="<#= modelPropertyName #>" class="form-control" asp-items="ViewBag.<#= modelPropertyName #>"></select>
+<#
+    }
+    else
+    {
+#>
                 <<#= inputTag#> asp-for="<#= modelPropertyName #>" class="<#= inputClass #>" />
+<#
+    }
+#>
                 <span asp-validation-for="<#= modelPropertyName #>" class="text-danger"></span>
             </div>
 <#

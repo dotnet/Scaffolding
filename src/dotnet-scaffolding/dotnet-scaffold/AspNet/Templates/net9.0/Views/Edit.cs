@@ -29,8 +29,13 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.Templates.net9.Views
     string modelName = Model.ModelInfo.ModelTypeName;
     string modelNamespace = Model.ModelInfo.ModelNamespace;
     string modelFullName = string.IsNullOrEmpty(modelNamespace) ? modelName : $"{modelNamespace}.{modelName}";
+    var foreignKeyNavigations = Model.ModelInfo.ForeignKeyNavigations;
+    var navigationPropertyNames = new HashSet<string>(foreignKeyNavigations.Select(n => n.NavigationPropertyName));
+    var foreignKeyPropertyNames = new HashSet<string>(foreignKeyNavigations.Select(n => n.ForeignKeyPropertyName));
+    var nullableForeignKeyPropertyNames = new HashSet<string>(foreignKeyNavigations.Where(n => n.IsNullable).Select(n => n.ForeignKeyPropertyName));
     var entityProperties =  Model.ModelInfo.ModelProperties
-        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase)).ToList();
+        .Where(x => !x.Name.Equals(Model.ModelInfo.PrimaryKeyName, StringComparison.OrdinalIgnoreCase) &&
+            !navigationPropertyNames.Contains(x.Name)).ToList();
     string primaryKeyName = Model.ModelInfo.PrimaryKeyName;
 
             this.Write("@model ");
@@ -52,13 +57,43 @@ foreach (var property in entityProperties)
 
             this.Write("            <div class=\"form-group\">\r\n                <label asp-for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
-            this.Write("\" class=\"control-label\"></label>\r\n                <");
+            this.Write("\" class=\"control-label\"></label>\r\n");
+
+    if (nullableForeignKeyPropertyNames.Contains(modelPropertyName))
+    {
+
+            this.Write("                <select asp-for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\" class=\"form-control\" asp-items=\"ViewBag.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\">\r\n                    <option value=\"\">-- select --</option>\r\n                <" +
+                    "/select>\r\n");
+
+    }
+    else if (foreignKeyPropertyNames.Contains(modelPropertyName))
+    {
+
+            this.Write("                <select asp-for=\"");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\" class=\"form-control\" asp-items=\"ViewBag.");
+            this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
+            this.Write("\"></select>\r\n");
+
+    }
+    else
+    {
+
+            this.Write("                <");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputTag));
             this.Write(" asp-for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write("\" class=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(inputClass));
-            this.Write("\" />\r\n                <span asp-validation-for=\"");
+            this.Write("\" />\r\n");
+
+    }
+
+            this.Write("                <span asp-validation-for=\"");
             this.Write(this.ToStringHelper.ToStringWithCulture(modelPropertyName));
             this.Write("\" class=\"text-danger\"></span>\r\n            </div>\r\n");
 

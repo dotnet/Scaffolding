@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Scaffolding.Core.Scaffolders;
 using Microsoft.DotNet.Scaffolding.Core.Steps;
 using Microsoft.DotNet.Scaffolding.Internal.Services;
@@ -133,7 +134,7 @@ internal class ValidateViewsStep : ScaffoldStep
     /// <returns>Task that represents the asynchronous operation, with a ViewModel result if successful, null otherwise.</returns>
     private async Task<ViewModel?> GetViewModelAsync(ScaffolderContext context, CrudSettings settings)
     {
-        ProjectInfo projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
+        var projectInfo = ClassAnalyzers.GetProjectInfo(settings.Project, _logger);
         context.SetSpecifiedTargetFramework(projectInfo.LowestSupportedTargetFramework);
         if (projectInfo is null || projectInfo.CodeService is null)
         {
@@ -154,7 +155,30 @@ internal class ValidateViewsStep : ScaffoldStep
             modelInfo = ClassAnalyzers.GetModelClassInfo(modelClassSymbol);
         }
 
-        var validateModelInfoResult = ClassAnalyzers.ValidateModelForCrudScaffolders(modelInfo, _logger);
+        // The shared EF helper only returns properties for models with a key.
+        if (modelInfo.ModelProperties is null && modelClassSymbol is INamedTypeSymbol modelType)
+        {
+            modelInfo.ModelProperties = [];
+            HashSet<string> propertyNames = new(StringComparer.Ordinal);
+            for (INamedTypeSymbol? type = modelType; type is not null && type.SpecialType != SpecialType.System_Object; type = type.BaseType)
+            {
+                foreach (var property in type.GetMembers().OfType<IPropertySymbol>())
+                {
+                    if (!property.IsStatic && !property.IsIndexer &&
+                        property.GetMethod?.DeclaredAccessibility == Accessibility.Public &&
+                        (property.SetMethod?.DeclaredAccessibility == Accessibility.Public ||
+                         (property.IsOverride && property.OverriddenProperty?.SetMethod?.DeclaredAccessibility == Accessibility.Public)) &&
+                        propertyNames.Add(property.Name))
+                    {
+                        modelInfo.ModelProperties.Add(property);
+                    }
+                }
+            }
+        }
+
+        // Unlike the other CRUD views, Create does not generate fields or links that need a key.
+        bool requirePrimaryKey = !string.Equals(settings.Page, "Create", StringComparison.OrdinalIgnoreCase);
+        var validateModelInfoResult = ClassAnalyzers.ValidateModelForCrudScaffolders(modelInfo, _logger, requirePrimaryKey);
         if (!validateModelInfoResult)
         {
             _logger.LogError($"Invalid {AspNetConstants.CliOptions.ModelCliOption} '{settings.Model}'");

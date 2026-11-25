@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Tools.Scaffold.Tests.Helpers;
 using Xunit;
@@ -41,10 +42,16 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
         File.WriteAllText(Path.Combine(_testProjectDir, "LoginViewModel.cs"), """
             namespace TestProject;
 
-            public class LoginViewModel
+            public class LoginViewModelBase
             {
-                public string Email { get; set; }
+                public virtual string Email { get; set; }
                 public string Password { get; set; }
+            }
+
+            public class LoginViewModel : LoginViewModelBase
+            {
+                public override string Email { get; set; }
+                public new string Password { get; set; }
                 public bool RememberMe { get; set; }
                 private string PrivateProperty { get; set; }
                 public static string StaticProperty { get; set; }
@@ -67,8 +74,8 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
 
         var (runExitCode, html, runError) = await ScaffoldCliHelper.RunDotNetAsync(_testProjectDir, "run", "--no-launch-profile");
         Assert.True(runExitCode == 0, $"The generated MVC view should render.\nOutput: {html}\nError: {runError}");
-        Assert.Matches("<input[^>]*name=\"Email\"", html);
-        Assert.Matches("<input[^>]*name=\"Password\"", html);
+        Assert.Single(Regex.Matches(html, "<input[^>]*name=\"Email\""));
+        Assert.Single(Regex.Matches(html, "<input[^>]*name=\"Password\""));
         Assert.Matches("<input[^>]*type=\"checkbox\"[^>]*name=\"RememberMe\"", html);
         Assert.DoesNotContain("PrivateProperty", html);
         Assert.DoesNotContain("StaticProperty", html);

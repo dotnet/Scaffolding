@@ -159,10 +159,11 @@ internal class ValidateViewsStep : ScaffoldStep
         if (modelInfo.ModelProperties is null && modelClassSymbol is INamedTypeSymbol modelType)
         {
             modelInfo.ModelProperties = [];
+            HashSet<string> propertyNames = new(StringComparer.Ordinal);
             for (INamedTypeSymbol? type = modelType; type is not null && type.SpecialType != SpecialType.System_Object; type = type.BaseType)
             {
                 modelInfo.ModelProperties.AddRange(type.GetMembers().OfType<IPropertySymbol>().Where(property =>
-                    !property.IsStatic && !property.IsIndexer &&
+                    propertyNames.Add(property.Name) && !property.IsStatic && !property.IsIndexer &&
                     property.GetMethod?.DeclaredAccessibility == Accessibility.Public &&
                     property.SetMethod?.DeclaredAccessibility == Accessibility.Public));
             }

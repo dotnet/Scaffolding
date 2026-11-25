@@ -46,12 +46,16 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
             {
                 public virtual string Email { get; set; }
                 public string Password { get; set; }
+                public virtual string DisplayName { get; set; }
+                public string PhoneNumber { get; set; }
             }
 
             public class LoginViewModel : LoginViewModelBase
             {
                 public override string Email { get; set; }
                 public new string Password { get; set; }
+                public override string DisplayName => base.DisplayName;
+                private new string PhoneNumber { get; set; }
                 public bool RememberMe { get; set; }
                 private string PrivateProperty { get; set; }
                 public static string StaticProperty { get; set; }
@@ -76,6 +80,8 @@ public class RazorViewsNet10IntegrationTests : RazorViewsIntegrationTestsBase
         Assert.True(runExitCode == 0, $"The generated MVC view should render.\nOutput: {html}\nError: {runError}");
         Assert.Single(Regex.Matches(html, "<input[^>]*name=\"Email\""));
         Assert.Single(Regex.Matches(html, "<input[^>]*name=\"Password\""));
+        Assert.Single(Regex.Matches(html, "<input[^>]*name=\"DisplayName\""));
+        Assert.Single(Regex.Matches(html, "<input[^>]*name=\"PhoneNumber\""));
         Assert.Matches("<input[^>]*type=\"checkbox\"[^>]*name=\"RememberMe\"", html);
         Assert.DoesNotContain("PrivateProperty", html);
         Assert.DoesNotContain("StaticProperty", html);

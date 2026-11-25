@@ -162,10 +162,17 @@ internal class ValidateViewsStep : ScaffoldStep
             HashSet<string> propertyNames = new(StringComparer.Ordinal);
             for (INamedTypeSymbol? type = modelType; type is not null && type.SpecialType != SpecialType.System_Object; type = type.BaseType)
             {
-                modelInfo.ModelProperties.AddRange(type.GetMembers().OfType<IPropertySymbol>().Where(property =>
-                    propertyNames.Add(property.Name) && !property.IsStatic && !property.IsIndexer &&
-                    property.GetMethod?.DeclaredAccessibility == Accessibility.Public &&
-                    property.SetMethod?.DeclaredAccessibility == Accessibility.Public));
+                foreach (var property in type.GetMembers().OfType<IPropertySymbol>())
+                {
+                    if (!property.IsStatic && !property.IsIndexer &&
+                        property.GetMethod?.DeclaredAccessibility == Accessibility.Public &&
+                        (property.SetMethod?.DeclaredAccessibility == Accessibility.Public ||
+                         (property.IsOverride && property.OverriddenProperty?.SetMethod?.DeclaredAccessibility == Accessibility.Public)) &&
+                        propertyNames.Add(property.Name))
+                    {
+                        modelInfo.ModelProperties.Add(property);
+                    }
+                }
             }
         }
 

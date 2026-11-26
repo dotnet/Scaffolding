@@ -25,7 +25,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             _logger = logger;
         }
 
-        public bool EnsureTargetImported(string projectPath, string configuration)
+        public bool EnsureTargetImported(string projectPath, string configuration, string workingDirectory)
         {
             const string ToolsImportTargetsName = "Imports.targets";
 
@@ -39,8 +39,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 throw new ArgumentNullException(nameof(configuration));
             }
 
-            var projectDirectory = Path.GetDirectoryName(projectPath);
-            var targetLocation = GetProjectExtensionsPath(projectPath, projectDirectory, configuration);
+            if (string.IsNullOrEmpty(workingDirectory))
+            {
+                throw new ArgumentNullException(nameof(workingDirectory));
+            }
+
+            var targetLocation = GetProjectExtensionsPath(projectPath, workingDirectory, configuration);
             Directory.CreateDirectory(targetLocation);
 
             var projectName = Path.GetFileName(projectPath);
@@ -66,7 +70,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             return true;
         }
 
-        private static string GetProjectExtensionsPath(string projectPath, string projectDirectory, string configuration)
+        private static string GetProjectExtensionsPath(string projectPath, string workingDirectory, string configuration)
         {
             var output = new List<string>();
             var errors = new List<string>();
@@ -79,7 +83,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                     "-nologo",
                     "-getProperty:MSBuildProjectExtensionsPath"
                 })
-                .InWorkingDirectory(projectDirectory)
+                .InWorkingDirectory(workingDirectory)
                 .OnErrorLine(error => errors.Add(error))
                 .OnOutputLine(line => output.Add(line))
                 .Execute();
@@ -96,7 +100,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 throw new InvalidOperationException(errorMessage);
             }
 
-            return Path.GetFullPath(extensionsPath, projectDirectory);
+            return Path.GetFullPath(extensionsPath, workingDirectory);
         }
     }
 }

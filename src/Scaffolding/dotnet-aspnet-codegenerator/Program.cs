@@ -275,15 +275,12 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 if (!SkipImportTarget)
                 {
-                    // First install the target to obj folder so that it imports the one in the tools package.
-                    // Here we are taking an assumption that the 'obj' folder is the right place to put the project extension target.
-                    // This may not always be true if the user's settings override the default in the csproj.
-                    // However, currently restoring the project always creates the obj folder irrespective of the user's settings.
+                    // Install the target alongside the restore-generated imports so MSBuild loads it when evaluating the project.
 
                     new TargetInstaller(_logger)
                         .EnsureTargetImported(
-                            Path.GetFileName(projectFileFinder.ProjectFilePath),
-                            Path.Combine(Path.GetDirectoryName(projectFileFinder.ProjectFilePath), "obj"));
+                            projectFileFinder.ProjectFilePath,
+                            configuration);
                 }
 
                 return new MsBuildProjectContextBuilder(projectFileFinder.ProjectFilePath, CodeGenerationTargetsLocation, configuration)

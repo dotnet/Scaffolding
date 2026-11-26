@@ -15,8 +15,13 @@ namespace Microsoft.Extensions.ProjectModel
         private string _projectPath;
         private string _targetLocation;
         private string _configuration;
+        private string _workingDirectory;
 
-        public MsBuildProjectContextBuilder(string projectPath, string targetsLocation, string configuration = "Debug")
+        public MsBuildProjectContextBuilder(
+            string projectPath,
+            string targetsLocation,
+            string configuration = "Debug",
+            string workingDirectory = null)
         {
             if (string.IsNullOrEmpty(projectPath))
             {
@@ -31,6 +36,7 @@ namespace Microsoft.Extensions.ProjectModel
             _configuration = configuration;
             _projectPath = projectPath;
             _targetLocation = targetsLocation;
+            _workingDirectory = workingDirectory ?? Directory.GetCurrentDirectory();
         }
 
         public IProjectContext Build()
@@ -47,6 +53,7 @@ namespace Microsoft.Extensions.ProjectModel
                     $"/p:OutputFile={tmpFile};CodeGenerationTargetLocation={_targetLocation};Configuration={_configuration}",
                     "-restore"
                 })
+                .InWorkingDirectory(_workingDirectory)
                 .OnErrorLine(e => errors.Add(e))
                 .OnOutputLine(o => output.Add(o))
                 .Execute();

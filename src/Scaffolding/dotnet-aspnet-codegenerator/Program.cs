@@ -112,6 +112,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
                     project = Path.GetFullPath(project);
                     var configuration = app.AppConfiguration.Value() ?? "Debug";
+                    var workingDirectory = Directory.GetCurrentDirectory();
 
                     isShowHelp = ToolCommandLineHelper.IsHelpArgument(args)
                                                 || app.GeneratorArgument == null
@@ -121,7 +122,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
 
                     if (isShowHelp)
                     {
-                        app.ProjectContext = GetProjectInformation(projectFileFinder.ProjectFilePath, configuration);
+                        app.ProjectContext = GetProjectInformation(projectFileFinder.ProjectFilePath, configuration, workingDirectory);
                         app.ShowHelp();
                         return 0;
                     }
@@ -131,6 +132,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                         projectFileFinder.ProjectFilePath,
                         app.BuildBasePath.Value(),
                         configuration,
+                        workingDirectory,
                         isNoBuild,
                         Logger);
                 }
@@ -162,6 +164,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             string projectPath,
             string buildBasePath,
             string configuration,
+            string workingDirectory,
             bool noBuild,
             ILogger logger)
         {
@@ -169,7 +172,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
             {
                 throw new ArgumentNullException(nameof(projectPath));
             }
-            var context = GetProjectInformation(projectPath, configuration);
+            var context = GetProjectInformation(projectPath, configuration, workingDirectory);
             var tfmMoniker = context.TargetFrameworkMoniker;
             var shortFramework = context.TargetFramework;
             if (!noBuild)
@@ -268,25 +271,27 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Tools
                 .InWorkingDirectory(projectDirectory);
         }
 
-        private IProjectContext GetProjectInformation(string projectPath, string configuration)
+        private IProjectContext GetProjectInformation(string projectPath, string configuration, string workingDirectory)
         {
             var projectFileFinder = new ProjectFileFinder(projectPath);
             if (projectFileFinder.IsMsBuildProject)
             {
                 if (!SkipImportTarget)
                 {
-                    // First install the target to obj folder so that it imports the one in the tools package.
-                    // Here we are taking an assumption that the 'obj' folder is the right place to put the project extension target.
-                    // This may not always be true if the user's settings override the default in the csproj.
-                    // However, currently restoring the project always creates the obj folder irrespective of the user's settings.
+                    // Install the target alongside the restore-generated imports so MSBuild loads it when evaluating the project.
 
                     new TargetInstaller(_logger)
                         .EnsureTargetImported(
-                            Path.GetFileName(projectFileFinder.ProjectFilePath),
-                            Path.Combine(Path.GetDirectoryName(projectFileFinder.ProjectFilePath), "obj"));
+                            projectFileFinder.ProjectFilePath,
+                            configuration,
+                            workingDirectory);
                 }
 
-                return new MsBuildProjectContextBuilder(projectFileFinder.ProjectFilePath, CodeGenerationTargetsLocation, configuration)
+                return new MsBuildProjectContextBuilder(
+                    projectFileFinder.ProjectFilePath,
+                    CodeGenerationTargetsLocation,
+                    configuration,
+                    workingDirectory)
                     .Build();
             }
 
